@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { BACKEND_URL, CALLS } from '@/lib/constants';
 import { CallData } from '@/models/call';
 import { apiCall } from '@/lib/api';
 
-export default function TranscriptPage() {
+function TranscriptContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [data, setData] = useState<CallData | null>(null);
@@ -361,5 +361,17 @@ export default function TranscriptPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function TranscriptPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center">
+        <div className="text-sm text-zinc-600 dark:text-zinc-400">Loading...</div>
+      </div>
+    }>
+      <TranscriptContent />
+    </Suspense>
   );
 }

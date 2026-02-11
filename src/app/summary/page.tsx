@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { BACKEND_URL, CALLS } from '@/lib/constants';
 import { SummaryData } from '@/models/summary';
 import { apiCall } from '@/lib/api';
 
-export default function SummaryPage() {
+function SummaryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [data, setData] = useState<SummaryData | null>(null);
@@ -370,5 +370,17 @@ export default function SummaryPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SummaryPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center">
+        <div className="text-sm text-zinc-600 dark:text-zinc-400">Loading...</div>
+      </div>
+    }>
+      <SummaryContent />
+    </Suspense>
   );
 }

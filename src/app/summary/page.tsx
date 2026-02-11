@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { BACKEND_URL, CALLS } from '@/lib/constants';
 
 interface SummaryData {
   success: boolean;
@@ -49,8 +50,6 @@ interface SummaryData {
   };
 }
 
-const CALLS = ["CANFINHOME_FY2026_Q3", "TCS_FY2026_Q3"];
-
 export default function SummaryPage() {
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -71,7 +70,7 @@ export default function SummaryPage() {
     setError(null);
     setData(null);
 
-    fetch(`http://localhost:8000/api/summary/${callId}`)
+    fetch(`${BACKEND_URL}/api/summary/${callId}`)
       .then(res => {
         if (!res.ok) {
           throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);

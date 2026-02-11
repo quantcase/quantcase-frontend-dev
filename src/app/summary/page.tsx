@@ -3,52 +3,8 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { BACKEND_URL, CALLS } from '@/lib/constants';
-
-interface SummaryData {
-  success: boolean;
-  data: {
-    id: string;
-    callId: string;
-    entities: {
-      people: string[];
-      geographies: string[];
-      business_segments: string[];
-    };
-    promises: Array<{
-      metric: string;
-      target: string;
-      timeline: string;
-      statement: string;
-    }>;
-    milestones: Array<{
-      metric: string;
-      period: string;
-      guided_value: string;
-    }>;
-    metrics: Array<{
-      metric: string;
-      period: string;
-      guided_value: string;
-    }>;
-    governanceSignals: {
-      transparent: boolean;
-      defensive_language: boolean;
-      capital_allocation_clarity: boolean;
-    };
-    notablePatterns: {
-      tone: string;
-      risk_disclosures: Array<{
-        risk: string;
-        severity: string;
-        disclosed_early: boolean;
-      }>;
-    };
-    managementScore: number | null;
-    confidence: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
+import { SummaryData } from '@/models/summary';
+import { apiCall } from '@/lib/api';
 
 export default function SummaryPage() {
   const [data, setData] = useState<SummaryData | null>(null);
@@ -66,29 +22,22 @@ export default function SummaryPage() {
   const fetchData = (callId: string) => {
     if (!callId.trim()) return;
 
-    setLoading(true);
-    setError(null);
-    setData(null);
-
-    fetch(`${BACKEND_URL}/api/summary/${callId}`)
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-        if (!data || !data.success || !data.data) {
-          throw new Error('Invalid response format from API');
-        }
+    apiCall<SummaryData>(`${BACKEND_URL}/api/summary/${callId}`, {
+      onStart: () => {
+        setLoading(true);
+        setError(null);
+        setData(null);
+      },
+      onSuccess: (data) => {
         setData(data);
         setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message || 'Failed to load data');
+      },
+      onError: (error) => {
+        setError(error);
         setData(null);
         setLoading(false);
-      });
+      },
+    });
   };
 
   useEffect(() => {
@@ -125,100 +74,122 @@ export default function SummaryPage() {
     }
   };
 
-  const handleLoadClick = () => {
-    if (inputValue.trim()) {
-      setSelectedCallId(inputValue);
-      setInputValue('');
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Combobox */}
-        <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
-          <div className="flex items-center gap-4">
-            <div className="flex-1 relative" ref={dropdownRef}>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Select or Enter Transcript ID
-              </label>
-              <div className="relative">
+    <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      {/* Combined Header Bar */}
+      <div className="sticky top-0 z-20 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-6">
+            {/* Left: Title and Metadata */}
+            {!loading && !error && data ? (
+              <div className="flex items-center gap-6">
+                <div>
+                  <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                    Earnings Call Summary
+                  </h1>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-0.5">
+                    {data.data.callId}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 text-xs border-l border-zinc-200 dark:border-zinc-800 pl-6">
+                  <div>
+                    <span className="text-zinc-500 dark:text-zinc-500">Confidence: </span>
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-50 capitalize">
+                      {data.data.confidence}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 dark:text-zinc-500">Created: </span>
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                      {new Date(data.data.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                  Earnings Call Summary
+                </h1>
+              </div>
+            )}
+
+            {/* Right: Search and Back Button */}
+            <div className="flex items-center gap-3">
+              <div className="relative w-80" ref={dropdownRef}>
                 <input
                   type="text"
                   value={inputValue}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   onFocus={() => setIsOpen(true)}
-                  placeholder="Search or enter custom call ID..."
-                  className="w-full px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-zinc-900 dark:text-zinc-50"
+                  placeholder="Search or enter transcript ID..."
+                  className="w-full px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-zinc-900 dark:text-zinc-50"
                 />
                 <button
                   onClick={() => setIsOpen(!isOpen)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-              </div>
 
-              {isOpen && (
-                <div className="absolute z-10 w-full mt-2 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-auto">
-                  {filteredCalls.length > 0 ? (
-                    filteredCalls.map((call) => (
-                      <button
-                        key={call}
-                        onClick={() => handleSelectCall(call)}
-                        className="w-full px-4 py-2 text-left hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-50 transition-colors"
-                      >
-                        {call}
-                      </button>
-                    ))
-                  ) : (
-                    <div className="px-4 py-2 text-zinc-500 dark:text-zinc-400">
-                      No matching calls. Press Enter to search for "{inputValue}"
-                    </div>
-                  )}
-                </div>
-              )}
+                {isOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {filteredCalls.length > 0 ? (
+                      filteredCalls.map((call) => (
+                        <button
+                          key={call}
+                          onClick={() => handleSelectCall(call)}
+                          className="w-full px-3 py-2 text-sm text-left hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-50 transition-colors"
+                        >
+                          {call}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-zinc-500 dark:text-zinc-400">
+                        No matching calls. Press Enter to search for &ldquo;{inputValue}&rdquo;
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              <Link
+                href="/"
+                className="px-4 py-1.5 text-sm font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors text-zinc-900 dark:text-zinc-50 whitespace-nowrap"
+              >
+                Back to Home
+              </Link>
             </div>
-            <button
-              onClick={handleLoadClick}
-              className="mt-7 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              Load
-            </button>
-            <Link
-              href="/"
-              className="mt-7 px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors text-zinc-900 dark:text-zinc-50"
-            >
-              Back to Home
-            </Link>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-4 space-y-4">
 
         {loading && (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-xl text-zinc-600 dark:text-zinc-400">Loading...</div>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-sm text-zinc-600 dark:text-zinc-400">Loading...</div>
           </div>
         )}
 
         {error && (
-          <div className="bg-white dark:bg-zinc-900 rounded-lg p-8 border border-red-200 dark:border-red-800">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="text-red-600 dark:text-red-400">
-                <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-red-200 dark:border-red-800">
+            <div className="flex items-start gap-3">
+              <div className="text-red-600 dark:text-red-400 shrink-0">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <div className="text-center">
-                <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
                   Failed to Load Data
                 </h3>
-                <p className="text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
                   {error}
                 </p>
-                <p className="text-sm text-zinc-500 dark:text-zinc-500 mt-2">
+                <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
                   Please check the call ID and try again.
                 </p>
               </div>
@@ -228,79 +199,49 @@ export default function SummaryPage() {
 
         {!loading && !error && data && (
           <>
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50">
-                  Earnings Call Summary
-                </h1>
-                <p className="text-lg text-zinc-600 dark:text-zinc-400 mt-2">
-                  {data.data.callId}
-                </p>
-              </div>
-            </div>
-
-            {/* Metadata */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">Confidence</p>
-                  <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 capitalize">
-                    {data.data.confidence}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">Created At</p>
-                  <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                    {new Date(data.data.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Entities */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Entities</h2>
+            <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800">
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-3">Entities</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <h3 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-2">People</h3>
-                  <ul className="space-y-1">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-500 mb-2">People</h3>
+                  <ol className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-sm list-decimal list-inside">
                     {data.data.entities.people.map((person, idx) => (
                       <li key={idx} className="text-zinc-900 dark:text-zinc-50">{person}</li>
                     ))}
-                  </ul>
+                  </ol>
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-2">Geographies</h3>
-                  <ul className="space-y-1">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-500 mb-2">Geographies</h3>
+                  <ol className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-sm list-decimal list-inside">
                     {data.data.entities.geographies.map((geo, idx) => (
                       <li key={idx} className="text-zinc-900 dark:text-zinc-50">{geo}</li>
                     ))}
-                  </ul>
+                  </ol>
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-2">Business Segments</h3>
-                  <ul className="space-y-1">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-500 mb-2">Business Segments</h3>
+                  <ol className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-sm list-decimal list-inside">
                     {data.data.entities.business_segments.map((segment, idx) => (
                       <li key={idx} className="text-zinc-900 dark:text-zinc-50">{segment}</li>
                     ))}
-                  </ul>
+                  </ol>
                 </div>
               </div>
             </div>
 
             {/* Promises */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Promises</h2>
-              <div className="space-y-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800">
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-3">Promises</h2>
+              <div className="space-y-2">
                 {data.data.promises.map((promise, idx) => (
-                  <div key={idx} className="border-l-4 border-blue-500 pl-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">{promise.metric}</h3>
-                        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">{promise.statement}</p>
+                  <div key={idx} className="border-l-3 border-blue-500 pl-3 py-1">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{promise.metric}</h3>
+                        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5 line-clamp-2">{promise.statement}</p>
                       </div>
-                      <div className="ml-4 text-right">
+                      <div className="text-right shrink-0">
                         <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{promise.target}</p>
                         <p className="text-xs text-zinc-500 dark:text-zinc-500">{promise.timeline}</p>
                       </div>
@@ -311,15 +252,15 @@ export default function SummaryPage() {
             </div>
 
             {/* Milestones */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Milestones</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800">
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-3">Milestones</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {data.data.milestones.map((milestone, idx) => (
-                  <div key={idx} className="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-lg">
-                    <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">{milestone.metric}</h3>
-                    <div className="mt-2 flex items-center justify-between">
-                      <span className="text-sm text-zinc-600 dark:text-zinc-400">{milestone.period}</span>
-                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{milestone.guided_value}</span>
+                  <div key={idx} className="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-md">
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{milestone.metric}</h3>
+                    <div className="mt-1 flex items-center justify-between text-xs">
+                      <span className="text-zinc-600 dark:text-zinc-400">{milestone.period}</span>
+                      <span className="font-medium text-zinc-900 dark:text-zinc-50">{milestone.guided_value}</span>
                     </div>
                   </div>
                 ))}
@@ -327,15 +268,15 @@ export default function SummaryPage() {
             </div>
 
             {/* Metrics */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Metrics</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800">
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-3">Metrics</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {data.data.metrics.map((metric, idx) => (
-                  <div key={idx} className="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-lg">
-                    <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">{metric.metric}</h3>
-                    <div className="mt-2 flex items-center justify-between">
-                      <span className="text-sm text-zinc-600 dark:text-zinc-400">{metric.period}</span>
-                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{metric.guided_value}</span>
+                  <div key={idx} className="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-md">
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{metric.metric}</h3>
+                    <div className="mt-1 flex items-center justify-between text-xs">
+                      <span className="text-zinc-600 dark:text-zinc-400">{metric.period}</span>
+                      <span className="font-medium text-zinc-900 dark:text-zinc-50">{metric.guided_value}</span>
                     </div>
                   </div>
                 ))}
@@ -343,43 +284,43 @@ export default function SummaryPage() {
             </div>
 
             {/* Governance Signals */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Governance Signals</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${data.data.governanceSignals.transparent ? 'bg-green-500' : 'bg-red-500'}`} />
-                  <span className="text-zinc-900 dark:text-zinc-50">Transparent</span>
+            <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800">
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-3">Governance Signals</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${data.data.governanceSignals.transparent ? 'bg-green-500' : 'bg-red-500'}`} />
+                  <span className="text-sm text-zinc-900 dark:text-zinc-50">Transparent</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${data.data.governanceSignals.defensive_language ? 'bg-red-500' : 'bg-green-500'}`} />
-                  <span className="text-zinc-900 dark:text-zinc-50">No Defensive Language</span>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${data.data.governanceSignals.defensive_language ? 'bg-red-500' : 'bg-green-500'}`} />
+                  <span className="text-sm text-zinc-900 dark:text-zinc-50">No Defensive Language</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${data.data.governanceSignals.capital_allocation_clarity ? 'bg-green-500' : 'bg-red-500'}`} />
-                  <span className="text-zinc-900 dark:text-zinc-50">Capital Allocation Clarity</span>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${data.data.governanceSignals.capital_allocation_clarity ? 'bg-green-500' : 'bg-red-500'}`} />
+                  <span className="text-sm text-zinc-900 dark:text-zinc-50">Capital Allocation Clarity</span>
                 </div>
               </div>
             </div>
 
             {/* Notable Patterns */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Notable Patterns</h2>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">Tone</p>
-                  <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 capitalize">
+            <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800">
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-3">Notable Patterns</h2>
+              <div className="space-y-3">
+                <div className="pb-3 border-b border-zinc-200 dark:border-zinc-800">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-500">Tone</p>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 capitalize mt-0.5">
                     {data.data.notablePatterns.tone}
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-2">Risk Disclosures</h3>
-                  <div className="space-y-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-500 mb-2">Risk Disclosures</h3>
+                  <div className="space-y-2">
                     {data.data.notablePatterns.risk_disclosures.map((risk, idx) => (
-                      <div key={idx} className="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-lg">
-                        <div className="flex items-start justify-between">
-                          <p className="text-zinc-900 dark:text-zinc-50 flex-1">{risk.risk}</p>
-                          <div className="ml-4 flex flex-col items-end gap-1">
-                            <span className={`px-2 py-1 text-xs font-medium rounded ${
+                      <div key={idx} className="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-md">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-sm text-zinc-900 dark:text-zinc-50 flex-1">{risk.risk}</p>
+                          <div className="flex flex-col items-end gap-1 shrink-0">
+                            <span className={`px-2 py-0.5 text-xs font-medium rounded ${
                               risk.severity === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' :
                               risk.severity === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' :
                               'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
@@ -387,8 +328,8 @@ export default function SummaryPage() {
                               {risk.severity}
                             </span>
                             {risk.disclosed_early && (
-                              <span className="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                                Early Disclosure
+                              <span className="px-2 py-0.5 text-xs font-medium rounded bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                                Early
                               </span>
                             )}
                           </div>

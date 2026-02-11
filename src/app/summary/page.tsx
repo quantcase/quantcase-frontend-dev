@@ -2,15 +2,20 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { BACKEND_URL, CALLS } from '@/lib/constants';
 import { SummaryData } from '@/models/summary';
 import { apiCall } from '@/lib/api';
 
 export default function SummaryPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCallId, setSelectedCallId] = useState<string>(CALLS[1]);
+  const [selectedCallId, setSelectedCallId] = useState<string>(() => {
+    return searchParams.get('callId') || CALLS[1];
+  });
   const [inputValue, setInputValue] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -43,6 +48,12 @@ export default function SummaryPage() {
   useEffect(() => {
     fetchData(selectedCallId);
   }, [selectedCallId]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('callId', selectedCallId);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }, [selectedCallId, router, searchParams]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -113,6 +124,21 @@ export default function SummaryPage() {
                 </h1>
               </div>
             )}
+
+            {/* Center: Toggle Navigation */}
+            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-md p-1">
+              <button
+                className="px-4 py-1.5 text-sm font-medium rounded bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-50 shadow-sm"
+              >
+                Summary
+              </button>
+              <Link
+                href={`/transcript?callId=${selectedCallId}`}
+                className="px-4 py-1.5 text-sm font-medium rounded text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+              >
+                Transcript
+              </Link>
+            </div>
 
             {/* Right: Search and Back Button */}
             <div className="flex items-center gap-3">

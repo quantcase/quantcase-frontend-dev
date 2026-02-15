@@ -99,3 +99,56 @@ export interface ManagementDashboardResponse {
   success: boolean;
   data: ManagementDashboardData;
 }
+
+// Transcript Call types
+export interface TranscriptCall {
+  id: string;
+  company: string;
+  company_name: string;
+  basic_industry: string;
+  fiscal_year: string;
+  call_date: string;
+  quarter: string;
+  ppt_url: string;
+}
+
+export interface TranscriptCallsResponse {
+  success: boolean;
+  data: TranscriptCall[];
+}
+
+// Job types
+export type JobStatus = "pending" | "processing" | "completed" | "failed";
+
+export interface BullMQObject {
+  id: string;
+  name: string;
+  state: string;
+  progress: number;
+  attemptsMade: number;
+  returnvalue: unknown;
+}
+
+export interface Job {
+  id: string;
+  callId: string;
+  type: string;
+  status: JobStatus;
+  bullmqId: string;
+  createdAt: string;
+  updatedAt?: string;
+  completedAt?: string;
+  error?: string;
+  bullmqObject?: BullMQObject;
+}
+
+export interface JobCreateResponse {
+  success: boolean;
+  message: string;
+  job: Job;
+}
+
+export interface JobStatusResponse {
+  success: boolean;
+  data: Job;
+}

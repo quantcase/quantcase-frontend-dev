@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -11,10 +10,11 @@ export default function Home() {
             QuantCase Frontend
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400 mt-4">
-            Active Pages 
+            Active Pages
             <br/>- Summary
             <br/>- Transcript
             <br/>- Management* <span className="text-zinc-400">(work in progress)</span>
+            <br/>- Screener
             <br/><br/> <span className="text-sm text-zinc-400">(Click on the buttons below to explore)</span>
           </p>
         </div>
@@ -36,6 +36,12 @@ export default function Home() {
             href="/management"
           >
             Management*
+          </Link>
+          <Link
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[180px]"
+            href="/screener/home"
+          >
+            Screener
           </Link>
         </div>
       </main>

@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { DataValue } from "@/components/molecules/data-value";
-import { CheckCircle2, XCircle, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, DollarSign, Target } from "lucide-react";
 import { getVarianceColor } from "@/lib/utils";
 import type { GuidanceRecord, StatusType } from "@/types/management";
 
@@ -51,19 +51,16 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
             <Table className="table-fixed w-full">
               <colgroup>
                 <col className="w-[10%]" />
-                <col className="w-[20%]" />
-                <col className="w-[12%]" />
+                <col className="w-[28%]" />
                 <col className="w-[15%]" />
                 <col className="w-[15%]" />
                 <col className="w-[8%]" />
-                <col className="w-[12%]" />
-                <col className="w-[8%]" />
+                <col className="w-[14%]" />
               </colgroup>
               <TableHeader>
                 <TableRow className="border-zinc-200 dark:border-zinc-800">
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">PERIOD</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">METRIC</TableHead>
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">TYPE</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">CURRENT</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">TARGET</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">VAR</TableHead>
@@ -85,17 +82,19 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                         </div>
                       </TableCell>
                       <TableCell className="text-zinc-900 dark:text-zinc-50 text-sm">
-                        <div className="break-words whitespace-normal">
+                        <div className="flex items-center gap-2 break-words whitespace-normal">
+                          <span className={`inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0 ${
+                            isFinancial
+                              ? "bg-purple-100 dark:bg-purple-900/30"
+                              : "bg-sky-100 dark:bg-sky-900/30"
+                          }`}>
+                            {isFinancial ? (
+                              <DollarSign className="h-3 w-3 text-purple-700 dark:text-purple-400" />
+                            ) : (
+                              <Target className="h-3 w-3 text-sky-700 dark:text-sky-400" />
+                            )}
+                          </span>
                           <DataValue value={record.metric} />
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        <div className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                          isFinancial
-                            ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400"
-                            : "bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400"
-                        }`}>
-                          <DataValue value={record.target_type} />
                         </div>
                       </TableCell>
                       <TableCell className="text-zinc-900 dark:text-zinc-50 text-sm">
@@ -114,9 +113,9 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className={`flex items-center gap-2 px-2 py-1 rounded-md ${statusConfig.bgColor}`}>
-                          {statusConfig.icon}
-                          <span className={`text-xs font-semibold uppercase break-words whitespace-normal ${statusConfig.textColor}`}>
+                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md ${statusConfig.bgColor}`}>
+                          <span className="flex-shrink-0">{statusConfig.icon}</span>
+                          <span className={`text-xs font-semibold uppercase whitespace-nowrap ${statusConfig.textColor}`}>
                             <DataValue value={record.status} />
                           </span>
                         </div>

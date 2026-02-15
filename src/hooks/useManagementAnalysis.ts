@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { BACKEND_URL } from '@/lib/constants';
 import { apiCall } from '@/lib/api';
-import { ManagementDashboardData, ManagementDashboardResponse, TimeframeOption } from '@/types/management';
+import { ManagementDashboardResponse, TimeframeOption } from '@/types/management';
 
 export function useManagementAnalysis(callId: string, timeframe: TimeframeOption = 'rolling_3_year') {
-  const [data, setData] = useState<ManagementDashboardData | null>(null);
+  const [data, setData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,7 +17,7 @@ export function useManagementAnalysis(callId: string, timeframe: TimeframeOption
       onStart: () => {
         setLoading(true);
         setError(null);
-        setData(null);
+        setData({});
       },
       onSuccess: (data) => {
         setData(data.data);
@@ -25,7 +25,7 @@ export function useManagementAnalysis(callId: string, timeframe: TimeframeOption
       },
       onError: (error) => {
         setError(error);
-        setData(null);
+        setData({});
         setLoading(false);
       },
     });

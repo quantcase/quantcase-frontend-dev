@@ -7,14 +7,29 @@ interface NotablePatternsProps {
   patterns: NotablePattern[];
 }
 
-function getBorderColor(category: NotablePattern["category"]) {
+function getCategoryStyles(category: NotablePattern["category"]) {
   switch (category) {
     case "positive":
-      return "border-l-yellow-500 dark:border-l-yellow-400";
+      return {
+        border: "border-l-green-500 dark:border-l-green-400",
+        bg: "bg-green-50 dark:bg-green-950/30",
+        text: "text-green-700 dark:text-green-400",
+        badge: "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400"
+      };
     case "neutral":
-      return "border-l-yellow-500 dark:border-l-yellow-400";
+      return {
+        border: "border-l-yellow-500 dark:border-l-yellow-400",
+        bg: "bg-yellow-50 dark:bg-yellow-950/30",
+        text: "text-yellow-700 dark:text-yellow-400",
+        badge: "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400"
+      };
     case "negative":
-      return "border-l-yellow-500 dark:border-l-yellow-400";
+      return {
+        border: "border-l-red-500 dark:border-l-red-400",
+        bg: "bg-red-50 dark:bg-red-950/30",
+        text: "text-red-700 dark:text-red-400",
+        badge: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400"
+      };
   }
 }
 
@@ -33,21 +48,24 @@ export function NotablePatterns({ patterns }: NotablePatternsProps) {
             <p className="text-sm text-red-600 dark:text-red-400">No patterns available</p>
           </div>
         ) : (
-          patterns.map((pattern) => (
-            <div
-              key={pattern.id}
-              className={`border-l-4 ${getBorderColor(pattern.category)} pl-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-r-md`}
-            >
-              <p className="text-sm leading-relaxed text-zinc-900 dark:text-zinc-50">
-                <DataValue value={pattern.title} />
-              </p>
-              {pattern.description && (
-                <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
-                  <DataValue value={pattern.description} />
+          patterns.map((pattern) => {
+            const styles = getCategoryStyles(pattern.category);
+            return (
+              <div
+                key={pattern.id}
+                className={`border-l-4 ${styles.border} ${styles.bg} pl-3 py-2 rounded-r-md transition-all hover:shadow-sm`}
+              >
+                <p className="text-sm leading-relaxed text-zinc-900 dark:text-zinc-50">
+                  <DataValue value={pattern.title} />
                 </p>
-              )}
-            </div>
-          ))
+                <div className="flex items-center gap-2 mt-2">
+                  <span className={`text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded ${styles.badge}`}>
+                    <DataValue value={pattern.category} />
+                  </span>
+                </div>
+              </div>
+            );
+          })
         )}
         <p className="text-[10px] text-zinc-500 dark:text-zinc-500 pt-4 border-t border-zinc-200 dark:border-zinc-800 leading-relaxed">
           *Scoring Methodology: Hit Rate = (MET + Adj) / (MET + MISS + Adj). Consistency score is

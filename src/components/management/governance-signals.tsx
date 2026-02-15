@@ -12,21 +12,26 @@ export function GovernanceSignals({ signals }: GovernanceSignalsProps) {
     <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-900 dark:text-zinc-50">
-          <span className="text-green-600 dark:text-green-400">●</span>
+          <span className="text-zinc-400 dark:text-zinc-500">●</span>
           GOVERNANCE SIGNALS & EVIDENCE
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {signals.length === 0 ? (
             <div className="flex items-start gap-2">
               <span className="text-sm text-red-600 dark:text-red-400">No signals available</span>
             </div>
           ) : (
             signals.map((signal) => (
-              <div key={signal.id} className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-zinc-900 dark:text-zinc-50">
+              <div
+                key={signal.id}
+                className="flex items-start gap-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4"
+              >
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+                <span className="text-sm text-zinc-900 dark:text-zinc-50 leading-relaxed pt-0.5">
                   <DataValue value={signal.text} />
                 </span>
               </div>

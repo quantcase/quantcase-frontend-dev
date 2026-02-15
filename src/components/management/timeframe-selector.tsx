@@ -21,7 +21,11 @@ export function TimeframeSelector({ selected, onChange }: TimeframeSelectorProps
           variant={selected === option.value ? "default" : "outline"}
           size="sm"
           onClick={() => onChange(option.value)}
-          className="text-xs"
+          className={`text-sm font-medium ${
+            selected === option.value
+              ? "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              : "bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          }`}
         >
           {option.label}
         </Button>

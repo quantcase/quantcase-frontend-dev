@@ -3,16 +3,12 @@
 import { useEffect, useState, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { BACKEND_URL, CALLS } from '@/lib/constants';
-import { SummaryData } from '@/models/summary';
-import { apiCall } from '@/lib/api';
+import { CALLS } from '@/lib/constants';
+import { useSummary } from '@/hooks/useSummary';
 
 function SummaryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [data, setData] = useState<SummaryData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [selectedCallId, setSelectedCallId] = useState<string>(() => {
     return searchParams.get('callId') || CALLS[1];
   });
@@ -20,34 +16,11 @@ function SummaryContent() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const { data, loading, error } = useSummary(selectedCallId);
+
   const filteredCalls = inputValue.trim() === ''
     ? CALLS
     : CALLS.filter(call => call.toLowerCase().includes(inputValue.toLowerCase()));
-
-  const fetchData = (callId: string) => {
-    if (!callId.trim()) return;
-
-    apiCall<SummaryData>(`${BACKEND_URL}/api/summary/${callId}`, {
-      onStart: () => {
-        setLoading(true);
-        setError(null);
-        setData(null);
-      },
-      onSuccess: (data) => {
-        setData(data);
-        setLoading(false);
-      },
-      onError: (error) => {
-        setError(error);
-        setData(null);
-        setLoading(false);
-      },
-    });
-  };
-
-  useEffect(() => {
-    fetchData(selectedCallId);
-  }, [selectedCallId]);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());

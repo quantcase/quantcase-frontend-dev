@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { DataValue } from "@/components/molecules/data-value";
 import { CheckCircle2 } from "lucide-react";
 import type { GovernanceSignal } from "@/types/management";
 
@@ -8,20 +9,29 @@ interface GovernanceSignalsProps {
 
 export function GovernanceSignals({ signals }: GovernanceSignalsProps) {
   return (
-    <Card>
+    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span className="text-lg">●</span> GOVERNANCE SIGNALS & EVIDENCE
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-900 dark:text-zinc-50">
+          <span className="text-green-600 dark:text-green-400">●</span>
+          GOVERNANCE SIGNALS & EVIDENCE
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {signals.map((signal) => (
-            <div key={signal.id} className="flex items-start gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span className="text-sm">{signal.text}</span>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {signals.length === 0 ? (
+            <div className="flex items-start gap-2">
+              <span className="text-sm text-red-600 dark:text-red-400">No signals available</span>
             </div>
-          ))}
+          ) : (
+            signals.map((signal) => (
+              <div key={signal.id} className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-zinc-900 dark:text-zinc-50">
+                  <DataValue value={signal.text} />
+                </span>
+              </div>
+            ))
+          )}
         </div>
       </CardContent>
     </Card>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { mockManagementData } from "@/lib/mock-data";
+import { CALLS } from "@/lib/constants";
+import { useManagementAnalysis } from "@/hooks/useManagementAnalysis";
 import type { TimeframeOption } from "@/types/management";
 
 import { CallHeader } from "@/components/management/call-header";
@@ -14,13 +15,37 @@ import { NotablePatterns } from "@/components/management/notable-patterns";
 import { TimeframeSelector } from "@/components/management/timeframe-selector";
 
 export default function ManagementDashboardPage() {
-  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>(
-    mockManagementData.selectedTimeframe
-  );
+  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>("rolling_3_year");
+
+  const { data: managementData, loading, error } = useManagementAnalysis(CALLS[0], selectedTimeframe);
 
   const handleFullLLMClick = () => {
     console.log("Open full LLM analysis modal");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-sm">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-sm text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
+
+  if (!managementData) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-sm">No data available</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,7 +68,7 @@ export default function ManagementDashboardPage() {
         {/* Company Header */}
         <div className="mb-6">
           <CallHeader
-            company={mockManagementData.company}
+            company={managementData.company}
             onFullLLMClick={handleFullLLMClick}
           />
         </div>
@@ -53,22 +78,22 @@ export default function ManagementDashboardPage() {
           {/* Left Column: Main Content (2/3) */}
           <div className="space-y-6 lg:col-span-2">
             {/* Score Overview Cards */}
-            <ScoreOverviewCards scores={mockManagementData.scores} />
+            <ScoreOverviewCards scores={managementData.scores} />
 
             {/* Governance Signals */}
-            <GovernanceSignals signals={mockManagementData.governanceSignals} />
+            <GovernanceSignals signals={managementData.governanceSignals} />
 
             {/* Consistency Analysis */}
-            <ConsistencyAnalysis consistency={mockManagementData.consistency} />
+            <ConsistencyAnalysis consistency={managementData.consistency} />
 
             {/* Guidance Track Table */}
-            <GuidanceTrackTable records={mockManagementData.guidanceRecords} />
+            <GuidanceTrackTable records={managementData.guidanceRecords} />
           </div>
 
           {/* Right Sidebar: Trust Panel + Notable Patterns (1/3) */}
           <div className="lg:col-span-1 space-y-6">
-            <TrustPanel trust={mockManagementData.trust} />
-            <NotablePatterns patterns={mockManagementData.notablePatterns} />
+            <TrustPanel trust={managementData.trust} />
+            <NotablePatterns patterns={managementData.notablePatterns} />
           </div>
         </div>
       </div>

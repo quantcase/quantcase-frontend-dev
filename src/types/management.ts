@@ -2,16 +2,31 @@
 
 export type TrustLevel = "HIGH" | "MODERATE" | "LOW";
 export type ConfidenceLevel = "HIGH" | "MEDIUM" | "LOW";
-export type StatusType = "MET" | "MISS" | "UNDERPERFORM";
+export type StatusType = "ACHIEVED" | "MISSED" | "PENDING";
+export type TargetType = "financial" | "conceptual";
 export type TimeframeOption = "current_quarter" | "rolling_3_year" | "full_history";
+
+// API Response types
+export interface Promise {
+  metric: string;
+  target: string;
+  timeline: string;
+  statement: string;
+}
+
+export interface RiskDisclosure {
+  risk: string;
+  severity: "high" | "medium" | "low";
+  disclosed_early: boolean;
+}
 
 // Company header
 export interface CompanyInfo {
-  name: string;
-  ticker: string;
+  name: string | null;
+  ticker: string | null;
   exchange: "NSE" | "BSE";
-  industry: string;
-  callDate: string;
+  industry: string | null;
+  callDate: string | null;
   confidenceLevel: ConfidenceLevel;
 }
 
@@ -19,14 +34,14 @@ export interface CompanyInfo {
 export interface FactorScore {
   factor: "Guidance Accuracy" | "Disclosure Honesty" | "Capital Allocation";
   rating: TrustLevel;
-  descriptor: string;
+  descriptor: string | null;
 }
 
 // Trust panel
 export interface TrustScore {
   overall: TrustLevel;
   subfactors: {
-    governanceAccuracy: number;
+    guidanceAccuracy: number;
     disclosureHonesty: number;
     capitalAllocation: number;
   };
@@ -53,9 +68,11 @@ export interface GuidanceRecord {
   period: string;
   metric: string;
   guided: string;
-  actual: string;
+  targeted_value: string;
+  current_value: string;
   variance: string;
   status: StatusType;
+  target_type: TargetType;
 }
 
 // Notable patterns
@@ -76,4 +93,9 @@ export interface ManagementDashboardData {
   guidanceRecords: GuidanceRecord[];
   notablePatterns: NotablePattern[];
   selectedTimeframe: TimeframeOption;
+}
+
+export interface ManagementDashboardResponse {
+  success: boolean;
+  data: ManagementDashboardData;
 }

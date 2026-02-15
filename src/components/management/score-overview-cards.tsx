@@ -37,20 +37,23 @@ export function ScoreOverviewCards({ scores }: ScoreOverviewCardsProps) {
 
         return (
           <Card key={score.factor} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-2 rounded-lg ${iconColor.includes('green') ? 'bg-green-100 dark:bg-green-900/30' : iconColor.includes('blue') ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-purple-100 dark:bg-purple-900/30'}`}>
+            <CardContent className="px-3">
+              {/* Header with title and icon */}
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                  {score.factor}
+                </h3>
+                <div className={`p-3 rounded-[10px] ${iconColor.includes('green') ? 'bg-emerald-100 dark:bg-emerald-900/30' : iconColor.includes('blue') ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-purple-100 dark:bg-purple-900/30'}`}>
                   <Icon className={`h-5 w-5 ${iconColor}`} />
                 </div>
               </div>
+
+              {/* Rating and descriptor */}
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-500 mb-2">
-                  {score.factor}
-                </h3>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">
                   <DataValue value={ratingDisplay} />
                 </p>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                   <DataValue value={score.descriptor} />
                 </p>
               </div>

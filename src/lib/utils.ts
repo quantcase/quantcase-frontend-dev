@@ -48,11 +48,11 @@ export function getRatingVariant(rating: TrustLevel): "default" | "secondary" | 
 
 export function getStatusVariant(status: StatusType): "default" | "secondary" | "destructive" {
   switch (status) {
-    case "MET":
+    case "ACHIEVED":
       return "default";
-    case "MISS":
+    case "MISSED":
       return "destructive";
-    case "UNDERPERFORM":
+    case "PENDING":
       return "secondary";
   }
 }

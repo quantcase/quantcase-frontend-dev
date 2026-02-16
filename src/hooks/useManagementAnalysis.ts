@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { BACKEND_URL } from '@/lib/constants';
 import { apiCall } from '@/lib/api';
-import { ManagementDashboardResponse, TimeframeOption } from '@/types/management';
+import { ManagementDashboardResponse, TimeframeOption, ManagementDashboardData } from '@/types/management';
 
 export function useManagementAnalysis(callId: string, timeframe: TimeframeOption = 'rolling_3_year') {
-  const [data, setData] = useState({});
+  const [data, setData] = useState<ManagementDashboardData | Record<string, never>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

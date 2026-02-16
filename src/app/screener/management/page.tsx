@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useManagementAnalysis } from "@/hooks/useManagementAnalysis";
@@ -17,7 +17,7 @@ import { GuidanceTrackTable } from "@/components/management/guidance-track-table
 import { NotablePatterns } from "@/components/management/notable-patterns";
 import { TimeframeSelector } from "@/components/management/timeframe-selector";
 
-export default function ManagementDashboardPage() {
+function ManagementDashboardContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
 
@@ -353,7 +353,6 @@ export default function ManagementDashboardPage() {
     );
   }
 
-
   return (
     <div className="min-h-screen bg-background">
       {/* Confidential Banner */}
@@ -367,7 +366,7 @@ export default function ManagementDashboardPage() {
         {/* Company Header */}
         <div className="mb-6">
           <CallHeader
-            company={managementData.company}
+            company={managementData?.company}
             onFullLLMClick={handleFullLLMClick}
           />
         </div>
@@ -397,5 +396,17 @@ export default function ManagementDashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ManagementDashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-sm">Loading...</div>
+      </div>
+    }>
+      <ManagementDashboardContent />
+    </Suspense>
   );
 }

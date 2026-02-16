@@ -26,7 +26,7 @@ export function CallHeader({ company, onFullLLMClick }: CallHeaderProps) {
                 <DataValue value={company.ticker} />
               </h1>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                <span className="font-medium bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">{company.exchange}: <DataValue value={company.name.split("_")[0]} /></span>
+                <span className="font-medium bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">{company.exchange}: <DataValue value={company.name?.split("_")[0] ?? null} /></span>
                 {company.industry && (
                   <>
                     <span className="mx-2">•</span>

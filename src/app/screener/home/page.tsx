@@ -11,6 +11,7 @@ import { ResearchCard } from "@/components/molecules/research-card";
 import { InfoItem } from "@/components/molecules/info-item";
 import { apiCall } from "@/lib/api";
 import { StocksApiResponse } from "@/types/screener";
+import { BACKEND_URL } from "@/lib/constants";
 
 export default function ScreenerHomePage() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function ScreenerHomePage() {
 
   // Fetch stock data on mount
   useEffect(() => {
-    apiCall<StocksApiResponse>("http://localhost:8000/api/transcript-stocks", {
+    apiCall<StocksApiResponse>(`${BACKEND_URL}/api/transcript-stocks`, {
       onStart: () => setIsLoading(true),
       onSuccess: (response) => {
         const options: AutocompleteOption[] = response.data.map((stock) => ({

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function Home() {
@@ -11,38 +12,30 @@ export default function Home() {
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400 mt-4">
             Active Pages
-            <br/>- Summary
-            <br/>- Transcript
-            <br/>- Management* <span className="text-zinc-400">(work in progress)</span>
-            <br/>- Screener
-            <br/><br/> <span className="text-sm text-zinc-400">(Click on the buttons below to explore)</span>
+            <br />- Screener / Home
+            <br />- Screener / Management
+            <br />
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <Link
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[180px]"
-            href="/summary"
-          >
-            Summary
-          </Link>
-          <Link
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[180px]"
-            href="/transcript"
-          >
-            Transcript
-          </Link>
-          <Link
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[180px]"
-            href="/management"
-          >
-            Management*
-          </Link>
-          <Link
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[180px]"
-            href="/screener/home"
-          >
-            Screener
-          </Link>
+          <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+            <Link href="/screener/home">
+              <Button>Screener</Button>
+            </Link>
+          </div>
+          <p className="italic max-w-md text-sm leading-8 text-zinc-500 dark:text-zinc-400 mt-4">
+            Helper Pages
+            <br />- Transcript
+            <br />- Summary
+            <br />
+            <br />{" "}
+            <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+              <Link href="/summary">
+                <Button variant={"outline"}>Summary</Button>
+              </Link>
+              <Link href="/transcript">
+                <Button variant={"outline"}>Transcript</Button>
+              </Link>
+            </div>
+          </p>
         </div>
       </main>
     </div>

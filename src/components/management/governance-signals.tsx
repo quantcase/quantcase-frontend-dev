@@ -26,9 +26,9 @@ export function GovernanceSignals({ signals }: GovernanceSignalsProps) {
             signals.map((signal) => (
               <div
                 key={signal.id}
-                className="flex items-start gap-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4"
+                className="flex items-center gap-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-1"
               >
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                   <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <span className="text-sm text-zinc-900 dark:text-zinc-50 leading-relaxed pt-0.5">

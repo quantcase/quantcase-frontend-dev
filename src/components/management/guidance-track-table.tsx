@@ -50,16 +50,16 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
           <div className="overflow-x-auto">
             <Table className="table-fixed w-full">
               <colgroup>
-                <col className="w-[10%]" />
-                <col className="w-[28%]" />
                 <col className="w-[15%]" />
+                <col className="w-[20%]" />
+                <col className="w-[20%]" />
                 <col className="w-[15%]" />
-                <col className="w-[8%]" />
-                <col className="w-[14%]" />
+                <col className="w-[5%]" />
+                <col className="w-[15%]" />
               </colgroup>
               <TableHeader>
                 <TableRow className="border-zinc-200 dark:border-zinc-800">
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">PERIOD</TableHead>
+                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">TARGET DATE</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">METRIC</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">CURRENT</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">TARGET</TableHead>

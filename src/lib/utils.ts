@@ -9,6 +9,12 @@ export function cn(...inputs: ClassValue[]) {
 // Date formatting
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
+
+  // Safari is strict about invalid dates - validate before formatting
+  if (isNaN(date.getTime())) {
+    return "Invalid Date";
+  }
+
   return new Intl.DateTimeFormat("en-IN", {
     year: "numeric",
     month: "short",

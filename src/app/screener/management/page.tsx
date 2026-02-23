@@ -217,7 +217,7 @@ function ManagementDashboardContent() {
   if (Object.keys(managementData).length === 0) {
     const transcriptCall = transcriptCalls[0];
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background p-4">
         {/* Confidential Banner */}
         <div className="sticky top-0 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-sm font-semibold text-white">
           ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
@@ -354,7 +354,7 @@ function ManagementDashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background p-4">
       {/* Confidential Banner */}
       <div className="sticky top-0 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-sm font-semibold text-white">
         ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY

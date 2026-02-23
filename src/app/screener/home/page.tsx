@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, ShieldAlert, FileText } from "lucide-react";
-import { AppHeader } from "@/components/molecules/app-header";
 import { PageHeader } from "@/components/molecules/page-header";
 import { TabToggle } from "@/components/molecules/tab-toggle";
 import { AutocompleteInput, AutocompleteOption } from "@/components/molecules/autocomplete-input";
@@ -59,9 +58,7 @@ export default function ScreenerHomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
-      <AppHeader />
-
+    <div>
       <main className="max-w-4xl mx-auto px-8 py-16">
         <div className="space-y-12">
           {/* Header Section */}
@@ -116,3 +113,4 @@ export default function ScreenerHomePage() {
     </div>
   );
 }
+

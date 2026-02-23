@@ -40,8 +40,8 @@ export function AutocompleteInput({
         .filter((option) => {
           const searchTerm = value.toLowerCase();
           return (
-            option.label.toLowerCase().includes(searchTerm) ||
-            option.value.toLowerCase().includes(searchTerm) ||
+            option.label?.toLowerCase().includes(searchTerm) ||
+            option.value?.toLowerCase().includes(searchTerm) ||
             option.subtitle?.toLowerCase().includes(searchTerm)
           );
         })

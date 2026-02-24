@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { label: "Home", href: "/", icon: Home },
   { label: "Screener", href: "/screener/home", icon: SlidersHorizontal },
-  { label: "IC Report", href: "#", icon: FileText },
-  { label: "Model Builder", href: "#", icon: TrendingUp },
-  { label: "Model Analytics", href: "#", icon: BarChart2 },
+  { label: "IC Report", href: "/ic-report", icon: FileText },
+  { label: "Model Builder", href: "/model-builder", icon: TrendingUp },
+  { label: "Model Analytics", href: "/model-analytics", icon: BarChart2 },
   { label: "Settings", href: "#", icon: Settings },
 ];
 

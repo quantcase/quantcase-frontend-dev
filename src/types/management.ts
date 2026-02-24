@@ -65,12 +65,15 @@ export interface ConsistencyMetrics {
 // Guidance table
 export interface GuidanceRecord {
   id: string;
+  source_call?: string;
+  source_date?: string;
   period: string;
   metric: string;
-  guided: string;
-  targeted_value: string;
-  current_value: string;
-  variance: string;
+  statement?: string;
+  targeted_value: string | number;
+  current_value: string | number;
+  variance?: string;
+  variance_pct?: number;
   status: StatusType;
   target_type: TargetType;
 }

@@ -15,17 +15,15 @@ import { GovernanceSignals } from "@/components/management/governance-signals";
 import { ConsistencyAnalysis } from "@/components/management/consistency-analysis";
 import { GuidanceTrackTable } from "@/components/management/guidance-track-table";
 import { NotablePatterns } from "@/components/management/notable-patterns";
-import { TimeframeSelector } from "@/components/management/timeframe-selector";
 
 function ManagementDashboardContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
 
-  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>("rolling_3_year");
+  const [selectedTimeframe] = useState<TimeframeOption>("rolling_3_year");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
-  const [jobId, setJobId] = useState<string | null>(null);
-  const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
+  const [jobStatuses, setJobStatuses] = useState<Record<string, JobStatus>>({});
   const [progress, setProgress] = useState(0);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -37,7 +35,7 @@ function ManagementDashboardContent() {
   const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
 
   // Then fetch the management analysis for the first call
-  const { data: managementData, loading: managementLoading, error: managementError } = useManagementAnalysis(
+  const { data: managementData, loading: managementLoading } = useManagementAnalysis(
     firstCallId,
     selectedTimeframe
   );
@@ -48,115 +46,112 @@ function ManagementDashboardContent() {
     console.log("Open full LLM analysis modal");
   };
 
-  const pollJobStatus = (jobId: string) => {
-    const url = `${BACKEND_URL}/api/jobs/${jobId}`;
+  // Derive an aggregate status from all job statuses for display
+  const allStatuses = Object.values(jobStatuses);
+  const aggregateStatus: JobStatus | null = allStatuses.length === 0
+    ? null
+    : allStatuses.some(s => s === "failed")
+    ? "failed"
+    : allStatuses.every(s => s === "completed")
+    ? "completed"
+    : allStatuses.some(s => s === "processing")
+    ? "processing"
+    : "pending";
 
-    apiCall<JobStatusResponse>(url, {
-      onSuccess: (response) => {
-        const status = response.data.status;
-        setJobStatus(status);
-
-        if (status === "completed") {
-          // Set progress to 100%
-          setProgress(100);
-          // Stop polling and reload
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current);
-            pollingIntervalRef.current = null;
-          }
-          if (progressIntervalRef.current) {
-            clearInterval(progressIntervalRef.current);
-            progressIntervalRef.current = null;
-          }
-          setIsAnalyzing(false);
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else if (status === "failed") {
-          // Stop polling and show error
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current);
-            pollingIntervalRef.current = null;
-          }
-          if (progressIntervalRef.current) {
-            clearInterval(progressIntervalRef.current);
-            progressIntervalRef.current = null;
-          }
-          setIsAnalyzing(false);
-          setAnalyzeError(response.data.error || "Job failed");
-        }
-        // If pending or processing, keep polling
-      },
-      onError: (error: string) => {
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current);
-          pollingIntervalRef.current = null;
-        }
-        if (progressIntervalRef.current) {
-          clearInterval(progressIntervalRef.current);
-          progressIntervalRef.current = null;
-        }
-        setIsAnalyzing(false);
-        setAnalyzeError(error);
-      },
-    });
+  const stopPolling = () => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
   };
 
-  const handleAnalyzeClick = () => {
-    setAnalyzeError(null);
-    setJobId(null);
-    setJobStatus(null);
-    setProgress(0);
-
-    const url = `${BACKEND_URL}/api/calls/${firstCallId}/summarize`;
-
-    apiPost<JobCreateResponse>(
-      url,
-      {
-        onStart: () => {
-          setIsAnalyzing(true);
-        },
+  const pollAllJobs = (ids: string[]) => {
+    ids.forEach(jobId => {
+      const url = `${BACKEND_URL}/api/jobs/${jobId}`;
+      apiCall<JobStatusResponse>(url, {
         onSuccess: (response) => {
-          const newJobId = response.job.id;
-          setJobId(newJobId);
-          setJobStatus(response.job.status);
+          const status = response.data.status;
+          setJobStatuses(prev => {
+            const updated = { ...prev, [jobId]: status };
+            const statuses = Object.values(updated);
 
-          // Start polling every 2 seconds
-          pollingIntervalRef.current = setInterval(() => {
-            pollJobStatus(newJobId);
-          }, 2000);
+            if (statuses.every(s => s === "completed")) {
+              setProgress(100);
+              stopPolling();
+              setIsAnalyzing(false);
+              setTimeout(() => window.location.reload(), 1000);
+            } else if (statuses.some(s => s === "failed")) {
+              stopPolling();
+              setIsAnalyzing(false);
+              setAnalyzeError(response.data.error || "One or more jobs failed");
+            }
 
-          // Initial poll
-          pollJobStatus(newJobId);
+            return updated;
+          });
         },
         onError: (error: string) => {
+          stopPolling();
           setIsAnalyzing(false);
           setAnalyzeError(error);
         },
+      });
+    });
+  };
+
+  const handleAnalyzeClick = async () => {
+    setAnalyzeError(null);
+    setJobStatuses({});
+    setProgress(0);
+    setIsAnalyzing(true);
+
+    // Take top 3 calls and reverse so we submit oldest (3rd) first, then 2nd, then latest
+    const callIds = transcriptCalls.slice(0, 3).reverse().map(c => c.id);
+
+    const submitCall = (callId: string): Promise<string> =>
+      new Promise<string>((resolve, reject) => {
+        const url = `${BACKEND_URL}/api/calls/${callId}/summarize`;
+        apiPost<JobCreateResponse>(url, {
+          onSuccess: (response) => resolve(response.job.id),
+          onError: reject,
+        });
+      });
+
+    try {
+      const ids: string[] = [];
+      for (const callId of callIds) {
+        const jobId = await submitCall(callId);
+        ids.push(jobId);
       }
-    );
+
+      const initialStatuses: Record<string, JobStatus> = {};
+      ids.forEach(id => { initialStatuses[id] = "pending"; });
+      setJobStatuses(initialStatuses);
+
+      // Initial poll then every 2 seconds
+      pollAllJobs(ids);
+      pollingIntervalRef.current = setInterval(() => pollAllJobs(ids), 2000);
+    } catch (error: unknown) {
+      setIsAnalyzing(false);
+      setAnalyzeError(error instanceof Error ? error.message : "Failed to start analysis");
+    }
   };
 
   // Cleanup polling on unmount
   useEffect(() => {
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
-    };
+    return () => stopPolling();
   }, []);
 
-  // Manage progress animation when processing
+  // Manage progress animation when any job is processing
   useEffect(() => {
-    if (jobStatus === "processing") {
+    if (aggregateStatus === "processing") {
       const totalDuration = 40000; // 40 seconds
       const targetProgress = 95;
-      const updateInterval = 100; // Update every 100ms
-      const totalSteps = totalDuration / updateInterval;
-      const progressPerStep = targetProgress / totalSteps;
+      const updateInterval = 100;
+      const progressPerStep = targetProgress / (totalDuration / updateInterval);
 
       let currentProgress = 0;
 
@@ -179,7 +174,7 @@ function ManagementDashboardContent() {
         progressIntervalRef.current = null;
       }
     };
-  }, [jobStatus]);
+  }, [aggregateStatus]);
 
   if (!symbol) {
     return (
@@ -265,26 +260,26 @@ function ManagementDashboardContent() {
                   </div>
                 )}
 
-                {jobStatus && (
+                {aggregateStatus && (
                   <div className={`mb-4 p-3 rounded-md border ${
-                    jobStatus === "completed"
+                    aggregateStatus === "completed"
                       ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                      : jobStatus === "failed"
+                      : aggregateStatus === "failed"
                       ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
                       : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
                   }`}>
-                    {jobStatus === "processing" || jobStatus === "completed" ? (
+                    {aggregateStatus === "processing" || aggregateStatus === "completed" ? (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <p className={`text-sm ${
-                            jobStatus === "completed"
+                            aggregateStatus === "completed"
                               ? "text-green-600 dark:text-green-400"
                               : "text-blue-600 dark:text-blue-400"
                           }`}>
-                            {jobStatus === "completed" ? "Analysis complete!" : "Analyzing transcript..."}
+                            {aggregateStatus === "completed" ? "Analysis complete!" : "Analyzing transcripts..."}
                           </p>
                           <p className={`text-sm font-medium ${
-                            jobStatus === "completed"
+                            aggregateStatus === "completed"
                               ? "text-green-600 dark:text-green-400"
                               : "text-blue-600 dark:text-blue-400"
                           }`}>
@@ -292,13 +287,13 @@ function ManagementDashboardContent() {
                           </p>
                         </div>
                         <div className={`w-full rounded-full h-2 overflow-hidden ${
-                          jobStatus === "completed"
+                          aggregateStatus === "completed"
                             ? "bg-green-200 dark:bg-green-800"
                             : "bg-blue-200 dark:bg-blue-800"
                         }`}>
                           <div
                             className={`h-full transition-all duration-300 ease-linear ${
-                              jobStatus === "completed"
+                              aggregateStatus === "completed"
                                 ? "bg-green-600 dark:bg-green-400"
                                 : "bg-blue-600 dark:bg-blue-400"
                             }`}
@@ -308,12 +303,12 @@ function ManagementDashboardContent() {
                       </div>
                     ) : (
                       <p className={`text-sm ${
-                        jobStatus === "failed"
+                        aggregateStatus === "failed"
                           ? "text-red-600 dark:text-red-400"
                           : "text-blue-600 dark:text-blue-400"
                       }`}>
-                        {jobStatus === "failed" && "Analysis failed"}
-                        {jobStatus === "pending" && "Analysis job queued..."}
+                        {aggregateStatus === "failed" && "Analysis failed"}
+                        {aggregateStatus === "pending" && "Analysis jobs queued..."}
                       </p>
                     )}
                   </div>
@@ -325,9 +320,9 @@ function ManagementDashboardContent() {
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing
-                    ? jobStatus === "pending"
+                    ? aggregateStatus === "pending"
                       ? "Queued..."
-                      : jobStatus === "processing"
+                      : aggregateStatus === "processing"
                       ? "Processing..."
                       : "Starting..."
                     : "Analyze"}

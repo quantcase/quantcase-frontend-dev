@@ -31,7 +31,8 @@ export function formatLabel(camelCase: string): string {
 }
 
 // Variance color helper
-export function getVarianceColor(variance: string): string {
+export function getVarianceColor(variance: string | undefined | null): string {
+  if (!variance) return "text-muted-foreground";
   if (variance.startsWith("+")) {
     return "text-green-600 dark:text-green-400";
   } else if (variance.startsWith("-")) {

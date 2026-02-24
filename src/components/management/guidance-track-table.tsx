@@ -32,6 +32,13 @@ function getStatusConfig(status: StatusType) {
         textColor: "text-blue-700 dark:text-blue-400",
         borderColor: "border-l-4 border-l-blue-600 dark:border-l-blue-400",
       };
+    default:
+      return {
+        icon: null,
+        bgColor: "bg-zinc-50 dark:bg-zinc-900/30",
+        textColor: "text-zinc-500 dark:text-zinc-400",
+        borderColor: "",
+      };
   }
 }
 
@@ -52,17 +59,17 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
               <colgroup>
                 <col className="w-[15%]" />
                 <col className="w-[20%]" />
-                <col className="w-[20%]" />
                 <col className="w-[15%]" />
-                <col className="w-[5%]" />
+                <col className="w-[15%]" />
+                <col className="w-[10%]" />
                 <col className="w-[15%]" />
               </colgroup>
               <TableHeader>
                 <TableRow className="border-zinc-200 dark:border-zinc-800">
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">TARGET DATE</TableHead>
+                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">GUIDANCE DATE</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">METRIC</TableHead>
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">CURRENT</TableHead>
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">TARGET</TableHead>
+                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">GUIDED</TableHead>
+                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">ACTUAL</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">VAR</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">STATUS</TableHead>
                 </TableRow>
@@ -71,11 +78,17 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                 {records.map((record) => {
                   const statusConfig = getStatusConfig(record.status);
                   const isFinancial = record.target_type === "financial";
+                  const varianceDisplay = record.variance ?? (
+                    record.variance_pct != null
+                      ? `${record.variance_pct >= 0 ? "+" : ""}${record.variance_pct}%`
+                      : "-"
+                  );
                   return (
                     <TableRow
                       key={record.id}
                       className={`border-zinc-200 dark:border-zinc-800 ${statusConfig.borderColor}`}
                     >
+
                       <TableCell className="font-medium text-zinc-900 dark:text-zinc-50 text-sm">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.period} />
@@ -107,9 +120,9 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                           <DataValue value={record.targeted_value} />
                         </div>
                       </TableCell>
-                      <TableCell className={`${getVarianceColor(record.variance)} text-sm`}>
+                      <TableCell className={`${getVarianceColor(varianceDisplay)} text-sm`}>
                         <div className="break-words whitespace-normal">
-                          <DataValue value={record.variance} />
+                          <DataValue value={varianceDisplay} />
                         </div>
                       </TableCell>
                       <TableCell>

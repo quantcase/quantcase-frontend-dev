@@ -68,8 +68,8 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                 <TableRow className="border-zinc-200 dark:border-zinc-800">
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">GUIDANCE DATE</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">METRIC</TableHead>
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">GUIDED</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">ACTUAL</TableHead>
+                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">GUIDED</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">VAR</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">STATUS</TableHead>
                 </TableRow>

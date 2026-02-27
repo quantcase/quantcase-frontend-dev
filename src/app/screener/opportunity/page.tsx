@@ -429,7 +429,6 @@ function OpportunityContent() {
         <FinancialStrengthCard data={data.financial_strength} />
         <BalanceSheetCard data={data.financial_strength?.text?.balance_sheet} />
         <CustomerTractionCard data={data.customer_traction} />
-        <GrowthRisks />
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ export function FinancialStrengthCard({ data }: FinancialStrengthCardProps) {
 
   const m = data?.metrics;
   const financialMetrics = [
-    { ...safeMetric(m?.revenue_fy24), icon: TrendingUp, iconColor: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
+    { ...safeMetric(m?.revenue), icon: TrendingUp, iconColor: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
     { ...safeMetric(m?.ebitda_margin), icon: BarChart2, iconColor: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
     { ...safeMetric(m?.free_cash_flow), icon: Wallet, iconColor: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
     { ...safeMetric(m?.net_debt_ebitda), icon: CreditCard, iconColor: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },

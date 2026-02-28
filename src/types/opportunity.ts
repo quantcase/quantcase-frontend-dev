@@ -34,7 +34,7 @@ export interface IndustryOverviewSection {
     };
     opm_trend?: {
       metrics?: {
-        current_opm_fy24?: OFactorMetric;
+        current_opm?: OFactorMetric;
         five_year_change?: OFactorMetric;
         ten_year_change?: OFactorMetric;
         trend_direction?: OFactorMetric;
@@ -97,7 +97,7 @@ export interface BalanceSheetSection {
 export interface FinancialStrengthSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
   metrics?: {
-    revenue_fy24?: OFactorMetric;
+    revenue?: OFactorMetric;
     ebitda_margin?: OFactorMetric;
     free_cash_flow?: OFactorMetric;
     net_debt_ebitda?: OFactorMetric;
@@ -107,7 +107,7 @@ export interface FinancialStrengthSection {
     key_takeaway?: string;
     revenue_growth?: {
       metrics?: {
-        fy24_revenue?: OFactorMetric;
+        revenue?: OFactorMetric;
         five_year_cagr?: OFactorMetric;
         peak_growth?: OFactorMetric;
         growth_quality?: OFactorMetric;
@@ -116,8 +116,8 @@ export interface FinancialStrengthSection {
     };
     profitability?: {
       metrics?: {
-        ebitda_margin_fy24?: OFactorMetric;
-        pat_margin_fy24?: OFactorMetric;
+        ebitda_margin?: OFactorMetric;
+        pat_margin?: OFactorMetric;
         five_year_improvement?: OFactorMetric;
       };
       operating_leverage_drivers?: string[];
@@ -125,7 +125,7 @@ export interface FinancialStrengthSection {
     };
     cash_flow?: {
       metrics?: {
-        fcf_fy24?: OFactorMetric;
+        fcf?: OFactorMetric;
         fcf_conversion?: OFactorMetric;
         ocf_ebitda?: OFactorMetric;
         working_capital?: OFactorMetric;
@@ -154,8 +154,8 @@ export interface CustomerTractionSection {
       metrics?: {
         current_base?: OFactorMetric;
         five_year_growth?: OFactorMetric;
-        new_adds_fy24?: OFactorMetric;
-        churned_fy24?: OFactorMetric;
+        new_adds?: OFactorMetric;
+        churned?: OFactorMetric;
       };
       acquisition_dynamics?: string[];
     };

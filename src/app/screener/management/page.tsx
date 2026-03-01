@@ -108,8 +108,8 @@ function ManagementDashboardContent() {
     setProgress(0);
     setIsAnalyzing(true);
 
-    // Take top 3 calls and reverse so we submit oldest (3rd) first, then 2nd, then latest
-    const callIds = transcriptCalls.slice(0, 3).reverse().map(c => c.id);
+    // Take top 4 latest calls and submit all in parallel
+    const callIds = transcriptCalls.slice(0, 4).map(c => c.id);
 
     const submitCall = (callId: string): Promise<string> =>
       new Promise<string>((resolve, reject) => {
@@ -121,11 +121,7 @@ function ManagementDashboardContent() {
       });
 
     try {
-      const ids: string[] = [];
-      for (const callId of callIds) {
-        const jobId = await submitCall(callId);
-        ids.push(jobId);
-      }
+      const ids = await Promise.all(callIds.map(submitCall));
 
       const initialStatuses: Record<string, JobStatus> = {};
       ids.forEach(id => { initialStatuses[id] = "pending"; });

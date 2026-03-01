@@ -9,6 +9,7 @@ import {
   UserPlus, UserX,
   Shield, Zap, TrendingDown,
   Globe, Smartphone, Briefcase,
+  CheckCircle2,
 } from "lucide-react";
 import { safeMetric, type CustomerTractionSection } from "@/types/opportunity";
 
@@ -42,8 +43,8 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
   const growthTrajectory = [
     { ...safeMetric(gm?.current_base), icon: Users, iconColor: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
     { ...safeMetric(gm?.five_year_growth), icon: TrendingUp, iconColor: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-    { ...safeMetric(gm?.new_adds_fy24), icon: UserPlus, iconColor: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
-    { ...safeMetric(gm?.churned_fy24), icon: UserX, iconColor: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
+    { ...safeMetric(gm?.new_adds), icon: UserPlus, iconColor: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
+    { ...safeMetric(gm?.churned), icon: UserX, iconColor: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
   ];
 
   const retentionMetrics = [
@@ -252,10 +253,15 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 {(seg?.tiers ?? []).map((tier, i) => (
                   <div key={i} className="rounded-lg border border-zinc-100 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{tier.tier ?? 'N/A'} ({tier.customer_count ?? 'N/A'} Customers)</p>
-                      <span className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{tier.revenue_share ?? 'N/A'}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{tier.tier ?? 'N/A'}</p>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">{tier.customer_count ?? 'N/A'} Customers</p>
                     </div>
+                    {tier.revenue_share && (
+                      <p className="text-xs font-medium text-zinc-700 dark:text-zinc-200 bg-zinc-50 dark:bg-zinc-800 rounded px-2 py-1.5 leading-snug">
+                        {tier.revenue_share}
+                      </p>
+                    )}
                     <div className="space-y-1">
                       {[
                         { label: "Avg ACV", value: tier.avg_acv },
@@ -280,31 +286,31 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                 <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Segmentation Strategy &amp; Insights</span>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2.5">
-                    <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Revenue Quality</p>
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                      <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Revenue Quality</p>
+                    </div>
                     {(seg?.revenue_quality ?? []).map((item, i) => {
                       const [label, body] = splitLabelBody(item);
                       return (
-                        <div key={i} className="flex gap-2">
-                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                          <div>
-                            {label && <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{label}: </span>}
-                            <span className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{body}</span>
-                          </div>
+                        <div key={i}>
+                          {label && <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-0.5">{label}</p>}
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{body}</p>
                         </div>
                       );
                     })}
                   </div>
                   <div className="space-y-2.5">
-                    <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Growth Strategy</p>
+                    <div className="flex items-center gap-1.5">
+                      <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
+                      <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Growth Strategy</p>
+                    </div>
                     {(seg?.growth_strategy ?? []).map((item, i) => {
                       const [label, body] = splitLabelBody(item);
                       return (
-                        <div key={i} className="flex gap-2">
-                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                          <div>
-                            {label && <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{label}: </span>}
-                            <span className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{body}</span>
-                          </div>
+                        <div key={i}>
+                          {label && <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-0.5">{label}</p>}
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{body}</p>
                         </div>
                       );
                     })}

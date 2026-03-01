@@ -355,7 +355,7 @@ function OpportunityContent() {
       {/* Page Content */}
       <div className="container mx-auto max-w-7xl space-y-6">
         <IndustryOverviewCard data={data.industry_overview} />
-        <OperatingMetrics />
+        <OperatingMetrics industryOverview={data.industry_overview} competition={data.competition} />
 
         {/* Margin Trend Analysis */}
         <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">

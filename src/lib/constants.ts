@@ -3,6 +3,6 @@ export const BACKEND_URLS = {
   production: 'https://qc-backend.mach33.club',
 };
 
-export const BACKEND_URL = BACKEND_URLS.local;
+export const BACKEND_URL = BACKEND_URLS.production;
 
 export const CALLS = ['CANFINHOME_FY2026_Q3', 'TCS_FY2026_Q3'];

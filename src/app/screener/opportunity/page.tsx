@@ -11,7 +11,7 @@ import type { OFactorResponse } from "@/types/opportunity";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { FileText, Calendar, CheckCircle2, PanelRight } from "lucide-react";
 import { PromptSideWindow } from "@/components/opportunity/prompt-side-window";
 import { IndustryOverviewCard } from "@/components/opportunity/industry-overview-card";
@@ -344,13 +344,12 @@ function OpportunityContent() {
       </Card>
 
       {/* Score Banner */}
-      <div className="container mx-auto max-w-7xl mb-5 flex items-center gap-3">
+      <div className="container mx-auto max-w-7xl mb-5 flex items-center gap-2">
+        <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 mr-1">§4</span>
         <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
-          2.1 Opportunity Factor Score
+          Opportunity Factor Score
         </h2>
-        <Badge className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold text-sm px-3 py-1">
-          35/40
-        </Badge>
+        <span className="text-lg font-bold text-zinc-600 dark:text-zinc-400">(30/50)</span>
       </div>
 
       {/* Floating Prompt Toggle */}
@@ -369,59 +368,62 @@ function OpportunityContent() {
       {/* Page Content */}
       <div className="container mx-auto max-w-7xl space-y-6">
 
-        {/* 2.1 Industry Overview & Market */}
-        <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-          <CardHeader className="pb-2 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
-              2.1 Industry Overview &amp; Market
+        {/* 4.1 Industry Overview & Market */}
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+          <div className="px-6 pt-5 pb-4">
+            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
+              4.1 Industry Overview &amp; Market
             </h2>
-            <p className="text-xs text-zinc-400 normal-case">Synthesized from public company transcripts &amp; filings</p>
-          </CardHeader>
-          <CardContent className="p-4 space-y-4">
+            <p className="text-xs text-zinc-400">Synthesized from public company transcripts &amp; filings</p>
+          </div>
+          <div className="px-6 space-y-4">
             <IndustryOverviewCard data={data.industry_overview} competition={data.competition} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* 2.2 Competitive Benchmarking vs Industry Peers */}
-        <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-          <CardHeader className="pb-2 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
-              2.2 Competitive Benchmarking vs Industry Peers
+        {/* 4.2 Competitive Benchmarking vs Industry Peers */}
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+          <div className="px-6 pt-5 pb-4">
+            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
+              4.2 Competitive Benchmarking vs Industry Peers
             </h2>
-            <p className="text-xs text-zinc-400 normal-case">Peer comparison from public filings &amp; market data</p>
-          </CardHeader>
-          <CardContent className="p-4 space-y-4">
+            <p className="text-xs text-zinc-400">Peer comparison from public filings &amp; market data</p>
+          </div>
+          <div className="px-6 pb-0 space-y-4">
             <CompetitionCard data={data.competition} />
             <CompetitiveBenchmarking data={data.competition} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* 2.3 Financial Strength */}
-        <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-          <CardHeader className="pb-2 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
-              2.3 Financial Strength
+        {/* 4.3 Financial Strength */}
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+          <div className="px-6 pt-5 pb-4">
+            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
+              4.3 Financial Strength
             </h2>
-            <p className="text-xs text-zinc-400 normal-case">Snapshot from financial statements, investor decks &amp; management commentary</p>
-          </CardHeader>
-          <CardContent className="p-4 space-y-4">
+            <p className="text-xs text-zinc-400">Snapshot from financial statements, investor decks &amp; management commentary</p>
+          </div>
+          <div className="px-6 pb-0 space-y-4">
             <FinancialStrengthCard data={data.financial_strength} />
-            <BalanceSheetCard data={data.financial_strength?.text?.balance_sheet} />
-          </CardContent>
-        </Card>
+            <BalanceSheetCard
+              data={data.financial_strength?.text?.balance_sheet}
+              takeaway={data.financial_strength?.text?.takeaway}
+            />
+          </div>
+        </div>
 
-        {/* 2.4 Client/Customer Traction */}
-        <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-          <CardHeader className="pb-2 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
-              2.4 Client/Customer Traction
+        {/* 4.4 Client/Customer Traction */}
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+          <div className="px-6 pt-5 pb-4">
+            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
+              4.4 Client/Customer Traction
             </h2>
-            <p className="text-xs text-zinc-400 normal-case">Customer growth, retention &amp; revenue trajectory with alt data projections</p>
-          </CardHeader>
-          <CardContent className="p-4">
+            <p className="text-xs text-zinc-400">Customer growth, retention &amp; revenue trajectory with alt data projections</p>
+          </div>
+          <div className="px-6 pb-6">
             <CustomerTractionCard data={data.customer_traction} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
       </div>
 

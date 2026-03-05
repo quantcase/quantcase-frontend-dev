@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Shield, TrendingUp, Award, Activity, Lock } from "lucide-react";
+import { ChevronDown, ChevronUp, Shield, TrendingUp, Award, Activity, Lock, ZapIcon } from "lucide-react";
 import { safeMetric, type CompetitionSection } from "@/types/opportunity";
 
 interface CompetitionCardProps {
@@ -29,15 +29,15 @@ export function CompetitionCard({ data }: CompetitionCardProps) {
           {competitionMetrics.map((m, i) => {
             const Icon = m.icon;
             return (
-              <div key={i} className="rounded-lg border border-zinc-100 dark:border-zinc-800 p-3">
+              <div key={i} className={`rounded-lg border border-zinc-100 dark:border-zinc-800 p-3 ${m.bg}`}>
                 <div className="flex items-start justify-between mb-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{m.label}</p>
+                  <p className={`text-[10px] font-semibold uppercase tracking-wider ${m.iconColor}`}>{m.label}</p>
                   <div className={`rounded-md p-1 ${m.bg}`}>
                     <Icon className={`h-3.5 w-3.5 ${m.iconColor}`} />
                   </div>
                 </div>
                 <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{m.value}</p>
-                <p className="text-[11px] text-zinc-400 mt-0.5">{m.sublabel}</p>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">{m.sublabel}</p>
               </div>
             );
           })}
@@ -55,28 +55,32 @@ export function CompetitionCard({ data }: CompetitionCardProps) {
 
         {showDeepDive && (
           <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Pricing Power &amp; Dynamics</span>
+            <div className="flex items-center gap-1.5">
+              <ZapIcon className="h-3.5 w-3.5 text-zinc-500" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Pricing Power &amp; Dynamics</span>
+            </div>
+            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">How Pricing Power is Shifting</p>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
-                <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Current State (FY24)</p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{ppd?.current_state ?? 'N/A'}</p>
+                <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Current State (FY24)</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{ppd?.current_state ?? 'N/A'}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Shifting Dynamics</p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{ppd?.shifting_dynamics ?? 'N/A'}</p>
+                <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Shifting Dynamics</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{ppd?.shifting_dynamics ?? 'N/A'}</p>
               </div>
             </div>
             <div className="flex flex-wrap items-start gap-2 pt-1">
-              <Badge className="bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-semibold uppercase shrink-0">
+              <Badge className="bg-zinc-700 dark:bg-zinc-600 text-white text-[10px] font-semibold uppercase shrink-0 border-0">
                 Future Trajectory (FY25-27E)
               </Badge>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">{ppd?.future_trajectory ?? 'N/A'}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">{ppd?.future_trajectory ?? 'N/A'}</p>
             </div>
             <div className="flex flex-wrap items-start gap-2">
-              <Badge className="bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-semibold uppercase shrink-0">
+              <Badge className="bg-zinc-700 dark:bg-zinc-600 text-white text-[10px] font-semibold uppercase shrink-0 border-0">
                 Watch-outs
               </Badge>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">{ppd?.watch_outs ?? 'N/A'}</p>
+              <p className="text-sm text-orange-600 dark:text-orange-400">{ppd?.watch_outs ?? 'N/A'}</p>
             </div>
           </div>
         )}

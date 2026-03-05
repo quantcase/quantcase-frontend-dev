@@ -4,16 +4,26 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   ChevronDown, ChevronUp, TrendingUp, Package, BarChart2, Zap, AlertTriangle,
-  DollarSign, Quote, FileText,
+  DollarSign, Quote, FileText, Info, CheckCircle2,
 } from "lucide-react";
 import { safeMetric, type IndustryOverviewSection, type CompetitionSection } from "@/types/opportunity";
 import { OperatingMetrics } from "@/components/opportunity/operating-metrics";
 
 const insightAccents = [
-  { border: "border-l-blue-500", icon: "text-blue-500" },
-  { border: "border-l-emerald-500", icon: "text-emerald-500" },
-  { border: "border-l-orange-500", icon: "text-orange-500" },
-  { border: "border-l-purple-500", icon: "text-purple-500" },
+  { border: "border-l-blue-500", icon: "text-blue-500", badge: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" },
+  { border: "border-l-emerald-500", icon: "text-emerald-500", badge: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300" },
+  { border: "border-l-orange-500", icon: "text-orange-500", badge: "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300" },
+  { border: "border-l-purple-500", icon: "text-purple-500", badge: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300" },
+];
+
+// Figma-style metric tile config: label color, value color, sublabel color, bg
+const metricTileStyles = [
+  { labelColor: "text-indigo-500", valueColor: "text-zinc-900 dark:text-zinc-50", sublabelColor: "text-indigo-400", bg: "bg-indigo-50/60 dark:bg-indigo-900/10" },
+  { labelColor: "text-blue-500", valueColor: "text-blue-700 dark:text-blue-300", sublabelColor: "text-blue-400", bg: "bg-blue-50/60 dark:bg-blue-900/10" },
+  { labelColor: "text-emerald-600", valueColor: "text-emerald-700 dark:text-emerald-300", sublabelColor: "text-emerald-500", bg: "bg-emerald-50/60 dark:bg-emerald-900/10" },
+  { labelColor: "text-purple-500", valueColor: "text-purple-700 dark:text-purple-300", sublabelColor: "text-purple-400", bg: "bg-purple-50/60 dark:bg-purple-900/10" },
+  { labelColor: "text-orange-500", valueColor: "text-orange-700 dark:text-orange-300", sublabelColor: "text-orange-400", bg: "bg-orange-50/60 dark:bg-orange-900/10" },
+  { labelColor: "text-zinc-500", valueColor: "text-zinc-900 dark:text-zinc-50", sublabelColor: "text-zinc-400", bg: "bg-zinc-50/80 dark:bg-zinc-800/40" },
 ];
 
 interface IndustryOverviewCardProps {
@@ -26,12 +36,12 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
 
   const m = data?.metrics;
   const industryMetrics = [
-    { ...safeMetric(m?.industry_revenue_ttm), icon: DollarSign, iconColor: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
-    { ...safeMetric(m?.industry_cagr), icon: TrendingUp, iconColor: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
-    { ...safeMetric(m?.market_size), icon: Package, iconColor: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-    { ...safeMetric(m?.current_opm), icon: BarChart2, iconColor: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
-    { ...safeMetric(m?.demand_signal), icon: Zap, iconColor: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
-    { ...safeMetric(m?.supply_constraint), icon: AlertTriangle, iconColor: "text-zinc-500", bg: "bg-zinc-50 dark:bg-zinc-800" },
+    { ...safeMetric(m?.industry_revenue_ttm), icon: DollarSign, style: metricTileStyles[0] },
+    { ...safeMetric(m?.industry_cagr), icon: TrendingUp, style: metricTileStyles[1] },
+    { ...safeMetric(m?.market_size), icon: Package, style: metricTileStyles[2] },
+    { ...safeMetric(m?.current_opm), icon: BarChart2, style: metricTileStyles[3] },
+    { ...safeMetric(m?.demand_signal), icon: Zap, style: metricTileStyles[4] },
+    { ...safeMetric(m?.supply_constraint), icon: AlertTriangle, style: metricTileStyles[5] },
   ];
 
   const dsd = data?.text?.demand_supply_dynamics;
@@ -45,15 +55,13 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
           {industryMetrics.map((metric, i) => {
             const Icon = metric.icon;
             return (
-              <div key={i} className="rounded-lg border border-zinc-100 dark:border-zinc-800 p-3">
-                <div className="flex items-start justify-between mb-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{metric.label}</p>
-                  <div className={`rounded-md p-1 ${metric.bg}`}>
-                    <Icon className={`h-3.5 w-3.5 ${metric.iconColor}`} />
-                  </div>
+              <div key={i} className={`rounded-lg border border-zinc-100 dark:border-zinc-800 p-3 ${metric.style.bg}`}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Icon className={`h-3 w-3 ${metric.style.labelColor}`} />
+                  <p className={`text-[10px] font-semibold uppercase tracking-wider ${metric.style.labelColor}`}>{metric.label}</p>
                 </div>
-                <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{metric.value}</p>
-                <p className="text-[11px] text-zinc-400 mt-0.5">{metric.sublabel}</p>
+                <p className={`text-lg font-bold ${metric.style.valueColor}`}>{metric.value}</p>
+                <p className={`text-[11px] mt-0.5 ${metric.style.sublabelColor}`}>{metric.sublabel}</p>
               </div>
             );
           })}
@@ -75,18 +83,21 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
 
             {/* Demand-Supply Dynamics */}
             <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Demand-Supply Dynamics</span>
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
+                <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Demand-Supply Dynamics</span>
+              </div>
               <div className="space-y-2">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">Demand: </span>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  <span className="font-bold text-zinc-800 dark:text-zinc-200">Demand: </span>
                   {dsd?.demand ?? 'N/A'}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">Supply: </span>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  <span className="font-bold text-zinc-800 dark:text-zinc-200">Supply: </span>
                   {dsd?.supply ?? 'N/A'}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">Net Impact: </span>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  <span className="font-bold text-zinc-800 dark:text-zinc-200">Net Impact: </span>
                   {dsd?.net_impact ?? 'N/A'}
                 </p>
               </div>
@@ -97,62 +108,92 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
 
             {/* Margin Trend Analysis */}
             <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Margin Trend Analysis</span>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <div>
-                  <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Key Observations</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed whitespace-pre-line">
-                    {(opmTrend?.key_observations ?? []).map(s => `• ${s}`).join("\n")}
-                  </p>
+              <p className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">Margin Trend Analysis</p>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                    <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Key Observations</p>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {(opmTrend?.key_observations ?? []).map((s, i) => {
+                      const colonIdx = s.indexOf(':');
+                      const hasBold = colonIdx > 0 && colonIdx < 40;
+                      return (
+                        <li key={i} className="flex gap-1.5 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                          <span className="text-zinc-400 flex-shrink-0">•</span>
+                          {hasBold
+                            ? <span><span className="font-bold text-zinc-800 dark:text-zinc-200">{s.slice(0, colonIdx)}:</span>{s.slice(colonIdx + 1)}</span>
+                            : <span>{s}</span>
+                          }
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
-                <div>
-                  <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Margin Drivers</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed whitespace-pre-line">
-                    {(opmTrend?.margin_drivers ?? []).map(s => `• ${s}`).join("\n")}
-                  </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5">
+                    <Info className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
+                    <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Margin Drivers</p>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {(opmTrend?.margin_drivers ?? []).map((s, i) => {
+                      const colonIdx = s.indexOf(':');
+                      const hasBold = colonIdx > 0 && colonIdx < 40;
+                      return (
+                        <li key={i} className="flex gap-1.5 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                          <span className="text-zinc-400 flex-shrink-0">•</span>
+                          {hasBold
+                            ? <span><span className="font-bold text-zinc-800 dark:text-zinc-200">{s.slice(0, colonIdx)}:</span>{s.slice(colonIdx + 1)}</span>
+                            : <span>{s}</span>
+                          }
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               </div>
             </div>
 
-            {/* Forward Outlook — separate callout block */}
-            <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-4 space-y-1.5">
+            {/* Forward Outlook */}
+            <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-gradient-to-r from-cyan-100 to-cyan-50 dark:from-zinc-900 dark:to-cyan-900/10 p-4 space-y-2">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">
+                <TrendingUp className="h-4 w-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
                   Forward Outlook (FY25-FY27E)
                 </p>
               </div>
-              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                 {opmTrend?.forward_outlook ?? 'N/A'}
               </p>
             </div>
 
             {/* Key Insights from Industry Transcripts */}
             {(transcripts ?? []).length > 0 && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-zinc-500" />
                   <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
                     Key Insights from Industry Transcripts
                   </h3>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {(transcripts ?? []).map((item, i) => {
                     const accent = insightAccents[i % insightAccents.length];
                     return (
-                      <div key={i} className={`border-l-2 ${accent.border} pl-4 space-y-2`}>
-                        <div className="flex gap-2.5">
-                          <Quote className={`h-4 w-4 shrink-0 mt-0.5 ${accent.icon}`} />
-                          <p className="text-sm italic text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                      <div key={i} className={`border-l-4 ${accent.border} pl-3 space-y-1`}>
+                        <div className="flex gap-2">
+                          <Quote className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${accent.icon}`} />
+                          <p className="text-xs italic text-zinc-600 dark:text-zinc-400 leading-relaxed">
                             &ldquo;{item.quote}&rdquo;
                           </p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-1.5 pl-6">
-                          <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">{item.company}</span>
-                          <span className="text-xs text-zinc-400">•</span>
-                          <span className="text-xs text-zinc-500 dark:text-zinc-500">{item.context}</span>
-                          <span className="text-xs text-zinc-400">•</span>
-                          <Badge className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-[10px] font-semibold border-0">
+                        <div className="flex flex-wrap items-center gap-1.5 pl-5">
+                          <span className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">{item.company}</span>
+                          <span className="text-[11px] text-zinc-400">•</span>
+                          <span className="text-[11px] text-zinc-500 dark:text-zinc-500">{item.context}</span>
+                          <span className="text-[11px] text-zinc-400">•</span>
+                          <Badge className={`${accent.badge} text-[10px] font-semibold border-0`}>
                             {item.sector}
                           </Badge>
                         </div>

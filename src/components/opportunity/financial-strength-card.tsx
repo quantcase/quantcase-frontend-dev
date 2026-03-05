@@ -35,18 +35,29 @@ export function FinancialStrengthCard({ data }: FinancialStrengthCardProps) {
           {financialMetrics.map((metric, i) => {
             const Icon = metric.icon;
             return (
-              <div key={i} className="rounded-lg border border-zinc-100 dark:border-zinc-800 p-3">
+              <div key={i} className={`rounded-lg border border-zinc-100 dark:border-zinc-800 p-3 ${metric.bg}`}>
                 <div className="flex items-start justify-between mb-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{metric.label}</p>
+                  <p className={`text-[10px] font-semibold uppercase tracking-wider ${metric.iconColor}`}>{metric.label}</p>
                   <div className={`rounded-md p-1 ${metric.bg}`}>
                     <Icon className={`h-3.5 w-3.5 ${metric.iconColor}`} />
                   </div>
                 </div>
                 <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{metric.value}</p>
-                <p className="text-[11px] text-zinc-400 mt-0.5">{metric.sublabel}</p>
+                <p className={`text-[11px] mt-0.5 ${metric.iconColor} opacity-80`}>{metric.sublabel}</p>
               </div>
             );
           })}
+        </div>
+
+        {/* Key Financial Takeaway — always visible */}
+        <div className="rounded-lg border border-indigo-100 dark:border-indigo-900/30 bg-indigo-50/40 dark:bg-indigo-900/10 p-4 space-y-2">
+          <div className="flex items-center gap-1.5">
+            <DollarSign className="h-3.5 w-3.5 text-indigo-500" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Key Financial Takeaway</span>
+          </div>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            {data?.text?.key_takeaway ?? 'N/A'}
+          </p>
         </div>
 
         <div className="flex justify-center">
@@ -60,13 +71,7 @@ export function FinancialStrengthCard({ data }: FinancialStrengthCardProps) {
         </div>
 
         {showDetails && (
-          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
-            <TrendCharts color="green" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Key Financial Takeaway</span>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              {data?.text?.key_takeaway ?? 'N/A'}
-            </p>
-          </div>
+          <TrendCharts />
         )}
     </div>
   );

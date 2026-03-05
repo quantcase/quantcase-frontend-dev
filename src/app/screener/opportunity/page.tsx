@@ -12,23 +12,14 @@ import type { OFactorResponse } from "@/types/opportunity";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { FileText, Calendar, CheckCircle2, Quote, PanelRight } from "lucide-react";
+import { FileText, Calendar, CheckCircle2, PanelRight } from "lucide-react";
 import { PromptSideWindow } from "@/components/opportunity/prompt-side-window";
 import { IndustryOverviewCard } from "@/components/opportunity/industry-overview-card";
-import { OperatingMetrics } from "@/components/opportunity/operating-metrics";
-import { GrowthRisks } from "@/components/opportunity/growth-risks";
 import { CompetitionCard } from "@/components/opportunity/competition-card";
 import { CompetitiveBenchmarking } from "@/components/opportunity/competitive-benchmarking";
 import { FinancialStrengthCard } from "@/components/opportunity/financial-strength-card";
 import { BalanceSheetCard } from "@/components/opportunity/balance-sheet-card";
 import { CustomerTractionCard } from "@/components/opportunity/customer-traction-card";
-
-const insightAccents = [
-  { border: "border-l-blue-500", icon: "text-blue-500" },
-  { border: "border-l-emerald-500", icon: "text-emerald-500" },
-  { border: "border-l-orange-500", icon: "text-orange-500" },
-  { border: "border-l-purple-500", icon: "text-purple-500" },
-];
 
 function OpportunityContent() {
   const searchParams = useSearchParams();
@@ -304,8 +295,6 @@ function OpportunityContent() {
   // Analysis available — render full dashboard
   const data = opportunityData as OFactorResponse;
   const transcriptCall = transcriptCalls[0];
-  const opmTrend = data.industry_overview?.text?.opm_trend;
-  const transcripts = data.industry_overview?.text?.industry_transcripts;
   const callsAnalyzed = transcriptCalls.map(
     (c) => `${c.company}_${c.fiscal_year}_${c.quarter}`
   );
@@ -379,81 +368,61 @@ function OpportunityContent() {
 
       {/* Page Content */}
       <div className="container mx-auto max-w-7xl space-y-6">
-        <IndustryOverviewCard data={data.industry_overview} />
-        <OperatingMetrics industryOverview={data.industry_overview} competition={data.competition} />
 
-        {/* Margin Trend Analysis */}
+        {/* 2.1 Industry Overview & Market */}
         <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-          <CardContent className="p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Margin Trend Analysis</span>
-            </div>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div>
-                <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Key Observations</p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed whitespace-pre-line">
-                  {(opmTrend?.key_observations ?? []).map(s => `• ${s}`).join("\n")}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Margin Drivers</p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed whitespace-pre-line">
-                  {(opmTrend?.margin_drivers ?? []).map(s => `• ${s}`).join("\n")}
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <Badge className="bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-semibold uppercase">
-                Forward Outlook (FY25-FY27E)
-              </Badge>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                {opmTrend?.forward_outlook ?? 'N/A'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Key Insights from Industry Transcripts */}
-        <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-zinc-500" />
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-                Key Insights from Industry Transcripts
-              </h3>
-            </div>
+          <CardHeader className="pb-2 border-b border-zinc-100 dark:border-zinc-800">
+            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
+              2.1 Industry Overview &amp; Market
+            </h2>
+            <p className="text-xs text-zinc-400 normal-case">Synthesized from public company transcripts &amp; filings</p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {(transcripts ?? []).map((item, i) => {
-              const accent = insightAccents[i % insightAccents.length];
-              return (
-                <div key={i} className={`border-l-2 ${accent.border} pl-4 space-y-2`}>
-                  <div className="flex gap-2.5">
-                    <Quote className={`h-4 w-4 shrink-0 mt-0.5 ${accent.icon}`} />
-                    <p className="text-sm italic text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                      &ldquo;{item.quote}&rdquo;
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-1.5 pl-6">
-                    <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">{item.company}</span>
-                    <span className="text-xs text-zinc-400">•</span>
-                    <span className="text-xs text-zinc-500 dark:text-zinc-500">{item.context}</span>
-                    <span className="text-xs text-zinc-400">•</span>
-                    <Badge className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-[10px] font-semibold border-0">
-                      {item.sector}
-                    </Badge>
-                  </div>
-                </div>
-              );
-            })}
+          <CardContent className="p-4 space-y-4">
+            <IndustryOverviewCard data={data.industry_overview} competition={data.competition} />
           </CardContent>
         </Card>
 
-        <CompetitionCard data={data.competition} />
-        <CompetitiveBenchmarking data={data.competition} />
-        <FinancialStrengthCard data={data.financial_strength} />
-        <BalanceSheetCard data={data.financial_strength?.text?.balance_sheet} />
-        <CustomerTractionCard data={data.customer_traction} />
+        {/* 2.2 Competitive Benchmarking vs Industry Peers */}
+        <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+          <CardHeader className="pb-2 border-b border-zinc-100 dark:border-zinc-800">
+            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
+              2.2 Competitive Benchmarking vs Industry Peers
+            </h2>
+            <p className="text-xs text-zinc-400 normal-case">Peer comparison from public filings &amp; market data</p>
+          </CardHeader>
+          <CardContent className="p-4 space-y-4">
+            <CompetitionCard data={data.competition} />
+            <CompetitiveBenchmarking data={data.competition} />
+          </CardContent>
+        </Card>
+
+        {/* 2.3 Financial Strength */}
+        <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+          <CardHeader className="pb-2 border-b border-zinc-100 dark:border-zinc-800">
+            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
+              2.3 Financial Strength
+            </h2>
+            <p className="text-xs text-zinc-400 normal-case">Snapshot from financial statements, investor decks &amp; management commentary</p>
+          </CardHeader>
+          <CardContent className="p-4 space-y-4">
+            <FinancialStrengthCard data={data.financial_strength} />
+            <BalanceSheetCard data={data.financial_strength?.text?.balance_sheet} />
+          </CardContent>
+        </Card>
+
+        {/* 2.4 Client/Customer Traction */}
+        <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+          <CardHeader className="pb-2 border-b border-zinc-100 dark:border-zinc-800">
+            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
+              2.4 Client/Customer Traction
+            </h2>
+            <p className="text-xs text-zinc-400 normal-case">Customer growth, retention &amp; revenue trajectory with alt data projections</p>
+          </CardHeader>
+          <CardContent className="p-4">
+            <CustomerTractionCard data={data.customer_traction} />
+          </CardContent>
+        </Card>
+
       </div>
 
       {/* Prompt Side Window — fixed overlay */}

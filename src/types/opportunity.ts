@@ -20,6 +20,7 @@ export function safeMetric(m?: OFactorMetric): Required<OFactorMetric> {
 export interface IndustryOverviewSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
   metrics?: {
+    industry_revenue_ttm?: OFactorMetric;
     industry_cagr?: OFactorMetric;
     market_size?: OFactorMetric;
     current_opm?: OFactorMetric;
@@ -98,10 +99,14 @@ export interface FinancialStrengthSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
   metrics?: {
     revenue?: OFactorMetric;
+    gross_margin?: OFactorMetric;
     ebitda_margin?: OFactorMetric;
+    pat?: OFactorMetric;
     free_cash_flow?: OFactorMetric;
-    net_debt_ebitda?: OFactorMetric;
+    interest_coverage?: OFactorMetric;
     roce?: OFactorMetric;
+    roe?: OFactorMetric;
+    net_debt_ebitda?: OFactorMetric;
   };
   text?: {
     key_takeaway?: string;

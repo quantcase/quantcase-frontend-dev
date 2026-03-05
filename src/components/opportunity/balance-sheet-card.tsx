@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, TrendingDown, BarChart2, ShieldCheck, Gauge, Award } from "lucide-react";
 import { safeMetric, type BalanceSheetSection } from "@/types/opportunity";
@@ -32,21 +31,7 @@ export function BalanceSheetCard({ data }: BalanceSheetCardProps) {
   const considerations = data?.considerations ?? [];
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-blue-500" />
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-              Balance Sheet Strength &amp; Leverage
-            </h3>
-          </div>
-          <Badge variant="secondary" className="text-xs text-zinc-500">
-            Weight: 15% of Total Score
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {balanceSheetMetrics.map((m, i) => {
             const Icon = m.icon;
@@ -112,7 +97,6 @@ export function BalanceSheetCard({ data }: BalanceSheetCardProps) {
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+    </div>
   );
 }

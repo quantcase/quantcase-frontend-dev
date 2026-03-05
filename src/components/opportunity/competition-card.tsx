@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, Shield, TrendingUp, Award, Activity, Lock } from "lucide-react";
 import { safeMetric, type CompetitionSection } from "@/types/opportunity";
@@ -25,24 +24,7 @@ export function CompetitionCard({ data }: CompetitionCardProps) {
   const ppd = data?.text?.pricing_power_dynamics;
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-blue-500" />
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-              Competition
-            </h3>
-            <span className="text-xs text-zinc-400 dark:text-zinc-500 normal-case font-normal tracking-normal">
-              {data?.meta?.subtitle}
-            </span>
-          </div>
-          <Badge variant="secondary" className="text-xs text-zinc-500">
-            Weight: 20% of Total Score
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {competitionMetrics.map((m, i) => {
             const Icon = m.icon;
@@ -98,7 +80,6 @@ export function CompetitionCard({ data }: CompetitionCardProps) {
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+    </div>
   );
 }

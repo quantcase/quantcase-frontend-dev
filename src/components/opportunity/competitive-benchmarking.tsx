@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -34,16 +33,7 @@ export function CompetitiveBenchmarking({ data }: CompetitiveBenchmarkingProps) 
   const takeaway = data?.text?.takeaway ?? 'N/A';
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-blue-500" />
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-            Competitive Benchmarking vs Industry Peers
-          </h3>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-5">
+    <div className="space-y-5">
         <Table>
           <TableHeader>
             <TableRow className="border-zinc-100 dark:border-zinc-800">
@@ -141,7 +131,6 @@ export function CompetitiveBenchmarking({ data }: CompetitiveBenchmarkingProps) 
             <p className="text-xs text-zinc-500 dark:text-zinc-400">{takeaway}</p>
           </div>
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

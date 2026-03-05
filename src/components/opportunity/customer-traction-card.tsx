@@ -12,6 +12,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { safeMetric, type CustomerTractionSection } from "@/types/opportunity";
+import { TrendCharts } from "@/components/opportunity/trend-charts";
 
 interface CustomerTractionCardProps {
   data?: CustomerTractionSection;
@@ -115,22 +116,23 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
         </div>
 
         {showDetails && (
-          <div className="space-y-3">
+          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-4">
 
             {/* ── Key Customer Takeaway ── */}
-            <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+            <div className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Key Customer Takeaway</span>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t?.key_takeaway ?? 'N/A'}</p>
             </div>
 
             {/* ── Customer Growth Trajectory ── */}
-            <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
+              <TrendCharts color="blue" />
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Customer Growth Trajectory</span>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {growthTrajectory.map((m, i) => {
                   const Icon = m.icon;
                   return (
-                    <div key={i} className="rounded-lg border border-zinc-100 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3">
+                    <div key={i} className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3">
                       <div className="flex items-start justify-between mb-2">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{m.label}</p>
                         <div className={`rounded-md p-1 ${m.bg}`}>
@@ -171,13 +173,14 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
             </div>
 
             {/* ── Retention & Revenue Expansion ── */}
-            <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
+              <TrendCharts color="blue" />
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Retention &amp; Revenue Expansion</span>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {retentionMetrics.map((m, i) => {
                   const Icon = m.icon;
                   return (
-                    <div key={i} className="rounded-lg border border-zinc-100 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3">
+                    <div key={i} className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3">
                       <div className="flex items-start justify-between mb-2">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{m.label}</p>
                         <div className={`rounded-md p-1 ${m.bg}`}>
@@ -228,14 +231,14 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
             </div>
 
             {/* ── Revenue Trajectory Projection (Alt Data Signals) ── */}
-            <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Revenue Trajectory Projection (Alt Data Signals)</span>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Alt Data Sources Tracked</p>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 {(t?.alt_data_signals ?? []).map((s, i) => {
                   const Icon = altDataIcons[i % altDataIcons.length];
                   return (
-                    <div key={i} className="rounded-lg border border-zinc-100 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-1.5">
+                    <div key={i} className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-1.5">
                       <div className="flex items-center gap-2">
                         <Icon className="h-3.5 w-3.5 text-zinc-500" />
                         <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{s.source ?? 'N/A'}</p>
@@ -248,17 +251,17 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
             </div>
 
             {/* ── Customer Segmentation & Revenue Mix ── */}
-            <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Customer Segmentation &amp; Revenue Mix</span>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 {(seg?.tiers ?? []).map((tier, i) => (
-                  <div key={i} className="rounded-lg border border-zinc-100 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-2">
+                  <div key={i} className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-2">
                     <div>
                       <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{tier.tier ?? 'N/A'}</p>
                       <p className="text-[11px] text-zinc-400 mt-0.5">{tier.customer_count ?? 'N/A'} Customers</p>
                     </div>
                     {tier.revenue_share && (
-                      <p className="text-xs font-medium text-zinc-700 dark:text-zinc-200 bg-zinc-50 dark:bg-zinc-800 rounded px-2 py-1.5 leading-snug">
+                      <p className="text-xs font-medium text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-700 rounded px-2 py-1.5 leading-snug">
                         {tier.revenue_share}
                       </p>
                     )}

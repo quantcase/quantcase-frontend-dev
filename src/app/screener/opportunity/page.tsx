@@ -12,7 +12,8 @@ import type { OFactorResponse } from "@/types/opportunity";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { FileText, Calendar, CheckCircle2, Quote } from "lucide-react";
+import { FileText, Calendar, CheckCircle2, Quote, PanelRight } from "lucide-react";
+import { PromptSideWindow } from "@/components/opportunity/prompt-side-window";
 import { IndustryOverviewCard } from "@/components/opportunity/industry-overview-card";
 import { OperatingMetrics } from "@/components/opportunity/operating-metrics";
 import { GrowthRisks } from "@/components/opportunity/growth-risks";
@@ -33,6 +34,8 @@ function OpportunityContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
 
+  const [selectedSection, setSelectedSection] = useState("industry_overview");
+  const [showSideWindow, setShowSideWindow] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const [jobStatuses, setJobStatuses] = useState<Record<string, JobStatus>>({});
@@ -297,6 +300,9 @@ function OpportunityContent() {
   const transcriptCall = transcriptCalls[0];
   const opmTrend = data.industry_overview?.text?.opm_trend;
   const transcripts = data.industry_overview?.text?.industry_transcripts;
+  const callsAnalyzed = transcriptCalls.map(
+    (c) => `${c.company}_${c.fiscal_year}_${c.quarter}`
+  );
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -351,6 +357,19 @@ function OpportunityContent() {
           35/40
         </Badge>
       </div>
+
+      {/* Floating Prompt Toggle */}
+      <button
+        onClick={() => setShowSideWindow((v) => !v)}
+        className={`fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg transition-all ${
+          showSideWindow
+            ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-zinc-900/30"
+            : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/40 hover:shadow-blue-600/60"
+        }`}
+      >
+        <PanelRight className="h-4 w-4" />
+        Prompt
+      </button>
 
       {/* Page Content */}
       <div className="container mx-auto max-w-7xl space-y-6">
@@ -430,6 +449,16 @@ function OpportunityContent() {
         <BalanceSheetCard data={data.financial_strength?.text?.balance_sheet} />
         <CustomerTractionCard data={data.customer_traction} />
       </div>
+
+      {/* Prompt Side Window — fixed overlay */}
+      {showSideWindow && (
+        <PromptSideWindow
+          callsAnalyzed={callsAnalyzed}
+          selectedSection={selectedSection}
+          onSectionChange={setSelectedSection}
+          onClose={() => setShowSideWindow(false)}
+        />
+      )}
     </div>
   );
 }

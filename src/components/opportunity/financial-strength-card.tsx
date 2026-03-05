@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, TrendingUp, BarChart2, Wallet, CreditCard, Target } from "lucide-react";
 import { safeMetric, type FinancialStrengthSection } from "@/types/opportunity";
+import { TrendCharts } from "@/components/opportunity/trend-charts";
 
 interface FinancialStrengthCardProps {
   data?: FinancialStrengthSection;
@@ -73,6 +74,7 @@ export function FinancialStrengthCard({ data }: FinancialStrengthCardProps) {
 
         {showDetails && (
           <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+            <TrendCharts color="green" />
             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Key Financial Takeaway</span>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
               {data?.text?.key_takeaway ?? 'N/A'}

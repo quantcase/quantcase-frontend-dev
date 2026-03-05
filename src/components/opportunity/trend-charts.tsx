@@ -34,7 +34,36 @@ const forecastData = [
   { year: "FY29", value: 82 },
 ];
 
-export function TrendCharts() {
+const colorConfig = {
+  green: {
+    historical: {
+      stroke: "#16a34a",
+      badge: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300",
+    },
+    forecast: {
+      stroke: "#15803d",
+      badge: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300",
+    },
+  },
+  blue: {
+    historical: {
+      stroke: "#2563eb",
+      badge: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300",
+    },
+    forecast: {
+      stroke: "#1d4ed8",
+      badge: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200",
+    },
+  },
+};
+
+interface TrendChartsProps {
+  color?: "green" | "blue";
+}
+
+export function TrendCharts({ color = "green" }: TrendChartsProps) {
+  const cfg = colorConfig[color];
+
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {/* Historical */}
@@ -44,7 +73,7 @@ export function TrendCharts() {
             <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">
               10-Year Trend
             </h3>
-            <Badge className="bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-[10px]">
+            <Badge className={`text-[10px] ${cfg.historical.badge}`}>
               Historical
             </Badge>
           </div>
@@ -60,10 +89,9 @@ export function TrendCharts() {
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#7c3aed"
+                  stroke={cfg.historical.stroke}
                   strokeWidth={2}
                   dot={false}
-                  fill="#ede9fe"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -78,7 +106,7 @@ export function TrendCharts() {
             <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">
               5-Year Forecast
             </h3>
-            <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-[10px]">
+            <Badge className={`text-[10px] ${cfg.forecast.badge}`}>
               Projection
             </Badge>
           </div>
@@ -94,7 +122,7 @@ export function TrendCharts() {
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#16a34a"
+                  stroke={cfg.forecast.stroke}
                   strokeWidth={2}
                   dot={false}
                 />

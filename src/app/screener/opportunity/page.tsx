@@ -300,7 +300,7 @@ function OpportunityContent() {
   );
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-background p-4 mb-20">
       {/* Confidential Banner */}
       <div className="sticky top-0 z-10 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-sm font-semibold text-white mb-4">
         ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
@@ -420,7 +420,7 @@ function OpportunityContent() {
             </h2>
             <p className="text-xs text-zinc-400">Customer growth, retention &amp; revenue trajectory with alt data projections</p>
           </div>
-          <div className="px-6 pb-6">
+          <div className="px-6">
             <CustomerTractionCard data={data.customer_traction} />
           </div>
         </div>

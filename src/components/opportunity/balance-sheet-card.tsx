@@ -67,7 +67,7 @@ export function BalanceSheetCard({ data, takeaway }: BalanceSheetCardProps) {
               <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Balance Sheet Assessment</span>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-2.5">
+              <div className="">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                   <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Strengths</p>
@@ -77,15 +77,15 @@ export function BalanceSheetCard({ data, takeaway }: BalanceSheetCardProps) {
                   return (
                     <div key={i} className="flex gap-2">
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                      <div>
+                      <>
                         {label && <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{label}: </span>}
                         <span className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{body}</span>
-                      </div>
+                      </>
                     </div>
                   );
                 })}
               </div>
-              <div className="space-y-2.5">
+              <div className="">
                 <div className="flex items-center gap-1.5">
                   <AlertTriangle className="h-3.5 w-3.5 text-orange-500 shrink-0" />
                   <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Considerations</p>

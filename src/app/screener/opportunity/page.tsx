@@ -108,20 +108,26 @@ function OpportunityContent() {
     setProgress(0);
     setIsAnalyzing(true);
 
+    const sections = ["industry", "competition", "financial_strength", "customer_traction"] as const;
     const url = `${BACKEND_URL}/api/calls/${firstCallId}/opportunity/analysis`;
 
     try {
-      const jobId = await new Promise<string>((resolve, reject) => {
-        apiPost<JobCreateResponse>(url, {
-          onSuccess: (response) => resolve(response.job.id),
-          onError: reject,
-        });
-      });
+      const jobIds = await Promise.all(
+        sections.map(
+          (section) =>
+            new Promise<string>((resolve, reject) => {
+              apiPost<JobCreateResponse>(url, {
+                onSuccess: (response) => resolve(response.job.id),
+                onError: reject,
+              }, { section });
+            })
+        )
+      );
 
-      const initialStatuses: Record<string, JobStatus> = { [jobId]: "pending" };
+      const initialStatuses: Record<string, JobStatus> = Object.fromEntries(jobIds.map(id => [id, "pending"]));
       setJobStatuses(initialStatuses);
-      pollAllJobs([jobId]);
-      pollingIntervalRef.current = setInterval(() => pollAllJobs([jobId]), 2000);
+      pollAllJobs(jobIds);
+      pollingIntervalRef.current = setInterval(() => pollAllJobs(jobIds), 2000);
     } catch (error: unknown) {
       setIsAnalyzing(false);
       setAnalyzeError(error instanceof Error ? error.message : "Failed to start analysis");

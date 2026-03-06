@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ChevronDown, ChevronUp,
@@ -9,10 +8,9 @@ import {
   UserPlus, UserX,
   Shield, Zap, TrendingDown,
   Globe, Smartphone, Briefcase,
-  CheckCircle2,
+  CheckCircle2, Database, Info,
 } from "lucide-react";
 import { safeMetric, type CustomerTractionSection } from "@/types/opportunity";
-import { TrendCharts } from "@/components/opportunity/trend-charts";
 
 interface CustomerTractionCardProps {
   data?: CustomerTractionSection;
@@ -25,6 +23,10 @@ function splitLabelBody(item: string): [string, string] {
 }
 
 const altDataIcons = [Globe, Smartphone, Briefcase];
+const altDataTitleColors = ["text-purple-600", "text-blue-600", "text-green-600"];
+const tierCardBg = ["bg-blue-50 dark:bg-blue-900/15", "bg-green-50 dark:bg-green-900/15", "bg-purple-50 dark:bg-purple-900/15"];
+const tierTitleColors = ["text-blue-600 dark:text-blue-400", "text-green-600 dark:text-green-400", "text-purple-600 dark:text-purple-400"];
+const tierValueColors = ["text-blue-700 dark:text-blue-300", "text-green-700 dark:text-green-300", "text-purple-700 dark:text-purple-300"];
 
 export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
   const [showDetails, setShowDetails] = useState(true);
@@ -64,44 +66,34 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
   const seg = t?.segmentation;
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-blue-500" />
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-                {data?.meta?.section_id} {data?.meta?.title ?? 'Client / Customer Traction'}
-              </h3>
-              <p className="text-[11px] text-zinc-400 dark:text-zinc-500 normal-case tracking-normal font-normal mt-0.5">
-                {data?.meta?.subtitle}
-              </p>
-            </div>
-          </div>
-          <Badge variant="secondary" className="text-xs text-zinc-500">
-            Weight: 15% of Total Score
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
 
         {/* Top-level metric tiles */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {customerMetrics.map((m, i) => {
             const Icon = m.icon;
             return (
-              <div key={i} className="rounded-lg border border-zinc-100 dark:border-zinc-800 p-3">
+              <div key={i} className={`rounded-lg border border-zinc-100 dark:border-zinc-800 p-3 ${m.bg}`}>
                 <div className="flex items-start justify-between mb-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{m.label}</p>
+                  <p className={`text-[10px] font-semibold uppercase tracking-wider ${m.iconColor}`}>{m.label}</p>
                   <div className={`rounded-md p-1 ${m.bg}`}>
                     <Icon className={`h-3.5 w-3.5 ${m.iconColor}`} />
                   </div>
                 </div>
                 <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{m.value}</p>
-                <p className="text-[11px] text-zinc-400 mt-0.5">{m.sublabel}</p>
+                <p className={`text-[11px] mt-0.5 ${m.iconColor} opacity-80`}>{m.sublabel}</p>
               </div>
             );
           })}
+        </div>
+
+        {/* Key Customer Takeaway — always visible */}
+        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-gradient-to-r from-cyan-100 to-cyan-50 dark:from-zinc-900 dark:to-cyan-900/10 p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Key Customer Takeaway</p>
+          </div>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">{t?.key_takeaway ?? 'N/A'}</p>
         </div>
 
         {/* Toggle */}
@@ -116,37 +108,36 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
         </div>
 
         {showDetails && (
-          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-4">
-
-            {/* ── Key Customer Takeaway ── */}
-            <div className="space-y-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Key Customer Takeaway</span>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t?.key_takeaway ?? 'N/A'}</p>
-            </div>
+          <div className="">
 
             {/* ── Customer Growth Trajectory ── */}
-            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
-              <TrendCharts color="blue" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Customer Growth Trajectory</span>
+            <div className="space-y-3">
+              <div className="flex items-center gap-1.5">
+                <Users className="h-3.5 w-3.5 text-zinc-500" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Customer Growth Trajectory</span>
+              </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {growthTrajectory.map((m, i) => {
                   const Icon = m.icon;
                   return (
-                    <div key={i} className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3">
+                    <div key={i} className={`rounded-lg border border-zinc-200 dark:border-zinc-700 p-3 ${m.bg}`}>
                       <div className="flex items-start justify-between mb-2">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{m.label}</p>
+                        <p className={`text-[10px] font-semibold uppercase tracking-wider ${m.iconColor}`}>{m.label}</p>
                         <div className={`rounded-md p-1 ${m.bg}`}>
                           <Icon className={`h-3.5 w-3.5 ${m.iconColor}`} />
                         </div>
                       </div>
                       <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{m.value}</p>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">{m.sublabel}</p>
+                      <p className={`text-[11px] mt-0.5 ${m.iconColor} opacity-80`}>{m.sublabel}</p>
                     </div>
                   );
                 })}
               </div>
-              <div className="space-y-3 pt-1">
-                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Customer Acquisition Dynamics</span>
+              <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
+                  <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Customer Acquisition Dynamics</p>
+                </div>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   {acqGrid.map((item, i) => {
                     const [label, body] = splitLabelBody(item);
@@ -174,30 +165,35 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
 
             {/* ── Retention & Revenue Expansion ── */}
             <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
-              <TrendCharts color="blue" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Retention &amp; Revenue Expansion</span>
+              <div className="flex items-center gap-1.5">
+                <RefreshCw className="h-3.5 w-3.5 text-zinc-500" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Retention &amp; Revenue Expansion</span>
+              </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {retentionMetrics.map((m, i) => {
                   const Icon = m.icon;
                   return (
-                    <div key={i} className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3">
+                    <div key={i} className={`rounded-lg border border-zinc-200 dark:border-zinc-700 p-3 ${m.bg}`}>
                       <div className="flex items-start justify-between mb-2">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{m.label}</p>
+                        <p className={`text-[10px] font-semibold uppercase tracking-wider ${m.iconColor}`}>{m.label}</p>
                         <div className={`rounded-md p-1 ${m.bg}`}>
                           <Icon className={`h-3.5 w-3.5 ${m.iconColor}`} />
                         </div>
                       </div>
                       <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{m.value}</p>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">{m.sublabel}</p>
+                      <p className={`text-[11px] mt-0.5 ${m.iconColor} opacity-80`}>{m.sublabel}</p>
                     </div>
                   );
                 })}
               </div>
-              <div className="space-y-3 pt-1">
-                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Why Retention is Strong</span>
+              <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
+                  <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Why Retention is Strong</span>
+                </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2.5">
-                    <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Product Stickiness</p>
+                    <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Product Stickiness</p>
                     {stickiness.map((item, i) => {
                       const [label, body] = splitLabelBody(item);
                       return (
@@ -212,7 +208,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                     })}
                   </div>
                   <div className="space-y-2.5">
-                    <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Expansion Drivers</p>
+                    <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Expansion Drivers</p>
                     {expansion.map((item, i) => {
                       const [label, body] = splitLabelBody(item);
                       return (
@@ -232,66 +228,79 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
 
             {/* ── Revenue Trajectory Projection (Alt Data Signals) ── */}
             <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Revenue Trajectory Projection (Alt Data Signals)</span>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Alt Data Sources Tracked</p>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                {(t?.alt_data_signals ?? []).map((s, i) => {
-                  const Icon = altDataIcons[i % altDataIcons.length];
-                  return (
-                    <div key={i} className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <Icon className="h-3.5 w-3.5 text-zinc-500" />
-                        <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{s.source ?? 'N/A'}</p>
+              <div className="flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5 text-zinc-500" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Revenue Trajectory Projection (Alt Data Signals)</span>
+              </div>
+              <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-indigo-50/40 dark:bg-indigo-900/10 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
+                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">Alt Data Sources Tracked</p>
+                </div>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  {(t?.alt_data_signals ?? []).map((s, i) => {
+                    const Icon = altDataIcons[i % altDataIcons.length];
+                    const titleColor = altDataTitleColors[i % altDataTitleColors.length];
+                    return (
+                      <div key={i} className="bg-white dark:bg-zinc-900 rounded-lg p-3 space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <Icon className={`h-3.5 w-3.5 ${titleColor}`} />
+                          <p className={`text-xs font-semibold ${titleColor}`}>{s.source ?? 'N/A'}</p>
+                        </div>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{s.insight ?? 'N/A'}</p>
                       </div>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{s.insight ?? 'N/A'}</p>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
             {/* ── Customer Segmentation & Revenue Mix ── */}
             <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Customer Segmentation &amp; Revenue Mix</span>
+              <div className="flex items-center gap-1.5">
+                <PieChart className="h-3.5 w-3.5 text-zinc-500" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Customer Segmentation &amp; Revenue Mix</span>
+              </div>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 {(seg?.tiers ?? []).map((tier, i) => (
-                  <div key={i} className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-2">
+                  <div key={i} className={`rounded-lg p-4 space-y-3 ${tierCardBg[i % tierCardBg.length]}`}>
                     <div>
-                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{tier.tier ?? 'N/A'}</p>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">{tier.customer_count ?? 'N/A'} Customers</p>
+                      <p className={`text-xs font-bold uppercase tracking-wider ${tierTitleColors[i % tierTitleColors.length]}`}>{tier.tier ?? 'N/A'}</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">{tier.customer_count ?? 'N/A'} Customers</p>
                     </div>
                     {tier.revenue_share && (
-                      <p className="text-xs font-medium text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-700 rounded px-2 py-1.5 leading-snug">
+                      <p className={`text-xs font-semibold ${tierValueColors[i % tierValueColors.length]} bg-white/60 dark:bg-white/10 rounded px-2 py-1.5 leading-snug`}>
                         {tier.revenue_share}
                       </p>
                     )}
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       {[
                         { label: "Avg ACV", value: tier.avg_acv },
                         { label: "Contracts", value: tier.contract_terms },
                         { label: "NRR", value: tier.nrr },
                         { label: "Churn", value: tier.churn },
                       ].map((item) => (
-                        <div key={item.label} className="flex items-center gap-1.5">
-                          <span className="h-1 w-1 rounded-full bg-zinc-400 shrink-0" />
-                          <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                            <span className="font-medium text-zinc-600 dark:text-zinc-300">{item.label}: </span>
-                            {item.value ?? 'N/A'}
-                          </span>
-                        </div>
+                        <p key={item.label} className="text-[12px] text-zinc-600 dark:text-zinc-400">
+                          <span className="mr-1 text-zinc-400">•</span>
+                          <span className="font-semibold text-zinc-700 dark:text-zinc-300">{item.label}:</span>{" "}
+                          {item.value ?? 'N/A'}
+                        </p>
                       ))}
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="space-y-3 pt-1">
-                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Segmentation Strategy &amp; Insights</span>
+              <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
+                  <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Segmentation Strategy &amp; Insights</span>
+                </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2.5">
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                      <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Revenue Quality</p>
+                      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Revenue Quality</p>
                     </div>
                     {(seg?.revenue_quality ?? []).map((item, i) => {
                       const [label, body] = splitLabelBody(item);
@@ -306,7 +315,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                   <div className="space-y-2.5">
                     <div className="flex items-center gap-1.5">
                       <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
-                      <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Growth Strategy</p>
+                      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Growth Strategy</p>
                     </div>
                     {(seg?.growth_strategy ?? []).map((item, i) => {
                       const [label, body] = splitLabelBody(item);
@@ -319,18 +328,17 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                     })}
                   </div>
                 </div>
-                <div className="flex flex-wrap items-start gap-2 pt-1">
-                  <Badge className="bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-semibold uppercase shrink-0">
-                    Customer Takeaway
-                  </Badge>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{t?.takeaway ?? 'N/A'}</p>
-                </div>
+              </div>
+              <div className="border-t border-blue-100 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/20 -mx-6 px-6 py-3 rounded-b-lg">
+                <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                  <span className="font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wide">CUSTOMER TAKEAWAY: </span>
+                  {t?.takeaway ?? 'N/A'}
+                </p>
               </div>
             </div>
 
           </div>
         )}
-      </CardContent>
-    </Card>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Activity } from "lucide-react";
 import type { IndustryOverviewSection, CompetitionSection } from "@/types/opportunity";
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 function trendColor(value?: string | null): string {
   if (!value) return "text-zinc-900 dark:text-zinc-50";
   const v = value.toLowerCase();
-  if (v.includes("improv") || v.includes("high") || v.includes("strong")) return "text-emerald-600 dark:text-emerald-400";
+  if (v.includes("improv") || v.includes("high") || v.includes("strong")) return "text-blue-600 dark:text-blue-400";
   if (v.includes("declin") || v.includes("low") || v.includes("weak")) return "text-red-600 dark:text-red-400";
   if (v.includes("moderate") || v.includes("stable")) return "text-orange-500 dark:text-orange-400";
   return "text-zinc-900 dark:text-zinc-50";
@@ -54,23 +54,32 @@ export function OperatingMetrics({ industryOverview, competition }: Props) {
     },
   ];
 
+  const cardStyles = [
+    { labelColor: "text-blue-500", bg: "bg-blue-50/60 dark:bg-blue-900/10", sublabelColor: "text-blue-400" },
+    { labelColor: "text-emerald-600", bg: "bg-emerald-50/60 dark:bg-emerald-900/10", sublabelColor: "text-emerald-500" },
+    { labelColor: "text-purple-500", bg: "bg-purple-50/60 dark:bg-purple-900/10", sublabelColor: "text-purple-400" },
+    { labelColor: "text-orange-500", bg: "bg-orange-50/60 dark:bg-orange-900/10", sublabelColor: "text-orange-400" },
+  ];
+
   return (
-    <div className="space-y-2">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-        Operating Metrics &amp; Trends
-      </h3>
+    <div className="space-y-3">
+      <div className="flex items-center gap-1.5">
+        <Activity className="h-3.5 w-3.5 text-zinc-400" />
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+          Industry Operating Margin Trends
+        </h3>
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {metrics.map((m) => (
-          <Card key={m.label} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-            <CardContent className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">{m.label}</p>
-              <p className={`text-2xl font-bold mb-0.5 ${m.valueColor}`}>
-                {m.value}
-              </p>
-              <p className={`text-[11px] font-medium ${m.subColor}`}>{m.sub}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {metrics.map((m, i) => {
+          const cs = cardStyles[i];
+          return (
+            <div key={m.label} className={`rounded-lg border border-zinc-100 dark:border-zinc-800 p-4 ${cs.bg}`}>
+              <p className={`text-[10px] font-semibold uppercase tracking-wider mb-2 ${cs.labelColor}`}>{m.label}</p>
+              <p className={`text-2xl font-bold mb-0.5 ${m.valueColor}`}>{m.value}</p>
+              <p className={`text-[11px] font-medium ${cs.sublabelColor}`}>{m.sub}</p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

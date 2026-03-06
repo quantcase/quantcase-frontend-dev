@@ -1,9 +1,7 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Target, AlertCircle, TrendingUp } from "lucide-react";
+import { Target, AlertCircle, TrendingUp, ArrowUpRight } from "lucide-react";
 import type { CompetitionSection } from "@/types/opportunity";
 
 interface CompetitiveBenchmarkingProps {
@@ -34,114 +32,121 @@ export function CompetitiveBenchmarking({ data }: CompetitiveBenchmarkingProps) 
   const takeaway = data?.text?.takeaway ?? 'N/A';
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-blue-500" />
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-            Competitive Benchmarking vs Industry Peers
-          </h3>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-zinc-100 dark:border-zinc-800">
-              {columns.map((col) => (
-                <TableHead key={col.key} className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 bg-zinc-50 dark:bg-zinc-800/60">
-                  {col.label}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {peers.map((row) => (
-              <TableRow
-                key={row.company}
-                className={
-                  row.is_current ? "bg-blue-50 dark:bg-blue-900/10 border-zinc-100 dark:border-zinc-800"
-                  : row.is_average ? "bg-zinc-50 dark:bg-zinc-800/40 border-zinc-100 dark:border-zinc-800"
-                  : "border-zinc-100 dark:border-zinc-800"
-                }
-              >
-                <TableCell className="font-medium text-xs text-zinc-700 dark:text-zinc-300">
-                  <div className="flex items-center gap-2">
-                    {row.company}
-                    {row.is_current && <Badge className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[9px] font-semibold border-0 px-1.5 py-0">Current</Badge>}
-                    {row.is_average && <span className="text-[10px] text-zinc-400 italic">(avg)</span>}
-                  </div>
-                </TableCell>
-                <TableCell className="text-xs text-zinc-600 dark:text-zinc-400">{row.revenue}</TableCell>
-                <TableCell className="text-xs text-zinc-600 dark:text-zinc-400">{row.revenue_growth}</TableCell>
-                <TableCell className="text-xs text-zinc-600 dark:text-zinc-400">{row.opm}</TableCell>
-                <TableCell className="text-xs text-zinc-600 dark:text-zinc-400">{row.roce}</TableCell>
-                <TableCell className="text-xs text-zinc-600 dark:text-zinc-400">{row.market_share}</TableCell>
-                <TableCell className="text-xs text-zinc-600 dark:text-zinc-400">{row.debt_equity}</TableCell>
+    <div className="space-y-4">
+        {/* Table */}
+        <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-0">
+                {columns.map((col) => (
+                  <TableHead key={col.key} className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 py-2.5">
+                    {col.label}
+                  </TableHead>
+                ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {peers.map((row) => (
+                <TableRow
+                  key={row.company}
+                  className={
+                    row.is_current
+                      ? "bg-blue-50 dark:bg-blue-900/10 border-zinc-100 dark:border-zinc-800"
+                      : row.is_average
+                      ? "bg-zinc-50 dark:bg-zinc-800/40 border-zinc-100 dark:border-zinc-800 font-semibold"
+                      : "border-zinc-100 dark:border-zinc-800"
+                  }
+                >
+                  <TableCell className="py-2.5">
+                    <div className="flex items-center gap-2">
+                      {row.is_current && <div className="w-0.5 h-4 bg-blue-500 rounded-full -ml-px shrink-0" />}
+                      <span className={`text-xs font-semibold ${row.is_current ? "text-blue-700 dark:text-blue-300" : "text-zinc-800 dark:text-zinc-200"}`}>
+                        {row.company}
+                      </span>
+                      {row.is_current && (
+                        <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[9px] font-semibold px-1.5 py-0.5 uppercase tracking-wide">
+                          CURRENT
+                        </span>
+                      )}
+                      {row.is_average && <span className="text-[10px] text-zinc-400 font-normal italic">(avg)</span>}
+                    </div>
+                  </TableCell>
+                  <TableCell className={`text-xs py-2.5 ${row.is_current ? "text-blue-700 dark:text-blue-300 font-semibold" : "text-zinc-600 dark:text-zinc-400"}`}>{row.revenue}</TableCell>
+                  <TableCell className="text-xs py-2.5">
+                    <span className={`flex items-center gap-0.5 ${row.revenue_growth ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-zinc-600 dark:text-zinc-400"}`}>
+                      {row.revenue_growth && <ArrowUpRight className="h-3 w-3 shrink-0" />}
+                      {row.revenue_growth}
+                    </span>
+                  </TableCell>
+                  <TableCell className={`text-xs py-2.5 font-semibold ${row.is_current ? "text-blue-700 dark:text-blue-300" : "text-zinc-700 dark:text-zinc-300"}`}>{row.opm}</TableCell>
+                  <TableCell className={`text-xs py-2.5 font-semibold ${row.is_current ? "text-blue-700 dark:text-blue-300" : "text-zinc-700 dark:text-zinc-300"}`}>{row.roce}</TableCell>
+                  <TableCell className={`text-xs py-2.5 font-semibold ${row.is_current ? "text-blue-700 dark:text-blue-300" : "text-zinc-700 dark:text-zinc-300"}`}>{row.market_share}</TableCell>
+                  <TableCell className={`text-xs py-2.5 ${row.is_current ? "text-blue-700 dark:text-blue-300 font-semibold" : "text-zinc-600 dark:text-zinc-400"}`}>{row.debt_equity}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
-        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">⊙ Competitive Positioning Insights</span>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        {/* Competitive Positioning Insights */}
+        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-4">
+          <div className="flex items-center gap-1.5">
+            <Target className="h-3.5 w-3.5 text-zinc-500" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Competitive Positioning Insights</span>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <div className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                  <Target className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Strengths</p>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Target className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Strengths</p>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {(positioning?.strengths ?? []).map((s, i) => (
                   <div key={i} className="flex gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{s}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{s}</p>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <div className="flex h-4 w-4 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30">
-                  <AlertCircle className="h-2.5 w-2.5 text-orange-600 dark:text-orange-400" />
-                </div>
-                <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Areas to Monitor</p>
+              <div className="flex items-center gap-1.5 mb-2">
+                <AlertCircle className="h-3.5 w-3.5 text-orange-500 shrink-0" />
+                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Areas to Monitor</p>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {(positioning?.areas_to_monitor ?? []).map((a, i) => (
                   <div key={i} className="flex gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{a}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{a}</p>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <div className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-                  <TrendingUp className="h-2.5 w-2.5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Opportunities</p>
+              <div className="flex items-center gap-1.5 mb-2">
+                <TrendingUp className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Opportunities</p>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {(positioning?.opportunities ?? []).map((o, i) => (
                   <div key={i} className="flex gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{o}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{o}</p>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <Badge className="bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-semibold uppercase">
-              Competition Takeaway
-            </Badge>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">{takeaway}</p>
-          </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Competition Takeaway footer */}
+        <div className="border-t border-emerald-100 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-900/20 -mx-6 px-6 py-3 rounded-b-lg">
+          <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            <span className="font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">COMPETITION TAKEAWAY: </span>
+            {takeaway}
+          </p>
+        </div>
+    </div>
   );
 }

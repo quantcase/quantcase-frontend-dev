@@ -22,6 +22,7 @@ import { OperatingLeverageCard } from "@/components/opportunity/operating-levera
 import { FreeCashFlowCard } from "@/components/opportunity/free-cash-flow-card";
 import { WorkingCapitalCard } from "@/components/opportunity/working-capital-card";
 import { CapitalStructureCard } from "@/components/opportunity/capital-structure-card";
+import { IndustryKpiTable } from "@/components/opportunity/industry-kpi-table";
 import { FinalScoringCard } from "@/components/opportunity/final-scoring-card";
 import { CustomerTractionCard } from "@/components/opportunity/customer-traction-card";
 
@@ -437,6 +438,11 @@ function OpportunityContent() {
               <p className="text-xs text-zinc-400">Balance sheet position, debt trajectory, equity allocation &amp; capex intensity</p>
             </div>
             <CapitalStructureCard data={data.financial_strength?.capital_structure} />
+            <div>
+              <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Industry KPI Timeseries</h4>
+              <p className="text-xs text-zinc-400 mb-3">Industry-specific KPI trends over time</p>
+              <IndustryKpiTable callId={firstCallId} />
+            </div>
           </div>
           <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
             <div>

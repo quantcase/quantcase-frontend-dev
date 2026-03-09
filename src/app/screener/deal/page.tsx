@@ -17,6 +17,7 @@ import { EntryPointCallout } from "@/components/deal/entry-point-callout";
 import { ScenarioFramework } from "@/components/deal/scenario-framework";
 import { TargetPriceMatrix } from "@/components/deal/target-price-matrix";
 import { RiskRewardSummary } from "@/components/deal/risk-reward-summary";
+import { DetailedAnalysis } from "@/components/deal/detailed-analysis";
 
 function DealContent() {
   const searchParams = useSearchParams();
@@ -341,6 +342,7 @@ function DealContent() {
         <ScenarioFramework data={data.scenario_framework} />
         <TargetPriceMatrix data={data.target_price_matrix} />
         {data.risk_reward_summary && <RiskRewardSummary data={data.risk_reward_summary} />}
+        <DetailedAnalysis />
       </div>
     </div>
   );

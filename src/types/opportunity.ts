@@ -456,3 +456,21 @@ export interface OFactorResponseWrapper {
   success: boolean;
   data: OFactorResponse;
 }
+
+// ─── Industry KPI Timeseries (from peer-data endpoint) ────────────────────────
+
+export interface IndustryKpiDataPoint {
+  period: string;
+  value: number;
+}
+
+export interface IndustryKpiEntry {
+  kpi_abbr: string;
+  quarters_present: number;
+  data: IndustryKpiDataPoint[];
+}
+
+export interface IndustryKpiTimeseries {
+  meta?: { section_id?: string; title?: string };
+  timeseries: IndustryKpiEntry[];
+}

@@ -168,41 +168,7 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
               </p>
             </div>
 
-            {/* Key Insights from Industry Transcripts */}
-            {(transcripts ?? []).length > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-zinc-500" />
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-                    Key Insights from Industry Transcripts
-                  </h3>
-                </div>
-                <div className="space-y-2">
-                  {(transcripts ?? []).map((item, i) => {
-                    const accent = insightAccents[i % insightAccents.length];
-                    return (
-                      <div key={i} className={`border-l-4 ${accent.border} pl-3 space-y-1`}>
-                        <div className="flex gap-2">
-                          <Quote className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${accent.icon}`} />
-                          <p className="text-xs italic text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                            &ldquo;{item.quote}&rdquo;
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-1.5 pl-5">
-                          <span className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">{item.company}</span>
-                          <span className="text-[11px] text-zinc-400">•</span>
-                          <span className="text-[11px] text-zinc-500 dark:text-zinc-500">{item.context}</span>
-                          <span className="text-[11px] text-zinc-400">•</span>
-                          <Badge className={`${accent.badge} text-[10px] font-semibold border-0`}>
-                            {item.sector}
-                          </Badge>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            
 
           </div>
         )}

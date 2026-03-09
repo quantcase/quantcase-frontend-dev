@@ -253,6 +253,188 @@ export interface OperatingLeverageSection {
   all_verdicts?: Array<{ status: string; label: string; is_current?: boolean }>;
 }
 
+// ─── Free Cash Flow ───────────────────────────────────────────────────────────
+
+export interface FcfConversionDataPoint {
+  quarter: string;
+  pct: number;
+  is_floor?: boolean;
+}
+
+export interface FcfYieldDataPoint {
+  label: string;
+  yield_pct: number;
+  zone: string;
+  is_current?: boolean;
+}
+
+export interface FreeCashFlowSection {
+  meta?: { section_id?: string; title?: string; subtitle?: string };
+
+  // Panel 1 — Conversion Consistency (FCF / PAT %)
+  conversion_consistency?: {
+    status: string;     // e.g. "Stable"
+    status_color?: string; // "green" | "yellow" | "red"
+    healthy_threshold_pct: number;
+    quarterly_data: FcfConversionDataPoint[];
+    range_low: number;
+    range_high: number;
+    floor_pct: number;
+    floor_quarter: string;
+    all_above_threshold: boolean;
+  };
+
+  // Panel 2 — FCF vs PAT Growth Trajectory
+  growth_trajectory?: {
+    status: string;           // e.g. "FCF Outpacing"
+    status_color?: string;
+    fcf_cagr_pct: number;
+    fcf_start: string;        // e.g. "₹10,840 Cr"
+    fcf_end: string;
+    pat_cagr_pct: number;
+    pat_start: string;
+    pat_end: string;
+    periods: string;          // e.g. "8Q"
+    insight_headline: string; // e.g. "FCF growing 2pp faster than PAT…"
+    insight_body: string;
+  };
+
+  // Panel 3 — OCF → FCF Drag (Capex)
+  ocf_to_fcf?: {
+    status: string;           // e.g. "Minimal Drag"
+    status_color?: string;
+    ocf_ttm: string;          // formatted, e.g. "₹45,940 Cr"
+    capex: string;            // formatted, e.g. "-₹3,100 Cr"
+    fcf_ttm: string;          // formatted, e.g. "₹42,840 Cr"
+    ocf_bar_pct: number;      // 0–100 for the bar fill
+    capex_bar_pct: number;
+    fcf_bar_pct: number;
+    capex_revenue_pct: number;    // e.g. 1.8
+    capex_ocf_pct: number;        // e.g. 6.7
+    drag_description: string;     // e.g. "Very limited"
+  };
+
+  // Panel 4 — FCF Yield Then vs Now
+  fcf_yield?: {
+    status: string;           // e.g. "Watch"
+    status_color?: string;    // "green" | "yellow" | "red"
+    yield_history: FcfYieldDataPoint[];
+    compression_explanation: string;
+  };
+}
+
+// ─── Working Capital ──────────────────────────────────────────────────────────
+
+export interface WcMetricRow {
+  label: string;       // e.g. "DSO (days)"
+  key: string;         // e.g. "dso"
+  values: (number | null)[];  // one per quarter in quarters[]
+}
+
+export interface WcTrendDataPoint {
+  quarter: string;
+  wc_pct: number;
+}
+
+export interface WorkingCapitalSection {
+  meta?: { section_id?: string; title?: string; subtitle?: string };
+  quarters: string[];             // column headers, e.g. ["Q3'22","Q4'22","Q1'23"]
+  rows: WcMetricRow[];            // DSO, DIO, DPO, CCC
+  trend_chart?: {
+    title: string;                // "WC as % of Revenue"
+    data: WcTrendDataPoint[];
+    verdict_badge?: string;       // e.g. "Asset Light Scaling"
+    verdict_color?: string;       // "green" | "yellow" | "red"
+  };
+  signals?: Array<{
+    label: string;
+    color?: string;               // "green" | "yellow" | "red"
+  }>;
+  insight?: string;               // e.g. "CCC improving 12 days over 4Q…"
+}
+
+// ─── Capital Structure & Capex ────────────────────────────────────────────────
+
+export interface CapexIntensityMetric {
+  label: string;
+  value: string;         // e.g. "1.8%"
+  bar_pct: number;       // 0–100 for the fill bar
+  max_label?: string;    // e.g. "max 2.4%"
+  note?: string;         // e.g. "Declining – less capital needed per rupee of revenue"
+  status?: string;       // "green" | "yellow" | "red"
+}
+
+export interface CapitalStructureSection {
+  meta?: { section_id?: string; title?: string; subtitle?: string };
+
+  // Panel 1 — Balance Sheet Position
+  balance_sheet?: {
+    status: string;           // e.g. "Net Cash Company"
+    status_color?: string;
+    cash_investments: string; // e.g. "₹62,000 Cr"
+    cash_bar_pct: number;
+    gross_debt: string;       // e.g. "₹4,000 Cr"
+    debt_bar_pct: number;
+    net_cash: string;         // e.g. "₹58,000 Cr"
+    timeline: Array<{ label: string; value: string; is_current?: boolean }>;
+    insight: string;
+  };
+
+  // Panel 2 — Debt Trajectory
+  debt_trajectory?: {
+    status: string;           // e.g. "Deleveraging"
+    status_color?: string;
+    bars: Array<{ label: string; value: number; color?: string; is_current?: boolean }>;
+    peak_debt: string;
+    peak_label?: string;
+    current_debt: string;
+    current_label?: string;
+    reduction_pct: string;    // e.g. "–57%"
+    reduction_label?: string;
+    insight: string;
+  };
+
+  // Panel 3 — Equity & Profit Allocation
+  equity_allocation?: {
+    status: string;           // e.g. "Compounding"
+    status_color?: string;
+    rows: Array<{
+      label: string;
+      kept_pct: number;
+      paid_pct: number;
+      is_current?: boolean;
+    }>;
+    total_equity: string;     // e.g. "₹1.12L Cr"
+    total_equity_sublabel?: string;
+    roe: string;              // e.g. "47.8%"
+    roe_sublabel?: string;
+    payout_trend: string;     // e.g. "Rising"
+    payout_trend_direction?: "up" | "down" | "flat";
+    payout_sublabel?: string;
+    insight: string;
+  };
+
+  // Panel 4 — Capex Intensity
+  capex_intensity?: {
+    status: string;           // e.g. "Asset Light"
+    status_color?: string;
+    metrics: CapexIntensityMetric[];
+    note?: string;            // explanatory note box
+  };
+}
+
+// ─── Final Scoring ────────────────────────────────────────────────────────────
+
+export interface FinalScoringSection {
+  meta?: { section_id?: string; title?: string; subtitle?: string };
+  score: number;             // e.g. 6
+  max_score: number;         // e.g. 8
+  status: string;            // e.g. "HIGH QUALITY"
+  status_color?: string;     // "green" | "yellow" | "red"
+  title: string;             // e.g. "Numbers support the thesis"
+  body: string;              // paragraph text
+}
+
 // ─── Root Response ────────────────────────────────────────────────────────────
 
 export interface OFactorResponse {
@@ -261,6 +443,10 @@ export interface OFactorResponse {
   financial_strength?: FinancialStrengthSection;
   customer_traction?: CustomerTractionSection;
   operating_leverage?: OperatingLeverageSection;
+  free_cash_flow?: FreeCashFlowSection;
+  working_capital?: WorkingCapitalSection;
+  capital_structure?: CapitalStructureSection;
+  final_scoring?: FinalScoringSection;
 }
 
 export interface OFactorResponseWrapper {

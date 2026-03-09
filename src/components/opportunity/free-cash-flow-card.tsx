@@ -79,19 +79,26 @@ function ConversionConsistencyPanel({ d }: { d: NonNullable<FreeCashFlowSection[
       <div className="flex gap-1 overflow-x-auto pb-1">
         {d.quarterly_data.map((q: FcfConversionDataPoint) => {
           const isFloor = !!q.is_floor;
-          const aboveThreshold = q.pct >= threshold;
+          const isNull = q.pct == null;
+          const aboveThreshold = !isNull && q.pct! >= threshold;
           return (
             <div key={q.quarter} className="flex flex-col items-center gap-1 min-w-[44px]">
               <span
                 className={`text-[11px] font-bold ${
-                  isFloor ? "text-yellow-500" : aboveThreshold ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"
+                  isNull ? "text-zinc-400" :
+                  isFloor ? "text-yellow-500" :
+                  aboveThreshold ? "text-emerald-600 dark:text-emerald-400" :
+                  "text-red-500"
                 }`}
               >
-                {q.pct}%
+                {q.pct != null ? `${q.pct}%` : "—"}
               </span>
               <div
                 className={`h-1 w-9 rounded-full ${
-                  isFloor ? "bg-yellow-400" : aboveThreshold ? "bg-emerald-500" : "bg-red-500"
+                  isNull ? "bg-zinc-300 dark:bg-zinc-600" :
+                  isFloor ? "bg-yellow-400" :
+                  aboveThreshold ? "bg-emerald-500" :
+                  "bg-red-500"
                 }`}
               />
               <span className={`text-[9px] ${isFloor ? "text-yellow-500 font-semibold" : "text-zinc-400"}`}>
@@ -108,12 +115,12 @@ function ConversionConsistencyPanel({ d }: { d: NonNullable<FreeCashFlowSection[
         <div>
           <p className="text-[9px] text-zinc-400 uppercase tracking-wider">10Q Range</p>
           <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">
-            {d.range_low}% –<br />{d.range_high}%
+            {d.range_low != null ? `${d.range_low}%` : "—"} –<br />{d.range_high != null ? `${d.range_high}%` : "—"}
           </p>
         </div>
         <div>
           <p className="text-[9px] text-zinc-400 uppercase tracking-wider">Floor</p>
-          <p className="text-sm font-bold text-yellow-500">{d.floor_pct}%</p>
+          <p className="text-sm font-bold text-yellow-500">{d.floor_pct != null ? `${d.floor_pct}%` : "—"}</p>
           <p className="text-[10px] text-yellow-500 font-semibold">{d.floor_quarter}</p>
         </div>
         <div>
@@ -135,7 +142,14 @@ function ConversionConsistencyPanel({ d }: { d: NonNullable<FreeCashFlowSection[
 
 // ─── Panel 2: FCF vs PAT Growth Trajectory ───────────────────────────────────
 
+const INSIGHT_COLOR_MAP: Record<string, { bg: string; border: string; text: string }> = {
+  green:  { bg: "bg-emerald-50 dark:bg-emerald-950/50", border: "border-emerald-200 dark:border-emerald-800/60", text: "text-emerald-700 dark:text-emerald-300" },
+  yellow: { bg: "bg-yellow-50 dark:bg-yellow-950/50",   border: "border-yellow-200 dark:border-yellow-800/60",   text: "text-yellow-700 dark:text-yellow-300" },
+  red:    { bg: "bg-red-50 dark:bg-red-950/50",         border: "border-red-200 dark:border-red-800/60",         text: "text-red-700 dark:text-red-300" },
+};
+
 function GrowthTrajectoryPanel({ d }: { d: NonNullable<FreeCashFlowSection["growth_trajectory"]> }) {
+  const ic = INSIGHT_COLOR_MAP[d.status_color ?? "green"] ?? INSIGHT_COLOR_MAP.green;
   return (
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-3 h-full flex flex-col">
       {/* Header */}
@@ -151,7 +165,7 @@ function GrowthTrajectoryPanel({ d }: { d: NonNullable<FreeCashFlowSection["grow
         {/* FCF side */}
         <div className="rounded-md bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-3 text-center space-y-0.5">
           <p className="text-[9px] text-zinc-400 uppercase tracking-wider">FCF CAGR ({d.periods})</p>
-          <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">+{d.fcf_cagr_pct}%</p>
+          <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{d.fcf_cagr_pct != null ? `+${d.fcf_cagr_pct}%` : "—"}</p>
           <p className="text-[10px] text-zinc-500">
             {d.fcf_start} → {d.fcf_end}
           </p>
@@ -162,7 +176,7 @@ function GrowthTrajectoryPanel({ d }: { d: NonNullable<FreeCashFlowSection["grow
         {/* PAT side */}
         <div className="rounded-md bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-3 text-center space-y-0.5">
           <p className="text-[9px] text-zinc-400 uppercase tracking-wider">PAT CAGR ({d.periods})</p>
-          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">+{d.pat_cagr_pct}%</p>
+          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{d.pat_cagr_pct != null ? `+${d.pat_cagr_pct}%` : "—"}</p>
           <p className="text-[10px] text-zinc-500">
             {d.pat_start} → {d.pat_end}
           </p>
@@ -170,8 +184,8 @@ function GrowthTrajectoryPanel({ d }: { d: NonNullable<FreeCashFlowSection["grow
       </div>
 
       {/* Insight box */}
-      <div className="rounded-md bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 p-3">
-        <p className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">▲ {d.insight_headline}</p>
+      <div className={`rounded-md ${ic.bg} border ${ic.border} p-3`}>
+        <p className={`text-[11px] font-semibold ${ic.text}`}>▲ {d.insight_headline}</p>
       </div>
 
       {/* Body */}
@@ -286,7 +300,7 @@ function FcfYieldPanel({ d }: { d: NonNullable<FreeCashFlowSection["fcf_yield"]>
                     isCurrent ? "text-yellow-600 dark:text-yellow-400" : "text-emerald-600 dark:text-emerald-400"
                   }`}
                 >
-                  {y.yield_pct}%
+                  {y.yield_pct != null ? `${y.yield_pct}%` : "—"}
                 </p>
                 <p className={`text-[9px] ${isCurrent ? "text-yellow-500" : "text-zinc-400"}`}>
                   {y.zone}

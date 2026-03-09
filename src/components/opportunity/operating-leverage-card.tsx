@@ -21,6 +21,10 @@ const VERDICT_META: Record<string, { dotColor: string; textColor: string; bgColo
   cost_inflation:    { dotColor: "bg-orange-500",   textColor: "text-orange-600 dark:text-orange-400",    bgColor: "bg-orange-50 dark:bg-orange-900/20" },
   negative_leverage: { dotColor: "bg-red-500",      textColor: "text-red-600 dark:text-red-400",          bgColor: "bg-red-50 dark:bg-red-900/20" },
   investment_mode:   { dotColor: "bg-blue-500",     textColor: "text-blue-600 dark:text-blue-400",        bgColor: "bg-blue-50 dark:bg-blue-900/20" },
+  // Short-key aliases sent by backend
+  negative: { dotColor: "bg-red-500",      textColor: "text-red-600 dark:text-red-400",          bgColor: "bg-red-50 dark:bg-red-900/20" },
+  neutral:  { dotColor: "bg-zinc-400",     textColor: "text-zinc-500 dark:text-zinc-400",         bgColor: "bg-zinc-50 dark:bg-zinc-800/30" },
+  positive: { dotColor: "bg-emerald-500",  textColor: "text-emerald-600 dark:text-emerald-400",   bgColor: "bg-emerald-50 dark:bg-emerald-900/20" },
 };
 
 const FIXED_COST_COLORS: Record<string, { dot: string; bar: string }> = {
@@ -182,14 +186,18 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
 
           <div className="space-y-4 flex-1">
             {fixedCostLines.map((line, i) => {
-              const colors = FIXED_COST_COLORS[line.color] ?? FIXED_COST_COLORS.slate;
+              const isHex = line.color?.startsWith("#");
+              const tailwindColors = FIXED_COST_COLORS[line.color] ?? FIXED_COST_COLORS.slate;
               const isUp = line.change_bps > 0;
               const barPct = Math.min((line.current_pct / 70) * 100, 100);
               return (
                 <div key={i} className="space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${colors.dot}`} />
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full shrink-0 ${isHex ? "" : tailwindColors.dot}`}
+                        style={isHex ? { backgroundColor: line.color } : undefined}
+                      />
                       <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate">{line.name}</span>
                     </div>
                     <span className={`text-xs font-semibold shrink-0 ${isUp ? "text-red-500" : "text-emerald-500"}`}>
@@ -199,8 +207,8 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                   <div className="flex items-center gap-3">
                     <div className="relative flex-1 h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
                       <div
-                        className={`absolute inset-y-0 left-0 rounded-full ${colors.bar}`}
-                        style={{ width: `${barPct}%` }}
+                        className={`absolute inset-y-0 left-0 rounded-full ${isHex ? "" : tailwindColors.bar}`}
+                        style={{ width: `${barPct}%`, ...(isHex ? { backgroundColor: line.color } : {}) }}
                       />
                     </div>
                     <div className="shrink-0 text-right">

@@ -257,13 +257,13 @@ export interface OperatingLeverageSection {
 
 export interface FcfConversionDataPoint {
   quarter: string;
-  pct: number;
+  pct: number | null;
   is_floor?: boolean;
 }
 
 export interface FcfYieldDataPoint {
   label: string;
-  yield_pct: number;
+  yield_pct: number | null;
   zone: string;
   is_current?: boolean;
 }
@@ -277,9 +277,9 @@ export interface FreeCashFlowSection {
     status_color?: string; // "green" | "yellow" | "red"
     healthy_threshold_pct: number;
     quarterly_data: FcfConversionDataPoint[];
-    range_low: number;
-    range_high: number;
-    floor_pct: number;
+    range_low: number | null;
+    range_high: number | null;
+    floor_pct: number | null;
     floor_quarter: string;
     all_above_threshold: boolean;
   };
@@ -288,10 +288,10 @@ export interface FreeCashFlowSection {
   growth_trajectory?: {
     status: string;           // e.g. "FCF Outpacing"
     status_color?: string;
-    fcf_cagr_pct: number;
+    fcf_cagr_pct: number | null;
     fcf_start: string;        // e.g. "₹10,840 Cr"
     fcf_end: string;
-    pat_cagr_pct: number;
+    pat_cagr_pct: number | null;
     pat_start: string;
     pat_end: string;
     periods: string;          // e.g. "8Q"
@@ -400,8 +400,8 @@ export interface CapitalStructureSection {
     status_color?: string;
     rows: Array<{
       label: string;
-      kept_pct: number;
-      paid_pct: number;
+      kept_pct: number | null;
+      paid_pct: number | null;
       is_current?: boolean;
     }>;
     total_equity: string;     // e.g. "₹1.12L Cr"

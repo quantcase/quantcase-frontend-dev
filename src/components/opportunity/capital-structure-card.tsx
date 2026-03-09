@@ -78,7 +78,12 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
         <div>
           <div className="flex justify-between text-[11px] mb-1">
             <span className="text-zinc-600 dark:text-zinc-300">Cash &amp; Investments</span>
-            <span className="font-bold text-zinc-800 dark:text-zinc-100">{d.cash_investments}</span>
+            <span
+              className="font-bold text-zinc-800 dark:text-zinc-100 truncate max-w-[140px] text-right"
+              title={d.cash_investments}
+            >
+              {d.cash_investments}
+            </span>
           </div>
           <div className="h-3 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
             <div
@@ -124,8 +129,9 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
                       ? "text-emerald-600 dark:text-emerald-400"
                       : "text-zinc-400"
                   }`}
+                  title={t.value}
                 >
-                  {t.value}
+                  {t.value.split(" ")[0]}
                 </span>
                 <div
                   className={`w-full rounded-t-sm ${
@@ -293,14 +299,14 @@ function EquityAllocationPanel({
             <div className="flex-1 flex h-4 rounded-sm overflow-hidden">
               <div
                 className="bg-emerald-400 h-full"
-                style={{ width: `${row.kept_pct}%` }}
+                style={{ width: `${row.kept_pct ?? 0}%` }}
               />
               <div
                 className="bg-zinc-200 dark:bg-zinc-600 h-full flex-1"
               />
             </div>
             <span className="text-[10px] text-zinc-400 whitespace-nowrap shrink-0">
-              {row.kept_pct}% kept · {row.paid_pct}% paid
+              {row.kept_pct != null ? `${row.kept_pct}%` : "—"} kept · {row.paid_pct != null ? `${row.paid_pct}%` : "—"} paid
             </span>
           </div>
         ))}

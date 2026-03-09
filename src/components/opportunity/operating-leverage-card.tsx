@@ -21,57 +21,16 @@ const VERDICT_META: Record<string, { dotColor: string; textColor: string; bgColo
   cost_inflation:    { dotColor: "bg-orange-500",   textColor: "text-orange-600 dark:text-orange-400",    bgColor: "bg-orange-50 dark:bg-orange-900/20" },
   negative_leverage: { dotColor: "bg-red-500",      textColor: "text-red-600 dark:text-red-400",          bgColor: "bg-red-50 dark:bg-red-900/20" },
   investment_mode:   { dotColor: "bg-blue-500",     textColor: "text-blue-600 dark:text-blue-400",        bgColor: "bg-blue-50 dark:bg-blue-900/20" },
+  // Short-key aliases sent by backend
+  negative: { dotColor: "bg-red-500",      textColor: "text-red-600 dark:text-red-400",          bgColor: "bg-red-50 dark:bg-red-900/20" },
+  neutral:  { dotColor: "bg-zinc-400",     textColor: "text-zinc-500 dark:text-zinc-400",         bgColor: "bg-zinc-50 dark:bg-zinc-800/30" },
+  positive: { dotColor: "bg-emerald-500",  textColor: "text-emerald-600 dark:text-emerald-400",   bgColor: "bg-emerald-50 dark:bg-emerald-900/20" },
 };
 
 const FIXED_COST_COLORS: Record<string, { dot: string; bar: string }> = {
   blue:   { dot: "bg-blue-500",   bar: "bg-blue-500" },
   orange: { dot: "bg-orange-500", bar: "bg-orange-500" },
   slate:  { dot: "bg-slate-400",  bar: "bg-slate-400" },
-};
-
-// ─── Mock data (replace with API when ready) ──────────────────────────────────
-
-const MOCK_DATA: OperatingLeverageSection = {
-  fixed_cost_equation: "FIXED COSTS = EMP_EXP + OTH_EXP + DEP_AMORT",
-  dol_chart_data: [
-    { quarter: "Q4'22", revenue_growth: 16, ebit_growth: 19, dol: 1.1 },
-    { quarter: "Q1'23", revenue_growth: 14, ebit_growth: 14, dol: 1.0 },
-    { quarter: "Q2'23", revenue_growth: 12, ebit_growth: 11, dol: 0.9 },
-    { quarter: "Q3'23", revenue_growth: 10, ebit_growth: 9,  dol: 0.9 },
-    { quarter: "Q4'23", revenue_growth: 9,  ebit_growth: 5,  dol: 0.6 },
-    { quarter: "Q1'24", revenue_growth: 9,  ebit_growth: 5,  dol: 0.6 },
-    { quarter: "Q2'24", revenue_growth: 9,  ebit_growth: 7,  dol: 0.8 },
-    { quarter: "Q3'24", revenue_growth: 8,  ebit_growth: 7,  dol: 0.9 },
-    { quarter: "Q4'24", revenue_growth: 7,  ebit_growth: 6,  dol: 0.9 },
-  ],
-  fixed_cost_lines: [
-    { name: "Employee Expenses (EMP_EXP)",       key: "EMP_EXP",    color: "blue",   current_pct: 51.4, prior_pct: 50.6, change_bps: 80,  note: "Wage hike cycle — temporary pressure, watch H2" },
-    { name: "Other Expenses (OTH_EXP)",          key: "OTH_EXP",    color: "orange", current_pct: 9.2,  prior_pct: 9.5,  change_bps: -30, note: "Compressing — scale benefit on admin & overhead" },
-    { name: "Depreciation & Amort. (DEP_AMORT)", key: "DEP_AMORT",  color: "slate",  current_pct: 3.8,  prior_pct: 4.0,  change_bps: -20, note: "Asset base maturing — lower D&A intensity vs revenue" },
-  ],
-  total_fixed_costs: {
-    current_pct: 64.4, prior_pct: 64.1, change_bps: 30,
-    note: "OTH_EXP and DEP savings offset by EMP_EXP pressure",
-  },
-  metrics: {
-    revenue_growth_yoy: { value: "+8.4%",   label: "Revenue Growth (YOY)", sublabel: "TTM vs prior year" },
-    ebit_growth_yoy:    { value: "+7.2%",   label: "EBIT Growth (YOY)",    sublabel: "EBIT growing slower than revenue" },
-    leverage_spread:    { value: "−1.2pp",  label: "Leverage Spread",      sublabel: "EBIT growth minus Revenue growth. Positive = leverage active · Negative = not yet" },
-  },
-  verdict: {
-    status: "leverage_pending",
-    label: "LEVERAGE PENDING",
-    tag: "EBIT growing, but slower than Revenue",
-    description: "OTH_EXP and DEP_AMORT are both compressing as a % of revenue — the structural efficiency is in place. EMP_EXP has risen 80bps due to the annual wage cycle, which is **temporarily masking the fixed cost leverage**. Once wage resets normalise in H2, the fixed cost absorption should translate into 50–80bps EBIT margin expansion. The leverage mechanics are sound — the timing is the only open question.",
-  },
-  all_verdicts: [
-    { status: "leverage_active",   label: "Leverage Active" },
-    { status: "leverage_pending",  label: "Leverage Pending",  is_current: true },
-    { status: "leverage_matured",  label: "Leverage Matured" },
-    { status: "cost_inflation",    label: "Cost Inflation" },
-    { status: "negative_leverage", label: "Negative Leverage" },
-    { status: "investment_mode",   label: "Investment Mode" },
-  ],
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -104,7 +63,7 @@ interface OperatingLeverageCardProps {
 }
 
 export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
-  const d = data ?? MOCK_DATA;
+  const d = data ?? {};
   const chartData      = d.dol_chart_data ?? [];
   const fixedCostLines = d.fixed_cost_lines ?? [];
   const totalFixed     = d.total_fixed_costs;
@@ -227,14 +186,18 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
 
           <div className="space-y-4 flex-1">
             {fixedCostLines.map((line, i) => {
-              const colors = FIXED_COST_COLORS[line.color] ?? FIXED_COST_COLORS.slate;
+              const isHex = line.color?.startsWith("#");
+              const tailwindColors = FIXED_COST_COLORS[line.color] ?? FIXED_COST_COLORS.slate;
               const isUp = line.change_bps > 0;
               const barPct = Math.min((line.current_pct / 70) * 100, 100);
               return (
                 <div key={i} className="space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${colors.dot}`} />
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full shrink-0 ${isHex ? "" : tailwindColors.dot}`}
+                        style={isHex ? { backgroundColor: line.color } : undefined}
+                      />
                       <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate">{line.name}</span>
                     </div>
                     <span className={`text-xs font-semibold shrink-0 ${isUp ? "text-red-500" : "text-emerald-500"}`}>
@@ -244,8 +207,8 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                   <div className="flex items-center gap-3">
                     <div className="relative flex-1 h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
                       <div
-                        className={`absolute inset-y-0 left-0 rounded-full ${colors.bar}`}
-                        style={{ width: `${barPct}%` }}
+                        className={`absolute inset-y-0 left-0 rounded-full ${isHex ? "" : tailwindColors.bar}`}
+                        style={{ width: `${barPct}%`, ...(isHex ? { backgroundColor: line.color } : {}) }}
                       />
                     </div>
                     <div className="shrink-0 text-right">

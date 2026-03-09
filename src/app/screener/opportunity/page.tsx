@@ -19,6 +19,11 @@ import { CompetitionCard } from "@/components/opportunity/competition-card";
 import { CompetitiveBenchmarking } from "@/components/opportunity/competitive-benchmarking";
 import { FinancialStrengthCard } from "@/components/opportunity/financial-strength-card";
 import { OperatingLeverageCard } from "@/components/opportunity/operating-leverage-card";
+import { FreeCashFlowCard } from "@/components/opportunity/free-cash-flow-card";
+import { WorkingCapitalCard } from "@/components/opportunity/working-capital-card";
+import { CapitalStructureCard } from "@/components/opportunity/capital-structure-card";
+import { IndustryKpiTable } from "@/components/opportunity/industry-kpi-table";
+import { FinalScoringCard } from "@/components/opportunity/final-scoring-card";
 import { CustomerTractionCard } from "@/components/opportunity/customer-traction-card";
 
 function OpportunityContent() {
@@ -411,7 +416,40 @@ function OpportunityContent() {
               <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Operating Leverage Analysis</h3>
               <p className="text-xs text-zinc-400">Fixed cost absorption, DOL trend &amp; leverage verdict</p>
             </div>
-            <OperatingLeverageCard data={data.operating_leverage} />
+            <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />
+          </div>
+          <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+            <div>
+              <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Free Cash Flow Analysis</h3>
+              <p className="text-xs text-zinc-400">FCF conversion, growth trajectory, capex drag &amp; yield</p>
+            </div>
+            <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />
+          </div>
+          <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+            <div>
+              <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Working Capital</h3>
+              <p className="text-xs text-zinc-400">DSO, DIO, DPO, CCC trends &amp; WC as % of revenue</p>
+            </div>
+            <WorkingCapitalCard data={data.financial_strength?.working_capital} />
+          </div>
+          <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+            <div>
+              <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Capital Structure &amp; Capex</h3>
+              <p className="text-xs text-zinc-400">Balance sheet position, debt trajectory, equity allocation &amp; capex intensity</p>
+            </div>
+            <CapitalStructureCard data={data.financial_strength?.capital_structure} />
+            <div>
+              <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Industry KPI Timeseries</h4>
+              <p className="text-xs text-zinc-400 mb-3">Industry-specific KPI trends over time</p>
+              <IndustryKpiTable callId={firstCallId} />
+            </div>
+          </div>
+          <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+            <div>
+              <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Financial Quality Scorecard</h3>
+              <p className="text-xs text-zinc-400">Overall score &amp; verdict based on financial quality signals</p>
+            </div>
+            <FinalScoringCard data={data.financial_strength?.final_scoring} />
           </div>
         </div>
 

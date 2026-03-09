@@ -2,98 +2,6 @@
 
 import type { CapitalStructureSection } from "@/types/opportunity";
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-const MOCK_DATA: CapitalStructureSection = {
-  balance_sheet: {
-    status: "Net Cash Company",
-    status_color: "green",
-    cash_investments: "₹62,000 Cr",
-    cash_bar_pct: 94,
-    gross_debt: "₹4,000 Cr",
-    debt_bar_pct: 6,
-    net_cash: "₹58,000 Cr",
-    timeline: [
-      { label: "FY20", value: "33.8K" },
-      { label: "FY21", value: "40.2K" },
-      { label: "FY22", value: "48.8K" },
-      { label: "FY23", value: "53.4K" },
-      { label: "FY24", value: "58.0K", is_current: true },
-    ],
-    insight:
-      "Net cash has compounded from ₹33.8K Cr to ₹58K Cr in 5 years. **The balance sheet is a structural asset** — it funds dividends, buybacks, and treasury income without any debt dependency.",
-  },
-  debt_trajectory: {
-    status: "Deleveraging",
-    status_color: "green",
-    bars: [
-      { label: "FY20", value: 4200, color: "red" },
-      { label: "FY21", value: 3800, color: "red" },
-      { label: "FY22", value: 3200, color: "amber" },
-      { label: "FY23", value: 2600, color: "amber" },
-      { label: "FY24", value: 1800, color: "green", is_current: true },
-    ],
-    peak_debt: "₹4,200 Cr",
-    peak_label: "FY20",
-    current_debt: "₹1,800 Cr",
-    current_label: "FY24",
-    reduction_pct: "–57%",
-    reduction_label: "over 4 years",
-    insight:
-      "Debt cut by 57% in 4 years — entirely from internal cash flows. **Interest coverage at 62x** means remaining debt is a non-issue. At this pace, TCS will be effectively debt-free within 2 years.",
-  },
-  equity_allocation: {
-    status: "Compounding",
-    status_color: "green",
-    rows: [
-      { label: "FY20", kept_pct: 38, paid_pct: 62 },
-      { label: "FY21", kept_pct: 35, paid_pct: 65 },
-      { label: "FY22", kept_pct: 32, paid_pct: 68 },
-      { label: "FY23", kept_pct: 30, paid_pct: 70 },
-      { label: "FY24", kept_pct: 28, paid_pct: 72, is_current: true },
-    ],
-    total_equity: "₹1.12L Cr",
-    total_equity_sublabel: "Total Equity (FY24)",
-    roe: "47.8%",
-    roe_sublabel: "Every ₹100 of equity earns ₹47.8",
-    payout_trend: "Rising",
-    payout_trend_direction: "up",
-    payout_sublabel: "62% → 72% over 5Y",
-    insight:
-      "TCS returns ~70% of profits to shareholders — a mature capital return policy. Equity still grows because ROE at 47.8% means even 28% retention compounds the book value strongly. **High payout + high ROE is a quality sign, not a concern.**",
-  },
-  capex_intensity: {
-    status: "Asset Light",
-    status_color: "green",
-    metrics: [
-      {
-        label: "Capex as % of Revenue",
-        value: "1.8%",
-        bar_pct: 75,
-        max_label: "max 2.4%",
-        note: "Declining – less capital needed per rupee of revenue",
-        status: "green",
-      },
-      {
-        label: "Capex as % of OCF",
-        value: "7.1%",
-        bar_pct: 15,
-        note: "Growth entirely self-funded – no external capital needed",
-        status: "green",
-      },
-      {
-        label: "Capex / Depreciation ratio",
-        value: "0.46x",
-        bar_pct: 46,
-        max_label: "1x = under-investing",
-        note: "Maintenance mode – asset base not expanding",
-        status: "yellow",
-      },
-    ],
-    note: "Note: Capex/D&A <1x is not a red flag for IT-services — TCS's value is in IP, talent, and client relationships, not physical assets. Low capex here means more FCF, not under-investment.",
-  },
-};
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<string, { badge: string; dot: string }> = {
@@ -529,7 +437,7 @@ interface CapitalStructureCardProps {
 }
 
 export function CapitalStructureCard({ data }: CapitalStructureCardProps) {
-  const d = data ?? MOCK_DATA;
+  const d = data ?? {};
 
   return (
     <div className="space-y-4">

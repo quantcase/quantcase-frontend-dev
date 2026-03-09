@@ -29,51 +29,6 @@ const FIXED_COST_COLORS: Record<string, { dot: string; bar: string }> = {
   slate:  { dot: "bg-slate-400",  bar: "bg-slate-400" },
 };
 
-// ─── Mock data (replace with API when ready) ──────────────────────────────────
-
-const MOCK_DATA: OperatingLeverageSection = {
-  fixed_cost_equation: "FIXED COSTS = EMP_EXP + OTH_EXP + DEP_AMORT",
-  dol_chart_data: [
-    { quarter: "Q4'22", revenue_growth: 16, ebit_growth: 19, dol: 1.1 },
-    { quarter: "Q1'23", revenue_growth: 14, ebit_growth: 14, dol: 1.0 },
-    { quarter: "Q2'23", revenue_growth: 12, ebit_growth: 11, dol: 0.9 },
-    { quarter: "Q3'23", revenue_growth: 10, ebit_growth: 9,  dol: 0.9 },
-    { quarter: "Q4'23", revenue_growth: 9,  ebit_growth: 5,  dol: 0.6 },
-    { quarter: "Q1'24", revenue_growth: 9,  ebit_growth: 5,  dol: 0.6 },
-    { quarter: "Q2'24", revenue_growth: 9,  ebit_growth: 7,  dol: 0.8 },
-    { quarter: "Q3'24", revenue_growth: 8,  ebit_growth: 7,  dol: 0.9 },
-    { quarter: "Q4'24", revenue_growth: 7,  ebit_growth: 6,  dol: 0.9 },
-  ],
-  fixed_cost_lines: [
-    { name: "Employee Expenses (EMP_EXP)",       key: "EMP_EXP",    color: "blue",   current_pct: 51.4, prior_pct: 50.6, change_bps: 80,  note: "Wage hike cycle — temporary pressure, watch H2" },
-    { name: "Other Expenses (OTH_EXP)",          key: "OTH_EXP",    color: "orange", current_pct: 9.2,  prior_pct: 9.5,  change_bps: -30, note: "Compressing — scale benefit on admin & overhead" },
-    { name: "Depreciation & Amort. (DEP_AMORT)", key: "DEP_AMORT",  color: "slate",  current_pct: 3.8,  prior_pct: 4.0,  change_bps: -20, note: "Asset base maturing — lower D&A intensity vs revenue" },
-  ],
-  total_fixed_costs: {
-    current_pct: 64.4, prior_pct: 64.1, change_bps: 30,
-    note: "OTH_EXP and DEP savings offset by EMP_EXP pressure",
-  },
-  metrics: {
-    revenue_growth_yoy: { value: "+8.4%",   label: "Revenue Growth (YOY)", sublabel: "TTM vs prior year" },
-    ebit_growth_yoy:    { value: "+7.2%",   label: "EBIT Growth (YOY)",    sublabel: "EBIT growing slower than revenue" },
-    leverage_spread:    { value: "−1.2pp",  label: "Leverage Spread",      sublabel: "EBIT growth minus Revenue growth. Positive = leverage active · Negative = not yet" },
-  },
-  verdict: {
-    status: "leverage_pending",
-    label: "LEVERAGE PENDING",
-    tag: "EBIT growing, but slower than Revenue",
-    description: "OTH_EXP and DEP_AMORT are both compressing as a % of revenue — the structural efficiency is in place. EMP_EXP has risen 80bps due to the annual wage cycle, which is **temporarily masking the fixed cost leverage**. Once wage resets normalise in H2, the fixed cost absorption should translate into 50–80bps EBIT margin expansion. The leverage mechanics are sound — the timing is the only open question.",
-  },
-  all_verdicts: [
-    { status: "leverage_active",   label: "Leverage Active" },
-    { status: "leverage_pending",  label: "Leverage Pending",  is_current: true },
-    { status: "leverage_matured",  label: "Leverage Matured" },
-    { status: "cost_inflation",    label: "Cost Inflation" },
-    { status: "negative_leverage", label: "Negative Leverage" },
-    { status: "investment_mode",   label: "Investment Mode" },
-  ],
-};
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function RenderWithBold({ text }: { text: string }) {
@@ -104,7 +59,7 @@ interface OperatingLeverageCardProps {
 }
 
 export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
-  const d = data ?? MOCK_DATA;
+  const d = data ?? {};
   const chartData      = d.dol_chart_data ?? [];
   const fixedCostLines = d.fixed_cost_lines ?? [];
   const totalFixed     = d.total_fixed_costs;

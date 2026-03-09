@@ -6,71 +6,6 @@ import type {
   FcfYieldDataPoint,
 } from "@/types/opportunity";
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-const MOCK_DATA: FreeCashFlowSection = {
-  conversion_consistency: {
-    status: "Stable",
-    status_color: "green",
-    healthy_threshold_pct: 80,
-    quarterly_data: [
-      { quarter: "Q3'22", pct: 93 },
-      { quarter: "Q4'22", pct: 95 },
-      { quarter: "Q1'23", pct: 92 },
-      { quarter: "Q2'23", pct: 90 },
-      { quarter: "Q3'23", pct: 88, is_floor: true },
-      { quarter: "Q4'23", pct: 91 },
-      { quarter: "Q1'24", pct: 92 },
-      { quarter: "Q2'24", pct: 91 },
-      { quarter: "Q3'24", pct: 93 },
-      { quarter: "Q4'24", pct: 92 },
-    ],
-    range_low: 88,
-    range_high: 95,
-    floor_pct: 88,
-    floor_quarter: "Q3'23",
-    all_above_threshold: true,
-  },
-  growth_trajectory: {
-    status: "FCF Outpacing",
-    status_color: "green",
-    fcf_cagr_pct: 11,
-    fcf_start: "₹10,840 Cr",
-    fcf_end: "₹14,790 Cr",
-    pat_cagr_pct: 9,
-    pat_start: "₹11,620 Cr",
-    pat_end: "₹15,870 Cr",
-    periods: "8Q",
-    insight_headline: "FCF growing 2pp faster than PAT — cash quality improving, not just profits",
-    insight_body:
-      "Cash generation is outpacing accounting earnings. The **direction is what matters** — PAT is not flattering FCF.",
-  },
-  ocf_to_fcf: {
-    status: "Minimal Drag",
-    status_color: "green",
-    ocf_ttm: "₹45,940 Cr",
-    capex: "-₹3,100 Cr",
-    fcf_ttm: "₹42,840 Cr",
-    ocf_bar_pct: 100,
-    capex_bar_pct: 7,
-    fcf_bar_pct: 93,
-    capex_revenue_pct: 1.8,
-    capex_ocf_pct: 6.7,
-    drag_description: "Very limited",
-  },
-  fcf_yield: {
-    status: "Watch",
-    status_color: "yellow",
-    yield_history: [
-      { label: "FY22 Yield", yield_pct: 4.8, zone: "Attractive zone" },
-      { label: "FY23 Yield", yield_pct: 3.8, zone: "Fair zone" },
-      { label: "Today",      yield_pct: 3.1, zone: "Fair / Expensive", is_current: true },
-    ],
-    compression_explanation:
-      "FCF grew +56% over 3 years — market cap grew +104%. Re-rating, not FCF weakness. Business is better; the market has priced it in.",
-  },
-};
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function RenderWithBold({ text }: { text: string }) {
@@ -381,7 +316,7 @@ interface FreeCashFlowCardProps {
 }
 
 export function FreeCashFlowCard({ data }: FreeCashFlowCardProps) {
-  const d = data ?? MOCK_DATA;
+  const d = data ?? {};
 
   return (
     <div className="space-y-4">

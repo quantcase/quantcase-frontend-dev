@@ -13,40 +13,6 @@ import {
 } from "recharts";
 import type { WorkingCapitalSection } from "@/types/opportunity";
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-const MOCK_DATA: WorkingCapitalSection = {
-  quarters: ["Q3'22", "Q4'22", "Q1'23"],
-  rows: [
-    { label: "DSO (days)", key: "dso", values: [72, 70, 71] },
-    { label: "DIO (days)", key: "dio", values: [12, 11, 11] },
-    { label: "DPO (days)", key: "dpo", values: [38, 40, 39] },
-    { label: "CCC (days)", key: "ccc", values: [46, 41, 43] },
-  ],
-  trend_chart: {
-    title: "WC as % of Revenue",
-    data: [
-      { quarter: "Q3'22", wc_pct: 18.2 },
-      { quarter: "Q4'22", wc_pct: 17.8 },
-      { quarter: "Q1'23", wc_pct: 17.9 },
-      { quarter: "Q2'23", wc_pct: 18.4 },
-      { quarter: "Q3'23", wc_pct: 17.7 },
-      { quarter: "Q4'23", wc_pct: 17.4 },
-      { quarter: "Q1'24", wc_pct: 17.5 },
-      { quarter: "Q2'24", wc_pct: 17.1 },
-      { quarter: "Q3'24", wc_pct: 16.7 },
-      { quarter: "Q4'24", wc_pct: 16.2 },
-    ],
-    verdict_badge: "Asset Light Scaling",
-    verdict_color: "green",
-  },
-  signals: [
-    { label: "Tight Collections", color: "green" },
-    { label: "Asset Light Scaling", color: "green" },
-  ],
-  insight: "CCC improving 12 days over 4Q — DPO extending while DSO tightening. Best combination.",
-};
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<string, { badge: string; dot: string }> = {
@@ -83,7 +49,7 @@ interface WorkingCapitalCardProps {
 }
 
 export function WorkingCapitalCard({ data }: WorkingCapitalCardProps) {
-  const d = data ?? MOCK_DATA;
+  const d = data ?? { quarters: [], rows: [] };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

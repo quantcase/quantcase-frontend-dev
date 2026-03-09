@@ -437,16 +437,19 @@ export interface FinalScoringSection {
 
 // ─── Root Response ────────────────────────────────────────────────────────────
 
-export interface OFactorResponse {
-  industry_overview?: IndustryOverviewSection;
-  competition?: CompetitionSection;
-  financial_strength?: FinancialStrengthSection;
-  customer_traction?: CustomerTractionSection;
+export interface FinancialStrengthSectionFull extends FinancialStrengthSection {
   operating_leverage?: OperatingLeverageSection;
   free_cash_flow?: FreeCashFlowSection;
   working_capital?: WorkingCapitalSection;
   capital_structure?: CapitalStructureSection;
   final_scoring?: FinalScoringSection;
+}
+
+export interface OFactorResponse {
+  industry_overview?: IndustryOverviewSection;
+  competition?: CompetitionSection;
+  financial_strength?: FinancialStrengthSectionFull;
+  customer_traction?: CustomerTractionSection;
 }
 
 export interface OFactorResponseWrapper {

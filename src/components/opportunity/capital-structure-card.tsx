@@ -199,7 +199,7 @@ function DebtTrajectoryPanel({
                   b.is_current ? "text-zinc-800 dark:text-zinc-100" : "text-zinc-500"
                 }`}
               >
-                {b.value.toLocaleString()}
+                {b.value != null ? b.value.toLocaleString() : "—"}
               </span>
               <div
                 className={`w-full rounded-t-sm ${barColor}`}

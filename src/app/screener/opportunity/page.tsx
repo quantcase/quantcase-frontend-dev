@@ -18,7 +18,7 @@ import { IndustryOverviewCard } from "@/components/opportunity/industry-overview
 import { CompetitionCard } from "@/components/opportunity/competition-card";
 import { CompetitiveBenchmarking } from "@/components/opportunity/competitive-benchmarking";
 import { FinancialStrengthCard } from "@/components/opportunity/financial-strength-card";
-import { BalanceSheetCard } from "@/components/opportunity/balance-sheet-card";
+import { OperatingLeverageCard } from "@/components/opportunity/operating-leverage-card";
 import { CustomerTractionCard } from "@/components/opportunity/customer-traction-card";
 
 function OpportunityContent() {
@@ -391,7 +391,7 @@ function OpportunityContent() {
           </div>
           <div className="px-6 pb-0 space-y-4">
             <CompetitionCard data={data.competition} />
-            <CompetitiveBenchmarking data={data.competition} />
+            <CompetitiveBenchmarking data={data.competition} callId={firstCallId} />
           </div>
         </div>
 
@@ -405,10 +405,13 @@ function OpportunityContent() {
           </div>
           <div className="px-6 pb-0 space-y-4">
             <FinancialStrengthCard data={data.financial_strength} />
-            <BalanceSheetCard
-              data={data.financial_strength?.text?.balance_sheet}
-              takeaway={data.financial_strength?.text?.takeaway}
-            />
+          </div>
+          <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 mt-4 space-y-4">
+            <div>
+              <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Operating Leverage Analysis</h3>
+              <p className="text-xs text-zinc-400">Fixed cost absorption, DOL trend &amp; leverage verdict</p>
+            </div>
+            <OperatingLeverageCard data={data.operating_leverage} />
           </div>
         </div>
 

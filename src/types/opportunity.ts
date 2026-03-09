@@ -56,6 +56,18 @@ export interface IndustryOverviewSection {
 
 // ─── Competition ──────────────────────────────────────────────────────────────
 
+export interface PeerRow {
+  company: string;
+  revenue: number | null;
+  revenue_growth: number | null;
+  opm: number | null;
+  roce: number | null;
+  market_share: number | null;
+  debt_equity: number | null;
+  is_current: boolean;
+  is_average: boolean;
+}
+
 export interface CompetitionSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
   metrics?: {
@@ -197,6 +209,50 @@ export interface CustomerTractionSection {
   };
 }
 
+// ─── Operating Leverage Analysis ─────────────────────────────────────────────
+
+export interface DolDataPoint {
+  quarter: string;
+  revenue_growth: number;
+  ebit_growth: number;
+  dol: number;
+}
+
+export interface FixedCostLine {
+  name: string;
+  key: string;
+  color: string;
+  current_pct: number;
+  prior_pct: number;
+  change_bps: number;
+  note: string;
+}
+
+export interface OperatingLeverageSection {
+  meta?: { section_id?: string; title?: string; subtitle?: string };
+  fixed_cost_equation?: string;
+  dol_chart_data?: DolDataPoint[];
+  fixed_cost_lines?: FixedCostLine[];
+  total_fixed_costs?: {
+    current_pct: number;
+    prior_pct: number;
+    change_bps: number;
+    note: string;
+  };
+  metrics?: {
+    revenue_growth_yoy?: OFactorMetric;
+    ebit_growth_yoy?: OFactorMetric;
+    leverage_spread?: OFactorMetric;
+  };
+  verdict?: {
+    status: string;
+    label: string;
+    tag: string;
+    description: string;
+  };
+  all_verdicts?: Array<{ status: string; label: string; is_current?: boolean }>;
+}
+
 // ─── Root Response ────────────────────────────────────────────────────────────
 
 export interface OFactorResponse {
@@ -204,6 +260,7 @@ export interface OFactorResponse {
   competition?: CompetitionSection;
   financial_strength?: FinancialStrengthSection;
   customer_traction?: CustomerTractionSection;
+  operating_leverage?: OperatingLeverageSection;
 }
 
 export interface OFactorResponseWrapper {

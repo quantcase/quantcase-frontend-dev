@@ -6,8 +6,13 @@ import { EpsEngine } from "@/components/deal/eps-engine";
 import { HistoricalPerformance } from "@/components/deal/historical-performance";
 import { QualityOfEarnings } from "@/components/deal/quality-of-earnings";
 import { ValuationVsPeers } from "@/components/deal/valuation-vs-peers";
+import type { DetailedAnalysisSection } from "@/types/deal";
 
-export function DetailedAnalysis() {
+interface DetailedAnalysisProps {
+  data?: DetailedAnalysisSection;
+}
+
+export function DetailedAnalysis({ data }: DetailedAnalysisProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -43,10 +48,10 @@ export function DetailedAnalysis() {
       {/* Expanded Sections */}
       {isOpen && (
         <div className="space-y-8">
-          <EpsEngine />
-          <HistoricalPerformance />
-          <QualityOfEarnings />
-          <ValuationVsPeers />
+          <EpsEngine data={data?.eps_engine} />
+          <HistoricalPerformance data={data?.historical_performance} />
+          <QualityOfEarnings data={data?.quality_of_earnings} />
+          <ValuationVsPeers data={data?.valuation_vs_peers} />
         </div>
       )}
     </div>

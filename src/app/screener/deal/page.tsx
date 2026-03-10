@@ -342,7 +342,7 @@ function DealContent() {
         <ScenarioFramework data={data.scenario_framework} />
         <TargetPriceMatrix data={data.target_price_matrix} />
         {data.risk_reward_summary && <RiskRewardSummary data={data.risk_reward_summary} />}
-        <DetailedAnalysis />
+        <DetailedAnalysis data={data.detailed_analysis} />
       </div>
     </div>
   );

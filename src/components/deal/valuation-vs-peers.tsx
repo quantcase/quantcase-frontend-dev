@@ -1,7 +1,12 @@
 import { BarChart3, TrendingUp, TrendingDown, BarChart2 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import type { ValuationVsPeersSection, ValuationRichSegment } from "@/types/deal";
 import { valuationVsPeersData, type DescriptionSegment } from "@/components/deal/detailed-analysis-data";
+
+interface ValuationVsPeersProps {
+  data?: ValuationVsPeersSection;
+}
 
 const positionColors: Record<string, { bg: string; value: string }> = {
   amber: { bg: "bg-amber-50 dark:bg-amber-950/20", value: "text-amber-600" },
@@ -26,7 +31,7 @@ const segmentColor: Record<string, string> = {
   red: "text-red-500",
 };
 
-function RichDescription({ segments }: { segments: DescriptionSegment[] }) {
+function RichDescription({ segments }: { segments: (DescriptionSegment | ValuationRichSegment)[] }) {
   return (
     <p className="text-sm text-zinc-600 dark:text-zinc-400">
       {segments.map((seg, i) => {
@@ -41,16 +46,14 @@ function RichDescription({ segments }: { segments: DescriptionSegment[] }) {
   );
 }
 
-export function ValuationVsPeers() {
-  const {
-    title,
-    subtitle,
-    currentPosition,
-    reRatingView,
-    expansionDrivers,
-    contractionRisks,
-    scenarioMultiples,
-  } = valuationVsPeersData;
+export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
+  const title             = data?.meta?.title           ?? valuationVsPeersData.title;
+  const subtitle          = data?.meta?.subtitle        ?? valuationVsPeersData.subtitle;
+  const currentPosition   = data?.current_position     ?? valuationVsPeersData.currentPosition;
+  const reRatingView      = data?.re_rating_view        ?? valuationVsPeersData.reRatingView;
+  const expansionDrivers  = data?.expansion_drivers     ?? valuationVsPeersData.expansionDrivers;
+  const contractionRisks  = data?.contraction_risks     ?? valuationVsPeersData.contractionRisks;
+  const scenarioMultiples = data?.scenario_multiples    ?? valuationVsPeersData.scenarioMultiples;
 
   return (
     <div className="space-y-5">

@@ -51,12 +51,89 @@ export interface RiskRewardSummarySection {
   downside_protection?: RiskRewardMetric;
 }
 
+// ─── EPS Engine ───────────────────────────────────────────────────────────────
+
+export interface EpsScenario {
+  industry_cagr?: { value: string; note: string };
+  revenue_growth?: { value: string; note: string; mgmt_guidance: string; mgmt_result: string };
+  margin_trajectory?: { value: string; note: string; mgmt_guidance: string; mgmt_result: string };
+  execution_alpha?: { rating: string; value: string; note: string };
+  expected_eps_cagr?: { value: string; subtitle: string };
+}
+
+export interface EpsEngineSection {
+  meta?: { section_id?: string; title?: string; subtitle?: string };
+  sub_section_title?: string;
+  sub_section_subtitle?: string;
+  scenarios?: { bear?: EpsScenario; base?: EpsScenario; bull?: EpsScenario };
+  insight?: string;
+}
+
+// ─── Historical Performance ───────────────────────────────────────────────────
+
+export interface HistoricalPerformanceSection {
+  meta?: { section_id?: string; title?: string; subtitle?: string };
+  company_growth?: { value: string; label: string };
+  industry_growth?: { value: string; label: string };
+  company_name?: string;
+  industry_name?: string;
+  chart_data?: Array<{ year: string; company: number; industry: number }>;
+  stats?: Array<{ value: string; label: string; color: string }>;
+}
+
+// ─── Quality of Earnings ──────────────────────────────────────────────────────
+
+export interface QualityMetric {
+  label: string;
+  value: string;
+  change: string;
+  change_color: string;
+}
+
+export interface QualityOfEarningsSection {
+  meta?: { section_id?: string; title?: string; subtitle?: string };
+  metrics?: QualityMetric[];
+  chart_data?: Array<{ year: string; roe: number; roic: number; market_share: number }>;
+  bottom_line?: string;
+}
+
+// ─── Valuation vs Peers ───────────────────────────────────────────────────────
+
+export interface ValuationRichSegment {
+  text: string;
+  bold?: boolean;
+  color?: "emerald" | "blue" | "red";
+}
+
+export interface ValuationVsPeersSection {
+  meta?: { section_id?: string; title?: string; subtitle?: string };
+  current_position?: Array<{ label: string; value: string; detail: string; color: string }>;
+  re_rating_view?: {
+    badge: string;
+    title: string;
+    description: ValuationRichSegment[];
+  };
+  expansion_drivers?: Array<{ text: string; detail: string }>;
+  contraction_risks?: Array<{ text: string; detail: string }>;
+  scenario_multiples?: Array<{ label: string; value: string; change: string; color: string }>;
+}
+
+// ─── Detailed Analysis (wrapper) ──────────────────────────────────────────────
+
+export interface DetailedAnalysisSection {
+  eps_engine?: EpsEngineSection;
+  historical_performance?: HistoricalPerformanceSection;
+  quality_of_earnings?: QualityOfEarningsSection;
+  valuation_vs_peers?: ValuationVsPeersSection;
+}
+
 // ─── Root Response ────────────────────────────────────────────────────────────
 
 export interface DFactorResponse {
   scenario_framework?: ScenarioFrameworkSection;
   target_price_matrix?: TargetPriceMatrixSection;
   risk_reward_summary?: RiskRewardSummarySection;
+  detailed_analysis?: DetailedAnalysisSection;
 }
 
 export interface DFactorResponseWrapper {

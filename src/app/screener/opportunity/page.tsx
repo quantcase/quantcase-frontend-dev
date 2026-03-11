@@ -32,6 +32,7 @@ function OpportunityContent() {
 
   const [selectedSection, setSelectedSection] = useState("industry_overview");
   const [showSideWindow, setShowSideWindow] = useState(false);
+  const [patchedSections, setPatchedSections] = useState<Partial<OFactorResponse>>({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const [jobStatuses, setJobStatuses] = useState<Record<string, JobStatus>>({});
@@ -298,8 +299,12 @@ function OpportunityContent() {
   }
 
   // Analysis available — render full dashboard
-  const data = opportunityData as OFactorResponse;
+  const data = { ...opportunityData, ...patchedSections } as OFactorResponse;
   const transcriptCall = transcriptCalls[0];
+
+  const handleSectionUpdate = (sectionKey: string, sectionResult: unknown) => {
+    setPatchedSections((prev) => ({ ...prev, [sectionKey]: sectionResult }));
+  };
   const callsAnalyzed = transcriptCalls.map(
     (c) => `${c.company}_${c.fiscal_year}_${c.quarter}`
   );
@@ -471,9 +476,10 @@ function OpportunityContent() {
       {/* Prompt Side Window — fixed overlay */}
       {showSideWindow && (
         <PromptSideWindow
-          callsAnalyzed={callsAnalyzed}
+          callId={firstCallId}
           selectedSection={selectedSection}
           onSectionChange={setSelectedSection}
+          onSectionUpdate={handleSectionUpdate}
           onClose={() => setShowSideWindow(false)}
         />
       )}

@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Target, AlertCircle, TrendingUp, ArrowUpRight } from "lucide-react";
-import { BACKEND_URL } from "@/lib/constants";
 import type { CompetitionSection, PeerRow } from "@/types/opportunity";
 
 interface CompetitiveBenchmarkingProps {
   data?: CompetitionSection;
-  callId: string;
+  peers: PeerRow[];
+  loading?: boolean;
 }
 
 const columns = [
@@ -31,19 +30,7 @@ function formatValue(key: string, value: number | null): string {
   return String(value);
 }
 
-export function CompetitiveBenchmarking({ data, callId }: CompetitiveBenchmarkingProps) {
-  const [peers, setPeers] = useState<PeerRow[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!callId) return;
-    setLoading(true);
-    fetch(`${BACKEND_URL}/api/opportunity/peer-data?callId=${callId}`)
-      .then((res) => res.json())
-      .then((json) => setPeers(json.competition?.peers ?? []))
-      .catch(() => setPeers([]))
-      .finally(() => setLoading(false));
-  }, [callId]);
+export function CompetitiveBenchmarking({ data, peers, loading }: CompetitiveBenchmarkingProps) {
 
   const positioning = data?.text?.competitive_positioning;
   const takeaway = data?.text?.takeaway ?? "N/A";

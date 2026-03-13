@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { BACKEND_URL } from "@/lib/constants";
 import type { IndustryKpiTimeseries } from "@/types/opportunity";
 
 interface IndustryKpiTableProps {
-  callId: string;
+  data?: IndustryKpiTimeseries | null;
+  loading?: boolean;
 }
 
 // Make abbreviation human-readable: "EBITDA_MARGIN" → "Ebitda Margin"
@@ -21,23 +20,10 @@ function humanize(abbr: string): string {
 
 function formatValue(value: number | null): string {
   if (value === null || value === undefined) return "—";
-  // Show up to 2 decimal places, strip trailing zeros
   return parseFloat(value.toFixed(2)).toString();
 }
 
-export function IndustryKpiTable({ callId }: IndustryKpiTableProps) {
-  const [data, setData] = useState<IndustryKpiTimeseries | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!callId) return;
-    setLoading(true);
-    fetch(`${BACKEND_URL}/api/opportunity/peer-data?callId=${callId}`)
-      .then((res) => res.json())
-      .then((json) => setData(json.industry_kpis ?? null))
-      .catch(() => setData(null))
-      .finally(() => setLoading(false));
-  }, [callId]);
+export function IndustryKpiTable({ data, loading }: IndustryKpiTableProps) {
 
   if (loading) {
     return (

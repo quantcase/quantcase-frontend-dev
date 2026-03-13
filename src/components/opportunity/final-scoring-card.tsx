@@ -2,17 +2,6 @@
 
 import type { FinalScoringSection } from "@/types/opportunity";
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-const MOCK_DATA: FinalScoringSection = {
-  score: 6,
-  max_score: 8,
-  status: "HIGH QUALITY",
-  status_color: "green",
-  title: "Numbers support the thesis",
-  body: "TCS scores 6/8 on the financial quality scorecard. The two amber flags — gross margin compression and EBIT margin pressure — are both wage-cycle driven and have shown early signs of reversal in Q4'24. The core quality signals are exceptional: 92% FCF conversion, 51.2% ROCE, net cash of ₹58,000 Cr, and a cash conversion cycle improving every quarter. The business is self-funding, clean, and compounding. The question is not quality — it's growth re-acceleration.",
-};
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<
@@ -46,7 +35,8 @@ interface FinalScoringCardProps {
 }
 
 export function FinalScoringCard({ data }: FinalScoringCardProps) {
-  const d = data ?? MOCK_DATA;
+  if (!data) return null;
+  const d = data;
   const c = STATUS_STYLES[d.status_color ?? "green"] ?? STATUS_STYLES.green;
 
   return (

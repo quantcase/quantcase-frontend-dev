@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Shield, TrendingUp, Award, Activity, Lock, ZapIcon } from "lucide-react";
+import { ChevronDown, ChevronUp, TrendingUp, Award, Activity, Lock, ZapIcon } from "lucide-react";
 import { safeMetric, type CompetitionSection } from "@/types/opportunity";
 
 interface CompetitionCardProps {
@@ -14,7 +14,6 @@ export function CompetitionCard({ data }: CompetitionCardProps) {
 
   const m = data?.metrics;
   const competitionMetrics = [
-    { ...safeMetric(m?.porters_score), icon: Shield, iconColor: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
     { ...safeMetric(m?.pricing_power), icon: TrendingUp, iconColor: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
     { ...safeMetric(m?.market_position), icon: Award, iconColor: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
     { ...safeMetric(m?.competitive_intensity), icon: Activity, iconColor: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
@@ -25,7 +24,7 @@ export function CompetitionCard({ data }: CompetitionCardProps) {
 
   return (
     <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {competitionMetrics.map((m, i) => {
             const Icon = m.icon;
             return (

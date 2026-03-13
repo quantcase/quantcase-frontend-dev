@@ -4,10 +4,11 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useOpportunityAnalysis } from "@/hooks/useOpportunityAnalysis";
+import { usePeerData } from "@/hooks/usePeerData";
 import { apiPost, apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import type { JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
-import type { OFactorResponse } from "@/types/opportunity";
+import type { OFactorResponse, FinalScoringSection } from "@/types/opportunity";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,8 +24,25 @@ import { FreeCashFlowCard } from "@/components/opportunity/free-cash-flow-card";
 import { WorkingCapitalCard } from "@/components/opportunity/working-capital-card";
 import { CapitalStructureCard } from "@/components/opportunity/capital-structure-card";
 import { IndustryKpiTable } from "@/components/opportunity/industry-kpi-table";
+import { KpiBenchmarkingTable } from "@/components/opportunity/kpi-benchmarking-table";
 import { FinalScoringCard } from "@/components/opportunity/final-scoring-card";
 import { CustomerTractionCard } from "@/components/opportunity/customer-traction-card";
+
+const SCORE_COLORS: Record<string, string> = {
+  green: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+  yellow: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+  red: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+};
+
+function SectionScoreBadge({ scoring }: { scoring: FinalScoringSection }) {
+  const colorClass = SCORE_COLORS[scoring.status_color ?? "green"] ?? SCORE_COLORS.green;
+  return (
+    <div className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold ${colorClass}`}>
+      <span>{scoring.score}/{scoring.max_score}</span>
+      <span className="font-medium opacity-80">{scoring.status}</span>
+    </div>
+  );
+}
 
 function OpportunityContent() {
   const searchParams = useSearchParams();
@@ -42,7 +60,8 @@ function OpportunityContent() {
 
   const { data: transcriptCalls, loading: transcriptLoading, error: transcriptError } = useTranscriptCalls(symbol);
   const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
-  const { data: opportunityData, loading: opportunityLoading } = useOpportunityAnalysis(firstCallId);
+  const { data: opportunityData, totalScore, loading: opportunityLoading } = useOpportunityAnalysis(firstCallId);
+  const { data: peerData, loading: peerLoading } = usePeerData(firstCallId);
 
   const loading = transcriptLoading || opportunityLoading;
 
@@ -359,7 +378,13 @@ function OpportunityContent() {
         <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
           Opportunity Factor Score
         </h2>
-        <span className="text-lg font-bold text-zinc-600 dark:text-zinc-400">(30/50)</span>
+        {totalScore ? (
+          <span className="text-lg font-bold text-zinc-600 dark:text-zinc-400">
+            ({totalScore.total_score}/{totalScore.max_score})
+          </span>
+        ) : (
+          <span className="text-lg font-bold text-zinc-400 dark:text-zinc-600">—</span>
+        )}
       </div>
 
       {/* Floating Prompt Toggle */}
@@ -380,11 +405,16 @@ function OpportunityContent() {
 
         {/* 4.1 Industry Overview & Market */}
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-          <div className="px-6 pt-5 pb-4">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
-              4.1 Industry Overview &amp; Market
-            </h2>
-            <p className="text-xs text-zinc-400">Synthesized from public company transcripts &amp; filings</p>
+          <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
+                4.1 Industry Overview &amp; Market
+              </h2>
+              <p className="text-xs text-zinc-400">Synthesized from public company transcripts &amp; filings</p>
+            </div>
+            {data.industry_overview?.final_scoring && (
+              <SectionScoreBadge scoring={data.industry_overview.final_scoring} />
+            )}
           </div>
           <div className="px-6 space-y-4">
             <IndustryOverviewCard data={data.industry_overview} competition={data.competition} />
@@ -393,25 +423,45 @@ function OpportunityContent() {
 
         {/* 4.2 Competitive Benchmarking vs Industry Peers */}
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-          <div className="px-6 pt-5 pb-4">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
-              4.2 Competitive Benchmarking vs Industry Peers
-            </h2>
-            <p className="text-xs text-zinc-400">Peer comparison from public filings &amp; market data</p>
+          <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
+                4.2 Competitive Benchmarking vs Industry Peers
+              </h2>
+              <p className="text-xs text-zinc-400">Peer comparison from public filings &amp; market data</p>
+            </div>
+            {data.competition?.final_scoring && (
+              <SectionScoreBadge scoring={data.competition.final_scoring} />
+            )}
           </div>
           <div className="px-6 pb-0 space-y-4">
             <CompetitionCard data={data.competition} />
-            <CompetitiveBenchmarking data={data.competition} callId={firstCallId} />
+            <div>
+              <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">KPI Benchmarking</h4>
+              <p className="text-xs text-zinc-400 mb-3">Latest KPI values across industry peers</p>
+              <KpiBenchmarkingTable data={peerData?.peer_kpi_timeseries} loading={peerLoading} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Industry KPI Timeseries</h4>
+              <p className="text-xs text-zinc-400 mb-3">Industry-specific KPI trends over time</p>
+              <IndustryKpiTable data={peerData?.industry_kpis} loading={peerLoading} />
+            </div>
+            <CompetitiveBenchmarking data={data.competition} peers={peerData?.competition?.peers ?? []} loading={peerLoading} />
           </div>
         </div>
 
         {/* 4.3 Financial Strength */}
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-          <div className="px-6 pt-5 pb-4">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
-              4.3 Financial Strength
-            </h2>
-            <p className="text-xs text-zinc-400">Snapshot from financial statements, investor decks &amp; management commentary</p>
+          <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
+                4.3 Financial Strength
+              </h2>
+              <p className="text-xs text-zinc-400">Snapshot from financial statements, investor decks &amp; management commentary</p>
+            </div>
+            {data.financial_strength?.final_scoring && (
+              <SectionScoreBadge scoring={data.financial_strength.final_scoring} />
+            )}
           </div>
           <div className="px-6 pb-0 space-y-4">
             <FinancialStrengthCard data={data.financial_strength} />
@@ -443,11 +493,6 @@ function OpportunityContent() {
               <p className="text-xs text-zinc-400">Balance sheet position, debt trajectory, equity allocation &amp; capex intensity</p>
             </div>
             <CapitalStructureCard data={data.financial_strength?.capital_structure} />
-            <div>
-              <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Industry KPI Timeseries</h4>
-              <p className="text-xs text-zinc-400 mb-3">Industry-specific KPI trends over time</p>
-              <IndustryKpiTable callId={firstCallId} />
-            </div>
           </div>
           <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
             <div>
@@ -460,11 +505,16 @@ function OpportunityContent() {
 
         {/* 4.4 Client/Customer Traction */}
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-          <div className="px-6 pt-5 pb-4">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
-              4.4 Client/Customer Traction
-            </h2>
-            <p className="text-xs text-zinc-400">Customer growth, retention &amp; revenue trajectory with alt data projections</p>
+          <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
+                4.4 Client/Customer Traction
+              </h2>
+              <p className="text-xs text-zinc-400">Customer growth, retention &amp; revenue trajectory with alt data projections</p>
+            </div>
+            {data.customer_traction?.final_scoring && (
+              <SectionScoreBadge scoring={data.customer_traction.final_scoring} />
+            )}
           </div>
           <div className="px-6">
             <CustomerTractionCard data={data.customer_traction} />

@@ -1,20 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import {
   ChevronDown, ChevronUp, TrendingUp, Package, BarChart2, Zap, AlertTriangle,
-  DollarSign, Quote, FileText, Info, CheckCircle2,
+  DollarSign, Info, CheckCircle2,
 } from "lucide-react";
-import { safeMetric, type IndustryOverviewSection, type CompetitionSection } from "@/types/opportunity";
+import { safeMetric, type IndustryOverviewSection, type CompetitionSection, type IndustryCagrMetric } from "@/types/opportunity";
 import { OperatingMetrics } from "@/components/opportunity/operating-metrics";
-
-const insightAccents = [
-  { border: "border-l-blue-500", icon: "text-blue-500", badge: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" },
-  { border: "border-l-emerald-500", icon: "text-emerald-500", badge: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300" },
-  { border: "border-l-orange-500", icon: "text-orange-500", badge: "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300" },
-  { border: "border-l-purple-500", icon: "text-purple-500", badge: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300" },
-];
 
 // Figma-style metric tile config: label color, value color, sublabel color, bg
 const metricTileStyles = [
@@ -31,27 +23,46 @@ interface IndustryOverviewCardProps {
   competition?: CompetitionSection;
 }
 
+function changeColor(change?: string | null): string {
+  if (!change) return "";
+  if (change.startsWith("+")) return "text-emerald-600 dark:text-emerald-400";
+  if (change.startsWith("-")) return "text-red-500 dark:text-red-400";
+  return "text-zinc-500 dark:text-zinc-400";
+}
+
+function cagrDisplay(cagr?: IndustryCagrMetric): { value: string; sublabel: string } {
+  const value = cagr?.one_year ?? cagr?.three_year ?? cagr?.qoq ?? "N/A";
+  const parts = [
+    cagr?.qoq ? `QoQ: ${cagr.qoq}` : null,
+    cagr?.one_year ? `1Y: ${cagr.one_year}` : null,
+    cagr?.three_year ? `3Y: ${cagr.three_year}` : null,
+  ].filter(Boolean);
+  return { value, sublabel: parts.join(" | ") || cagr?.sublabel || "" };
+}
+
 export function IndustryOverviewCard({ data, competition }: IndustryOverviewCardProps) {
   const [showDeepDive, setShowDeepDive] = useState(true);
 
   const m = data?.metrics;
+  const cagr = cagrDisplay(m?.industry_cagr);
+
   const industryMetrics = [
-    { ...safeMetric(m?.industry_revenue_ttm), icon: DollarSign, style: metricTileStyles[0] },
-    { ...safeMetric(m?.industry_cagr), icon: TrendingUp, style: metricTileStyles[1] },
-    { ...safeMetric(m?.market_size), icon: Package, style: metricTileStyles[2] },
-    { ...safeMetric(m?.current_opm), icon: BarChart2, style: metricTileStyles[3] },
-    { ...safeMetric(m?.demand_signal), icon: Zap, style: metricTileStyles[4] },
-    { ...safeMetric(m?.supply_constraint), icon: AlertTriangle, style: metricTileStyles[5] },
+    { ...safeMetric(m?.industry_revenue_ttm), change: m?.industry_revenue_ttm?.change, icon: DollarSign, style: metricTileStyles[0] },
+    { label: m?.industry_cagr?.label ?? "Industry CAGR", value: cagr.value, sublabel: cagr.sublabel, change: null, icon: TrendingUp, style: metricTileStyles[1] },
+    { ...safeMetric(m?.current_opm), change: m?.current_opm?.change, icon: BarChart2, style: metricTileStyles[3] },
+    { ...safeMetric(m?.industry_aum), change: m?.industry_aum?.change, icon: Package, style: metricTileStyles[2] },
+    { ...safeMetric(m?.industry_roce), change: m?.industry_roce?.change, icon: BarChart2, style: metricTileStyles[0] },
+    { ...safeMetric(m?.demand_signal), change: null, icon: Zap, style: metricTileStyles[4] },
+    { ...safeMetric(m?.supply_constraint), change: null, icon: AlertTriangle, style: metricTileStyles[5] },
   ];
 
   const dsd = data?.text?.demand_supply_dynamics;
   const opmTrend = data?.text?.opm_trend;
-  const transcripts = data?.text?.industry_transcripts;
 
   return (
     <div className="space-y-4">
-        {/* 6 Metric tiles */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {/* Metric tiles */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {industryMetrics.map((metric, i) => {
             const Icon = metric.icon;
             return (
@@ -60,7 +71,12 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
                   <Icon className={`h-3 w-3 ${metric.style.labelColor}`} />
                   <p className={`text-[10px] font-semibold uppercase tracking-wider ${metric.style.labelColor}`}>{metric.label}</p>
                 </div>
-                <p className={`text-lg font-bold ${metric.style.valueColor}`}>{metric.value}</p>
+                <div className="flex items-baseline gap-2">
+                  <p className={`text-lg font-bold ${metric.style.valueColor}`}>{metric.value}</p>
+                  {metric.change && (
+                    <span className={`text-[11px] font-semibold ${changeColor(metric.change)}`}>{metric.change}</span>
+                  )}
+                </div>
                 <p className={`text-[11px] mt-0.5 ${metric.style.sublabelColor}`}>{metric.sublabel}</p>
               </div>
             );

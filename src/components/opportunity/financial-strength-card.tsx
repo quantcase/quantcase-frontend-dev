@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import {
   ChevronDown, ChevronUp, TrendingUp, BarChart2, Wallet, Target,
   DollarSign, PieChart, Shield, Activity,
 } from "lucide-react";
 import { safeMetric, type FinancialStrengthSection } from "@/types/opportunity";
-import { TrendCharts } from "@/components/opportunity/trend-charts";
 
 interface FinancialStrengthCardProps {
   data?: FinancialStrengthSection;
@@ -70,9 +68,6 @@ export function FinancialStrengthCard({ data }: FinancialStrengthCardProps) {
           </button>
         </div>
 
-        {showDetails && (
-          <TrendCharts />
-        )}
     </div>
   );
 }

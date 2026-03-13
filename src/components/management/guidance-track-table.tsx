@@ -66,7 +66,7 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
               </colgroup>
               <TableHeader>
                 <TableRow className="border-zinc-200 dark:border-zinc-800">
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">GUIDANCE DATE</TableHead>
+                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">TARGET DATE</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">METRIC</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">ACTUAL</TableHead>
                   <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">GUIDED</TableHead>
@@ -75,7 +75,10 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {records.map((record) => {
+                {records.filter((record) => {
+                  const isNA = (v: unknown) => v == null || String(v).trim().toUpperCase() === "N/A" || String(v).trim() === "";
+                  return !isNA(record.current_value) && !isNA(record.targeted_value);
+                }).map((record) => {
                   const statusConfig = getStatusConfig(record.status);
                   const isFinancial = record.target_type === "financial";
                   const varianceDisplay = record.variance ?? (

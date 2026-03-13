@@ -1,13 +1,22 @@
 // Core type definitions for Opportunity Factor Dashboard
 
 export interface OFactorMetric {
-  value?: string;
+  value?: string | null;
   label?: string;
   sublabel?: string;
+  change?: string | null;
+}
+
+export interface IndustryCagrMetric {
+  label?: string;
+  sublabel?: string;
+  qoq?: string | null;
+  one_year?: string | null;
+  three_year?: string | null;
 }
 
 // Returns a safe metric with N/A defaults when keys are missing
-export function safeMetric(m?: OFactorMetric): Required<OFactorMetric> {
+export function safeMetric(m?: OFactorMetric): { value: string; label: string; sublabel: string } {
   return {
     value: m?.value ?? 'N/A',
     label: m?.label ?? 'N/A',
@@ -19,11 +28,14 @@ export function safeMetric(m?: OFactorMetric): Required<OFactorMetric> {
 
 export interface IndustryOverviewSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
+  final_scoring?: FinalScoringSection;
   metrics?: {
     industry_revenue_ttm?: OFactorMetric;
-    industry_cagr?: OFactorMetric;
+    industry_cagr?: IndustryCagrMetric;
     market_size?: OFactorMetric;
     current_opm?: OFactorMetric;
+    industry_aum?: OFactorMetric;
+    industry_roce?: OFactorMetric;
     demand_signal?: OFactorMetric;
     supply_constraint?: OFactorMetric;
   };
@@ -70,6 +82,7 @@ export interface PeerRow {
 
 export interface CompetitionSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
+  final_scoring?: FinalScoringSection;
   metrics?: {
     porters_score?: OFactorMetric;
     pricing_power?: OFactorMetric;
@@ -158,6 +171,7 @@ export interface FinancialStrengthSection {
 
 export interface CustomerTractionSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
+  final_scoring?: FinalScoringSection;
   metrics?: {
     active_customers?: OFactorMetric;
     net_retention?: OFactorMetric;
@@ -452,9 +466,15 @@ export interface OFactorResponse {
   customer_traction?: CustomerTractionSection;
 }
 
+export interface TotalScore {
+  total_score: number;
+  max_score: number;
+}
+
 export interface OFactorResponseWrapper {
   success: boolean;
   data: OFactorResponse;
+  total_score?: TotalScore;
 }
 
 // ─── Industry KPI Timeseries (from peer-data endpoint) ────────────────────────
@@ -473,4 +493,26 @@ export interface IndustryKpiEntry {
 export interface IndustryKpiTimeseries {
   meta?: { section_id?: string; title?: string };
   timeseries: IndustryKpiEntry[];
+}
+
+// ─── Peer KPI Timeseries (new structure for KPI Benchmarking) ─────────────────
+
+export interface PeerKpiCompany {
+  ticker: string;
+  company_name: string;
+  is_current?: boolean;
+  timeseries: IndustryKpiEntry[];
+}
+
+export interface PeerKpiTimeseries {
+  meta?: { section_id?: string; title?: string };
+  companies: PeerKpiCompany[];
+}
+
+// ─── Full peer-data API response ──────────────────────────────────────────────
+
+export interface PeerDataResponse {
+  competition?: { peers?: PeerRow[] };
+  industry_kpis?: IndustryKpiTimeseries;
+  peer_kpi_timeseries?: PeerKpiTimeseries;
 }

@@ -37,6 +37,24 @@ export function apiCall<T>(url: string, callbacks: ApiCallbacks<T>): void {
 }
 
 /**
+ * Fetch without success/data validation — for endpoints that return raw JSON
+ */
+export function rawFetch<T>(url: string, callbacks: ApiCallbacks<T>): void {
+  const { onStart, onSuccess, onError, onComplete } = callbacks;
+
+  onStart?.();
+
+  fetch(url)
+    .then((res) => {
+      if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+      return res.json();
+    })
+    .then((data: T) => onSuccess(data))
+    .catch((err) => onError(err.message || 'Failed to load data'))
+    .finally(() => onComplete?.());
+}
+
+/**
  * Simple network utility for POST API calls with callbacks
  * @param url - The API endpoint URL
  * @param callbacks - Callbacks for different stages of the request

@@ -14,10 +14,10 @@ export function CompetitionCard({ data }: CompetitionCardProps) {
 
   const m = data?.metrics;
   const competitionMetrics = [
-    { ...safeMetric(m?.pricing_power), icon: TrendingUp, iconColor: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-    { ...safeMetric(m?.market_position), icon: Award, iconColor: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
-    { ...safeMetric(m?.competitive_intensity), icon: Activity, iconColor: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
-    { ...safeMetric(m?.entry_barriers), icon: Lock, iconColor: "text-zinc-500", bg: "bg-zinc-50 dark:bg-zinc-800" },
+    { ...safeMetric(m?.pricing_power), icon: TrendingUp, iconColor: "text-emerald-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(m?.market_position), icon: Award, iconColor: "text-purple-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(m?.competitive_intensity), icon: Activity, iconColor: "text-orange-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(m?.entry_barriers), icon: Lock, iconColor: "text-zinc-500", bg: "bg-white dark:bg-zinc-900" },
   ];
 
   const ppd = data?.text?.pricing_power_dynamics;
@@ -53,7 +53,7 @@ export function CompetitionCard({ data }: CompetitionCardProps) {
         </div>
 
         {showDeepDive && (
-          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
             <div className="flex items-center gap-1.5">
               <ZapIcon className="h-3.5 w-3.5 text-zinc-500" />
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Pricing Power &amp; Dynamics</span>

@@ -5,6 +5,7 @@ import type {
   FcfConversionDataPoint,
   FcfYieldDataPoint,
 } from "@/types/opportunity";
+import { SegmentedBar } from "@/components/opportunity/segmented-bar";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -41,16 +42,9 @@ function StatusBadge({ status, color }: { status: string; color?: string }) {
   );
 }
 
-// Bar for the OCF→FCF panel
+// Bar for the OCF→FCF panel — delegates to segmented bar
 function HorizBar({ pct, color }: { pct: number; color: string }) {
-  return (
-    <div className="relative h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-700">
-      <div
-        className={`absolute inset-y-0 left-0 rounded-full ${color}`}
-        style={{ width: `${Math.min(pct, 100)}%` }}
-      />
-    </div>
-  );
+  return <SegmentedBar pct={pct} color={color} />;
 }
 
 // ─── Panel 1: Conversion Consistency ─────────────────────────────────────────
@@ -199,6 +193,10 @@ function GrowthTrajectoryPanel({ d }: { d: NonNullable<FreeCashFlowSection["grow
 // ─── Panel 3: OCF → FCF Drag ─────────────────────────────────────────────────
 
 function OcfToFcfPanel({ d }: { d: NonNullable<FreeCashFlowSection["ocf_to_fcf"]> }) {
+  // Normalize bars to the same scale so none overshoots 100%
+  const maxPct = Math.max(d.ocf_bar_pct ?? 0, d.capex_bar_pct ?? 0, d.fcf_bar_pct ?? 0);
+  const norm = (pct: number) => maxPct > 100 ? Math.round((pct / maxPct) * 100) : (pct ?? 0);
+
   return (
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4 h-full flex flex-col">
       {/* Header */}
@@ -217,7 +215,7 @@ function OcfToFcfPanel({ d }: { d: NonNullable<FreeCashFlowSection["ocf_to_fcf"]
             <span className="text-[11px] text-zinc-500">OCF (TTM)</span>
             <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{d.ocf_ttm}</span>
           </div>
-          <HorizBar pct={d.ocf_bar_pct} color="bg-blue-500" />
+          <HorizBar pct={norm(d.ocf_bar_pct)} color="bg-blue-500" />
         </div>
 
         {/* Capex */}
@@ -226,7 +224,7 @@ function OcfToFcfPanel({ d }: { d: NonNullable<FreeCashFlowSection["ocf_to_fcf"]
             <span className="text-[11px] text-zinc-500">Less: Capex</span>
             <span className="text-sm font-bold text-red-500">{d.capex}</span>
           </div>
-          <HorizBar pct={d.capex_bar_pct} color="bg-red-400" />
+          <HorizBar pct={norm(d.capex_bar_pct)} color="bg-red-400" />
         </div>
 
         {/* FCF */}
@@ -235,16 +233,7 @@ function OcfToFcfPanel({ d }: { d: NonNullable<FreeCashFlowSection["ocf_to_fcf"]
             <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-200">FCF (TTM)</span>
             <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{d.fcf_ttm}</span>
           </div>
-          <div className="relative h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-700">
-            <div
-              className="absolute inset-y-0 left-0 rounded-full bg-emerald-500"
-              style={{ width: `${Math.min(d.fcf_bar_pct, 100)}%` }}
-            />
-            <div
-              className="absolute inset-y-0 rounded-full bg-zinc-300 dark:bg-zinc-600"
-              style={{ left: `${Math.min(d.fcf_bar_pct, 100)}%`, right: 0 }}
-            />
-          </div>
+          <SegmentedBar pct={norm(d.fcf_bar_pct)} color="bg-emerald-500" />
         </div>
       </div>
 

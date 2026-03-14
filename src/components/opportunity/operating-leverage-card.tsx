@@ -11,6 +11,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { safeMetric, type OperatingLeverageSection, type DolDataPoint } from "@/types/opportunity";
+import { SegmentedBar } from "@/components/opportunity/segmented-bar";
 
 // ─── Verdict metadata ──────────────────────────────────────────────────────────
 
@@ -205,10 +206,11 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="relative flex-1 h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
-                      <div
-                        className={`absolute inset-y-0 left-0 rounded-full ${isHex ? "" : tailwindColors.bar}`}
-                        style={{ width: `${barPct}%`, ...(isHex ? { backgroundColor: line.color } : {}) }}
+                    <div className="flex-1">
+                      <SegmentedBar
+                        pct={barPct}
+                        color={isHex ? undefined : tailwindColors.bar}
+                        hexColor={isHex ? line.color : undefined}
                       />
                     </div>
                     <div className="shrink-0 text-right">

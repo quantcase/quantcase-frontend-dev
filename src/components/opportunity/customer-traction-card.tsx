@@ -24,7 +24,7 @@ function splitLabelBody(item: string): [string, string] {
 
 const altDataIcons = [Globe, Smartphone, Briefcase];
 const altDataTitleColors = ["text-purple-600", "text-blue-600", "text-green-600"];
-const tierCardBg = ["bg-blue-50 dark:bg-blue-900/15", "bg-green-50 dark:bg-green-900/15", "bg-purple-50 dark:bg-purple-900/15"];
+const tierCardBg = ["bg-white dark:bg-zinc-900", "bg-white dark:bg-zinc-900", "bg-white dark:bg-zinc-900"];
 const tierTitleColors = ["text-blue-600 dark:text-blue-400", "text-green-600 dark:text-green-400", "text-purple-600 dark:text-purple-400"];
 const tierValueColors = ["text-blue-700 dark:text-blue-300", "text-green-700 dark:text-green-300", "text-purple-700 dark:text-purple-300"];
 
@@ -36,25 +36,25 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
   const rm = t?.retention?.metrics;
 
   const customerMetrics = [
-    { ...safeMetric(data?.metrics?.active_customers), icon: Users, iconColor: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
-    { ...safeMetric(data?.metrics?.net_retention), icon: RefreshCw, iconColor: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-    { ...safeMetric(data?.metrics?.top_10_concentration), icon: PieChart, iconColor: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
-    { ...safeMetric(data?.metrics?.avg_contract_value), icon: TrendingUp, iconColor: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
-    { ...safeMetric(data?.metrics?.churn_rate), icon: UserMinus, iconColor: "text-zinc-500", bg: "bg-zinc-50 dark:bg-zinc-800" },
+    { ...safeMetric(data?.metrics?.active_customers), icon: Users, iconColor: "text-blue-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(data?.metrics?.net_retention), icon: RefreshCw, iconColor: "text-emerald-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(data?.metrics?.top_10_concentration), icon: PieChart, iconColor: "text-purple-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(data?.metrics?.avg_contract_value), icon: TrendingUp, iconColor: "text-orange-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(data?.metrics?.churn_rate), icon: UserMinus, iconColor: "text-zinc-500", bg: "bg-white dark:bg-zinc-900" },
   ];
 
   const growthTrajectory = [
-    { ...safeMetric(gm?.current_base), icon: Users, iconColor: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
-    { ...safeMetric(gm?.five_year_growth), icon: TrendingUp, iconColor: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-    { ...safeMetric(gm?.new_adds), icon: UserPlus, iconColor: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
-    { ...safeMetric(gm?.churned), icon: UserX, iconColor: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
+    { ...safeMetric(gm?.current_base), icon: Users, iconColor: "text-blue-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(gm?.five_year_growth), icon: TrendingUp, iconColor: "text-emerald-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(gm?.new_adds), icon: UserPlus, iconColor: "text-purple-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(gm?.churned), icon: UserX, iconColor: "text-orange-500", bg: "bg-white dark:bg-zinc-900" },
   ];
 
   const retentionMetrics = [
-    { ...safeMetric(rm?.net_revenue_retention), icon: TrendingUp, iconColor: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
-    { ...safeMetric(rm?.gross_revenue_retention), icon: Shield, iconColor: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-    { ...safeMetric(rm?.expansion_revenue), icon: Zap, iconColor: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
-    { ...safeMetric(rm?.annual_churn), icon: TrendingDown, iconColor: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
+    { ...safeMetric(rm?.net_revenue_retention), icon: TrendingUp, iconColor: "text-blue-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(rm?.gross_revenue_retention), icon: Shield, iconColor: "text-emerald-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(rm?.expansion_revenue), icon: Zap, iconColor: "text-purple-500", bg: "bg-white dark:bg-zinc-900" },
+    { ...safeMetric(rm?.annual_churn), icon: TrendingDown, iconColor: "text-orange-500", bg: "bg-white dark:bg-zinc-900" },
   ];
 
   const acqItems = t?.customer_growth?.acquisition_dynamics ?? [];
@@ -81,14 +81,14 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                   </div>
                 </div>
                 <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{m.value}</p>
-                <p className={`text-[11px] mt-0.5 ${m.iconColor} opacity-80`}>{m.sublabel}</p>
+                <p className={`text-[11px] mt-0.5 text-zinc-500 dark:text-zinc-400`}>{m.sublabel}</p>
               </div>
             );
           })}
         </div>
 
         {/* Key Customer Takeaway — always visible */}
-        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-gradient-to-r from-cyan-100 to-cyan-50 dark:from-zinc-900 dark:to-cyan-900/10 p-4 space-y-2">
+        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-2">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
             <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Key Customer Takeaway</p>
@@ -128,12 +128,12 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                         </div>
                       </div>
                       <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{m.value}</p>
-                      <p className={`text-[11px] mt-0.5 ${m.iconColor} opacity-80`}>{m.sublabel}</p>
+                      <p className={`text-[11px] mt-0.5 text-zinc-500 dark:text-zinc-400`}>{m.sublabel}</p>
                     </div>
                   );
                 })}
               </div>
-              <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+              <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
                   <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Customer Acquisition Dynamics</p>
@@ -181,12 +181,12 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                         </div>
                       </div>
                       <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{m.value}</p>
-                      <p className={`text-[11px] mt-0.5 ${m.iconColor} opacity-80`}>{m.sublabel}</p>
+                      <p className={`text-[11px] mt-0.5 text-zinc-500 dark:text-zinc-400`}>{m.sublabel}</p>
                     </div>
                   );
                 })}
               </div>
-              <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+              <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
                   <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Why Retention is Strong</span>
@@ -232,7 +232,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                 <TrendingUp className="h-3.5 w-3.5 text-zinc-500" />
                 <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Revenue Trajectory Projection (Alt Data Signals)</span>
               </div>
-              <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-indigo-50/40 dark:bg-indigo-900/10 p-4 space-y-3">
+              <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <Database className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
                   <p className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">Alt Data Sources Tracked</p>
@@ -263,13 +263,13 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
               </div>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 {(seg?.tiers ?? []).map((tier, i) => (
-                  <div key={i} className={`rounded-lg p-4 space-y-3 ${tierCardBg[i % tierCardBg.length]}`}>
+                  <div key={i} className={`rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 space-y-3 ${tierCardBg[i % tierCardBg.length]}`}>
                     <div>
                       <p className={`text-xs font-bold uppercase tracking-wider ${tierTitleColors[i % tierTitleColors.length]}`}>{tier.tier ?? 'N/A'}</p>
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">{tier.customer_count ?? 'N/A'} Customers</p>
                     </div>
                     {tier.revenue_share && (
-                      <p className={`text-xs font-semibold ${tierValueColors[i % tierValueColors.length]} bg-white/60 dark:bg-white/10 rounded px-2 py-1.5 leading-snug`}>
+                      <p className={`text-xs font-semibold ${tierValueColors[i % tierValueColors.length]} bg-zinc-50 dark:bg-zinc-800 rounded px-2 py-1.5 leading-snug`}>
                         {tier.revenue_share}
                       </p>
                     )}
@@ -291,7 +291,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                 ))}
               </div>
 
-              <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-3">
+              <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
                   <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Segmentation Strategy &amp; Insights</span>
@@ -330,10 +330,8 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                 </div>
               </div>
               <div className="border-t border-blue-100 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/20 -mx-6 px-6 py-3 rounded-b-lg">
-                <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                  <span className="font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wide">CUSTOMER TAKEAWAY: </span>
-                  {t?.takeaway ?? 'N/A'}
-                </p>
+                <p className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-1">CUSTOMER TAKEAWAY</p>
+                <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">{t?.takeaway ?? 'N/A'}</p>
               </div>
             </div>
 

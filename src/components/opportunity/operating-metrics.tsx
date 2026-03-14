@@ -55,10 +55,10 @@ export function OperatingMetrics({ industryOverview, competition }: Props) {
   ];
 
   const cardStyles = [
-    { labelColor: "text-blue-500", bg: "bg-blue-50/60 dark:bg-blue-900/10", sublabelColor: "text-blue-400" },
-    { labelColor: "text-emerald-600", bg: "bg-emerald-50/60 dark:bg-emerald-900/10", sublabelColor: "text-emerald-500" },
-    { labelColor: "text-purple-500", bg: "bg-purple-50/60 dark:bg-purple-900/10", sublabelColor: "text-purple-400" },
-    { labelColor: "text-orange-500", bg: "bg-orange-50/60 dark:bg-orange-900/10", sublabelColor: "text-orange-400" },
+    { labelColor: "text-blue-500", bg: "bg-white dark:bg-zinc-900", sublabelColor: "text-zinc-500 dark:text-zinc-400" },
+    { labelColor: "text-emerald-600", bg: "bg-white dark:bg-zinc-900", sublabelColor: "text-zinc-500 dark:text-zinc-400" },
+    { labelColor: "text-purple-500", bg: "bg-white dark:bg-zinc-900", sublabelColor: "text-zinc-500 dark:text-zinc-400" },
+    { labelColor: "text-orange-500", bg: "bg-white dark:bg-zinc-900", sublabelColor: "text-zinc-500 dark:text-zinc-400" },
   ];
 
   return (

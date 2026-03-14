@@ -1,6 +1,7 @@
 "use client";
 
 import type { CapitalStructureSection } from "@/types/opportunity";
+import { SegmentedBar } from "@/components/opportunity/segmented-bar";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -85,24 +86,14 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
               {d.cash_investments}
             </span>
           </div>
-          <div className="h-3 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-emerald-400"
-              style={{ width: `${d.cash_bar_pct}%` }}
-            />
-          </div>
+          <SegmentedBar pct={d.cash_bar_pct} color="bg-emerald-400" />
         </div>
         <div>
           <div className="flex justify-between text-[11px] mb-1">
             <span className="text-zinc-600 dark:text-zinc-300">Gross Debt</span>
             <span className="font-bold text-red-500">{d.gross_debt}</span>
           </div>
-          <div className="h-3 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-red-400"
-              style={{ width: `${d.debt_bar_pct}%` }}
-            />
-          </div>
+          <SegmentedBar pct={d.debt_bar_pct} color="bg-red-400" />
         </div>
       </div>
 
@@ -410,12 +401,7 @@ function CapexIntensityPanel({
                   </span>
                 </div>
               </div>
-              <div className="h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${barColor}`}
-                  style={{ width: `${m.bar_pct}%` }}
-                />
-              </div>
+              <SegmentedBar pct={m.bar_pct} color={barColor} />
               {m.note && (
                 <p className="text-[10px] text-zinc-400">{m.note}</p>
               )}

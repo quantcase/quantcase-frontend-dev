@@ -2,56 +2,8 @@
 
 import type { CapitalStructureSection } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const STATUS_COLORS: Record<string, { badge: string; dot: string }> = {
-  green: {
-    badge:
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700",
-    dot: "bg-emerald-500",
-  },
-  yellow: {
-    badge:
-      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700",
-    dot: "bg-yellow-500",
-  },
-  red: {
-    badge:
-      "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-700",
-    dot: "bg-red-500",
-  },
-};
-
-function StatusBadge({ label, color }: { label: string; color?: string }) {
-  const c = STATUS_COLORS[color ?? "green"] ?? STATUS_COLORS.green;
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-semibold ${c.badge}`}
-    >
-      <span className={`h-2 w-2 rounded-full ${c.dot}`} />
-      {label}
-    </span>
-  );
-}
-
-// Renders bold segments from **text** markdown
-function BoldText({ text }: { text: string }) {
-  const parts = text.split(/\*\*(.*?)\*\*/g);
-  return (
-    <>
-      {parts.map((p, i) =>
-        i % 2 === 1 ? (
-          <strong key={i} className="font-semibold text-zinc-800 dark:text-zinc-100">
-            {p}
-          </strong>
-        ) : (
-          <span key={i}>{p}</span>
-        )
-      )}
-    </>
-  );
-}
+import { StatusBadge } from "@/components/opportunity/status-badge";
+import { BoldText } from "@/components/opportunity/bold-text";
 
 const DEBT_BAR_COLORS: Record<string, string> = {
   red: "bg-red-400",
@@ -68,7 +20,7 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
           Balance Sheet Position
         </p>
         <StatusBadge label={d.status} color={d.status_color} />
@@ -77,7 +29,7 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
       {/* Cash & Debt bars */}
       <div className="space-y-2.5">
         <div>
-          <div className="flex justify-between text-[11px] mb-1">
+          <div className="flex justify-between text-sm mb-1">
             <span className="text-zinc-600 dark:text-zinc-300">Cash &amp; Investments</span>
             <span
               className="font-bold text-zinc-800 dark:text-zinc-100 truncate max-w-[140px] text-right"
@@ -89,7 +41,7 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
           <SegmentedBar pct={d.cash_bar_pct} color="bg-emerald-400" />
         </div>
         <div>
-          <div className="flex justify-between text-[11px] mb-1">
+          <div className="flex justify-between text-sm mb-1">
             <span className="text-zinc-600 dark:text-zinc-300">Gross Debt</span>
             <span className="font-bold text-red-500">{d.gross_debt}</span>
           </div>
@@ -99,7 +51,7 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
 
       {/* Net Cash headline */}
       <div className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800 pt-3">
-        <span className="text-[12px] font-bold text-zinc-700 dark:text-zinc-200">Net Cash</span>
+        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200">Net Cash</span>
         <span className="text-[20px] font-bold text-zinc-900 dark:text-zinc-50">{d.net_cash}</span>
       </div>
 
@@ -147,7 +99,7 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
       </div>
 
       {/* Insight */}
-      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
         <BoldText text={d.insight} />
       </p>
     </div>
@@ -167,7 +119,7 @@ function DebtTrajectoryPanel({
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
           Debt Trajectory
         </p>
         <StatusBadge label={d.status} color={d.status_color} />
@@ -215,14 +167,14 @@ function DebtTrajectoryPanel({
       <div className="grid grid-cols-3 gap-2 border-t border-zinc-100 dark:border-zinc-800 pt-3">
         <div className="text-center">
           <p className="text-[9px] text-zinc-400 mb-0.5">Peak Debt</p>
-          <p className="text-[14px] font-bold text-red-500">{d.peak_debt}</p>
+          <p className="text-xs font-semibold text-red-500">{d.peak_debt}</p>
           {d.peak_label && (
             <p className="text-[9px] text-zinc-400">{d.peak_label}</p>
           )}
         </div>
         <div className="text-center">
           <p className="text-[9px] text-zinc-400 mb-0.5">Current</p>
-          <p className="text-[14px] font-bold text-zinc-800 dark:text-zinc-100">
+          <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-100">
             {d.current_debt}
           </p>
           {d.current_label && (
@@ -231,7 +183,7 @@ function DebtTrajectoryPanel({
         </div>
         <div className="text-center">
           <p className="text-[9px] text-zinc-400 mb-0.5">Reduction</p>
-          <p className="text-[14px] font-bold text-emerald-600 dark:text-emerald-400">
+          <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
             {d.reduction_pct}
           </p>
           {d.reduction_label && (
@@ -241,7 +193,7 @@ function DebtTrajectoryPanel({
       </div>
 
       {/* Insight */}
-      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
         <BoldText text={d.insight} />
       </p>
     </div>
@@ -259,7 +211,7 @@ function EquityAllocationPanel({
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
           Equity &amp; Profit Allocation
         </p>
         <StatusBadge label={d.status} color={d.status_color} />
@@ -319,11 +271,11 @@ function EquityAllocationPanel({
       <div className="grid grid-cols-3 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-3">
         <div>
           <p className="text-[9px] text-zinc-400 mb-0.5">{d.total_equity_sublabel ?? "Total Equity"}</p>
-          <p className="text-[15px] font-bold text-zinc-800 dark:text-zinc-100">{d.total_equity}</p>
+          <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-100">{d.total_equity}</p>
         </div>
         <div>
           <p className="text-[9px] text-zinc-400 mb-0.5">ROE (FY24)</p>
-          <p className="text-[15px] font-bold text-emerald-600 dark:text-emerald-400">{d.roe}</p>
+          <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{d.roe}</p>
           {d.roe_sublabel && (
             <p className="text-[9px] text-zinc-400">{d.roe_sublabel}</p>
           )}
@@ -331,7 +283,7 @@ function EquityAllocationPanel({
         <div>
           <p className="text-[9px] text-zinc-400 mb-0.5">Payout Trend</p>
           <p
-            className={`text-[15px] font-bold ${
+            className={`text-xs font-semibold ${
               d.payout_trend_direction === "up"
                 ? "text-amber-500"
                 : d.payout_trend_direction === "down"
@@ -353,7 +305,7 @@ function EquityAllocationPanel({
       </div>
 
       {/* Insight */}
-      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed border-t border-zinc-100 dark:border-zinc-800 pt-3">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed border-t border-zinc-100 dark:border-zinc-800 pt-3">
         <BoldText text={d.insight} />
       </p>
     </div>
@@ -377,7 +329,7 @@ function CapexIntensityPanel({
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
           Capex Intensity
         </p>
         <StatusBadge label={d.status} color={d.status_color} />
@@ -389,7 +341,7 @@ function CapexIntensityPanel({
           const barColor = CAPEX_BAR_COLORS[m.status ?? "green"] ?? "bg-emerald-400";
           return (
             <div key={m.label} className="space-y-1">
-              <div className="flex items-center justify-between text-[11px]">
+              <div className="flex items-center justify-between text-sm">
                 <span className="text-zinc-600 dark:text-zinc-300">{m.label}</span>
                 <div className="flex items-center gap-2">
                   {m.max_label && (

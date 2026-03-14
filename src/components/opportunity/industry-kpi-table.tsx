@@ -18,9 +18,9 @@ function humanize(abbr: string): string {
     .join(" ");
 }
 
-function formatValue(value: number | null): string {
+function formatValue(value: string | null): string {
   if (value === null || value === undefined) return "—";
-  return parseFloat(value.toFixed(2)).toString();
+  return value;
 }
 
 export function IndustryKpiTable({ data, loading }: IndustryKpiTableProps) {
@@ -43,9 +43,9 @@ export function IndustryKpiTable({ data, loading }: IndustryKpiTableProps) {
   ).sort();
 
   // Build lookup: kpi_abbr → { period → value }
-  const lookup = new Map<string, Map<string, number>>();
+  const lookup = new Map<string, Map<string, string>>();
   for (const entry of data.timeseries) {
-    const periodMap = new Map<string, number>();
+    const periodMap = new Map<string, string>();
     for (const point of entry.data) {
       periodMap.set(point.period, point.value);
     }
@@ -87,8 +87,8 @@ export function IndustryKpiTable({ data, loading }: IndustryKpiTableProps) {
                     <TableCell
                       key={period}
                       className={`text-xs py-2.5 text-right ${
-                        val !== null
-                          ? "text-zinc-700 dark:text-zinc-300 font-medium"
+                        val != null
+                          ? "text-zinc-700 dark:text-zinc-300 font-semibold"
                           : "text-zinc-300 dark:text-zinc-600"
                       }`}
                     >

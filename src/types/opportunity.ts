@@ -481,7 +481,7 @@ export interface OFactorResponseWrapper {
 
 export interface IndustryKpiDataPoint {
   period: string;
-  value: number;
+  value: string;
 }
 
 export interface IndustryKpiEntry {

@@ -17,9 +17,9 @@ function humanize(abbr: string): string {
     .join(" ");
 }
 
-function formatValue(value: number | null | undefined): string {
-  if (value === null || value === undefined) return "—";
-  return parseFloat(value.toFixed(2)).toString();
+function formatValue(value: string | null | undefined): string {
+  if (value == null) return "—";
+  return value;
 }
 
 export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProps) {
@@ -37,7 +37,7 @@ export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProp
   );
 
   // For each company + KPI, get the latest (last) data point value
-  const latestValue = (ticker: string, kpi: string): number | null => {
+  const latestValue = (ticker: string, kpi: string): string | null => {
     const company = data.companies.find((c) => c.ticker === ticker);
     if (!company) return null;
     const entry = company.timeseries.find((t) => t.kpi_abbr === kpi);
@@ -82,10 +82,10 @@ export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProp
                 return (
                   <TableCell
                     key={company.ticker}
-                    className={`text-xs py-2.5 text-right font-medium ${
+                    className={`text-xs py-2.5 text-right font-semibold ${
                       company.is_current
                         ? "text-blue-700 dark:text-blue-300 bg-blue-50/50 dark:bg-blue-900/10"
-                        : val !== null
+                        : val != null
                         ? "text-zinc-700 dark:text-zinc-300"
                         : "text-zinc-300 dark:text-zinc-600"
                     }`}

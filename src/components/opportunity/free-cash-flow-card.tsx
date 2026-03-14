@@ -6,41 +6,8 @@ import type {
   FcfYieldDataPoint,
 } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function RenderWithBold({ text }: { text: string }) {
-  const parts = text.split(/\*\*(.+?)\*\*/g);
-  return (
-    <>
-      {parts.map((part, i) =>
-        i % 2 === 1 ? (
-          <strong key={i} className="font-semibold text-zinc-900 dark:text-zinc-100">
-            {part}
-          </strong>
-        ) : (
-          <span key={i}>{part}</span>
-        )
-      )}
-    </>
-  );
-}
-
-const STATUS_COLORS: Record<string, { badge: string; dot: string }> = {
-  green:  { badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700", dot: "bg-emerald-500" },
-  yellow: { badge: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700",     dot: "bg-yellow-500" },
-  red:    { badge: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-700",                        dot: "bg-red-500" },
-};
-
-function StatusBadge({ status, color }: { status: string; color?: string }) {
-  const c = STATUS_COLORS[color ?? "green"] ?? STATUS_COLORS.green;
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-semibold ${c.badge}`}>
-      <span className={`h-2 w-2 rounded-full ${c.dot}`} />
-      {status}
-    </span>
-  );
-}
+import { StatusBadge } from "@/components/opportunity/status-badge";
+import { BoldText as RenderWithBold } from "@/components/opportunity/bold-text";
 
 // Bar for the OCF→FCF panel — delegates to segmented bar
 function HorizBar({ pct, color }: { pct: number; color: string }) {
@@ -56,10 +23,10 @@ function ConversionConsistencyPanel({ d }: { d: NonNullable<FreeCashFlowSection[
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-3 h-full flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
           Conversion Consistency — FCF / PAT %
         </p>
-        <StatusBadge status={d.status} color={d.status_color} />
+        <StatusBadge label={d.status} color={d.status_color} />
       </div>
 
       {/* Threshold line label */}
@@ -148,10 +115,10 @@ function GrowthTrajectoryPanel({ d }: { d: NonNullable<FreeCashFlowSection["grow
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-3 h-full flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
           FCF vs PAT Growth Trajectory
         </p>
-        <StatusBadge status={d.status} color={d.status_color} />
+        <StatusBadge label={d.status} color={d.status_color} />
       </div>
 
       {/* CAGR comparison */}
@@ -179,11 +146,11 @@ function GrowthTrajectoryPanel({ d }: { d: NonNullable<FreeCashFlowSection["grow
 
       {/* Insight box */}
       <div className={`rounded-md ${ic.bg} border ${ic.border} p-3`}>
-        <p className={`text-[11px] font-semibold ${ic.text}`}>▲ {d.insight_headline}</p>
+        <p className={`text-xs font-semibold ${ic.text}`}>▲ {d.insight_headline}</p>
       </div>
 
       {/* Body */}
-      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed mt-auto">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed mt-auto">
         <RenderWithBold text={d.insight_body} />
       </p>
     </div>
@@ -201,10 +168,10 @@ function OcfToFcfPanel({ d }: { d: NonNullable<FreeCashFlowSection["ocf_to_fcf"]
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4 h-full flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
           OCF → FCF Drag (Capex)
         </p>
-        <StatusBadge status={d.status} color={d.status_color} />
+        <StatusBadge label={d.status} color={d.status_color} />
       </div>
 
       {/* Bars */}
@@ -212,7 +179,7 @@ function OcfToFcfPanel({ d }: { d: NonNullable<FreeCashFlowSection["ocf_to_fcf"]
         {/* OCF */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] text-zinc-500">OCF (TTM)</span>
+            <span className="text-sm text-zinc-500">OCF (TTM)</span>
             <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{d.ocf_ttm}</span>
           </div>
           <HorizBar pct={norm(d.ocf_bar_pct)} color="bg-blue-500" />
@@ -221,7 +188,7 @@ function OcfToFcfPanel({ d }: { d: NonNullable<FreeCashFlowSection["ocf_to_fcf"]
         {/* Capex */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] text-zinc-500">Less: Capex</span>
+            <span className="text-sm text-zinc-500">Less: Capex</span>
             <span className="text-sm font-bold text-red-500">{d.capex}</span>
           </div>
           <HorizBar pct={norm(d.capex_bar_pct)} color="bg-red-400" />
@@ -230,7 +197,7 @@ function OcfToFcfPanel({ d }: { d: NonNullable<FreeCashFlowSection["ocf_to_fcf"]
         {/* FCF */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-200">FCF (TTM)</span>
+            <span className="text-sm font-bold text-zinc-700 dark:text-zinc-200">FCF (TTM)</span>
             <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{d.fcf_ttm}</span>
           </div>
           <SegmentedBar pct={norm(d.fcf_bar_pct)} color="bg-emerald-500" />
@@ -259,10 +226,10 @@ function FcfYieldPanel({ d }: { d: NonNullable<FreeCashFlowSection["fcf_yield"]>
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-3 h-full flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
           FCF Yield — Then vs Now
         </p>
-        <StatusBadge status={d.status} color={d.status_color} />
+        <StatusBadge label={d.status} color={d.status_color} />
       </div>
 
       {/* Yield cards */}
@@ -305,8 +272,8 @@ function FcfYieldPanel({ d }: { d: NonNullable<FreeCashFlowSection["fcf_yield"]>
 
       {/* Compression explanation */}
       <div className="border-t border-zinc-200 dark:border-zinc-700 pt-2 mt-auto space-y-1">
-        <p className="text-[10px] font-semibold text-yellow-600 dark:text-yellow-400">Why compressed?</p>
-        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{d.compression_explanation}</p>
+        <p className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">Why compressed?</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{d.compression_explanation}</p>
       </div>
     </div>
   );

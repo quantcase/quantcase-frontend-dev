@@ -9,9 +9,11 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  ReferenceLine,
 } from "recharts";
 import { safeMetric, type OperatingLeverageSection, type DolDataPoint } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
+import { BoldText as RenderWithBold } from "@/components/opportunity/bold-text";
 
 // ─── Verdict metadata ──────────────────────────────────────────────────────────
 
@@ -35,19 +37,6 @@ const FIXED_COST_COLORS: Record<string, { dot: string; bar: string }> = {
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function RenderWithBold({ text }: { text: string }) {
-  const parts = text.split(/\*\*(.+?)\*\*/g);
-  return (
-    <>
-      {parts.map((part, i) =>
-        i % 2 === 1
-          ? <strong key={i} className="font-semibold text-zinc-800 dark:text-zinc-200">{part}</strong>
-          : <span key={i}>{part}</span>
-      )}
-    </>
-  );
-}
 
 // Colored dot per DOL threshold
 const DolDot = (props: { cx?: number; cy?: number; payload?: DolDataPoint }) => {
@@ -116,14 +105,14 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                   tick={{ fontSize: 9, fill: "#a1a1aa" }}
                   axisLine={false} tickLine={false}
                   tickFormatter={(v) => `${v}%`}
-                  domain={[0, 22]}
+                  domain={["auto", "auto"]}
                 />
                 <YAxis
                   yAxisId="right" orientation="right"
                   tick={{ fontSize: 9, fill: "#f59e0b" }}
                   axisLine={false} tickLine={false}
                   tickFormatter={(v) => `${v}x`}
-                  domain={[0, 3]}
+                  domain={["auto", "auto"]}
                 />
                 <Tooltip
                   contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid #e4e4e7", backgroundColor: "white" }}
@@ -131,6 +120,8 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                     name === "DOL" ? [`${value}x`, name] : [`${value}%`, name]
                   }
                 />
+                <ReferenceLine yAxisId="left" y={0} stroke="#d4d4d8" strokeWidth={1} />
+                <ReferenceLine yAxisId="right" y={0} stroke="#d4d4d8" strokeWidth={1} strokeDasharray="3 3" />
                 <Bar yAxisId="left" dataKey="revenue_growth" name="Revenue Growth % YoY" fill="#64748b" opacity={0.85} barSize={11} />
                 <Bar yAxisId="left" dataKey="ebit_growth"    name="EBIT Growth % YoY"    fill="#166534" opacity={0.85} barSize={11} />
                 <Line
@@ -199,7 +190,7 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                         className={`h-2.5 w-2.5 rounded-full shrink-0 ${isHex ? "" : tailwindColors.dot}`}
                         style={isHex ? { backgroundColor: line.color } : undefined}
                       />
-                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate">{line.name}</span>
+                      <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 truncate">{line.name}</span>
                     </div>
                     <span className={`text-xs font-semibold shrink-0 ${isUp ? "text-red-500" : "text-emerald-500"}`}>
                       {isUp ? "▲" : "▼"} {isUp ? "+" : ""}{line.change_bps}bps
@@ -218,7 +209,7 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                       <span className="text-[11px] text-zinc-400 ml-1">was {line.prior_pct}%</span>
                     </div>
                   </div>
-                  <p className="text-[11px] italic text-zinc-400 dark:text-zinc-500 leading-relaxed">{line.note}</p>
+                  <p className="text-sm italic text-zinc-400 dark:text-zinc-500 leading-relaxed">{line.note}</p>
                 </div>
               );
             })}
@@ -238,7 +229,7 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                   </span>
                 </div>
               </div>
-              <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{totalFixed.note}</p>
+              <p className="text-sm text-zinc-400 dark:text-zinc-500">{totalFixed.note}</p>
             </div>
           )}
         </div>
@@ -278,7 +269,7 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
               <div className="space-y-2">
                 <div className="flex items-center gap-3 flex-wrap">
                   <h3 className={`text-sm font-bold uppercase tracking-wide ${verdictMeta?.textColor ?? ""}`}>{verdict.label}</h3>
-                  <span className="text-xs bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2.5 py-1 rounded-full font-medium">
+                  <span className="text-xs bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2.5 py-1 rounded-full font-semibold">
                     {verdict.tag}
                   </span>
                 </div>
@@ -300,7 +291,7 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                       : <span className="text-zinc-300 dark:text-zinc-600 text-xs">·</span>
                     }
                     <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${meta?.dotColor ?? "bg-zinc-400"}`} />
-                    <span className={`text-xs font-medium ${v.is_current ? (meta?.textColor ?? "") : "text-zinc-500 dark:text-zinc-400"}`}>
+                    <span className={`text-xs font-semibold ${v.is_current ? (meta?.textColor ?? "") : "text-zinc-500 dark:text-zinc-400"}`}>
                       {v.label}{v.is_current && " ←"}
                     </span>
                   </div>

@@ -41,8 +41,8 @@ export interface IndustryOverviewSection {
   };
   text?: {
     demand_supply_dynamics?: {
-      demand?: string;
-      supply?: string;
+      demand?: string[];
+      supply?: string[];
       net_impact?: string;
     };
     opm_trend?: {
@@ -459,7 +459,24 @@ export interface FinancialStrengthSectionFull extends FinancialStrengthSection {
   final_scoring?: FinalScoringSection;
 }
 
+export interface FinalTakeaways {
+  overall_score: number;
+  max_score: 40;
+  overall_status: "STRONG" | "MODERATE" | "WEAK";
+  status_color: "green" | "yellow" | "red";
+  investment_thesis: string;
+  key_highlights: string[];
+  key_risks: string[];
+  section_scores: {
+    industry: { score: number; status: string; takeaway: string };
+    competition: { score: number; status: string; takeaway: string };
+    financial_strength: { score: number; status: string; takeaway: string };
+    customer_traction: { score: number; status: string; takeaway: string };
+  };
+}
+
 export interface OFactorResponse {
+  final_takeaways?: FinalTakeaways;
   industry_overview?: IndustryOverviewSection;
   competition?: CompetitionSection;
   financial_strength?: FinancialStrengthSectionFull;
@@ -481,7 +498,7 @@ export interface OFactorResponseWrapper {
 
 export interface IndustryKpiDataPoint {
   period: string;
-  value: number;
+  value: string;
 }
 
 export interface IndustryKpiEntry {

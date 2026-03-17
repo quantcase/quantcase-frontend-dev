@@ -67,15 +67,10 @@ function ScenarioCard({
 
 export function ScenarioFramework({ data }: ScenarioFrameworkProps) {
   return (
-    <div className="space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-        {data?.meta?.title ?? "Scenario Framework"}
-      </p>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {scenarioConfig.map((config) => (
           <ScenarioCard key={config.key} config={config} caseData={data?.[config.key]} />
         ))}
-      </div>
     </div>
   );
 }

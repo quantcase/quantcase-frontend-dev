@@ -33,7 +33,6 @@ function formatValue(key: string, value: number | null): string {
 export function CompetitiveBenchmarking({ data, peers, loading }: CompetitiveBenchmarkingProps) {
 
   const positioning = data?.text?.competitive_positioning;
-  const takeaway = data?.text?.takeaway ?? "N/A";
 
   return (
     <div className="space-y-4">
@@ -81,7 +80,7 @@ export function CompetitiveBenchmarking({ data, peers, loading }: CompetitiveBen
                         {row.company}
                       </span>
                       {row.is_current && (
-                        <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[9px] font-semibold px-1.5 py-0.5 uppercase tracking-wide">
+                        <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-semibold px-1.5 py-0.5 uppercase tracking-wide">
                           CURRENT
                         </span>
                       )}
@@ -166,14 +165,6 @@ export function CompetitiveBenchmarking({ data, peers, loading }: CompetitiveBen
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Competition Takeaway footer */}
-      <div className="border-t border-emerald-100 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-900/20 -mx-6 px-6 py-3 rounded-b-lg">
-        <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
-          <span className="font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">COMPETITION TAKEAWAY: </span>
-          {takeaway}
-        </p>
       </div>
     </div>
   );

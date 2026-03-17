@@ -8,7 +8,7 @@ import { usePeerData } from "@/hooks/usePeerData";
 import { apiPost, apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import type { JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
-import type { OFactorResponse, FinalScoringSection } from "@/types/opportunity";
+import type { OFactorResponse } from "@/types/opportunity";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,24 +25,10 @@ import { WorkingCapitalCard } from "@/components/opportunity/working-capital-car
 import { CapitalStructureCard } from "@/components/opportunity/capital-structure-card";
 import { IndustryKpiTable } from "@/components/opportunity/industry-kpi-table";
 import { KpiBenchmarkingTable } from "@/components/opportunity/kpi-benchmarking-table";
-import { FinalScoringCard } from "@/components/opportunity/final-scoring-card";
 import { CustomerTractionCard } from "@/components/opportunity/customer-traction-card";
-
-const SCORE_COLORS: Record<string, string> = {
-  green: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
-  yellow: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-  red: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
-};
-
-function SectionScoreBadge({ scoring }: { scoring: FinalScoringSection }) {
-  const colorClass = SCORE_COLORS[scoring.status_color ?? "green"] ?? SCORE_COLORS.green;
-  return (
-    <div className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold ${colorClass}`}>
-      <span>{scoring.score}/{scoring.max_score}</span>
-      <span className="font-medium opacity-80">{scoring.status}</span>
-    </div>
-  );
-}
+import { SectionPanel } from "@/components/opportunity/section-panel";
+import { SubsectionHeader } from "@/components/opportunity/subsection-header";
+import { TakeawayBox } from "@/components/opportunity/takeaway-box";
 
 function OpportunityContent() {
   const searchParams = useSearchParams();
@@ -51,6 +37,8 @@ function OpportunityContent() {
   const [selectedSection, setSelectedSection] = useState("industry_overview");
   const [showSideWindow, setShowSideWindow] = useState(false);
   const [patchedSections, setPatchedSections] = useState<Partial<OFactorResponse>>({});
+  const [showCompetitionDetails, setShowCompetitionDetails] = useState(false);
+  const [showFinancialDetails, setShowFinancialDetails] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const [jobStatuses, setJobStatuses] = useState<Record<string, JobStatus>>({});
@@ -223,29 +211,29 @@ function OpportunityContent() {
           ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
         </div>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <h1 className="text-3xl font-bold mb-6">Opportunity Factor Analysis</h1>
+          <h1 className="text-sm font-bold mb-6">Opportunity Factor Analysis</h1>
           <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
             <div className="space-y-4">
               <div>
-                <h2 className="text-2xl font-semibold mb-2">{transcriptCall.company_name}</h2>
+                <h2 className="text-sm font-semibold mb-2">{transcriptCall.company_name}</h2>
                 <p className="text-sm text-muted-foreground">{transcriptCall.basic_industry}</p>
               </div>
               <div className="grid grid-cols-2 gap-4 py-4 border-t border-border">
                 <div>
                   <p className="text-sm text-muted-foreground">Ticker</p>
-                  <p className="font-medium">{transcriptCall.company}</p>
+                  <p className="font-semibold">{transcriptCall.company}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Quarter</p>
-                  <p className="font-medium">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
+                  <p className="font-semibold">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Call Date</p>
-                  <p className="font-medium">{transcriptCall.call_date}</p>
+                  <p className="font-semibold">{transcriptCall.call_date}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Call ID</p>
-                  <p className="font-medium text-xs">{transcriptCall.id}</p>
+                  <p className="font-semibold text-xs">{transcriptCall.id}</p>
                 </div>
               </div>
               <div className="pt-4 border-t border-border">
@@ -273,7 +261,7 @@ function OpportunityContent() {
                           <p className={`text-sm ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
                             {aggregateStatus === "completed" ? "Analysis complete!" : "Analyzing transcripts..."}
                           </p>
-                          <p className={`text-sm font-medium ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
+                          <p className={`text-sm font-semibold ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
                             {progress}%
                           </p>
                         </div>
@@ -296,7 +284,7 @@ function OpportunityContent() {
                 <button
                   onClick={handleAnalyzeClick}
                   disabled={isAnalyzing}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing
                     ? aggregateStatus === "pending" ? "Queued..." : aggregateStatus === "processing" ? "Processing..." : "Starting..."
@@ -321,15 +309,25 @@ function OpportunityContent() {
   const data = { ...opportunityData, ...patchedSections } as OFactorResponse;
   const transcriptCall = transcriptCalls[0];
 
+  // Derive per-section scoring from final_takeaways.section_scores when individual final_scoring is absent
+  const ft = data.final_takeaways;
+  const ftColor = ft?.status_color;
+  function ftScoring(key: keyof NonNullable<typeof ft>["section_scores"], maxScore: number) {
+    const ss = ft?.section_scores?.[key];
+    if (!ss) return undefined;
+    return { score: ss.score, max_score: maxScore, status: ss.status, status_color: ftColor, title: ss.takeaway, body: "" };
+  }
+  const industryScoring = data.industry_overview?.final_scoring ?? ftScoring("industry", 10);
+  const competitionScoring = data.competition?.final_scoring ?? ftScoring("competition", 10);
+  const financialScoring = data.financial_strength?.final_scoring ?? ftScoring("financial_strength", 10);
+  const customerScoring = data.customer_traction?.final_scoring ?? ftScoring("customer_traction", 10);
+
   const handleSectionUpdate = (sectionKey: string, sectionResult: unknown) => {
     setPatchedSections((prev) => ({ ...prev, [sectionKey]: sectionResult }));
   };
-  const callsAnalyzed = transcriptCalls.map(
-    (c) => `${c.company}_${c.fiscal_year}_${c.quarter}`
-  );
 
   return (
-    <div className="min-h-screen bg-background p-4 mb-20">
+    <div className="min-h-screen bg-zinc-50 p-4 mb-20">
       {/* Confidential Banner */}
       <div className="sticky top-0 z-10 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-sm font-semibold text-white mb-4">
         ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
@@ -344,9 +342,9 @@ function OpportunityContent() {
                 <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
               </div>
               <div className="space-y-1.5">
-                <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{transcriptCall.company_name}</h1>
+                <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{transcriptCall.company_name}</h1>
                 <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  <span className="font-medium bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">
+                  <span className="font-semibold bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">
                     NSE: {symbol}
                   </span>
                   <span>•</span>
@@ -375,15 +373,15 @@ function OpportunityContent() {
       {/* Score Banner */}
       <div className="container mx-auto max-w-7xl mb-5 flex items-center gap-2">
         <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 mr-1">§4</span>
-        <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
+        <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
           Opportunity Factor Score
         </h2>
         {totalScore ? (
-          <span className="text-lg font-bold text-zinc-600 dark:text-zinc-400">
+          <span className="text-sm font-bold text-zinc-600 dark:text-zinc-400">
             ({totalScore.total_score}/{totalScore.max_score})
           </span>
         ) : (
-          <span className="text-lg font-bold text-zinc-400 dark:text-zinc-600">—</span>
+          <span className="text-sm font-bold text-zinc-400 dark:text-zinc-600">—</span>
         )}
       </div>
 
@@ -403,123 +401,179 @@ function OpportunityContent() {
       {/* Page Content */}
       <div className="container mx-auto max-w-7xl space-y-6">
 
-        {/* 4.1 Industry Overview & Market */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-          <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
-                4.1 Industry Overview &amp; Market
-              </h2>
-              <p className="text-xs text-zinc-400">Synthesized from public company transcripts &amp; filings</p>
+        {/* Final Takeaways */}
+        {data.final_takeaways && (() => {
+          const ft = data.final_takeaways!;
+          const statusColor = ft.status_color === "green"
+            ? "text-emerald-400"
+            : ft.status_color === "red"
+            ? "text-red-400"
+            : "text-yellow-400";
+          const sections = [
+            { label: "Industry", ...ft.section_scores.industry },
+            { label: "Competition", ...ft.section_scores.competition },
+            { label: "Financial", ...ft.section_scores.financial_strength },
+            { label: "Traction", ...ft.section_scores.customer_traction },
+          ];
+          return (
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+              {/* Black header strip */}
+              <div className="bg-zinc-900 dark:bg-zinc-950 px-6 py-4 flex items-center justify-between gap-4">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Overall Takeaway</p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-xs font-semibold uppercase tracking-wide ${statusColor}`}>{ft.overall_status}</span>
+                  <span className="text-zinc-600 text-xs">·</span>
+                  <span className="text-xs font-light text-zinc-400">{ft.overall_score}/{ft.max_score}</span>
+                </div>
+              </div>
+
+              {/* White body */}
+              <div className="bg-white dark:bg-zinc-900 px-6 py-5 space-y-4">
+                {/* Investment thesis */}
+                <p className="text-xs font-light text-zinc-600 dark:text-zinc-300 leading-relaxed">{ft.investment_thesis}</p>
+
+                {/* Highlights + Risks */}
+                <div className="grid grid-cols-2 gap-4 border-t border-zinc-100 dark:border-zinc-800 pt-4">
+                  <div>
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 mb-2">Key Highlights</p>
+                    <ul className="space-y-1">
+                      {ft.key_highlights.map((h, i) => (
+                        <li key={i} className="flex gap-1.5 text-xs font-light text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                          <span className="text-emerald-500 shrink-0">+</span>
+                          <span>{h}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 mb-2">Key Risks</p>
+                    <ul className="space-y-1">
+                      {ft.key_risks.map((r, i) => (
+                        <li key={i} className="flex gap-1.5 text-xs font-light text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                          <span className="text-red-400 shrink-0">−</span>
+                          <span>{r}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Section scores */}
+                <div className="grid grid-cols-4 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-4">
+                  {sections.map((s) => (
+                    <div key={s.label}>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">{s.label}</p>
+                      <p className="text-2xl font-normal text-zinc-900 dark:text-zinc-100">{s.score}<span className="text-zinc-400 text-sm font-light">/10</span></p>
+                      <p className="text-xs font-medium text-zinc-500 mt-0.5">{s.status}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            {data.industry_overview?.final_scoring && (
-              <SectionScoreBadge scoring={data.industry_overview.final_scoring} />
-            )}
-          </div>
-          <div className="px-6 space-y-4">
-            <IndustryOverviewCard data={data.industry_overview} competition={data.competition} />
-          </div>
-        </div>
+          );
+        })()}
+
+        {/* 4.1 Industry Overview & Market */}
+        <SectionPanel
+          title="4.1 Industry Overview & Market"
+          subtitle="Synthesized from public company transcripts & filings"
+          scoring={industryScoring}
+        >
+          <IndustryOverviewCard data={data.industry_overview} competition={data.competition} />
+        </SectionPanel>
 
         {/* 4.2 Competitive Benchmarking vs Industry Peers */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-          <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
-                4.2 Competitive Benchmarking vs Industry Peers
-              </h2>
-              <p className="text-xs text-zinc-400">Peer comparison from public filings &amp; market data</p>
-            </div>
-            {data.competition?.final_scoring && (
-              <SectionScoreBadge scoring={data.competition.final_scoring} />
-            )}
-          </div>
-          <div className="px-6 pb-0 space-y-4">
-            <CompetitionCard data={data.competition} />
-            <div>
-              <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">KPI Benchmarking</h4>
-              <p className="text-xs text-zinc-400 mb-3">Latest KPI values across industry peers</p>
-              <KpiBenchmarkingTable data={peerData?.peer_kpi_timeseries} loading={peerLoading} />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Industry KPI Timeseries</h4>
-              <p className="text-xs text-zinc-400 mb-3">Industry-specific KPI trends over time</p>
-              <IndustryKpiTable data={peerData?.industry_kpis} loading={peerLoading} />
-            </div>
-            <CompetitiveBenchmarking data={data.competition} peers={peerData?.competition?.peers ?? []} loading={peerLoading} />
-          </div>
-        </div>
+        <SectionPanel
+          title="4.2 Competitive Benchmarking vs Industry Peers"
+          subtitle="Peer comparison from public filings & market data"
+          scoring={competitionScoring}
+          contentClassName="px-6 space-y-4"
+        >
+          <CompetitionCard
+            data={data.competition}
+            showDetails={showCompetitionDetails}
+            onToggle={() => setShowCompetitionDetails(v => !v)}
+          />
+          {showCompetitionDetails && (
+            <>
+              <div>
+                <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">KPI Benchmarking</h4>
+                <p className="text-xs text-zinc-400 mb-3">Latest KPI values across industry peers</p>
+                <KpiBenchmarkingTable data={peerData?.peer_kpi_timeseries} loading={peerLoading} />
+              </div>
+              <CompetitiveBenchmarking data={data.competition} peers={peerData?.competition?.peers ?? []} loading={peerLoading} />
+            </>
+          )}
+          <TakeawayBox title="COMPETITION TAKEAWAY" text={data.competition?.text?.takeaway} color="emerald" />
+        </SectionPanel>
 
         {/* 4.3 Financial Strength */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-          <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
-                4.3 Financial Strength
-              </h2>
-              <p className="text-xs text-zinc-400">Snapshot from financial statements, investor decks &amp; management commentary</p>
-            </div>
-            {data.financial_strength?.final_scoring && (
-              <SectionScoreBadge scoring={data.financial_strength.final_scoring} />
-            )}
-          </div>
+        <SectionPanel
+          title="4.3 Financial Strength"
+          subtitle="Snapshot from financial statements, investor decks & management commentary"
+          scoring={financialScoring}
+          contentClassName=""
+        >
           <div className="px-6 pb-0 space-y-4">
-            <FinancialStrengthCard data={data.financial_strength} />
+            <FinancialStrengthCard
+              data={data.financial_strength}
+              showDetails={showFinancialDetails}
+              onToggle={() => setShowFinancialDetails(v => !v)}
+            />
           </div>
-          <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 mt-4 space-y-4">
-            <div>
-              <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Operating Leverage Analysis</h3>
-              <p className="text-xs text-zinc-400">Fixed cost absorption, DOL trend &amp; leverage verdict</p>
-            </div>
-            <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />
+          {showFinancialDetails && (
+            <>
+              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 mt-4 space-y-4">
+                <SubsectionHeader
+                  title="Operating Leverage Analysis"
+                  subtitle="Fixed cost absorption, DOL trend & leverage verdict"
+                />
+                <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />
+              </div>
+              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+                <SubsectionHeader
+                  title="Free Cash Flow Analysis"
+                  subtitle="FCF conversion, growth trajectory, capex drag & yield"
+                />
+                <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />
+              </div>
+              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+                <SubsectionHeader
+                  title="Working Capital"
+                  subtitle="DSO, DIO, DPO, CCC trends & WC as % of revenue"
+                />
+                <WorkingCapitalCard data={data.financial_strength?.working_capital} />
+              </div>
+              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+                <SubsectionHeader
+                  title="Capital Structure & Capex"
+                  subtitle="Balance sheet position, debt trajectory, equity allocation & capex intensity"
+                />
+                <CapitalStructureCard data={data.financial_strength?.capital_structure} />
+              </div>
+              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+                <SubsectionHeader
+                  title="KPI Timeseries"
+                  subtitle="Industry-specific KPI trends over time"
+                />
+                <IndustryKpiTable data={peerData?.industry_kpis} loading={peerLoading} />
+              </div>
+            </>
+          )}
+          <div className="px-6 pb-6">
+            <TakeawayBox title="FINANCIAL TAKEAWAY" text={data.financial_strength?.text?.key_takeaway} />
           </div>
-          <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-            <div>
-              <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Free Cash Flow Analysis</h3>
-              <p className="text-xs text-zinc-400">FCF conversion, growth trajectory, capex drag &amp; yield</p>
-            </div>
-            <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />
-          </div>
-          <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-            <div>
-              <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Working Capital</h3>
-              <p className="text-xs text-zinc-400">DSO, DIO, DPO, CCC trends &amp; WC as % of revenue</p>
-            </div>
-            <WorkingCapitalCard data={data.financial_strength?.working_capital} />
-          </div>
-          <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-            <div>
-              <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Capital Structure &amp; Capex</h3>
-              <p className="text-xs text-zinc-400">Balance sheet position, debt trajectory, equity allocation &amp; capex intensity</p>
-            </div>
-            <CapitalStructureCard data={data.financial_strength?.capital_structure} />
-          </div>
-          <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-            <div>
-              <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">Financial Quality Scorecard</h3>
-              <p className="text-xs text-zinc-400">Overall score &amp; verdict based on financial quality signals</p>
-            </div>
-            <FinalScoringCard data={data.financial_strength?.final_scoring} />
-          </div>
-        </div>
+        </SectionPanel>
 
         {/* 4.4 Client/Customer Traction */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-          <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
-                4.4 Client/Customer Traction
-              </h2>
-              <p className="text-xs text-zinc-400">Customer growth, retention &amp; revenue trajectory with alt data projections</p>
-            </div>
-            {data.customer_traction?.final_scoring && (
-              <SectionScoreBadge scoring={data.customer_traction.final_scoring} />
-            )}
-          </div>
-          <div className="px-6">
-            <CustomerTractionCard data={data.customer_traction} />
-          </div>
-        </div>
+        <SectionPanel
+          title="4.4 Client/Customer Traction"
+          subtitle="Customer growth, retention & revenue trajectory with alt data projections"
+          scoring={customerScoring}
+          contentClassName="px-6"
+        >
+          <CustomerTractionCard data={data.customer_traction} />
+        </SectionPanel>
 
       </div>
 

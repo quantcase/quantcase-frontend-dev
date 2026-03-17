@@ -9,8 +9,11 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  ReferenceLine,
 } from "recharts";
 import { safeMetric, type OperatingLeverageSection, type DolDataPoint } from "@/types/opportunity";
+import { SegmentedBar } from "@/components/opportunity/segmented-bar";
+import { BoldText as RenderWithBold } from "@/components/opportunity/bold-text";
 
 // ─── Verdict metadata ──────────────────────────────────────────────────────────
 
@@ -35,25 +38,23 @@ const FIXED_COST_COLORS: Record<string, { dot: string; bar: string }> = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function RenderWithBold({ text }: { text: string }) {
-  const parts = text.split(/\*\*(.+?)\*\*/g);
-  return (
-    <>
-      {parts.map((part, i) =>
-        i % 2 === 1
-          ? <strong key={i} className="font-semibold text-zinc-800 dark:text-zinc-200">{part}</strong>
-          : <span key={i}>{part}</span>
-      )}
-    </>
-  );
+function dolZone(dol: number): string {
+  if (dol > 1.5) return "Strong leverage";
+  if (dol >= 0.8) return "Moderate";
+  return "Cost drag";
+}
+
+function dolColor(dol: number): string {
+  if (dol > 1.5) return "#16a34a";
+  if (dol >= 0.8) return "#f59e0b";
+  return "#ef4444";
 }
 
 // Colored dot per DOL threshold
 const DolDot = (props: { cx?: number; cy?: number; payload?: DolDataPoint }) => {
   const { cx, cy, payload } = props;
   if (cx === undefined || cy === undefined || !payload) return null;
-  const color = payload.dol > 1.5 ? "#16a34a" : payload.dol >= 0.8 ? "#f59e0b" : "#ef4444";
-  return <circle cx={cx} cy={cy} r={4} fill={color} stroke="white" strokeWidth={1.5} />;
+  return <circle cx={cx} cy={cy} r={5} fill={dolColor(payload.dol)} stroke="white" strokeWidth={2} />;
 };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -68,7 +69,6 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
   const fixedCostLines = d.fixed_cost_lines ?? [];
   const totalFixed     = d.total_fixed_costs;
   const verdict        = d.verdict;
-  const allVerdicts    = d.all_verdicts ?? [];
   const verdictMeta    = VERDICT_META[verdict?.status ?? "leverage_pending"];
 
   const revGrowth      = safeMetric(d.metrics?.revenue_growth_yoy);
@@ -115,31 +115,35 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                   tick={{ fontSize: 9, fill: "#a1a1aa" }}
                   axisLine={false} tickLine={false}
                   tickFormatter={(v) => `${v}%`}
-                  domain={[0, 22]}
+                  domain={["auto", "auto"]}
                 />
                 <YAxis
                   yAxisId="right" orientation="right"
                   tick={{ fontSize: 9, fill: "#f59e0b" }}
                   axisLine={false} tickLine={false}
                   tickFormatter={(v) => `${v}x`}
-                  domain={[0, 3]}
+                  domain={["auto", "auto"]}
                 />
                 <Tooltip
                   contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid #e4e4e7", backgroundColor: "white" }}
                   formatter={(value: number, name: string) =>
-                    name === "DOL" ? [`${value}x`, name] : [`${value}%`, name]
+                    name === "DOL"
+                      ? [`${value}x (${dolZone(value)})`, name]
+                      : [`${value}%`, name]
                   }
                 />
-                <Bar yAxisId="left" dataKey="revenue_growth" name="Revenue Growth % YoY" fill="#64748b" opacity={0.85} barSize={11} />
-                <Bar yAxisId="left" dataKey="ebit_growth"    name="EBIT Growth % YoY"    fill="#166534" opacity={0.85} barSize={11} />
+                <ReferenceLine yAxisId="left" y={0} stroke="#d4d4d8" strokeWidth={1} />
+                <ReferenceLine yAxisId="right" y={0} stroke="#d4d4d8" strokeWidth={1} strokeDasharray="3 3" />
+                <Bar yAxisId="left" dataKey="revenue_growth" name="Revenue Growth % YoY" fill="#64748b" opacity={0.3} barSize={11} />
+                <Bar yAxisId="left" dataKey="ebit_growth"    name="EBIT Growth % YoY"    fill="#166534" opacity={0.3} barSize={11} />
                 <Line
                   yAxisId="right"
                   dataKey="dol"
                   name="DOL"
                   stroke="#f59e0b"
-                  strokeWidth={2}
+                  strokeWidth={3}
                   dot={<DolDot />}
-                  activeDot={{ r: 5, fill: "#f59e0b" }}
+                  activeDot={{ r: 6, fill: "#f59e0b" }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -161,21 +165,6 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
             </span>
           </div>
 
-          {/* DOL threshold legend */}
-          <div className="flex flex-wrap items-center gap-3 text-[10px] border-t border-zinc-100 dark:border-zinc-800 pt-2">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
-              <span className="text-emerald-600 dark:text-emerald-400">DOL &gt;1.5 = Strong leverage</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-yellow-500 inline-block" />
-              <span className="text-yellow-600 dark:text-yellow-400">DOL 0.8–1.5 = Moderate</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-red-500 inline-block" />
-              <span className="text-red-500">DOL &lt;0.8 = Cost drag</span>
-            </span>
-          </div>
         </div>
 
         {/* Fixed Cost Lines panel — new UI element */}
@@ -198,17 +187,18 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                         className={`h-2.5 w-2.5 rounded-full shrink-0 ${isHex ? "" : tailwindColors.dot}`}
                         style={isHex ? { backgroundColor: line.color } : undefined}
                       />
-                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate">{line.name}</span>
+                      <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 truncate">{line.name}</span>
                     </div>
                     <span className={`text-xs font-semibold shrink-0 ${isUp ? "text-red-500" : "text-emerald-500"}`}>
                       {isUp ? "▲" : "▼"} {isUp ? "+" : ""}{line.change_bps}bps
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="relative flex-1 h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
-                      <div
-                        className={`absolute inset-y-0 left-0 rounded-full ${isHex ? "" : tailwindColors.bar}`}
-                        style={{ width: `${barPct}%`, ...(isHex ? { backgroundColor: line.color } : {}) }}
+                    <div className="flex-1">
+                      <SegmentedBar
+                        pct={barPct}
+                        color={isHex ? undefined : tailwindColors.bar}
+                        hexColor={isHex ? line.color : undefined}
                       />
                     </div>
                     <div className="shrink-0 text-right">
@@ -216,7 +206,7 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                       <span className="text-[11px] text-zinc-400 ml-1">was {line.prior_pct}%</span>
                     </div>
                   </div>
-                  <p className="text-[11px] italic text-zinc-400 dark:text-zinc-500 leading-relaxed">{line.note}</p>
+                  <p className="text-sm italic text-zinc-400 dark:text-zinc-500 leading-relaxed">{line.note}</p>
                 </div>
               );
             })}
@@ -230,13 +220,13 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
                   <span className="text-xs text-zinc-400">was {totalFixed.prior_pct}%</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{totalFixed.current_pct}%</span>
+                  <span className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50">{totalFixed.current_pct}%</span>
                   <span className={`text-xs font-semibold ${totalFixed.change_bps > 0 ? "text-red-500" : "text-emerald-500"}`}>
                     {totalFixed.change_bps > 0 ? "▲" : "▼"} +{Math.abs(totalFixed.change_bps)}bps net
                   </span>
                 </div>
               </div>
-              <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{totalFixed.note}</p>
+              <p className="text-sm text-zinc-400 dark:text-zinc-500">{totalFixed.note}</p>
             </div>
           )}
         </div>
@@ -246,19 +236,19 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
           <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{revGrowth.label}</p>
-          <p className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">{revGrowth.value}</p>
+          <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50 tracking-tight">{revGrowth.value}</p>
           <p className="text-xs text-zinc-400">{revGrowth.sublabel}</p>
         </div>
 
         <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
           <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{ebitGrowth.label}</p>
-          <p className="text-4xl font-bold text-orange-500 tracking-tight">{ebitGrowth.value}</p>
+          <p className="text-[26px] font-normal text-orange-500 tracking-tight">{ebitGrowth.value}</p>
           <p className="text-xs text-orange-400">{ebitGrowth.sublabel}</p>
         </div>
 
         <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
           <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{levSpread.label}</p>
-          <p className="text-4xl font-bold text-red-500 tracking-tight">{levSpread.value}</p>
+          <p className="text-[26px] font-normal text-red-500 tracking-tight">{levSpread.value}</p>
           <p className="text-xs text-zinc-400 leading-relaxed">{levSpread.sublabel}</p>
         </div>
       </div>
@@ -266,44 +256,20 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
       {/* ── Row 3: Verdict ── */}
       {verdict && (
         <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_200px] gap-6">
-
-            {/* Left: verdict content */}
-            <div className="flex gap-4">
-              <div className={`h-12 w-12 rounded-xl shrink-0 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 ${verdictMeta?.bgColor ?? ""}`}>
-                <div className={`h-5 w-5 rounded-full ${verdictMeta?.dotColor ?? "bg-zinc-400"}`} />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h3 className={`text-sm font-bold uppercase tracking-wide ${verdictMeta?.textColor ?? ""}`}>{verdict.label}</h3>
-                  <span className="text-xs bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2.5 py-1 rounded-full font-medium">
-                    {verdict.tag}
-                  </span>
-                </div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                  <RenderWithBold text={verdict.description} />
-                </p>
-              </div>
+          <div className="flex gap-4">
+            <div className={`h-12 w-12 rounded-xl shrink-0 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 ${verdictMeta?.bgColor ?? ""}`}>
+              <div className={`h-5 w-5 rounded-full ${verdictMeta?.dotColor ?? "bg-zinc-400"}`} />
             </div>
-
-            {/* Right: all possible verdicts */}
-            <div className="space-y-2 md:border-l md:border-zinc-200 md:dark:border-zinc-700 md:pl-6">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-3">All Possible Verdicts</p>
-              {allVerdicts.map((v) => {
-                const meta = VERDICT_META[v.status];
-                return (
-                  <div key={v.status} className={`flex items-center gap-2 ${v.is_current ? "" : "opacity-55"}`}>
-                    {v.is_current
-                      ? <span className="text-yellow-500 text-xs font-bold">→</span>
-                      : <span className="text-zinc-300 dark:text-zinc-600 text-xs">·</span>
-                    }
-                    <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${meta?.dotColor ?? "bg-zinc-400"}`} />
-                    <span className={`text-xs font-medium ${v.is_current ? (meta?.textColor ?? "") : "text-zinc-500 dark:text-zinc-400"}`}>
-                      {v.label}{v.is_current && " ←"}
-                    </span>
-                  </div>
-                );
-              })}
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h3 className={`text-sm font-bold uppercase tracking-wide ${verdictMeta?.textColor ?? ""}`}>{verdict.label}</h3>
+                <span className="text-xs bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2.5 py-1 rounded-full font-semibold">
+                  {verdict.tag}
+                </span>
+              </div>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                <RenderWithBold text={verdict.description} />
+              </p>
             </div>
           </div>
         </div>

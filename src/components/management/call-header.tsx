@@ -8,10 +8,16 @@ import { FileText, Calendar } from "lucide-react";
 
 interface CallHeaderProps {
   company: CompanyInfo;
+  score?: number;
+  callId?: string;
+  callDate?: string;
   onFullLLMClick?: () => void;
 }
 
-export function CallHeader({ company, onFullLLMClick }: CallHeaderProps) {
+export function CallHeader({ company, score, callId, callDate, onFullLLMClick }: CallHeaderProps) {
+  const resolvedDate = callDate ?? company.callDate;
+  const ticker = company.ticker ?? company.name?.split("_")[0] ?? null;
+  const displayName = company.company_name ?? company.name ?? null;
   return (
     <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
       <CardHeader>
@@ -22,11 +28,11 @@ export function CallHeader({ company, onFullLLMClick }: CallHeaderProps) {
               <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
             </div>
             <div className="space-y-1.5">
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-                <DataValue value={company.ticker} />
+              <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                <DataValue value={displayName} />
               </h1>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                <span className="font-medium bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">{company.exchange}: <DataValue value={company.name?.split("_")[0] ?? null} /></span>
+                <span className="font-semibold bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">{company.exchange}: <DataValue value={ticker} /></span>
                 {company.industry && (
                   <>
                     <span className="mx-2">•</span>
@@ -48,15 +54,26 @@ export function CallHeader({ company, onFullLLMClick }: CallHeaderProps) {
               <FileText className="h-4 w-4 mr-1.5" />
               FULL IM
             </Button>
+            {score != null && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-100 dark:bg-zinc-800">
+                <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Score</span>
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{score}</span>
+              </div>
+            )}
             <Badge
               variant={getConfidenceVariant(company.confidenceLevel)}
-              className="h-fit px-3 py-1.5 text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 border-0"
+              className="h-fit px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider bg-zinc-100 text-green-700 dark:bg-zinc-800 dark:text-green-300 border-0"
             >
               ✓ {company.confidenceLevel.toUpperCase()} CONFIDENCE
             </Badge>
+            {callId && (
+              <div className="text-xs text-zinc-400 dark:text-zinc-500 font-mono">
+                #{callId.slice(0, 8)}
+              </div>
+            )}
             <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
               <Calendar className="h-4 w-4" />
-              <DataValue value={company.callDate ? formatDate(company.callDate) : null} />
+              <DataValue value={resolvedDate ? formatDate(resolvedDate) : null} />
             </div>
           </div>
         </div>

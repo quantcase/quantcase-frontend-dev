@@ -12,12 +12,13 @@ import type { DFactorResponse } from "@/types/deal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
-import { FileText, Calendar, Target } from "lucide-react";
+import { FileText, Calendar } from "lucide-react";
 import { EntryPointCallout } from "@/components/deal/entry-point-callout";
 import { ScenarioFramework } from "@/components/deal/scenario-framework";
 import { TargetPriceMatrix } from "@/components/deal/target-price-matrix";
 import { RiskRewardSummary } from "@/components/deal/risk-reward-summary";
 import { DetailedAnalysis } from "@/components/deal/detailed-analysis";
+import { SectionPanel } from "@/components/molecules/section-panel";
 
 function DealContent() {
   const searchParams = useSearchParams();
@@ -188,29 +189,29 @@ function DealContent() {
           ⚠️ HIGHLY CONFIDENTIAL — FOR INVESTMENT COMMITTEE USE ONLY
         </div>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <h1 className="text-3xl font-bold mb-6">Deal Factor Analysis</h1>
+          <h1 className="text-sm font-bold mb-6">Deal Factor Analysis</h1>
           <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
             <div className="space-y-4">
               <div>
-                <h2 className="text-2xl font-semibold mb-2">{transcriptCall.company_name}</h2>
+                <h2 className="text-sm font-semibold mb-2">{transcriptCall.company_name}</h2>
                 <p className="text-sm text-muted-foreground">{transcriptCall.basic_industry}</p>
               </div>
               <div className="grid grid-cols-2 gap-4 py-4 border-t border-border">
                 <div>
                   <p className="text-sm text-muted-foreground">Ticker</p>
-                  <p className="font-medium">{transcriptCall.company}</p>
+                  <p className="font-semibold">{transcriptCall.company}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Quarter</p>
-                  <p className="font-medium">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
+                  <p className="font-semibold">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Call Date</p>
-                  <p className="font-medium">{transcriptCall.call_date}</p>
+                  <p className="font-semibold">{transcriptCall.call_date}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Call ID</p>
-                  <p className="font-medium text-xs">{transcriptCall.id}</p>
+                  <p className="font-semibold text-xs">{transcriptCall.id}</p>
                 </div>
               </div>
               <div className="pt-4 border-t border-border">
@@ -238,7 +239,7 @@ function DealContent() {
                           <p className={`text-sm ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
                             {aggregateStatus === "completed" ? "Analysis complete!" : "Analyzing transcripts..."}
                           </p>
-                          <p className={`text-sm font-medium ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
+                          <p className={`text-sm font-semibold ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
                             {progress}%
                           </p>
                         </div>
@@ -261,7 +262,7 @@ function DealContent() {
                 <button
                   onClick={handleAnalyzeClick}
                   disabled={isAnalyzing}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing
                     ? aggregateStatus === "pending" ? "Queued..." : aggregateStatus === "processing" ? "Processing..." : "Starting..."
@@ -287,7 +288,7 @@ function DealContent() {
   const transcriptCall = transcriptCalls[0];
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-4">
       {/* Confidential Banner */}
       <div className="sticky top-0 z-10 w-full bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 py-2 px-4 text-center text-xs font-semibold text-red-600 dark:text-red-400 mb-4">
         ⚠️ HIGHLY CONFIDENTIAL — FOR INVESTMENT COMMITTEE USE ONLY
@@ -302,9 +303,9 @@ function DealContent() {
                 <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
               </div>
               <div className="space-y-1.5">
-                <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{transcriptCall.company_name}</h1>
+                <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{transcriptCall.company_name}</h1>
                 <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  <span className="font-medium bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">
+                  <span className="font-semibold bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">
                     NSE: {symbol}
                   </span>
                   <span>•</span>
@@ -329,20 +330,45 @@ function DealContent() {
       </Card>
 
       {/* Page Title */}
-      <div className="container mx-auto max-w-7xl mb-5 flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-          <Target className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
-        </div>
-        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Deal Factor</h2>
+      <div className="container mx-auto max-w-7xl mb-5 flex items-center gap-2">
+        <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 mr-1">§5</span>
+        <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">Deal Factor</h2>
       </div>
 
       {/* Page Content */}
       <div className="container mx-auto max-w-7xl space-y-6">
         <EntryPointCallout />
-        <ScenarioFramework data={data.scenario_framework} />
-        <TargetPriceMatrix data={data.target_price_matrix} />
-        {data.risk_reward_summary && <RiskRewardSummary data={data.risk_reward_summary} />}
-        <DetailedAnalysis data={data.detailed_analysis} />
+        <SectionPanel
+          title={data.scenario_framework?.meta?.title ?? "Scenario Framework"}
+          contentClassName="px-6 pb-6"
+        >
+          <ScenarioFramework data={data.scenario_framework} />
+        </SectionPanel>
+        <SectionPanel
+          title={data.target_price_matrix?.meta?.title ?? "Target Price Matrix"}
+          subtitle={[
+            data.target_price_matrix?.holding_period,
+            data.target_price_matrix?.current_price ? `Current Price: ${data.target_price_matrix.current_price}` : undefined,
+          ].filter(Boolean).join(" | ") || undefined}
+          contentClassName="px-6 pb-6"
+        >
+          <TargetPriceMatrix data={data.target_price_matrix} />
+        </SectionPanel>
+        {data.risk_reward_summary && (
+          <SectionPanel
+            title={data.risk_reward_summary?.meta?.title ?? "Risk / Reward Summary"}
+            contentClassName="px-6 pb-6"
+          >
+            <RiskRewardSummary data={data.risk_reward_summary} />
+          </SectionPanel>
+        )}
+        <SectionPanel
+          title="Detailed Analysis"
+          subtitle="Earnings trajectory, quality of earnings, and valuation comparisons"
+          contentClassName="px-6 pb-6 space-y-6"
+        >
+          <DetailedAnalysis data={data.detailed_analysis} />
+        </SectionPanel>
       </div>
     </div>
   );

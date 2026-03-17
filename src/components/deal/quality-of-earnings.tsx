@@ -12,12 +12,12 @@ interface QualityOfEarningsProps {
   data?: QualityOfEarningsSection;
 }
 
-const changeColors: Record<string, string> = {
-  emerald: "text-emerald-600",
-  blue:    "text-blue-600",
-  purple:  "text-purple-600",
-  amber:   "text-amber-600",
-};
+function changeColor(change?: string): string {
+  if (!change) return "text-zinc-500 dark:text-zinc-400";
+  if (change.startsWith("+")) return "text-emerald-600 dark:text-emerald-400";
+  if (change.startsWith("-")) return "text-red-500 dark:text-red-400";
+  return "text-zinc-500 dark:text-zinc-400";
+}
 
 export function QualityOfEarnings({ data }: QualityOfEarningsProps) {
   const title      = data?.meta?.title    ?? qualityOfEarningsData.title;
@@ -30,14 +30,14 @@ export function QualityOfEarnings({ data }: QualityOfEarningsProps) {
 
   return (
     <div className="space-y-5">
-      {/* Section Header — matches EpsEngine / ValuationVsPeers pattern */}
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-lg bg-purple-500 flex items-center justify-center flex-shrink-0">
-          <ShieldCheck className="h-5 w-5 text-white" />
+      {/* Section Header */}
+      <div className="flex items-center gap-2.5">
+        <div className="h-7 w-7 rounded-lg bg-purple-500 flex items-center justify-center flex-shrink-0">
+          <ShieldCheck className="h-3.5 w-3.5 text-white" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{title}</h3>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">{subtitle}</p>
+          <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">{title}</h3>
+          {subtitle && <p className="text-xs text-zinc-400">{subtitle}</p>}
         </div>
       </div>
 
@@ -51,8 +51,8 @@ export function QualityOfEarnings({ data }: QualityOfEarningsProps) {
             <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
               {metric.label}
             </p>
-            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{metric.value}</p>
-            <p className={`text-xs font-medium mt-0.5 ${changeColors[metric.change_color ?? (metric as { changeColor?: string }).changeColor ?? "emerald"]}`}>
+            <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50">{metric.value}</p>
+            <p className={`text-[11px] mt-0.5 ${changeColor(metric.change)}`}>
               {metric.change}
             </p>
           </div>

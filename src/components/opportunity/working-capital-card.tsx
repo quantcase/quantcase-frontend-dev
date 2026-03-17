@@ -12,13 +12,14 @@ import {
   AreaChart,
 } from "recharts";
 import type { WorkingCapitalSection } from "@/types/opportunity";
+import { InsightText } from "@/components/opportunity/bold-text";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<string, { badge: string; dot: string }> = {
-  green:  { badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700", dot: "bg-emerald-500" },
-  yellow: { badge: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700",     dot: "bg-yellow-500" },
-  red:    { badge: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-700",                        dot: "bg-red-500" },
+  green:  { badge: "text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700", dot: "bg-emerald-500" },
+  yellow: { badge: "text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700",     dot: "bg-yellow-500" },
+  red:    { badge: "text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700",                 dot: "bg-red-500" },
 };
 
 function SignalBadge({ label, color }: { label: string; color?: string }) {
@@ -59,13 +60,13 @@ export function WorkingCapitalCard({ data }: WorkingCapitalCardProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-700">
-                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/60">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/60">
                   METRIC
                 </th>
                 {d.quarters.map((q) => (
                   <th
                     key={q}
-                    className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/60"
+                    className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/60"
                   >
                     {q}
                   </th>
@@ -83,7 +84,7 @@ export function WorkingCapitalCard({ data }: WorkingCapitalCardProps) {
                     }`}
                   >
                     <td
-                      className={`px-4 py-3.5 text-[12px] font-semibold ${
+                      className={`px-4 py-3.5 text-xs font-semibold ${
                         isCcc ? "text-zinc-900 dark:text-zinc-50" : "text-zinc-700 dark:text-zinc-300"
                       }`}
                     >
@@ -92,7 +93,7 @@ export function WorkingCapitalCard({ data }: WorkingCapitalCardProps) {
                     {row.values.map((val, j) => (
                       <td
                         key={j}
-                        className={`px-4 py-3.5 text-right text-[13px] font-bold ${
+                        className={`px-4 py-3.5 text-right text-xs font-semibold ${
                           isCcc
                             ? "text-zinc-900 dark:text-zinc-50"
                             : "text-zinc-600 dark:text-zinc-300"
@@ -114,7 +115,7 @@ export function WorkingCapitalCard({ data }: WorkingCapitalCardProps) {
         {/* Trend Chart */}
         {d.trend_chart && (
           <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-3">
-            <p className="text-[11px] font-bold text-zinc-800 dark:text-zinc-100">{d.trend_chart.title}</p>
+            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{d.trend_chart.title}</p>
             <div className="h-36">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={d.trend_chart.data} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
@@ -171,9 +172,9 @@ export function WorkingCapitalCard({ data }: WorkingCapitalCardProps) {
               </div>
             )}
             {d.insight && (
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed border-t border-zinc-100 dark:border-zinc-800 pt-2.5">
-                {d.insight}
-              </p>
+              <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5">
+                <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 leading-relaxed"><InsightText text={d.insight} /></p>
+              </div>
             )}
           </div>
         )}

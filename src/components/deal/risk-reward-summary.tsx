@@ -18,7 +18,7 @@ function MetricCard({ metric }: { metric?: RiskRewardMetric }) {
       <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
         {metric?.label ?? "—"}
       </p>
-      <p className={`text-4xl font-bold leading-none ${valueColor(metric?.value)}`}>
+      <p className={`text-[26px] font-normal leading-none ${valueColor(metric?.value)}`}>
         {metric?.value ?? "N/A"}
       </p>
       <p className="text-xs text-zinc-400 dark:text-zinc-500 pt-1">

@@ -216,32 +216,32 @@ function ManagementDashboardContent() {
 
         {/* Main Container */}
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <h1 className="text-3xl font-bold mb-6">Management Factor Analysis</h1>
+          <h1 className="text-sm font-bold mb-6">Management Factor Analysis</h1>
 
           {/* Transcript Details Card */}
           <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
             <div className="space-y-4">
               <div>
-                <h2 className="text-2xl font-semibold mb-2">{transcriptCall.company_name}</h2>
+                <h2 className="text-sm font-semibold mb-2">{transcriptCall.company_name}</h2>
                 <p className="text-sm text-muted-foreground">{transcriptCall.basic_industry}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 py-4 border-t border-border">
                 <div>
                   <p className="text-sm text-muted-foreground">Ticker</p>
-                  <p className="font-medium">{transcriptCall.company}</p>
+                  <p className="font-semibold">{transcriptCall.company}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Quarter</p>
-                  <p className="font-medium">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
+                  <p className="font-semibold">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Call Date</p>
-                  <p className="font-medium">{transcriptCall.call_date}</p>
+                  <p className="font-semibold">{transcriptCall.call_date}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Call ID</p>
-                  <p className="font-medium text-xs">{transcriptCall.id}</p>
+                  <p className="font-semibold text-xs">{transcriptCall.id}</p>
                 </div>
               </div>
 
@@ -274,7 +274,7 @@ function ManagementDashboardContent() {
                           }`}>
                             {aggregateStatus === "completed" ? "Analysis complete!" : "Analyzing transcripts..."}
                           </p>
-                          <p className={`text-sm font-medium ${
+                          <p className={`text-sm font-semibold ${
                             aggregateStatus === "completed"
                               ? "text-green-600 dark:text-green-400"
                               : "text-blue-600 dark:text-blue-400"
@@ -313,7 +313,7 @@ function ManagementDashboardContent() {
                 <button
                   onClick={handleAnalyzeClick}
                   disabled={isAnalyzing}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing
                     ? aggregateStatus === "pending"
@@ -358,6 +358,13 @@ function ManagementDashboardContent() {
         <div className="mb-6">
           <CallHeader
             company={managementData?.company}
+            score={(() => {
+              const sf = managementData?.trust?.subfactors;
+              if (!sf) return undefined;
+              return Math.round(sf.guidanceAccuracy * 0.5 + sf.disclosureHonesty * 0.3 + sf.capitalAllocation * 0.2);
+            })()}
+            callId={firstCallId || undefined}
+            callDate={transcriptCalls[0]?.call_date}
             onFullLLMClick={handleFullLLMClick}
           />
         </div>

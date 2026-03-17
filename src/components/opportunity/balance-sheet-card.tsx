@@ -43,7 +43,7 @@ export function BalanceSheetCard({ data, takeaway }: BalanceSheetCardProps) {
                     <Icon className={`h-3.5 w-3.5 ${m.iconColor}`} />
                   </div>
                 </div>
-                <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{m.value}</p>
+                <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50">{m.value}</p>
                 <p className={`text-[11px] mt-0.5 ${m.iconColor} opacity-80`}>{m.sublabel}</p>
               </div>
             );

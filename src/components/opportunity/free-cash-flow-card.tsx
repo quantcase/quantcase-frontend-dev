@@ -7,7 +7,7 @@ import type {
 } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
 import { StatusBadge } from "@/components/opportunity/status-badge";
-import { BoldText as RenderWithBold } from "@/components/opportunity/bold-text";
+import { InsightText } from "@/components/opportunity/bold-text";
 
 // Bar for the OCF→FCF panel — delegates to segmented bar
 function HorizBar({ pct, color }: { pct: number; color: string }) {
@@ -62,10 +62,10 @@ function ConversionConsistencyPanel({ d }: { d: NonNullable<FreeCashFlowSection[
                   "bg-red-500"
                 }`}
               />
-              <span className={`text-[9px] ${isFloor ? "text-yellow-500 font-semibold" : "text-zinc-400"}`}>
+              <span className={`text-[10px] ${isFloor ? "text-yellow-500 font-semibold" : "text-zinc-400"}`}>
                 {q.quarter}
               </span>
-              {isFloor && <span className="text-[9px] text-yellow-500 font-semibold leading-none">floor</span>}
+              {isFloor && <span className="text-[10px] text-yellow-500 font-semibold leading-none">floor</span>}
             </div>
           );
         })}
@@ -74,24 +74,24 @@ function ConversionConsistencyPanel({ d }: { d: NonNullable<FreeCashFlowSection[
       {/* Summary row */}
       <div className="grid grid-cols-3 gap-2 border-t border-zinc-200 dark:border-zinc-700 pt-3 mt-auto">
         <div>
-          <p className="text-[9px] text-zinc-400 uppercase tracking-wider">10Q Range</p>
+          <p className="text-[10px] text-zinc-400 uppercase tracking-wider">10Q Range</p>
           <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">
-            {d.range_low != null ? `${d.range_low}%` : "—"} –<br />{d.range_high != null ? `${d.range_high}%` : "—"}
+            {d.range_low != null ? `${d.range_low}%` : "—"} – {d.range_high != null ? `${d.range_high}%` : "—"}
           </p>
         </div>
         <div>
-          <p className="text-[9px] text-zinc-400 uppercase tracking-wider">Floor</p>
+          <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Floor</p>
           <p className="text-sm font-bold text-yellow-500">{d.floor_pct != null ? `${d.floor_pct}%` : "—"}</p>
           <p className="text-[10px] text-yellow-500 font-semibold">{d.floor_quarter}</p>
         </div>
         <div>
-          <p className="text-[9px] text-zinc-400 uppercase tracking-wider">All 10Q above</p>
+          <p className="text-[10px] text-zinc-400 uppercase tracking-wider">All 10Q above</p>
           <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">
             {d.healthy_threshold_pct}%{" "}
             <span className="text-emerald-600 dark:text-emerald-400 font-bold">threshold</span>
           </p>
           {d.all_above_threshold && (
-            <span className="inline-flex items-center justify-center h-4 w-4 rounded bg-emerald-500 text-white text-[9px] font-bold mt-0.5">
+            <span className="inline-flex items-center justify-center h-4 w-4 rounded bg-emerald-500 text-white text-[10px] font-bold mt-0.5">
               ✓
             </span>
           )}
@@ -125,8 +125,8 @@ function GrowthTrajectoryPanel({ d }: { d: NonNullable<FreeCashFlowSection["grow
       <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
         {/* FCF side */}
         <div className="rounded-md bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-3 text-center space-y-0.5">
-          <p className="text-[9px] text-zinc-400 uppercase tracking-wider">FCF CAGR ({d.periods})</p>
-          <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{d.fcf_cagr_pct != null ? `+${d.fcf_cagr_pct}%` : "—"}</p>
+          <p className="text-[10px] text-zinc-400 uppercase tracking-wider">FCF CAGR ({d.periods})</p>
+          <p className="text-[26px] font-normal text-emerald-600 dark:text-emerald-400">{d.fcf_cagr_pct != null ? `+${d.fcf_cagr_pct}%` : "—"}</p>
           <p className="text-[10px] text-zinc-500">
             {d.fcf_start} → {d.fcf_end}
           </p>
@@ -136,8 +136,8 @@ function GrowthTrajectoryPanel({ d }: { d: NonNullable<FreeCashFlowSection["grow
 
         {/* PAT side */}
         <div className="rounded-md bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-3 text-center space-y-0.5">
-          <p className="text-[9px] text-zinc-400 uppercase tracking-wider">PAT CAGR ({d.periods})</p>
-          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{d.pat_cagr_pct != null ? `+${d.pat_cagr_pct}%` : "—"}</p>
+          <p className="text-[10px] text-zinc-400 uppercase tracking-wider">PAT CAGR ({d.periods})</p>
+          <p className="text-[26px] font-normal text-blue-600 dark:text-blue-400">{d.pat_cagr_pct != null ? `+${d.pat_cagr_pct}%` : "—"}</p>
           <p className="text-[10px] text-zinc-500">
             {d.pat_start} → {d.pat_end}
           </p>
@@ -150,9 +150,11 @@ function GrowthTrajectoryPanel({ d }: { d: NonNullable<FreeCashFlowSection["grow
       </div>
 
       {/* Body */}
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed mt-auto">
-        <RenderWithBold text={d.insight_body} />
-      </p>
+      {d.insight_body && (
+        <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5 mt-auto">
+          <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 leading-relaxed"><InsightText text={d.insight_body} /></p>
+        </div>
+      )}
     </div>
   );
 }
@@ -205,14 +207,18 @@ function OcfToFcfPanel({ d }: { d: NonNullable<FreeCashFlowSection["ocf_to_fcf"]
       </div>
 
       {/* Summary footer */}
-      <div className="border-t border-zinc-200 dark:border-zinc-700 pt-3 flex items-end justify-between gap-2 flex-wrap">
-        <p className="text-[10px] text-zinc-400 leading-tight">
-          Capex / Revenue&nbsp;&nbsp;Capex drag on OCF&nbsp;&nbsp;Scope to improve
-        </p>
-        <div className="flex items-center gap-4 shrink-0">
-          <span className="text-sm font-bold text-zinc-600 dark:text-zinc-300">{d.capex_revenue_pct}%</span>
-          <span className="text-sm font-bold text-zinc-600 dark:text-zinc-300">{d.capex_ocf_pct}% only</span>
-          <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{d.drag_description}</span>
+      <div className="border-t border-zinc-200 dark:border-zinc-700 pt-3 grid grid-cols-3 gap-2">
+        <div>
+          <p className="text-[10px] text-zinc-400 leading-tight">Capex / Revenue</p>
+          <p className="text-sm font-bold text-zinc-600 dark:text-zinc-300 mt-1">{d.capex_revenue_pct}%</p>
+        </div>
+        <div>
+          <p className="text-[10px] text-zinc-400 leading-tight">Capex drag on OCF</p>
+          <p className="text-sm font-bold text-zinc-600 dark:text-zinc-300 mt-1">{d.capex_ocf_pct}%</p>
+        </div>
+        <div>
+          <p className="text-[10px] text-zinc-400 leading-tight">Scope to improve</p>
+          <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 mt-1">{d.drag_description}</p>
         </div>
       </div>
     </div>
@@ -247,18 +253,18 @@ function FcfYieldPanel({ d }: { d: NonNullable<FreeCashFlowSection["fcf_yield"]>
                 }`}
               >
                 {isCurrent ? (
-                  <p className="text-[9px] font-bold uppercase tracking-wider text-yellow-600 dark:text-yellow-400">Today</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-yellow-600 dark:text-yellow-400">Today</p>
                 ) : (
-                  <p className="text-[9px] text-zinc-400">{y.label}</p>
+                  <p className="text-[10px] text-zinc-400">{y.label}</p>
                 )}
                 <p
-                  className={`text-3xl font-bold tracking-tight ${
+                  className={`text-[26px] font-normal tracking-tight ${
                     isCurrent ? "text-yellow-600 dark:text-yellow-400" : "text-emerald-600 dark:text-emerald-400"
                   }`}
                 >
                   {y.yield_pct != null ? `${y.yield_pct}%` : "—"}
                 </p>
-                <p className={`text-[9px] ${isCurrent ? "text-yellow-500" : "text-zinc-400"}`}>
+                <p className={`text-[10px] ${isCurrent ? "text-yellow-500" : "text-zinc-400"}`}>
                   {y.zone}
                 </p>
               </div>
@@ -271,9 +277,13 @@ function FcfYieldPanel({ d }: { d: NonNullable<FreeCashFlowSection["fcf_yield"]>
       </div>
 
       {/* Compression explanation */}
-      <div className="border-t border-zinc-200 dark:border-zinc-700 pt-2 mt-auto space-y-1">
-        <p className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">Why compressed?</p>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{d.compression_explanation}</p>
+      <div className="border-t border-zinc-200 dark:border-zinc-700 pt-2 mt-auto">
+        <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5">
+          <p className="text-[10px] font-medium text-yellow-600 dark:text-yellow-400 mb-1">Why compressed?</p>
+          <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 leading-relaxed">
+            <InsightText text={d.compression_explanation} />
+          </p>
+        </div>
       </div>
     </div>
   );

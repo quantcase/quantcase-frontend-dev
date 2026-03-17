@@ -157,7 +157,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                       <div key={i} className="flex gap-2">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
                         <div>
-                          {label && <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{label}: </span>}
+                          {label && <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">{label}: </span>}
                           <span className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{body}</span>
                         </div>
                       </div>
@@ -172,7 +172,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                       <div key={i} className="flex gap-2">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
                         <div>
-                          {label && <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{label}: </span>}
+                          {label && <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">{label}: </span>}
                           <span className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{body}</span>
                         </div>
                       </div>

@@ -32,14 +32,14 @@ export function HistoricalPerformance({ data }: HistoricalPerformanceProps) {
 
   return (
     <div className="space-y-5">
-      {/* Section Header — matches EpsEngine / ValuationVsPeers pattern */}
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
-          <BarChart2 className="h-5 w-5 text-white" />
+      {/* Section Header */}
+      <div className="flex items-center gap-2.5">
+        <div className="h-7 w-7 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
+          <BarChart2 className="h-3.5 w-3.5 text-white" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{title}</h3>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">{subtitle}</p>
+          <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">{title}</h3>
+          {subtitle && <p className="text-xs text-zinc-400">{subtitle}</p>}
         </div>
       </div>
 
@@ -49,14 +49,14 @@ export function HistoricalPerformance({ data }: HistoricalPerformanceProps) {
           <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
             Company Earnings Growth
           </p>
-          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">{companyGrowth.value}</p>
+          <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50">{companyGrowth.value}</p>
           <p className="text-xs text-emerald-600 mt-0.5">{companyGrowth.label}</p>
         </div>
         <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
             Industry Earnings Growth
           </p>
-          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">{industryGrowth.value}</p>
+          <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50">{industryGrowth.value}</p>
           <p className="text-xs text-zinc-500 mt-0.5">{industryGrowth.label}</p>
         </div>
       </div>
@@ -99,7 +99,7 @@ export function HistoricalPerformance({ data }: HistoricalPerformanceProps) {
           const colors = statColors[stat.color] ?? statColors.emerald;
           return (
             <div key={i} className={`rounded-lg border ${colors.border} ${colors.bg} p-3 text-center`}>
-              <p className={`text-xl font-bold ${colors.value}`}>{stat.value}</p>
+              <p className={`text-[26px] font-normal ${colors.value}`}>{stat.value}</p>
               <p className="text-[10px] text-zinc-500 mt-0.5">{stat.label}</p>
             </div>
           );

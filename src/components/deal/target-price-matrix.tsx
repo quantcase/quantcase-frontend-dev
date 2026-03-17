@@ -55,37 +55,37 @@ function PriceCard({
         <div className="grid grid-cols-2 gap-y-3 gap-x-4">
           <div>
             <p className="text-[10px] text-zinc-400 uppercase mb-0.5">EPS CAGR</p>
-            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+            <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
               {caseData?.eps_cagr ?? "N/A"}
             </p>
           </div>
           <div>
             <p className="text-[10px] text-zinc-400 uppercase mb-0.5">FY EPS</p>
-            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+            <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
               {caseData?.fy_eps ?? "N/A"}
             </p>
           </div>
           <div className="col-span-2">
             <p className="text-[10px] text-zinc-400 uppercase mb-0.5">Exit P/E</p>
-            <p className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
+            <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
               {caseData?.exit_pe ?? "N/A"}
             </p>
-            <p className="text-[10px] text-zinc-400 mt-0.5">{caseData?.pe_rationale}</p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">{caseData?.pe_rationale}</p>
           </div>
         </div>
 
         <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3 space-y-1">
           <p className="text-[10px] text-zinc-400 uppercase">Target Range</p>
-          <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+          <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50">
             {caseData?.target_range ?? "N/A"}
           </p>
           <div className="flex items-center gap-2">
             <span className={`text-sm font-semibold ${fromCmpColor}`}>
               {caseData?.from_cmp ?? "N/A"}
             </span>
-            <span className="text-xs text-zinc-400">from CMP</span>
+            <span className="text-[11px] text-zinc-500 dark:text-zinc-400">from CMP</span>
           </div>
-          <p className="text-xs text-zinc-400">{caseData?.cagr}</p>
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">{caseData?.cagr}</p>
         </div>
 
         <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3 space-y-1.5">
@@ -108,25 +108,11 @@ function PriceCard({
 }
 
 export function TargetPriceMatrix({ data }: TargetPriceMatrixProps) {
-  const title = data?.meta?.title ?? "Target Price Matrix";
-  const subtitle = [data?.holding_period, data?.current_price ? `Current Price: ${data.current_price}` : undefined]
-    .filter(Boolean)
-    .join(" | ");
-
   return (
-    <div className="space-y-3">
-      <div className="flex items-baseline gap-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-          {title}
-        </h3>
-        {subtitle && <span className="text-xs text-zinc-400">{subtitle}</span>}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {scenarioConfig.map((config) => (
-          <PriceCard key={config.key} config={config} caseData={data?.[config.key]} />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {scenarioConfig.map((config) => (
+        <PriceCard key={config.key} config={config} caseData={data?.[config.key]} />
+      ))}
     </div>
   );
 }

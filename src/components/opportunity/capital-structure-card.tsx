@@ -3,13 +3,14 @@
 import type { CapitalStructureSection } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
 import { StatusBadge } from "@/components/opportunity/status-badge";
-import { BoldText } from "@/components/opportunity/bold-text";
+import { InsightText } from "@/components/opportunity/bold-text";
 
 const DEBT_BAR_COLORS: Record<string, string> = {
   red: "bg-red-400",
   amber: "bg-amber-400",
   green: "bg-emerald-400",
 };
+
 
 // ─── Panel: Balance Sheet ──────────────────────────────────────────────────────
 
@@ -57,51 +58,62 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
 
       {/* Timeline */}
       <div>
-        <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
           Net Cash — FY20 to FY24
         </p>
-        <div className="flex items-end gap-1">
+        {/* Value labels row — fixed at top so all align */}
+        <div className="flex gap-1 mb-1">
+          {d.timeline.map((t) => (
+            <div key={t.label} className="flex-1 text-center">
+              <span
+                className={`text-[10px] font-semibold ${
+                  t.is_current ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400"
+                }`}
+                title={t.value}
+              >
+                {t.value.split(" ")[0]}
+              </span>
+            </div>
+          ))}
+        </div>
+        {/* Bars — grow from bottom */}
+        <div className="flex items-end gap-1 h-12">
           {d.timeline.map((t) => {
             const val = parseFloat(t.value.replace("K", ""));
-            const h = Math.round((val / maxVal) * 48);
+            const h = maxVal > 0 ? Math.round((val / maxVal) * 48) : 2;
             return (
-              <div key={t.label} className="flex-1 flex flex-col items-center gap-1">
-                <span
-                  className={`text-[9px] font-semibold ${
-                    t.is_current
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-zinc-400"
-                  }`}
-                  title={t.value}
-                >
-                  {t.value.split(" ")[0]}
-                </span>
-                <div
-                  className={`w-full rounded-t-sm ${
-                    t.is_current ? "bg-emerald-400" : "bg-emerald-200 dark:bg-emerald-800/50"
-                  }`}
-                  style={{ height: `${h}px` }}
-                />
-                <span
-                  className={`text-[9px] ${
-                    t.is_current
-                      ? "font-bold text-zinc-700 dark:text-zinc-200"
-                      : "text-zinc-400"
-                  }`}
-                >
-                  {t.label}
-                  {t.is_current && " ↑"}
-                </span>
-              </div>
+              <div
+                key={t.label}
+                className={`flex-1 rounded-t-sm ${
+                  t.is_current ? "bg-emerald-400" : "bg-emerald-200 dark:bg-emerald-800/50"
+                }`}
+                style={{ height: `${Math.max(h, 2)}px` }}
+              />
             );
           })}
+        </div>
+        {/* Period labels row — fixed at bottom */}
+        <div className="flex gap-1 mt-1">
+          {d.timeline.map((t) => (
+            <div key={t.label} className="flex-1 text-center">
+              <span
+                className={`text-[10px] ${
+                  t.is_current ? "font-bold text-zinc-700 dark:text-zinc-200" : "text-zinc-400"
+                }`}
+              >
+                {t.label}{t.is_current && " ↑"}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Insight */}
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-        <BoldText text={d.insight} />
-      </p>
+      {d.insight && (
+        <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5">
+          <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 leading-relaxed"><InsightText text={d.insight} /></p>
+        </div>
+      )}
     </div>
   );
 }
@@ -126,7 +138,7 @@ function DebtTrajectoryPanel({
       </div>
 
       {/* Sub-label */}
-      <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
         Gross Debt — FY20 to FY24 (₹CR)
       </p>
 
@@ -149,7 +161,7 @@ function DebtTrajectoryPanel({
                 style={{ height: `${h}px` }}
               />
               <span
-                className={`text-[9px] ${
+                className={`text-[10px] ${
                   b.is_current
                     ? "font-bold text-zinc-700 dark:text-zinc-200"
                     : "text-zinc-400"
@@ -166,36 +178,38 @@ function DebtTrajectoryPanel({
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-2 border-t border-zinc-100 dark:border-zinc-800 pt-3">
         <div className="text-center">
-          <p className="text-[9px] text-zinc-400 mb-0.5">Peak Debt</p>
+          <p className="text-[10px] text-zinc-400 mb-0.5">Peak Debt</p>
           <p className="text-xs font-semibold text-red-500">{d.peak_debt}</p>
           {d.peak_label && (
-            <p className="text-[9px] text-zinc-400">{d.peak_label}</p>
+            <p className="text-[10px] text-zinc-400">{d.peak_label}</p>
           )}
         </div>
         <div className="text-center">
-          <p className="text-[9px] text-zinc-400 mb-0.5">Current</p>
+          <p className="text-[10px] text-zinc-400 mb-0.5">Current</p>
           <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-100">
             {d.current_debt}
           </p>
           {d.current_label && (
-            <p className="text-[9px] text-zinc-400">{d.current_label}</p>
+            <p className="text-[10px] text-zinc-400">{d.current_label}</p>
           )}
         </div>
         <div className="text-center">
-          <p className="text-[9px] text-zinc-400 mb-0.5">Reduction</p>
+          <p className="text-[10px] text-zinc-400 mb-0.5">Reduction</p>
           <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
             {d.reduction_pct}
           </p>
           {d.reduction_label && (
-            <p className="text-[9px] text-zinc-400">{d.reduction_label}</p>
+            <p className="text-[10px] text-zinc-400">{d.reduction_label}</p>
           )}
         </div>
       </div>
 
       {/* Insight */}
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-        <BoldText text={d.insight} />
-      </p>
+      {d.insight && (
+        <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5">
+          <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 leading-relaxed"><InsightText text={d.insight} /></p>
+        </div>
+      )}
     </div>
   );
 }
@@ -222,12 +236,12 @@ function EquityAllocationPanel({
         Of every ₹100 earned, how much stays in the business vs goes out to shareholders?
       </p>
 
-      <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
         PAT Allocation per year — Retained vs Paid Out
       </p>
 
-      {/* Stacked bars */}
-      <div className="space-y-1.5">
+      {/* Bars */}
+      <div className="space-y-2">
         {d.rows.map((row) => (
           <div key={row.label} className="flex items-center gap-2">
             <span
@@ -239,14 +253,8 @@ function EquityAllocationPanel({
             >
               {row.label}
             </span>
-            <div className="flex-1 flex h-4 rounded-sm overflow-hidden">
-              <div
-                className="bg-emerald-400 h-full"
-                style={{ width: `${row.kept_pct ?? 0}%` }}
-              />
-              <div
-                className="bg-zinc-200 dark:bg-zinc-600 h-full flex-1"
-              />
+            <div className="flex-1">
+              <SegmentedBar pct={row.kept_pct ?? 0} color="bg-emerald-400" height={10} />
             </div>
             <span className="text-[10px] text-zinc-400 whitespace-nowrap shrink-0">
               {row.kept_pct != null ? `${row.kept_pct}%` : "—"} kept · {row.paid_pct != null ? `${row.paid_pct}%` : "—"} paid
@@ -262,7 +270,7 @@ function EquityAllocationPanel({
           Retained in business
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-2 w-3 rounded-sm bg-zinc-200 dark:bg-zinc-600 inline-block" />
+          <span className="h-2 w-3 rounded-sm bg-zinc-200 dark:bg-zinc-700 inline-block" />
           Paid as dividends / buybacks
         </span>
       </div>
@@ -270,18 +278,18 @@ function EquityAllocationPanel({
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-3">
         <div>
-          <p className="text-[9px] text-zinc-400 mb-0.5">{d.total_equity_sublabel ?? "Total Equity"}</p>
+          <p className="text-[10px] text-zinc-400 mb-0.5">{d.total_equity_sublabel ?? "Total Equity"}</p>
           <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-100">{d.total_equity}</p>
         </div>
         <div>
-          <p className="text-[9px] text-zinc-400 mb-0.5">ROE (FY24)</p>
+          <p className="text-[10px] text-zinc-400 mb-0.5">ROE (FY24)</p>
           <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{d.roe}</p>
           {d.roe_sublabel && (
-            <p className="text-[9px] text-zinc-400">{d.roe_sublabel}</p>
+            <p className="text-[10px] text-zinc-400">{d.roe_sublabel}</p>
           )}
         </div>
         <div>
-          <p className="text-[9px] text-zinc-400 mb-0.5">Payout Trend</p>
+          <p className="text-[10px] text-zinc-400 mb-0.5">Payout Trend</p>
           <p
             className={`text-xs font-semibold ${
               d.payout_trend_direction === "up"
@@ -299,15 +307,19 @@ function EquityAllocationPanel({
               : ""}
           </p>
           {d.payout_sublabel && (
-            <p className="text-[9px] text-zinc-400">{d.payout_sublabel}</p>
+            <p className="text-[10px] text-zinc-400">{d.payout_sublabel}</p>
           )}
         </div>
       </div>
 
       {/* Insight */}
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed border-t border-zinc-100 dark:border-zinc-800 pt-3">
-        <BoldText text={d.insight} />
-      </p>
+      {d.insight && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
+          <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5">
+            <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 leading-relaxed"><InsightText text={d.insight} /></p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -364,10 +376,8 @@ function CapexIntensityPanel({
 
       {/* Note box */}
       {d.note && (
-        <div className="rounded border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-900/10 px-3 py-2.5">
-          <p className="text-[10px] text-amber-700 dark:text-amber-400 leading-relaxed">
-            {d.note}
-          </p>
+        <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5">
+          <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 leading-relaxed"><InsightText text={d.note} /></p>
         </div>
       )}
     </div>

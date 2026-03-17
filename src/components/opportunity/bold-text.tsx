@@ -15,3 +15,24 @@ export function BoldText({ text }: { text: string }) {
     </>
   );
 }
+
+/**
+ * For insight boxes: regular text at text-xs, **marked** segments at text-sm (no bold).
+ * Wrap in a <p className="text-xs ..."> — marked segments override up to text-sm inline.
+ */
+export function InsightText({ text }: { text: string }) {
+  const parts = (text ?? "").split(/\*\*(.*?)\*\*/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? (
+          <span key={i} className="text-sm font-normal text-zinc-700 dark:text-zinc-200">
+            {p}
+          </span>
+        ) : (
+          <span key={i}>{p}</span>
+        )
+      )}
+    </>
+  );
+}

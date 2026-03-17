@@ -1,5 +1,7 @@
+import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { TooltipProvider, TooltipRoot, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { DataValue } from "@/components/molecules/data-value";
 import { CheckCircle2, XCircle, Clock, DollarSign, Target } from "lucide-react";
 import { getVarianceColor } from "@/lib/utils";
@@ -14,28 +16,24 @@ function getStatusConfig(status: StatusType) {
     case "ACHIEVED":
       return {
         icon: <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />,
-        bgColor: "bg-green-50 dark:bg-green-950/30",
         textColor: "text-green-700 dark:text-green-400",
         borderColor: "border-l-4 border-l-green-600 dark:border-l-green-400",
       };
     case "MISSED":
       return {
         icon: <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />,
-        bgColor: "bg-red-50 dark:bg-red-950/30",
         textColor: "text-red-700 dark:text-red-400",
         borderColor: "border-l-4 border-l-red-600 dark:border-l-red-400",
       };
     case "PENDING":
       return {
         icon: <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />,
-        bgColor: "bg-blue-50 dark:bg-blue-950/30",
         textColor: "text-blue-700 dark:text-blue-400",
         borderColor: "border-l-4 border-l-blue-600 dark:border-l-blue-400",
       };
     default:
       return {
         icon: null,
-        bgColor: "bg-zinc-50 dark:bg-zinc-900/30",
         textColor: "text-zinc-500 dark:text-zinc-400",
         borderColor: "",
       };
@@ -46,13 +44,13 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
   return (
     <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
       <CardHeader>
-        <CardTitle className="text-sm font-semibold uppercase tracking-wide text-zinc-900 dark:text-zinc-50">
+        <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50">
           GUIDANCE TRACK RECORD
         </CardTitle>
       </CardHeader>
       <CardContent>
         {records.length === 0 ? (
-          <p className="text-sm text-red-600 dark:text-red-400 py-4">No guidance records available</p>
+          <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 py-4">No guidance records available</p>
         ) : (
           <div className="overflow-x-auto">
             <Table className="table-fixed w-full">
@@ -66,15 +64,16 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
               </colgroup>
               <TableHeader>
                 <TableRow className="border-zinc-200 dark:border-zinc-800">
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">TARGET DATE</TableHead>
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">METRIC</TableHead>
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">ACTUAL</TableHead>
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">GUIDED</TableHead>
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">VAR</TableHead>
-                  <TableHead className="text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase">STATUS</TableHead>
+                  <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">TARGET DATE</TableHead>
+                  <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">METRIC</TableHead>
+                  <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">ACTUAL</TableHead>
+                  <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">GUIDED</TableHead>
+                  <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">VAR</TableHead>
+                  <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">STATUS</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
+                <TooltipProvider delayDuration={300}>
                 {records.filter((record) => {
                   const isNA = (v: unknown) => v == null || String(v).trim().toUpperCase() === "N/A" || String(v).trim() === "";
                   return !isNA(record.current_value) && !isNA(record.targeted_value);
@@ -86,24 +85,19 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                       ? `${record.variance_pct >= 0 ? "+" : ""}${record.variance_pct}%`
                       : "-"
                   );
-                  return (
+                  const hasStatement = !!record.statement;
+                  const row = (
                     <TableRow
-                      key={record.id}
-                      className={`border-zinc-200 dark:border-zinc-800 ${statusConfig.borderColor}`}
+                      className={`border-zinc-200 dark:border-zinc-800 ${statusConfig.borderColor} ${hasStatement ? "cursor-default" : ""}`}
                     >
-
-                      <TableCell className="font-medium text-zinc-900 dark:text-zinc-50 text-sm">
+                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.period} />
                         </div>
                       </TableCell>
-                      <TableCell className="text-zinc-900 dark:text-zinc-50 text-sm">
+                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
                         <div className="flex items-center gap-2 break-words whitespace-normal">
-                          <span className={`inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0 ${
-                            isFinancial
-                              ? "bg-purple-100 dark:bg-purple-900/30"
-                              : "bg-sky-100 dark:bg-sky-900/30"
-                          }`}>
+                          <span className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0 bg-zinc-100 dark:bg-zinc-800">
                             {isFinancial ? (
                               <DollarSign className="h-3 w-3 text-purple-700 dark:text-purple-400" />
                             ) : (
@@ -113,32 +107,42 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                           <DataValue value={record.metric} />
                         </div>
                       </TableCell>
-                      <TableCell className="text-zinc-900 dark:text-zinc-50 text-sm">
+                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.current_value} />
                         </div>
                       </TableCell>
-                      <TableCell className="font-semibold text-zinc-900 dark:text-zinc-50 text-sm">
+                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.targeted_value} />
                         </div>
                       </TableCell>
-                      <TableCell className={`${getVarianceColor(varianceDisplay)} text-sm`}>
+                      <TableCell className={`${getVarianceColor(varianceDisplay)} text-xs font-light`}>
                         <div className="break-words whitespace-normal">
                           <DataValue value={varianceDisplay} />
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md ${statusConfig.bgColor}`}>
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-zinc-50 dark:bg-zinc-800">
                           <span className="flex-shrink-0">{statusConfig.icon}</span>
-                          <span className={`text-xs font-semibold uppercase whitespace-nowrap ${statusConfig.textColor}`}>
+                          <span className={`text-[10px] font-medium uppercase tracking-wide whitespace-nowrap ${statusConfig.textColor}`}>
                             <DataValue value={record.status} />
                           </span>
                         </div>
                       </TableCell>
                     </TableRow>
                   );
+                  if (!hasStatement) return React.cloneElement(row, { key: record.id });
+                  return (
+                    <TooltipRoot key={record.id}>
+                      <TooltipTrigger asChild>{row}</TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-sm leading-relaxed">
+                        {record.statement}
+                      </TooltipContent>
+                    </TooltipRoot>
+                  );
                 })}
+                </TooltipProvider>
               </TableBody>
             </Table>
           </div>

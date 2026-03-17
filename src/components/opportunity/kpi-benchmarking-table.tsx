@@ -36,6 +36,10 @@ export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProp
     new Set(data.companies.flatMap((c) => c.timeseries.map((t) => t.kpi_abbr)))
   );
 
+  if (allKpis.length === 0) {
+    return <div className="text-center text-xs text-zinc-400 py-6">No KPI benchmarking data available for peers.</div>;
+  }
+
   // For each company + KPI, get the latest (last) data point value
   const latestValue = (ticker: string, kpi: string): string | null => {
     const company = data.companies.find((c) => c.ticker === ticker);
@@ -64,7 +68,7 @@ export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProp
               >
                 {company.ticker}
                 {company.is_current && (
-                  <span className="ml-1 text-[9px] normal-case font-normal opacity-70">(you)</span>
+                  <span className="ml-1 text-[10px] normal-case font-normal opacity-70">(you)</span>
                 )}
               </TableHead>
             ))}

@@ -171,7 +171,7 @@ export function PromptSideWindow({
                   key={section.id}
                   onClick={() => onSectionChange(section.id)}
                   disabled={generating}
-                  className={`text-left px-3 py-2 rounded-md text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`text-left px-3 py-2 rounded-md text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                     isSelected
                       ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
                       : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"

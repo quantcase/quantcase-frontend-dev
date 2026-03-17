@@ -6,7 +6,7 @@ export function EntryPointCallout() {
           ⊙
         </div>
         <div>
-          <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Why Entry Point Matters</h3>
+          <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50">Why Entry Point Matters</h3>
           <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
             <span className="text-red-600 dark:text-red-400 font-semibold">A good asset can be a bad investment at a bad entry point.</span>{" "}
             You can do everything right to underwrite promoter teams and their assets, but your entry point dictates the success of your investment. This goes beyond plain valuation.

@@ -42,11 +42,11 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
   const cagr = cagrDisplay(m?.industry_cagr);
 
   const industryMetrics = [
-    { ...safeMetric(m?.industry_revenue_ttm), change: m?.industry_revenue_ttm?.change, icon: DollarSign, style: metricTileStyles[0] },
+    { ...safeMetric(m?.industry_revenue_ttm), sublabel: undefined, change: m?.industry_revenue_ttm?.change, icon: DollarSign, style: metricTileStyles[0] },
     { label: m?.industry_cagr?.label ?? "Industry CAGR", value: cagr.value, sublabel: cagr.sublabel, change: null, icon: TrendingUp, style: metricTileStyles[1] },
-    { ...safeMetric(m?.current_opm), change: m?.current_opm?.change, icon: BarChart2, style: metricTileStyles[3] },
+    { ...safeMetric(m?.current_opm), sublabel: undefined, change: m?.current_opm?.change, icon: BarChart2, style: metricTileStyles[3] },
     { ...safeMetric(m?.industry_aum), change: m?.industry_aum?.change, icon: Package, style: metricTileStyles[2] },
-    { ...safeMetric(m?.industry_roce), change: m?.industry_roce?.change, icon: BarChart2, style: metricTileStyles[0] },
+    { ...safeMetric(m?.industry_roce), sublabel: undefined, change: m?.industry_roce?.change, icon: BarChart2, style: metricTileStyles[0] },
     { ...safeMetric(m?.demand_signal), change: null, icon: Zap, style: metricTileStyles[4] },
     { ...safeMetric(m?.supply_constraint), change: null, icon: AlertTriangle, style: metricTileStyles[5] },
   ];
@@ -90,20 +90,32 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
               <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
               <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Demand-Supply Dynamics</span>
             </div>
-            <div className="space-y-2">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                <span className="font-bold text-zinc-800 dark:text-zinc-200">Demand: </span>
-                {dsd?.demand ?? 'N/A'}
-              </p>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                <span className="font-bold text-zinc-800 dark:text-zinc-200">Supply: </span>
-                {dsd?.supply ?? 'N/A'}
-              </p>
-              <div className="rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-700/50 px-3 py-2">
-                <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                  <span className="font-bold text-amber-700 dark:text-amber-400">Net Impact: </span>
-                  {dsd?.net_impact ?? 'N/A'}
-                </p>
+            <div className="space-y-3">
+              <div>
+                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1">Demand</p>
+                <ul className="space-y-1">
+                  {(dsd?.demand ?? []).map((pt, i) => (
+                    <li key={i} className="flex gap-1.5 text-xs font-light text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                      <span className="text-zinc-400 shrink-0 mt-0.5">•</span>
+                      <span>{pt}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1">Supply</p>
+                <ul className="space-y-1">
+                  {(dsd?.supply ?? []).map((pt, i) => (
+                    <li key={i} className="flex gap-1.5 text-xs font-light text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                      <span className="text-zinc-400 shrink-0 mt-0.5">•</span>
+                      <span>{pt}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-md bg-zinc-900 dark:bg-zinc-950 px-3 py-2.5">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 mb-1">Net Impact</p>
+                <p className="text-xs font-light text-zinc-200 leading-relaxed">{dsd?.net_impact ?? 'N/A'}</p>
               </div>
             </div>
           </div>
@@ -161,14 +173,9 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
           </div>
 
           {/* Forward Outlook */}
-          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
-              <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
-                Forward Outlook (FY25-FY27E)
-              </p>
-            </div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          <div className="rounded-lg bg-zinc-900 dark:bg-zinc-950 px-4 py-3 space-y-1.5">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Forward Outlook (FY25-FY27E)</p>
+            <p className="text-xs font-light text-zinc-200 leading-relaxed">
               {opmTrend?.forward_outlook ?? 'N/A'}
             </p>
           </div>

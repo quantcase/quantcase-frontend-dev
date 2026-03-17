@@ -23,16 +23,18 @@ export interface RiskDisclosure {
 // Company header
 export interface CompanyInfo {
   name: string | null;
+  company_name?: string | null;
   ticker: string | null;
   exchange: "NSE" | "BSE";
   industry: string | null;
   callDate: string | null;
   confidenceLevel: ConfidenceLevel;
+  transcriptsAnalyzed?: number | null;
 }
 
 // Score cards
 export interface FactorScore {
-  factor: "Guidance Accuracy" | "Disclosure Honesty" | "Capital Allocation";
+  factor: "Guidance Accuracy" | "Disclosure Honesty" | "Capital Allocation" | "Customer Traction" | string;
   rating: TrustLevel;
   descriptor: string | null;
 }

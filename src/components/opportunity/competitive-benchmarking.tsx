@@ -80,7 +80,7 @@ export function CompetitiveBenchmarking({ data, peers, loading }: CompetitiveBen
                         {row.company}
                       </span>
                       {row.is_current && (
-                        <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[9px] font-semibold px-1.5 py-0.5 uppercase tracking-wide">
+                        <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-semibold px-1.5 py-0.5 uppercase tracking-wide">
                           CURRENT
                         </span>
                       )}

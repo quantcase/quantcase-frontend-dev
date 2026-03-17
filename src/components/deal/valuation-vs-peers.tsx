@@ -58,13 +58,13 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
   return (
     <div className="space-y-5">
       {/* Section Header */}
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0">
-          <BarChart3 className="h-5 w-5 text-white" />
+      <div className="flex items-center gap-2.5">
+        <div className="h-7 w-7 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0">
+          <BarChart3 className="h-3.5 w-3.5 text-white" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{title}</h3>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">{subtitle}</p>
+          <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">{title}</h3>
+          {subtitle && <p className="text-xs text-zinc-400">{subtitle}</p>}
         </div>
       </div>
 
@@ -84,7 +84,7 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
                   {item.label}
                 </p>
-                <p className={`text-2xl font-bold ${colors.value}`}>{item.value}</p>
+                <p className={`text-[26px] font-normal ${colors.value}`}>{item.value}</p>
                 <p className="text-xs text-zinc-500 mt-0.5">{item.detail}</p>
               </div>
             );
@@ -112,7 +112,7 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
                 </Badge>
               </div>
             </div>
-            <h4 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+            <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 mb-2">
               {reRatingView.title}
             </h4>
             <RichDescription segments={reRatingView.description} />
@@ -186,7 +186,7 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
             {scenarioMultiples.map((item, i) => (
               <div key={i}>
                 <p className="text-[10px] text-zinc-400">{item.label}</p>
-                <p className={`text-2xl font-bold ${multipleColors[item.color]}`}>
+                <p className={`text-[26px] font-normal ${multipleColors[item.color]}`}>
                   {item.value}
                 </p>
                 <p className={`text-xs ${multipleSubColors[item.color]}`}>{item.change}</p>

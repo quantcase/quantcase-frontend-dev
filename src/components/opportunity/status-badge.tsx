@@ -1,14 +1,14 @@
 const STATUS_COLORS: Record<string, { badge: string; dot: string }> = {
   green: {
-    badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700",
+    badge: "text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700",
     dot: "bg-emerald-500",
   },
   yellow: {
-    badge: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700",
+    badge: "text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700",
     dot: "bg-yellow-500",
   },
   red: {
-    badge: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-700",
+    badge: "text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700",
     dot: "bg-red-500",
   },
 };

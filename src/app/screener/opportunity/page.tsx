@@ -417,12 +417,12 @@ function OpportunityContent() {
 
                   {/* Segmented bar with LOW / MODERATE / HIGH labels */}
                   <div className="space-y-1.5">
-                    <div style={{ display: "flex", gap: 3 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
                       {Array.from({ length: maxScore }).map((_, i) => (
                         <div
                           key={i}
                           style={{
-                            flex: 1,
+                            width: 8,
                             height: 32,
                             borderRadius: 2,
                             backgroundColor: i < filledCount ? fillColor : "#E2E8F0",
@@ -446,19 +446,19 @@ function OpportunityContent() {
                       const sFilled = numericScore ? Math.round(Math.min(parsedScore, s!.max_score)) : 0;
                       const rowFillColor = numericScore ? scoreColor(parsedScore, s!.max_score) : fillColor;
                       return (
-                        <div key={row.name} className="flex items-center gap-3 py-2.5 border-b border-zinc-100 last:border-0">
-                          <h6 className="w-32 shrink-0">{row.name}</h6>
+                        <div key={row.name} className="flex items-center gap-4 py-2.5 border-b border-zinc-100 last:border-0">
+                          <h6 className="w-40 shrink-0">{row.name}</h6>
                           <span style={{ fontSize: 14, fontWeight: 500, color: numericScore ? "#0F172B" : "#94a3b8", whiteSpace: "nowrap" }}>
                             {numericScore ? `${parsedScore}/${s!.max_score}` : "N/A"}
                           </span>
                           {numericScore && (
-                            <div style={{ display: "flex", gap: 2, flex: 1 }}>
+                            <div style={{ display: "flex", gap: 2, flex: 1, justifyContent: "center" }}>
                               {Array.from({ length: s!.max_score }).map((_, i) => (
                                 <div
                                   key={i}
                                   style={{
-                                    flex: 1,
                                     height: 12,
+                                    width: 6,
                                     borderRadius: 1,
                                     backgroundColor: i < sFilled ? rowFillColor : "#E2E8F0",
                                   }}
@@ -467,7 +467,7 @@ function OpportunityContent() {
                             </div>
                           )}
                           {!numericScore && <div style={{ flex: 1 }} />}
-                          <h6 className="shrink-0 text-right w-20" style={{ color: numericScore ? undefined : "#94a3b8" }}>{s?.status.split(" ")[0] ?? "N/A"}</h6>
+                          <h6 className="shrink-0 text-right w-36" style={{ color: numericScore ? undefined : "#94a3b8" }}>{s?.status ?? "N/A"}</h6>
                         </div>
                       );
                     })}

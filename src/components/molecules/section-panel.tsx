@@ -7,44 +7,42 @@ interface SectionScoring {
   status_color?: string;
 }
 
-const SEGMENT_FILL_COLORS: Record<string, string> = {
-  green: "#22c55e",
-  yellow: "#eab308",
-  red: "#ef4444",
-};
-
-const SEGMENT_TEXT_COLORS: Record<string, string> = {
-  green: "#16a34a",
-  yellow: "#a16207",
-  red: "#dc2626",
-};
+function scoreColor(score: number, maxScore: number): string {
+  const pct = maxScore > 0 ? score / maxScore : 0;
+  if (pct < 0.4) return "#F8383C";
+  if (pct < 0.7) return "#FBBF24";
+  return "#888888";
+}
 
 function SectionScoreBar({ scoring }: { scoring: SectionScoring }) {
-  const filled = Math.round(Math.min(scoring.score, scoring.max_score));
+  const parsedScore = parseFloat(String(scoring.score));
+  const numericScore = !isNaN(parsedScore);
+  const filled = numericScore ? Math.round(Math.min(parsedScore, scoring.max_score)) : 0;
   const total = scoring.max_score;
-  const colorKey = scoring.status_color ?? "green";
-  const fillColor = SEGMENT_FILL_COLORS[colorKey] ?? SEGMENT_FILL_COLORS.green;
-  const textColor = SEGMENT_TEXT_COLORS[colorKey] ?? SEGMENT_TEXT_COLORS.green;
+  const fillColor = numericScore ? scoreColor(parsedScore, scoring.max_score) : "#E2E8F0";
+  const textColor = fillColor;
 
   return (
     <div className="shrink-0 flex items-center gap-2">
-      <span style={{ fontSize: 13, fontWeight: 600, color: textColor, letterSpacing: "0.01em" }}>
-        {scoring.score}/{scoring.max_score}
+      <span style={{ fontSize: 13, fontWeight: 600, color: numericScore ? textColor : "#94a3b8", letterSpacing: "0.01em" }}>
+        {numericScore ? `${parsedScore}/${scoring.max_score}` : "N/A"}
       </span>
-      <div style={{ display: "flex", gap: 2 }}>
-        {Array.from({ length: total }).map((_, i) => (
-          <div
-            key={i}
-            style={{
-              width: 6,
-              height: 12,
-              flexShrink: 0,
-              borderRadius: 1,
-              backgroundColor: i < filled ? fillColor : "#E2E8F0",
-            }}
-          />
-        ))}
-      </div>
+      {numericScore && (
+        <div style={{ display: "flex", gap: 2 }}>
+          {Array.from({ length: total }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: 6,
+                height: 12,
+                flexShrink: 0,
+                borderRadius: 1,
+                backgroundColor: i < filled ? fillColor : "#E2E8F0",
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -81,8 +79,7 @@ export function SectionPanel({
           borderRadius: 10,
           border: "1px solid rgba(226, 226, 226, 0.10)",
           background: "#FFF",
-          paddingTop: 32,
-          paddingBottom: 20,
+          paddingTop: 16,
           paddingLeft: 16,
           paddingRight: 16,
         }}

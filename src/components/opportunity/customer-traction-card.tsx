@@ -86,16 +86,16 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
           <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-2 mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
-              <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Key Customer Takeaway</p>
+              <h5>Key Customer Takeaway</h5>
             </div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">{t?.key_takeaway ?? 'N/A'}</p>
+            <p>{t?.key_takeaway ?? 'N/A'}</p>
           </div>
 
           {/* ── Customer Growth Trajectory ── */}
           <div className="space-y-3">
             <div className="flex items-center gap-1.5">
               <Users className="h-3.5 w-3.5 text-zinc-500" />
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Customer Growth Trajectory</span>
+              <h6 className="uppercase tracking-wider">Customer Growth Trajectory</h6>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {growthTrajectory.map((m, i) => (
@@ -105,15 +105,15 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
             <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
-                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Customer Acquisition Dynamics</p>
+                <h5>Customer Acquisition Dynamics</h5>
               </div>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {acqGrid.map((item, i) => {
                   const [label, body] = splitLabelBody(item);
                   return (
                     <div key={i}>
-                      {label && <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">{label}</p>}
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{body}</p>
+                      {label && <h6 className="mb-1">{label}</h6>}
+                      <p>{body}</p>
                     </div>
                   );
                 })}
@@ -125,7 +125,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                     <Badge className="bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-semibold uppercase shrink-0">
                       {label || "Note"}
                     </Badge>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{body}</p>
+                    <p>{body}</p>
                   </div>
                 );
               })()}
@@ -136,7 +136,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
           <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
             <div className="flex items-center gap-1.5">
               <RefreshCw className="h-3.5 w-3.5 text-zinc-500" />
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Retention &amp; Revenue Expansion</span>
+              <h6 className="uppercase tracking-wider">Retention &amp; Revenue Expansion</h6>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {retentionMetrics.map((m, i) => (
@@ -146,11 +146,11 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
             <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
-                <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Why Retention is Strong</span>
+                <h5>Why Retention is Strong</h5>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2.5">
-                  <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Product Stickiness</p>
+                  <h5>Product Stickiness</h5>
                   {stickiness.map((item, i) => {
                     const [label, body] = splitLabelBody(item);
                     return (
@@ -165,7 +165,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                   })}
                 </div>
                 <div className="space-y-2.5">
-                  <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Expansion Drivers</p>
+                  <h5>Expansion Drivers</h5>
                   {expansion.map((item, i) => {
                     const [label, body] = splitLabelBody(item);
                     return (
@@ -187,12 +187,12 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
           <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
             <div className="flex items-center gap-1.5">
               <TrendingUp className="h-3.5 w-3.5 text-zinc-500" />
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Revenue Trajectory Projection (Alt Data Signals)</span>
+              <h6 className="uppercase tracking-wider">Revenue Trajectory Projection (Alt Data Signals)</h6>
             </div>
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Database className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
-                <p className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">Alt Data Sources Tracked</p>
+                <h6 className="uppercase tracking-wider">Alt Data Sources Tracked</h6>
               </div>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 {(t?.alt_data_signals ?? []).map((s, i) => {
@@ -202,9 +202,9 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                     <div key={i} className="bg-white dark:bg-zinc-900 rounded-lg p-3 space-y-1.5">
                       <div className="flex items-center gap-2">
                         <Icon className={`h-3.5 w-3.5 ${titleColor}`} />
-                        <p className={`text-xs font-semibold ${titleColor}`}>{s.source ?? 'N/A'}</p>
+                        <h6 className={titleColor}>{s.source ?? 'N/A'}</h6>
                       </div>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{s.insight ?? 'N/A'}</p>
+                      <p>{s.insight ?? 'N/A'}</p>
                     </div>
                   );
                 })}
@@ -216,17 +216,17 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
           <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
             <div className="flex items-center gap-1.5">
               <PieChart className="h-3.5 w-3.5 text-zinc-500" />
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Customer Segmentation &amp; Revenue Mix</span>
+              <h6 className="uppercase tracking-wider">Customer Segmentation &amp; Revenue Mix</h6>
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               {(seg?.tiers ?? []).map((tier, i) => (
                 <div key={i} className={`rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 space-y-3 ${tierCardBg[i % tierCardBg.length]}`}>
                   <div>
-                    <p className={`text-xs font-bold uppercase tracking-wider ${tierTitleColors[i % tierTitleColors.length]}`}>{tier.tier ?? 'N/A'}</p>
-                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">{tier.customer_count ?? 'N/A'} Customers</p>
+                    <h6 className={`uppercase tracking-wider ${tierTitleColors[i % tierTitleColors.length]}`}>{tier.tier ?? 'N/A'}</h6>
+                    <p className="mt-0.5">{tier.customer_count ?? 'N/A'} Customers</p>
                   </div>
                   {tier.revenue_share && (
-                    <p className={`text-xs font-semibold ${tierValueColors[i % tierValueColors.length]} bg-zinc-50 dark:bg-zinc-800 rounded px-2 py-1.5 leading-snug`}>
+                    <p className={`font-semibold ${tierValueColors[i % tierValueColors.length]} bg-zinc-50 dark:bg-zinc-800 rounded px-2 py-1.5 leading-snug`}>
                       {tier.revenue_share}
                     </p>
                   )}
@@ -237,7 +237,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                       { label: "NRR", value: tier.nrr },
                       { label: "Churn", value: tier.churn },
                     ].map((item) => (
-                      <p key={item.label} className="text-[12px] text-zinc-600 dark:text-zinc-400">
+                      <p key={item.label}>
                         <span className="mr-1 text-zinc-400">•</span>
                         <span className="font-semibold text-zinc-700 dark:text-zinc-300">{item.label}:</span>{" "}
                         {item.value ?? 'N/A'}
@@ -251,20 +251,20 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
             <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Info className="h-4 w-4 text-zinc-400 flex-shrink-0" />
-                <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Segmentation Strategy &amp; Insights</span>
+                <h5>Segmentation Strategy &amp; Insights</h5>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2.5">
                   <div className="flex items-center gap-1.5">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                    <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Revenue Quality</p>
+                    <h5>Revenue Quality</h5>
                   </div>
                   {(seg?.revenue_quality ?? []).map((item, i) => {
                     const [label, body] = splitLabelBody(item);
                     return (
                       <div key={i}>
-                        {label && <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-0.5">{label}</p>}
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{body}</p>
+                        {label && <h6 className="mb-0.5">{label}</h6>}
+                        <p>{body}</p>
                       </div>
                     );
                   })}
@@ -272,14 +272,14 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                 <div className="space-y-2.5">
                   <div className="flex items-center gap-1.5">
                     <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
-                    <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Growth Strategy</p>
+                    <h5>Growth Strategy</h5>
                   </div>
                   {(seg?.growth_strategy ?? []).map((item, i) => {
                     const [label, body] = splitLabelBody(item);
                     return (
                       <div key={i}>
-                        {label && <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-0.5">{label}</p>}
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{body}</p>
+                        {label && <h6 className="mb-0.5">{label}</h6>}
+                        <p>{body}</p>
                       </div>
                     );
                   })}

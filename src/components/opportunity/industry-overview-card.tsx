@@ -94,7 +94,7 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
               <div>
                 <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1">Demand</p>
                 <ul className="space-y-1">
-                  {(dsd?.demand ?? []).map((pt, i) => (
+                  {(Array.isArray(dsd?.demand) ? dsd.demand : []).map((pt, i) => (
                     <li key={i} className="flex gap-1.5 text-xs font-light text-zinc-600 dark:text-zinc-400 leading-relaxed">
                       <span className="text-zinc-400 shrink-0 mt-0.5">•</span>
                       <span>{pt}</span>
@@ -105,7 +105,7 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
               <div>
                 <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1">Supply</p>
                 <ul className="space-y-1">
-                  {(dsd?.supply ?? []).map((pt, i) => (
+                  {(Array.isArray(dsd?.supply) ? dsd.supply : []).map((pt, i) => (
                     <li key={i} className="flex gap-1.5 text-xs font-light text-zinc-600 dark:text-zinc-400 leading-relaxed">
                       <span className="text-zinc-400 shrink-0 mt-0.5">•</span>
                       <span>{pt}</span>

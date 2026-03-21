@@ -21,7 +21,7 @@ export default function ScreenerHomePage() {
 
   // Fetch stock data on mount
   useEffect(() => {
-    apiCall<StocksApiResponse>(`${BACKEND_URL}/api/transcript-stocks`, {
+    apiCall<StocksApiResponse>(`${BACKEND_URL}/api/transcript/stocks`, {
       onStart: () => setIsLoading(true),
       onSuccess: (response) => {
         const options: AutocompleteOption[] = response.data.map((stock) => ({

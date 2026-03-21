@@ -11,7 +11,7 @@ export function useTranscriptCalls(symbol: string) {
   useEffect(() => {
     if (!symbol?.trim()) return;
 
-    const url = `${BACKEND_URL}/api/transcript-calls?symbol=${symbol}`;
+    const url = `${BACKEND_URL}/api/transcript/calls?symbol=${symbol}`;
 
     apiCall<TranscriptCallsResponse>(url, {
       onStart: () => {

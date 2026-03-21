@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, SlidersHorizontal, FileText, BarChart2, TrendingUp, Settings } from "lucide-react";
+import { Home, SlidersHorizontal, FileText, BarChart2, TrendingUp, Settings, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Home", href: "/", icon: Home },
-  { label: "Screener", href: "/screener/home", icon: SlidersHorizontal },
+  { label: "Screener", href: "/screener/home", icon: SlidersHorizontal, activePrefix: "/screener" },
+  { label: "WealthOS", href: "/wealthos/dashboard", icon: Briefcase, activePrefix: "/wealthos" },
   { label: "IC Report", href: "/ic-report", icon: FileText },
   { label: "Model Builder", href: "/model-builder", icon: TrendingUp },
   { label: "Model Analytics", href: "/model-analytics", icon: BarChart2 },
@@ -28,10 +29,13 @@ export function AppSidebar() {
 
       {/* Nav Items */}
       <nav className="flex flex-col gap-2 py-3 px-3">
-        {navItems.map(({ label, href, icon: Icon }) => {
+        {navItems.map(({ label, href, icon: Icon, ...rest }) => {
+          const activePrefix = (rest as { activePrefix?: string }).activePrefix;
           const isActive =
             href !== "#" &&
-            (pathname === href || (href !== "/" && pathname.startsWith(href)));
+            (activePrefix
+              ? pathname.startsWith(activePrefix)
+              : pathname === href || (href !== "/" && pathname.startsWith(href)));
           return (
             <Link
               key={label}

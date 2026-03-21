@@ -28,6 +28,7 @@ import { CustomerTractionCard } from "@/components/opportunity/customer-traction
 import { SectionPanel } from "@/components/opportunity/section-panel";
 import { SubsectionHeader } from "@/components/opportunity/subsection-header";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
+import { InsightsCard } from "@/components/opportunity/insights-card";
 
 function OpportunityContent() {
   const searchParams = useSearchParams();
@@ -542,7 +543,7 @@ function OpportunityContent() {
           scoring={financialScoring}
           contentClassName=""
         >
-          <div className="px-6 pb-0 space-y-4">
+          <div className="pb-0 space-y-4">
             <FinancialStrengthCard
               data={data.financial_strength}
               showDetails={showFinancialDetails}

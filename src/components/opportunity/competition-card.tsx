@@ -4,7 +4,7 @@ import { TrendingUp, Award, Activity, Lock, ZapIcon } from "lucide-react";
 import { safeMetric, type CompetitionSection } from "@/types/opportunity";
 import { MetricTile } from "@/components/molecules/metric-tile";
 import { ExpandToggle } from "@/components/molecules/expand-toggle";
-import { Badge } from "@/components/ui/badge";
+import { InsightsCard } from "@/components/opportunity/insights-card";
 
 interface CompetitionCardProps {
   data?: CompetitionSection;
@@ -64,10 +64,7 @@ export function CompetitionCard({ data, showDetails = false, onToggle }: Competi
             </div>
           </div>
           {ppd?.watch_outs && (
-            <div className="rounded-lg bg-[#D9D9D9] dark:bg-zinc-950 px-4 py-3 space-y-1.5 flex items-center gap-2">
-              <Badge className="bg-black text-white uppercase tracking-wider mb-0">Watch-outs</Badge>
-              <p className="text-[#121212] dark:text-zinc-200 leading-relaxed">{ppd.watch_outs}</p>
-            </div>
+            <InsightsCard title="Watch-outs" text={ppd.watch_outs} />
           )}
         </div>
       )}

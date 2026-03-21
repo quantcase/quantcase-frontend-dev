@@ -7,7 +7,6 @@ export function SubsectionHeader({ title, subtitle }: SubsectionHeaderProps) {
   return (
     <div>
       <h6 className="uppercase tracking-wide mb-0.5">{title}</h6>
-      {subtitle && <p>{subtitle}</p>}
     </div>
   );
 }

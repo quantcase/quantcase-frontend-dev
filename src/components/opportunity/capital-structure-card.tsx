@@ -4,6 +4,8 @@ import type { CapitalStructureSection } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
 import { StatusBadge } from "@/components/opportunity/status-badge";
 import { InsightText } from "@/components/opportunity/bold-text";
+import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
+import { InsightsCard } from "@/components/opportunity/insights-card";
 
 const DEBT_BAR_COLORS: Record<string, string> = {
   red: "bg-red-400",
@@ -11,14 +13,13 @@ const DEBT_BAR_COLORS: Record<string, string> = {
   green: "bg-emerald-400",
 };
 
-
 // ─── Panel: Balance Sheet ──────────────────────────────────────────────────────
 
 function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["balance_sheet"]> }) {
   const maxVal = Math.max(...d.timeline.map((t) => parseFloat(t.value.replace("K", ""))));
 
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4 h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
@@ -61,7 +62,6 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
         <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
           Net Cash — FY20 to FY24
         </p>
-        {/* Value labels row — fixed at top so all align */}
         <div className="flex gap-1 mb-1">
           {d.timeline.map((t) => (
             <div key={t.label} className="flex-1 text-center">
@@ -76,7 +76,6 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
             </div>
           ))}
         </div>
-        {/* Bars — grow from bottom */}
         <div className="flex items-end gap-1 h-12">
           {d.timeline.map((t) => {
             const val = parseFloat(t.value.replace("K", ""));
@@ -92,7 +91,6 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
             );
           })}
         </div>
-        {/* Period labels row — fixed at bottom */}
         <div className="flex gap-1 mt-1">
           {d.timeline.map((t) => (
             <div key={t.label} className="flex-1 text-center">
@@ -128,7 +126,7 @@ function DebtTrajectoryPanel({
   const maxVal = Math.max(...d.bars.map((b) => b.value));
 
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4 h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
@@ -137,7 +135,6 @@ function DebtTrajectoryPanel({
         <StatusBadge label={d.status} color={d.status_color} />
       </div>
 
-      {/* Sub-label */}
       <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
         Gross Debt — FY20 to FY24 (₹CR)
       </p>
@@ -222,22 +219,17 @@ function EquityAllocationPanel({
   d: NonNullable<CapitalStructureSection["equity_allocation"]>;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4 h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-          Equity &amp; Profit Allocation
+          PAT Allocation — Retained vs Paid Out
         </p>
         <StatusBadge label={d.status} color={d.status_color} />
       </div>
 
-      {/* Sub-label */}
       <p className="text-[10px] text-zinc-400 italic">
         Of every ₹100 earned, how much stays in the business vs goes out to shareholders?
-      </p>
-
-      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-        PAT Allocation per year — Retained vs Paid Out
       </p>
 
       {/* Bars */}
@@ -338,7 +330,7 @@ function CapexIntensityPanel({
   d: NonNullable<CapitalStructureSection["capex_intensity"]>;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4 h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
@@ -393,19 +385,101 @@ interface CapitalStructureCardProps {
 export function CapitalStructureCard({ data }: CapitalStructureCardProps) {
   const d = data ?? {};
 
-  return (
-    <div className="space-y-4">
-      {/* Row 1: Balance Sheet + Debt Trajectory */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {d.balance_sheet && <BalanceSheetPanel d={d.balance_sheet} />}
-        {d.debt_trajectory && <DebtTrajectoryPanel d={d.debt_trajectory} />}
+  // ── Row 1 col1: Balance Sheet metric tiles ─────────────────────────────────
+  const balanceCol1 = d.balance_sheet ? (
+    <>
+      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Net Cash</p>
+        <p className="text-[26px] font-normal text-emerald-600 dark:text-emerald-400 tracking-tight">
+          {d.balance_sheet.net_cash}
+        </p>
+        <StatusBadge label={d.balance_sheet.status} color={d.balance_sheet.status_color} />
       </div>
+      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Cash &amp; Investments</p>
+        <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50 tracking-tight">{d.balance_sheet.cash_investments}</p>
+        <p className="text-xs text-zinc-400">Gross Debt: {d.balance_sheet.gross_debt}</p>
+      </div>
+      {d.debt_trajectory && (
+        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Debt Reduction</p>
+          <p className="text-[26px] font-normal text-emerald-600 dark:text-emerald-400 tracking-tight">
+            {d.debt_trajectory.reduction_pct}
+          </p>
+          <p className="text-xs text-zinc-400">Current: {d.debt_trajectory.current_debt}</p>
+        </div>
+      )}
+    </>
+  ) : null;
 
-      {/* Row 2: Equity Allocation + Capex Intensity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {d.equity_allocation && <EquityAllocationPanel d={d.equity_allocation} />}
-        {d.capex_intensity && <CapexIntensityPanel d={d.capex_intensity} />}
+  // ── Row 2 col1: Equity metric tiles ───────────────────────────────────────
+  const equityCol1 = d.equity_allocation ? (
+    <>
+      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+          {d.equity_allocation.total_equity_sublabel ?? "Equity & Reserves"}
+        </p>
+        <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{d.equity_allocation.total_equity}</p>
       </div>
+      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">ROE (FY24)</p>
+        <p className="text-[26px] font-normal text-emerald-600 dark:text-emerald-400 tracking-tight">
+          {d.equity_allocation.roe}
+        </p>
+        {d.equity_allocation.roe_sublabel && (
+          <p className="text-xs text-zinc-400">{d.equity_allocation.roe_sublabel}</p>
+        )}
+      </div>
+      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Payout Ratio</p>
+        <p
+          className={`text-[26px] font-normal tracking-tight ${
+            d.equity_allocation.payout_trend_direction === "up"
+              ? "text-amber-500"
+              : d.equity_allocation.payout_trend_direction === "down"
+              ? "text-red-500"
+              : "text-zinc-900 dark:text-zinc-50"
+          }`}
+        >
+          {d.equity_allocation.payout_trend}
+          {d.equity_allocation.payout_trend_direction === "up" ? " ▲" : d.equity_allocation.payout_trend_direction === "down" ? " ▼" : ""}
+        </p>
+        {d.equity_allocation.payout_sublabel && (
+          <p className="text-xs text-zinc-400">{d.equity_allocation.payout_sublabel}</p>
+        )}
+      </div>
+    </>
+  ) : null;
+
+  return (
+    <div className="space-y-6">
+      {/* Row 1 — Balance Sheet & Leverage */}
+      {(d.balance_sheet || d.debt_trajectory) && (
+        <BentoSectionGrid
+          col1={balanceCol1}
+          col2={d.debt_trajectory ? <DebtTrajectoryPanel d={d.debt_trajectory} /> : undefined}
+          col3={d.balance_sheet ? <BalanceSheetPanel d={d.balance_sheet} /> : undefined}
+          takeaway={
+            d.balance_sheet?.insight
+              ? <InsightsCard title="BALANCE SHEET TAKEAWAY" text={d.balance_sheet.insight} />
+              : undefined
+          }
+        />
+      )}
+
+      {/* Row 2 — Equity Allocation & Capex */}
+      {(d.equity_allocation || d.capex_intensity) && (
+        <BentoSectionGrid
+          col1={equityCol1}
+          col2={d.equity_allocation ? <EquityAllocationPanel d={d.equity_allocation} /> : undefined}
+          col3={d.capex_intensity ? <CapexIntensityPanel d={d.capex_intensity} /> : undefined}
+          takeaway={
+            d.equity_allocation?.insight
+              ? <InsightsCard title="EQUITY & CAPEX TAKEAWAY" text={d.equity_allocation.insight} />
+              : undefined
+          }
+        />
+      )}
     </div>
   );
 }

@@ -11,8 +11,8 @@ import { OperatingMetrics } from "@/components/opportunity/operating-metrics";
 import { MetricTile } from "@/components/molecules/metric-tile";
 import { ExpandToggle } from "@/components/molecules/expand-toggle";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
+import { InsightsCard } from "@/components/opportunity/insights-card";
 import { IconBox } from "../molecules/icon-box";
-import { Badge } from "@/components/ui/badge";
 
 interface IndustryOverviewCardProps {
   data?: IndustryOverviewSection;
@@ -104,10 +104,7 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
               </div>
             </div>
             {dsd?.net_impact && (
-              <div className="rounded-lg bg-[#D9D9D9] dark:bg-zinc-950 px-4 py-3 space-y-1.5 flex items-center gap-2">
-                <Badge className="bg-black text-white uppercase tracking-wider mb-0">Net Impact</Badge>
-                <p className="text-[#121212] leading-relaxed">{dsd.net_impact}</p>
-              </div>
+              <InsightsCard title="Net Impact" text={dsd.net_impact} />
             )}
           </div>
 
@@ -164,12 +161,7 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
           </div>
 
           {/* Forward Outlook */}
-          <div className="rounded-lg bg-[#D9D9D9] dark:bg-zinc-950 px-4 py-3 space-y-1.5 flex items-center gap-2">
-            <Badge className="bg-black text-white uppercase tracking-wider mb-0">Forward Outlook</Badge>
-            <p className="text-[#121212] leading-relaxed">
-              {opmTrend?.forward_outlook ?? 'N/A'}
-            </p>
-          </div>
+          <InsightsCard title="Forward Outlook" text={opmTrend?.forward_outlook} />
 
         </div>
       )}

@@ -122,4 +122,65 @@
   body {
     @apply bg-background text-foreground;
   }
+  h1 {
+    color: #0F172B;
+    font-size: 56px;
+    font-weight: 500;
+    line-height: 64px;
+  }
+  h2 {
+    color: #0F172B;
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 40px;
+  }
+  h3 {
+    color: #0F172B;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 36px;
+  }
+  h4 {
+    color: #0F172B;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 28px;
+  }
+  h5 {
+    color: #0F172B;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+  }
+  h6 {
+    color: rgba(18, 18, 18, 0.50);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 20px;
+  }
+  p {
+    color: #888;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+  ul, ol {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  li {
+    color: #888;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    list-style-type: disc;
+    margin-left: 1.25rem;
+  }
+  small {
+    color: #888;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 18px;
+  }
 }

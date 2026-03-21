@@ -1,5 +1,3 @@
-Set these universal properties for standard HTML elements with these CSS specs. I want to replace all custom class and tailwind based elaborate html code with simple and standard HTML tags. 
-
 
 # CardWithHeader:
 
@@ -81,7 +79,7 @@ line-height: 20px; /* 166.667% */
 
 
 
-## BODY/PARAGRAPH
+## BODY/PARAGRAPH/LI/UL/OL/SPAN
 color: #888;
 font-family: "IBM Plex Sans";
 font-size: 14px;
@@ -105,3 +103,28 @@ align-items: flex-start;
 border-radius: 2px;
 border: 1px solid rgba(255, 255, 255, 0.30);
 background: #121212;
+
+## Lists (OL/UL)
+display: flex;
+flex-direction: column;
+gap: 20px;
+
+
+# IconBox
+## Main Box
+display: flex;
+width: 32px;
+height: 32px;
+padding: 6px 6px 0 6px;
+flex-direction: column;
+align-items: flex-start;
+aspect-ratio: 1/1;
+border-radius: 6px;
+border: 1px solid rgba(18, 18, 18, 0.10);
+background: rgba(18, 18, 18, 0.03);
+
+## Icon
+height: 20px;
+flex-shrink: 0;
+align-self: stretch;
+color: #888888;

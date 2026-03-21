@@ -477,7 +477,7 @@ function OpportunityContent() {
 
               {/* Right — Overall Opportunity Assessment */}
               <SectionPanel title="Overall Opportunity Assessment">
-                <div className="flex flex-col justify-between h-90 py-4 pb-8">
+                <div className="flex flex-col justify-between h-90 pb-4">
                   {assessmentRows.map((row, i) => {
                     const s = ft.section_scores[row.key];
                     return (
@@ -486,7 +486,7 @@ function OpportunityContent() {
                         <IconBox icon={TrendingUp} />
                         <div className="space-y-0.5">
                           <h5>{row.name}</h5>
-                          <p className="line-clamp-1 text-truncate">{s.takeaway}</p>
+                          <p className="line-clamp-2 text-truncate">{s.takeaway}</p>
                         </div>
                       </div>
                       {i < assessmentRows.length - 1 && <hr className="border-zinc-200 dark:border-zinc-700 border-dashed"/> }

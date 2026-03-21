@@ -9,8 +9,8 @@ interface SectionScoring {
 
 function scoreColor(score: number, maxScore: number): string {
   const pct = maxScore > 0 ? score / maxScore : 0;
-  if (pct < 0.4) return "#F8383C";
-  if (pct < 0.7) return "#FBBF24";
+  if (pct <= 0.4) return "#F8383C";
+  if (pct <= 0.7) return "#FBBF24";
   return "#888888";
 }
 

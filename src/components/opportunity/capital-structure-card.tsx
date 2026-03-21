@@ -1,11 +1,13 @@
 "use client";
 
+import { Wallet, TrendingDown, PieChart, BarChart2, Percent } from "lucide-react";
 import type { CapitalStructureSection } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
 import { StatusBadge } from "@/components/opportunity/status-badge";
 import { InsightText } from "@/components/opportunity/bold-text";
 import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
 import { InsightsCard } from "@/components/opportunity/insights-card";
+import { MetricTile } from "@/components/molecules/metric-tile";
 
 const DEBT_BAR_COLORS: Record<string, string> = {
   red: "bg-red-400",
@@ -388,26 +390,25 @@ export function CapitalStructureCard({ data }: CapitalStructureCardProps) {
   // ── Row 1 col1: Balance Sheet metric tiles ─────────────────────────────────
   const balanceCol1 = d.balance_sheet ? (
     <>
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Net Cash</p>
-        <p className="text-[26px] font-normal text-emerald-600 dark:text-emerald-400 tracking-tight">
-          {d.balance_sheet.net_cash}
-        </p>
-        <StatusBadge label={d.balance_sheet.status} color={d.balance_sheet.status_color} />
-      </div>
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Cash &amp; Investments</p>
-        <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50 tracking-tight">{d.balance_sheet.cash_investments}</p>
-        <p className="text-xs text-zinc-400">Gross Debt: {d.balance_sheet.gross_debt}</p>
-      </div>
+      <MetricTile
+        label="Net Cash"
+        value={d.balance_sheet.net_cash}
+        sublabel={d.balance_sheet.status}
+        icon={Wallet}
+      />
+      <MetricTile
+        label="Cash & Investments"
+        value={d.balance_sheet.cash_investments}
+        sublabel={`Gross Debt: ${d.balance_sheet.gross_debt}`}
+        icon={BarChart2}
+      />
       {d.debt_trajectory && (
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Debt Reduction</p>
-          <p className="text-[26px] font-normal text-emerald-600 dark:text-emerald-400 tracking-tight">
-            {d.debt_trajectory.reduction_pct}
-          </p>
-          <p className="text-xs text-zinc-400">Current: {d.debt_trajectory.current_debt}</p>
-        </div>
+        <MetricTile
+          label="Debt Reduction"
+          value={d.debt_trajectory.reduction_pct}
+          sublabel={`Current: ${d.debt_trajectory.current_debt}`}
+          icon={TrendingDown}
+        />
       )}
     </>
   ) : null;
@@ -415,39 +416,23 @@ export function CapitalStructureCard({ data }: CapitalStructureCardProps) {
   // ── Row 2 col1: Equity metric tiles ───────────────────────────────────────
   const equityCol1 = d.equity_allocation ? (
     <>
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-          {d.equity_allocation.total_equity_sublabel ?? "Equity & Reserves"}
-        </p>
-        <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{d.equity_allocation.total_equity}</p>
-      </div>
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">ROE (FY24)</p>
-        <p className="text-[26px] font-normal text-emerald-600 dark:text-emerald-400 tracking-tight">
-          {d.equity_allocation.roe}
-        </p>
-        {d.equity_allocation.roe_sublabel && (
-          <p className="text-xs text-zinc-400">{d.equity_allocation.roe_sublabel}</p>
-        )}
-      </div>
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Payout Ratio</p>
-        <p
-          className={`text-[26px] font-normal tracking-tight ${
-            d.equity_allocation.payout_trend_direction === "up"
-              ? "text-amber-500"
-              : d.equity_allocation.payout_trend_direction === "down"
-              ? "text-red-500"
-              : "text-zinc-900 dark:text-zinc-50"
-          }`}
-        >
-          {d.equity_allocation.payout_trend}
-          {d.equity_allocation.payout_trend_direction === "up" ? " ▲" : d.equity_allocation.payout_trend_direction === "down" ? " ▼" : ""}
-        </p>
-        {d.equity_allocation.payout_sublabel && (
-          <p className="text-xs text-zinc-400">{d.equity_allocation.payout_sublabel}</p>
-        )}
-      </div>
+      <MetricTile
+        label={d.equity_allocation.total_equity_sublabel ?? "Equity & Reserves"}
+        value={d.equity_allocation.total_equity}
+        icon={PieChart}
+      />
+      <MetricTile
+        label="ROE (FY24)"
+        value={d.equity_allocation.roe}
+        sublabel={d.equity_allocation.roe_sublabel}
+        icon={Percent}
+      />
+      <MetricTile
+        label="Payout Ratio"
+        value={`${d.equity_allocation.payout_trend}${d.equity_allocation.payout_trend_direction === "up" ? " ▲" : d.equity_allocation.payout_trend_direction === "down" ? " ▼" : ""}`}
+        sublabel={d.equity_allocation.payout_sublabel}
+        icon={TrendingDown}
+      />
     </>
   ) : null;
 

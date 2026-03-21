@@ -13,6 +13,7 @@ import type { WorkingCapitalSection } from "@/types/opportunity";
 import { InsightText } from "@/components/opportunity/bold-text";
 import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
 import { InsightsCard } from "@/components/opportunity/insights-card";
+import { MetricTile } from "@/components/molecules/metric-tile";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -127,13 +128,12 @@ export function WorkingCapitalCard({ data }: WorkingCapitalCardProps) {
   const col1 = (
     <>
       {d.rows.map((row) => (
-        <div key={row.key} className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{row.label}</p>
-          <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50 tracking-tight">
-            {row.values[latestIdx] ?? "—"}
-          </p>
-          <p className="text-xs text-zinc-400">{d.quarters[latestIdx] ?? "Latest"}</p>
-        </div>
+        <MetricTile
+          key={row.key}
+          label={row.label}
+          value={String(row.values[latestIdx] ?? "—")}
+          sublabel={d.quarters[latestIdx] ?? "Latest"}
+        />
       ))}
     </>
   );

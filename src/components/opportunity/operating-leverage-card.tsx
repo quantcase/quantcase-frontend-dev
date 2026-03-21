@@ -11,26 +11,13 @@ import {
   CartesianGrid,
   ReferenceLine,
 } from "recharts";
+import { TrendingUp, TrendingDown, Gauge } from "lucide-react";
 import { safeMetric, type OperatingLeverageSection, type DolDataPoint } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
-import { StatusBadge } from "@/components/opportunity/status-badge";
 import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
 import { InsightsCard } from "@/components/opportunity/insights-card";
+import { MetricTile } from "@/components/molecules/metric-tile";
 
-// ─── Verdict metadata ──────────────────────────────────────────────────────────
-
-const VERDICT_META: Record<string, { dotColor: string; textColor: string; bgColor: string }> = {
-  leverage_active:   { dotColor: "bg-emerald-500", textColor: "text-emerald-600 dark:text-emerald-400",   bgColor: "bg-emerald-50 dark:bg-emerald-900/20" },
-  leverage_pending:  { dotColor: "bg-yellow-400",   textColor: "text-yellow-600 dark:text-yellow-400",    bgColor: "bg-yellow-50 dark:bg-yellow-900/20" },
-  leverage_matured:  { dotColor: "bg-teal-500",     textColor: "text-teal-600 dark:text-teal-400",        bgColor: "bg-teal-50 dark:bg-teal-900/20" },
-  cost_inflation:    { dotColor: "bg-orange-500",   textColor: "text-orange-600 dark:text-orange-400",    bgColor: "bg-orange-50 dark:bg-orange-900/20" },
-  negative_leverage: { dotColor: "bg-red-500",      textColor: "text-red-600 dark:text-red-400",          bgColor: "bg-red-50 dark:bg-red-900/20" },
-  investment_mode:   { dotColor: "bg-blue-500",     textColor: "text-blue-600 dark:text-blue-400",        bgColor: "bg-blue-50 dark:bg-blue-900/20" },
-  // Short-key aliases sent by backend
-  negative: { dotColor: "bg-red-500",      textColor: "text-red-600 dark:text-red-400",          bgColor: "bg-red-50 dark:bg-red-900/20" },
-  neutral:  { dotColor: "bg-zinc-400",     textColor: "text-zinc-500 dark:text-zinc-400",         bgColor: "bg-zinc-50 dark:bg-zinc-800/30" },
-  positive: { dotColor: "bg-emerald-500",  textColor: "text-emerald-600 dark:text-emerald-400",   bgColor: "bg-emerald-50 dark:bg-emerald-900/20" },
-};
 
 const FIXED_COST_COLORS: Record<string, { bar: string }> = {
   blue:   { bar: "bg-blue-500" },
@@ -210,7 +197,6 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
   const fixedCostLines = d.fixed_cost_lines ?? [];
   const totalFixed     = d.total_fixed_costs;
   const verdict        = d.verdict;
-  const verdictMeta    = VERDICT_META[verdict?.status ?? "leverage_pending"];
 
   const revGrowth  = safeMetric(d.metrics?.revenue_growth_yoy);
   const ebitGrowth = safeMetric(d.metrics?.ebit_growth_yoy);
@@ -220,36 +206,31 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
   // Latest DOL value from chart data
   const latestDol = chartData.length > 0 ? chartData[chartData.length - 1].dol : null;
 
+  const dolValue = latestDol != null ? `${latestDol}x` : "—";
+  const dolChange = verdict?.tag ?? undefined;
+
   const col1 = (
     <>
-      {/* DOL Score tile */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">DOL Score</p>
-        </div>
-        <p className={`text-[26px] font-normal tracking-tight ${verdictMeta?.textColor ?? "text-zinc-900 dark:text-zinc-50"}`}>
-          {latestDol != null ? latestDol : "—"}
-        </p>
-        {verdict?.tag && <p className="text-xs text-zinc-400">{verdict.tag}</p>}
-      </div>
-
-      {/* Revenue Growth YoY */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{revGrowth.label}</p>
-        <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50 tracking-tight">{revGrowth.value}</p>
-        {revGrowth.sublabel && <p className="text-xs text-zinc-400">{revGrowth.sublabel}</p>}
-        {revChange && <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">{revChange}</p>}
-      </div>
-
-      {/* EBIT Growth YoY — with leverage spread callout */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{ebitGrowth.label}</p>
-        <p className="text-[26px] font-normal text-orange-500 tracking-tight">{ebitGrowth.value}</p>
-        {ebitGrowth.sublabel && <p className="text-xs text-zinc-400">{ebitGrowth.sublabel}</p>}
-        {levSpread.value !== "N/A" && (
-          <p className="text-xs font-semibold text-red-500">Leverage Spread: {levSpread.value}</p>
-        )}
-      </div>
+      <MetricTile
+        label="DOL Score"
+        value={dolValue}
+        sublabel={dolChange}
+        icon={Gauge}
+      />
+      <MetricTile
+        label={revGrowth.label}
+        value={revGrowth.value}
+        sublabel={revGrowth.sublabel}
+        change={revChange ?? undefined}
+        icon={TrendingUp}
+      />
+      <MetricTile
+        label={ebitGrowth.label}
+        value={ebitGrowth.value}
+        sublabel={ebitGrowth.sublabel}
+        change={levSpread.value !== "N/A" ? `Leverage Spread: ${levSpread.value}` : undefined}
+        icon={TrendingDown}
+      />
     </>
   );
 

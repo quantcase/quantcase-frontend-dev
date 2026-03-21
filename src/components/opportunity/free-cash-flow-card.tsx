@@ -10,7 +10,7 @@ import {
   CartesianGrid,
   Cell,
 } from "recharts";
-import { CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Info, Percent, TrendingUp, DollarSign } from "lucide-react";
 import type {
   FreeCashFlowSection,
   FcfConversionDataPoint,
@@ -19,6 +19,7 @@ import { StatusBadge } from "@/components/opportunity/status-badge";
 import { InsightText } from "@/components/opportunity/bold-text";
 import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
 import { InsightsCard } from "@/components/opportunity/insights-card";
+import { MetricTile } from "@/components/molecules/metric-tile";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -26,12 +27,6 @@ function parseAmtCr(s?: string | null): number {
   if (!s) return 0;
   const n = parseFloat(s.replace(/[₹,\s]/g, "").replace("Cr", ""));
   return isNaN(n) ? 0 : n;
-}
-
-function statusTextColor(color?: string): string {
-  if (color === "green") return "text-emerald-600 dark:text-emerald-400";
-  if (color === "yellow") return "text-yellow-600 dark:text-yellow-400";
-  return "text-red-500";
 }
 
 // ─── Panel 1: Conversion Consistency (unchanged) ─────────────────────────────
@@ -240,50 +235,31 @@ export function FreeCashFlowCard({ data }: FreeCashFlowCardProps) {
   const d = data ?? {};
   const yieldNow = d.fcf_yield?.yield_history?.find((y) => y.is_current);
 
+  const fcfGrowthSublabel = (d.growth_trajectory?.fcf_start && d.growth_trajectory?.fcf_end)
+    ? `${d.growth_trajectory.fcf_start} → ${d.growth_trajectory.fcf_end}`
+    : undefined;
+
   const col1 = (
     <>
-      {/* FCF Conversion tile — shows range_high (best conversion) */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">FCF Conversion</p>
-          {d.conversion_consistency && (
-            <StatusBadge label={d.conversion_consistency.status} color={d.conversion_consistency.status_color} />
-          )}
-        </div>
-        <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50 tracking-tight">
-          {d.conversion_consistency?.range_high != null ? `${d.conversion_consistency.range_high}%` : "—"}
-        </p>
-        <p className="text-xs text-zinc-400">TTM Conversion Rate</p>
-      </div>
-
-      {/* FCF Growth tile */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">FCF Growth</p>
-        <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50 tracking-tight">
-          {d.growth_trajectory?.fcf_cagr_pct != null ? `${d.growth_trajectory.fcf_cagr_pct}%` : "—"}
-        </p>
-        {(d.growth_trajectory?.fcf_start && d.growth_trajectory?.fcf_end) && (
-          <p className="text-xs text-zinc-400">{d.growth_trajectory.fcf_start} → {d.growth_trajectory.fcf_end}</p>
-        )}
-        {d.growth_trajectory?.status && (
-          <p className={`text-xs font-semibold ${statusTextColor(d.growth_trajectory.status_color)}`}>
-            {d.growth_trajectory.status}
-          </p>
-        )}
-      </div>
-
-      {/* FCF Yield tile */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">FCF Yield</p>
-        <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50 tracking-tight">
-          {yieldNow?.yield_pct != null ? `${yieldNow.yield_pct}%` : "—"}
-        </p>
-        {yieldNow?.zone && (
-          <p className={`text-xs font-semibold ${statusTextColor(d.fcf_yield?.status_color)}`}>
-            {yieldNow.zone}
-          </p>
-        )}
-      </div>
+      <MetricTile
+        label="FCF Conversion"
+        value={d.conversion_consistency?.range_high != null ? `${d.conversion_consistency.range_high}%` : "—"}
+        sublabel="TTM Conversion Rate"
+        icon={Percent}
+      />
+      <MetricTile
+        label="FCF Growth"
+        value={d.growth_trajectory?.fcf_cagr_pct != null ? `${d.growth_trajectory.fcf_cagr_pct}%` : "—"}
+        sublabel={fcfGrowthSublabel}
+        change={d.growth_trajectory?.status}
+        icon={TrendingUp}
+      />
+      <MetricTile
+        label="FCF Yield"
+        value={yieldNow?.yield_pct != null ? `${yieldNow.yield_pct}%` : "—"}
+        sublabel={yieldNow?.zone}
+        icon={DollarSign}
+      />
     </>
   );
 

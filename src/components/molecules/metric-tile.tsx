@@ -34,7 +34,7 @@ export function MetricTile({
   className,
 }: MetricTileProps) {
   return (
-    <div className={cn("rounded-lg border border-zinc-100 bg-white px-4 py-6 flex flex-col gap-2", className)}>
+    <div className={cn("rounded-lg border border-zinc-100 bg-white px-4 py-4 flex flex-col gap-2", className)}>
       {Icon && <IconBox icon={Icon} />}
       <small className="uppercase tracking-wider">{label}</small>
       <h3>{value}</h3>

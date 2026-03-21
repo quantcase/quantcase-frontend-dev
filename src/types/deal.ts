@@ -136,7 +136,13 @@ export interface DFactorResponse {
   detailed_analysis?: DetailedAnalysisSection;
 }
 
+export interface DFactorTotalScore {
+  total_score: number;
+  max_score: number;
+}
+
 export interface DFactorResponseWrapper {
   success: boolean;
   data: DFactorResponse;
+  total_score?: DFactorTotalScore;
 }

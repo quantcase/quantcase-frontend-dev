@@ -1,22 +1,35 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUpRight } from "lucide-react";
+import type { GovernanceSignal } from "@/types/management";
 
-const thesisPoints = [
-  {
-    title: "Structural Revenue Growth",
-    description: "Revenue CMGR12 of 18.5% benchmarks in the top quartile.",
-  },
-  {
-    title: "ROCE Inflection Point",
-    description: "Commissioning of green hydrogen ecosystem to boost ROCE.",
-  },
-  {
-    title: "Current Returns",
-    description: "ROCE currently at 14-16% is above WACC but not elite.",
-  },
-];
+interface ThesisPoint {
+  title: string;
+  description: string;
+}
 
-export function KeyThesisCard() {
+interface KeyThesisCardProps {
+  governanceSignals?: GovernanceSignal[];
+  opportunityTakeaway?: string | null;
+}
+
+export function KeyThesisCard({ governanceSignals, opportunityTakeaway }: KeyThesisCardProps) {
+  const thesisPoints: ThesisPoint[] = [];
+
+  // Add positive governance signals (up to 2)
+  if (governanceSignals && governanceSignals.length > 0) {
+    const positiveSignals = governanceSignals.filter((s) => s.isPositive).slice(0, 2);
+    for (const signal of positiveSignals) {
+      thesisPoints.push({ title: "Governance Signal", description: signal.text });
+    }
+  }
+
+  // Add opportunity overall takeaway
+  if (opportunityTakeaway) {
+    thesisPoints.push({ title: "Opportunity Outlook", description: opportunityTakeaway });
+  }
+
+  const hasData = thesisPoints.length > 0;
+
   return (
     <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
       <CardHeader className="pb-2">
@@ -28,6 +41,9 @@ export function KeyThesisCard() {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        {!hasData && (
+          <p className="text-xs text-zinc-400">No analysis available yet.</p>
+        )}
         {thesisPoints.map((point, i) => (
           <div key={i} className="flex gap-3">
             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-bold text-zinc-600 dark:text-zinc-300">

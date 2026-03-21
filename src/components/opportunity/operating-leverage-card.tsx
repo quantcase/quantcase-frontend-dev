@@ -50,8 +50,8 @@ const DolDot = (props: { cx?: number; cy?: number; payload?: DolDataPoint }) => 
 
 function DolChartPanel({ chartData }: { chartData: DolDataPoint[] }) {
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3 h-full">
-      <div className="flex items-start justify-between gap-2">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 flex flex-col h-full">
+      <div className="flex items-start justify-between gap-2 mb-3">
         <div>
           <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Degree of Operating Leverage Trend</h3>
           <p className="text-xs text-zinc-400 mt-0.5">For every 1% revenue growth, how much does EBIT grow?</p>
@@ -62,7 +62,7 @@ function DolChartPanel({ chartData }: { chartData: DolDataPoint[] }) {
         </div>
       </div>
 
-      <div className="h-52">
+      <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 4, right: 36, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" strokeOpacity={0.6} />
@@ -110,7 +110,7 @@ function DolChartPanel({ chartData }: { chartData: DolDataPoint[] }) {
         </ResponsiveContainer>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-[10px] text-zinc-600 dark:text-zinc-400">
+      <div className="flex flex-wrap items-center gap-3 text-[10px] text-zinc-600 dark:text-zinc-400 mt-3">
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm bg-slate-500 opacity-85 inline-block" />
           Revenue Growth % YoY

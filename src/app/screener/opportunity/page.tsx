@@ -543,7 +543,7 @@ function OpportunityContent() {
           scoring={financialScoring}
           contentClassName=""
         >
-          <div className="pb-0 space-y-4">
+          <div className="pb-4 space-y-4">
             <FinancialStrengthCard
               data={data.financial_strength}
               showDetails={showFinancialDetails}

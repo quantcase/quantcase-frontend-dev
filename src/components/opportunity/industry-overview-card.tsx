@@ -12,6 +12,7 @@ import { MetricTile } from "@/components/molecules/metric-tile";
 import { ExpandToggle } from "@/components/molecules/expand-toggle";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
 import { IconBox } from "../molecules/icon-box";
+import { Badge } from "@/components/ui/badge";
 
 interface IndustryOverviewCardProps {
   data?: IndustryOverviewSection;
@@ -103,9 +104,9 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
               </div>
             </div>
             {dsd?.net_impact && (
-              <div className="rounded-md bg-zinc-900 dark:bg-zinc-950 px-3 py-2.5">
-                <h6 className="uppercase tracking-wider mb-1">Net Impact</h6>
-                <p className="text-zinc-200">{dsd.net_impact}</p>
+              <div className="rounded-lg bg-[#D9D9D9] dark:bg-zinc-950 px-4 py-3 space-y-1.5 flex items-center gap-2">
+                <Badge className="bg-black text-white uppercase tracking-wider mb-0">Net Impact</Badge>
+                <p className="text-[#121212] leading-relaxed">{dsd.net_impact}</p>
               </div>
             )}
           </div>
@@ -163,9 +164,9 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
           </div>
 
           {/* Forward Outlook */}
-          <div className="rounded-lg bg-zinc-900 dark:bg-zinc-950 px-4 py-3 space-y-1.5">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Forward Outlook (FY25-FY27E)</p>
-            <p className="text-xs font-light text-zinc-200 leading-relaxed">
+          <div className="rounded-lg bg-[#D9D9D9] dark:bg-zinc-950 px-4 py-3 space-y-1.5 flex items-center gap-2">
+            <Badge className="bg-black text-white uppercase tracking-wider mb-0">Forward Outlook</Badge>
+            <p className="text-[#121212] leading-relaxed">
               {opmTrend?.forward_outlook ?? 'N/A'}
             </p>
           </div>

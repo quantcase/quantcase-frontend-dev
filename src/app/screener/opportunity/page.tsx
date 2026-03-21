@@ -524,6 +524,7 @@ function OpportunityContent() {
           {showCompetitionDetails && (
             <>
               <div>
+                <hr className="border-zinc-200 dark:border-zinc-700 border-dashed my-6" />
                 <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">KPI Benchmarking</h4>
                 <p className="text-xs text-zinc-400 mb-3">Latest KPI values across industry peers</p>
                 <KpiBenchmarkingTable data={peerData?.peer_kpi_timeseries} loading={peerLoading} />

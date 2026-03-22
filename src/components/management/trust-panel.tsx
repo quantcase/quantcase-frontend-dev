@@ -30,7 +30,7 @@ export function TrustPanel({ trust }: TrustPanelProps) {
       <CardHeader>
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-            <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <Shield className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
           </div>
           <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50">
             MANAGEMENT QUALITY SUMMARY
@@ -45,9 +45,9 @@ export function TrustPanel({ trust }: TrustPanelProps) {
           </p>
           <div className="flex items-center gap-2 mt-3 text-xs text-zinc-500 dark:text-zinc-500">
             <span className="text-[10px]">LOW</span>
-            <div className="flex-1 h-2 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full" />
+            <div className="flex-1 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full" />
             <span className="text-[10px]">MODERATE</span>
-            <div className="flex-1 h-2 bg-gradient-to-r from-yellow-500 to-green-500 rounded-full" />
+            <div className="flex-1 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full" />
             <span className="text-[10px]">HIGH</span>
           </div>
         </div>
@@ -65,7 +65,7 @@ export function TrustPanel({ trust }: TrustPanelProps) {
                         key={i}
                         className={`w-2 h-4 rounded-sm ${
                           i < blocks.filled
-                            ? "bg-green-600 dark:bg-green-400"
+                            ? "bg-zinc-900 dark:bg-zinc-400"
                             : "bg-zinc-200 dark:bg-zinc-700"
                         }`}
                       />

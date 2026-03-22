@@ -8,7 +8,9 @@ import { apiPost, apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import type { TimeframeOption, JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 
-import { CallHeader } from "@/components/management/call-header";
+import { Badge } from "@/components/ui/badge";
+import { FileText, CheckCircle2 } from "lucide-react";
+import { SectionPanel } from "@/components/molecules/section-panel";
 import { ScoreOverviewCards } from "@/components/management/score-overview-cards";
 import { TrustPanel } from "@/components/management/trust-panel";
 import { GovernanceSignals } from "@/components/management/governance-signals";
@@ -41,10 +43,6 @@ function ManagementDashboardContent() {
   );
 
   const loading = transcriptLoading || managementLoading;
-
-  const handleFullLLMClick = () => {
-    console.log("Open full LLM analysis modal");
-  };
 
   // Derive an aggregate status from all job statuses for display
   const allStatuses = Object.values(jobStatuses);
@@ -344,46 +342,74 @@ function ManagementDashboardContent() {
     );
   }
 
+  const company = managementData?.company;
+  const ticker = company?.ticker ?? company?.name?.split("_")[0] ?? null;
+  const displayName = company?.company_name ?? company?.name ?? null;
+
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
       {/* Confidential Banner */}
       <div className="sticky top-0 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-sm font-semibold text-white">
         ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
       </div>
 
-      {/* Main Container */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-
-        {/* Company Header */}
-        <div className="mb-6">
-          <CallHeader
-            company={managementData?.company}
-            score={(() => {
-              const sf = managementData?.trust?.subfactors;
-              if (!sf) return undefined;
-              return Math.round(sf.guidanceAccuracy * 0.5 + sf.disclosureHonesty * 0.3 + sf.capitalAllocation * 0.2);
-            })()}
-            callId={firstCallId || undefined}
-            callDate={transcriptCalls[0]?.call_date}
-            onFullLLMClick={handleFullLLMClick}
-          />
+      {/* Company Header — matches opportunity page style */}
+      <div className="flex items-start justify-between gap-4 mb-6 mt-8">
+        <div className="flex items-start gap-4">
+          <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+            <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
+          </div>
+          <div className="space-y-1.5">
+            <h2>{displayName}</h2>
+            <div className="flex items-center gap-2">
+              <Badge>{company?.exchange}: {ticker}</Badge>
+              <p>{company?.industry?.split(", ").slice(0, 3).join(" • ")}</p>
+            </div>
+          </div>
         </div>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <Badge>
+            <FileText className="h-3.5 w-3.5 mr-1.5" />
+            FULL IM
+          </Badge>
+          <Badge>
+            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+            {company?.confidenceLevel?.toUpperCase() ?? "HIGH"} CONFIDENCE
+          </Badge>
+        </div>
+      </div>
+
+      {/* Page Content */}
+      <div className="container mx-auto max-w-7xl space-y-6">
 
         {/* Main Layout: 2 columns */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Left Column: Main Content (2/3) */}
           <div className="space-y-6 lg:col-span-2">
             {/* Score Overview Cards */}
-            <ScoreOverviewCards scores={managementData.scores} />
+            <SectionPanel title="Management Factor Scores">
+              <ScoreOverviewCards scores={managementData.scores} />
+            </SectionPanel>
 
             {/* Governance Signals */}
-            <GovernanceSignals signals={managementData.governanceSignals} />
+            <SectionPanel title="Governance Signals & Evidence">
+              <GovernanceSignals signals={managementData.governanceSignals} />
+            </SectionPanel>
 
             {/* Consistency Analysis */}
-            <ConsistencyAnalysis consistency={managementData.consistency} />
+            <SectionPanel
+              title="Commentary Consistency Analysis"
+              subtitle="Scoring methodology: Hit Rate = (MET + Adj) / (MET + MISS + Adj)"
+            >
+              <ConsistencyAnalysis consistency={managementData.consistency} />
+            </SectionPanel>
 
             {/* Guidance Track Table */}
-            <GuidanceTrackTable records={managementData.guidanceRecords} />
+            <SectionPanel
+              title="Guidance Track Record"
+            >
+              <GuidanceTrackTable records={managementData.guidanceRecords} />
+            </SectionPanel>
           </div>
 
           {/* Right Sidebar: Trust Panel + Notable Patterns (1/3) */}

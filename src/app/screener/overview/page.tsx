@@ -2,9 +2,9 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { FileText, Calendar, Plug, FileDown, Plus, TrendingUp, TrendingDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
+import { FileText, TrendingUp, TrendingDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { SectionPanel } from "@/components/molecules/section-panel";
 import { FinancialPerformanceCard } from "@/components/overview/financial-performance-card";
 import { IMScoreCard } from "@/components/overview/im-score-card";
 import { ValuationCard } from "@/components/overview/valuation-card";
@@ -49,93 +49,62 @@ function OverviewContent() {
     : "—";
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
       {/* Confidential Banner */}
-      <div className="sticky top-0 z-10 w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 py-2 px-4 text-center text-xs text-zinc-500 dark:text-zinc-400 mb-4 rounded">
+      <div className="sticky top-0 z-10 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-xs font-semibold text-white">
         ⏱ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
       </div>
 
-      {/* Company Header */}
-      <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 mb-6">
-        <CardHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-                    {loading ? "Loading…" : (data?.company.name ?? symbol)}
-                  </h1>
-                  {data?.quote.marketState && (
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      data.quote.marketState === "REGULAR"
-                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                        : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
-                    }`}>
-                      {data.quote.marketState === "REGULAR" ? "Live" : data.quote.marketState}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  <span className="font-medium bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">
-                    {data?.company.exchange ?? "NSE"}: {symbol}
+      {/* Company Header — matches opportunity page style */}
+      <div className="flex items-start justify-between gap-4 mb-6 mt-8">
+        <div className="flex items-start gap-4">
+          <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+            <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-3">
+              <h2>{loading ? "Loading…" : (data?.company.name ?? symbol)}</h2>
+              {data?.quote.marketState && (
+                <Badge>
+                  {data.quote.marketState === "REGULAR" ? "Live" : data.quote.marketState}
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge>{data?.company.exchange ?? "NSE"}: {symbol}</Badge>
+              <p>{data?.company.industry ?? "—"}</p>
+              {data?.company.sector && data.company.sector !== data.company.industry && (
+                <p className="text-zinc-400">{data.company.sector}</p>
+              )}
+            </div>
+            {data?.quote.price != null && (
+              <div className="flex items-center gap-3 pt-0.5">
+                <span style={{ fontSize: 22, fontWeight: 500, color: "#0F172B" }}>
+                  ₹{data.quote.price.toFixed(2)}
+                </span>
+                <span className={`flex items-center gap-0.5 text-sm font-semibold ${
+                  (data.quote.changePercent ?? 0) >= 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-red-500 dark:text-red-400"
+                }`}>
+                  {(data.quote.changePercent ?? 0) >= 0
+                    ? <TrendingUp className="h-3.5 w-3.5" />
+                    : <TrendingDown className="h-3.5 w-3.5" />}
+                  {data.quote.change >= 0 ? "+" : ""}{data.quote.change.toFixed(2)} ({data.quote.changePercent >= 0 ? "+" : ""}{data.quote.changePercent.toFixed(2)}%)
+                </span>
+                {data.quote.marketCap != null && (
+                  <span className="text-xs text-zinc-400">
+                    Mkt Cap ₹{(data.quote.marketCap / 1e12).toFixed(2)}L Cr
                   </span>
-                  <span>•</span>
-                  <span>{data?.company.industry ?? "—"}</span>
-                  {data?.company.sector && data.company.sector !== data.company.industry && (
-                    <>
-                      <span>•</span>
-                      <span className="text-zinc-400">{data.company.sector}</span>
-                    </>
-                  )}
-                </div>
-                {data?.quote.price != null && (
-                  <div className="flex items-center gap-3 pt-0.5">
-                    <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                      ₹{data.quote.price.toFixed(2)}
-                    </span>
-                    <span className={`flex items-center gap-0.5 text-sm font-semibold ${
-                      (data.quote.changePercent ?? 0) >= 0
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-red-500 dark:text-red-400"
-                    }`}>
-                      {(data.quote.changePercent ?? 0) >= 0
-                        ? <TrendingUp className="h-3.5 w-3.5" />
-                        : <TrendingDown className="h-3.5 w-3.5" />}
-                      {data.quote.change >= 0 ? "+" : ""}{data.quote.change.toFixed(2)} ({data.quote.changePercent >= 0 ? "+" : ""}{data.quote.changePercent.toFixed(2)}%)
-                    </span>
-                    {data.quote.marketCap != null && (
-                      <span className="text-xs text-zinc-400">
-                        Mkt Cap ₹{(data.quote.marketCap / 1e12).toFixed(2)}L Cr
-                      </span>
-                    )}
-                  </div>
                 )}
               </div>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Button variant="outline" size="sm" className="text-zinc-600 gap-1.5">
-                <Plug className="h-3.5 w-3.5" />
-                AI Plugins
-              </Button>
-              <Button variant="outline" size="sm" className="text-zinc-600 gap-1.5">
-                <FileDown className="h-3.5 w-3.5" />
-                Export PDF
-              </Button>
-              <Button size="sm" className="bg-zinc-900 text-white hover:bg-zinc-800 gap-1.5">
-                <Plus className="h-3.5 w-3.5" />
-                Add Widget
-              </Button>
-              <div className="flex items-center gap-1.5 text-sm text-zinc-500 ml-2">
-                <Calendar className="h-4 w-4" />
-                <span>{formattedDate}</span>
-              </div>
-            </div>
+            )}
           </div>
-        </CardHeader>
-      </Card>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0 text-xs text-zinc-400">
+          {formattedDate}
+        </div>
+      </div>
 
       {error && (
         <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
@@ -170,36 +139,38 @@ function OverviewContent() {
         </div>
 
         {/* Row 2: Valuation + Efficiency + Market Data */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <ValuationCard
-            peRatio={data?.valuation.peRatio ?? null}
-            forwardPE={data?.valuation.forwardPE ?? null}
-            pbRatio={data?.valuation.pbRatio ?? null}
-            evToEbitda={data?.valuation.evToEbitda ?? null}
-          />
-          <EfficiencyCard
-            ebitda={data?.financialPerformance.ebitda ?? null}
-            enterpriseValue={data?.valuation.enterpriseValue ?? null}
-            totalCash={data?.efficiency.totalCash ?? null}
-            totalDebt={data?.efficiency.totalDebt ?? null}
-            grossMargins={data?.financialPerformance.grossMargins ?? null}
-            operatingMargins={data?.financialPerformance.operatingMargins ?? null}
-            profitMargins={data?.financialPerformance.profitMargins ?? null}
-            debtToEquity={data?.efficiency.debtToEquity ?? null}
-          />
-          <MarketDataCard
-            week52High={data?.quote.week52High ?? null}
-            week52Low={data?.quote.week52Low ?? null}
-            price={data?.quote.price ?? null}
-            fiftyDayAverage={data?.keyStats.fiftyDayAverage ?? null}
-            twoHundredDayAverage={data?.keyStats.twoHundredDayAverage ?? null}
-            volume={data?.quote.volume ?? null}
-            avgVolume={data?.quote.avgVolume ?? null}
-            eps={data?.perShare.eps ?? null}
-            epsForward={data?.perShare.epsForward ?? null}
-            dividendYield={data?.perShare.dividendYield ?? null}
-          />
-        </div>
+        <SectionPanel title="Market Snapshot" subtitle="Valuation, margins & trading data">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 pb-4">
+            <ValuationCard
+              peRatio={data?.valuation.peRatio ?? null}
+              forwardPE={data?.valuation.forwardPE ?? null}
+              pbRatio={data?.valuation.pbRatio ?? null}
+              evToEbitda={data?.valuation.evToEbitda ?? null}
+            />
+            <EfficiencyCard
+              ebitda={data?.financialPerformance.ebitda ?? null}
+              enterpriseValue={data?.valuation.enterpriseValue ?? null}
+              totalCash={data?.efficiency.totalCash ?? null}
+              totalDebt={data?.efficiency.totalDebt ?? null}
+              grossMargins={data?.financialPerformance.grossMargins ?? null}
+              operatingMargins={data?.financialPerformance.operatingMargins ?? null}
+              profitMargins={data?.financialPerformance.profitMargins ?? null}
+              debtToEquity={data?.efficiency.debtToEquity ?? null}
+            />
+            <MarketDataCard
+              week52High={data?.quote.week52High ?? null}
+              week52Low={data?.quote.week52Low ?? null}
+              price={data?.quote.price ?? null}
+              fiftyDayAverage={data?.keyStats.fiftyDayAverage ?? null}
+              twoHundredDayAverage={data?.keyStats.twoHundredDayAverage ?? null}
+              volume={data?.quote.volume ?? null}
+              avgVolume={data?.quote.avgVolume ?? null}
+              eps={data?.perShare.eps ?? null}
+              epsForward={data?.perShare.epsForward ?? null}
+              dividendYield={data?.perShare.dividendYield ?? null}
+            />
+          </div>
+        </SectionPanel>
 
         {/* Row 3: Analyst Coverage + Key Thesis */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">

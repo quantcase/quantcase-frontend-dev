@@ -10,9 +10,7 @@ import type { JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/ma
 import type { DFactorResponse } from "@/types/deal";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
-import { FileText, Calendar } from "lucide-react";
+import { FileText, CheckCircle2 } from "lucide-react";
 import { EntryPointCallout } from "@/components/deal/entry-point-callout";
 import { ScenarioFramework } from "@/components/deal/scenario-framework";
 import { TargetPriceMatrix } from "@/components/deal/target-price-matrix";
@@ -185,7 +183,7 @@ function DealContent() {
     const transcriptCall = transcriptCalls[0];
     return (
       <div className="min-h-screen bg-background p-4">
-        <div className="sticky top-0 w-full bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 py-2 px-4 text-center text-xs font-semibold text-red-600 dark:text-red-400">
+        <div className="sticky top-0 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-xs font-semibold text-white">
           ⚠️ HIGHLY CONFIDENTIAL — FOR INVESTMENT COMMITTEE USE ONLY
         </div>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -288,51 +286,37 @@ function DealContent() {
   const transcriptCall = transcriptCalls[0];
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-4">
+    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
       {/* Confidential Banner */}
-      <div className="sticky top-0 z-10 w-full bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 py-2 px-4 text-center text-xs font-semibold text-red-600 dark:text-red-400 mb-4">
+      <div className="sticky top-0 z-10 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-xs font-semibold text-white">
         ⚠️ HIGHLY CONFIDENTIAL — FOR INVESTMENT COMMITTEE USE ONLY
       </div>
 
-      {/* Company Header */}
-      <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 mb-6">
-        <CardHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
-              </div>
-              <div className="space-y-1.5">
-                <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{transcriptCall.company_name}</h1>
-                <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  <span className="font-semibold bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">
-                    NSE: {symbol}
-                  </span>
-                  <span>•</span>
-                  <span>{transcriptCall.basic_industry}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <Button variant="outline" size="sm" className="font-semibold">
-                FULL IM
-              </Button>
-              <Badge className="px-3 py-1.5 text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-0">
-                ⊙ DATA CONFIDENCE: HIGH
-              </Badge>
-              <div className="flex items-center gap-1.5 text-sm text-zinc-500">
-                <Calendar className="h-4 w-4" />
-                {transcriptCall.call_date}
-              </div>
+      {/* Company Header — matches opportunity page style */}
+      <div className="flex items-start justify-between gap-4 mb-6 mt-8">
+        <div className="flex items-start gap-4">
+          <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+            <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
+          </div>
+          <div className="space-y-1.5">
+            <h2>{transcriptCall.company_name}</h2>
+            <div className="flex items-center gap-2">
+              <Badge>NSE: {symbol}</Badge>
+              <p>{transcriptCall.basic_industry}</p>
             </div>
           </div>
-        </CardHeader>
-      </Card>
-
-      {/* Page Title */}
-      <div className="container mx-auto max-w-7xl mb-5 flex items-center gap-2">
-        <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 mr-1">§5</span>
-        <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">Deal Factor</h2>
+        </div>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <Badge>
+            <FileText className="h-3.5 w-3.5 mr-1.5" />
+            FULL IM
+          </Badge>
+          <Badge>
+            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+            DATA CONFIDENCE: HIGH
+          </Badge>
+          <span className="text-xs text-zinc-400">{transcriptCall.call_date}</span>
+        </div>
       </div>
 
       {/* Page Content */}

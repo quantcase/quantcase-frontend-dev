@@ -102,7 +102,7 @@ export function AnalystCard({
           <div className="relative h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800">
             {rangePercent != null && (
               <div
-                className="absolute top-0 h-1.5 w-2 -translate-x-1/2 rounded-full bg-indigo-500"
+                className="absolute top-0 h-1.5 w-2 -translate-x-1/2 rounded-full bg-zinc-900 dark:bg-zinc-300"
                 style={{ left: `${Math.min(100, Math.max(0, rangePercent))}%` }}
               />
             )}

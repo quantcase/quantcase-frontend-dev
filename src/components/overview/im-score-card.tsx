@@ -51,7 +51,7 @@ function TickGauge({ value, max }: { value: number; max: number }) {
     const iy = cy - (r - tickH) * Math.sin(rad);
 
     const filled = i < filledCount;
-    const color = filled ? "#22c55e" : "#d1d5db";
+    const color = filled ? "#0F172B" : "#d1d5db";
 
     return { ox, oy, ix, iy, angle: rad, color, tickH };
   });
@@ -115,9 +115,9 @@ export function IMScoreCard({
   const rating = hasAnyScore ? getRating(partialScore / gaugeMax) : null;
 
   const scoreBreakdown = [
-    { label: "Management (M)", max: mMax, value: mScore, color: "text-emerald-600 dark:text-emerald-400" },
-    { label: "Opportunity (O)", max: oMax, value: oScore, color: "text-blue-600 dark:text-blue-400" },
-    { label: "Deal (D)",        max: dMax, value: dScore, color: "text-orange-500 dark:text-orange-400" },
+    { label: "Management (M)", max: mMax, value: mScore, color: "text-zinc-900 dark:text-zinc-50" },
+    { label: "Opportunity (O)", max: oMax, value: oScore, color: "text-zinc-900 dark:text-zinc-50" },
+    { label: "Deal (D)",        max: dMax, value: dScore, color: "text-zinc-900 dark:text-zinc-50" },
   ];
 
   return (
@@ -140,7 +140,7 @@ export function IMScoreCard({
               {displayScore !== null ? displayScore : "—"}
             </span>
             {rating && (
-              <span className="mt-2 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-3 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">
+              <span className="mt-2 rounded-full bg-zinc-900 dark:bg-zinc-700 px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide">
                 {rating}
               </span>
             )}

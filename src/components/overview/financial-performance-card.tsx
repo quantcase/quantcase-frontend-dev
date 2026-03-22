@@ -132,8 +132,8 @@ export function FinancialPerformanceCard({
                 iconSize={8}
                 wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
               />
-              <Bar dataKey="revenue" name="Revenue" fill="#818cf8" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="ebitda" name="EBITDA" fill="#f87171" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="revenue" name="Revenue" fill="#0F172B" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="ebitda" name="EBITDA" fill="#d4d4d8" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

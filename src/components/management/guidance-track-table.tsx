@@ -1,5 +1,4 @@
 import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { TooltipProvider, TooltipRoot, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { DataValue } from "@/components/molecules/data-value";
@@ -42,13 +41,7 @@ function getStatusConfig(status: StatusType) {
 
 export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-      <CardHeader>
-        <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50">
-          GUIDANCE TRACK RECORD
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div>
         {records.length === 0 ? (
           <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 py-4">No guidance records available</p>
         ) : (
@@ -99,9 +92,9 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                         <div className="flex items-center gap-2 break-words whitespace-normal">
                           <span className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0 bg-zinc-100 dark:bg-zinc-800">
                             {isFinancial ? (
-                              <DollarSign className="h-3 w-3 text-purple-700 dark:text-purple-400" />
+                              <DollarSign className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
                             ) : (
-                              <Target className="h-3 w-3 text-sky-700 dark:text-sky-400" />
+                              <Target className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
                             )}
                           </span>
                           <DataValue value={record.metric} />
@@ -147,7 +140,6 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
             </Table>
           </div>
         )}
-      </CardContent>
-    </Card>
+    </div>
   );
 }

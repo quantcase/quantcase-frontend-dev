@@ -137,9 +137,9 @@ export interface TechnicalsDerived {
 // Rule Engine types
 export interface RuleEngineIndicator {
   growthOutput: string | null;
-  growthWatchouts: string[];
+  growthWatchout: string | null;
   valueOutput: string | null;
-  valueWatchouts: string[];
+  valueWatchout: string | null;
 }
 
 export interface MarketPhaseIndicator extends RuleEngineIndicator {

@@ -207,10 +207,6 @@ function ManagementDashboardContent() {
     const transcriptCall = transcriptCalls[0];
     return (
       <div className="min-h-screen bg-background p-4">
-        {/* Confidential Banner */}
-        <div className="sticky top-0 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-sm font-semibold text-white">
-          ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
-        </div>
 
         {/* Main Container */}
         <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -347,11 +343,7 @@ function ManagementDashboardContent() {
   const displayName = company?.company_name ?? company?.name ?? null;
 
   return (
-    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
-      {/* Confidential Banner */}
-      <div className="sticky top-0 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-sm font-semibold text-white">
-        ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
-      </div>
+    <div className="min-h-screen bg-white mb-8 px-4">
 
       {/* Company Header — matches opportunity page style */}
       <div className="flex items-start justify-between gap-4 mb-6 mt-8">

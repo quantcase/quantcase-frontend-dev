@@ -8,7 +8,7 @@ interface ConsistencyStatsRowProps {
 
 export function ConsistencyStatsRow({ metrics }: ConsistencyStatsRowProps) {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-3 mb-3">
       <div className="flex items-center gap-4">
         <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800">
           <TrendingUp className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />

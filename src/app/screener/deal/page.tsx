@@ -286,7 +286,7 @@ function DealContent() {
   const transcriptCall = transcriptCalls[0];
 
   return (
-    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
+    <div className="min-h-screen bg-white mb-8 px-4">
 
       {/* Company Header — matches opportunity page style */}
       <div className="flex items-start justify-between gap-4 mb-6 mt-8">

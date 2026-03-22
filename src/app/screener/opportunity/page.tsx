@@ -207,9 +207,6 @@ function OpportunityContent() {
     const transcriptCall = transcriptCalls[0];
     return (
       <div className="min-h-screen bg-background p-4">
-        <div className="sticky top-0 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-sm font-semibold text-white">
-          ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
-        </div>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <h1 className="text-sm font-bold mb-6">Opportunity Factor Analysis</h1>
           <div className="bg-card border border-border rounded-lg p-6 shadow-sm">

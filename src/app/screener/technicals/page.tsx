@@ -83,7 +83,7 @@ function TechnicalsContent() {
   const ruleEngine = data.ruleEngine;
 
   return (
-    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
+    <div className="min-h-screen bg-white mb-8 px-4">
 
       {/* Company Header */}
       <div className="flex items-start justify-between gap-4 mb-6 mt-8">
@@ -108,12 +108,31 @@ function TechnicalsContent() {
         </div>
       </div>
 
+      {/* Quick Summary Strip */}
+      {ruleEngine?.decisionContext?.summary && (
+        <div className="mb-6 rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+          <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] px-4 py-3 flex items-start gap-3">
+            <span style={{ fontSize: 10, fontWeight: 600, color: "#888888", letterSpacing: "0.08em", whiteSpace: "nowrap", marginTop: 2 }}>QUICK SUMMARY</span>
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {ruleEngine.decisionContext.summary.split("|").map((sentence, i) => (
+                <span key={i} style={{ fontSize: 13, color: "#121212", lineHeight: 1.5 }}>
+                  {sentence.trim()}
+                  {i < ruleEngine.decisionContext.summary.split("|").length - 1 && (
+                    <span style={{ color: "#d4d4d8", margin: "0 8px" }}>|</span>
+                  )}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Page content — two independently scrollable columns */}
       <div className="container mx-auto max-w-7xl">
-        <div className="grid grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-3 h-[calc(100vh-200px)]">
 
           {/* Left column — col-span-2 */}
-          <div className="col-span-2 overflow-y-auto space-y-6 pr-1 pb-8">
+          <div className="col-span-2 overflow-y-auto space-y-6 px-3 pb-8">
 
             {/* Price Chart */}
             <SectionPanel title="Price Chart" subtitle="OHLCV candlestick data">
@@ -486,11 +505,28 @@ function TechnicalsContent() {
           </div>{/* end left column */}
 
           {/* Right column — col-span-1 */}
-          <div className="col-span-1 overflow-y-auto space-y-6 pr-1 pb-8">
+          <div className="col-span-1 overflow-y-auto space-y-6 pl-3 pr-2 pb-8">
 
             {/* Decision Intelligence */}
             {data.decisionIntelligence && (
               <DecisionIntelligenceCard di={data.decisionIntelligence} />
+            )}
+
+            {/* Risk Alerts */}
+            {ruleEngine?.decisionContext?.alerts && ruleEngine.decisionContext.alerts.length > 0 && (
+              <SectionPanel
+                title="Risk Alerts"
+                subtitle="Consolidated watchouts across all rule engine indicators"
+              >
+                <div className="pb-4 space-y-2">
+                  {ruleEngine.decisionContext.alerts.map((alert, i) => (
+                    <div key={i} className="flex items-start gap-3 rounded-lg border border-zinc-100 bg-white px-4 py-3" style={{ borderLeft: "3px solid #f59e0b" }}>
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+                      <span style={{ fontSize: 13, color: "#121212", lineHeight: 1.5 }}>{alert}</span>
+                    </div>
+                  ))}
+                </div>
+              </SectionPanel>
             )}
 
             {/* Market Structure */}

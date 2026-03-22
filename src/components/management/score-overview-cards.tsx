@@ -31,7 +31,7 @@ function getRatingColor(rating: TrustLevel | string): string {
 
 export function ScoreOverviewCards({ scores }: ScoreOverviewCardsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 pb-2">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 pb-2 items-start">
       {scores.map((score) => {
         const Icon = iconMap[score.factor] ?? Star;
         const ratingDisplay = getRatingDisplay(score.rating);

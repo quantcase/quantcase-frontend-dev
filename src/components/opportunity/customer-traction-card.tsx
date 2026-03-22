@@ -256,7 +256,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
             </div>
           </div>
 
-          {/* ── Customer Segmentation & Revenue Mix ── */}
+          {/* ── Customer Segmentation & Revenue Mix  ── */}
           {(seg?.tiers ?? []).length > 0 && (
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
               <div className="flex items-center gap-4 pb-1">

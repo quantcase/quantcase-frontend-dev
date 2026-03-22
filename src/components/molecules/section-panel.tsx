@@ -48,7 +48,7 @@ function SectionScoreBar({ scoring }: { scoring: SectionScoring }) {
 }
 
 interface SectionPanelProps {
-  title: string;
+  title: ReactNode;
   subtitle?: string;
   scoring?: SectionScoring;
   children: ReactNode;

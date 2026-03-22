@@ -13,7 +13,7 @@ interface NavTab {
 const NAV_TABS: NavTab[] = [
   { label: "Dashboard", href: "/wealthos/dashboard" },
   { label: "Clients", href: "/wealthos/clients" },
-  { label: "RMs", href: "/wealthos/rm" },
+  { label: "RMs", href: "/wealthos/rms" },
   { label: "Models", href: "/wealthos/models" },
   { label: "Analytics", href: "/wealthos/analytics" },
 ];

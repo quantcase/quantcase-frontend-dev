@@ -414,7 +414,6 @@ function TechnicalsContent() {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Badge className="shrink-0">P/E {data.meta.pe}</Badge>
           <Badge className="shrink-0 flex items-center gap-1">
             <Calendar className="h-3 w-3" />
             Next Earnings: {data.meta.nextEarningsDate}

@@ -16,7 +16,7 @@ const NAV_TABS: NavTab[] = [
   { label: "Opportunity Factor", href: "/screener/opportunity" },
   { label: "Deal Factor", href: "/screener/deal" },
   { label: "Technicals", href: "/screener/technicals" },
-  { label: "Forward Trajectory", href: "/screener/forward-trajectory" },
+  { label: "Financials", href: "/screener/financials" },
 ];
 
 function ScreenerSubpageNavInner() {

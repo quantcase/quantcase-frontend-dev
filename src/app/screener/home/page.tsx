@@ -11,6 +11,7 @@ import { InfoItem } from "@/components/molecules/info-item";
 import { apiCall } from "@/lib/api";
 import { StocksApiResponse } from "@/types/screener";
 import { BACKEND_URL } from "@/lib/constants";
+import { StockSearchPanel } from "@/components/molecules/stock-search-panel";
 
 export default function ScreenerHomePage() {
   const router = useRouter();
@@ -46,9 +47,8 @@ export default function ScreenerHomePage() {
   ];
 
   const handleSearch = (stockSymbol: string) => {
-    // Navigate to management page with stock symbol as query parameter
     if (stockSymbol) {
-      router.push(`/screener/management?symbol=${encodeURIComponent(stockSymbol)}`);
+      router.push(`/screener/overview?symbol=${encodeURIComponent(stockSymbol)}`);
     }
   };
 
@@ -100,6 +100,14 @@ export default function ScreenerHomePage() {
                 />
               ))}
             </div>
+          </div>
+
+          {/* Stock Browser */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-center">
+              Browse All Stocks
+            </h3>
+            <StockSearchPanel variant="screener" />
           </div>
 
           {/* Info Footer */}

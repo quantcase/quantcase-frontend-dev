@@ -11,7 +11,7 @@ interface TakeawayBoxProps {
 
 export function TakeawayBox({ title, text, inline = false, noBleed = false }: TakeawayBoxProps) {
   return (
-    <div className={`bg-zinc-900 dark:bg-zinc-950 ${noBleed ? "rounded-lg" : "-mx-6 rounded-b-lg"} p-[20px]`}>
+    <div className={`bg-zinc-900 dark:bg-zinc-950 ${noBleed ? "rounded-lg" : "-mx-4 rounded-b-lg"} p-[20px]`}>
       {inline ? (
         <p className="text-xs font-light text-zinc-200 leading-relaxed">
           <Badge variant="destructive" className="mr-1.5">{title}</Badge>

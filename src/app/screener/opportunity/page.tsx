@@ -552,35 +552,35 @@ function OpportunityContent() {
           </div>
           {showFinancialDetails && (
             <>
-              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 mt-4 space-y-4">
+              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 mt-4 space-y-4">
                 <SubsectionHeader
                   title="Operating Leverage Analysis"
                   subtitle="Fixed cost absorption, DOL trend & leverage verdict"
                 />
                 <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />
               </div>
-              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+              <div className="pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
                 <SubsectionHeader
                   title="Free Cash Flow Analysis"
                   subtitle="FCF conversion, growth trajectory, capex drag & yield"
                 />
                 <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />
               </div>
-              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+              <div className="pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
                 <SubsectionHeader
                   title="Working Capital"
                   subtitle="DSO, DIO, DPO, CCC trends & WC as % of revenue"
                 />
                 <WorkingCapitalCard data={data.financial_strength?.working_capital} />
               </div>
-              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+              <div className="pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
                 <SubsectionHeader
                   title="Capital Structure & Capex"
                   subtitle="Balance sheet position, debt trajectory, equity allocation & capex intensity"
                 />
                 <CapitalStructureCard data={data.financial_strength?.capital_structure} />
               </div>
-              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+              <div className="pt-4 pb-4 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
                 <SubsectionHeader
                   title="KPI Timeseries"
                   subtitle="Industry-specific KPI trends over time"
@@ -589,7 +589,7 @@ function OpportunityContent() {
               </div>
             </>
           )}
-          <div className="px-6 pb-6">
+          <div>
             <TakeawayBox title="FINANCIAL TAKEAWAY" text={data.financial_strength?.text?.key_takeaway} />
           </div>
         </SectionPanel>

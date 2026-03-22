@@ -190,23 +190,23 @@ export interface RelativeStrengthSingle extends RuleEngineIndicator {
 }
 
 export interface StructureEngineData {
-  marketPhase: MarketPhaseIndicator;
-  capitalParticipation: CapitalParticipationIndicator;
-  priceArchitecture: PriceArchitectureIndicator;
+  marketStructure: MarketPhaseIndicator;
+  participation: CapitalParticipationIndicator;
+  priceStructure: PriceArchitectureIndicator;
 }
 
 export interface TrendEngineData {
-  directionalBias: DirectionalBiasIndicator;
-  trendMaturity: TrendMaturityIndicator;
+  trendDirection: DirectionalBiasIndicator;
+  trendQuality: TrendMaturityIndicator;
 }
 
 export interface TimingEngineData {
-  momentumThrust: MomentumThrustIndicator;
-  volatilityRegime: VolatilityRegimeIndicator;
+  momentum: MomentumThrustIndicator;
+  volatility: VolatilityRegimeIndicator;
 }
 
 export interface DominanceEngineData {
-  relativeStrength: {
+  leadership: {
     vsNifty: RelativeStrengthSingle;
     vsSector: RelativeStrengthSingle;
   };

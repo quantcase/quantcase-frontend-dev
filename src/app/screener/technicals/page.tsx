@@ -255,18 +255,46 @@ function TechnicalsContent() {
                     </div>
                   )}
                 </div>
-                <div className="col-span-2 flex flex-col gap-4 pb-4">
-                  <div className="grid grid-cols-4 gap-3">
-                    <MetricTile icon={AlertTriangle} label="Support" value={`₹${derived.supportNum.toLocaleString("en-IN")}`} sublabel="Key floor level" />
-                    <MetricTile icon={Target} label="Resistance" value={`₹${derived.resistanceNum.toLocaleString("en-IN")}`} sublabel="Key ceiling level" />
-                    <MetricTile icon={TrendingUp} label="Upside to Resistance" value={`+${derived.upsideToResistance.toFixed(2)}%`} change={`+${derived.upsideToResistance.toFixed(2)}%`} />
-                    <MetricTile icon={TrendingDown} label="Downside to Support" value={`-${derived.downsideToSupport.toFixed(2)}%`} change={`-${derived.downsideToSupport.toFixed(2)}%`} />
-                  </div>
-                  <div className="grid grid-cols-4 gap-3">
-                    <MetricTile icon={Scale} label="Risk / Reward" value={riskRewardDisplay} sublabel="Upside ÷ Downside" />
-                    <MetricTile icon={Crosshair} label="Pivot Point" value={`₹${data.supportResistance.pivotPoints.pivot.toFixed(2)}`} sublabel="Daily pivot level" />
-                    <MetricTile icon={ArrowUpRight} label="Resistance R1 / R2" value={`₹${data.supportResistance.pivotPoints.r1.toFixed(2)}`} sublabel={`R2: ₹${data.supportResistance.pivotPoints.r2.toFixed(2)}`} />
-                    <MetricTile icon={ArrowDownRight} label="Support S1 / S2" value={`₹${data.supportResistance.pivotPoints.s1.toFixed(2)}`} sublabel={`S2: ₹${data.supportResistance.pivotPoints.s2.toFixed(2)}`} />
+                <div className="col-span-2 pb-4">
+                  <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
+                    {/* Row 1 */}
+                    <div className="grid grid-cols-4 divide-x divide-dashed divide-zinc-200">
+                      {[
+                        { icon: AlertTriangle, label: "Support", value: `₹${derived.supportNum.toLocaleString("en-IN")}`, sub: "Key floor level", change: null },
+                        { icon: Target, label: "Resistance", value: `₹${derived.resistanceNum.toLocaleString("en-IN")}`, sub: "Key ceiling level", change: null },
+                        { icon: TrendingUp, label: "Upside to Resistance", value: `+${derived.upsideToResistance.toFixed(2)}%`, sub: null, change: "positive" },
+                        { icon: TrendingDown, label: "Downside to Support", value: `-${derived.downsideToSupport.toFixed(2)}%`, sub: null, change: "negative" },
+                      ].map(({ icon: Icon, label, value, sub, change }, i) => (
+                        <div key={i} className="flex flex-col gap-1 px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <Icon className="w-3 h-3 text-zinc-400" />
+                            <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">{label}</span>
+                          </div>
+                          <span className={`text-lg font-semibold leading-tight ${change === "positive" ? "text-emerald-600" : change === "negative" ? "text-red-600" : "text-[#0F172B]"}`}>{value}</span>
+                          {sub && <span className="text-[11px] text-[#888888]">{sub}</span>}
+                        </div>
+                      ))}
+                    </div>
+                    {/* Horizontal dashed divider */}
+                    <div className="border-t border-dashed border-zinc-200" />
+                    {/* Row 2 */}
+                    <div className="grid grid-cols-4 divide-x divide-dashed divide-zinc-200">
+                      {[
+                        { icon: Scale, label: "Risk / Reward", value: riskRewardDisplay, sub: "Upside ÷ Downside" },
+                        { icon: Crosshair, label: "Pivot Point", value: `₹${data.supportResistance.pivotPoints.pivot.toFixed(2)}`, sub: "Daily pivot level" },
+                        { icon: ArrowUpRight, label: "Resistance R1 / R2", value: `₹${data.supportResistance.pivotPoints.r1.toFixed(2)}`, sub: `R2: ₹${data.supportResistance.pivotPoints.r2.toFixed(2)}` },
+                        { icon: ArrowDownRight, label: "Support S1 / S2", value: `₹${data.supportResistance.pivotPoints.s1.toFixed(2)}`, sub: `S2: ₹${data.supportResistance.pivotPoints.s2.toFixed(2)}` },
+                      ].map(({ icon: Icon, label, value, sub }, i) => (
+                        <div key={i} className="flex flex-col gap-1 px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <Icon className="w-3 h-3 text-zinc-400" />
+                            <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">{label}</span>
+                          </div>
+                          <span className="text-lg font-semibold leading-tight text-[#0F172B]">{value}</span>
+                          {sub && <span className="text-[11px] text-[#888888]">{sub}</span>}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -330,47 +358,58 @@ function TechnicalsContent() {
               title="Momentum Indicators"
               subtitle="RSI, MACD, and Stochastic oscillator readings"
             >
-              <div className="divide-y divide-zinc-100 pb-4">
-                <div className="flex items-center gap-4 py-4 px-2">
-                  <div className="flex-1">
-                    <h6 className="uppercase tracking-wider">RSI (14)</h6>
-                    <p>Relative Strength Index — {data.momentum.rsi.zone}</p>
-                  </div>
-                  <div className="w-32">
-                    <div className="relative h-2 rounded-full bg-zinc-100" style={{ border: "1px solid #E2E2E2" }}>
-                      <div className="absolute left-0 top-0 h-full rounded-full bg-zinc-900" style={{ width: `${Math.min(data.momentum.rsi.value, 100)}%` }} />
+              <div className="pb-4">
+                <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
+                  {/* RSI Row */}
+                  <div className="flex items-center gap-4 px-4 py-3 border-b border-dashed border-zinc-200">
+                    <div className="flex items-center gap-2 w-36 shrink-0">
+                      <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">RSI (14)</span>
                     </div>
-                    <div className="flex justify-between mt-0.5">
-                      <small>0</small>
-                      <small>100</small>
+                    <div className="flex-1">
+                      <div className="relative h-1.5 rounded-full bg-zinc-100">
+                        <div className="absolute left-0 top-0 h-full rounded-full bg-zinc-900" style={{ width: `${Math.min(data.momentum.rsi.value, 100)}%` }} />
+                      </div>
+                      <div className="flex justify-between mt-0.5">
+                        <span className="text-[10px] text-zinc-400">0</span>
+                        <span className="text-[10px] text-zinc-400">100</span>
+                      </div>
+                    </div>
+                    <div className="text-right w-28 shrink-0">
+                      <span className={`text-lg font-semibold ${rsiZoneColor(data.momentum.rsi.zone)}`}>{data.momentum.rsi.value.toFixed(2)}</span>
+                      <p className="text-[10px] uppercase tracking-wider text-[#888888] mt-0.5">{data.momentum.rsi.zone}</p>
                     </div>
                   </div>
-                  <div className="text-right w-20">
-                    <h4 className={rsiZoneColor(data.momentum.rsi.zone)}>{data.momentum.rsi.value.toFixed(2)}</h4>
-                    <small>{data.momentum.rsi.zone}</small>
+                  {/* MACD Row */}
+                  <div className="border-b border-dashed border-zinc-200">
+                    <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+                      <Zap className="h-3 w-3 text-zinc-400" />
+                      <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">MACD</span>
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${data.momentum.macd.crossover === "ABOVE" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"}`}>{data.momentum.macd.crossover}</span>
+                    </div>
+                    <div className="grid grid-cols-3 divide-x divide-dashed divide-zinc-200 border-t border-dashed border-zinc-200">
+                      {[
+                        { label: "MACD Value", value: data.momentum.macd.value.toFixed(2), colored: false },
+                        { label: "Signal Line", value: data.momentum.macd.signal.toFixed(2), colored: false },
+                        { label: "Histogram", value: data.momentum.macd.histogram.toFixed(2), colored: true },
+                      ].map(({ label, value, colored }, i) => (
+                        <div key={i} className="px-4 py-3 flex flex-col gap-0.5">
+                          <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">{label}</span>
+                          <span className={`text-lg font-semibold leading-tight ${colored ? (data.momentum.macd.histogram >= 0 ? "text-emerald-600" : "text-red-600") : "text-[#0F172B]"}`}>{value}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className="py-4 px-2">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Zap className="h-4 w-4 text-zinc-400" />
-                    <h6 className="uppercase tracking-wider">MACD</h6>
-                    <Badge className={data.momentum.macd.crossover === "ABOVE" ? "text-emerald-600" : "text-red-600"}>{data.momentum.macd.crossover}</Badge>
+                  {/* Stochastic Row */}
+                  <div className="flex items-center gap-4 px-4 py-3">
+                    <Layers className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                    <div className="flex-1">
+                      <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">Stochastic</span>
+                      <p className="text-sm text-[#0F172B] font-medium mt-0.5">K: {data.momentum.stochastic.k.toFixed(2)} / D: {data.momentum.stochastic.d.toFixed(2)}</p>
+                    </div>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${data.momentum.stochastic.signal === "BUY" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : data.momentum.stochastic.signal === "SELL" ? "bg-red-50 text-red-600 border-red-200" : "bg-amber-50 text-amber-600 border-amber-200"}`}>
+                      {data.momentum.stochastic.signal}
+                    </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <MetricTile label="MACD Value" value={data.momentum.macd.value.toFixed(2)} />
-                    <MetricTile label="Signal Line" value={data.momentum.macd.signal.toFixed(2)} />
-                    <MetricTile label="Histogram" value={data.momentum.macd.histogram.toFixed(2)} change={data.momentum.macd.histogram >= 0 ? `+${data.momentum.macd.histogram.toFixed(2)}` : `${data.momentum.macd.histogram.toFixed(2)}`} />
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 py-4 px-2">
-                  <Layers className="h-4 w-4 text-zinc-400 shrink-0" />
-                  <div className="flex-1">
-                    <h6 className="uppercase tracking-wider">Stochastic</h6>
-                    <p>K: {data.momentum.stochastic.k.toFixed(2)} / D: {data.momentum.stochastic.d.toFixed(2)}</p>
-                  </div>
-                  <Badge className={data.momentum.stochastic.signal === "BUY" ? "text-emerald-600" : data.momentum.stochastic.signal === "SELL" ? "text-red-600" : "text-amber-600"}>
-                    {data.momentum.stochastic.signal}
-                  </Badge>
                 </div>
               </div>
             </SectionPanel>
@@ -380,29 +419,30 @@ function TechnicalsContent() {
               title="Moving Averages"
               subtitle="Price position relative to key SMAs and EMAs"
             >
-              <div className="grid grid-cols-3 gap-3 pb-4 pt-2 md:grid-cols-6">
-                {([
-                  { label: "SMA 20", value: data.movingAverages.sma[20] },
-                  { label: "SMA 50", value: data.movingAverages.sma[50] },
-                  { label: "SMA 100", value: data.movingAverages.sma[100] },
-                  { label: "SMA 200", value: data.movingAverages.sma[200] },
-                  { label: "EMA 20", value: data.movingAverages.ema[20] },
-                  { label: "EMA 50", value: data.movingAverages.ema[50] },
-                ]).map(({ label, value }) => {
-                  const above = data.price.cmp > value;
-                  return (
-                    <div key={label} className="rounded-lg border border-zinc-100 bg-white px-4 py-4 flex flex-col gap-2">
-                      <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] w-fit">
-                        <TrendingUp className="h-4 w-4 text-zinc-500" />
+              {/* MA values — compact unified card */}
+              <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden mb-4">
+                <div className="grid grid-cols-6 divide-x divide-dashed divide-zinc-200">
+                  {([
+                    { label: "SMA 20", value: data.movingAverages.sma[20] },
+                    { label: "SMA 50", value: data.movingAverages.sma[50] },
+                    { label: "SMA 100", value: data.movingAverages.sma[100] },
+                    { label: "SMA 200", value: data.movingAverages.sma[200] },
+                    { label: "EMA 20", value: data.movingAverages.ema[20] },
+                    { label: "EMA 50", value: data.movingAverages.ema[50] },
+                  ]).map(({ label, value }) => {
+                    const above = data.price.cmp > value;
+                    return (
+                      <div key={label} className="flex flex-col gap-0.5 px-4 py-3">
+                        <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">{label}</span>
+                        <span className="text-base font-semibold text-[#0F172B]">₹{value.toFixed(2)}</span>
+                        <span className={`text-[10px] font-semibold ${above ? "text-emerald-600" : "text-red-600"}`}>{above ? "▲ Above" : "▼ Below"}</span>
                       </div>
-                      <small className="uppercase tracking-wider text-[#888888]">{label}</small>
-                      <h3>₹{value.toFixed(2)}</h3>
-                      <small className={`text-[11px] font-semibold ${above ? "text-emerald-600" : "text-red-600"}`}>{above ? "▲ Above" : "▼ Below"}</small>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-              <hr className="border-zinc-100 mx-0" />
+
+              {/* MA Position Chart */}
               <MAPositionChart
                 price={data.price.cmp}
                 mas={[
@@ -416,55 +456,59 @@ function TechnicalsContent() {
                 low52w={data.price.low52w}
                 high52w={data.price.high52w}
               />
-              <hr className="border-zinc-100 mx-0" />
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-4 pb-4 px-2">
-                <div className="flex items-center gap-2">
-                  <h6 className="uppercase tracking-wider">Golden Cross</h6>
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${data.movingAverages.crossovers.goldenCross ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-zinc-100 text-zinc-500 border-zinc-200"}`}>
-                    {data.movingAverages.crossovers.goldenCross ? "ACTIVE" : "INACTIVE"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <h6 className="uppercase tracking-wider">Death Cross</h6>
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${data.movingAverages.crossovers.deathCross ? "bg-red-50 text-red-700 border-red-200" : "bg-zinc-100 text-zinc-500 border-zinc-200"}`}>
-                    {data.movingAverages.crossovers.deathCross ? "ACTIVE" : "INACTIVE"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <h6 className="uppercase tracking-wider">Last Crossover</h6>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: "#0F172B" }}>{data.movingAverages.crossovers.lastCrossoverDate}</span>
-                </div>
-                <div className="ml-auto flex gap-2">
-                  {([
-                    { label: "SMA20", above: data.movingAverages.pricePosition.aboveSMA20 },
-                    { label: "SMA50", above: data.movingAverages.pricePosition.aboveSMA50 },
-                    { label: "SMA200", above: data.movingAverages.pricePosition.aboveSMA200 },
-                  ]).map(({ label, above }) => (
-                    <span key={label} className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[11px] font-semibold border ${above ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-red-50 text-red-700 border-red-200"}`}>
-                      {above ? "▲" : "▼"} {above ? "Above" : "Below"} {label}
-                    </span>
+
+              {/* Crossovers + Price Position — compact row */}
+              <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden mt-4 mb-4">
+                <div className="flex items-center divide-x divide-dashed divide-zinc-200">
+                  {[
+                    { label: "Golden Cross", active: data.movingAverages.crossovers.goldenCross, activeClass: "bg-emerald-50 text-emerald-600 border-emerald-200", inactiveClass: "bg-zinc-100 text-zinc-500 border-zinc-200" },
+                    { label: "Death Cross", active: data.movingAverages.crossovers.deathCross, activeClass: "bg-red-50 text-red-600 border-red-200", inactiveClass: "bg-zinc-100 text-zinc-500 border-zinc-200" },
+                  ].map(({ label, active, activeClass, inactiveClass }) => (
+                    <div key={label} className="flex items-center gap-2 px-4 py-3">
+                      <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">{label}</span>
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${active ? activeClass : inactiveClass}`}>
+                        {active ? "ACTIVE" : "INACTIVE"}
+                      </span>
+                    </div>
                   ))}
+                  <div className="flex items-center gap-2 px-4 py-3">
+                    <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">Last Crossover</span>
+                    <span className="text-[13px] font-medium text-[#0F172B]">{data.movingAverages.crossovers.lastCrossoverDate}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-3 ml-auto">
+                    {([
+                      { label: "SMA20", above: data.movingAverages.pricePosition.aboveSMA20 },
+                      { label: "SMA50", above: data.movingAverages.pricePosition.aboveSMA50 },
+                      { label: "SMA200", above: data.movingAverages.pricePosition.aboveSMA200 },
+                    ]).map(({ label, above }) => (
+                      <span key={label} className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${above ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-red-50 text-red-600 border-red-200"}`}>
+                        {above ? "▲" : "▼"} {above ? "Above" : "Below"} {label}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <hr className="border-zinc-100 mx-0" />
-              <div className="pt-4 pb-2 px-2">
-                <h6 className="uppercase tracking-wider mb-3">Bollinger Bands &amp; Volatility</h6>
-              </div>
-              <div className="grid grid-cols-3 gap-3 pb-4 md:grid-cols-6">
-                <MetricTile icon={Waves} label="BB Upper" value={`₹${data.volatility.bollingerBands.upper.toFixed(2)}`} sublabel="Upper band" />
-                <MetricTile icon={Waves} label="BB Middle" value={`₹${data.volatility.bollingerBands.middle.toFixed(2)}`} sublabel="Middle band" />
-                <MetricTile icon={Waves} label="BB Lower" value={`₹${data.volatility.bollingerBands.lower.toFixed(2)}`} sublabel="Lower band" />
-                <MetricTile icon={Waves} label="ATR (14)" value={`₹${data.volatility.atr14.toFixed(2)}`} sublabel={`${data.volatility.atrPercent.toFixed(2)}% of price`} />
-                <MetricTile icon={Waves} label="BB Width" value={data.volatility.bollingerBands.width.toFixed(2)} sublabel="Band width" />
-                <div className="rounded-lg border border-zinc-100 bg-white px-4 py-4 flex flex-col gap-2">
-                  <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] w-fit">
-                    <Waves className="h-4 w-4 text-zinc-500" />
+
+              {/* Bollinger Bands & Volatility — compact unified card */}
+              <div className="mb-1">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-[#0F172B] mb-2 block">Bollinger Bands &amp; Volatility</span>
+                <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
+                  <div className="grid grid-cols-6 divide-x divide-dashed divide-zinc-200">
+                    {[
+                      { label: "BB Upper", value: `₹${data.volatility.bollingerBands.upper.toFixed(2)}`, sub: "Upper band" },
+                      { label: "BB Middle", value: `₹${data.volatility.bollingerBands.middle.toFixed(2)}`, sub: "Middle band" },
+                      { label: "BB Lower", value: `₹${data.volatility.bollingerBands.lower.toFixed(2)}`, sub: "Lower band" },
+                      { label: "ATR (14)", value: `₹${data.volatility.atr14.toFixed(2)}`, sub: `${data.volatility.atrPercent.toFixed(2)}% of price` },
+                      { label: "BB Width", value: data.volatility.bollingerBands.width.toFixed(2), sub: "Band width" },
+                      { label: "BB Squeeze", value: data.volatility.bollingerBands.squeeze ? "YES" : "NO", sub: data.volatility.bollingerBands.squeeze ? "Squeeze active" : "No squeeze", squeeze: data.volatility.bollingerBands.squeeze },
+                    ].map(({ label, value, sub, squeeze }, i) => (
+                      <div key={i} className="flex flex-col gap-0.5 px-4 py-3">
+                        <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">{label}</span>
+                        <span className={`text-base font-semibold ${squeeze === true ? "text-amber-600" : squeeze === false ? "text-zinc-500" : "text-[#0F172B]"}`}>{value}</span>
+                        <span className="text-[10px] text-[#888888]">{sub}</span>
+                      </div>
+                    ))}
                   </div>
-                  <small className="uppercase tracking-wider text-[#888888]">BB Squeeze</small>
-                  <h3>{data.volatility.bollingerBands.squeeze ? "YES" : "NO"}</h3>
-                  <small className={`text-[11px] font-semibold ${data.volatility.bollingerBands.squeeze ? "text-amber-600" : "text-zinc-500"}`}>
-                    {data.volatility.bollingerBands.squeeze ? "Squeeze Active" : "Volatility compression"}
-                  </small>
                 </div>
               </div>
             </SectionPanel>

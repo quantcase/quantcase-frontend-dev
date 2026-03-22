@@ -141,9 +141,9 @@ function EngineCard({
 }
 
 function StructureEnginePanel({ engine, perspective }: { engine: StructureEngineData; perspective: "GROWTH" | "VALUE" }) {
-  const mp = engine.marketPhase;
-  const cp = engine.capitalParticipation;
-  const pa = engine.priceArchitecture;
+  const mp = engine.marketStructure;
+  const cp = engine.participation;
+  const pa = engine.priceStructure;
   const isGrowth = perspective === "GROWTH";
 
   return (
@@ -178,8 +178,8 @@ function StructureEnginePanel({ engine, perspective }: { engine: StructureEngine
 }
 
 function TrendEnginePanel({ engine, perspective }: { engine: TrendEngineData; perspective: "GROWTH" | "VALUE" }) {
-  const db = engine.directionalBias;
-  const tm = engine.trendMaturity;
+  const db = engine.trendDirection;
+  const tm = engine.trendQuality;
   const isGrowth = perspective === "GROWTH";
 
   return (
@@ -214,8 +214,8 @@ function TrendEnginePanel({ engine, perspective }: { engine: TrendEngineData; pe
 }
 
 function TimingEnginePanel({ engine, perspective }: { engine: TimingEngineData; perspective: "GROWTH" | "VALUE" }) {
-  const mt = engine.momentumThrust;
-  const vr = engine.volatilityRegime;
+  const mt = engine.momentum;
+  const vr = engine.volatility;
   const isGrowth = perspective === "GROWTH";
 
   function rsiLabel(zone: string): string {
@@ -270,8 +270,8 @@ function RelativeStrengthCard({ title, subtitle, rs, perspective }: { title: str
 function DominanceEnginePanel({ engine, perspective }: { engine: DominanceEngineData; perspective: "GROWTH" | "VALUE" }) {
   return (
     <div className="space-y-4">
-      <RelativeStrengthCard title="Relative Strength vs Nifty" subtitle="Price Ratio vs Index" rs={engine.relativeStrength.vsNifty} perspective={perspective} />
-      <RelativeStrengthCard title="Relative Strength vs Sector" subtitle="Price Ratio vs Sector ETF" rs={engine.relativeStrength.vsSector} perspective={perspective} />
+      <RelativeStrengthCard title="Relative Strength vs Nifty" subtitle="Price Ratio vs Index" rs={engine.leadership.vsNifty} perspective={perspective} />
+      <RelativeStrengthCard title="Relative Strength vs Sector" subtitle="Price Ratio vs Sector ETF" rs={engine.leadership.vsSector} perspective={perspective} />
     </div>
   );
 }

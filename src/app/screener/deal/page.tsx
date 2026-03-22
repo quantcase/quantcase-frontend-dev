@@ -287,10 +287,6 @@ function DealContent() {
 
   return (
     <div className="min-h-screen bg-white pt-8 mb-8 px-4">
-      {/* Confidential Banner */}
-      <div className="sticky top-0 z-10 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-xs font-semibold text-white">
-        ⚠️ HIGHLY CONFIDENTIAL — FOR INVESTMENT COMMITTEE USE ONLY
-      </div>
 
       {/* Company Header — matches opportunity page style */}
       <div className="flex items-start justify-between gap-4 mb-6 mt-8">

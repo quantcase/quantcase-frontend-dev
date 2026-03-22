@@ -90,6 +90,20 @@ export interface TechnicalsTimeframesRaw {
   multiTimeframeSignal: string;
 }
 
+export interface DecisionIntelligence {
+  currentRegime: {
+    label: string;
+    description: string;
+  };
+  actionBias: string;
+  strategyViews: {
+    growth: string;
+    value: string;
+  };
+  riskAlerts: string[];
+  convictionLevel: string;
+}
+
 export interface TechnicalsResponse {
   symbol: string;
   exchange: string;
@@ -106,6 +120,8 @@ export interface TechnicalsResponse {
   signals: TechnicalsSignalsRaw;
   timeframes: TechnicalsTimeframesRaw;
   insights: string[];
+  ruleEngine?: RuleEngine;
+  decisionIntelligence?: DecisionIntelligence;
 }
 
 export interface TechnicalsDerived {
@@ -116,4 +132,93 @@ export interface TechnicalsDerived {
   downsideToSupport: number;  // percent
   riskReward: number;
   srMidpoint: number;
+}
+
+// Rule Engine types
+export interface RuleEngineIndicator {
+  growthOutput: string | null;
+  growthWatchouts: string[];
+  valueOutput: string | null;
+  valueWatchouts: string[];
+}
+
+export interface MarketPhaseIndicator extends RuleEngineIndicator {
+  wyckoffPhase: string;
+}
+
+export interface CapitalParticipationIndicator extends RuleEngineIndicator {
+  volumeSignal: string;
+  cmfSignal: string;
+  cmf: number;
+}
+
+export interface PriceArchitectureIndicator extends RuleEngineIndicator {
+  zone: string | null;
+}
+
+export interface DirectionalBiasIndicator extends RuleEngineIndicator {
+  priceVsSMA20: string;
+  priceVsSMA50: string;
+  priceVsSMA100: string;
+  priceVsSMA200: string;
+}
+
+export interface TrendMaturityIndicator extends RuleEngineIndicator {
+  adx: number;
+  adxTrend: string;
+  adxBand: string;
+  condition: string;
+}
+
+export interface MomentumThrustIndicator extends RuleEngineIndicator {
+  rsi: number;
+  rsiZone: string;
+}
+
+export interface VolatilityRegimeIndicator extends RuleEngineIndicator {
+  bbWidth: number;
+  prevBbWidth: number;
+  expanding: boolean;
+  condition: string;
+}
+
+export interface RelativeStrengthSingle extends RuleEngineIndicator {
+  crsValue: number | null;
+  prevCrsValue: number | null;
+  signal: string | null;
+  sectorTicker?: string | null;
+}
+
+export interface StructureEngineData {
+  marketPhase: MarketPhaseIndicator;
+  capitalParticipation: CapitalParticipationIndicator;
+  priceArchitecture: PriceArchitectureIndicator;
+}
+
+export interface TrendEngineData {
+  directionalBias: DirectionalBiasIndicator;
+  trendMaturity: TrendMaturityIndicator;
+}
+
+export interface TimingEngineData {
+  momentumThrust: MomentumThrustIndicator;
+  volatilityRegime: VolatilityRegimeIndicator;
+}
+
+export interface DominanceEngineData {
+  relativeStrength: {
+    vsNifty: RelativeStrengthSingle;
+    vsSector: RelativeStrengthSingle;
+  };
+}
+
+export interface RuleEngine {
+  structureEngine: StructureEngineData;
+  trendEngine: TrendEngineData;
+  timingEngine: TimingEngineData;
+  dominanceEngine: DominanceEngineData;
+  decisionContext: {
+    summary: string;
+    alerts: string[];
+  };
 }

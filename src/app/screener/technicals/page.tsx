@@ -13,7 +13,6 @@ import {
   Gauge,
   Layers,
   Zap,
-  ChevronRight,
   ArrowUpRight,
   ArrowDownRight,
   Waves,
@@ -63,7 +62,7 @@ function SRRangeBar({
   const clampedPos = Math.max(0, Math.min(100, positionInRange));
 
   return (
-    <div className="px-2 py-4">
+    <div className="px-2 py-2">
       <div className="flex justify-between mb-2">
         <span style={{ fontSize: 11, color: "#888888", fontWeight: 500 }}>SUPPORT</span>
         <span style={{ fontSize: 11, color: "#888888", fontWeight: 500 }}>RESISTANCE</span>
@@ -411,23 +410,7 @@ function TechnicalsContent() {
               <p>{data.meta.basicIndustry}</p>
               <p className="text-zinc-400">{data.meta.macroSector}</p>
             </div>
-            <div className="flex items-center gap-3 pt-0.5">
-              <span style={{ fontSize: 22, fontWeight: 500, color: "#0F172B" }}>
-                ₹{data.price.cmp.toLocaleString("en-IN")}
-              </span>
-              <span
-                className={`flex items-center gap-0.5 text-sm font-semibold ${
-                  changeIsPositive ? "text-emerald-600" : "text-red-500"
-                }`}
-              >
-                {changeIsPositive ? (
-                  <TrendingUp className="h-3.5 w-3.5" />
-                ) : (
-                  <TrendingDown className="h-3.5 w-3.5" />
-                )}
-                {changeDisplay}
-              </span>
-            </div>
+            
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -580,81 +563,131 @@ function TechnicalsContent() {
           title="Support & Resistance Analysis"
           subtitle="Price position within identified support/resistance band"
         >
-          <SRRangeBar
-            support={derived.supportNum}
-            resistance={derived.resistanceNum}
-            cmp={data.price.cmp}
-            positionInRange={derived.positionInRange}
-          />
+          <div className="grid grid-cols-3 gap-6">
 
-          <hr className="border-zinc-100 mx-0" />
+            {/* Left column — SR chart + Fibonacci visual */}
+            <div className="col-span-1 flex flex-col gap-4">
 
-          <div className="grid grid-cols-2 gap-4 pb-4 pt-4 md:grid-cols-5">
-            <MetricTile
-              icon={AlertTriangle}
-              label="Support"
-              value={`₹${derived.supportNum.toLocaleString("en-IN")}`}
-              sublabel="Key floor level"
-            />
-            <MetricTile
-              icon={Target}
-              label="Resistance"
-              value={`₹${derived.resistanceNum.toLocaleString("en-IN")}`}
-              sublabel="Key ceiling level"
-            />
-            <MetricTile
-              icon={TrendingUp}
-              label="Upside to Resistance"
-              value={`+${derived.upsideToResistance.toFixed(2)}%`}
-              change={`+${derived.upsideToResistance.toFixed(2)}%`}
-            />
-            <MetricTile
-              icon={TrendingDown}
-              label="Downside to Support"
-              value={`-${derived.downsideToSupport.toFixed(2)}%`}
-              change={`-${derived.downsideToSupport.toFixed(2)}%`}
-            />
-            <MetricTile
-              icon={Scale}
-              label="Risk / Reward"
-              value={riskRewardDisplay}
-              sublabel="Upside ÷ Downside"
-            />
-          </div>
+              {/* SR Range Bar */}
+              <div>
+                <SRRangeBar
+                  support={derived.supportNum}
+                  resistance={derived.resistanceNum}
+                  cmp={data.price.cmp}
+                  positionInRange={derived.positionInRange}
+                />
+              </div>
 
-          <hr className="border-zinc-100 mx-0" />
+              {/* Fibonacci Levels Visual */}
+              {data.supportResistance.fibonacci.length > 0 && (
+                <div className="border-t border-zinc-100 pt-4">
+                  <h6 className="uppercase tracking-wider mb-3 px-2">Fibonacci Retracement Levels</h6>
+                  <div className="px-2 pb-2 space-y-2">
+                    {(() => {
+                      const fibs = [...data.supportResistance.fibonacci].sort((a, b) => b - a);
+                      const min = fibs[fibs.length - 1];
+                      const max = fibs[0];
+                      const range = max - min || 1;
+                      const fibLabels = ["0%", "23.6%", "38.2%", "50%", "61.8%", "78.6%", "100%"];
+                      return fibs.map((level, i) => {
+                        const pct = ((level - min) / range) * 100;
+                        const isCurrent = data.price.cmp >= level - (range * 0.05) && data.price.cmp <= level + (range * 0.05);
+                        return (
+                          <div key={i} className="flex items-center gap-2">
+                            <span style={{ fontSize: 10, color: "#888888", width: 36, textAlign: "right", flexShrink: 0 }}>
+                              {fibLabels[i] ?? ""}
+                            </span>
+                            <div className="flex-1 relative h-5 flex items-center">
+                              <div className="absolute inset-0 rounded-sm bg-zinc-50 border border-zinc-100" />
+                              <div
+                                className="absolute left-0 top-0 h-full rounded-sm"
+                                style={{
+                                  width: `${pct}%`,
+                                  background: isCurrent ? "#0F172B" : "rgba(15,23,43,0.12)",
+                                }}
+                              />
+                              <span
+                                className="relative z-10 pl-2"
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 600,
+                                  color: isCurrent ? "#fff" : "#0F172B",
+                                  mixBlendMode: "normal",
+                                }}
+                              >
+                                ₹{level.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              )}
+            </div>
 
-          <div className="grid grid-cols-3 gap-4 pb-4 pt-4">
-            <MetricTile
-              icon={Crosshair}
-              label="Pivot Point"
-              value={`₹${data.supportResistance.pivotPoints.pivot.toFixed(2)}`}
-              sublabel="Daily pivot level"
-            />
-            <MetricTile
-              icon={ArrowUpRight}
-              label="Resistance R1 / R2"
-              value={`₹${data.supportResistance.pivotPoints.r1.toFixed(2)}`}
-              sublabel={`R2: ₹${data.supportResistance.pivotPoints.r2.toFixed(2)}`}
-            />
-            <MetricTile
-              icon={ArrowDownRight}
-              label="Support S1 / S2"
-              value={`₹${data.supportResistance.pivotPoints.s1.toFixed(2)}`}
-              sublabel={`S2: ₹${data.supportResistance.pivotPoints.s2.toFixed(2)}`}
-            />
-          </div>
+            {/* Right column — Metric tiles (2 spans, 4 per row) */}
+            <div className="col-span-2 flex flex-col gap-4 pb-4">
 
-          {data.supportResistance.fibonacci.length > 0 && (
-            <div className="pt-2 border-t border-zinc-100">
-              <h6 className="uppercase tracking-wider mb-3 px-2">Fibonacci Levels</h6>
-              <div className="flex flex-wrap gap-2 px-2 pb-4">
-                {data.supportResistance.fibonacci.map((level, i) => (
-                  <Badge key={i}>₹{level.toFixed(2)}</Badge>
-                ))}
+              {/* SR + Risk metrics — 4 per row */}
+              <div className="grid grid-cols-4 gap-3">
+                <MetricTile
+                  icon={AlertTriangle}
+                  label="Support"
+                  value={`₹${derived.supportNum.toLocaleString("en-IN")}`}
+                  sublabel="Key floor level"
+                />
+                <MetricTile
+                  icon={Target}
+                  label="Resistance"
+                  value={`₹${derived.resistanceNum.toLocaleString("en-IN")}`}
+                  sublabel="Key ceiling level"
+                />
+                <MetricTile
+                  icon={TrendingUp}
+                  label="Upside to Resistance"
+                  value={`+${derived.upsideToResistance.toFixed(2)}%`}
+                  change={`+${derived.upsideToResistance.toFixed(2)}%`}
+                />
+                <MetricTile
+                  icon={TrendingDown}
+                  label="Downside to Support"
+                  value={`-${derived.downsideToSupport.toFixed(2)}%`}
+                  change={`-${derived.downsideToSupport.toFixed(2)}%`}
+                />
+              </div>
+
+              {/* Pivot metrics — 4 per row */}
+              <div className="grid grid-cols-4 gap-3">
+                <MetricTile
+                  icon={Scale}
+                  label="Risk / Reward"
+                  value={riskRewardDisplay}
+                  sublabel="Upside ÷ Downside"
+                />
+                <MetricTile
+                  icon={Crosshair}
+                  label="Pivot Point"
+                  value={`₹${data.supportResistance.pivotPoints.pivot.toFixed(2)}`}
+                  sublabel="Daily pivot level"
+                />
+                <MetricTile
+                  icon={ArrowUpRight}
+                  label="Resistance R1 / R2"
+                  value={`₹${data.supportResistance.pivotPoints.r1.toFixed(2)}`}
+                  sublabel={`R2: ₹${data.supportResistance.pivotPoints.r2.toFixed(2)}`}
+                />
+                <MetricTile
+                  icon={ArrowDownRight}
+                  label="Support S1 / S2"
+                  value={`₹${data.supportResistance.pivotPoints.s1.toFixed(2)}`}
+                  sublabel={`S2: ₹${data.supportResistance.pivotPoints.s2.toFixed(2)}`}
+                />
               </div>
             </div>
-          )}
+
+          </div>
         </SectionPanel>
 
         {/* Row 3 — Signal Scorecard (2/3) + Timeframe Matrix (1/3) */}
@@ -684,7 +717,7 @@ function TechnicalsContent() {
               </div>
 
               {/* Segmented score bar */}
-              <div className="px-2 py-4 border-b border-zinc-100">
+              <div className="px-2">
                 <div className="flex gap-0.5">
                   {Array.from({ length: 20 }).map((_, i) => {
                     const threshold = (i + 1) * 5;
@@ -702,7 +735,7 @@ function TechnicalsContent() {
                     );
                   })}
                 </div>
-                <div className="flex justify-between mt-1">
+                <div className="flex justify-between">
                   <h6>SELL</h6>
                   <h6>NEUTRAL</h6>
                   <h6>BUY</h6>
@@ -711,30 +744,23 @@ function TechnicalsContent() {
 
               {/* Component scores */}
               <div className="grid grid-cols-4 gap-3 pb-4 pt-4">
-                <MetricTile
-                  icon={TrendingUp}
-                  label="Trend Score"
-                  value={`${data.signals.components.trend}`}
-                  sublabel="/100"
-                />
-                <MetricTile
-                  icon={Gauge}
-                  label="Momentum Score"
-                  value={`${data.signals.components.momentum}`}
-                  sublabel="/100"
-                />
-                <MetricTile
-                  icon={BarChart2}
-                  label="Volume Score"
-                  value={`${data.signals.components.volume}`}
-                  sublabel="/100"
-                />
-                <MetricTile
-                  icon={Waves}
-                  label="Volatility Score"
-                  value={`${data.signals.components.volatility}`}
-                  sublabel="/100"
-                />
+                {([
+                  { icon: TrendingUp, label: "Trend Score", score: data.signals.components.trend },
+                  { icon: Gauge, label: "Momentum Score", score: data.signals.components.momentum },
+                  { icon: BarChart2, label: "Volume Score", score: data.signals.components.volume },
+                  { icon: Waves, label: "Volatility Score", score: data.signals.components.volatility },
+                ] as const).map(({ icon: Icon, label, score }) => (
+                  <div key={label} className="rounded-lg border border-zinc-100 bg-white px-4 py-4 flex flex-col gap-2">
+                    <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] w-fit">
+                      <Icon className="h-4 w-4 text-zinc-500" />
+                    </div>
+                    <small className="uppercase tracking-wider">{label}</small>
+                    <div className="flex items-baseline gap-1">
+                      <h3>{score}</h3>
+                      <small className="text-[#888888]">/100</small>
+                    </div>
+                  </div>
+                ))}
               </div>
             </SectionPanel>
           </div>
@@ -1060,14 +1086,47 @@ function TechnicalsContent() {
           title="Key Insights"
           subtitle="AI-synthesised signals from technical data"
         >
-          <ul className="divide-y divide-zinc-100 pb-4">
-            {data.insights.map((insight, i) => (
-              <li key={i} className="flex items-start gap-3 py-3 px-2">
-                <ChevronRight className="h-4 w-4 text-zinc-400 mt-0.5 shrink-0" />
-                <p>{insight}</p>
-              </li>
-            ))}
-          </ul>
+          <div className="grid grid-cols-2 gap-2 pb-4">
+            {data.insights.map((insight, i) => {
+              const lower = insight.toLowerCase();
+              const isBullish = /bullish|buy|uptrend|breakout|accumulation|above|strong|reversion/.test(lower);
+              const isBearish = /bearish|sell|downtrend|breakdown|distribution|below|weak|correction/.test(lower);
+              const [trigger, ...rest] = insight.split("—");
+              const conclusion = rest.join("—").trim();
+              const accentColor = isBullish ? "#16a34a" : isBearish ? "#dc2626" : "#888888";
+              return (
+                <div
+                  key={i}
+                  className="flex items-start gap-3 rounded-lg border border-zinc-100 bg-white px-4 py-3"
+                  style={{ borderLeft: `3px solid ${accentColor}` }}
+                >
+                  <span
+                    className="shrink-0 mt-0.5 flex items-center justify-center rounded-sm text-[10px] font-bold"
+                    style={{
+                      width: 18,
+                      height: 18,
+                      background: "rgba(15,23,43,0.06)",
+                      color: "#0F172B",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <span style={{ fontSize: 13, fontWeight: 500, color: "#0F172B" }}>
+                      {trigger.trim()}
+                    </span>
+                    {conclusion && (
+                      <>
+                        <span style={{ color: "#d4d4d8", margin: "0 4px" }}>—</span>
+                        <span style={{ fontSize: 13, color: "#888888" }}>{conclusion}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </SectionPanel>
 
       </div>

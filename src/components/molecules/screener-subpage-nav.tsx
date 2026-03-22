@@ -15,7 +15,7 @@ const NAV_TABS: NavTab[] = [
   { label: "Management Factor", href: "/screener/management" },
   { label: "Opportunity Factor", href: "/screener/opportunity" },
   { label: "Deal Factor", href: "/screener/deal" },
-  { label: "Entry/Exit Factor", href: "/screener/entry-exit" },
+  { label: "Technicals", href: "/screener/technicals" },
   { label: "Forward Trajectory", href: "/screener/forward-trajectory" },
 ];
 

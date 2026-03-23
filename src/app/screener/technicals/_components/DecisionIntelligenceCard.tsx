@@ -1,6 +1,6 @@
 "use client";
 
-import { Brain, TrendingUp, AlertTriangle } from "lucide-react";
+import { Brain, TrendingUp } from "lucide-react";
 import { DecisionIntelligence } from "@/types/technicals";
 
 interface Props {
@@ -58,22 +58,6 @@ export function DecisionIntelligenceCard({ di }: Props) {
               <p className="text-[11px] font-semibold text-[#0F172B] uppercase tracking-wide">Value Strategy View</p>
               <p className="text-[12px] text-[#888888] leading-relaxed">{di.strategyViews.value}</p>
             </div>
-          </div>
-        </div>
-
-        {/* Risk Alerts */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5">
-            <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
-            <p className="text-[10px] font-500 text-[#888888] uppercase tracking-wider">Risk Alerts</p>
-          </div>
-          <div className="space-y-1">
-            {di.riskAlerts.map((alert, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="text-amber-600 text-[10px]">●</span>
-                <p className="text-[12px] text-amber-700">{alert}</p>
-              </div>
-            ))}
           </div>
         </div>
 

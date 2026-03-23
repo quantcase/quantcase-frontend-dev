@@ -90,6 +90,12 @@ export interface TechnicalsTimeframesRaw {
   multiTimeframeSignal: string;
 }
 
+export interface DecisionIntelligenceIndicator {
+  name: string;
+  growthWatchout: string | null;
+  valueWatchout: string | null;
+}
+
 export interface DecisionIntelligence {
   currentRegime: {
     label: string;
@@ -102,6 +108,7 @@ export interface DecisionIntelligence {
   };
   riskAlerts: string[];
   convictionLevel: string;
+  indicators?: DecisionIntelligenceIndicator[];
 }
 
 export interface TechnicalsResponse {

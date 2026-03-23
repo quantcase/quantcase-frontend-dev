@@ -81,6 +81,7 @@ function TechnicalsContent() {
     derived.downsideToSupport === 0 ? "N/A" : `${derived.riskReward.toFixed(2)}x`;
 
   const ruleEngine = data.ruleEngine;
+  const decisionIntelligence = data.decisionIntelligence;
 
   return (
     <div className="min-h-screen bg-white mb-8 px-4">
@@ -147,6 +148,7 @@ function TechnicalsContent() {
               >
                 <RuleEngineSection
                   ruleEngine={ruleEngine}
+                  decisionIntelligence={decisionIntelligence}
                   activeEngine={activeEngine}
                   setActiveEngine={setActiveEngine}
                   activePerspective={activePerspective}

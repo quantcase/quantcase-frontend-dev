@@ -9,7 +9,24 @@ import type {
   TimingEngineData,
   DominanceEngineData,
   DirectionalBiasIndicator,
+  DecisionIntelligence,
+  DecisionIntelligenceIndicator,
 } from "@/types/technicals";
+
+function resolveWatchout(
+  indicators: DecisionIntelligenceIndicator[] | undefined,
+  name: string,
+  perspective: "GROWTH" | "VALUE",
+  fallback: string | null
+): string | null {
+  if (indicators) {
+    const match = indicators.find((ind) => ind.name === name);
+    if (match) {
+      return perspective === "GROWTH" ? match.growthWatchout : match.valueWatchout;
+    }
+  }
+  return fallback;
+}
 
 const ENGINE_TABS = ["STRUCTURE ENGINE", "TREND ENGINE", "TIMING ENGINE", "DOMINANCE ENGINE"] as const;
 
@@ -140,7 +157,7 @@ function EngineCard({
   );
 }
 
-function StructureEnginePanel({ engine, perspective }: { engine: StructureEngineData; perspective: "GROWTH" | "VALUE" }) {
+function StructureEnginePanel({ engine, perspective, indicators }: { engine: StructureEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined }) {
   const mp = engine.marketStructure;
   const cp = engine.participation;
   const pa = engine.priceStructure;
@@ -153,7 +170,7 @@ function StructureEnginePanel({ engine, perspective }: { engine: StructureEngine
         subtitle="Wyckoff Phase"
         badge={mp.wyckoffPhase}
         output={isGrowth ? mp.growthOutput : mp.valueOutput}
-        watchout={isGrowth ? mp.growthWatchout : mp.valueWatchout}
+        watchout={resolveWatchout(indicators, "Wyckoff Phase", perspective, isGrowth ? mp.growthWatchout : mp.valueWatchout)}
       />
       <EngineCard
         title="Capital Participation"
@@ -164,20 +181,20 @@ function StructureEnginePanel({ engine, perspective }: { engine: StructureEngine
           <MetricPill label="CMF Signal" value={cp.cmfSignal} colorClass={engineSignalColor(cp.cmfSignal)} />
         </>}
         output={isGrowth ? cp.growthOutput : cp.valueOutput}
-        watchout={isGrowth ? cp.growthWatchout : cp.valueWatchout}
+        watchout={resolveWatchout(indicators, "Participation", perspective, isGrowth ? cp.growthWatchout : cp.valueWatchout)}
       />
       <EngineCard
         title="Price Structure"
         subtitle="Support & Resistance"
         badge={pa.zone ?? "N/A"}
         output={isGrowth ? pa.growthOutput : pa.valueOutput}
-        watchout={isGrowth ? pa.growthWatchout : pa.valueWatchout}
+        watchout={resolveWatchout(indicators, "Price Structure", perspective, isGrowth ? pa.growthWatchout : pa.valueWatchout)}
       />
     </div>
   );
 }
 
-function TrendEnginePanel({ engine, perspective }: { engine: TrendEngineData; perspective: "GROWTH" | "VALUE" }) {
+function TrendEnginePanel({ engine, perspective, indicators }: { engine: TrendEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined }) {
   const db = engine.trendDirection;
   const tm = engine.trendQuality;
   const isGrowth = perspective === "GROWTH";
@@ -207,13 +224,13 @@ function TrendEnginePanel({ engine, perspective }: { engine: TrendEngineData; pe
           <MetricPill label="Band" value={tm.adxBand} colorClass="text-zinc-500" />
         </>}
         output={isGrowth ? tm.growthOutput : tm.valueOutput}
-        watchout={isGrowth ? tm.growthWatchout : tm.valueWatchout}
+        watchout={resolveWatchout(indicators, "Trend Quality", perspective, isGrowth ? tm.growthWatchout : tm.valueWatchout)}
       />
     </div>
   );
 }
 
-function TimingEnginePanel({ engine, perspective }: { engine: TimingEngineData; perspective: "GROWTH" | "VALUE" }) {
+function TimingEnginePanel({ engine, perspective, indicators }: { engine: TimingEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined }) {
   const mt = engine.momentum;
   const vr = engine.volatility;
   const isGrowth = perspective === "GROWTH";
@@ -232,7 +249,7 @@ function TimingEnginePanel({ engine, perspective }: { engine: TimingEngineData; 
         badge={rsiLabel(mt.rsiZone)}
         metrics={<MetricPill label="RSI" value={mt.rsi.toFixed(2)} colorClass={mt.rsiZone === "0-30" ? "text-emerald-600" : mt.rsiZone === "70-100" ? "text-red-600" : "text-zinc-600"} />}
         output={isGrowth ? mt.growthOutput : mt.valueOutput}
-        watchout={isGrowth ? mt.growthWatchout : mt.valueWatchout}
+        watchout={resolveWatchout(indicators, "Momentum", perspective, isGrowth ? mt.growthWatchout : mt.valueWatchout)}
       />
       <EngineCard
         title="Volatility"
@@ -278,17 +295,21 @@ function DominanceEnginePanel({ engine, perspective }: { engine: DominanceEngine
 
 export function RuleEngineSection({
   ruleEngine,
+  decisionIntelligence,
   activeEngine,
   setActiveEngine,
   activePerspective,
   setActivePerspective,
 }: {
   ruleEngine: RuleEngine;
+  decisionIntelligence?: DecisionIntelligence;
   activeEngine: string;
   setActiveEngine: (v: string) => void;
   activePerspective: "GROWTH" | "VALUE";
   setActivePerspective: (v: "GROWTH" | "VALUE") => void;
 }) {
+  const diIndicators = decisionIntelligence?.indicators;
+
   return (
     <>
       <div className="flex items-center justify-between flex-wrap gap-3 mb-5">
@@ -315,13 +336,13 @@ export function RuleEngineSection({
       </div>
 
       {activeEngine === "STRUCTURE ENGINE" && (
-        <StructureEnginePanel engine={ruleEngine.structureEngine} perspective={activePerspective} />
+        <StructureEnginePanel engine={ruleEngine.structureEngine} perspective={activePerspective} indicators={diIndicators} />
       )}
       {activeEngine === "TREND ENGINE" && (
-        <TrendEnginePanel engine={ruleEngine.trendEngine} perspective={activePerspective} />
+        <TrendEnginePanel engine={ruleEngine.trendEngine} perspective={activePerspective} indicators={diIndicators} />
       )}
       {activeEngine === "TIMING ENGINE" && (
-        <TimingEnginePanel engine={ruleEngine.timingEngine} perspective={activePerspective} />
+        <TimingEnginePanel engine={ruleEngine.timingEngine} perspective={activePerspective} indicators={diIndicators} />
       )}
       {activeEngine === "DOMINANCE ENGINE" && (
         <DominanceEnginePanel engine={ruleEngine.dominanceEngine} perspective={activePerspective} />

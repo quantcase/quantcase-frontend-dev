@@ -1,34 +1,42 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Info, Pencil } from "lucide-react";
+import { FileText, Pencil } from "lucide-react";
 
 interface WhyThisPortfolioCardProps {
   points: string[];
+  onEdit?: () => void;
 }
 
-export function WhyThisPortfolioCard({ points }: WhyThisPortfolioCardProps) {
+export function WhyThisPortfolioCard({ points, onEdit }: WhyThisPortfolioCardProps) {
+  const isEmpty = points.length === 0 || (points.length === 1 && points[0].startsWith("No rationale"));
+
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
-            <Info className="h-3.5 w-3.5" />
-            Why This Portfolio
-          </CardTitle>
-          <button className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
+    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+      <div className="px-2 pt-1 pb-3 flex items-center justify-between">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] flex items-center gap-1.5" style={{ color: "rgba(18,18,18,0.50)" }}>
+          <FileText className="h-3 w-3" />
+          Why This Portfolio
+        </p>
+        {onEdit && (
+          <button onClick={onEdit} className="text-zinc-400 hover:text-zinc-600 transition-colors">
             <Pencil className="h-3.5 w-3.5" />
           </button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-2.5">
-          {points.map((point, i) => (
-            <li key={i} className="flex items-start gap-2">
-              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-              <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">{point}</p>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4">
+        {isEmpty ? (
+          <p className="text-sm" style={{ color: "#888888" }}>
+            No rationale added yet. Edit this model to add portfolio thesis points.
+          </p>
+        ) : (
+          <ul className="space-y-2.5">
+            {points.map((point, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-zinc-400 flex-shrink-0" />
+                <p className="text-sm leading-relaxed" style={{ color: "#888888" }}>{point}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }

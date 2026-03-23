@@ -11,9 +11,8 @@ import type { JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/ma
 import type { OFactorResponse } from "@/types/opportunity";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
-import { FileText, Calendar, CheckCircle2, PanelRight } from "lucide-react";
+import { FileText, Calendar, CheckCircle2, PanelRight, TrendingUp } from "lucide-react";
+import { IconBox } from "@/components/molecules/icon-box";
 import { PromptSideWindow } from "@/components/opportunity/prompt-side-window";
 import { IndustryOverviewCard } from "@/components/opportunity/industry-overview-card";
 import { CompetitionCard } from "@/components/opportunity/competition-card";
@@ -29,6 +28,7 @@ import { CustomerTractionCard } from "@/components/opportunity/customer-traction
 import { SectionPanel } from "@/components/opportunity/section-panel";
 import { SubsectionHeader } from "@/components/opportunity/subsection-header";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
+import { InsightsCard } from "@/components/opportunity/insights-card";
 
 function OpportunityContent() {
   const searchParams = useSearchParams();
@@ -207,9 +207,6 @@ function OpportunityContent() {
     const transcriptCall = transcriptCalls[0];
     return (
       <div className="min-h-screen bg-background p-4">
-        <div className="sticky top-0 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-sm font-semibold text-white">
-          ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
-        </div>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <h1 className="text-sm font-bold mb-6">Opportunity Factor Analysis</h1>
           <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
@@ -327,62 +324,32 @@ function OpportunityContent() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 p-4 mb-20">
-      {/* Confidential Banner */}
-      <div className="sticky top-0 z-10 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-sm font-semibold text-white mb-4">
-        ⚠️ CONFIDENTIAL — INVESTMENT COMMITTEE USE ONLY
-      </div>
+    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
 
       {/* Company Header */}
-      <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 mb-6">
-        <CardHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
-              </div>
-              <div className="space-y-1.5">
-                <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{transcriptCall.company_name}</h1>
-                <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  <span className="font-semibold bg-zinc-50 dark:bg-zinc-800 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700">
-                    NSE: {symbol}
-                  </span>
-                  <span>•</span>
-                  <span>{transcriptCall.basic_industry}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <Button variant="outline" size="sm" className="text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 font-semibold">
-                <FileText className="h-4 w-4 mr-1.5" />
-                FULL IM
-              </Button>
-              <Badge className="px-3 py-1.5 text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 border-0">
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                HIGH CONFIDENCE
-              </Badge>
-              <div className="flex items-center gap-1.5 text-sm text-zinc-500">
-                <Calendar className="h-4 w-4" />
-                {transcriptCall.call_date}
-              </div>
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="flex items-start gap-4">
+          <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+            <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
+          </div>
+          <div className="space-y-1.5">
+            <h2>{transcriptCall.company_name}</h2>
+            <div className="flex items-center gap-2">
+              <Badge>NSE: {symbol}</Badge>
+              <p>{transcriptCall.basic_industry}</p>
             </div>
           </div>
-        </CardHeader>
-      </Card>
-
-      {/* Score Banner */}
-      <div className="container mx-auto max-w-7xl mb-5 flex items-center gap-2">
-        <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 mr-1">§4</span>
-        <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">
-          Opportunity Factor Score
-        </h2>
-        {totalScore ? (
-          <span className="text-sm font-bold text-zinc-600 dark:text-zinc-400">
-            ({totalScore.total_score}/{totalScore.max_score})
-          </span>
-        ) : (
-          <span className="text-sm font-bold text-zinc-400 dark:text-zinc-600">—</span>
-        )}
+        </div>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <Badge>
+            <FileText className="h-3.5 w-3.5 mr-1.5" />
+            FULL IM
+          </Badge>
+          <Badge>
+            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+            HIGH CONFIDENCE
+          </Badge>
+        </div>
       </div>
 
       {/* Floating Prompt Toggle */}
@@ -401,81 +368,139 @@ function OpportunityContent() {
       {/* Page Content */}
       <div className="container mx-auto max-w-7xl space-y-6">
 
-        {/* Final Takeaways */}
+        {/* Opportunity Factor Summary — two-column layout */}
         {data.final_takeaways && (() => {
           const ft = data.final_takeaways!;
-          const statusColor = ft.status_color === "green"
-            ? "text-emerald-400"
-            : ft.status_color === "red"
-            ? "text-red-400"
-            : "text-yellow-400";
-          const sections = [
-            { label: "Industry", ...ft.section_scores.industry },
-            { label: "Competition", ...ft.section_scores.competition },
-            { label: "Financial", ...ft.section_scores.financial_strength },
-            { label: "Traction", ...ft.section_scores.customer_traction },
+          const score = totalScore?.total_score ?? ft.overall_score;
+          const maxScore = totalScore?.max_score ?? ft.max_score;
+
+          function scoreColor(s: number, max: number): string {
+            const pct = max > 0 ? s / max : 0;
+            if (pct <= 0.4) return "#F8383C";
+            if (pct <= 0.7) return "#FBBF24";
+            return "#888888";
+          }
+          const fillColor = scoreColor(score, maxScore);
+          const filledCount = Math.round(Math.min(score, maxScore));
+
+          const sectionRows = [
+            { name: "Industry", scoring: industryScoring },
+            { name: "Competition", scoring: competitionScoring },
+            { name: "Financial Strength", scoring: financialScoring },
+            { name: "Customer Traction", scoring: customerScoring },
           ];
+
+          const assessmentRows = [
+            { name: "Industry Overview", key: "industry" as const },
+            { name: "Competition", key: "competition" as const },
+            { name: "Financial Strength", key: "financial_strength" as const },
+            { name: "Customer Traction", key: "customer_traction" as const },
+          ];
+
           return (
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-              {/* Black header strip */}
-              <div className="bg-zinc-900 dark:bg-zinc-950 px-6 py-4 flex items-center justify-between gap-4">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Overall Takeaway</p>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className={`text-xs font-semibold uppercase tracking-wide ${statusColor}`}>{ft.overall_status}</span>
-                  <span className="text-zinc-600 text-xs">·</span>
-                  <span className="text-xs font-light text-zinc-400">{ft.overall_score}/{ft.max_score}</span>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 
-              {/* White body */}
-              <div className="bg-white dark:bg-zinc-900 px-6 py-5 space-y-4">
-                {/* Investment thesis */}
-                <p className="text-xs font-light text-zinc-600 dark:text-zinc-300 leading-relaxed">{ft.investment_thesis}</p>
-
-                {/* Highlights + Risks */}
-                <div className="grid grid-cols-2 gap-4 border-t border-zinc-100 dark:border-zinc-800 pt-4">
+              {/* Left — Opportunity Factor Summary */}
+              <SectionPanel title="Opportunity Factor Score">
+                <div className="space-y-5 p-2 pb-4">
+                  {/* Big score number */}
                   <div>
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 mb-2">Key Highlights</p>
-                    <ul className="space-y-1">
-                      {ft.key_highlights.map((h, i) => (
-                        <li key={i} className="flex gap-1.5 text-xs font-light text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                          <span className="text-emerald-500 shrink-0">+</span>
-                          <span>{h}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <span style={{ fontSize: 56, fontWeight: 500, color: "#0F172B", lineHeight: 1 }}>
+                      {score}
+                    </span>
+                    <span style={{ fontSize: 28, fontWeight: 400, color: "rgba(18,18,18,0.40)" }}>
+                      /{maxScore}
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 mb-2">Key Risks</p>
-                    <ul className="space-y-1">
-                      {ft.key_risks.map((r, i) => (
-                        <li key={i} className="flex gap-1.5 text-xs font-light text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                          <span className="text-red-400 shrink-0">−</span>
-                          <span>{r}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
 
-                {/* Section scores */}
-                <div className="grid grid-cols-4 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-4">
-                  {sections.map((s) => (
-                    <div key={s.label}>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">{s.label}</p>
-                      <p className="text-2xl font-normal text-zinc-900 dark:text-zinc-100">{s.score}<span className="text-zinc-400 text-sm font-light">/10</span></p>
-                      <p className="text-xs font-medium text-zinc-500 mt-0.5">{s.status}</p>
+                  {/* Segmented bar with LOW / MODERATE / HIGH labels */}
+                  <div className="space-y-1.5">
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      {Array.from({ length: maxScore }).map((_, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            width: 8,
+                            height: 32,
+                            borderRadius: 2,
+                            backgroundColor: i < filledCount ? fillColor : "#E2E8F0",
+                          }}
+                        />
+                      ))}
                     </div>
-                  ))}
+                    <div className="flex justify-between">
+                      <h6>LOW</h6>
+                      <h6>MODERATE</h6>
+                      <h6>HIGH</h6>
+                    </div>
+                  </div>
+
+                  {/* Per-section rows */}
+                  <div className="border-t border-zinc-100 pt-4">
+                    {sectionRows.map((row) => {
+                      const s = row.scoring;
+                      const parsedScore = s ? parseFloat(String(s.score)) : NaN;
+                      const numericScore = !isNaN(parsedScore);
+                      const sFilled = numericScore ? Math.round(Math.min(parsedScore, s!.max_score)) : 0;
+                      const rowFillColor = numericScore ? scoreColor(parsedScore, s!.max_score) : fillColor;
+                      return (
+                        <div key={row.name} className="flex items-center gap-4 py-2.5 border-b border-zinc-100 last:border-0">
+                          <h6 className="w-40 shrink-0">{row.name}</h6>
+                          <span style={{ fontSize: 14, fontWeight: 500, color: numericScore ? "#0F172B" : "#94a3b8", whiteSpace: "nowrap" }}>
+                            {numericScore ? `${parsedScore}/${s!.max_score}` : "N/A"}
+                          </span>
+                          {numericScore && (
+                            <div style={{ display: "flex", gap: 2, flex: 1, justifyContent: "center" }}>
+                              {Array.from({ length: s!.max_score }).map((_, i) => (
+                                <div
+                                  key={i}
+                                  style={{
+                                    height: 12,
+                                    width: 6,
+                                    borderRadius: 1,
+                                    backgroundColor: i < sFilled ? rowFillColor : "#E2E8F0",
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          )}
+                          {!numericScore && <div style={{ flex: 1 }} />}
+                          <h6 className="shrink-0 text-right w-36" style={{ color: numericScore ? undefined : "#94a3b8" }}>{s?.status ?? "N/A"}</h6>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              </SectionPanel>
+
+              {/* Right — Overall Opportunity Assessment */}
+              <SectionPanel title="Overall Opportunity Assessment">
+                <div className="flex flex-col justify-between h-90 pb-4">
+                  {assessmentRows.map((row, i) => {
+                    const s = ft.section_scores[row.key];
+                    return (
+                      <>
+                      <div key={row.key} className={`flex items-start gap-3 px-2`}>
+                        <IconBox icon={TrendingUp} />
+                        <div className="space-y-0.5">
+                          <h5>{row.name}</h5>
+                          <p className="line-clamp-2 text-truncate">{s.takeaway}</p>
+                        </div>
+                      </div>
+                      {i < assessmentRows.length - 1 && <hr className="border-zinc-200 dark:border-zinc-700 border-dashed"/> }
+                      </>
+                    );
+                  })}
+                </div>
+              </SectionPanel>
+
             </div>
           );
         })()}
 
         {/* 4.1 Industry Overview & Market */}
         <SectionPanel
-          title="4.1 Industry Overview & Market"
+          title="Industry Overview & Market"
           subtitle="Synthesized from public company transcripts & filings"
           scoring={industryScoring}
         >
@@ -484,7 +509,7 @@ function OpportunityContent() {
 
         {/* 4.2 Competitive Benchmarking vs Industry Peers */}
         <SectionPanel
-          title="4.2 Competitive Benchmarking vs Industry Peers"
+          title="Competitive Benchmarking vs Industry Peers"
           subtitle="Peer comparison from public filings & market data"
           scoring={competitionScoring}
           contentClassName="px-6 space-y-4"
@@ -497,6 +522,7 @@ function OpportunityContent() {
           {showCompetitionDetails && (
             <>
               <div>
+                <hr className="border-zinc-200 dark:border-zinc-700 border-dashed my-6" />
                 <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">KPI Benchmarking</h4>
                 <p className="text-xs text-zinc-400 mb-3">Latest KPI values across industry peers</p>
                 <KpiBenchmarkingTable data={peerData?.peer_kpi_timeseries} loading={peerLoading} />
@@ -509,12 +535,12 @@ function OpportunityContent() {
 
         {/* 4.3 Financial Strength */}
         <SectionPanel
-          title="4.3 Financial Strength"
+          title="Financial Strength"
           subtitle="Snapshot from financial statements, investor decks & management commentary"
           scoring={financialScoring}
           contentClassName=""
         >
-          <div className="px-6 pb-0 space-y-4">
+          <div className="pb-4 space-y-4">
             <FinancialStrengthCard
               data={data.financial_strength}
               showDetails={showFinancialDetails}
@@ -523,35 +549,35 @@ function OpportunityContent() {
           </div>
           {showFinancialDetails && (
             <>
-              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 mt-4 space-y-4">
+              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 mt-4 space-y-4">
                 <SubsectionHeader
                   title="Operating Leverage Analysis"
                   subtitle="Fixed cost absorption, DOL trend & leverage verdict"
                 />
                 <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />
               </div>
-              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+              <div className="pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
                 <SubsectionHeader
                   title="Free Cash Flow Analysis"
                   subtitle="FCF conversion, growth trajectory, capex drag & yield"
                 />
                 <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />
               </div>
-              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+              <div className="pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
                 <SubsectionHeader
                   title="Working Capital"
                   subtitle="DSO, DIO, DPO, CCC trends & WC as % of revenue"
                 />
                 <WorkingCapitalCard data={data.financial_strength?.working_capital} />
               </div>
-              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+              <div className="pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
                 <SubsectionHeader
                   title="Capital Structure & Capex"
                   subtitle="Balance sheet position, debt trajectory, equity allocation & capex intensity"
                 />
                 <CapitalStructureCard data={data.financial_strength?.capital_structure} />
               </div>
-              <div className="px-6 pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+              <div className="pt-4 pb-4 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
                 <SubsectionHeader
                   title="KPI Timeseries"
                   subtitle="Industry-specific KPI trends over time"
@@ -560,14 +586,14 @@ function OpportunityContent() {
               </div>
             </>
           )}
-          <div className="px-6 pb-6">
+          <div>
             <TakeawayBox title="FINANCIAL TAKEAWAY" text={data.financial_strength?.text?.key_takeaway} />
           </div>
         </SectionPanel>
 
         {/* 4.4 Client/Customer Traction */}
         <SectionPanel
-          title="4.4 Client/Customer Traction"
+          title="Client/Customer Traction"
           subtitle="Customer growth, retention & revenue trajectory with alt data projections"
           scoring={customerScoring}
           contentClassName="px-6"

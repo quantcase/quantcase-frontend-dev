@@ -49,7 +49,7 @@ export function CallHeader({ company, score, callId, callDate, onFullLLMClick }:
               variant="outline"
               size="sm"
               onClick={onFullLLMClick}
-              className="text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950 font-semibold"
+              className="font-semibold"
             >
               <FileText className="h-4 w-4 mr-1.5" />
               FULL IM
@@ -62,7 +62,7 @@ export function CallHeader({ company, score, callId, callDate, onFullLLMClick }:
             )}
             <Badge
               variant={getConfidenceVariant(company.confidenceLevel)}
-              className="h-fit px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider bg-zinc-100 text-green-700 dark:bg-zinc-800 dark:text-green-300 border-0"
+              className="h-fit px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 border-0"
             >
               ✓ {company.confidenceLevel.toUpperCase()} CONFIDENCE
             </Badge>

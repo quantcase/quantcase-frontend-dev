@@ -11,32 +11,66 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { QuarterlyTrend } from "@/types/screener";
 
-const chartData = [
-  { quarter: "Q1", revenue: 720, ebitda: 80 },
-  { quarter: "Q2", revenue: 820, ebitda: 90 },
-  { quarter: "Q3", revenue: 980, ebitda: 110 },
-  { quarter: "Q4", revenue: 940, ebitda: 100 },
-  { quarter: "Q1 FY25", revenue: 1010, ebitda: 115 },
-  { quarter: "Q2 FY25", revenue: 1080, ebitda: 120 },
-  { quarter: "Q3 FY25", revenue: 1150, ebitda: 130 },
-  { quarter: "Q4 FY25E", revenue: 1280, ebitda: 145 },
-];
-
-interface Metric {
-  label: string;
-  value: string;
-  change: string;
-  positive: boolean;
+interface FinancialPerformanceCardProps {
+  revenue: number | null;
+  revenueGrowth: number | null;
+  ebitda: number | null;
+  ebitdaMargins: number | null;
+  earningsGrowth: number | null;
+  quarterlyTrend: QuarterlyTrend[] | null;
 }
 
-const metrics: Metric[] = [
-  { label: "Revenue (TTM)", value: "₹1.25L", change: "+18.5%", positive: true },
-  { label: "EBITDA", value: "₹190Cr", change: "-2.1%", positive: false },
-  { label: "EPS Growth", value: "26%", change: "+4.2%", positive: true },
-];
+function formatRevenue(value: number): string {
+  const lakhCr = value / 1e12;
+  if (lakhCr >= 1) return `₹${lakhCr.toFixed(2)}L Cr`;
+  const cr = value / 1e7;
+  return `₹${cr.toFixed(0)}Cr`;
+}
 
-export function FinancialPerformanceCard() {
+function formatPct(value: number): string {
+  const sign = value >= 0 ? "+" : "";
+  return `${sign}${(value * 100).toFixed(1)}%`;
+}
+
+export function FinancialPerformanceCard({
+  revenue,
+  revenueGrowth,
+  ebitda,
+  ebitdaMargins,
+  earningsGrowth,
+  quarterlyTrend,
+}: FinancialPerformanceCardProps) {
+  const chartData = quarterlyTrend
+    ? quarterlyTrend.map((q) => ({
+        quarter: q.period,
+        revenue: parseFloat((q.revenue / 1e7).toFixed(1)),
+        ebitda: parseFloat((q.ebitda / 1e7).toFixed(1)),
+      }))
+    : [];
+
+  const metrics = [
+    {
+      label: "Revenue (TTM)",
+      value: revenue != null ? formatRevenue(revenue) : "—",
+      change: revenueGrowth != null ? formatPct(revenueGrowth) : null,
+      positive: (revenueGrowth ?? 0) >= 0,
+    },
+    {
+      label: "EBITDA",
+      value: ebitda != null ? formatRevenue(ebitda) : "—",
+      change: ebitdaMargins != null ? formatPct(ebitdaMargins) : null,
+      positive: (ebitdaMargins ?? 0) >= 0,
+    },
+    {
+      label: "EPS Growth",
+      value: earningsGrowth != null ? `${(earningsGrowth * 100).toFixed(0)}%` : "—",
+      change: null,
+      positive: (earningsGrowth ?? 0) >= 0,
+    },
+  ];
+
   return (
     <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
       <CardHeader className="pb-2">
@@ -45,7 +79,7 @@ export function FinancialPerformanceCard() {
             <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
               Financial Performance
             </CardTitle>
-            <p className="text-xs text-zinc-400 mt-0.5">Updated 14:30 IST</p>
+            <p className="text-xs text-zinc-400 mt-0.5">Trailing twelve months</p>
           </div>
           <ArrowUpRight className="h-4 w-4 text-zinc-400" />
         </div>
@@ -58,10 +92,12 @@ export function FinancialPerformanceCard() {
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">{m.label}</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">{m.value}</span>
-                <span className={`flex items-center text-xs font-semibold ${m.positive ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
-                  {m.positive ? <TrendingUp className="h-3 w-3 mr-0.5" /> : <TrendingDown className="h-3 w-3 mr-0.5" />}
-                  {m.change}
-                </span>
+                {m.change && (
+                  <span className={`flex items-center text-xs font-semibold ${m.positive ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
+                    {m.positive ? <TrendingUp className="h-3 w-3 mr-0.5" /> : <TrendingDown className="h-3 w-3 mr-0.5" />}
+                    {m.change}
+                  </span>
+                )}
               </div>
             </div>
           ))}
@@ -89,14 +125,15 @@ export function FinancialPerformanceCard() {
                   borderRadius: 8,
                   fontSize: 12,
                 }}
+                formatter={(value: number) => [`₹${value}Cr`, undefined]}
               />
               <Legend
                 iconType="circle"
                 iconSize={8}
                 wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
               />
-              <Bar dataKey="revenue" name="Revenue" fill="#818cf8" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="ebitda" name="EBITDA" fill="#f87171" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="revenue" name="Revenue" fill="#0F172B" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="ebitda" name="EBITDA" fill="#d4d4d8" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

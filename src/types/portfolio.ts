@@ -106,3 +106,8 @@ export interface ICConclusion {
   whyNow: string;
   imScore: number;
 }
+
+export interface StoredModel extends PortfolioData {
+  createdAt: string;
+  updatedAt: string;
+}

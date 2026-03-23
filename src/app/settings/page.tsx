@@ -1,0 +1,154 @@
+"use client";
+
+import { User, Bell, Shield, Building2, Palette, Key } from "lucide-react";
+import { SectionPanel } from "@/components/molecules/section-panel";
+
+interface SettingRow {
+  label: string;
+  description: string;
+  value?: string;
+  placeholder?: string;
+}
+
+interface SettingSection {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: React.ElementType;
+  rows: SettingRow[];
+  /** span both columns */
+  wide?: boolean;
+}
+
+const SECTIONS: SettingSection[] = [
+  {
+    id: "profile",
+    title: "Profile",
+    subtitle: "Your personal account details",
+    icon: User,
+    rows: [
+      { label: "Full Name", description: "Your display name across the platform", value: "Alex Morgan", placeholder: "Enter full name" },
+      { label: "Email", description: "Primary contact and login email", value: "alex.morgan@firm.com", placeholder: "Enter email" },
+      { label: "Role", description: "Your designation within the organisation", value: "Relationship Manager", placeholder: "Enter role" },
+    ],
+  },
+  {
+    id: "organisation",
+    title: "Organisation",
+    subtitle: "Firm-level configuration",
+    icon: Building2,
+    rows: [
+      { label: "Firm Name", description: "Legal entity name shown on reports", value: "QuantCase FinTech", placeholder: "Enter firm name" },
+      { label: "Region", description: "Primary market jurisdiction", value: "India — NSE / BSE", placeholder: "Enter region" },
+      { label: "Currency", description: "Default display currency", value: "INR", placeholder: "Enter currency" },
+    ],
+  },
+  {
+    id: "notifications",
+    title: "Notifications",
+    subtitle: "Control how and when you receive alerts",
+    icon: Bell,
+    rows: [
+      { label: "Email Alerts", description: "Receive analysis completion notifications via email" },
+      { label: "In-app Alerts", description: "Show badge counts and toasts within the platform" },
+      { label: "Priority Client Digest", description: "Daily morning summary of high-priority client actions" },
+    ],
+  },
+  {
+    id: "security",
+    title: "Security",
+    subtitle: "Authentication and access control",
+    icon: Shield,
+    rows: [
+      { label: "Password", description: "Change your account password", placeholder: "••••••••" },
+      { label: "Two-factor Authentication", description: "Add an extra layer of login security" },
+      { label: "Active Sessions", description: "View and revoke devices signed in to your account" },
+    ],
+  },
+  {
+    id: "api",
+    title: "API Access",
+    subtitle: "Manage keys for programmatic access",
+    icon: Key,
+    wide: true,
+    rows: [
+      { label: "API Key", description: "Use this key to authenticate requests to the QuantCase API", placeholder: "sk-••••••••••••••••" },
+      { label: "Webhook URL", description: "Receive real-time event payloads at this endpoint", placeholder: "https://your-server.com/webhook" },
+    ],
+  },
+  {
+    id: "appearance",
+    title: "Appearance",
+    subtitle: "Visual preferences",
+    icon: Palette,
+    rows: [
+      { label: "Theme", description: "Light or dark interface mode" },
+      { label: "Density", description: "Compact or comfortable spacing for tables and lists" },
+    ],
+  },
+];
+
+function SettingRowItem({ row, wide }: { row: SettingRow; wide?: boolean }) {
+  return (
+    <div className="flex flex-col gap-1.5 py-3 border-b border-[#E2E2E2] last:border-0">
+      <div className="flex flex-col gap-0.5">
+        <span className="text-sm font-medium text-[#0F172B]">{row.label}</span>
+        <span className="text-xs text-[#888888]">{row.description}</span>
+      </div>
+      <div>
+        {row.value !== undefined || row.placeholder ? (
+          <input
+            type="text"
+            defaultValue={row.value ?? ""}
+            placeholder={row.placeholder}
+            disabled
+            className={`rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-3 py-1.5 text-sm text-[#0F172B] placeholder:text-[#888888] disabled:cursor-not-allowed focus:outline-none ${wide ? "w-full" : "w-full max-w-xs"}`}
+          />
+        ) : (
+          <span className="text-xs font-medium text-[#888888] uppercase tracking-wide bg-[#F5F5F5] border border-[#E2E2E2] rounded-sm px-2 py-1">
+            Coming soon
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <div className="p-6 space-y-4">
+      {/* Page header */}
+      <div>
+        <h2 className="text-[22px] font-medium text-[#0F172B]">Settings</h2>
+        <p className="text-sm text-[#888888] mt-1">Manage your account, organisation, and platform preferences.</p>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
+        {SECTIONS.map((section) => {
+          const Icon = section.icon;
+          return (
+            <div key={section.id} className={section.wide ? "xl:col-span-2" : ""}>
+              <SectionPanel
+                title={
+                  <span className="flex items-center gap-2">
+                    <span className="inline-flex items-center justify-center rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] p-1">
+                      <Icon className="size-4 text-[#888888]" />
+                    </span>
+                    {section.title}
+                  </span>
+                }
+                subtitle={section.subtitle}
+              >
+                <div className={section.wide ? "grid grid-cols-2 gap-x-8" : ""}>
+                  {section.rows.map((row) => (
+                    <SettingRowItem key={row.label} row={row} wide={section.wide} />
+                  ))}
+                </div>
+              </SectionPanel>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

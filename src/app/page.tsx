@@ -169,52 +169,56 @@ export default function Home() {
   const today = getTodayLabel();
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Page header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">{greeting}, Alex</h1>
-        <p className="text-muted-foreground text-sm mt-0.5">
-          Here is your daily IC briefing for {today}.
-        </p>
-      </div>
+    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
+      <div className="container mx-auto max-w-7xl space-y-4">
 
-      {/* Investment Signal Changes */}
-      <InvestmentSignalChanges signals={SIGNALS} className="mb-6" />
+        {/* Page header */}
+        <div className="mb-6">
+          <h2 style={{ color: "#0F172B", fontWeight: 500 }}>{greeting}, Alex</h2>
+          <p style={{ fontSize: 14, color: "#888888", marginTop: 4 }}>
+            Here is your daily IC briefing for {today}.
+          </p>
+        </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard
-          value={12}
-          label="Thesis Strengthening"
-          icon={<ShieldCheck className="size-5 text-emerald-500" />}
-        />
-        <StatCard
-          value={3}
-          label="Thesis Weakening"
-          icon={<AlertTriangle className="size-5 text-amber-500" />}
-        />
-        <StatCard
-          value={5}
-          label="Near Catalysts"
-          icon={<Clock className="size-5 text-indigo-500" />}
-        />
-        <StatCard
-          value={2}
-          label="Risk Flags Active"
-          icon={<AlertCircle className="size-5 text-red-500" />}
-        />
-      </div>
+        {/* Investment Signal Changes */}
+        <InvestmentSignalChanges signals={SIGNALS} />
 
-      {/* Bottom widgets */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <FrameworkIntegrityMonitor items={FRAMEWORK_ITEMS} />
-        <ResearchMomentum metrics={RESEARCH_METRICS} />
-      </div>
+        {/* Stats row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard
+            value={12}
+            label="Thesis Strengthening"
+            icon={<ShieldCheck className="size-4 text-zinc-500" />}
+          />
+          <StatCard
+            value={3}
+            label="Thesis Weakening"
+            icon={<AlertTriangle className="size-4 text-zinc-500" />}
+          />
+          <StatCard
+            value={5}
+            label="Near Catalysts"
+            icon={<Clock className="size-4 text-zinc-500" />}
+          />
+          <StatCard
+            value={2}
+            label="Risk Flags Active"
+            icon={<AlertCircle className="size-4 text-zinc-500" />}
+          />
+        </div>
 
-      {/* Opportunity Radar + Market Narrative Shifts */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-4">
-        <OpportunityRadar items={OPPORTUNITIES} />
-        <MarketNarrativeShifts shifts={NARRATIVE_SHIFTS} />
+        {/* Framework Integrity + Research Momentum */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FrameworkIntegrityMonitor items={FRAMEWORK_ITEMS} />
+          <ResearchMomentum metrics={RESEARCH_METRICS} />
+        </div>
+
+        {/* Opportunity Radar + Market Narrative Shifts */}
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-4">
+          <OpportunityRadar items={OPPORTUNITIES} />
+          <MarketNarrativeShifts shifts={NARRATIVE_SHIFTS} />
+        </div>
+
       </div>
     </div>
   );

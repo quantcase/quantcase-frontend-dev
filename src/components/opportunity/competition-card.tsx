@@ -1,10 +1,10 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Award, Activity, Lock, ZapIcon } from "lucide-react";
 import { safeMetric, type CompetitionSection } from "@/types/opportunity";
 import { MetricTile } from "@/components/molecules/metric-tile";
 import { ExpandToggle } from "@/components/molecules/expand-toggle";
+import { InsightsCard } from "@/components/opportunity/insights-card";
 
 interface CompetitionCardProps {
   data?: CompetitionSection;
@@ -41,34 +41,31 @@ export function CompetitionCard({ data, showDetails = false, onToggle }: Competi
       )}
 
       {showDetails && (
-        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
-          <div className="flex items-center gap-1.5">
-            <ZapIcon className="h-3.5 w-3.5 text-zinc-500" />
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Pricing Power &amp; Dynamics</span>
-          </div>
-          <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">How Pricing Power is Shifting</p>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div>
-              <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Current State (FY24)</p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{ppd?.current_state ?? 'N/A'}</p>
+        <div className="space-y-3">
+          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
+            <div className="flex items-center gap-1.5">
+              <ZapIcon className="h-3.5 w-3.5 text-zinc-500" />
+              <h6 className="uppercase tracking-wider">Pricing Power &amp; Dynamics</h6>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Shifting Dynamics</p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{ppd?.shifting_dynamics ?? 'N/A'}</p>
+            <h5>How Pricing Power is Shifting</h5>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border border-zinc-100 bg-white px-4 py-6 flex flex-col gap-2">
+                <h5>Current State</h5>
+                <p className="line-clamp-2">{ppd?.current_state ?? 'N/A'}</p>
+              </div>
+              <div className="rounded-lg border border-zinc-100 bg-white px-4 py-6 flex flex-col gap-2">
+                <h5>Shifting Dynamics</h5>
+                <p className="line-clamp-2">{ppd?.shifting_dynamics ?? 'N/A'}</p>
+              </div>
+              <div className="rounded-lg border border-zinc-100 bg-white px-4 py-6 flex flex-col gap-2">
+                <h5>Future Trajectory</h5>
+                <p className="line-clamp-2">{ppd?.future_trajectory ?? 'N/A'}</p>
+              </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-start gap-2 pt-1">
-            <Badge className="bg-zinc-700 dark:bg-zinc-600 text-white text-[10px] font-semibold uppercase shrink-0 border-0">
-              Future Trajectory (FY25-27E)
-            </Badge>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">{ppd?.future_trajectory ?? 'N/A'}</p>
-          </div>
-          <div className="flex flex-wrap items-start gap-2">
-            <Badge className="bg-zinc-700 dark:bg-zinc-600 text-white text-[10px] font-semibold uppercase shrink-0 border-0">
-              Watch-outs
-            </Badge>
-            <p className="text-sm text-orange-600 dark:text-orange-400">{ppd?.watch_outs ?? 'N/A'}</p>
-          </div>
+          {ppd?.watch_outs && (
+            <InsightsCard title="Watch-outs" text={ppd.watch_outs} />
+          )}
         </div>
       )}
     </div>

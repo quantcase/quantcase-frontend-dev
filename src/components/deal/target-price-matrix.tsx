@@ -9,23 +9,23 @@ const scenarioConfig = [
   {
     key: "bear" as const,
     label: "BEAR CASE",
-    barColor: "bg-red-500",
-    labelColor: "text-red-500",
-    progressColor: "bg-red-500",
+    barColor: "bg-zinc-200 dark:bg-zinc-700",
+    labelColor: "text-zinc-500 dark:text-zinc-400",
+    progressColor: "bg-zinc-900 dark:bg-zinc-400",
   },
   {
     key: "base" as const,
     label: "BASE CASE",
-    barColor: "bg-blue-500",
-    labelColor: "text-blue-500",
-    progressColor: "bg-blue-500",
+    barColor: "bg-zinc-200 dark:bg-zinc-700",
+    labelColor: "text-zinc-500 dark:text-zinc-400",
+    progressColor: "bg-zinc-900 dark:bg-zinc-400",
   },
   {
     key: "bull" as const,
     label: "BULL CASE",
-    barColor: "bg-emerald-500",
-    labelColor: "text-emerald-600",
-    progressColor: "bg-emerald-500",
+    barColor: "bg-zinc-200 dark:bg-zinc-700",
+    labelColor: "text-zinc-500 dark:text-zinc-400",
+    progressColor: "bg-zinc-900 dark:bg-zinc-400",
   },
 ];
 

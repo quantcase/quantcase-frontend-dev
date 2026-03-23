@@ -7,24 +7,48 @@ interface SectionScoring {
   status_color?: string;
 }
 
-const SCORE_COLORS: Record<string, string> = {
-  green: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
-  yellow: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-  red: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
-};
+function scoreColor(score: number, maxScore: number): string {
+  const pct = maxScore > 0 ? score / maxScore : 0;
+  if (pct <= 0.4) return "#F8383C";
+  if (pct <= 0.7) return "#FBBF24";
+  return "#888888";
+}
 
-function SectionScoreBadge({ scoring }: { scoring: SectionScoring }) {
-  const colorClass = SCORE_COLORS[scoring.status_color ?? "green"] ?? SCORE_COLORS.green;
+function SectionScoreBar({ scoring }: { scoring: SectionScoring }) {
+  const parsedScore = parseFloat(String(scoring.score));
+  const numericScore = !isNaN(parsedScore);
+  const filled = numericScore ? Math.round(Math.min(parsedScore, scoring.max_score)) : 0;
+  const total = scoring.max_score;
+  const fillColor = numericScore ? scoreColor(parsedScore, scoring.max_score) : "#E2E8F0";
+  const textColor = fillColor;
+
   return (
-    <div className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold ${colorClass}`}>
-      <span>{scoring.score}/{scoring.max_score}</span>
-      <span className="font-semibold opacity-80">{scoring.status}</span>
+    <div className="shrink-0 flex items-center gap-2">
+      <span style={{ fontSize: 13, fontWeight: 600, color: numericScore ? textColor : "#94a3b8", letterSpacing: "0.01em" }}>
+        {numericScore ? `${parsedScore}/${scoring.max_score}` : "N/A"}
+      </span>
+      {numericScore && (
+        <div style={{ display: "flex", gap: 2 }}>
+          {Array.from({ length: total }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: 6,
+                height: 12,
+                flexShrink: 0,
+                borderRadius: 1,
+                backgroundColor: i < filled ? fillColor : "#E2E8F0",
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 interface SectionPanelProps {
-  title: string;
+  title: ReactNode;
   subtitle?: string;
   scoring?: SectionScoring;
   children: ReactNode;
@@ -36,20 +60,32 @@ export function SectionPanel({
   subtitle,
   scoring,
   children,
-  contentClassName = "px-6 space-y-4",
+  contentClassName,
 }: SectionPanelProps) {
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-4">
+    <div className="flex flex-col" style={{ borderRadius: 10, border: "1px solid #E2E2E2", background: "#F5F5F5", padding: 8 }}>
+      {/* Header */}
+      <div className="flex items-center justify-between" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
         <div>
-          <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide mb-0.5">
-            {title}
-          </h2>
-          {subtitle && <p className="text-xs text-zinc-400">{subtitle}</p>}
+          <h5>{title}</h5>
+          {subtitle && <p>{subtitle}</p>}
         </div>
-        {scoring && <SectionScoreBadge scoring={scoring} />}
+        {scoring && <SectionScoreBar scoring={scoring} />}
       </div>
-      <div className={contentClassName}>{children}</div>
+      {/* Content box */}
+      <div
+        className={contentClassName ?? ""}
+        style={{
+          borderRadius: 10,
+          border: "1px solid rgba(226, 226, 226, 0.10)",
+          background: "#FFF",
+          paddingTop: 16,
+          paddingLeft: 16,
+          paddingRight: 16,
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }

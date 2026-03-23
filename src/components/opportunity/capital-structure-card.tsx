@@ -1,9 +1,13 @@
 "use client";
 
+import { Wallet, TrendingDown, PieChart, BarChart2, Percent } from "lucide-react";
 import type { CapitalStructureSection } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
 import { StatusBadge } from "@/components/opportunity/status-badge";
 import { InsightText } from "@/components/opportunity/bold-text";
+import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
+import { InsightsCard } from "@/components/opportunity/insights-card";
+import { MetricTile } from "@/components/molecules/metric-tile";
 
 const DEBT_BAR_COLORS: Record<string, string> = {
   red: "bg-red-400",
@@ -11,14 +15,13 @@ const DEBT_BAR_COLORS: Record<string, string> = {
   green: "bg-emerald-400",
 };
 
-
 // ─── Panel: Balance Sheet ──────────────────────────────────────────────────────
 
 function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["balance_sheet"]> }) {
   const maxVal = Math.max(...d.timeline.map((t) => parseFloat(t.value.replace("K", ""))));
 
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4 h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
@@ -61,7 +64,6 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
         <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
           Net Cash — FY20 to FY24
         </p>
-        {/* Value labels row — fixed at top so all align */}
         <div className="flex gap-1 mb-1">
           {d.timeline.map((t) => (
             <div key={t.label} className="flex-1 text-center">
@@ -76,7 +78,6 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
             </div>
           ))}
         </div>
-        {/* Bars — grow from bottom */}
         <div className="flex items-end gap-1 h-12">
           {d.timeline.map((t) => {
             const val = parseFloat(t.value.replace("K", ""));
@@ -92,7 +93,6 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
             );
           })}
         </div>
-        {/* Period labels row — fixed at bottom */}
         <div className="flex gap-1 mt-1">
           {d.timeline.map((t) => (
             <div key={t.label} className="flex-1 text-center">
@@ -128,55 +128,58 @@ function DebtTrajectoryPanel({
   const maxVal = Math.max(...d.bars.map((b) => b.value));
 
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 flex flex-col flex-1">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
           Debt Trajectory
         </p>
         <StatusBadge label={d.status} color={d.status_color} />
       </div>
 
-      {/* Sub-label */}
-      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-3">
         Gross Debt — FY20 to FY24 (₹CR)
       </p>
 
-      {/* Bar chart */}
-      <div className="flex items-end gap-2">
+      {/* Value labels row */}
+      <div className="flex gap-2 mb-1">
+        {d.bars.map((b) => (
+          <div key={b.label} className="flex-1 text-center">
+            <span className={`text-[10px] font-bold ${b.is_current ? "text-zinc-800 dark:text-zinc-100" : "text-zinc-500"}`}>
+              {b.value != null ? b.value.toLocaleString() : "—"}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Bar chart — grows to fill available space */}
+      <div className="flex-1 min-h-0 flex items-end gap-2" style={{ minHeight: 120 }}>
         {d.bars.map((b) => {
-          const h = Math.round((b.value / maxVal) * 64);
+          const pct = maxVal > 0 ? (b.value / maxVal) * 100 : 0;
           const barColor = DEBT_BAR_COLORS[b.color ?? "green"] ?? "bg-zinc-300";
           return (
-            <div key={b.label} className="flex-1 flex flex-col items-center gap-1">
-              <span
-                className={`text-[10px] font-bold ${
-                  b.is_current ? "text-zinc-800 dark:text-zinc-100" : "text-zinc-500"
-                }`}
-              >
-                {b.value != null ? b.value.toLocaleString() : "—"}
-              </span>
-              <div
-                className={`w-full rounded-t-sm ${barColor}`}
-                style={{ height: `${h}px` }}
-              />
-              <span
-                className={`text-[10px] ${
-                  b.is_current
-                    ? "font-bold text-zinc-700 dark:text-zinc-200"
-                    : "text-zinc-400"
-                }`}
-              >
-                {b.label}
-                {b.is_current && " ↓"}
-              </span>
-            </div>
+            <div
+              key={b.label}
+              className={`flex-1 rounded-t-sm ${barColor}`}
+              style={{ height: `${pct}%` }}
+            />
           );
         })}
       </div>
 
+      {/* Quarter labels row */}
+      <div className="flex gap-2 mt-1">
+        {d.bars.map((b) => (
+          <div key={b.label} className="flex-1 text-center">
+            <span className={`text-[10px] ${b.is_current ? "font-bold text-zinc-700 dark:text-zinc-200" : "text-zinc-400"}`}>
+              {b.label}{b.is_current && " ↓"}
+            </span>
+          </div>
+        ))}
+      </div>
+
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-2 border-t border-zinc-100 dark:border-zinc-800 pt-3">
+      <div className="grid grid-cols-3 gap-2 border-t border-zinc-100 dark:border-zinc-800 pt-3 mt-3">
         <div className="text-center">
           <p className="text-[10px] text-zinc-400 mb-0.5">Peak Debt</p>
           <p className="text-xs font-semibold text-red-500">{d.peak_debt}</p>
@@ -206,7 +209,7 @@ function DebtTrajectoryPanel({
 
       {/* Insight */}
       {d.insight && (
-        <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5">
+        <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5 mt-3">
           <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 leading-relaxed"><InsightText text={d.insight} /></p>
         </div>
       )}
@@ -222,61 +225,77 @@ function EquityAllocationPanel({
   d: NonNullable<CapitalStructureSection["equity_allocation"]>;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 flex flex-col flex-1">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-          Equity &amp; Profit Allocation
-        </p>
+      <div className="flex items-start justify-between gap-2 mb-1">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-zinc-800 dark:text-zinc-200">
+            PAT Allocation
+          </p>
+          <p className="text-[10px] text-zinc-400 mt-0.5">Retained vs Paid Out</p>
+        </div>
         <StatusBadge label={d.status} color={d.status_color} />
       </div>
 
-      {/* Sub-label */}
-      <p className="text-[10px] text-zinc-400 italic">
-        Of every ₹100 earned, how much stays in the business vs goes out to shareholders?
+      <p className="text-[10px] text-zinc-400 italic mb-4">
+        Of every ₹100 earned, how much stays vs goes to shareholders?
       </p>
 
-      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-        PAT Allocation per year — Retained vs Paid Out
-      </p>
-
-      {/* Bars */}
-      <div className="space-y-2">
-        {d.rows.map((row) => (
-          <div key={row.label} className="flex items-center gap-2">
-            <span
-              className={`w-8 text-[10px] shrink-0 ${
-                row.is_current
-                  ? "font-bold text-zinc-700 dark:text-zinc-200"
-                  : "text-zinc-400"
-              }`}
-            >
-              {row.label}
-            </span>
-            <div className="flex-1">
-              <SegmentedBar pct={row.kept_pct ?? 0} color="bg-emerald-400" height={10} />
+      {/* Stacked bars — one per year */}
+      <div className="flex-1 min-h-0 space-y-3" style={{ minHeight: 80 }}>
+        {d.rows.map((row) => {
+          const kept = row.kept_pct ?? 0;
+          const paid = row.paid_pct ?? 0;
+          return (
+            <div key={row.label}>
+              {/* Year label + stat */}
+              <div className="flex items-center justify-between mb-1.5">
+                <span className={`text-[11px] ${row.is_current ? "font-bold text-zinc-800 dark:text-zinc-100" : "text-zinc-500 dark:text-zinc-400"}`}>
+                  {row.label}
+                </span>
+                <span className="text-[10px] text-zinc-400">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{kept}% retained</span>
+                  {paid > 0 && <> · <span className="text-amber-500 font-semibold">{paid}% paid out</span></>}
+                </span>
+              </div>
+              {/* Two-tone solid bar */}
+              <div className="flex h-5 w-full rounded overflow-hidden gap-[2px]">
+                {kept > 0 && (
+                  <div
+                    className="bg-emerald-400 dark:bg-emerald-500 h-full rounded-l"
+                    style={{ width: `${kept}%` }}
+                  />
+                )}
+                {paid > 0 && (
+                  <div
+                    className="bg-amber-300 dark:bg-amber-500/60 h-full rounded-r"
+                    style={{ width: `${paid}%` }}
+                  />
+                )}
+                {kept === 100 && (
+                  /* full-width cap when no paid portion */
+                  <div className="sr-only" />
+                )}
+              </div>
             </div>
-            <span className="text-[10px] text-zinc-400 whitespace-nowrap shrink-0">
-              {row.kept_pct != null ? `${row.kept_pct}%` : "—"} kept · {row.paid_pct != null ? `${row.paid_pct}%` : "—"} paid
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 text-[10px] text-zinc-400">
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-3 rounded-sm bg-emerald-400 inline-block" />
+      <div className="flex items-center gap-4 text-[10px] text-zinc-400 mt-4">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-3.5 rounded-sm bg-emerald-400 dark:bg-emerald-500 inline-block" />
           Retained in business
         </span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-3 rounded-sm bg-zinc-200 dark:bg-zinc-700 inline-block" />
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-3.5 rounded-sm bg-amber-300 dark:bg-amber-500/60 inline-block" />
           Paid as dividends / buybacks
         </span>
       </div>
 
       {/* Summary stats */}
-      <div className="grid grid-cols-3 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-3">
+      <div className="grid grid-cols-3 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-3 mt-4">
         <div>
           <p className="text-[10px] text-zinc-400 mb-0.5">{d.total_equity_sublabel ?? "Total Equity"}</p>
           <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-100">{d.total_equity}</p>
@@ -314,10 +333,8 @@ function EquityAllocationPanel({
 
       {/* Insight */}
       {d.insight && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
-          <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5">
-            <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 leading-relaxed"><InsightText text={d.insight} /></p>
-          </div>
+        <div className="rounded border border-blue-200 dark:border-blue-800/40 px-3 py-2.5 mt-3">
+          <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 leading-relaxed"><InsightText text={d.insight} /></p>
         </div>
       )}
     </div>
@@ -338,7 +355,7 @@ function CapexIntensityPanel({
   d: NonNullable<CapitalStructureSection["capex_intensity"]>;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 space-y-4 h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
@@ -393,19 +410,84 @@ interface CapitalStructureCardProps {
 export function CapitalStructureCard({ data }: CapitalStructureCardProps) {
   const d = data ?? {};
 
-  return (
-    <div className="space-y-4">
-      {/* Row 1: Balance Sheet + Debt Trajectory */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {d.balance_sheet && <BalanceSheetPanel d={d.balance_sheet} />}
-        {d.debt_trajectory && <DebtTrajectoryPanel d={d.debt_trajectory} />}
-      </div>
+  // ── Row 1 col1: Balance Sheet metric tiles ─────────────────────────────────
+  const balanceCol1 = d.balance_sheet ? (
+    <>
+      <MetricTile
+        label="Net Cash"
+        value={d.balance_sheet.net_cash}
+        sublabel={d.balance_sheet.status}
+        icon={Wallet}
+      />
+      <MetricTile
+        label="Cash & Investments"
+        value={d.balance_sheet.cash_investments}
+        sublabel={`Gross Debt: ${d.balance_sheet.gross_debt}`}
+        icon={BarChart2}
+      />
+      {d.debt_trajectory && (
+        <MetricTile
+          label="Debt Reduction"
+          value={d.debt_trajectory.reduction_pct}
+          sublabel={`Current: ${d.debt_trajectory.current_debt}`}
+          icon={TrendingDown}
+        />
+      )}
+    </>
+  ) : null;
 
-      {/* Row 2: Equity Allocation + Capex Intensity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {d.equity_allocation && <EquityAllocationPanel d={d.equity_allocation} />}
-        {d.capex_intensity && <CapexIntensityPanel d={d.capex_intensity} />}
-      </div>
+  // ── Row 2 col1: Equity metric tiles ───────────────────────────────────────
+  const equityCol1 = d.equity_allocation ? (
+    <>
+      <MetricTile
+        label={d.equity_allocation.total_equity_sublabel ?? "Equity & Reserves"}
+        value={d.equity_allocation.total_equity}
+        icon={PieChart}
+      />
+      <MetricTile
+        label="ROE (FY24)"
+        value={d.equity_allocation.roe}
+        sublabel={d.equity_allocation.roe_sublabel}
+        icon={Percent}
+      />
+      <MetricTile
+        label="Payout Ratio"
+        value={`${d.equity_allocation.payout_trend}${d.equity_allocation.payout_trend_direction === "up" ? " ▲" : d.equity_allocation.payout_trend_direction === "down" ? " ▼" : ""}`}
+        sublabel={d.equity_allocation.payout_sublabel}
+        icon={TrendingDown}
+      />
+    </>
+  ) : null;
+
+  return (
+    <div className="space-y-6">
+      {/* Row 1 — Balance Sheet & Leverage */}
+      {(d.balance_sheet || d.debt_trajectory) && (
+        <BentoSectionGrid
+          col1={balanceCol1}
+          col2={d.debt_trajectory ? <DebtTrajectoryPanel d={d.debt_trajectory} /> : undefined}
+          col3={d.balance_sheet ? <BalanceSheetPanel d={d.balance_sheet} /> : undefined}
+          takeaway={
+            d.balance_sheet?.insight
+              ? <InsightsCard title="BALANCE SHEET TAKEAWAY" text={d.balance_sheet.insight} />
+              : undefined
+          }
+        />
+      )}
+
+      {/* Row 2 — Equity Allocation & Capex */}
+      {(d.equity_allocation || d.capex_intensity) && (
+        <BentoSectionGrid
+          col1={equityCol1}
+          col2={d.equity_allocation ? <EquityAllocationPanel d={d.equity_allocation} /> : undefined}
+          col3={d.capex_intensity ? <CapexIntensityPanel d={d.capex_intensity} /> : undefined}
+          takeaway={
+            d.equity_allocation?.insight
+              ? <InsightsCard title="EQUITY & CAPEX TAKEAWAY" text={d.equity_allocation.insight} />
+              : undefined
+          }
+        />
+      )}
     </div>
   );
 }

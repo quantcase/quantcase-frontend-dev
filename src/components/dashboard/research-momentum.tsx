@@ -1,5 +1,4 @@
 import { BookOpen } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export interface ResearchMetric {
@@ -16,29 +15,27 @@ interface ResearchMomentumProps {
 
 export function ResearchMomentum({ metrics, className }: ResearchMomentumProps) {
   return (
-    <Card className={cn("px-6 py-5 gap-0 h-full", className)}>
-      <CardHeader className="px-0 pb-4">
-        <div className="flex items-center gap-2">
-          <BookOpen className="size-4 text-muted-foreground" />
-          <span className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-            Research Momentum
-          </span>
-        </div>
-      </CardHeader>
-      <CardContent className="px-0 flex flex-col gap-3">
+    <div className={cn("rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2 h-full flex flex-col", className)}>
+      {/* Panel header */}
+      <div className="px-2 pt-1 pb-3 flex items-center gap-2">
+        <BookOpen className="size-3.5 text-[#888888]" />
+        <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.01em" }}>
+          Research Momentum
+        </span>
+      </div>
+
+      {/* Inner white box */}
+      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] flex-1 flex flex-col divide-y divide-[#E2E2E2]">
         {metrics.map((metric) => (
-          <div
-            key={metric.id}
-            className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/30 px-4 py-3"
-          >
-            <span className="text-sm font-semibold">{metric.label}</span>
+          <div key={metric.id} className="flex items-center justify-between gap-4 px-4 py-3.5">
+            <span style={{ fontSize: 14, fontWeight: 500, color: "#0F172B" }}>{metric.label}</span>
             <div className="text-right shrink-0">
-              <div className="text-2xl font-bold leading-none">{metric.value}</div>
-              <div className="text-xs text-muted-foreground mt-1">{metric.sublabel}</div>
+              <div style={{ fontSize: 28, fontWeight: 400, color: "#0F172B", lineHeight: 1 }}>{metric.value}</div>
+              <div style={{ fontSize: 11, color: "#888888", marginTop: 2 }}>{metric.sublabel}</div>
             </div>
           </div>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

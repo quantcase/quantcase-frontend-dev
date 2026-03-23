@@ -11,29 +11,18 @@ import {
   CartesianGrid,
   ReferenceLine,
 } from "recharts";
+import { TrendingUp, TrendingDown, Gauge } from "lucide-react";
 import { safeMetric, type OperatingLeverageSection, type DolDataPoint } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
-import { BoldText as RenderWithBold } from "@/components/opportunity/bold-text";
+import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
+import { InsightsCard } from "@/components/opportunity/insights-card";
+import { MetricTile } from "@/components/molecules/metric-tile";
 
-// ─── Verdict metadata ──────────────────────────────────────────────────────────
 
-const VERDICT_META: Record<string, { dotColor: string; textColor: string; bgColor: string }> = {
-  leverage_active:   { dotColor: "bg-emerald-500", textColor: "text-emerald-600 dark:text-emerald-400",   bgColor: "bg-emerald-50 dark:bg-emerald-900/20" },
-  leverage_pending:  { dotColor: "bg-yellow-400",   textColor: "text-yellow-600 dark:text-yellow-400",    bgColor: "bg-yellow-50 dark:bg-yellow-900/20" },
-  leverage_matured:  { dotColor: "bg-teal-500",     textColor: "text-teal-600 dark:text-teal-400",        bgColor: "bg-teal-50 dark:bg-teal-900/20" },
-  cost_inflation:    { dotColor: "bg-orange-500",   textColor: "text-orange-600 dark:text-orange-400",    bgColor: "bg-orange-50 dark:bg-orange-900/20" },
-  negative_leverage: { dotColor: "bg-red-500",      textColor: "text-red-600 dark:text-red-400",          bgColor: "bg-red-50 dark:bg-red-900/20" },
-  investment_mode:   { dotColor: "bg-blue-500",     textColor: "text-blue-600 dark:text-blue-400",        bgColor: "bg-blue-50 dark:bg-blue-900/20" },
-  // Short-key aliases sent by backend
-  negative: { dotColor: "bg-red-500",      textColor: "text-red-600 dark:text-red-400",          bgColor: "bg-red-50 dark:bg-red-900/20" },
-  neutral:  { dotColor: "bg-zinc-400",     textColor: "text-zinc-500 dark:text-zinc-400",         bgColor: "bg-zinc-50 dark:bg-zinc-800/30" },
-  positive: { dotColor: "bg-emerald-500",  textColor: "text-emerald-600 dark:text-emerald-400",   bgColor: "bg-emerald-50 dark:bg-emerald-900/20" },
-};
-
-const FIXED_COST_COLORS: Record<string, { dot: string; bar: string }> = {
-  blue:   { dot: "bg-blue-500",   bar: "bg-blue-500" },
-  orange: { dot: "bg-orange-500", bar: "bg-orange-500" },
-  slate:  { dot: "bg-slate-400",  bar: "bg-slate-400" },
+const FIXED_COST_COLORS: Record<string, { bar: string }> = {
+  blue:   { bar: "bg-blue-500" },
+  orange: { bar: "bg-orange-500" },
+  slate:  { bar: "bg-slate-400" },
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -57,6 +46,145 @@ const DolDot = (props: { cx?: number; cy?: number; payload?: DolDataPoint }) => 
   return <circle cx={cx} cy={cy} r={5} fill={dolColor(payload.dol)} stroke="white" strokeWidth={2} />;
 };
 
+// ─── Subcomponents ─────────────────────────────────────────────────────────────
+
+function DolChartPanel({ chartData }: { chartData: DolDataPoint[] }) {
+  return (
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 flex flex-col h-full">
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div>
+          <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Degree of Operating Leverage Trend</h3>
+          <p className="text-xs text-zinc-400 mt-0.5">For every 1% revenue growth, how much does EBIT grow?</p>
+        </div>
+        <div className="text-right shrink-0 space-y-0.5">
+          <p className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">DOL = %ΔEBIT / %ΔRev</p>
+          <p className="text-[10px] text-zinc-400">DOL &gt;1 = leverage · &lt;1 = dilution</p>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0">
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart data={chartData} margin={{ top: 4, right: 36, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" strokeOpacity={0.6} />
+            <XAxis
+              dataKey="quarter"
+              tick={{ fontSize: 9, fill: "#a1a1aa" }}
+              axisLine={false} tickLine={false}
+            />
+            <YAxis
+              yAxisId="left" orientation="left"
+              tick={{ fontSize: 9, fill: "#a1a1aa" }}
+              axisLine={false} tickLine={false}
+              tickFormatter={(v) => `${v}%`}
+              domain={["auto", "auto"]}
+            />
+            <YAxis
+              yAxisId="right" orientation="right"
+              tick={{ fontSize: 9, fill: "#f59e0b" }}
+              axisLine={false} tickLine={false}
+              tickFormatter={(v) => `${v}x`}
+              domain={["auto", "auto"]}
+            />
+            <Tooltip
+              contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid #e4e4e7", backgroundColor: "white" }}
+              formatter={(value: number, name: string) =>
+                name === "DOL"
+                  ? [`${value}x (${dolZone(value)})`, name]
+                  : [`${value}%`, name]
+              }
+            />
+            <ReferenceLine yAxisId="left" y={0} stroke="#d4d4d8" strokeWidth={1} />
+            <ReferenceLine yAxisId="right" y={0} stroke="#d4d4d8" strokeWidth={1} strokeDasharray="3 3" />
+            <Bar yAxisId="left" dataKey="revenue_growth" name="Revenue Growth % YoY" fill="#64748b" opacity={0.3} barSize={11} />
+            <Bar yAxisId="left" dataKey="ebit_growth"    name="EBIT Growth % YoY"    fill="#166534" opacity={0.3} barSize={11} />
+            <Line
+              yAxisId="right"
+              dataKey="dol"
+              name="DOL"
+              stroke="#f59e0b"
+              strokeWidth={3}
+              dot={<DolDot />}
+              activeDot={{ r: 6, fill: "#f59e0b" }}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 text-[10px] text-zinc-600 dark:text-zinc-400 mt-3">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-slate-500 opacity-85 inline-block" />
+          Revenue Growth % YoY
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-green-800 opacity-85 inline-block" />
+          EBIT Growth % YoY
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-1.5 w-5 rounded-full bg-yellow-500 inline-block" />
+          DOL (EBIT growth / Rev growth)
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function FixedCostLinesPanel({
+  fixedCostLines,
+  totalFixed,
+}: {
+  fixedCostLines: NonNullable<OperatingLeverageSection["fixed_cost_lines"]>;
+  totalFixed?: OperatingLeverageSection["total_fixed_costs"];
+}) {
+  return (
+    <>
+      {/* Merged cost lines card */}
+      {fixedCostLines.length > 0 && (
+        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
+          {fixedCostLines.map((line, i) => {
+            const isHex = line.color?.startsWith("#");
+            const tailwindColors = FIXED_COST_COLORS[line.color] ?? FIXED_COST_COLORS.slate;
+            const isUp = line.change_bps > 0;
+            const barPct = Math.min((line.current_pct / 70) * 100, 100);
+            return (
+              <div key={i} className={i > 0 ? "pt-3 border-t border-zinc-100 dark:border-zinc-800" : ""}>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{line.name} (% Revenue)</span>
+                  <span className="text-base font-bold text-zinc-900 dark:text-zinc-50">{line.current_pct}%</span>
+                </div>
+                <SegmentedBar
+                  pct={barPct}
+                  color={isHex ? undefined : tailwindColors.bar}
+                  hexColor={isHex ? line.color : undefined}
+                />
+                <p className="text-xs text-zinc-400 mt-1">
+                  FY24: {line.prior_pct}% | {isUp ? "+" : ""}{line.change_bps} bps {isUp ? "increase" : "improvement"}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {totalFixed && (
+        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Total Fixed Costs</p>
+              <p className="text-xs text-zinc-400">was {totalFixed.prior_pct}%</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50">{totalFixed.current_pct}%</span>
+              <span className={`text-xs font-semibold ${totalFixed.change_bps > 0 ? "text-red-500" : "text-emerald-500"}`}>
+                {totalFixed.change_bps > 0 ? "▲" : "▼"} {Math.abs(totalFixed.change_bps)}bps net
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-zinc-400">{totalFixed.note}</p>
+        </div>
+      )}
+    </>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 interface OperatingLeverageCardProps {
@@ -69,212 +197,55 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
   const fixedCostLines = d.fixed_cost_lines ?? [];
   const totalFixed     = d.total_fixed_costs;
   const verdict        = d.verdict;
-  const verdictMeta    = VERDICT_META[verdict?.status ?? "leverage_pending"];
 
-  const revGrowth      = safeMetric(d.metrics?.revenue_growth_yoy);
-  const ebitGrowth     = safeMetric(d.metrics?.ebit_growth_yoy);
-  const levSpread      = safeMetric(d.metrics?.leverage_spread);
+  const revGrowth  = safeMetric(d.metrics?.revenue_growth_yoy);
+  const ebitGrowth = safeMetric(d.metrics?.ebit_growth_yoy);
+  const levSpread  = safeMetric(d.metrics?.leverage_spread);
+  const revChange  = d.metrics?.revenue_growth_yoy?.change;
+
+  // Latest DOL value from chart data
+  const latestDol = chartData.length > 0 ? chartData[chartData.length - 1].dol : null;
+
+  const dolValue = latestDol != null ? `${latestDol}x` : "—";
+  const dolChange = verdict?.tag ?? undefined;
+
+  const col1 = (
+    <>
+      <MetricTile
+        label="DOL Score"
+        value={dolValue}
+        sublabel={dolChange}
+        icon={Gauge}
+      />
+      <MetricTile
+        label={revGrowth.label}
+        value={revGrowth.value}
+        sublabel={revGrowth.sublabel}
+        change={revChange ?? undefined}
+        icon={TrendingUp}
+      />
+      <MetricTile
+        label={ebitGrowth.label}
+        value={ebitGrowth.value}
+        sublabel={ebitGrowth.sublabel}
+        change={levSpread.value !== "N/A" ? `Leverage Spread: ${levSpread.value}` : undefined}
+        icon={TrendingDown}
+      />
+    </>
+  );
 
   return (
     <div className="space-y-4">
-
-      {/* Equation header */}
-      {d.fixed_cost_equation && (
-        <p className="text-xs font-mono font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-          {d.fixed_cost_equation}
-        </p>
-      )}
-
-      {/* ── Row 1: DOL Chart + Fixed Cost Lines ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        {/* DOL combo chart */}
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Degree of Operating Leverage (DOL)</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">For every 1% revenue growth, how much does EBIT grow?</p>
-            </div>
-            <div className="text-right shrink-0 space-y-0.5">
-              <p className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">DOL = %ΔEBIT / %ΔRev</p>
-              <p className="text-[10px] text-zinc-400">DOL &gt;1 = leverage · &lt;1 = dilution</p>
-            </div>
-          </div>
-
-          <div className="h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData} margin={{ top: 4, right: 36, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" strokeOpacity={0.6} />
-                <XAxis
-                  dataKey="quarter"
-                  tick={{ fontSize: 9, fill: "#a1a1aa" }}
-                  axisLine={false} tickLine={false}
-                />
-                <YAxis
-                  yAxisId="left" orientation="left"
-                  tick={{ fontSize: 9, fill: "#a1a1aa" }}
-                  axisLine={false} tickLine={false}
-                  tickFormatter={(v) => `${v}%`}
-                  domain={["auto", "auto"]}
-                />
-                <YAxis
-                  yAxisId="right" orientation="right"
-                  tick={{ fontSize: 9, fill: "#f59e0b" }}
-                  axisLine={false} tickLine={false}
-                  tickFormatter={(v) => `${v}x`}
-                  domain={["auto", "auto"]}
-                />
-                <Tooltip
-                  contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid #e4e4e7", backgroundColor: "white" }}
-                  formatter={(value: number, name: string) =>
-                    name === "DOL"
-                      ? [`${value}x (${dolZone(value)})`, name]
-                      : [`${value}%`, name]
-                  }
-                />
-                <ReferenceLine yAxisId="left" y={0} stroke="#d4d4d8" strokeWidth={1} />
-                <ReferenceLine yAxisId="right" y={0} stroke="#d4d4d8" strokeWidth={1} strokeDasharray="3 3" />
-                <Bar yAxisId="left" dataKey="revenue_growth" name="Revenue Growth % YoY" fill="#64748b" opacity={0.3} barSize={11} />
-                <Bar yAxisId="left" dataKey="ebit_growth"    name="EBIT Growth % YoY"    fill="#166534" opacity={0.3} barSize={11} />
-                <Line
-                  yAxisId="right"
-                  dataKey="dol"
-                  name="DOL"
-                  stroke="#f59e0b"
-                  strokeWidth={3}
-                  dot={<DolDot />}
-                  activeDot={{ r: 6, fill: "#f59e0b" }}
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Chart legend */}
-          <div className="flex flex-wrap items-center gap-3 text-[10px] text-zinc-600 dark:text-zinc-400">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-sm bg-slate-500 opacity-85 inline-block" />
-              Revenue Growth % YoY
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-sm bg-green-800 opacity-85 inline-block" />
-              EBIT Growth % YoY
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-5 rounded-full bg-yellow-500 inline-block" />
-              DOL (EBIT growth / Rev growth)
-            </span>
-          </div>
-
-        </div>
-
-        {/* Fixed Cost Lines panel — new UI element */}
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 flex flex-col gap-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
-            Fixed Cost Lines — Current % of Revenue vs 1 Year Ago
-          </h3>
-
-          <div className="space-y-4 flex-1">
-            {fixedCostLines.map((line, i) => {
-              const isHex = line.color?.startsWith("#");
-              const tailwindColors = FIXED_COST_COLORS[line.color] ?? FIXED_COST_COLORS.slate;
-              const isUp = line.change_bps > 0;
-              const barPct = Math.min((line.current_pct / 70) * 100, 100);
-              return (
-                <div key={i} className="space-y-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className={`h-2.5 w-2.5 rounded-full shrink-0 ${isHex ? "" : tailwindColors.dot}`}
-                        style={isHex ? { backgroundColor: line.color } : undefined}
-                      />
-                      <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 truncate">{line.name}</span>
-                    </div>
-                    <span className={`text-xs font-semibold shrink-0 ${isUp ? "text-red-500" : "text-emerald-500"}`}>
-                      {isUp ? "▲" : "▼"} {isUp ? "+" : ""}{line.change_bps}bps
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <SegmentedBar
-                        pct={barPct}
-                        color={isHex ? undefined : tailwindColors.bar}
-                        hexColor={isHex ? line.color : undefined}
-                      />
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{line.current_pct}%</span>
-                      <span className="text-[11px] text-zinc-400 ml-1">was {line.prior_pct}%</span>
-                    </div>
-                  </div>
-                  <p className="text-sm italic text-zinc-400 dark:text-zinc-500 leading-relaxed">{line.note}</p>
-                </div>
-              );
-            })}
-          </div>
-
-          {totalFixed && (
-            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-3 space-y-1">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">Total Fixed Costs</span>
-                  <span className="text-xs text-zinc-400">was {totalFixed.prior_pct}%</span>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50">{totalFixed.current_pct}%</span>
-                  <span className={`text-xs font-semibold ${totalFixed.change_bps > 0 ? "text-red-500" : "text-emerald-500"}`}>
-                    {totalFixed.change_bps > 0 ? "▲" : "▼"} +{Math.abs(totalFixed.change_bps)}bps net
-                  </span>
-                </div>
-              </div>
-              <p className="text-sm text-zinc-400 dark:text-zinc-500">{totalFixed.note}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── Row 2: 3 metric tiles ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{revGrowth.label}</p>
-          <p className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50 tracking-tight">{revGrowth.value}</p>
-          <p className="text-xs text-zinc-400">{revGrowth.sublabel}</p>
-        </div>
-
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{ebitGrowth.label}</p>
-          <p className="text-[26px] font-normal text-orange-500 tracking-tight">{ebitGrowth.value}</p>
-          <p className="text-xs text-orange-400">{ebitGrowth.sublabel}</p>
-        </div>
-
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{levSpread.label}</p>
-          <p className="text-[26px] font-normal text-red-500 tracking-tight">{levSpread.value}</p>
-          <p className="text-xs text-zinc-400 leading-relaxed">{levSpread.sublabel}</p>
-        </div>
-      </div>
-
-      {/* ── Row 3: Verdict ── */}
-      {verdict && (
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-          <div className="flex gap-4">
-            <div className={`h-12 w-12 rounded-xl shrink-0 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 ${verdictMeta?.bgColor ?? ""}`}>
-              <div className={`h-5 w-5 rounded-full ${verdictMeta?.dotColor ?? "bg-zinc-400"}`} />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h3 className={`text-sm font-bold uppercase tracking-wide ${verdictMeta?.textColor ?? ""}`}>{verdict.label}</h3>
-                <span className="text-xs bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2.5 py-1 rounded-full font-semibold">
-                  {verdict.tag}
-                </span>
-              </div>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                <RenderWithBold text={verdict.description} />
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
+      <BentoSectionGrid
+        col1={col1}
+        col2={<DolChartPanel chartData={chartData} />}
+        col3={<FixedCostLinesPanel fixedCostLines={fixedCostLines} totalFixed={totalFixed} />}
+        takeaway={
+          verdict
+            ? <InsightsCard title={verdict.tag ?? "OPERATING LEVERAGE"} text={verdict.description} />
+            : undefined
+        }
+      />
     </div>
   );
 }

@@ -35,7 +35,7 @@ export function NotablePatterns({ patterns }: NotablePatternsProps) {
     <Card className="h-fit bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50">
-          <Lightbulb className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+          <Lightbulb className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
           NOTABLE PATTERNS
         </CardTitle>
       </CardHeader>

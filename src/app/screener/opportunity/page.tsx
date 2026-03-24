@@ -328,7 +328,7 @@ function OpportunityContent() {
     <div className="min-h-screen bg-white mb-8 px-4">
 
       {/* Company Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex items-start justify-between gap-4 pt-6 mb-6">
         <div className="flex items-start gap-4">
           <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
             <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />

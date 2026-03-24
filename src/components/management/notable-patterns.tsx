@@ -20,7 +20,7 @@ function getCategoryLabel(category: NotablePattern["category"]): { text: string;
 
 export function NotablePatterns({ patterns }: NotablePatternsProps) {
   return (
-    <div style={{ borderRadius: 10, border: "1px solid #E2E2E2", background: "#F5F5F5", padding: 8 }}>
+    <div className="h-full flex flex-col" style={{ borderRadius: 10, border: "1px solid #E2E2E2", background: "#F5F5F5", padding: 8 }}>
       {/* Header */}
       <div className="flex items-center gap-2 px-2 pt-1 pb-3">
         <Lightbulb className="h-4 w-4 text-zinc-500" />
@@ -30,7 +30,7 @@ export function NotablePatterns({ patterns }: NotablePatternsProps) {
       </div>
 
       {/* Content box */}
-      <div style={{ borderRadius: 10, border: "1px solid rgba(226,226,226,0.10)", background: "#FFF", padding: 16 }} className="space-y-3">
+      <div style={{ borderRadius: 10, border: "1px solid rgba(226,226,226,0.10)", background: "#FFF", padding: 16 }} className="flex-1 space-y-3">
         {patterns.length === 0 ? (
           <div style={{ borderLeft: "4px solid #f59e0b", paddingLeft: 12, paddingTop: 8, paddingBottom: 8 }}>
             <p style={{ fontSize: 12, color: "#888888" }}>No patterns available</p>

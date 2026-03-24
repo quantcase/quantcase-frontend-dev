@@ -375,7 +375,7 @@ function ManagementDashboardContent() {
         {/* Main Layout: 2 columns */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Left Column: Main Content (2/3) */}
-          <div className="space-y-6 lg:col-span-2">
+          <div className="flex flex-col gap-6 lg:col-span-2">
             {/* Score Overview Cards */}
             <SectionPanel title="Management Factor Scores">
               <ScoreOverviewCards scores={managementData.scores} />
@@ -397,15 +397,18 @@ function ManagementDashboardContent() {
             {/* Guidance Track Table */}
             <SectionPanel
               title="Guidance Track Record"
+              className="flex-1"
             >
               <GuidanceTrackTable records={managementData.guidanceRecords} />
             </SectionPanel>
           </div>
 
           {/* Right Sidebar: Trust Panel + Notable Patterns (1/3) */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 flex flex-col gap-6">
             <TrustPanel trust={managementData.trust} consistency={managementData.consistency} />
-            <NotablePatterns patterns={managementData.notablePatterns} />
+            <div className="flex-1">
+              <NotablePatterns patterns={managementData.notablePatterns} />
+            </div>
           </div>
         </div>
       </div>

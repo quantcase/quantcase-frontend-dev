@@ -43,7 +43,7 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
   return (
     <div>
         {records.length === 0 ? (
-          <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 py-4">No guidance records available</p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 py-4">No guidance records available</p>
         ) : (
           <div className="overflow-x-auto">
             <Table className="table-fixed w-full">
@@ -83,12 +83,12 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                     <TableRow
                       className={`border-zinc-200 dark:border-zinc-800 ${statusConfig.borderColor} ${hasStatement ? "cursor-default" : ""}`}
                     >
-                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
+                      <TableCell className="text-xs text-zinc-700 dark:text-zinc-300">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.period} />
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
+                      <TableCell className="text-xs text-zinc-700 dark:text-zinc-300">
                         <div className="flex items-center gap-2 break-words whitespace-normal">
                           <span className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0 bg-zinc-100 dark:bg-zinc-800">
                             {isFinancial ? (
@@ -100,17 +100,17 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                           <DataValue value={record.metric} />
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
+                      <TableCell className="text-xs text-zinc-700 dark:text-zinc-300">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.current_value} />
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
+                      <TableCell className="text-xs text-zinc-700 dark:text-zinc-300">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.targeted_value} />
                         </div>
                       </TableCell>
-                      <TableCell className={`${getVarianceColor(varianceDisplay)} text-xs font-light`}>
+                      <TableCell className={`${getVarianceColor(varianceDisplay)} text-xs`}>
                         <div className="break-words whitespace-normal">
                           <DataValue value={varianceDisplay} />
                         </div>

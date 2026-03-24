@@ -19,6 +19,9 @@ export interface QuarterlyTrend {
   operatingIncome: number | null;
   netIncome: number | null;
   eps: number | null;
+  totalDebt: number | null;
+  totalEquity: number | null;
+  netDebt: number | null;
 }
 
 export interface ScreenerData {

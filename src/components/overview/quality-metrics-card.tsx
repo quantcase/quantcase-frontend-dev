@@ -31,6 +31,7 @@ export function QualityMetricsTrendCard({ quarterlyTrend }: QualityMetricsTrendC
             quarter: q.period,
             opMargin: q.operatingIncome != null ? parseFloat(((q.operatingIncome / rev) * 100).toFixed(1)) : null,
             netMargin: q.netIncome != null ? parseFloat(((q.netIncome / rev) * 100).toFixed(1)) : null,
+            grossMargin: q.grossProfit != null ? parseFloat(((q.grossProfit / rev) * 100).toFixed(1)) : null,
             ebitdaMargin: q.ebitda != null ? parseFloat(((q.ebitda / rev) * 100).toFixed(1)) : null,
           };
         })
@@ -86,6 +87,10 @@ export function QualityMetricsTrendCard({ quarterlyTrend }: QualityMetricsTrendC
                 <span className="inline-block w-2 h-2 rounded-full bg-[#71717a]" />
                 Net Margin
               </span>
+              <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+                <span className="inline-block w-2 h-2 rounded-full bg-[#a1a1aa]" />
+                Gross Margin
+              </span>
             </>
           ) : (
             <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">
@@ -138,6 +143,17 @@ export function QualityMetricsTrendCard({ quarterlyTrend }: QualityMetricsTrendC
                 stroke="#71717a"
                 strokeWidth={2}
                 dot={{ r: 3, fill: "#71717a" }}
+                activeDot={{ r: 4 }}
+                connectNulls
+                hide={view !== "margins"}
+              />
+              <Line
+                type="monotone"
+                dataKey="grossMargin"
+                name="Gross Margin"
+                stroke="#a1a1aa"
+                strokeWidth={2}
+                dot={{ r: 3, fill: "#a1a1aa" }}
                 activeDot={{ r: 4 }}
                 connectNulls
                 hide={view !== "margins"}

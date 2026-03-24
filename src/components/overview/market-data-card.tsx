@@ -17,7 +17,7 @@ interface MarketDataCardProps {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-zinc-400 mb-0.5">{label}</p>
+      <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
       <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{value}</p>
     </div>
   );
@@ -54,15 +54,15 @@ export function MarketDataCard({
             <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
               Market Data
             </CardTitle>
-            <p className="text-xs text-zinc-400 mt-0.5">Price &amp; Volume</p>
+            <p className="text-xs text-zinc-500 mt-0.5">Price &amp; Volume</p>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-zinc-400" />
+          <ArrowUpRight className="h-4 w-4 text-zinc-500" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* 52W range bar */}
         <div>
-          <div className="flex justify-between text-xs text-zinc-400 mb-1">
+          <div className="flex justify-between text-xs text-zinc-500 mb-1">
             <span>52W Low {week52Low != null ? `₹${week52Low.toFixed(2)}` : "—"}</span>
             <span>52W High {week52High != null ? `₹${week52High.toFixed(2)}` : "—"}</span>
           </div>

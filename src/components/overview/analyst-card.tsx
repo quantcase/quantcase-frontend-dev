@@ -18,13 +18,13 @@ const RECOMMENDATION_LABELS: Record<string, { label: string; color: string }> = 
   "hold":       { label: "Hold",        color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
   "sell":       { label: "Sell",        color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
   "strong_sell":{ label: "Strong Sell", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
-  "none":       { label: "No Rating",   color: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400" },
+  "none":       { label: "No Rating",   color: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500" },
 };
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-zinc-400 mb-0.5">{label}</p>
+      <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
       <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{value}</p>
     </div>
   );
@@ -63,18 +63,18 @@ export function AnalystCard({
             <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
               Analyst Coverage
             </CardTitle>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-zinc-500 mt-0.5">
               {numberOfAnalysts != null ? `${numberOfAnalysts} analysts` : "Price targets & ratings"}
             </p>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-zinc-400" />
+          <ArrowUpRight className="h-4 w-4 text-zinc-500" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Mean target + upside + recommendation badge */}
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-xs text-zinc-400 mb-0.5">Mean Target</p>
+            <p className="text-xs text-zinc-500 mb-0.5">Mean Target</p>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
                 {targetMeanPrice != null ? `₹${targetMeanPrice.toFixed(0)}` : "—"}
@@ -95,7 +95,7 @@ export function AnalystCard({
 
         {/* Target range bar */}
         <div>
-          <div className="flex justify-between text-xs text-zinc-400 mb-1">
+          <div className="flex justify-between text-xs text-zinc-500 mb-1">
             <span>Low {targetLowPrice != null ? `₹${targetLowPrice.toFixed(0)}` : "—"}</span>
             <span>High {targetHighPrice != null ? `₹${targetHighPrice.toFixed(0)}` : "—"}</span>
           </div>
@@ -107,7 +107,7 @@ export function AnalystCard({
               />
             )}
           </div>
-          <p className="text-xs text-zinc-400 mt-1 text-center">
+          <p className="text-xs text-zinc-500 mt-1 text-center">
             {currentPrice != null ? `Current ₹${currentPrice.toFixed(2)}` : ""}
           </p>
         </div>

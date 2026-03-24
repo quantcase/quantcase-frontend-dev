@@ -13,12 +13,12 @@ export interface StocksApiResponse {
 
 export interface QuarterlyTrend {
   period: string;
-  revenue: number;
-  ebitda: number;
-  grossProfit: number;
-  operatingIncome: number;
-  netIncome: number;
-  eps: number;
+  revenue: number | null;
+  ebitda: number | null;
+  grossProfit: number | null;
+  operatingIncome: number | null;
+  netIncome: number | null;
+  eps: number | null;
 }
 
 export interface ScreenerData {
@@ -62,6 +62,8 @@ export interface ScreenerData {
     profitMargins: number;
     earningsGrowth: number;
     revenuePerShare: number;
+    operatingCashflow: number;
+    freeCashflow: number;
     quarterlyTrend: QuarterlyTrend[];
   };
   valuation: {

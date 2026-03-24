@@ -11,7 +11,7 @@ interface ValuationCardProps {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-zinc-400 mb-0.5">{label}</p>
+      <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
       <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{value}</p>
     </div>
   );
@@ -26,9 +26,9 @@ export function ValuationCard({ peRatio, forwardPE, pbRatio, evToEbitda }: Valua
             <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
               Valuation
             </CardTitle>
-            <p className="text-xs text-zinc-400 mt-0.5">Multiples</p>
+            <p className="text-xs text-zinc-500 mt-0.5">Multiples</p>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-zinc-400" />
+          <ArrowUpRight className="h-4 w-4 text-zinc-500" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

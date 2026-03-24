@@ -37,12 +37,12 @@ export function KeyThesisCard({ governanceSignals, opportunityTakeaway }: KeyThe
           <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
             Key Thesis
           </CardTitle>
-          <ArrowUpRight className="h-4 w-4 text-zinc-400" />
+          <ArrowUpRight className="h-4 w-4 text-zinc-500" />
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {!hasData && (
-          <p className="text-xs text-zinc-400">No analysis available yet.</p>
+          <p className="text-xs text-zinc-500">No analysis available yet.</p>
         )}
         {thesisPoints.map((point, i) => (
           <div key={i} className="flex gap-3">
@@ -51,7 +51,7 @@ export function KeyThesisCard({ governanceSignals, opportunityTakeaway }: KeyThe
             </div>
             <div>
               <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{point.title}</p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{point.description}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-0.5">{point.description}</p>
             </div>
           </div>
         ))}

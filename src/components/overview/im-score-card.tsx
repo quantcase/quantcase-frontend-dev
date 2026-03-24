@@ -1,7 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUpRight, Plus } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 interface IMScoreCardProps {
   managementScore?: number | null;
@@ -20,11 +19,11 @@ function getRating(scorePct: number): string {
   return "Sell";
 }
 
-/** SVG semicircle tick gauge matching the Figma design */
+/** SVG semicircle tick gauge */
 function TickGauge({ value, max }: { value: number; max: number }) {
   const TICKS = 40;
-  const START_ANGLE = 180; // degrees, left
-  const END_ANGLE = 0;     // degrees, right
+  const START_ANGLE = 180;
+  const END_ANGLE = 0;
   const cx = 110;
   const cy = 100;
   const r = 80;
@@ -36,30 +35,22 @@ function TickGauge({ value, max }: { value: number; max: number }) {
   const filledCount = Math.round(pct * TICKS);
 
   const ticks = Array.from({ length: TICKS }, (_, i) => {
-    // angle goes from 180° down to 0° as i increases
     const angle = START_ANGLE - (i / (TICKS - 1)) * (START_ANGLE - END_ANGLE);
     const rad = (angle * Math.PI) / 180;
-
     const isTall = i === 0 || i === TICKS - 1 || i === Math.floor(TICKS / 2);
     const tickH = isTall ? TICK_H_TALL : TICK_H_SHORT;
-
-    // outer point
     const ox = cx + r * Math.cos(rad);
     const oy = cy - r * Math.sin(rad);
-    // inner point (toward center)
     const ix = cx + (r - tickH) * Math.cos(rad);
     const iy = cy - (r - tickH) * Math.sin(rad);
-
     const filled = i < filledCount;
     const color = filled ? "#0F172B" : "#d1d5db";
-
     return { ox, oy, ix, iy, angle: rad, color, tickH };
   });
 
   return (
     <svg viewBox="0 0 220 110" className="w-full" style={{ overflow: "visible" }}>
       {ticks.map(({ ox, oy, ix, iy, angle, color }, i) => {
-        // draw a thin rotated rect centered on the radial line
         const midX = (ox + ix) / 2;
         const midY = (oy + iy) / 2;
         const len = Math.sqrt((ox - ix) ** 2 + (oy - iy) ** 2);
@@ -77,11 +68,55 @@ function TickGauge({ value, max }: { value: number; max: number }) {
           />
         );
       })}
-      {/* 0 label */}
       <text x={8} y={108} fontSize={11} fill="#9ca3af" textAnchor="middle">0</text>
-      {/* 100 label */}
       <text x={212} y={108} fontSize={11} fill="#9ca3af" textAnchor="middle">100</text>
     </svg>
+  );
+}
+
+/** Horizontal tick bar for score distribution */
+function HorizontalTickBar({ value, max }: { value: number; max: number }) {
+  const ticks = max;
+  const filled = max > 0 ? Math.round(Math.min(value / max, 1) * ticks) : 0;
+  return (
+    <div className="flex gap-[2px] my-2 flex-wrap">
+      {Array.from({ length: ticks }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            width: 4,
+            height: 12,
+            borderRadius: 1,
+            backgroundColor: i < filled ? "#0F172B" : "#d1d5db",
+            flexShrink: 0,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+interface DistributionColumnProps {
+  label: string;
+  letter: string;
+  score: number | null;
+  max: number;
+  description: string;
+}
+
+function DistributionColumn({ label, letter, score, max, description }: DistributionColumnProps) {
+  return (
+    <div className="px-5 py-4">
+      <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold mb-2">
+        {label} ({letter})
+      </p>
+      <div className="text-2xl font-bold text-[#0F172B] leading-none">
+        {score !== null ? score : "—"}
+        <span className="text-base font-normal text-zinc-500 ml-1">/{max}</span>
+      </div>
+      <HorizontalTickBar value={score ?? 0} max={max} />
+      <p className="text-xs text-zinc-500 leading-relaxed">{description}</p>
+    </div>
   );
 }
 
@@ -114,57 +149,65 @@ export function IMScoreCard({
   const displayScore = hasAnyScore ? Math.round(partialScore * 10) / 10 : null;
   const rating = hasAnyScore ? getRating(partialScore / gaugeMax) : null;
 
-  const scoreBreakdown = [
-    { label: "Management (M)", max: mMax, value: mScore, color: "text-zinc-900 dark:text-zinc-50" },
-    { label: "Opportunity (O)", max: oMax, value: oScore, color: "text-zinc-900 dark:text-zinc-50" },
-    { label: "Deal (D)",        max: dMax, value: dScore, color: "text-zinc-900 dark:text-zinc-50" },
-  ];
-
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-            Total IM Score
-          </CardTitle>
-          <ArrowUpRight className="h-4 w-4 text-zinc-400" />
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Gauge */}
-        <div className="relative px-2">
-          <TickGauge value={gaugeValue} max={gaugeMax} />
-          {/* Score + rating centered at the bottom of the arc */}
-          <div className="absolute inset-x-0 bottom-0 flex flex-col items-center" style={{ bottom: 12 }}>
-            <span className="text-4xl font-bold leading-none text-zinc-900 dark:text-zinc-50">
-              {displayScore !== null ? displayScore : "—"}
-            </span>
-            {rating && (
-              <span className="mt-2 rounded-full bg-zinc-900 dark:bg-zinc-700 px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide">
-                {rating}
-              </span>
-            )}
+    <div className="rounded-[10px] border border-[#E2E2E2] bg-white overflow-hidden">
+      <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-[#E2E2E2]">
+
+        {/* Left panel: Total IM Score */}
+        <div className="p-6 flex flex-col lg:w-80 flex-shrink-0">
+          <div className="flex items-start justify-between mb-2">
+            <h5>Total IM Score</h5>
+            <ArrowUpRight className="h-4 w-4 text-zinc-500 flex-shrink-0" />
+          </div>
+          <div className="flex flex-col items-center justify-center">
+            <div className="relative w-full max-w-[260px]">
+              <TickGauge value={gaugeValue} max={gaugeMax} />
+              <div className="absolute inset-x-0 bottom-0 flex flex-col items-center" style={{ bottom: 8 }}>
+                <span className="text-4xl font-bold leading-none text-[#0F172B]">
+                  {displayScore !== null ? displayScore : "—"}
+                </span>
+                {rating && (
+                  <span className="mt-2 rounded-full bg-zinc-900 px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide">
+                    {rating}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Score breakdown */}
-        <div className="space-y-2 border-t border-zinc-100 dark:border-zinc-800 pt-3">
-          {scoreBreakdown.map((item) => (
-            <div key={item.label} className="flex items-center justify-between text-sm">
-              <span className="text-zinc-600 dark:text-zinc-400">{item.label}</span>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-400">/ {item.max}</span>
-                <span className={`w-6 text-right font-semibold ${item.color}`}>
-                  {item.value !== null ? item.value : "—"}
-                </span>
-                <button className="flex h-5 w-5 items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                  <Plus className="h-3 w-3" />
-                </button>
-              </div>
-            </div>
-          ))}
+        {/* Right panel: IM Score Distribution */}
+        <div className="p-6 flex-1">
+          <div className="flex items-start justify-between mb-4">
+            <h5>IM Score Distribution</h5>
+            <ArrowUpRight className="h-4 w-4 text-zinc-500 flex-shrink-0" />
+          </div>
+          <div className="grid grid-cols-3 divide-x divide-[#E2E2E2]">
+            <DistributionColumn
+              label="Management"
+              letter="M"
+              score={mScore}
+              max={mMax}
+              description="Guidance accuracy & capital discipline"
+            />
+            <DistributionColumn
+              label="Opportunity"
+              letter="O"
+              score={oScore}
+              max={oMax}
+              description="Industry strength & competitive position"
+            />
+            <DistributionColumn
+              label="Deal"
+              letter="D"
+              score={dScore}
+              max={dMax}
+              description="Valuation, EPS engine & risk-reward"
+            />
+          </div>
         </div>
-      </CardContent>
-    </Card>
+
+      </div>
+    </div>
   );
 }

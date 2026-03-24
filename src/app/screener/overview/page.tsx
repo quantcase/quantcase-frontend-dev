@@ -7,7 +7,6 @@ import { SectionPanel } from "@/components/molecules/section-panel";
 import { FinancialPerformanceCard } from "@/components/overview/financial-performance-card";
 import { IMScoreCard } from "@/components/overview/im-score-card";
 import { ValuationCard } from "@/components/overview/valuation-card";
-import { EfficiencyCard } from "@/components/overview/efficiency-card";
 import { KeyThesisCard } from "@/components/overview/key-thesis-card";
 import { MarketDataCard } from "@/components/overview/market-data-card";
 import { AnalystCard } from "@/components/overview/analyst-card";
@@ -131,60 +130,34 @@ function OverviewContent() {
           />
           <QualityMetricsTrendCard
             quarterlyTrend={data?.financialPerformance.quarterlyTrend ?? null}
+            grossMargins={data?.financialPerformance.grossMargins ?? null}
+            operatingMargins={data?.financialPerformance.operatingMargins ?? null}
+            profitMargins={data?.financialPerformance.profitMargins ?? null}
+            ebitda={data?.financialPerformance.ebitda ?? null}
+            totalCash={data?.efficiency.totalCash ?? null}
+            totalDebt={data?.efficiency.totalDebt ?? null}
+            debtToEquity={data?.efficiency.debtToEquity ?? null}
           />
         </div>
 
-        {/* Section D: Market Snapshot */}
-        <SectionPanel title="Market Snapshot" subtitle="Valuation, margins & trading data">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 pb-4">
-            <ValuationCard
-              peRatio={data?.valuation.peRatio ?? null}
-              forwardPE={data?.valuation.forwardPE ?? null}
-              pbRatio={data?.valuation.pbRatio ?? null}
-              evToEbitda={data?.valuation.evToEbitda ?? null}
-            />
-            <EfficiencyCard
-              ebitda={data?.financialPerformance.ebitda ?? null}
-              enterpriseValue={data?.valuation.enterpriseValue ?? null}
-              totalCash={data?.efficiency.totalCash ?? null}
-              totalDebt={data?.efficiency.totalDebt ?? null}
-              grossMargins={data?.financialPerformance.grossMargins ?? null}
-              operatingMargins={data?.financialPerformance.operatingMargins ?? null}
-              profitMargins={data?.financialPerformance.profitMargins ?? null}
-              debtToEquity={data?.efficiency.debtToEquity ?? null}
-            />
-            <MarketDataCard
-              week52High={data?.quote.week52High ?? null}
-              week52Low={data?.quote.week52Low ?? null}
-              price={data?.quote.price ?? null}
-              fiftyDayAverage={data?.keyStats.fiftyDayAverage ?? null}
-              twoHundredDayAverage={data?.keyStats.twoHundredDayAverage ?? null}
-              volume={data?.quote.volume ?? null}
-              avgVolume={data?.quote.avgVolume ?? null}
-              eps={data?.perShare.eps ?? null}
-              epsForward={data?.perShare.epsForward ?? null}
-              dividendYield={data?.perShare.dividendYield ?? null}
-            />
-          </div>
-        </SectionPanel>
 
         {/* Section E: Analyst Coverage + Key Thesis */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="md:col-span-2">
-            <AnalystCard
-              targetMeanPrice={data?.analystRatings.targetMeanPrice ?? null}
-              targetHighPrice={data?.analystRatings.targetHighPrice ?? null}
-              targetLowPrice={data?.analystRatings.targetLowPrice ?? null}
-              recommendationKey={data?.analystRatings.recommendationKey ?? null}
-              numberOfAnalysts={data?.analystRatings.numberOfAnalystOpinions ?? null}
-              currentPrice={data?.quote.price ?? null}
-              heldPercentInsiders={data?.keyStats.heldPercentInsiders ?? null}
-              heldPercentInstitutions={data?.keyStats.heldPercentInstitutions ?? null}
+            <KeyThesisCard
+              governanceSignals={mgmtDashboard?.governanceSignals}
+              opportunityTakeaway={oppData?.final_takeaways?.investment_thesis ?? null}
             />
           </div>
-          <KeyThesisCard
-            governanceSignals={mgmtDashboard?.governanceSignals}
-            opportunityTakeaway={oppData?.final_takeaways?.investment_thesis ?? null}
+          <AnalystCard
+            targetMeanPrice={data?.analystRatings.targetMeanPrice ?? null}
+            targetHighPrice={data?.analystRatings.targetHighPrice ?? null}
+            targetLowPrice={data?.analystRatings.targetLowPrice ?? null}
+            recommendationKey={data?.analystRatings.recommendationKey ?? null}
+            numberOfAnalysts={data?.analystRatings.numberOfAnalystOpinions ?? null}
+            currentPrice={data?.quote.price ?? null}
+            heldPercentInsiders={data?.keyStats.heldPercentInsiders ?? null}
+            heldPercentInstitutions={data?.keyStats.heldPercentInstitutions ?? null}
           />
         </div>
       </div>

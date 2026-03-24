@@ -15,12 +15,37 @@ import type { QuarterlyTrend } from "@/types/screener";
 
 interface QualityMetricsTrendCardProps {
   quarterlyTrend: QuarterlyTrend[] | null;
+  grossMargins: number | null;
+  operatingMargins: number | null;
+  profitMargins: number | null;
+  ebitda: number | null;
+  totalCash: number | null;
+  totalDebt: number | null;
+  debtToEquity: number | null;
 }
 
 type ViewMode = "margins" | "efficiency";
 
-export function QualityMetricsTrendCard({ quarterlyTrend }: QualityMetricsTrendCardProps) {
+function pct(v: number | null) {
+  return v != null ? `${(v * 100).toFixed(1)}%` : "—";
+}
+
+export function QualityMetricsTrendCard({
+  quarterlyTrend,
+  grossMargins,
+  operatingMargins,
+  profitMargins,
+  ebitda,
+  totalCash,
+  totalDebt,
+  debtToEquity,
+}: QualityMetricsTrendCardProps) {
   const [view, setView] = useState<ViewMode>("margins");
+
+  const netDebtOverEbitda =
+    totalDebt != null && totalCash != null && ebitda != null && ebitda !== 0
+      ? (totalDebt - totalCash) / ebitda
+      : null;
 
   const chartData = quarterlyTrend
     ? quarterlyTrend
@@ -171,6 +196,41 @@ export function QualityMetricsTrendCard({ quarterlyTrend }: QualityMetricsTrendC
               />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+
+        {/* Metric tiles below chart */}
+        <div className="grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 mt-1">
+          {view === "margins" ? (
+            <>
+              <div>
+                <p className="text-xs text-zinc-500 mb-0.5">Gross Margin</p>
+                <p className="text-lg font-bold text-zinc-900">{pct(grossMargins)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 mb-0.5">Op. Margin</p>
+                <p className="text-lg font-bold text-zinc-900">{pct(operatingMargins)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 mb-0.5">Net Margin</p>
+                <p className="text-lg font-bold text-zinc-900">{pct(profitMargins)}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <p className="text-xs text-zinc-500 mb-0.5">Net Debt / EBITDA</p>
+                <p className="text-lg font-bold text-zinc-900">
+                  {netDebtOverEbitda != null ? `${netDebtOverEbitda.toFixed(1)}x` : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 mb-0.5">Debt / Equity</p>
+                <p className="text-lg font-bold text-zinc-900">
+                  {debtToEquity != null ? `${debtToEquity.toFixed(1)}x` : "—"}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>

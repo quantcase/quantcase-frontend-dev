@@ -46,6 +46,7 @@ function AnalyticsContent() {
                       <YAxis tick={{ fontSize: 11 }} />
                       <Tooltip
                         contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                        itemStyle={{ padding: '0px 10px' }}
                         formatter={(value: number, name: string) => [
                           name === "avg_churn" ? `${(value * 100).toFixed(1)}%` : value.toFixed(1),
                           name === "avg_engagement" ? "Avg Engagement" : "Avg Churn %"

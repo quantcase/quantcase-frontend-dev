@@ -319,9 +319,7 @@ function DealContent() {
       {/* Page Content */}
       <div className="container mx-auto max-w-7xl space-y-6">
         {data.overview && (
-          <SectionPanel title="Deal Overview">
             <DealOverview data={data.overview} />
-          </SectionPanel>
         )}
         <SectionPanel
           title={data.scenario_framework?.meta?.title ?? "Scenario Framework"}

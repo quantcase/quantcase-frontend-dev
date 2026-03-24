@@ -35,6 +35,7 @@ export function DonutChart({ data, innerLabel, innerSubLabel }: DonutChartProps)
               borderRadius: 8,
               fontSize: 12,
             }}
+            itemStyle={{ padding: '0px 10px' }}
             formatter={(value: number, name: string) => [`${value}%`, name]}
           />
         </PieChart>

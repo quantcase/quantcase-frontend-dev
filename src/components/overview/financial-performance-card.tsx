@@ -133,7 +133,7 @@ export function FinancialPerformanceCard({
                   fontSize: 12,
                   padding: "6px 10px",
                 }}
-                itemStyle={{ padding: "1px 0", margin: 0 }}
+                itemStyle={{ padding: '0px 10px' }}
                 formatter={(value: number, name: string) => [`₹${value}Cr`, name]}
               />
               <Bar dataKey="revenue" name="Revenue" fill="#0F172B" radius={[2, 2, 0, 0]} />

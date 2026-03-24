@@ -117,6 +117,7 @@ function FcfChartPanel({
             />
             <Tooltip
               contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid #e4e4e7", backgroundColor: "white" }}
+              itemStyle={{ padding: '0px 10px' }}
               formatter={(value: number, name: string) =>
                 name === "FCF/PAT %"
                   ? [`${value}%`, name]

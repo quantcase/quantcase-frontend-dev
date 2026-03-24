@@ -44,6 +44,12 @@ function OverviewContent() {
     ? (dealData as DFactorResponse)
     : null;
 
+  // Derive deal score: prefer totalScore from API wrapper, fall back to overview.deal_factor_score
+  const derivedDealScore = dealTotalScore?.total_score
+    ?? (dFactorData?.overview?.deal_factor_score?.overall ?? null);
+  const derivedDealMax = dealTotalScore?.max_score
+    ?? (dFactorData?.overview?.deal_factor_score?.overall != null ? 20 : null);
+
   const formattedDate = data?.quote.lastUpdated
     ? new Date(data.quote.lastUpdated).toLocaleDateString("en-IN", {
         day: "numeric",
@@ -101,8 +107,8 @@ function OverviewContent() {
           managementMax={mgmtDashboard?.consistency.maxScore ?? null}
           opportunityScore={oppTotalScore?.total_score ?? null}
           opportunityMax={oppTotalScore?.max_score ?? null}
-          dealScore={dealTotalScore?.total_score ?? null}
-          dealMax={dealTotalScore?.max_score ?? null}
+          dealScore={derivedDealScore}
+          dealMax={derivedDealMax}
         />
 
         {/* Section B: Key Metrics Tiles */}

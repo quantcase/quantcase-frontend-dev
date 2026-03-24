@@ -18,7 +18,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
-      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{value}</p>
+      <p className="text-[28px] font-normal leading-none text-[#0F172B]">{value}</p>
     </div>
   );
 }
@@ -47,7 +47,7 @@ export function MarketDataCard({
       : null;
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
@@ -69,7 +69,7 @@ export function MarketDataCard({
           <div className="relative h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800">
             {rangePercent != null && (
               <div
-                className="absolute left-0 top-0 h-1.5 rounded-full bg-indigo-500"
+                className="absolute left-0 top-0 h-1.5 rounded-full bg-zinc-900"
                 style={{ width: `${Math.min(100, Math.max(0, rangePercent))}%` }}
               />
             )}

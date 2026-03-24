@@ -63,7 +63,7 @@ export function QualityMetricsTrendCard({
     : [];
 
   return (
-    <Card className="bg-white border border-zinc-200">
+    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
@@ -204,28 +204,28 @@ export function QualityMetricsTrendCard({
             <>
               <div>
                 <p className="text-xs text-zinc-500 mb-0.5">Gross Margin</p>
-                <p className="text-lg font-bold text-zinc-900">{pct(grossMargins)}</p>
+                <p className="text-[28px] font-normal leading-none text-[#0F172B]">{pct(grossMargins)}</p>
               </div>
               <div>
                 <p className="text-xs text-zinc-500 mb-0.5">Op. Margin</p>
-                <p className="text-lg font-bold text-zinc-900">{pct(operatingMargins)}</p>
+                <p className="text-[28px] font-normal leading-none text-[#0F172B]">{pct(operatingMargins)}</p>
               </div>
               <div>
                 <p className="text-xs text-zinc-500 mb-0.5">Net Margin</p>
-                <p className="text-lg font-bold text-zinc-900">{pct(profitMargins)}</p>
+                <p className="text-[28px] font-normal leading-none text-[#0F172B]">{pct(profitMargins)}</p>
               </div>
             </>
           ) : (
             <>
               <div>
                 <p className="text-xs text-zinc-500 mb-0.5">Net Debt / EBITDA</p>
-                <p className="text-lg font-bold text-zinc-900">
+                <p className="text-[28px] font-normal leading-none text-[#0F172B]">
                   {netDebtOverEbitda != null ? `${netDebtOverEbitda.toFixed(1)}x` : "—"}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-zinc-500 mb-0.5">Debt / Equity</p>
-                <p className="text-lg font-bold text-zinc-900">
+                <p className="text-[28px] font-normal leading-none text-[#0F172B]">
                   {debtToEquity != null ? `${debtToEquity.toFixed(1)}x` : "—"}
                 </p>
               </div>

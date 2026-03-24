@@ -12,14 +12,14 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
-      <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{value}</p>
+      <p className="text-[28px] font-normal leading-none text-[#0F172B]">{value}</p>
     </div>
   );
 }
 
 export function ValuationCard({ peRatio, forwardPE, pbRatio, evToEbitda }: ValuationCardProps) {
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
@@ -33,7 +33,7 @@ export function ValuationCard({ peRatio, forwardPE, pbRatio, evToEbitda }: Valua
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-baseline gap-2">
-          <span className="text-4xl font-bold text-zinc-900 dark:text-zinc-50">
+          <span className="text-[28px] font-normal leading-none text-[#0F172B]">
             {peRatio != null ? `${peRatio.toFixed(1)}x` : "—"}
           </span>
           <span className="text-sm text-zinc-500">P/E Ratio</span>

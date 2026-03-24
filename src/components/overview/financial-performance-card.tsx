@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { QuarterlyTrend } from "@/types/screener";
+import { formatINR } from "@/lib/utils";
 
 interface FinancialPerformanceCardProps {
   revenue: number | null;
@@ -19,13 +20,6 @@ interface FinancialPerformanceCardProps {
   ebitdaMargins: number | null;
   earningsGrowth: number | null;
   quarterlyTrend: QuarterlyTrend[] | null;
-}
-
-function formatRevenue(value: number): string {
-  const lakhCr = value / 1e12;
-  if (lakhCr >= 1) return `₹${lakhCr.toFixed(2)}L Cr`;
-  const cr = value / 1e7;
-  return `₹${cr.toFixed(0)}Cr`;
 }
 
 function formatPct(value: number): string {
@@ -54,13 +48,13 @@ export function FinancialPerformanceCard({
   const metrics = [
     {
       label: "Revenue (TTM)",
-      value: revenue != null ? formatRevenue(revenue) : "—",
+      value: revenue != null ? formatINR(revenue) : "—",
       change: revenueGrowth != null ? formatPct(revenueGrowth) : null,
       positive: (revenueGrowth ?? 0) >= 0,
     },
     {
       label: "EBITDA",
-      value: ebitda != null ? formatRevenue(ebitda) : "—",
+      value: ebitda != null ? formatINR(ebitda) : "—",
       change: ebitdaMargins != null ? formatPct(ebitdaMargins) : null,
       positive: (ebitdaMargins ?? 0) >= 0,
     },
@@ -73,7 +67,7 @@ export function FinancialPerformanceCard({
   ];
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
@@ -92,7 +86,7 @@ export function FinancialPerformanceCard({
             <div key={m.label}>
               <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-1">{m.label}</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">{m.value}</span>
+                <span className="text-[18px] font-normal leading-none text-[#0F172B]">{m.value}</span>
                 {m.change && (
                   <span className={`flex items-center text-xs font-semibold ${m.positive ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
                     {m.positive ? <TrendingUp className="h-3 w-3 mr-0.5" /> : <TrendingDown className="h-3 w-3 mr-0.5" />}

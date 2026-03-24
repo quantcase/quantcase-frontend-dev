@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUpRight } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 interface AnalystCardProps {
   targetMeanPrice: number | null;
@@ -25,7 +26,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
-      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{value}</p>
+      <p className="text-[28px] font-normal leading-none text-[#0F172B]">{value}</p>
     </div>
   );
 }
@@ -56,7 +57,7 @@ export function AnalystCard({
       : null;
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
@@ -76,8 +77,8 @@ export function AnalystCard({
           <div>
             <p className="text-xs text-zinc-500 mb-0.5">Mean Target</p>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-                {targetMeanPrice != null ? `₹${targetMeanPrice.toFixed(0)}` : "—"}
+              <span className="text-[28px] font-normal leading-none text-[#0F172B]">
+                {targetMeanPrice != null ? formatPrice(targetMeanPrice, 0) : "—"}
               </span>
               {upside != null && (
                 <span className={`text-sm font-semibold ${upside >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
@@ -96,8 +97,8 @@ export function AnalystCard({
         {/* Target range bar */}
         <div>
           <div className="flex justify-between text-xs text-zinc-500 mb-1">
-            <span>Low {targetLowPrice != null ? `₹${targetLowPrice.toFixed(0)}` : "—"}</span>
-            <span>High {targetHighPrice != null ? `₹${targetHighPrice.toFixed(0)}` : "—"}</span>
+            <span>Low {targetLowPrice != null ? formatPrice(targetLowPrice, 0) : "—"}</span>
+            <span>High {targetHighPrice != null ? formatPrice(targetHighPrice, 0) : "—"}</span>
           </div>
           <div className="relative h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800">
             {rangePercent != null && (
@@ -108,7 +109,7 @@ export function AnalystCard({
             )}
           </div>
           <p className="text-xs text-zinc-500 mt-1 text-center">
-            {currentPrice != null ? `Current ₹${currentPrice.toFixed(2)}` : ""}
+            {currentPrice != null ? `Current ${formatPrice(currentPrice)}` : ""}
           </p>
         </div>
 

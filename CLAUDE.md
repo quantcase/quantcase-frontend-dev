@@ -163,7 +163,7 @@ bg-[#F5F5F5] text-[#90A1B9] text-xs font-medium rounded-sm
 
 **Bar Charts** (Recharts):
 - Primary series (Revenue): `fill="#0F172B"` (dark navy)
-- Secondary series (EBITDA, etc.): `fill="#d4d4d8"` (zinc-300)
+- Secondary series (EBITDA, etc.): `fill="#71717a"` (zinc-300)
 
 **IM Score Gauge** (SVG tick gauge):
 - Filled ticks: `#0F172B` (dark navy, not green)

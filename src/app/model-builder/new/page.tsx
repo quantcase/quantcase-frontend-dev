@@ -316,7 +316,7 @@ export default function NewModelPage() {
                           </span>
                           <div
                             className="h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center"
-                            style={{ borderColor: isActive ? "#fff" : "#d4d4d8" }}
+                            style={{ borderColor: isActive ? "#fff" : "#71717a" }}
                           >
                             {isActive && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
                           </div>

@@ -111,7 +111,7 @@ export function FinancialPerformanceCard({
             Revenue
           </span>
           <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">
-            <span className="inline-block w-2 h-2 rounded-full bg-[#d4d4d8]" />
+            <span className="inline-block w-2 h-2 rounded-full bg-[#71717a]" />
             EBITDA
           </span>
         </div>
@@ -137,11 +137,13 @@ export function FinancialPerformanceCard({
                   border: "1px solid #e4e4e7",
                   borderRadius: 8,
                   fontSize: 12,
+                  padding: "6px 10px",
                 }}
+                itemStyle={{ padding: "1px 0", margin: 0 }}
                 formatter={(value: number, name: string) => [`₹${value}Cr`, name]}
               />
               <Bar dataKey="revenue" name="Revenue" fill="#0F172B" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="ebitda" name="EBITDA" fill="#d4d4d8" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="ebitda" name="EBITDA" fill="#71717a" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

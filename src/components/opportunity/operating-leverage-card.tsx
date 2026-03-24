@@ -93,8 +93,8 @@ function DolChartPanel({ chartData }: { chartData: DolDataPoint[] }) {
                   : [`${value}%`, name]
               }
             />
-            <ReferenceLine yAxisId="left" y={0} stroke="#d4d4d8" strokeWidth={1} />
-            <ReferenceLine yAxisId="right" y={0} stroke="#d4d4d8" strokeWidth={1} strokeDasharray="3 3" />
+            <ReferenceLine yAxisId="left" y={0} stroke="#71717a" strokeWidth={1} />
+            <ReferenceLine yAxisId="right" y={0} stroke="#71717a" strokeWidth={1} strokeDasharray="3 3" />
             <Bar yAxisId="left" dataKey="revenue_growth" name="Revenue Growth % YoY" fill="#64748b" opacity={0.3} barSize={11} />
             <Bar yAxisId="left" dataKey="ebit_growth"    name="EBIT Growth % YoY"    fill="#166534" opacity={0.3} barSize={11} />
             <Line

@@ -83,7 +83,7 @@ export function QualityMetricsTrendCard({ quarterlyTrend }: QualityMetricsTrendC
                 Op. Margin
               </span>
               <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#d4d4d8]" />
+                <span className="inline-block w-2 h-2 rounded-full bg-[#71717a]" />
                 Net Margin
               </span>
             </>
@@ -115,7 +115,9 @@ export function QualityMetricsTrendCard({ quarterlyTrend }: QualityMetricsTrendC
                   border: "1px solid #e4e4e7",
                   borderRadius: 8,
                   fontSize: 12,
+                  padding: "6px 10px",
                 }}
+                itemStyle={{ padding: "1px 0", margin: 0 }}
                 formatter={(value: number, name: string) => [`${value}%`, name]}
               />
               <Line
@@ -133,9 +135,9 @@ export function QualityMetricsTrendCard({ quarterlyTrend }: QualityMetricsTrendC
                 type="monotone"
                 dataKey="netMargin"
                 name="Net Margin"
-                stroke="#d4d4d8"
+                stroke="#71717a"
                 strokeWidth={2}
-                dot={{ r: 3, fill: "#d4d4d8" }}
+                dot={{ r: 3, fill: "#71717a" }}
                 activeDot={{ r: 4 }}
                 connectNulls
                 hide={view !== "margins"}

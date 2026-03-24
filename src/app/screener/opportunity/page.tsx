@@ -26,6 +26,7 @@ import { IndustryKpiTable } from "@/components/opportunity/industry-kpi-table";
 import { KpiBenchmarkingTable } from "@/components/opportunity/kpi-benchmarking-table";
 import { CustomerTractionCard } from "@/components/opportunity/customer-traction-card";
 import { SectionPanel } from "@/components/opportunity/section-panel";
+import { ScoringCard } from "@/components/molecules/scoring-card";
 import { SubsectionHeader } from "@/components/opportunity/subsection-header";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
 import { InsightsCard } from "@/components/opportunity/insights-card";
@@ -374,15 +375,6 @@ function OpportunityContent() {
           const score = totalScore?.total_score ?? ft.overall_score;
           const maxScore = totalScore?.max_score ?? ft.max_score;
 
-          function scoreColor(s: number, max: number): string {
-            const pct = max > 0 ? s / max : 0;
-            if (pct <= 0.4) return "#F8383C";
-            if (pct <= 0.7) return "#FBBF24";
-            return "#888888";
-          }
-          const fillColor = scoreColor(score, maxScore);
-          const filledCount = Math.round(Math.min(score, maxScore));
-
           const sectionRows = [
             { name: "Industry", scoring: industryScoring },
             { name: "Competition", scoring: competitionScoring },
@@ -401,77 +393,21 @@ function OpportunityContent() {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 
               {/* Left — Opportunity Factor Summary */}
-              <SectionPanel title="Opportunity Factor Score">
-                <div className="space-y-5 p-2 pb-4">
-                  {/* Big score number */}
-                  <div>
-                    <span style={{ fontSize: 56, fontWeight: 500, color: "#0F172B", lineHeight: 1 }}>
-                      {score}
-                    </span>
-                    <span style={{ fontSize: 28, fontWeight: 400, color: "rgba(18,18,18,0.40)" }}>
-                      /{maxScore}
-                    </span>
-                  </div>
-
-                  {/* Segmented bar with LOW / MODERATE / HIGH labels */}
-                  <div className="space-y-1.5">
-                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      {Array.from({ length: maxScore }).map((_, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            width: 8,
-                            height: 32,
-                            borderRadius: 2,
-                            backgroundColor: i < filledCount ? fillColor : "#E2E8F0",
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex justify-between">
-                      <h6>LOW</h6>
-                      <h6>MODERATE</h6>
-                      <h6>HIGH</h6>
-                    </div>
-                  </div>
-
-                  {/* Per-section rows */}
-                  <div className="border-t border-zinc-100 pt-4">
-                    {sectionRows.map((row) => {
-                      const s = row.scoring;
-                      const parsedScore = s ? parseFloat(String(s.score)) : NaN;
-                      const numericScore = !isNaN(parsedScore);
-                      const sFilled = numericScore ? Math.round(Math.min(parsedScore, s!.max_score)) : 0;
-                      const rowFillColor = numericScore ? scoreColor(parsedScore, s!.max_score) : fillColor;
-                      return (
-                        <div key={row.name} className="flex items-center gap-4 py-2.5 border-b border-zinc-100 last:border-0">
-                          <h6 className="w-40 shrink-0">{row.name}</h6>
-                          <span style={{ fontSize: 14, fontWeight: 500, color: numericScore ? "#0F172B" : "#94a3b8", whiteSpace: "nowrap" }}>
-                            {numericScore ? `${parsedScore}/${s!.max_score}` : "N/A"}
-                          </span>
-                          {numericScore && (
-                            <div style={{ display: "flex", gap: 2, flex: 1, justifyContent: "center" }}>
-                              {Array.from({ length: s!.max_score }).map((_, i) => (
-                                <div
-                                  key={i}
-                                  style={{
-                                    height: 12,
-                                    width: 6,
-                                    borderRadius: 1,
-                                    backgroundColor: i < sFilled ? rowFillColor : "#E2E8F0",
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          )}
-                          {!numericScore && <div style={{ flex: 1 }} />}
-                          <h6 className="shrink-0 text-right w-36" style={{ color: numericScore ? undefined : "#94a3b8" }}>{s?.status ?? "N/A"}</h6>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </SectionPanel>
+              <ScoringCard
+                title="Opportunity Factor Score"
+                score={score}
+                maxScore={maxScore}
+                rows={sectionRows.map((row) => {
+                  const s = row.scoring;
+                  const parsedScore = s ? parseFloat(String(s.score)) : NaN;
+                  return {
+                    name: row.name,
+                    score: isNaN(parsedScore) ? null : parsedScore,
+                    maxScore: s?.max_score ?? 10,
+                    status: s?.status,
+                  };
+                })}
+              />
 
               {/* Right — Overall Opportunity Assessment */}
               <SectionPanel title="Overall Opportunity Assessment">

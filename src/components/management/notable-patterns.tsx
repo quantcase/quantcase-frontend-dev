@@ -1,4 +1,3 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DataValue } from "@/components/molecules/data-value";
 import type { NotablePattern } from "@/types/management";
 import { Lightbulb } from "lucide-react";
@@ -7,68 +6,62 @@ interface NotablePatternsProps {
   patterns: NotablePattern[];
 }
 
-function getCategoryStyles(category: NotablePattern["category"]) {
-  switch (category) {
-    case "positive":
-      return {
-        border: "border-l-green-500 dark:border-l-green-400",
-        text: "text-green-700 dark:text-green-400",
-        badge: "bg-zinc-100 dark:bg-zinc-800 text-green-700 dark:text-green-400",
-      };
-    case "neutral":
-      return {
-        border: "border-l-yellow-500 dark:border-l-yellow-400",
-        text: "text-yellow-700 dark:text-yellow-400",
-        badge: "bg-zinc-100 dark:bg-zinc-800 text-yellow-700 dark:text-yellow-400",
-      };
-    case "negative":
-      return {
-        border: "border-l-red-500 dark:border-l-red-400",
-        text: "text-red-700 dark:text-red-400",
-        badge: "bg-zinc-100 dark:bg-zinc-800 text-red-700 dark:text-red-400",
-      };
-  }
+function getBorderColor(category: NotablePattern["category"]): string {
+  if (category === "positive") return "#22c55e";
+  if (category === "negative") return "#ef4444";
+  return "#f59e0b";
+}
+
+function getCategoryLabel(category: NotablePattern["category"]): { text: string; color: string } {
+  if (category === "positive") return { text: "POSITIVE", color: "#22c55e" };
+  if (category === "negative") return { text: "NEGATIVE", color: "#ef4444" };
+  return { text: "NEUTRAL", color: "#f59e0b" };
 }
 
 export function NotablePatterns({ patterns }: NotablePatternsProps) {
   return (
-    <Card className="h-fit bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50">
-          <Lightbulb className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
-          NOTABLE PATTERNS
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <div style={{ borderRadius: 10, border: "1px solid #E2E2E2", background: "#F5F5F5", padding: 8 }}>
+      {/* Header */}
+      <div className="flex items-center gap-2 px-2 pt-1 pb-3">
+        <Lightbulb className="h-4 w-4 text-zinc-500" />
+        <h5 className="uppercase tracking-wide" style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", letterSpacing: "0.01em" }}>
+          Notable Patterns
+        </h5>
+      </div>
+
+      {/* Content box */}
+      <div style={{ borderRadius: 10, border: "1px solid rgba(226,226,226,0.10)", background: "#FFF", padding: 16 }} className="space-y-3">
         {patterns.length === 0 ? (
-          <div className="border-l-4 border-l-yellow-500 dark:border-l-yellow-400 pl-3 py-2">
-            <p className="text-xs font-light text-zinc-500 dark:text-zinc-400">No patterns available</p>
+          <div style={{ borderLeft: "4px solid #f59e0b", paddingLeft: 12, paddingTop: 8, paddingBottom: 8 }}>
+            <p style={{ fontSize: 12, color: "#888888" }}>No patterns available</p>
           </div>
         ) : (
           patterns.map((pattern) => {
-            const styles = getCategoryStyles(pattern.category);
+            const borderColor = getBorderColor(pattern.category);
+            const label = getCategoryLabel(pattern.category);
             return (
               <div
                 key={pattern.id}
-                className={`border-l-4 ${styles.border} bg-zinc-50 dark:bg-zinc-800/50 pl-3 py-2 rounded-r-md`}
+                style={{
+                  borderLeft: `4px solid ${borderColor}`,
+                  paddingLeft: 12,
+                  paddingTop: 8,
+                  paddingBottom: 8,
+                  background: "#F9F9F9",
+                  borderRadius: "0 6px 6px 0",
+                }}
               >
-                <p className="text-xs font-light leading-relaxed text-zinc-700 dark:text-zinc-300">
+                <p style={{ fontSize: 12, color: "#121212", lineHeight: 1.5 }}>
                   <DataValue value={pattern.title} />
                 </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className={`text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded ${styles.badge}`}>
-                    <DataValue value={pattern.category} />
-                  </span>
-                </div>
+                <p style={{ fontSize: 10, fontWeight: 600, color: label.color, marginTop: 6, letterSpacing: "0.05em" }}>
+                  {label.text}
+                </p>
               </div>
             );
           })
         )}
-        <p className="text-[10px] font-light text-zinc-500 dark:text-zinc-500 pt-4 border-t border-zinc-200 dark:border-zinc-800 leading-relaxed">
-          *Scoring Methodology: Hit Rate = (MET + Adj) / (MET + MISS + Adj). Consistency score is
-          derived from a weighted average of historical guidance vs actuals over a rolling 3-year period.
-        </p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

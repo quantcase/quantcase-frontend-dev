@@ -6,6 +6,35 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Currency formatting for Indian Rupee (Cr/L Cr scale)
+// Values are expected in raw units (e.g. 1e7 = 1 Cr, 1e12 = 1 L Cr)
+export function formatINR(value: number | null | undefined): string {
+  if (value == null) return "—";
+  const abs = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+  if (abs >= 1e12) {
+    const lCr = abs / 1e12;
+    return `${sign}₹${lCr.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}L Cr`;
+  }
+  const cr = abs / 1e7;
+  if (cr >= 1000) {
+    // e.g. ₹10,601 Cr
+    return `${sign}₹${Math.round(cr).toLocaleString("en-IN")} Cr`;
+  }
+  if (cr >= 1) {
+    return `${sign}₹${cr.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} Cr`;
+  }
+  // Below 1 Cr — show as lakhs
+  const lakh = abs / 1e5;
+  return `${sign}₹${lakh.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}L`;
+}
+
+// Format a price (plain number) in INR with commas
+export function formatPrice(value: number | null | undefined, decimals = 2): string {
+  if (value == null) return "—";
+  return `₹${value.toLocaleString("en-IN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+}
+
 // Date formatting
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);

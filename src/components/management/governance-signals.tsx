@@ -8,7 +8,7 @@ interface GovernanceSignalsProps {
 
 export function GovernanceSignals({ signals }: GovernanceSignalsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-2">
       {signals.length === 0 ? (
         <div className="flex items-start gap-2">
           <span className="text-sm text-zinc-400">No signals available</span>
@@ -17,12 +17,10 @@ export function GovernanceSignals({ signals }: GovernanceSignalsProps) {
         signals.map((signal) => (
           <div
             key={signal.id}
-            className="flex items-center gap-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-2"
+            className="flex items-center gap-3 rounded-lg border border-zinc-100 bg-white p-3"
           >
-            <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-zinc-500 dark:text-zinc-400" />
-            </div>
-            <span className="text-xs font-light text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+            <span className="text-xs text-[#121212] leading-snug">
               <DataValue value={signal.text} />
             </span>
           </div>

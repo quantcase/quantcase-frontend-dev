@@ -119,7 +119,7 @@ function TechnicalsContent() {
                 <span key={i} style={{ fontSize: 13, color: "#121212", lineHeight: 1.5 }}>
                   {sentence.trim()}
                   {i < ruleEngine.decisionContext.summary.split("|").length - 1 && (
-                    <span style={{ color: "#d4d4d8", margin: "0 8px" }}>|</span>
+                    <span style={{ color: "#71717a", margin: "0 8px" }}>|</span>
                   )}
                 </span>
               ))}
@@ -537,7 +537,7 @@ function TechnicalsContent() {
                         <span style={{ fontSize: 13, fontWeight: 500, color: "#0F172B" }}>{trigger.trim()}</span>
                         {conclusion && (
                           <>
-                            <span style={{ color: "#d4d4d8", margin: "0 4px" }}>—</span>
+                            <span style={{ color: "#71717a", margin: "0 4px" }}>—</span>
                             <span style={{ fontSize: 13, color: "#888888" }}>{conclusion}</span>
                           </>
                         )}

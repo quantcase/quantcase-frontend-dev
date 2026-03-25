@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUpRight } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 interface AnalystCardProps {
   targetMeanPrice: number | null;
@@ -18,14 +19,14 @@ const RECOMMENDATION_LABELS: Record<string, { label: string; color: string }> = 
   "hold":       { label: "Hold",        color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
   "sell":       { label: "Sell",        color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
   "strong_sell":{ label: "Strong Sell", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
-  "none":       { label: "No Rating",   color: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400" },
+  "none":       { label: "No Rating",   color: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500" },
 };
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-zinc-400 mb-0.5">{label}</p>
-      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{value}</p>
+      <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
+      <p className="text-[28px] font-normal leading-none text-[#0F172B]">{value}</p>
     </div>
   );
 }
@@ -56,28 +57,28 @@ export function AnalystCard({
       : null;
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
               Analyst Coverage
             </CardTitle>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-zinc-500 mt-0.5">
               {numberOfAnalysts != null ? `${numberOfAnalysts} analysts` : "Price targets & ratings"}
             </p>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-zinc-400" />
+          <ArrowUpRight className="h-4 w-4 text-zinc-500" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Mean target + upside + recommendation badge */}
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-xs text-zinc-400 mb-0.5">Mean Target</p>
+            <p className="text-xs text-zinc-500 mb-0.5">Mean Target</p>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-                {targetMeanPrice != null ? `₹${targetMeanPrice.toFixed(0)}` : "—"}
+              <span className="text-[28px] font-normal leading-none text-[#0F172B]">
+                {targetMeanPrice != null ? formatPrice(targetMeanPrice, 0) : "—"}
               </span>
               {upside != null && (
                 <span className={`text-sm font-semibold ${upside >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
@@ -95,9 +96,9 @@ export function AnalystCard({
 
         {/* Target range bar */}
         <div>
-          <div className="flex justify-between text-xs text-zinc-400 mb-1">
-            <span>Low {targetLowPrice != null ? `₹${targetLowPrice.toFixed(0)}` : "—"}</span>
-            <span>High {targetHighPrice != null ? `₹${targetHighPrice.toFixed(0)}` : "—"}</span>
+          <div className="flex justify-between text-xs text-zinc-500 mb-1">
+            <span>Low {targetLowPrice != null ? formatPrice(targetLowPrice, 0) : "—"}</span>
+            <span>High {targetHighPrice != null ? formatPrice(targetHighPrice, 0) : "—"}</span>
           </div>
           <div className="relative h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800">
             {rangePercent != null && (
@@ -107,8 +108,8 @@ export function AnalystCard({
               />
             )}
           </div>
-          <p className="text-xs text-zinc-400 mt-1 text-center">
-            {currentPrice != null ? `Current ₹${currentPrice.toFixed(2)}` : ""}
+          <p className="text-xs text-zinc-500 mt-1 text-center">
+            {currentPrice != null ? `Current ${formatPrice(currentPrice)}` : ""}
           </p>
         </div>
 

@@ -169,7 +169,7 @@ export default function Home() {
   const today = getTodayLabel();
 
   return (
-    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
+    <div className="min-h-screen bg-white mb-8 px-4">
       <div className="container mx-auto max-w-7xl space-y-4">
 
         {/* Page header */}

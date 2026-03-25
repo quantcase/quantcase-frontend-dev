@@ -225,7 +225,7 @@ export default function NewModelPage() {
   const inputClass = "w-full rounded-md border border-[#E2E2E2] px-3 py-2 text-sm bg-white placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-[#0F172B] hover:border-zinc-300 transition-colors";
 
   return (
-    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
+    <div className="min-h-screen bg-white mb-8 px-4">
       <div className="container mx-auto max-w-3xl space-y-5">
 
         {/* Back */}
@@ -316,7 +316,7 @@ export default function NewModelPage() {
                           </span>
                           <div
                             className="h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center"
-                            style={{ borderColor: isActive ? "#fff" : "#d4d4d8" }}
+                            style={{ borderColor: isActive ? "#fff" : "#71717a" }}
                           >
                             {isActive && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
                           </div>

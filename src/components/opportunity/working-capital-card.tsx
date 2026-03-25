@@ -115,13 +115,14 @@ function WcTrendChartPanel({
             />
             <Tooltip
               contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid #e4e4e7", backgroundColor: "white" }}
+              itemStyle={{ padding: '0px 10px' }}
               formatter={(value: number, name: string) =>
                 name === "WC % of Revenue"
                   ? [`${value}%`, name]
                   : [`${value} days`, name]
               }
             />
-            <ReferenceLine yAxisId="left" y={0} stroke="#d4d4d8" strokeWidth={1} />
+            <ReferenceLine yAxisId="left" y={0} stroke="#71717a" strokeWidth={1} />
             <Bar yAxisId="left" dataKey="dso" name="DSO" fill="#6366f1" opacity={0.7} barSize={9} radius={[2, 2, 0, 0]} />
             <Bar yAxisId="left" dataKey="dio" name="DIO" fill="#f59e0b" opacity={0.7} barSize={9} radius={[2, 2, 0, 0]} />
             <Bar yAxisId="left" dataKey="dpo" name="DPO" fill="#22c55e" opacity={0.5} barSize={9} radius={[2, 2, 0, 0]} />

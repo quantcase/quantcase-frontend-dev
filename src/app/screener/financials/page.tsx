@@ -222,7 +222,7 @@ function FinancialsContent() {
   const plTable = plTab === "Quarterly" ? quarterly : annual;
 
   return (
-    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
+    <div className="min-h-screen bg-white mb-8 px-4">
 
       {/* Company Header */}
       <div className="flex items-start justify-between gap-4 mb-6 mt-8">

@@ -127,12 +127,51 @@ export interface DetailedAnalysisSection {
   valuation_vs_peers?: ValuationVsPeersSection;
 }
 
+// ─── Overview ─────────────────────────────────────────────────────────────────
+
+export interface DealVerdict {
+  title?: string;
+  description?: string;
+}
+
+export interface EpsEngineCard {
+  score?: number;
+  drivers?: string[];
+}
+
+export interface ScenarioSummaryCase {
+  label?: string;
+  subtext?: string;
+  headline?: string;
+}
+
+export interface DealFactorScore {
+  level?: string;
+  overall?: number;
+  eps_engine?: number;
+  valuation_rerating?: number;
+}
+
+export interface OverviewSection {
+  deal_verdict?: DealVerdict;
+  key_takeaway?: string[];
+  eps_engine_card?: EpsEngineCard;
+  valuation_rerating_card?: EpsEngineCard;
+  scenario_summary?: {
+    bear?: ScenarioSummaryCase;
+    base?: ScenarioSummaryCase;
+    bull?: ScenarioSummaryCase;
+  };
+  deal_factor_score?: DealFactorScore;
+}
+
 // ─── Root Response ────────────────────────────────────────────────────────────
 
 export interface DFactorResponse {
   scenario_framework?: ScenarioFrameworkSection;
   target_price_matrix?: TargetPriceMatrixSection;
   risk_reward_summary?: RiskRewardSummarySection;
+  overview?: OverviewSection;
   detailed_analysis?: DetailedAnalysisSection;
 }
 

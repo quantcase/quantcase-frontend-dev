@@ -9,7 +9,6 @@ import { BACKEND_URL } from "@/lib/constants";
 import type { TimeframeOption, JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 
 import { Badge } from "@/components/ui/badge";
-import { FileText, CheckCircle2 } from "lucide-react";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { ScoreOverviewCards } from "@/components/management/score-overview-cards";
 import { TrustPanel } from "@/components/management/trust-panel";
@@ -345,29 +344,28 @@ function ManagementDashboardContent() {
   return (
     <div className="min-h-screen bg-white mb-8 px-4">
 
-      {/* Company Header — matches opportunity page style */}
+      {/* Company Header — matches overview page style */}
       <div className="flex items-start justify-between gap-4 mb-6 mt-8">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-            <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
-          </div>
-          <div className="space-y-1.5">
-            <h2>{displayName}</h2>
-            <div className="flex items-center gap-2">
-              <Badge>{company?.exchange}: {ticker}</Badge>
-              <p>{company?.industry?.split(", ").slice(0, 3).join(" • ")}</p>
-            </div>
+        <div className="space-y-1.5">
+          <h2 className="leading-tight" style={{ fontSize: 32, fontWeight: 600 }}>
+            {displayName}
+          </h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge>{company?.exchange ?? "NSE"}: {ticker}</Badge>
+            <p className="text-[#888888]">{company?.industry?.split(", ").slice(0, 3).join(" • ")}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <Badge>
-            <FileText className="h-3.5 w-3.5 mr-1.5" />
-            FULL IM
-          </Badge>
-          <Badge>
-            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-            {company?.confidenceLevel?.toUpperCase() ?? "HIGH"} CONFIDENCE
-          </Badge>
+        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="bg-zinc-900 text-white text-xs font-semibold px-3 py-1 rounded-md uppercase tracking-wide">
+              Full IM
+            </span>
+            {company?.confidenceLevel === "HIGH" && (
+              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1 rounded-md uppercase tracking-wide">
+                High Confidence
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -377,7 +375,7 @@ function ManagementDashboardContent() {
         {/* Main Layout: 2 columns */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Left Column: Main Content (2/3) */}
-          <div className="space-y-6 lg:col-span-2">
+          <div className="flex flex-col gap-6 lg:col-span-2">
             {/* Score Overview Cards */}
             <SectionPanel title="Management Factor Scores">
               <ScoreOverviewCards scores={managementData.scores} />
@@ -399,15 +397,18 @@ function ManagementDashboardContent() {
             {/* Guidance Track Table */}
             <SectionPanel
               title="Guidance Track Record"
+              className="flex-1"
             >
               <GuidanceTrackTable records={managementData.guidanceRecords} />
             </SectionPanel>
           </div>
 
           {/* Right Sidebar: Trust Panel + Notable Patterns (1/3) */}
-          <div className="lg:col-span-1 space-y-6">
-            <TrustPanel trust={managementData.trust} />
-            <NotablePatterns patterns={managementData.notablePatterns} />
+          <div className="lg:col-span-1 flex flex-col gap-6">
+            <TrustPanel trust={managementData.trust} consistency={managementData.consistency} />
+            <div className="flex-1">
+              <NotablePatterns patterns={managementData.notablePatterns} />
+            </div>
           </div>
         </div>
       </div>

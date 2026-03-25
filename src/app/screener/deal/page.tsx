@@ -16,6 +16,7 @@ import { ScenarioFramework } from "@/components/deal/scenario-framework";
 import { TargetPriceMatrix } from "@/components/deal/target-price-matrix";
 import { RiskRewardSummary } from "@/components/deal/risk-reward-summary";
 import { DetailedAnalysis } from "@/components/deal/detailed-analysis";
+import { DealOverview } from "@/components/deal/deal-overview";
 import { SectionPanel } from "@/components/molecules/section-panel";
 
 function DealContent() {
@@ -317,7 +318,9 @@ function DealContent() {
 
       {/* Page Content */}
       <div className="container mx-auto max-w-7xl space-y-6">
-        <EntryPointCallout />
+        {data.overview && (
+            <DealOverview data={data.overview} />
+        )}
         <SectionPanel
           title={data.scenario_framework?.meta?.title ?? "Scenario Framework"}
           contentClassName="px-6 pb-6"

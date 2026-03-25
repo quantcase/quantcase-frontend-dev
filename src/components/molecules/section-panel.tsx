@@ -52,6 +52,7 @@ interface SectionPanelProps {
   subtitle?: string;
   scoring?: SectionScoring;
   children: ReactNode;
+  className?: string;
   contentClassName?: string;
 }
 
@@ -60,10 +61,11 @@ export function SectionPanel({
   subtitle,
   scoring,
   children,
+  className,
   contentClassName,
 }: SectionPanelProps) {
   return (
-    <div className="flex flex-col" style={{ borderRadius: 10, border: "1px solid #E2E2E2", background: "#F5F5F5", padding: 8 }}>
+    <div className={`flex flex-col${className ? ` ${className}` : ""}`} style={{ borderRadius: 10, border: "1px solid #E2E2E2", background: "#F5F5F5", padding: 8 }}>
       {/* Header */}
       <div className="flex items-center justify-between" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
         <div>
@@ -74,12 +76,13 @@ export function SectionPanel({
       </div>
       {/* Content box */}
       <div
-        className={contentClassName ?? ""}
+        className={`flex-1 ${contentClassName ?? ""}`}
         style={{
           borderRadius: 10,
           border: "1px solid rgba(226, 226, 226, 0.10)",
           background: "#FFF",
           paddingTop: 16,
+          paddingBottom: 16,
           paddingLeft: 16,
           paddingRight: 16,
         }}

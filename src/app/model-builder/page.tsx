@@ -10,7 +10,7 @@ export default function ModelBuilderPage() {
   const { models, loading, error } = useModels();
 
   return (
-    <div className="min-h-screen bg-white pt-8 mb-8 px-4">
+    <div className="min-h-screen bg-white mb-8 px-4">
       <div className="container mx-auto max-w-7xl space-y-6">
 
         {/* Header */}

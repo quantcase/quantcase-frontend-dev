@@ -8,10 +8,10 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { QuarterlyTrend } from "@/types/screener";
+import { formatINR } from "@/lib/utils";
 
 interface FinancialPerformanceCardProps {
   revenue: number | null;
@@ -20,13 +20,6 @@ interface FinancialPerformanceCardProps {
   ebitdaMargins: number | null;
   earningsGrowth: number | null;
   quarterlyTrend: QuarterlyTrend[] | null;
-}
-
-function formatRevenue(value: number): string {
-  const lakhCr = value / 1e12;
-  if (lakhCr >= 1) return `₹${lakhCr.toFixed(2)}L Cr`;
-  const cr = value / 1e7;
-  return `₹${cr.toFixed(0)}Cr`;
 }
 
 function formatPct(value: number): string {
@@ -43,23 +36,25 @@ export function FinancialPerformanceCard({
   quarterlyTrend,
 }: FinancialPerformanceCardProps) {
   const chartData = quarterlyTrend
-    ? quarterlyTrend.map((q) => ({
-        quarter: q.period,
-        revenue: parseFloat((q.revenue / 1e7).toFixed(1)),
-        ebitda: parseFloat((q.ebitda / 1e7).toFixed(1)),
-      }))
+    ? quarterlyTrend
+        .filter((q) => q.revenue != null)
+        .map((q) => ({
+          quarter: q.period,
+          revenue: parseFloat(((q.revenue as number) / 1e7).toFixed(1)),
+          ebitda: q.ebitda != null ? parseFloat((q.ebitda / 1e7).toFixed(1)) : null,
+        }))
     : [];
 
   const metrics = [
     {
       label: "Revenue (TTM)",
-      value: revenue != null ? formatRevenue(revenue) : "—",
+      value: revenue != null ? formatINR(revenue) : "—",
       change: revenueGrowth != null ? formatPct(revenueGrowth) : null,
       positive: (revenueGrowth ?? 0) >= 0,
     },
     {
       label: "EBITDA",
-      value: ebitda != null ? formatRevenue(ebitda) : "—",
+      value: ebitda != null ? formatINR(ebitda) : "—",
       change: ebitdaMargins != null ? formatPct(ebitdaMargins) : null,
       positive: (ebitdaMargins ?? 0) >= 0,
     },
@@ -72,16 +67,16 @@ export function FinancialPerformanceCard({
   ];
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
               Financial Performance
             </CardTitle>
-            <p className="text-xs text-zinc-400 mt-0.5">Trailing twelve months</p>
+            <p className="text-xs text-zinc-500 mt-0.5">Trailing twelve months</p>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-zinc-400" />
+          <ArrowUpRight className="h-4 w-4 text-zinc-500" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -89,9 +84,9 @@ export function FinancialPerformanceCard({
         <div className="grid grid-cols-3 gap-4">
           {metrics.map((m) => (
             <div key={m.label}>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">{m.label}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-1">{m.label}</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">{m.value}</span>
+                <span className="text-[18px] font-normal leading-none text-[#0F172B]">{m.value}</span>
                 {m.change && (
                   <span className={`flex items-center text-xs font-semibold ${m.positive ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
                     {m.positive ? <TrendingUp className="h-3 w-3 mr-0.5" /> : <TrendingDown className="h-3 w-3 mr-0.5" />}
@@ -103,9 +98,21 @@ export function FinancialPerformanceCard({
           ))}
         </div>
 
+        {/* Legend */}
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+            <span className="inline-block w-2 h-2 rounded-full bg-[#0F172B]" />
+            Revenue
+          </span>
+          <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+            <span className="inline-block w-2 h-2 rounded-full bg-[#71717a]" />
+            EBITDA
+          </span>
+        </div>
+
         {/* Bar chart */}
         <div className="h-48">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={192}>
             <BarChart data={chartData} barGap={2} barCategoryGap="30%">
               <XAxis
                 dataKey="quarter"
@@ -124,16 +131,13 @@ export function FinancialPerformanceCard({
                   border: "1px solid #e4e4e7",
                   borderRadius: 8,
                   fontSize: 12,
+                  padding: "6px 10px",
                 }}
-                formatter={(value: number) => [`₹${value}Cr`, undefined]}
-              />
-              <Legend
-                iconType="circle"
-                iconSize={8}
-                wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+                itemStyle={{ padding: '0px 10px' }}
+                formatter={(value: number, name: string) => [`₹${value}Cr`, name]}
               />
               <Bar dataKey="revenue" name="Revenue" fill="#0F172B" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="ebitda" name="EBITDA" fill="#d4d4d8" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="ebitda" name="EBITDA" fill="#71717a" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

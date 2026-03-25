@@ -43,7 +43,7 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
   return (
     <div>
         {records.length === 0 ? (
-          <p className="text-xs font-light text-zinc-500 dark:text-zinc-400 py-4">No guidance records available</p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 py-4">No guidance records available</p>
         ) : (
           <div className="overflow-x-auto">
             <Table className="table-fixed w-full">
@@ -57,7 +57,7 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
               </colgroup>
               <TableHeader>
                 <TableRow className="border-zinc-200 dark:border-zinc-800">
-                  <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">TARGET DATE</TableHead>
+                  <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">GUIDANCE DATE</TableHead>
                   <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">METRIC</TableHead>
                   <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">ACTUAL</TableHead>
                   <TableHead className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">GUIDED</TableHead>
@@ -70,6 +70,9 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                 {records.filter((record) => {
                   const isNA = (v: unknown) => v == null || String(v).trim().toUpperCase() === "N/A" || String(v).trim() === "";
                   return !isNA(record.current_value) && !isNA(record.targeted_value);
+                }).filter((record, index, arr) => {
+                  const key = `${record.metric}__${record.period}`;
+                  return arr.findIndex(r => `${r.metric}__${r.period}` === key) === index;
                 }).map((record) => {
                   const statusConfig = getStatusConfig(record.status);
                   const isFinancial = record.target_type === "financial";
@@ -83,12 +86,12 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                     <TableRow
                       className={`border-zinc-200 dark:border-zinc-800 ${statusConfig.borderColor} ${hasStatement ? "cursor-default" : ""}`}
                     >
-                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
+                      <TableCell className="text-xs text-zinc-700 dark:text-zinc-300">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.period} />
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
+                      <TableCell className="text-xs text-zinc-700 dark:text-zinc-300">
                         <div className="flex items-center gap-2 break-words whitespace-normal">
                           <span className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0 bg-zinc-100 dark:bg-zinc-800">
                             {isFinancial ? (
@@ -100,17 +103,17 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                           <DataValue value={record.metric} />
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
+                      <TableCell className="text-xs text-zinc-700 dark:text-zinc-300">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.current_value} />
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs font-light text-zinc-700 dark:text-zinc-300">
+                      <TableCell className="text-xs text-zinc-700 dark:text-zinc-300">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.targeted_value} />
                         </div>
                       </TableCell>
-                      <TableCell className={`${getVarianceColor(varianceDisplay)} text-xs font-light`}>
+                      <TableCell className={`${getVarianceColor(varianceDisplay)} text-xs`}>
                         <div className="break-words whitespace-normal">
                           <DataValue value={varianceDisplay} />
                         </div>
@@ -130,7 +133,10 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                     <TooltipRoot key={record.id}>
                       <TooltipTrigger asChild>{row}</TooltipTrigger>
                       <TooltipContent side="top" className="max-w-sm leading-relaxed">
-                        {record.statement}
+                        <p>{record.statement}</p>
+                        {record.source_call && (
+                          <p className="mt-2 text-[10px] text-zinc-400 border-t border-zinc-700 pt-2">{record.source_call}</p>
+                        )}
                       </TooltipContent>
                     </TooltipRoot>
                   );

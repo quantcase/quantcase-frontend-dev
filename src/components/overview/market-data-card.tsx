@@ -17,8 +17,8 @@ interface MarketDataCardProps {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-zinc-400 mb-0.5">{label}</p>
-      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{value}</p>
+      <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
+      <p className="text-[28px] font-normal leading-none text-[#0F172B]">{value}</p>
     </div>
   );
 }
@@ -47,29 +47,29 @@ export function MarketDataCard({
       : null;
 
   return (
-    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
               Market Data
             </CardTitle>
-            <p className="text-xs text-zinc-400 mt-0.5">Price &amp; Volume</p>
+            <p className="text-xs text-zinc-500 mt-0.5">Price &amp; Volume</p>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-zinc-400" />
+          <ArrowUpRight className="h-4 w-4 text-zinc-500" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* 52W range bar */}
         <div>
-          <div className="flex justify-between text-xs text-zinc-400 mb-1">
+          <div className="flex justify-between text-xs text-zinc-500 mb-1">
             <span>52W Low {week52Low != null ? `₹${week52Low.toFixed(2)}` : "—"}</span>
             <span>52W High {week52High != null ? `₹${week52High.toFixed(2)}` : "—"}</span>
           </div>
           <div className="relative h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800">
             {rangePercent != null && (
               <div
-                className="absolute left-0 top-0 h-1.5 rounded-full bg-indigo-500"
+                className="absolute left-0 top-0 h-1.5 rounded-full bg-zinc-900"
                 style={{ width: `${Math.min(100, Math.max(0, rangePercent))}%` }}
               />
             )}

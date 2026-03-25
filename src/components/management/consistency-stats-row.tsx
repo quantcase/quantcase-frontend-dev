@@ -10,15 +10,17 @@ export function ConsistencyStatsRow({ metrics }: ConsistencyStatsRowProps) {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3 mb-3">
       <div className="flex items-center gap-4">
-        <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800">
-          <TrendingUp className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
+        <div style={{ padding: 10, borderRadius: 8, border: "1px solid rgba(18,18,18,0.10)", background: "rgba(18,18,18,0.03)", flexShrink: 0 }}>
+          <TrendingUp className="h-5 w-5 text-zinc-500" />
         </div>
         <div>
-          <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">Consistency Score</p>
-          <p className="text-2xl font-normal text-zinc-900 dark:text-zinc-50">
+          <p style={{ fontSize: 10, fontWeight: 500, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>
+            Consistency Score
+          </p>
+          <p style={{ fontSize: 28, fontWeight: 400, color: "#0F172B", lineHeight: 1 }}>
             <DataValue value={metrics.score !== null && metrics.score !== undefined ? metrics.score : null} />
             {metrics.score !== null && metrics.score !== undefined && (
-              <span className="text-xs font-light text-zinc-400 dark:text-zinc-600">
+              <span style={{ fontSize: 12, fontWeight: 300, color: "#888888" }}>
                 /{metrics.maxScore}
               </span>
             )}
@@ -27,24 +29,28 @@ export function ConsistencyStatsRow({ metrics }: ConsistencyStatsRowProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800">
-          <Target className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
+        <div style={{ padding: 10, borderRadius: 8, border: "1px solid rgba(18,18,18,0.10)", background: "rgba(18,18,18,0.03)", flexShrink: 0 }}>
+          <Target className="h-5 w-5 text-zinc-500" />
         </div>
         <div>
-          <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">Hit Rate</p>
-          <p className="text-2xl font-normal text-zinc-900 dark:text-zinc-50">
+          <p style={{ fontSize: 10, fontWeight: 500, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>
+            Hit Rate
+          </p>
+          <p style={{ fontSize: 28, fontWeight: 400, color: "#0F172B", lineHeight: 1 }}>
             <DataValue value={metrics.hitRate !== null && metrics.hitRate !== undefined ? `${metrics.hitRate}%` : null} />
           </p>
         </div>
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800">
-          <Shield className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
+        <div style={{ padding: 10, borderRadius: 8, border: "1px solid rgba(18,18,18,0.10)", background: "rgba(18,18,18,0.03)", flexShrink: 0 }}>
+          <Shield className="h-5 w-5 text-zinc-500" />
         </div>
         <div>
-          <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500">Bad News Disclosure</p>
-          <p className="text-sm font-normal text-zinc-900 dark:text-zinc-50 capitalize">
+          <p style={{ fontSize: 10, fontWeight: 500, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>
+            Bad News Disclosure
+          </p>
+          <p style={{ fontSize: 18, fontWeight: 400, color: "#0F172B", lineHeight: 1.2 }} className="capitalize">
             <DataValue value={metrics.disclosurePattern} />
           </p>
         </div>

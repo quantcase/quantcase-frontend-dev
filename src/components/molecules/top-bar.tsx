@@ -185,28 +185,13 @@ function TopBarInner() {
   }
 
   return (
-    <header className="fixed left-14 right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-[#E2E2E2] bg-white px-6 dark:border-gray-800 dark:bg-gray-950">
+    <header className="fixed left-14 right-0 top-0 z-30 flex h-12 items-center justify-between border-b border-[#E2E2E2] bg-white px-6 dark:border-gray-800 dark:bg-gray-950">
       <div className="flex h-full items-center">{leftZone}</div>
 
       {/* Right: notification + user */}
       <div className="flex items-center gap-4">
-        <button
-          aria-label="Notifications"
-          className="relative text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-        >
-          <Bell className="size-5" />
-          <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-red-500" />
-        </button>
 
         <div className="flex items-center gap-2.5">
-          <div className="text-right">
-            <p className="text-sm font-semibold leading-tight text-gray-900 dark:text-white">
-              Alex Morgan
-            </p>
-            <p className="text-xs leading-tight text-gray-500 dark:text-gray-400">
-              Relationship Manager
-            </p>
-          </div>
           <div className="flex size-9 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
             AM
           </div>

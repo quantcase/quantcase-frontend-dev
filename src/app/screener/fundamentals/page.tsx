@@ -3,20 +3,27 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  Building2,
   ShieldCheck,
   AlertTriangle,
   Lightbulb,
   Zap,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { TabularCard } from "@/components/molecules/tabular-card";
+import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { useFinancials } from "@/hooks/useFinancials";
 import { useFinancialsCharts } from "@/hooks/useFinancialsCharts";
-import { useScreenerInfo } from "@/hooks/useScreenerInfo";
 import { MultiLineBarComboChart } from "@/components/molecules/multi-line-bar-combo-chart";
 import type { FinancialRow, FinancialTable } from "@/types/financials";
+
+const FUNDAMENTALS_NAV = [
+  { id: "section-charts",         label: "Charts" },
+  { id: "section-swot",           label: "SWOT Analysis" },
+  { id: "section-pnl",            label: "Profit & Loss" },
+  { id: "section-balance-sheet",  label: "Balance Sheet" },
+  { id: "section-cash-flow",      label: "Cash Flow" },
+  { id: "section-growth-returns", label: "Growth & Returns" },
+];
 
 function fmt(value: number | null | undefined, format?: string): string {
   if (value === null || value === undefined) return "—";
@@ -179,85 +186,60 @@ function FinancialsContent() {
 
   const { data, loading, error } = useFinancials(symbol);
   const { data: chartsData } = useFinancialsCharts(symbol);
-  const { data: screenerInfo } = useScreenerInfo(symbol);
 
   if (!symbol) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm text-red-600">Error: No symbol provided in query parameters</div>
-      </div>
+      <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
+        <div className="text-sm text-red-600 px-4 pt-6">Error: No symbol provided in query parameters</div>
+      </ScreenerPageShell>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm">Loading...</div>
-      </div>
+      <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
+        <div className="text-sm px-4 pt-6">Loading...</div>
+      </ScreenerPageShell>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm text-red-600">Error: {error}</div>
-      </div>
+      <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
+        <div className="text-sm text-red-600 px-4 pt-6">Error: {error}</div>
+      </ScreenerPageShell>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm">No financial data found for {symbol}</div>
-      </div>
+      <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
+        <div className="text-sm px-4 pt-6">No financial data found for {symbol}</div>
+      </ScreenerPageShell>
     );
   }
 
   const { standardized } = data;
   const { metrics, quarterly, annual, balanceSheet, cashFlow, cashFlowQuarterly } = standardized;
 
-
   return (
-    <div className="min-h-screen bg-white mb-8 px-4 pt-4">
+    <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
+      <div className="mx-auto space-y-6 px-4 pt-6">
 
-      {/* Company Header */}
-      <div className="flex items-center justify-between gap-4 mb-4 mt-8">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-zinc-100 flex items-center justify-center flex-shrink-0">
-            <Building2 className="h-5 w-5 text-zinc-600" />
+        {/* Price / PE / Sales chart */}
+        {chartsData && (
+          <div id="section-charts">
+            <MultiLineBarComboChart
+              chartGroups={chartsData.chartGroups}
+              height={300}
+              title="Charts"
+              subtitle="Price, valuation, and sales trends"
+            />
           </div>
-          <h2 style={{ fontSize: 22, fontWeight: 500, color: "#0F172B", lineHeight: 1.2 }}>
-            {screenerInfo?.company?.name ?? symbol}
-          </h2>
-        </div>
-        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-          <Badge>{data.exchange}: {symbol}</Badge>
-          {screenerInfo?.company?.sector && (
-            <Badge>{screenerInfo.company.sector}</Badge>
-          )}
-          {screenerInfo?.company?.industry && (
-            <Badge>{screenerInfo.company.industry}</Badge>
-          )}
-        </div>
-      </div>
-
-      {/* Price / PE / Sales chart */}
-      {chartsData && (
-        <div className="mx-auto mb-6">
-          <MultiLineBarComboChart
-            chartGroups={chartsData.chartGroups}
-            height={300}
-            title="Charts"
-            subtitle="Price, valuation, and sales trends"
-          />
-        </div>
-      )}
-
-      {/* Page content */}
-      <div className="mx-auto space-y-6 ">
+        )}
 
         {/* SWOT Analysis */}
-        <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+        <div id="section-swot" className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
           <div className="px-2 pt-1 pb-3 flex items-center justify-between">
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.01em" }}>
@@ -326,46 +308,53 @@ function FinancialsContent() {
         </div>
 
         {/* Row 2 — P&L Table (Quarterly / Annual toggle) */}
-        <TabularCard
-          title="Profit & Loss"
-          subtitle="All values in INR Crores"
-          tabs={["Quarterly", "Annual"]}
-        >
-          {(activeTab) => (
-            <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
-          )}
-        </TabularCard>
+        <div id="section-pnl">
+          <TabularCard
+            title="Profit & Loss"
+            subtitle="All values in INR Crores"
+            tabs={["Quarterly", "Annual"]}
+          >
+            {(activeTab) => (
+              <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
+            )}
+          </TabularCard>
+        </div>
 
         {/* Row 3 — Balance Sheet */}
-        <TabularCard
-          title="Balance Sheet"
-          subtitle="All values in INR Crores"
-          tabs={balanceSheet.quarterly ? ["Quarterly", "Annual"] : undefined}
-          defaultTab="Annual"
-        >
-          {(activeTab) => (
-            <FinancialDataTable
-              table={activeTab === "Quarterly" && balanceSheet.quarterly ? balanceSheet.quarterly : balanceSheet.annual}
-            />
-          )}
-        </TabularCard>
+        <div id="section-balance-sheet">
+          <TabularCard
+            title="Balance Sheet"
+            subtitle="All values in INR Crores"
+            tabs={balanceSheet.quarterly ? ["Quarterly", "Annual"] : undefined}
+            defaultTab="Annual"
+          >
+            {(activeTab) => (
+              <FinancialDataTable
+                table={activeTab === "Quarterly" && balanceSheet.quarterly ? balanceSheet.quarterly : balanceSheet.annual}
+              />
+            )}
+          </TabularCard>
+        </div>
 
         {/* Row 4 — Cash Flow */}
-        <TabularCard
-          title="Cash Flow"
-          subtitle="All values in INR Crores"
-          tabs={cashFlowQuarterly ? ["Quarterly", "Annual"] : undefined}
-          defaultTab="Annual"
-        >
-          {(activeTab) => (
-            <FinancialDataTable
-              table={activeTab === "Quarterly" && cashFlowQuarterly ? cashFlowQuarterly : cashFlow}
-              cashFlowMode
-            />
-          )}
-        </TabularCard>
+        <div id="section-cash-flow">
+          <TabularCard
+            title="Cash Flow"
+            subtitle="All values in INR Crores"
+            tabs={cashFlowQuarterly ? ["Quarterly", "Annual"] : undefined}
+            defaultTab="Annual"
+          >
+            {(activeTab) => (
+              <FinancialDataTable
+                table={activeTab === "Quarterly" && cashFlowQuarterly ? cashFlowQuarterly : cashFlow}
+                cashFlowMode
+              />
+            )}
+          </TabularCard>
+        </div>
 
-        {/* Row 4 — Growth & Returns */}
+        {/* Row 5 — Growth & Returns */}
+        <div id="section-growth-returns">
         <SectionPanel
           title="Growth & Returns"
           subtitle="Revenue growth, profitability trends, and return metrics"
@@ -395,21 +384,16 @@ function FinancialsContent() {
             </div>
           </div>
         </SectionPanel>
+        </div>
 
       </div>
-    </div>
+    </ScreenerPageShell>
   );
 }
 
 export default function FinancialsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-sm">Loading...</div>
-        </div>
-      }
-    >
+    <Suspense fallback={null}>
       <FinancialsContent />
     </Suspense>
   );

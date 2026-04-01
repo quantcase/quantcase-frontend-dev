@@ -25,7 +25,7 @@ export function AppSidebar() {
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-14 flex-col border-r border-[#E2E2E2] bg-white">
       {/* Logo */}
-      <div className="flex h-14 items-center justify-center border-b border-[#E2E2E2]">
+      <div className="flex h-12 items-center justify-center border-b border-[#E2E2E2]">
         <span className="text-base font-bold text-blue-600">Q</span>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Building2,
@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SectionPanel } from "@/components/molecules/section-panel";
-import { TabToggle } from "@/components/molecules/tab-toggle";
+import { TabularCard } from "@/components/molecules/tabular-card";
 import { useFinancials } from "@/hooks/useFinancials";
 import { useFinancialsCharts } from "@/hooks/useFinancialsCharts";
 import { useScreenerInfo } from "@/hooks/useScreenerInfo";
@@ -176,7 +176,6 @@ function GrowthMetricRow({
 function FinancialsContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
-  const [plTab, setPlTab] = useState("Quarterly");
 
   const { data, loading, error } = useFinancials(symbol);
   const { data: chartsData } = useFinancialsCharts(symbol);
@@ -215,9 +214,8 @@ function FinancialsContent() {
   }
 
   const { standardized } = data;
-  const { metrics, quarterly, annual, balanceSheet, cashFlow } = standardized;
+  const { metrics, quarterly, annual, balanceSheet, cashFlow, cashFlowQuarterly } = standardized;
 
-  const plTable = plTab === "Quarterly" ? quarterly : annual;
 
   return (
     <div className="min-h-screen bg-white mb-8 px-4 pt-4">
@@ -328,48 +326,44 @@ function FinancialsContent() {
         </div>
 
         {/* Row 2 — P&L Table (Quarterly / Annual toggle) */}
-        <SectionPanel
+        <TabularCard
           title="Profit & Loss"
-          subtitle="Income statement across reporting periods"
+          subtitle="All values in INR Crores"
+          tabs={["Quarterly", "Annual"]}
         >
-          <div className="pb-4">
-            <div className="flex items-center justify-between mb-4">
-              <span style={{ fontSize: 12, color: "#888888" }}>
-                All values in INR Crores
-              </span>
-              <TabToggle
-                options={["Quarterly", "Annual"]}
-                value={plTab}
-                onChange={setPlTab}
-              />
-            </div>
-            <FinancialDataTable table={plTable} />
-          </div>
-        </SectionPanel>
+          {(activeTab) => (
+            <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
+          )}
+        </TabularCard>
 
-        {/* Row 3 — Balance Sheet + Cash Flow */}
-        <div className="grid grid-cols-2 gap-6 items-stretch">
+        {/* Row 3 — Balance Sheet */}
+        <TabularCard
+          title="Balance Sheet"
+          subtitle="All values in INR Crores"
+          tabs={balanceSheet.quarterly ? ["Quarterly", "Annual"] : undefined}
+          defaultTab="Annual"
+        >
+          {(activeTab) => (
+            <FinancialDataTable
+              table={activeTab === "Quarterly" && balanceSheet.quarterly ? balanceSheet.quarterly : balanceSheet.annual}
+            />
+          )}
+        </TabularCard>
 
-          {/* Balance Sheet */}
-          <SectionPanel
-            title="Balance Sheet"
-            subtitle="Annual assets and liabilities"
-          >
-            <div className="pb-4">
-              <FinancialDataTable table={balanceSheet.annual} />
-            </div>
-          </SectionPanel>
-
-          {/* Cash Flow */}
-          <SectionPanel
-            title="Cash Flow"
-            subtitle="Annual operating, free, and capex cash flows"
-          >
-            <div className="pb-4">
-              <FinancialDataTable table={cashFlow} cashFlowMode />
-            </div>
-          </SectionPanel>
-        </div>
+        {/* Row 4 — Cash Flow */}
+        <TabularCard
+          title="Cash Flow"
+          subtitle="All values in INR Crores"
+          tabs={cashFlowQuarterly ? ["Quarterly", "Annual"] : undefined}
+          defaultTab="Annual"
+        >
+          {(activeTab) => (
+            <FinancialDataTable
+              table={activeTab === "Quarterly" && cashFlowQuarterly ? cashFlowQuarterly : cashFlow}
+              cashFlowMode
+            />
+          )}
+        </TabularCard>
 
         {/* Row 4 — Growth & Returns */}
         <SectionPanel

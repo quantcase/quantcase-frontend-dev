@@ -13,6 +13,7 @@ export interface FinancialTable {
 
 export interface BalanceSheetData {
   annual: FinancialTable;
+  quarterly?: FinancialTable;
 }
 
 export interface GrowthMetric {
@@ -58,6 +59,7 @@ export interface FinancialsStandardized {
   annual: FinancialTable;
   balanceSheet: BalanceSheetData;
   cashFlow: FinancialTable;
+  cashFlowQuarterly?: FinancialTable;
   ttm: FinancialsTTM;
   metrics: FinancialsMetrics;
   valuation: FinancialsValuation;

@@ -202,7 +202,7 @@ export default function ModelDetailPage() {
 
   return (
     <div className="min-h-screen pt-8 mb-8 px-4" style={{ background: "#FFFFFF" }}>
-      <div className="container mx-auto max-w-7xl space-y-6">
+      <div className="mx-auto space-y-6 ">
 
         {/* Back nav */}
         <Link href="/model-builder" className="text-xs transition-colors" style={{ color: "#888888" }}>

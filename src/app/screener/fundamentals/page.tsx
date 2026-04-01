@@ -243,7 +243,7 @@ function FinancialsContent() {
 
       {/* Price / PE / Sales chart */}
       {chartsData && (
-        <div className="container mx-auto max-w-7xl mb-6">
+        <div className="mx-auto mb-6">
           <MultiLineBarComboChart
             chartGroups={chartsData.chartGroups}
             height={300}
@@ -254,7 +254,7 @@ function FinancialsContent() {
       )}
 
       {/* Page content */}
-      <div className="container mx-auto max-w-7xl space-y-6">
+      <div className="mx-auto space-y-6 ">
 
         {/* SWOT Analysis */}
         <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">

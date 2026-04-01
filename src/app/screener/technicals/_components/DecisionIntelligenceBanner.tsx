@@ -59,7 +59,7 @@ export function DecisionIntelligenceBanner({ di }: Props) {
 
           {/* Col 2: Action Bias */}
           <div className="flex flex-col gap-1 px-6" style={{ flex: "0 0 30%" }}>
-            <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider">Action Bias</p>
+            <p className="text-[10px] font-semibold text-[#0F172B] uppercase tracking-wider">Action Bias</p>
             <p className="text-[13px] text-[#121212] leading-relaxed">{di.actionBias}</p>
           </div>
 

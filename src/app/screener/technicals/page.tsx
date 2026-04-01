@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Activity,
@@ -29,7 +29,7 @@ import { SRRangeBar } from "./_components/SRRangeBar";
 import { MAPositionChart } from "./_components/MAPositionChart";
 import { CandlestickChart } from "./_components/CandlestickChart";
 import { DecisionIntelligenceBanner } from "./_components/DecisionIntelligenceBanner";
-import { TechnicalsRuleEngine } from "./_components/TechnicalsRuleEngine";
+import { TechnicalsRuleEngine, type EngineTab } from "./_components/TechnicalsRuleEngine";
 
 const TECHNICALS_NAV = [
   { id: "section-price-chart",    label: "Price Chart" },
@@ -46,8 +46,10 @@ function TechnicalsContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
 
+  const [activeEngine, setActiveEngine] = useState<EngineTab>("STRUCTURE");
+
   const { data, derived, loading, error } = useTechnicals(symbol);
-  const { prices, loading: pricesLoading, error: pricesError } = usePrices(symbol);
+  const { prices, indicators, loading: pricesLoading, error: pricesError } = usePrices(symbol);
 
   if (!symbol) {
     return (
@@ -104,7 +106,13 @@ function TechnicalsContent() {
       <div className="grid grid-cols-2 gap-4">
         <div id="section-price-chart">
           <SectionPanel title="Price Chart">
-            <CandlestickChart prices={prices} loading={pricesLoading} error={pricesError} />
+            <CandlestickChart
+              prices={prices}
+              indicators={indicators}
+              activeEngine={activeEngine}
+              loading={pricesLoading}
+              error={pricesError}
+            />
           </SectionPanel>
         </div>
         {ruleEngine && (
@@ -112,6 +120,8 @@ function TechnicalsContent() {
             <TechnicalsRuleEngine
               ruleEngine={ruleEngine}
               decisionIntelligence={decisionIntelligence}
+              activeEngine={activeEngine}
+              onEngineChange={setActiveEngine}
             />
           </div>
         )}

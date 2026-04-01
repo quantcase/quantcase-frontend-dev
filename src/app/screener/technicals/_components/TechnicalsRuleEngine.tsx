@@ -6,14 +6,16 @@ import { RuleEngineSection } from "./RuleEngineSection";
 import type { RuleEngine, DecisionIntelligence } from "@/types/technicals";
 
 const ENGINE_TABS = ["STRUCTURE", "TREND", "TIMING", "DOMINANCE"] as const;
+export type EngineTab = typeof ENGINE_TABS[number];
 
 interface Props {
   ruleEngine: RuleEngine;
   decisionIntelligence?: DecisionIntelligence;
+  activeEngine: EngineTab;
+  onEngineChange: (tab: EngineTab) => void;
 }
 
-export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence }: Props) {
-  const [activeEngine, setActiveEngine] = useState<string>("STRUCTURE");
+export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeEngine, onEngineChange }: Props) {
   const [activePerspective, setActivePerspective] = useState<"GROWTH" | "VALUE">("GROWTH");
 
   const titleNode = (
@@ -45,7 +47,7 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence }: Props
       {ENGINE_TABS.map((tab) => (
         <button
           key={tab}
-          onClick={() => setActiveEngine(tab)}
+          onClick={() => onEngineChange(tab)}
           className={`px-3 py-1.5 rounded-md text-[10px] font-semibold uppercase tracking-wide transition-all ${
             activeEngine === tab
               ? "bg-[#0F172B] text-white"
@@ -67,7 +69,6 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence }: Props
         ruleEngine={ruleEngine}
         decisionIntelligence={decisionIntelligence}
         activeEngine={activeEngine}
-        setActiveEngine={setActiveEngine}
         activePerspective={activePerspective}
       />
     </SectionPanel>

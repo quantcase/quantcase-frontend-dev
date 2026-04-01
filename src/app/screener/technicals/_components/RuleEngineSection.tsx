@@ -11,6 +11,7 @@ import type {
   DecisionIntelligence,
   DecisionIntelligenceIndicator,
 } from "@/types/technicals";
+import type { EngineTab } from "./TechnicalsRuleEngine";
 
 function resolveWatchout(
   indicators: DecisionIntelligenceIndicator[] | undefined,
@@ -26,8 +27,6 @@ function resolveWatchout(
   }
   return fallback;
 }
-
-const ENGINE_TABS = ["STRUCTURE", "TREND", "TIMING", "DOMINANCE"] as const;
 
 function smaPositionColor(pos: string): string {
   if (pos === "ABOVE") return "text-emerald-600";
@@ -102,7 +101,7 @@ function EngineCard({
       {/* HEADER */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-baseline gap-2">
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B" }}>{title}</span>
+          <span className="text-[10px] font-semibold text-[#0F172B] uppercase tracking-wider">{title}</span>
           {subtitle && (
             <span style={{ fontSize: 11, color: "#888888", fontWeight: 400 }}>{subtitle}</span>
           )}
@@ -296,13 +295,11 @@ export function RuleEngineSection({
   ruleEngine,
   decisionIntelligence,
   activeEngine,
-  setActiveEngine,
   activePerspective,
 }: {
   ruleEngine: RuleEngine;
   decisionIntelligence?: DecisionIntelligence;
-  activeEngine: string;
-  setActiveEngine: (v: string) => void;
+  activeEngine: EngineTab;
   activePerspective: "GROWTH" | "VALUE";
 }) {
   const diIndicators = decisionIntelligence?.indicators;

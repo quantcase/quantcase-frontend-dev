@@ -13,6 +13,7 @@ export interface FinancialTable {
 
 export interface BalanceSheetData {
   annual: FinancialTable;
+  quarterly?: FinancialTable;
 }
 
 export interface GrowthMetric {
@@ -58,6 +59,7 @@ export interface FinancialsStandardized {
   annual: FinancialTable;
   balanceSheet: BalanceSheetData;
   cashFlow: FinancialTable;
+  cashFlowQuarterly?: FinancialTable;
   ttm: FinancialsTTM;
   metrics: FinancialsMetrics;
   valuation: FinancialsValuation;
@@ -70,4 +72,29 @@ export interface FinancialsResponse {
   unit: string;
   timestamp: string;
   standardized: FinancialsStandardized;
+}
+
+// ─── Chart types ───────────────────────────────────────────────────────────────
+
+export interface ChartDataPoint {
+  x: string;
+  y: number | null;
+}
+
+export interface ChartSeriesDefinition {
+  dataKey: string;
+  name: string;
+  data: ChartDataPoint[];
+}
+
+export interface ChartGroup {
+  group: string;
+  barSeries: ChartSeriesDefinition[];
+  lineSeries: ChartSeriesDefinition[];
+  leftAxisLabel?: string;
+  rightAxisLabel?: string;
+}
+
+export interface FinancialsChartsResponse {
+  chartGroups: ChartGroup[];
 }

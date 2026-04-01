@@ -370,7 +370,7 @@ function ManagementDashboardContent() {
       </div>
 
       {/* Page Content */}
-      <div className="container mx-auto max-w-7xl space-y-6">
+      <div className="mx-auto space-y-6 ">
 
         {/* Main Layout: 2 columns */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

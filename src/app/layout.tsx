@@ -28,7 +28,7 @@ export default function RootLayout({
         <AppSidebar />
         <TopBar />
         {/* Main content offset for fixed sidebar (w-56) and top bar (h-14) */}
-        <div className="ml-56 pt-14 min-h-screen bg-gray-50 dark:bg-black">
+        <div className="ml-14 pt-14 min-h-screen bg-gray-50 dark:bg-black">
           {children}
         </div>
       </body>

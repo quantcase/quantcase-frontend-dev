@@ -3,19 +3,18 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  TrendingUp,
-  BarChart2,
-  DollarSign,
-  Percent,
   Building2,
-  Activity,
+  ShieldCheck,
+  AlertTriangle,
+  Lightbulb,
+  Zap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SectionPanel } from "@/components/molecules/section-panel";
-import { MetricTile } from "@/components/molecules/metric-tile";
 import { TabToggle } from "@/components/molecules/tab-toggle";
 import { useFinancials } from "@/hooks/useFinancials";
 import { useFinancialsCharts } from "@/hooks/useFinancialsCharts";
+import { useScreenerInfo } from "@/hooks/useScreenerInfo";
 import { MultiLineBarComboChart } from "@/components/molecules/multi-line-bar-combo-chart";
 import type { FinancialRow, FinancialTable } from "@/types/financials";
 
@@ -23,11 +22,6 @@ function fmt(value: number | null | undefined, format?: string): string {
   if (value === null || value === undefined) return "—";
   if (format === "percent") return `${value}%`;
   return value.toLocaleString("en-IN", { maximumFractionDigits: 2 });
-}
-
-function fmtCr(value: number | null | undefined): string {
-  if (value === null || value === undefined) return "—";
-  return `₹${value.toLocaleString("en-IN", { maximumFractionDigits: 2 })} Cr`;
 }
 
 function fmtPct(value: number | null | undefined): string {
@@ -186,6 +180,7 @@ function FinancialsContent() {
 
   const { data, loading, error } = useFinancials(symbol);
   const { data: chartsData } = useFinancialsCharts(symbol);
+  const { data: screenerInfo } = useScreenerInfo(symbol);
 
   if (!symbol) {
     return (
@@ -220,34 +215,30 @@ function FinancialsContent() {
   }
 
   const { standardized } = data;
-  const { ttm, valuation, metrics, quarterly, annual, balanceSheet, cashFlow } = standardized;
+  const { metrics, quarterly, annual, balanceSheet, cashFlow } = standardized;
 
   const plTable = plTab === "Quarterly" ? quarterly : annual;
 
   return (
-    <div className="min-h-screen bg-white mb-8 px-4">
+    <div className="min-h-screen bg-white mb-8 px-4 pt-4">
 
       {/* Company Header */}
-      <div className="flex items-start justify-between gap-4 mb-6 mt-8">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-            <Building2 className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
+      <div className="flex items-center justify-between gap-4 mb-4 mt-8">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-zinc-100 flex items-center justify-center flex-shrink-0">
+            <Building2 className="h-5 w-5 text-zinc-600" />
           </div>
-          <div className="space-y-1.5">
-            <h2>{symbol}</h2>
-            <div className="flex items-center gap-2">
-              <Badge>{data.exchange}: {symbol}</Badge>
-              <p>{data.currency}</p>
-              <p className="text-zinc-400">{data.unit.replace("_", " ")}</p>
-            </div>
-          </div>
+          <h2 style={{ fontSize: 22, fontWeight: 500, color: "#0F172B", lineHeight: 1.2 }}>
+            {screenerInfo?.company?.name ?? symbol}
+          </h2>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {valuation.peRatio && (
-            <Badge className="shrink-0">P/E {valuation.peRatio}</Badge>
+        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+          <Badge>{data.exchange}: {symbol}</Badge>
+          {screenerInfo?.company?.sector && (
+            <Badge>{screenerInfo.company.sector}</Badge>
           )}
-          {valuation.marketCap && (
-            <Badge className="shrink-0">Mkt Cap ₹{valuation.marketCap.toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr</Badge>
+          {screenerInfo?.company?.industry && (
+            <Badge>{screenerInfo.company.industry}</Badge>
           )}
         </div>
       </div>
@@ -255,95 +246,85 @@ function FinancialsContent() {
       {/* Price / PE / Sales chart */}
       {chartsData && (
         <div className="container mx-auto max-w-7xl mb-6">
-          <SectionPanel title="Charts" subtitle="Price, valuation, and sales trends">
-            <MultiLineBarComboChart chartGroups={chartsData.chartGroups} height={300} />
-          </SectionPanel>
+          <MultiLineBarComboChart
+            chartGroups={chartsData.chartGroups}
+            height={300}
+            title="Charts"
+            subtitle="Price, valuation, and sales trends"
+          />
         </div>
       )}
 
       {/* Page content */}
       <div className="container mx-auto max-w-7xl space-y-6">
 
-        {/* Row 1 — TTM Snapshot + Valuation */}
-        <div className="grid grid-cols-2 gap-6 items-stretch">
-
-          {/* TTM Snapshot */}
-          <SectionPanel
-            title="TTM Snapshot"
-            subtitle="Trailing twelve-month financial summary"
-          >
-            <div className="grid grid-cols-2 gap-4 pb-4">
-              <MetricTile
-                icon={TrendingUp}
-                label="Revenue"
-                value={fmtCr(ttm.revenue)}
-                sublabel="TTM Sales"
-              />
-              <MetricTile
-                icon={BarChart2}
-                label="EBITDA"
-                value={fmtCr(ttm.ebitda)}
-                sublabel="TTM EBITDA"
-              />
-              <MetricTile
-                icon={DollarSign}
-                label="Net Profit"
-                value={ttm.netProfit !== null ? fmtCr(ttm.netProfit) : "—"}
-                sublabel="TTM Net Profit"
-              />
-              <MetricTile
-                icon={Activity}
-                label="EPS"
-                value={ttm.eps !== null ? `₹${ttm.eps}` : "—"}
-                sublabel="Earnings per share"
-              />
+        {/* SWOT Analysis */}
+        <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+          <div className="px-2 pt-1 pb-3 flex items-center justify-between">
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.01em" }}>
+                SWOT Analysis
+              </div>
+              <div style={{ fontSize: 12, color: "#888888", marginTop: 2 }}>Strategic assessment across four dimensions</div>
             </div>
-          </SectionPanel>
+          </div>
+          <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4">
+            <div className="grid grid-cols-4 divide-x divide-[#E2E2E2]">
 
-          {/* Valuation Multiples */}
-          <SectionPanel
-            title="Valuation Multiples"
-            subtitle="Key price and value ratios"
-          >
-            <div className="grid grid-cols-3 gap-4 pb-4">
-              <MetricTile
-                icon={Percent}
-                label="P/E Ratio"
-                value={valuation.peRatio !== null ? `${valuation.peRatio}x` : "—"}
-                sublabel="Trailing P/E"
-              />
-              <MetricTile
-                icon={Percent}
-                label="Forward P/E"
-                value={valuation.forwardPE !== null ? `${valuation.forwardPE}x` : "—"}
-                sublabel="Next 12M earnings"
-              />
-              <MetricTile
-                icon={Percent}
-                label="P/B Ratio"
-                value={valuation.pbRatio !== null ? `${valuation.pbRatio}x` : "—"}
-                sublabel="Price / Book"
-              />
-              <MetricTile
-                icon={BarChart2}
-                label="EV / EBITDA"
-                value={valuation.evToEbitda !== null ? `${valuation.evToEbitda}x` : "—"}
-                sublabel="Enterprise value"
-              />
-              <MetricTile
-                icon={BarChart2}
-                label="EV / Revenue"
-                value={valuation.evToRevenue !== null ? `${valuation.evToRevenue}x` : "—"}
-                sublabel="Revenue multiple"
-              />
-              <MetricTile
-                icon={DollarSign}
-                label="Dividend Yield"
-                value={valuation.dividendYield !== null ? `${valuation.dividendYield}%` : "—"}
-                sublabel="Annual yield"
-              />
+              {/* Strengths */}
+              <div className="pr-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)]">
+                    <ShieldCheck className="h-4 w-4 text-zinc-500" />
+                  </div>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Strengths</span>
+                </div>
+                <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6 }}>
+                  Market leader with ~17 GW installed capacity and consistent EBITDA margins above 35%, backed by long-term PPAs that provide strong revenue visibility.
+                </p>
+              </div>
+
+              {/* Weaknesses */}
+              <div className="px-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)]">
+                    <AlertTriangle className="h-4 w-4 text-zinc-500" />
+                  </div>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-red-600">Weaknesses</span>
+                </div>
+                <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6 }}>
+                  High leverage (net D/E above 2x) combined with DISCOM receivables risk creates a fragile balance sheet sensitive to payment delays from state utilities.
+                </p>
+              </div>
+
+              {/* Opportunities */}
+              <div className="px-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)]">
+                    <Lightbulb className="h-4 w-4 text-zinc-500" />
+                  </div>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-600">Opportunities</span>
+                </div>
+                <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6 }}>
+                  India&apos;s persistent peak power deficit and a 6+ GW capacity pipeline position the company to capture incremental demand while DISCOM reforms reduce payment friction.
+                </p>
+              </div>
+
+              {/* Threats */}
+              <div className="pl-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)]">
+                    <Zap className="h-4 w-4 text-zinc-500" />
+                  </div>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Threats</span>
+                </div>
+                <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6 }}>
+                  Accelerating renewables adoption and unresolved governance concerns post-Hindenburg report may compress long-run thermal valuations and limit institutional investor appetite.
+                </p>
+              </div>
+
             </div>
-          </SectionPanel>
+          </div>
         </div>
 
         {/* Row 2 — P&L Table (Quarterly / Annual toggle) */}

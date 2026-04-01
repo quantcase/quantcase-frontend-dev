@@ -24,6 +24,10 @@ export interface MultiLineBarComboChartProps {
   /** Height of the chart area in pixels — defaults to 300 */
   height?: number;
   className?: string;
+  /** When provided, wraps the chart in a SectionPanel with this title */
+  title?: string;
+  /** Subtitle shown below the title in the SectionPanel header */
+  subtitle?: string;
 }
 
 // ─── Default colors ───────────────────────────────────────────────────────────
@@ -138,7 +142,7 @@ function fmtTick(v: number): string {
   if (Math.abs(v) >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1)}B`;
   if (Math.abs(v) >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
   if (Math.abs(v) >= 1_000) return `${(v / 1_000).toFixed(0)}k`;
-  return String(v);
+  return parseFloat(v.toFixed(2)).toString();
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────────
@@ -149,6 +153,8 @@ export function MultiLineBarComboChart({
   rightAxisLabel,
   height = 300,
   className,
+  title,
+  subtitle,
 }: MultiLineBarComboChartProps) {
   const groupNames = useMemo(() => chartGroups.map((g) => g.group), [chartGroups]);
   const [activeGroupName, setActiveGroupName] = useState<string>(groupNames[0] ?? "");
@@ -177,14 +183,20 @@ export function MultiLineBarComboChart({
   const resolvedRightLabel =
     activeGroup.rightAxisLabel ?? rightAxisLabel ?? (hasLines ? activeGroup.lineSeries[0]?.name : undefined);
 
-  return (
-    <div className={className} style={{ width: "100%" }}>
-      {/* Group toggles — top right */}
-      {groupNames.length > 1 && (
+  const groupToggles = groupNames.length > 1 ? (
+    <div className="flex items-center gap-2">
+      {groupNames.map((g) => (
+        <GroupButton key={g} label={g} active={g === activeGroupName} onClick={() => setActiveGroupName(g)} />
+      ))}
+    </div>
+  ) : null;
+
+  const inner = (
+    <div style={{ width: "100%" }}>
+      {/* Group toggles — standalone top-right (no card header) */}
+      {!title && groupToggles && (
         <div className="flex items-center justify-end gap-2 mb-3">
-          {groupNames.map((g) => (
-            <GroupButton key={g} label={g} active={g === activeGroupName} onClick={() => setActiveGroupName(g)} />
-          ))}
+          {groupToggles}
         </div>
       )}
 
@@ -209,6 +221,10 @@ export function MultiLineBarComboChart({
             tickLine={false}
             tickFormatter={fmtTick}
             width={resolvedLeftLabel ? 60 : 40}
+            domain={([dataMin, dataMax]: [number, number]) => {
+              const padding = (dataMax - dataMin) * 0.1 || Math.abs(dataMin) * 0.1 || 1;
+              return [dataMin - padding, dataMax + padding];
+            }}
             label={
               resolvedLeftLabel
                 ? { value: resolvedLeftLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 11, fill: "#888888", textAnchor: "middle" } }
@@ -224,7 +240,12 @@ export function MultiLineBarComboChart({
               tick={{ fontSize: 11, fill: "#888888" }}
               axisLine={false}
               tickLine={false}
+              tickFormatter={fmtTick}
               width={resolvedRightLabel ? 60 : 40}
+              domain={([dataMin, dataMax]: [number, number]) => {
+                const padding = (dataMax - dataMin) * 0.1 || Math.abs(dataMin) * 0.1 || 1;
+                return [dataMin - padding, dataMax + padding];
+              }}
               label={
                 resolvedRightLabel
                   ? { value: resolvedRightLabel, angle: 90, position: "insideRight", offset: -10, style: { fontSize: 11, fill: "#888888", textAnchor: "middle" } }
@@ -300,4 +321,25 @@ export function MultiLineBarComboChart({
       </div>
     </div>
   );
+
+  if (title) {
+    return (
+      <div className={className} style={{ borderRadius: 10, border: "1px solid #E2E2E2", background: "#F5F5F5", padding: 8 }}>
+        {/* Card header */}
+        <div className="flex items-center justify-between" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
+          <div>
+            <h5>{title}</h5>
+            {subtitle && <p>{subtitle}</p>}
+          </div>
+          {groupToggles}
+        </div>
+        {/* Content box */}
+        <div style={{ borderRadius: 10, border: "1px solid rgba(226,226,226,0.10)", background: "#FFF", padding: 16 }}>
+          {inner}
+        </div>
+      </div>
+    );
+  }
+
+  return <div className={className}>{inner}</div>;
 }

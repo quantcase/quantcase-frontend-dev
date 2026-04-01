@@ -14,7 +14,7 @@ export default function ScreenerLayout({
   return (
     <>
       {showSubnav && <ScreenerSubpageNav />}
-      <div className={showSubnav ? "pt-11" : undefined}>{children}</div>
+      <div className={showSubnav ? "pt-3" : undefined}>{children}</div>
     </>
   );
 }

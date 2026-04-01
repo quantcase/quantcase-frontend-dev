@@ -13,6 +13,8 @@ import { TabularCard } from "@/components/molecules/tabular-card";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { useFinancials } from "@/hooks/useFinancials";
 import { useFinancialsCharts } from "@/hooks/useFinancialsCharts";
+import { useScreenerPeers } from "@/hooks/useScreenerPeers";
+import { PeerComparisonDataTable } from "@/components/molecules/peer-comparison-table";
 import { MultiLineBarComboChart } from "@/components/molecules/multi-line-bar-combo-chart";
 import type { FinancialRow, FinancialTable } from "@/types/financials";
 
@@ -22,6 +24,7 @@ const FUNDAMENTALS_NAV = [
   { id: "section-pnl",            label: "Profit & Loss" },
   { id: "section-balance-sheet",  label: "Balance Sheet" },
   { id: "section-cash-flow",      label: "Cash Flow" },
+  { id: "section-peer-comparison", label: "Peer Comparison" },
   { id: "section-growth-returns", label: "Growth & Returns" },
 ];
 
@@ -180,12 +183,14 @@ function GrowthMetricRow({
   );
 }
 
+
 function FinancialsContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
 
   const { data, loading, error } = useFinancials(symbol);
   const { data: chartsData } = useFinancialsCharts(symbol);
+  const { data: peersData } = useScreenerPeers(symbol);
 
   if (!symbol) {
     return (
@@ -353,7 +358,19 @@ function FinancialsContent() {
           </TabularCard>
         </div>
 
-        {/* Row 5 — Growth & Returns */}
+        {/* Row 5 — Peer Comparison */}
+        {peersData && peersData.peers.length > 0 && (
+          <div id="section-peer-comparison">
+            <TabularCard
+              title="Peer Comparison"
+              subtitle={`${peersData.basicIndustry} · ${peersData.latestQuarter} · ${peersData.count} companies`}
+            >
+              <PeerComparisonDataTable peers={peersData.peers} />
+            </TabularCard>
+          </div>
+        )}
+
+        {/* Row 6 — Growth & Returns */}
         <div id="section-growth-returns">
         <SectionPanel
           title="Growth & Returns"

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { BACKEND_URL } from "@/lib/constants";
 
 const DEFAULT_INDICATORS = [
   "cmp", "pe", "marketCap", "divYld", "npQtr",
@@ -44,7 +43,7 @@ export function useScreenerPeers(symbol: string) {
     setError(null);
     setData(null);
 
-    fetch(`${BACKEND_URL}/api/screener/${symbol}/peers`, {
+    fetch(`/api/peers/${symbol}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ indicators: DEFAULT_INDICATORS }),

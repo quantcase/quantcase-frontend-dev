@@ -190,7 +190,7 @@ function FinancialsContent() {
 
   const { data, loading, error } = useFinancials(symbol);
   const { data: chartsData } = useFinancialsCharts(symbol);
-  const { data: peersData } = useScreenerPeers(symbol);
+  const { data: peersData, loading: peersLoading } = useScreenerPeers(symbol);
 
   if (!symbol) {
     return (
@@ -359,13 +359,19 @@ function FinancialsContent() {
         </div>
 
         {/* Row 5 — Peer Comparison */}
-        {peersData && peersData.peers.length > 0 && (
+        {(peersLoading || (peersData && peersData.peers.length > 0)) && (
           <div id="section-peer-comparison">
             <TabularCard
               title="Peer Comparison"
-              subtitle={`${peersData.basicIndustry} · ${peersData.latestQuarter} · ${peersData.count} companies`}
+              subtitle={peersData ? `${peersData.basicIndustry} · ${peersData.latestQuarter} · ${peersData.count} companies` : undefined}
             >
-              <PeerComparisonDataTable peers={peersData.peers} />
+              {peersLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-5 h-5 rounded-full border-2 border-zinc-200 border-t-zinc-600 animate-spin" />
+                </div>
+              ) : (
+                <PeerComparisonDataTable peers={peersData!.peers} />
+              )}
             </TabularCard>
           </div>
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Activity,
@@ -17,19 +17,30 @@ import {
   ArrowDownRight,
   Waves,
   Crosshair,
-  Calendar,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SectionPanel } from "@/components/molecules/section-panel";
+import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { MetricTile } from "@/components/molecules/metric-tile";
 import { useTechnicals } from "@/hooks/useTechnicals";
 import { usePrices } from "@/hooks/usePrices";
 import { signalColor, directionColor, rsiZoneColor, booleanColor } from "./_components/helpers";
 import { SRRangeBar } from "./_components/SRRangeBar";
 import { MAPositionChart } from "./_components/MAPositionChart";
-import { RuleEngineSection } from "./_components/RuleEngineSection";
 import { CandlestickChart } from "./_components/CandlestickChart";
-import { DecisionIntelligenceCard } from "./_components/DecisionIntelligenceCard";
+import { DecisionIntelligenceBanner } from "./_components/DecisionIntelligenceBanner";
+import { TechnicalsRuleEngine } from "./_components/TechnicalsRuleEngine";
+
+const TECHNICALS_NAV = [
+  { id: "section-price-chart",    label: "Price Chart" },
+  { id: "section-rule-engine",    label: "Rule Engine" },
+  { id: "section-price-action",   label: "Price Action" },
+  { id: "section-support-resistance", label: "Support & Resistance" },
+  { id: "section-signal-scorecard",   label: "Signal Scorecard" },
+  { id: "section-momentum",       label: "Momentum" },
+  { id: "section-moving-averages", label: "Moving Averages" },
+  { id: "section-key-insights",   label: "Key Insights" },
+];
 
 function TechnicalsContent() {
   const searchParams = useSearchParams();
@@ -38,38 +49,35 @@ function TechnicalsContent() {
   const { data, derived, loading, error } = useTechnicals(symbol);
   const { prices, loading: pricesLoading, error: pricesError } = usePrices(symbol);
 
-  const [activeEngine, setActiveEngine] = useState<string>("STRUCTURE ENGINE");
-  const [activePerspective, setActivePerspective] = useState<"GROWTH" | "VALUE">("GROWTH");
-
   if (!symbol) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm text-red-600">Error: No symbol provided in query parameters</div>
-      </div>
+      <ScreenerPageShell navItems={TECHNICALS_NAV}>
+        <div className="text-sm text-red-600 px-4 pt-6">Error: No symbol provided in query parameters</div>
+      </ScreenerPageShell>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm">Loading...</div>
-      </div>
+      <ScreenerPageShell navItems={TECHNICALS_NAV}>
+        <div className="text-sm px-4 pt-6">Loading...</div>
+      </ScreenerPageShell>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm text-red-600">Error: {error}</div>
-      </div>
+      <ScreenerPageShell navItems={TECHNICALS_NAV}>
+        <div className="text-sm text-red-600 px-4 pt-6">Error: {error}</div>
+      </ScreenerPageShell>
     );
   }
 
   if (!data || !derived) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm">No technical data found for {symbol}</div>
-      </div>
+      <ScreenerPageShell navItems={TECHNICALS_NAV}>
+        <div className="text-sm px-4 pt-6">No technical data found for {symbol}</div>
+      </ScreenerPageShell>
     );
   }
 
@@ -84,80 +92,33 @@ function TechnicalsContent() {
   const decisionIntelligence = data.decisionIntelligence;
 
   return (
-    <div className="min-h-screen bg-white mb-8 px-4">
+    <ScreenerPageShell navItems={TECHNICALS_NAV}>
+      <div className="mb-8 px-4 space-y-6 pt-6">
 
-      {/* Company Header */}
-      <div className="flex items-start justify-between gap-4 mb-6 mt-8">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-            <Activity className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
-          </div>
-          <div className="space-y-1.5">
-            <h2>{symbol}</h2>
-            <div className="flex items-center gap-2">
-              <Badge>NSE: {symbol}</Badge>
-              <p>{data.meta.basicIndustry}</p>
-              <p className="text-zinc-400">{data.meta.macroSector}</p>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Badge className="shrink-0 flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            Next Earnings: {data.meta.nextEarningsDate}
-          </Badge>
-        </div>
-      </div>
-
-      {/* Quick Summary Strip */}
-      {ruleEngine?.decisionContext?.summary && (
-        <div className="mb-6 rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
-          <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] px-4 py-3 flex items-start gap-3">
-            <span style={{ fontSize: 10, fontWeight: 600, color: "#888888", letterSpacing: "0.08em", whiteSpace: "nowrap", marginTop: 2 }}>QUICK SUMMARY</span>
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-              {ruleEngine.decisionContext.summary.split("|").map((sentence, i) => (
-                <span key={i} style={{ fontSize: 13, color: "#121212", lineHeight: 1.5 }}>
-                  {sentence.trim()}
-                  {i < ruleEngine.decisionContext.summary.split("|").length - 1 && (
-                    <span style={{ color: "#71717a", margin: "0 8px" }}>|</span>
-                  )}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
+      {/* Decision Intelligence banner */}
+      {decisionIntelligence && (
+        <DecisionIntelligenceBanner di={decisionIntelligence} />
       )}
 
-      {/* Page content — two independently scrollable columns */}
-      <div className="container mx-auto max-w-7xl">
-        <div className="grid grid-cols-3 h-[calc(100vh-200px)]">
-
-          {/* Left column — col-span-2 */}
-          <div className="col-span-2 overflow-y-auto space-y-6 px-3 pb-8">
-
-            {/* Price Chart */}
-            <SectionPanel title="Price Chart" subtitle="OHLCV candlestick data">
-              <CandlestickChart prices={prices} loading={pricesLoading} error={pricesError} />
-            </SectionPanel>
-
-            {/* Rule Engine Section */}
-            {ruleEngine && (
-              <SectionPanel
-                title="Rule Engine"
-                subtitle="Structured analysis across market phase, trend, timing, and dominance"
-              >
-                <RuleEngineSection
-                  ruleEngine={ruleEngine}
-                  decisionIntelligence={decisionIntelligence}
-                  activeEngine={activeEngine}
-                  setActiveEngine={setActiveEngine}
-                  activePerspective={activePerspective}
-                  setActivePerspective={setActivePerspective}
-                />
-              </SectionPanel>
-            )}
+      {/* Price Chart + Rule Engine — equal width side by side */}
+      <div className="grid grid-cols-2 gap-4">
+        <div id="section-price-chart">
+          <SectionPanel title="Price Chart">
+            <CandlestickChart prices={prices} loading={pricesLoading} error={pricesError} />
+          </SectionPanel>
+        </div>
+        {ruleEngine && (
+          <div id="section-rule-engine">
+            <TechnicalsRuleEngine
+              ruleEngine={ruleEngine}
+              decisionIntelligence={decisionIntelligence}
+            />
+          </div>
+        )}
+      </div>
 
             {/* Price Action Overview */}
+            <div id="section-price-action">
             <SectionPanel
               title="Price Action Overview"
               subtitle="Key price statistics from latest market data"
@@ -202,8 +163,10 @@ function TechnicalsContent() {
                 />
               </div>
             </SectionPanel>
+            </div>
 
             {/* Support & Resistance Analysis */}
+            <div id="section-support-resistance">
             <SectionPanel
               title="Support & Resistance Analysis"
               subtitle="Price position within identified support/resistance band"
@@ -301,8 +264,10 @@ function TechnicalsContent() {
                 </div>
               </div>
             </SectionPanel>
+            </div>
 
             {/* Signal Scorecard */}
+            <div id="section-signal-scorecard">
             <SectionPanel
               title="Signal Scorecard"
               subtitle="Overall technical signal and component score breakdown"
@@ -354,8 +319,10 @@ function TechnicalsContent() {
                 ))}
               </div>
             </SectionPanel>
+            </div>
 
             {/* Momentum Indicators */}
+            <div id="section-momentum">
             <SectionPanel
               title="Momentum Indicators"
               subtitle="RSI, MACD, and Stochastic oscillator readings"
@@ -415,8 +382,10 @@ function TechnicalsContent() {
                 </div>
               </div>
             </SectionPanel>
+            </div>
 
             {/* Moving Averages */}
+            <div id="section-moving-averages">
             <SectionPanel
               title="Moving Averages"
               subtitle="Price position relative to key SMAs and EMAs"
@@ -514,187 +483,129 @@ function TechnicalsContent() {
                 </div>
               </div>
             </SectionPanel>
+            </div>
 
-            {/* Key Insights */}
-            <SectionPanel
-              title="Key Insights"
-              subtitle="AI-synthesised signals from technical data"
-            >
-              <div className="grid grid-cols-2 gap-2 pb-4">
-                {data.insights.map((insight, i) => {
-                  const lower = insight.toLowerCase();
-                  const isBullish = /bullish|buy|uptrend|breakout|accumulation|above|strong|reversion/.test(lower);
-                  const isBearish = /bearish|sell|downtrend|breakdown|distribution|below|weak|correction/.test(lower);
-                  const [trigger, ...rest] = insight.split("—");
-                  const conclusion = rest.join("—").trim();
-                  const accentColor = isBullish ? "#16a34a" : isBearish ? "#dc2626" : "#888888";
-                  return (
-                    <div key={i} className="flex items-start gap-3 rounded-lg border border-zinc-100 bg-white px-4 py-3" style={{ borderLeft: `3px solid ${accentColor}` }}>
-                      <span className="shrink-0 mt-0.5 flex items-center justify-center rounded-sm text-[10px] font-bold" style={{ width: 18, height: 18, background: "rgba(15,23,43,0.06)", color: "#0F172B", lineHeight: 1 }}>
-                        {i + 1}
-                      </span>
-                      <div className="min-w-0">
-                        <span style={{ fontSize: 13, fontWeight: 500, color: "#0F172B" }}>{trigger.trim()}</span>
-                        {conclusion && (
-                          <>
-                            <span style={{ color: "#71717a", margin: "0 4px" }}>—</span>
-                            <span style={{ fontSize: 13, color: "#888888" }}>{conclusion}</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+
+      {/* Market Structure + Timeframe Matrix + Volume Analysis — 3-col row */}
+      <div className="grid grid-cols-3 gap-6">
+        {/* Market Structure */}
+        <SectionPanel
+          title="Market Structure"
+          subtitle="Trend direction, Wyckoff phase & identified price pattern"
+        >
+          <div className="divide-y divide-zinc-100 pb-4">
+            <div className="flex items-center justify-between py-2 px-2">
+              <div className="space-y-0.5">
+                <h6 className="uppercase tracking-wider">Trend</h6>
+                <p>Medium-term price direction</p>
               </div>
-            </SectionPanel>
-
-          </div>{/* end left column */}
-
-          {/* Right column — col-span-1 */}
-          <div className="col-span-1 overflow-y-auto space-y-6 pl-3 pr-2 pb-8">
-
-            {/* Decision Intelligence */}
-            {data.decisionIntelligence && (
-              <DecisionIntelligenceCard di={data.decisionIntelligence} />
-            )}
-
-            {/* Risk Alerts */}
-            {ruleEngine?.decisionContext?.alerts && ruleEngine.decisionContext.alerts.length > 0 && (
-              <SectionPanel
-                title="Risk Alerts"
-                subtitle="Consolidated watchouts across all rule engine indicators"
-              >
-                <div className="pb-4 space-y-2">
-                  {ruleEngine.decisionContext.alerts.map((alert, i) => (
-                    <div key={i} className="flex items-start gap-3 rounded-lg border border-zinc-100 bg-white px-4 py-3" style={{ borderLeft: "3px solid #f59e0b" }}>
-                      <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <span style={{ fontSize: 13, color: "#121212", lineHeight: 1.5 }}>{alert}</span>
-                    </div>
-                  ))}
-                </div>
-              </SectionPanel>
-            )}
-
-            {/* Market Structure */}
-            <SectionPanel
-              title="Market Structure"
-              subtitle="Trend direction, Wyckoff phase & identified price pattern"
-            >
-              <div className="divide-y divide-zinc-100 flex flex-col h-full justify-between pb-4">
-                <div className="flex items-center justify-between py-2 px-2">
-                  <div className="space-y-0.5">
-                    <h6 className="uppercase tracking-wider">Trend</h6>
-                    <p>Medium-term price direction</p>
-                  </div>
-                  <Badge className={`uppercase font-semibold ${directionColor(data.trend.direction)}`}>{data.trend.direction}</Badge>
-                </div>
-                <div className="flex items-center justify-between py-2 px-2">
-                  <div className="space-y-0.5">
-                    <h6 className="uppercase tracking-wider">Trend Strength</h6>
-                    <p>ADX {data.trend.adx14.toFixed(1)}</p>
-                  </div>
-                  <Badge className={`font-semibold ${
-                    data.trend.strength === "STRONG" && data.trend.direction === "UPTREND"
-                      ? "text-emerald-600"
-                      : data.trend.strength === "STRONG" && data.trend.direction === "DOWNTREND"
-                      ? "text-red-600"
-                      : "text-amber-600"
-                  }`}>{data.trend.strength}</Badge>
-                </div>
-                <div className="flex items-center justify-between py-2 px-2">
-                  <div className="space-y-0.5">
-                    <h6 className="uppercase tracking-wider">Wyckoff Phase</h6>
-                    <p>Current market cycle phase</p>
-                  </div>
-                  <Badge className={`font-semibold ${data.trend.phase === "MARK-DOWN" || data.trend.phase === "DISTRIBUTION" ? "text-red-600" : "text-emerald-600"}`}>{data.trend.phase}</Badge>
-                </div>
-                <div className="flex items-center justify-between py-2 px-2">
-                  <div className="space-y-0.5">
-                    <h6 className="uppercase tracking-wider">Price Pattern</h6>
-                    <p>Identified chart formation</p>
-                  </div>
-                  <Badge>{data.patterns[0]?.name ?? "None"}</Badge>
-                </div>
-                <div className="flex items-center justify-between py-2 px-2">
-                  <div className="space-y-0.5">
-                    <h6 className="uppercase tracking-wider">Market Structure</h6>
-                    <p>Price action sequence</p>
-                  </div>
-                  <div className="flex flex-col gap-1 items-end">
-                    <span className={`text-xs font-semibold ${data.trend.structure.higherHighs ? "text-emerald-600" : "text-red-600"}`}>
-                      {data.trend.structure.higherHighs ? "Higher Highs" : "Lower Highs"}
-                    </span>
-                    <span className={`text-xs font-semibold ${data.trend.structure.higherLows ? "text-emerald-600" : "text-red-600"}`}>
-                      {data.trend.structure.higherLows ? "Higher Lows" : "Lower Lows"}
-                    </span>
-                  </div>
-                </div>
+              <Badge className={`uppercase font-semibold ${directionColor(data.trend.direction)}`}>{data.trend.direction}</Badge>
+            </div>
+            <div className="flex items-center justify-between py-2 px-2">
+              <div className="space-y-0.5">
+                <h6 className="uppercase tracking-wider">Trend Strength</h6>
+                <p>ADX {data.trend.adx14.toFixed(1)}</p>
               </div>
-            </SectionPanel>
+              <Badge className={`font-semibold ${
+                data.trend.strength === "STRONG" && data.trend.direction === "UPTREND"
+                  ? "text-emerald-600"
+                  : data.trend.strength === "STRONG" && data.trend.direction === "DOWNTREND"
+                  ? "text-red-600"
+                  : "text-amber-600"
+              }`}>{data.trend.strength}</Badge>
+            </div>
+            <div className="flex items-center justify-between py-2 px-2">
+              <div className="space-y-0.5">
+                <h6 className="uppercase tracking-wider">Wyckoff Phase</h6>
+                <p>Current market cycle phase</p>
+              </div>
+              <Badge className={`font-semibold ${data.trend.phase === "MARK-DOWN" || data.trend.phase === "DISTRIBUTION" ? "text-red-600" : "text-emerald-600"}`}>{data.trend.phase}</Badge>
+            </div>
+            <div className="flex items-center justify-between py-2 px-2">
+              <div className="space-y-0.5">
+                <h6 className="uppercase tracking-wider">Price Pattern</h6>
+                <p>Identified chart formation</p>
+              </div>
+              <Badge>{data.patterns[0]?.name ?? "None"}</Badge>
+            </div>
+            <div className="flex items-center justify-between py-2 px-2">
+              <div className="space-y-0.5">
+                <h6 className="uppercase tracking-wider">Market Structure</h6>
+                <p>Price action sequence</p>
+              </div>
+              <div className="flex flex-col gap-1 items-end">
+                <span className={`text-xs font-semibold ${data.trend.structure.higherHighs ? "text-emerald-600" : "text-red-600"}`}>
+                  {data.trend.structure.higherHighs ? "Higher Highs" : "Lower Highs"}
+                </span>
+                <span className={`text-xs font-semibold ${data.trend.structure.higherLows ? "text-emerald-600" : "text-red-600"}`}>
+                  {data.trend.structure.higherLows ? "Higher Lows" : "Lower Lows"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </SectionPanel>
 
-            {/* Timeframe Matrix */}
-            <SectionPanel
-              title="Timeframe Matrix"
-              subtitle="Signal alignment across daily, weekly, monthly"
-            >
-              <div className="divide-y divide-zinc-100 pb-4">
-                {([
-                  { label: "DAILY", tf: data.timeframes.daily },
-                  { label: "WEEKLY", tf: data.timeframes.weekly },
-                  { label: "MONTHLY", tf: data.timeframes.monthly },
-                ] as const).map(({ label, tf }) => (
-                  <div key={label} className="flex items-center justify-between py-3 px-2">
-                    <div>
-                      <h6 className="uppercase tracking-wider">{label}</h6>
-                      <p className={directionColor(tf.trend)}>{tf.trend}</p>
-                    </div>
-                    <Badge className={signalColor(tf.signal)}>{tf.signal.replace(/_/g, " ")}</Badge>
-                  </div>
-                ))}
-                <div className="flex items-center justify-between py-3 px-2">
-                  <div>
-                    <h6 className="uppercase tracking-wider">Multi-TF Score</h6>
-                    <p>{data.timeframes.multiTimeframeScore.toFixed(1)}/100</p>
-                  </div>
-                  <Badge className={signalColor(data.timeframes.multiTimeframeSignal)}>{data.timeframes.multiTimeframeSignal}</Badge>
+        {/* Timeframe Matrix */}
+        <SectionPanel
+          title="Timeframe Matrix"
+          subtitle="Signal alignment across daily, weekly, monthly"
+        >
+          <div className="divide-y divide-zinc-100 pb-4">
+            {([
+              { label: "DAILY", tf: data.timeframes.daily },
+              { label: "WEEKLY", tf: data.timeframes.weekly },
+              { label: "MONTHLY", tf: data.timeframes.monthly },
+            ] as const).map(({ label, tf }) => (
+              <div key={label} className="flex items-center justify-between py-3 px-2">
+                <div>
+                  <h6 className="uppercase tracking-wider">{label}</h6>
+                  <p className={directionColor(tf.trend)}>{tf.trend}</p>
                 </div>
+                <Badge className={signalColor(tf.signal)}>{tf.signal.replace(/_/g, " ")}</Badge>
               </div>
-            </SectionPanel>
-
-            {/* Volume Analysis */}
-            <SectionPanel
-              title="Volume Analysis"
-              subtitle="Volume levels, trend, and accumulation signals"
-            >
-              <div className="grid grid-cols-2 gap-3 pb-4 pt-2">
-                <MetricTile icon={BarChart2} label="Current Volume" value={data.volume.current.toLocaleString("en-IN")} sublabel="Today's volume" />
-                <MetricTile icon={BarChart2} label="Volume Ratio" value={`${data.volume.ratio.toFixed(2)}x`} sublabel="vs 20D avg" change={data.volume.ratio >= 1 ? `+${data.volume.ratio.toFixed(2)}x` : `-${data.volume.ratio.toFixed(2)}x`} />
+            ))}
+            <div className="flex items-center justify-between py-3 px-2">
+              <div>
+                <h6 className="uppercase tracking-wider">Multi-TF Score</h6>
+                <p>{data.timeframes.multiTimeframeScore.toFixed(1)}/100</p>
               </div>
-              <div className="flex items-center justify-between py-3 border-t border-zinc-100 px-2">
-                <h6 className="uppercase tracking-wider">Volume Trend</h6>
-                <Badge className={data.volume.trend === "INCREASING" ? "text-emerald-600" : data.volume.trend === "DECREASING" ? "text-red-600" : "text-amber-600"}>
-                  {data.volume.trend}
-                </Badge>
-              </div>
-              {([
-                { label: "Volume Breakout", key: "volumeBreakout" as const, positiveIsTrue: true },
-                { label: "Accumulation", key: "accumulation" as const, positiveIsTrue: true },
-                { label: "Distribution", key: "distribution" as const, positiveIsTrue: false },
-              ]).map(({ label, key, positiveIsTrue }) => (
-                <div key={key} className="flex items-center justify-between py-3 px-2 border-t border-zinc-100">
-                  <p>{label}</p>
-                  <span className={`text-xs font-semibold ${booleanColor(data.volume.signals[key], positiveIsTrue)}`}>
-                    {data.volume.signals[key] ? "YES" : "NO"}
-                  </span>
-                </div>
-              ))}
-            </SectionPanel>
+              <Badge className={signalColor(data.timeframes.multiTimeframeSignal)}>{data.timeframes.multiTimeframeSignal}</Badge>
+            </div>
+          </div>
+        </SectionPanel>
 
-          </div>{/* end right column */}
+        {/* Volume Analysis */}
+        <SectionPanel
+          title="Volume Analysis"
+          subtitle="Volume levels, trend, and accumulation signals"
+        >
+          <div className="grid grid-cols-2 gap-3 pb-4 pt-2">
+            <MetricTile icon={BarChart2} label="Current Volume" value={data.volume.current.toLocaleString("en-IN")} sublabel="Today's volume" />
+            <MetricTile icon={BarChart2} label="Volume Ratio" value={`${data.volume.ratio.toFixed(2)}x`} sublabel="vs 20D avg" change={data.volume.ratio >= 1 ? `+${data.volume.ratio.toFixed(2)}x` : `-${data.volume.ratio.toFixed(2)}x`} />
+          </div>
+          <div className="flex items-center justify-between py-3 border-t border-zinc-100 px-2">
+            <h6 className="uppercase tracking-wider">Volume Trend</h6>
+            <Badge className={data.volume.trend === "INCREASING" ? "text-emerald-600" : data.volume.trend === "DECREASING" ? "text-red-600" : "text-amber-600"}>
+              {data.volume.trend}
+            </Badge>
+          </div>
+          {([
+            { label: "Volume Breakout", key: "volumeBreakout" as const, positiveIsTrue: true },
+            { label: "Accumulation", key: "accumulation" as const, positiveIsTrue: true },
+            { label: "Distribution", key: "distribution" as const, positiveIsTrue: false },
+          ]).map(({ label, key, positiveIsTrue }) => (
+            <div key={key} className="flex items-center justify-between py-3 px-2 border-t border-zinc-100">
+              <p>{label}</p>
+              <span className={`text-xs font-semibold ${booleanColor(data.volume.signals[key], positiveIsTrue)}`}>
+                {data.volume.signals[key] ? "YES" : "NO"}
+              </span>
+            </div>
+          ))}
+        </SectionPanel>
+      </div>{/* end 3-col row */}
 
-        </div>{/* end two-column grid */}
-      </div>{/* end container */}
-    </div>
+      </div>{/* end mb-8 px-4 space-y-6 */}
+    </ScreenerPageShell>
   );
 }
 

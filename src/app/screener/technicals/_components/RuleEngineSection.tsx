@@ -1,6 +1,5 @@
 import React from "react";
 import { TrendingUp, AlertCircle } from "lucide-react";
-import { TabToggle } from "@/components/molecules/tab-toggle";
 import type {
   RuleEngine,
   RelativeStrengthSingle,
@@ -28,7 +27,7 @@ function resolveWatchout(
   return fallback;
 }
 
-const ENGINE_TABS = ["STRUCTURE ENGINE", "TREND ENGINE", "TIMING ENGINE", "DOMINANCE ENGINE"] as const;
+const ENGINE_TABS = ["STRUCTURE", "TREND", "TIMING", "DOMINANCE"] as const;
 
 function smaPositionColor(pos: string): string {
   if (pos === "ABOVE") return "text-emerald-600";
@@ -99,18 +98,18 @@ function EngineCard({
   const badgeLabel = badge ? badge.replace(/_/g, " ") : null;
 
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-4 space-y-4">
+    <div className="rounded-[10px] border border-[#E2E2E2] bg-white px-4 py-3 space-y-3">
       {/* HEADER */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-0.5">
-          <h5 style={{ fontSize: 18, fontWeight: 600, color: "#0F172B" }}>{title}</h5>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-baseline gap-2">
+          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B" }}>{title}</span>
           {subtitle && (
-            <span style={{ fontSize: 12, color: "#888888", fontWeight: 400 }}>{subtitle}</span>
+            <span style={{ fontSize: 11, color: "#888888", fontWeight: 400 }}>{subtitle}</span>
           )}
         </div>
         {badgeLabel && (
           <span
-            className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${variant.bg} ${variant.text}`}
+            className={`shrink-0 inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${variant.bg} ${variant.text}`}
           >
             {badgeLabel}
           </span>
@@ -118,38 +117,38 @@ function EngineCard({
       </div>
 
       {/* METRIC PILLS */}
-      {metrics && <div className="flex flex-wrap gap-2">{metrics}</div>}
+      {metrics && <div className="flex flex-wrap gap-1.5">{metrics}</div>}
 
       {/* INTERPRETATION */}
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5">
-          <TrendingUp className="h-3.5 w-3.5 text-zinc-400" />
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            INTERPRETATION
+      <div className="space-y-1">
+        <div className="flex items-center gap-1">
+          <TrendingUp className="h-3 w-3 text-zinc-400" />
+          <span style={{ fontSize: 9, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Interpretation
           </span>
         </div>
         {output ? (
-          <p style={{ fontSize: 14, color: "#3f3f46", lineHeight: 1.65 }}>
+          <p style={{ fontSize: 12, color: "#3f3f46", lineHeight: 1.6 }}>
             {output.split("\n").map((line, i, arr) => (
               <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
             ))}
           </p>
         ) : (
-          <p style={{ fontSize: 14, color: "#888888" }}>No data available.</p>
+          <p style={{ fontSize: 12, color: "#888888" }}>No data available.</p>
         )}
       </div>
 
       {/* WATCHOUTS */}
       {watchout && (
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-1.5">
-            <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
-            <span style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              WATCHOUTS
+        <div className="space-y-1">
+          <div className="flex items-center gap-1">
+            <AlertCircle className="h-3 w-3 text-amber-500" />
+            <span style={{ fontSize: 9, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              Watchouts
             </span>
           </div>
           <div className="rounded-[6px] bg-amber-50 px-3 py-2">
-            <p style={{ fontSize: 14, color: "#92400e", lineHeight: 1.65 }}>{watchout}</p>
+            <p style={{ fontSize: 12, color: "#92400e", lineHeight: 1.6 }}>{watchout}</p>
           </div>
         </div>
       )}
@@ -299,52 +298,27 @@ export function RuleEngineSection({
   activeEngine,
   setActiveEngine,
   activePerspective,
-  setActivePerspective,
 }: {
   ruleEngine: RuleEngine;
   decisionIntelligence?: DecisionIntelligence;
   activeEngine: string;
   setActiveEngine: (v: string) => void;
   activePerspective: "GROWTH" | "VALUE";
-  setActivePerspective: (v: "GROWTH" | "VALUE") => void;
 }) {
   const diIndicators = decisionIntelligence?.indicators;
 
   return (
     <>
-      <div className="flex items-center justify-between flex-wrap gap-3 mb-5">
-        <TabToggle
-          options={ENGINE_TABS as unknown as string[]}
-          value={activeEngine}
-          onChange={setActiveEngine}
-        />
-        <div className="inline-flex rounded-full border border-[#E2E2E2] bg-[#F5F5F5] p-0.5">
-          {(["GROWTH", "VALUE"] as const).map((p) => (
-            <button
-              key={p}
-              onClick={() => setActivePerspective(p)}
-              className={`px-4 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wide transition-all ${
-                activePerspective === p
-                  ? "bg-[#0F172B] text-white"
-                  : "text-[#888888] hover:text-[#0F172B]"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {activeEngine === "STRUCTURE ENGINE" && (
+      {activeEngine === "STRUCTURE" && (
         <StructureEnginePanel engine={ruleEngine.structureEngine} perspective={activePerspective} indicators={diIndicators} />
       )}
-      {activeEngine === "TREND ENGINE" && (
+      {activeEngine === "TREND" && (
         <TrendEnginePanel engine={ruleEngine.trendEngine} perspective={activePerspective} indicators={diIndicators} />
       )}
-      {activeEngine === "TIMING ENGINE" && (
+      {activeEngine === "TIMING" && (
         <TimingEnginePanel engine={ruleEngine.timingEngine} perspective={activePerspective} indicators={diIndicators} />
       )}
-      {activeEngine === "DOMINANCE ENGINE" && (
+      {activeEngine === "DOMINANCE" && (
         <DominanceEnginePanel engine={ruleEngine.dominanceEngine} perspective={activePerspective} />
       )}
     </>

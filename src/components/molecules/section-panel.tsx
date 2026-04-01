@@ -71,7 +71,7 @@ export function SectionPanel({
       {/* Header */}
       <div className="flex items-center justify-between" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
         <div>
-          <h5>{title}</h5>
+          {typeof title === "string" ? <h5>{title}</h5> : title}
           {subtitle && <p>{subtitle}</p>}
         </div>
         {scoring && <SectionScoreBar scoring={scoring} />}

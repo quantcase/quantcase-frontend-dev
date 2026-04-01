@@ -7,7 +7,10 @@ import {
   AlertTriangle,
   Lightbulb,
   Zap,
+  TableIcon,
+  BarChart2,
 } from "lucide-react";
+import ApexChart from "@/components/molecules/apex-chart";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { TabularCard } from "@/components/molecules/tabular-card";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
@@ -19,6 +22,7 @@ import type { ShareholdingSection } from "@/hooks/useShareholding";
 import { PeerComparisonDataTable } from "@/components/molecules/peer-comparison-table";
 import { MultiLineBarComboChart } from "@/components/molecules/multi-line-bar-combo-chart";
 import type { FinancialRow, FinancialTable } from "@/types/financials";
+
 
 const FUNDAMENTALS_NAV = [
   { id: "section-charts",         label: "Charts" },
@@ -289,9 +293,401 @@ function ShareholdingTable({ sections, quarters, mode = "Quarterly" }: { section
   );
 }
 
+// ── Balance Sheet Treemap ──────────────────────────────────────────────────────
+
+const ASSET_KEYS = ["net_block", "fixed_asset", "capital_wip", "cwip", "investments", "inventories", "inventory", "receivables", "debtors", "cash", "short_term_invest", "other_assets", "loans_advances"];
+const LIABILITY_KEYS = ["equity", "share_capital", "reserves", "borrowings", "debt", "payables", "creditors", "other_liabilities", "provisions"];
+
+function classifyRow(key: string): "asset" | "liability" | null {
+  const k = key.toLowerCase();
+  if (ASSET_KEYS.some((ak) => k.includes(ak))) return "asset";
+  if (LIABILITY_KEYS.some((lk) => k.includes(lk))) return "liability";
+  return null;
+}
+
+function fmtCr(value: number): string {
+  return `₹${value.toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr`;
+}
+
+function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
+  const lastIdx = table.periods.length - 1;
+  const period = table.periods[lastIdx];
+
+  const assets: { x: string; y: number }[] = [];
+  const liabilities: { x: string; y: number }[] = [];
+
+  for (const row of table.rows) {
+    const val = row.values[lastIdx];
+    if (val === null || val === undefined || val <= 0) continue;
+    if (row.label.toLowerCase().includes("total")) continue;
+    const side = classifyRow(row.key);
+    if (side === "asset") assets.push({ x: row.label, y: val });
+    else if (side === "liability") liabilities.push({ x: row.label, y: val });
+  }
+
+  // Fallback: split rows 50/50 if classification yields nothing
+  if (assets.length === 0 && liabilities.length === 0) {
+    const mid = Math.ceil(table.rows.length / 2);
+    table.rows.forEach((row, i) => {
+      const val = row.values[lastIdx];
+      if (val === null || val === undefined || val <= 0) return;
+      if (row.label.toLowerCase().includes("total")) return;
+      if (i < mid) assets.push({ x: row.label, y: val });
+      else liabilities.push({ x: row.label, y: val });
+    });
+  }
+
+  const assetTotal = assets.reduce((s, r) => s + r.y, 0);
+  const liabilityTotal = liabilities.reduce((s, r) => s + r.y, 0);
+
+  const series = [
+    { name: "Assets", data: assets },
+    { name: "Liabilities", data: liabilities },
+  ];
+
+  const options: ApexCharts.ApexOptions = {
+    legend: { show: false },
+    chart: {
+      type: "treemap",
+      toolbar: { show: false },
+      animations: { enabled: false },
+    },
+    colors: ["#4ade80", "#f87171"],
+    dataLabels: {
+      enabled: true,
+      style: { fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" },
+      formatter: (text: string, op?: ApexCharts.ApexFormatterOpts) =>
+        op?.value !== undefined ? [`${text}`, fmtCr(op.value as number)] : text,
+    },
+    tooltip: {
+      theme: "dark",
+      y: { formatter: (val: number) => fmtCr(val) },
+    },
+    plotOptions: {
+      treemap: {
+        distributed: false,
+        enableShades: false,
+        useFillColorAsStroke: false,
+      },
+    },
+  };
+
+  return (
+    <div>
+      <div className="grid grid-cols-2 mb-3">
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
+          Assets {assetTotal > 0 && <span style={{ fontWeight: 400, textTransform: "none" }}>· {fmtCr(assetTotal)}</span>}
+        </div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
+          Liabilities {liabilityTotal > 0 && <span style={{ fontWeight: 400, textTransform: "none" }}>· {fmtCr(liabilityTotal)}</span>}
+        </div>
+      </div>
+      <div style={{ fontSize: 11, color: "#888888", textAlign: "right", marginBottom: 4 }}>
+        Period: {period}
+      </div>
+      <ApexChart type="treemap" series={series} options={options} height={420} />
+    </div>
+  );
+}
+
+// ── Cash Flow Waterfall Chart ─────────────────────────────────────────────────
+
+// Keys that represent totals/subtotals — rendered in blue
+const CF_TOTAL_KEYS = ["cfo", "operating", "fcff", "fcfe", "net_cash", "core_cash", "total"];
+
+function isTotalRow(key: string, label: string): boolean {
+  const k = key.toLowerCase();
+  const l = label.toLowerCase();
+  return CF_TOTAL_KEYS.some((t) => k.includes(t) || l.includes(t));
+}
+
+function CashFlowWaterfall({ table }: { table: FinancialTable }) {
+  // Use the most recent period (last column)
+  const lastIdx = table.periods.length - 1;
+  const period = table.periods[lastIdx];
+
+  // Build waterfall data points — skip "total" rows that summarise others
+  // and skip rows with null values
+  const rows = table.rows.filter((r) => {
+    const val = r.values[lastIdx];
+    return val !== null && val !== undefined;
+  });
+
+  const categories: string[] = rows.map((r) => r.label);
+  const values: number[] = rows.map((r) => r.values[lastIdx] as number);
+
+  // Classify each bar
+  const isTotal: boolean[] = rows.map((r) => isTotalRow(r.key, r.label));
+
+  // Build waterfall stacks:
+  // - spacer: invisible bottom stack that lifts each incremental bar
+  // - positive / negative / total: visible bars
+  const spacerData: number[] = [];
+  const positiveData: (number | null)[] = [];
+  const negativeData: (number | null)[] = [];
+  const totalData: (number | null)[] = [];
+
+  let runningTotal = 0;
+
+  for (let i = 0; i < values.length; i++) {
+    const v = values[i];
+    if (isTotal[i]) {
+      // Total bar starts from 0
+      spacerData.push(0);
+      positiveData.push(null);
+      negativeData.push(null);
+      totalData.push(Math.abs(v));
+      runningTotal = v;
+    } else if (v >= 0) {
+      spacerData.push(runningTotal);
+      positiveData.push(v);
+      negativeData.push(null);
+      totalData.push(null);
+      runningTotal += v;
+    } else {
+      // Negative bar: spacer goes to the top of where the bar will end
+      spacerData.push(runningTotal + v);
+      positiveData.push(null);
+      negativeData.push(Math.abs(v));
+      totalData.push(null);
+      runningTotal += v;
+    }
+  }
+
+  const series = [
+    { name: "spacer", data: spacerData },
+    { name: "Increase", data: positiveData },
+    { name: "Decrease", data: negativeData },
+    { name: "Total", data: totalData },
+  ];
+
+  const options: ApexCharts.ApexOptions = {
+    chart: {
+      type: "bar",
+      stacked: true,
+      toolbar: { show: false },
+      animations: { enabled: false },
+    },
+    plotOptions: {
+      bar: {
+        columnWidth: "60%",
+        borderRadius: 2,
+        dataLabels: { position: "top" },
+      },
+    },
+    colors: ["transparent", "#6bba7f", "#e07070", "#5b9bd5"],
+    dataLabels: {
+      enabled: true,
+      enabledOnSeries: [1, 2, 3],
+      formatter: (val: number) => {
+        if (val === null || val === undefined) return "";
+        return `${Math.round(val).toLocaleString("en-IN")} Cr`;
+      },
+      style: {
+        fontSize: "11px",
+        fontWeight: "500",
+        fontFamily: "var(--font-ibm-plex-sans, sans-serif)",
+        colors: ["#0F172B"],
+      },
+      offsetY: -4,
+    },
+    xaxis: {
+      categories,
+      labels: {
+        rotate: -45,
+        style: { fontSize: "11px", colors: "#888888", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" },
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      labels: {
+        formatter: (val: number) => `${Math.round(val).toLocaleString("en-IN")}`,
+        style: { fontSize: "11px", colors: ["#888888"], fontFamily: "var(--font-ibm-plex-sans, sans-serif)" },
+      },
+    },
+    grid: {
+      borderColor: "#F0F0F0",
+      strokeDashArray: 3,
+      xaxis: { lines: { show: false } },
+    },
+    legend: {
+      show: true,
+      position: "top",
+      horizontalAlign: "left",
+      fontSize: "12px",
+      fontFamily: "var(--font-ibm-plex-sans, sans-serif)",
+      fontWeight: 500,
+      markers: { size: 10 },
+      onItemClick: { toggleDataSeries: false },
+      formatter: (seriesName: string) => seriesName === "spacer" ? "" : seriesName,
+    },
+    tooltip: {
+      shared: false,
+      intersect: true,
+      y: {
+        formatter: (val: number) => `${Math.round(val).toLocaleString("en-IN")} Cr`,
+      },
+    },
+    states: {
+      hover: { filter: { type: "lighten" } },
+    },
+  };
+
+  return (
+    <div>
+      <div style={{ fontSize: 11, color: "#888888", textAlign: "right", marginBottom: 4 }}>
+        Period: {period}
+      </div>
+      <ApexChart type="bar" series={series} options={options} height={420} />
+    </div>
+  );
+}
+
+// ── Shareholding Charts ───────────────────────────────────────────────────────
+
+// A neutral-but-distinct palette that works on white backgrounds
+const SHAREHOLDING_COLORS = ["#0F172B", "#71717a", "#a1a1aa", "#d4d4d8", "#52525b", "#3f3f46", "#27272a"];
+
+function ShareholdingCharts({ sections, quarters }: { sections: ShareholdingSection[]; quarters: string[] }) {
+  // Find the latest quarter where at least one section has a non-null value
+  const period = [...quarters].reverse().find((q) =>
+    sections.some((s) => {
+      const dp = s.data.find((d) => d.quarter === q);
+      return dp?.value !== null && dp?.value !== undefined;
+    })
+  ) ?? quarters[quarters.length - 1];
+
+  // Use only top-level sections (not children) and filter out zero/null
+  const items = sections
+    .map((s) => {
+      const dp = s.data.find((d) => d.quarter === period);
+      return { label: s.label, value: dp?.value ?? null };
+    })
+    .filter((item): item is { label: string; value: number } => item.value !== null && item.value > 0);
+
+  const maxValue = Math.max(...items.map((i) => i.value));
+
+  // Donut chart config
+  const donutOptions: ApexCharts.ApexOptions = {
+    chart: { type: "donut", toolbar: { show: false }, animations: { enabled: false } },
+    labels: items.map((i) => i.label),
+    colors: SHAREHOLDING_COLORS,
+    legend: { show: false },
+    dataLabels: { enabled: false },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: "58%",
+          labels: {
+            show: true,
+            total: {
+              show: true,
+              label: "Total",
+              fontSize: "12px",
+              fontFamily: "var(--font-ibm-plex-sans, sans-serif)",
+              color: "#888888",
+              formatter: () => "100%",
+            },
+          },
+        },
+      },
+    },
+    tooltip: {
+      y: { formatter: (val: number) => `${val.toFixed(2)}%` },
+    },
+    stroke: { width: 2, colors: ["#ffffff"] },
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-8" style={{ alignItems: "start" }}>
+      {/* Left — horizontal bar chart */}
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 16 }}>
+          Latest Quarter · {period}
+        </div>
+        <div className="space-y-4">
+          {items.map((item, i) => (
+            <div key={item.label}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: "#0F172B", marginBottom: 6 }}>{item.label}</div>
+              <div className="flex items-center gap-3">
+                <div style={{ flex: 1, height: 28, background: "#F5F5F5", borderRadius: 4, overflow: "hidden" }}>
+                  <div
+                    style={{
+                      width: `${(item.value / maxValue) * 100}%`,
+                      height: "100%",
+                      background: SHAREHOLDING_COLORS[i % SHAREHOLDING_COLORS.length],
+                      borderRadius: 4,
+                      transition: "width 0.4s ease",
+                    }}
+                  />
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#0F172B", minWidth: 52, textAlign: "right" }}>
+                  {item.value.toFixed(2)}%
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Right — donut chart */}
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 16 }}>
+          Shareholding Summary
+        </div>
+        <ApexChart
+          type="donut"
+          series={items.map((i) => i.value)}
+          options={donutOptions}
+          height={300}
+        />
+        {/* Custom legend */}
+        <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3 justify-center">
+          {items.map((item, i) => (
+            <div key={item.label} className="flex items-center gap-1.5">
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: SHAREHOLDING_COLORS[i % SHAREHOLDING_COLORS.length], flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: "#888888" }}>{item.label}: <strong style={{ color: "#0F172B" }}>{item.value.toFixed(1)}</strong></span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ViewToggle({ view, onChange }: { view: "table" | "chart"; onChange: (v: "table" | "chart") => void }) {
+  return (
+    <div className="inline-flex items-center gap-0.5" style={{ border: "1px solid #E2E2E2", borderRadius: 6, padding: 2 }}>
+      {(["table", "chart"] as const).map((v) => {
+        const active = view === v;
+        return (
+          <button
+            key={v}
+            onClick={() => onChange(v)}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: 28, height: 28, borderRadius: 4,
+              border: "none",
+              background: active ? "#0F172B" : "transparent",
+              color: active ? "#fff" : "#888888",
+              cursor: "pointer",
+            }}
+          >
+            {v === "table" ? <TableIcon size={13} /> : <BarChart2 size={13} />}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function FinancialsContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
+  const [balanceSheetView, setBalanceSheetView] = useState<"table" | "chart">("table");
+  const [cashFlowView, setCashFlowView] = useState<"table" | "chart">("table");
+  const [shareholdingView, setShareholdingView] = useState<"table" | "chart">("table");
 
   const { data, loading, error } = useFinancials(symbol);
   const { data: chartsData } = useFinancialsCharts(symbol);
@@ -436,14 +832,19 @@ function FinancialsContent() {
           <TabularCard
             title="Balance Sheet"
             subtitle="All values in INR Crores"
-            tabs={balanceSheet.quarterly ? ["Quarterly", "Annual"] : undefined}
+            tabs={balanceSheetView === "table" && balanceSheet.quarterly ? ["Quarterly", "Annual"] : undefined}
             defaultTab="Annual"
+            headerAction={<ViewToggle view={balanceSheetView} onChange={setBalanceSheetView} />}
           >
-            {(activeTab) => (
-              <FinancialDataTable
-                table={activeTab === "Quarterly" && balanceSheet.quarterly ? balanceSheet.quarterly : balanceSheet.annual}
-              />
-            )}
+            {(activeTab) =>
+              balanceSheetView === "chart" ? (
+                <BalanceSheetTreemap table={balanceSheet.annual} />
+              ) : (
+                <FinancialDataTable
+                  table={activeTab === "Quarterly" && balanceSheet.quarterly ? balanceSheet.quarterly : balanceSheet.annual}
+                />
+              )
+            }
           </TabularCard>
         </div>
 
@@ -452,15 +853,20 @@ function FinancialsContent() {
           <TabularCard
             title="Cash Flow"
             subtitle="All values in INR Crores"
-            tabs={cashFlowQuarterly ? ["Quarterly", "Annual"] : undefined}
+            tabs={cashFlowView === "table" && cashFlowQuarterly ? ["Quarterly", "Annual"] : undefined}
             defaultTab="Annual"
+            headerAction={<ViewToggle view={cashFlowView} onChange={setCashFlowView} />}
           >
-            {(activeTab) => (
-              <FinancialDataTable
-                table={activeTab === "Quarterly" && cashFlowQuarterly ? cashFlowQuarterly : cashFlow}
-                cashFlowMode
-              />
-            )}
+            {(activeTab) =>
+              cashFlowView === "chart" ? (
+                <CashFlowWaterfall table={cashFlow} />
+              ) : (
+                <FinancialDataTable
+                  table={activeTab === "Quarterly" && cashFlowQuarterly ? cashFlowQuarterly : cashFlow}
+                  cashFlowMode
+                />
+              )
+            }
           </TabularCard>
         </div>
 
@@ -488,12 +894,15 @@ function FinancialsContent() {
             <TabularCard
               title="Shareholding Pattern"
               subtitle="Numbers in percentages"
-              tabs={["Quarterly", "Annual"]}
+              tabs={shareholdingView === "table" ? ["Quarterly", "Annual"] : undefined}
+              headerAction={<ViewToggle view={shareholdingView} onChange={setShareholdingView} />}
             >
               {(activeTab) => shareholdingLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="w-5 h-5 rounded-full border-2 border-zinc-200 border-t-zinc-600 animate-spin" />
                 </div>
+              ) : shareholdingView === "chart" ? (
+                <ShareholdingCharts sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} />
               ) : (
                 <ShareholdingTable sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} mode={activeTab} />
               )}

@@ -60,7 +60,7 @@ export function TabularCard({
   const [activeTab, setActiveTab] = useState<string>(defaultTab ?? tabs?.[0] ?? "");
 
   const resolvedContent =
-    tabs && typeof children === "function" ? children(activeTab) : children;
+    typeof children === "function" ? children(activeTab) : children;
 
   return (
     <div

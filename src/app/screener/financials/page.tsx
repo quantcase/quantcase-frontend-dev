@@ -15,6 +15,8 @@ import { SectionPanel } from "@/components/molecules/section-panel";
 import { MetricTile } from "@/components/molecules/metric-tile";
 import { TabToggle } from "@/components/molecules/tab-toggle";
 import { useFinancials } from "@/hooks/useFinancials";
+import { useFinancialsCharts } from "@/hooks/useFinancialsCharts";
+import { MultiLineBarComboChart } from "@/components/molecules/multi-line-bar-combo-chart";
 import type { FinancialRow, FinancialTable } from "@/types/financials";
 
 function fmt(value: number | null | undefined, format?: string): string {
@@ -183,6 +185,7 @@ function FinancialsContent() {
   const [plTab, setPlTab] = useState("Quarterly");
 
   const { data, loading, error } = useFinancials(symbol);
+  const { data: chartsData } = useFinancialsCharts(symbol);
 
   if (!symbol) {
     return (
@@ -248,6 +251,15 @@ function FinancialsContent() {
           )}
         </div>
       </div>
+
+      {/* Price / PE / Sales chart */}
+      {chartsData && (
+        <div className="container mx-auto max-w-7xl mb-6">
+          <SectionPanel title="Charts" subtitle="Price, valuation, and sales trends">
+            <MultiLineBarComboChart chartGroups={chartsData.chartGroups} height={300} />
+          </SectionPanel>
+        </div>
+      )}
 
       {/* Page content */}
       <div className="container mx-auto max-w-7xl space-y-6">

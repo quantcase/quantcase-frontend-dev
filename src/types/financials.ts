@@ -71,3 +71,28 @@ export interface FinancialsResponse {
   timestamp: string;
   standardized: FinancialsStandardized;
 }
+
+// ─── Chart types ───────────────────────────────────────────────────────────────
+
+export interface ChartDataPoint {
+  x: string;
+  y: number | null;
+}
+
+export interface ChartSeriesDefinition {
+  dataKey: string;
+  name: string;
+  data: ChartDataPoint[];
+}
+
+export interface ChartGroup {
+  group: string;
+  barSeries: ChartSeriesDefinition[];
+  lineSeries: ChartSeriesDefinition[];
+  leftAxisLabel?: string;
+  rightAxisLabel?: string;
+}
+
+export interface FinancialsChartsResponse {
+  chartGroups: ChartGroup[];
+}

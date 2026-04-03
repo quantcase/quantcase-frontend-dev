@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { TabularCard } from "@/components/molecules/tabular-card";
 import type { GovernanceSignal } from "@/types/management";
 import type { FinalTakeaways } from "@/types/opportunity";
 import type { OverviewSection } from "@/types/deal";
@@ -228,10 +229,9 @@ export function IMScoreCard({
   const dFlex = cDW;
 
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-white overflow-hidden">
-
+    <TabularCard title="QC Insight">
       {/* Top row: Score circle + Insight + Sliders */}
-      <div className="flex flex-col lg:flex-row items-start gap-6 p-6 border-b border-[#E2E2E2]">
+      <div className="flex flex-col lg:flex-row items-start gap-6 mb-4 pb-4 border-b border-[#E2E2E2]">
 
         {/* Col 1: Score circle */}
         <div className="flex-shrink-0">
@@ -307,7 +307,7 @@ export function IMScoreCard({
       </div>
 
       {/* Bento grid */}
-      <div className="flex flex-col lg:flex-row gap-0 divide-y lg:divide-y-0 lg:divide-x divide-[#E2E2E2] p-4 gap-4">
+      <div className="flex flex-col lg:flex-row gap-4 divide-y lg:divide-y-0 lg:divide-x divide-[#E2E2E2]">
         <BentoCard
           label="Management"
           letter="M"
@@ -337,6 +337,6 @@ export function IMScoreCard({
         />
       </div>
 
-    </div>
+    </TabularCard>
   );
 }

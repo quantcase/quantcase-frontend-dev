@@ -11,6 +11,7 @@ import { KeyMetricsRow } from "@/components/overview/key-metrics-row";
 import { FundamentalOverviewCard } from "@/components/overview/fundamental-overview-card";
 import { TechnicalsCard } from "@/components/overview/technicals-card";
 import { MarketViewCard } from "@/components/overview/market-view-card";
+import { InvestmentConclusionCard } from "@/components/overview/investment-conclusion-card";
 import { QualityMetricsTrendCard } from "@/components/overview/quality-metrics-card";
 import { formatINR, formatPrice } from "@/lib/utils";
 import { useScreenerData } from "@/hooks/useScreenerData";
@@ -264,21 +265,8 @@ function OverviewContent() {
         {/* Section B3: Market View */}
         <MarketViewCard />
 
-        {/* Section C: Key Metrics Tiles */}
-        <KeyMetricsRow
-          peRatio={data?.valuation.peRatio ?? null}
-          forwardPE={data?.valuation.forwardPE ?? null}
-          ebitda={data?.financialPerformance.ebitda ?? null}
-          enterpriseValue={data?.valuation.enterpriseValue ?? null}
-          totalCash={data?.efficiency.totalCash ?? null}
-          totalDebt={data?.efficiency.totalDebt ?? null}
-          operatingCashflow={data?.financialPerformance.operatingCashflow || null}
-          earningsQuarterlyGrowth={data?.keyStats.earningsQuarterlyGrowth ?? null}
-          epsCagrFromDeal={dFactorData?.target_price_matrix?.base?.eps_cagr ?? null}
-        />
-
         {/* Section C: Charts 2-up */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FinancialPerformanceCard
             revenue={data?.financialPerformance.revenue ?? null}
             revenueGrowth={data?.financialPerformance.revenueGrowth ?? null}
@@ -297,10 +285,10 @@ function OverviewContent() {
             totalDebt={data?.efficiency.totalDebt ?? null}
             debtToEquity={data?.efficiency.debtToEquity ?? null}
           />
-        </div>
+        </div> */}
 
         {/* Section E: Analyst Coverage + Key Thesis */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {/* <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="md:col-span-2">
             <KeyThesisCard
               governanceSignals={mgmtDashboard?.governanceSignals}
@@ -317,7 +305,15 @@ function OverviewContent() {
             heldPercentInsiders={data?.keyStats.heldPercentInsiders ?? null}
             heldPercentInstitutions={data?.keyStats.heldPercentInstitutions ?? null}
           />
-        </div>
+        </div> */}
+
+        {/* Section F: Investment Conclusion */}
+        <InvestmentConclusionCard
+          dealData={dFactorData}
+          oppTakeaways={oppData?.final_takeaways ?? null}
+          technicalsData={technicalsData ?? null}
+          rating={rating}
+        />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { TabularCard } from "@/components/molecules/tabular-card";
 import type { TechnicalsResponse } from "@/types/technicals";
 
 function formatPrice(val: number | null | undefined): string {
@@ -101,25 +102,10 @@ export function TechnicalsCard({ data }: Props) {
   ];
 
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-white overflow-hidden">
+    <TabularCard title="Technicals" subtitle={summary || undefined}>
 
-      {/* Header */}
-      <div className="px-5 pt-4 pb-2">
-        <p className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#0F172B]">
-          Technicals
-        </p>
-      </div>
-
-      <div className="px-5 pb-5 space-y-4">
-
-        {/* Insight summary line */}
-        {summary && (
-          <p className="text-sm text-[#888888] leading-snug">
-            {summary}
-          </p>
-        )}
-
-        {/* 4-up summary tiles */}
+      {/* 4-up summary tiles */}
+      <div className="space-y-4">
         <div className="flex gap-3 flex-wrap sm:flex-nowrap">
           <SummaryTile label="Structure" value={structureLabel} sublabel={structureSub} />
           <SummaryTile label="Trend" value={trendLabel} sublabel={trendSub} />
@@ -214,6 +200,6 @@ export function TechnicalsCard({ data }: Props) {
 
         </div>
       </div>
-    </div>
+    </TabularCard>
   );
 }

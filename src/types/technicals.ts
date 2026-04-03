@@ -227,5 +227,7 @@ export interface RuleEngine {
   decisionContext: {
     summary: string;
     alerts: string[];
+    marketBias: string;
+    overallCondition: string;
   };
 }

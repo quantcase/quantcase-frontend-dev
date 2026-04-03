@@ -1,5 +1,6 @@
 "use client";
 
+import { TabularCard } from "@/components/molecules/tabular-card";
 import { formatINR } from "@/lib/utils";
 import type { ScreenerData } from "@/types/screener";
 
@@ -129,21 +130,9 @@ export function FundamentalOverviewCard({ data }: Props) {
     : own.publicLabel === "Low" ? "green"
     : "zinc";
 
-  const debtStatusColor: "red" | "amber" | "green" | "zinc" =
-    rat.debtStatus === "High debt" ? "red"
-    : rat.debtStatus === "Moderate debt" ? "amber"
-    : rat.debtStatus === "Near debt-free" || rat.debtStatus === "Low debt" ? "green"
-    : "zinc";
-
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-white overflow-hidden">
-      <div className="px-5 pt-4 pb-2">
-        <p className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#0F172B]">
-          Fundamentals
-        </p>
-      </div>
-
-      <div className="px-5 pb-5 space-y-5">
+    <TabularCard title="Fundamentals">
+      <div className="space-y-5">
 
         {/* KEY METRICS */}
         <div>
@@ -238,6 +227,6 @@ export function FundamentalOverviewCard({ data }: Props) {
         </div>
 
       </div>
-    </div>
+    </TabularCard>
   );
 }

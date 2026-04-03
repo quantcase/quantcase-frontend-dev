@@ -231,7 +231,7 @@ export function IMScoreCard({
   return (
     <TabularCard title="QC Insight">
       {/* Top row: Score circle + Insight + Sliders */}
-      <div className="flex flex-col lg:flex-row items-start gap-6 mb-4 pb-4 border-b border-[#E2E2E2]">
+      <div className="grid grid-cols-1 lg:grid-cols-[auto_2fr_1fr] items-start gap-6 mb-4 pb-4 border-b border-[#E2E2E2]">
 
         {/* Col 1: Score circle */}
         <div className="flex-shrink-0">
@@ -259,7 +259,7 @@ export function IMScoreCard({
         </div>
 
         {/* Col 2: Rating badge + insight headline + subtext */}
-        <div className="flex-1 min-w-0 flex flex-col gap-1">
+        <div className="min-w-0 flex flex-col gap-1">
           {rating && (
             <span className="self-start rounded-full bg-zinc-900 px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide">
               {rating}
@@ -276,7 +276,7 @@ export function IMScoreCard({
         </div>
 
         {/* Sliders */}
-        <div className="flex-shrink-0 w-full lg:w-64 space-y-2">
+        <div className="min-w-0 space-y-2">
           <p className="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold mb-2">
             Adjust Weightings — must total 100%
           </p>
@@ -286,14 +286,14 @@ export function IMScoreCard({
             { label: "Deal", value: cDW, onChange: handleDWeight },
           ].map(({ label, value, onChange }) => (
             <div key={label} className="flex items-center gap-2">
-              <span className="text-[11px] text-zinc-500 w-24 flex-shrink-0">{label}</span>
+              <span className="text-[11px] text-zinc-500 w-20 flex-shrink-0">{label}</span>
               <input
                 type="range"
                 min={5}
                 max={90}
                 value={value}
                 onChange={(e) => onChange(Number(e.target.value))}
-                className="flex-1 accent-zinc-900 h-1"
+                className="flex-1 min-w-0 accent-zinc-900 h-1"
               />
               <span className="text-[11px] font-semibold text-[#0F172B] w-8 text-right flex-shrink-0">
                 {value}%

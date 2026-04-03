@@ -60,31 +60,58 @@ export interface ScreenerData {
     grossProfits: number;
     grossMargins: number;
     ebitda: number;
+    ebitdaGrowth: number | null;
     ebitdaMargins: number;
     operatingMargins: number;
+    netProfit: number | null;
+    netProfitGrowth: number | null;
     profitMargins: number;
     earningsGrowth: number;
     revenuePerShare: number;
     operatingCashflow: number;
+    cfoGrowth: number | null;
     freeCashflow: number;
+    fcfGrowth: number | null;
+    reserves: number | null;
+    reservesGrowth: number | null;
     quarterlyTrend: QuarterlyTrend[];
   };
   valuation: {
     peRatio: number;
+    peValuationLabel: string | null;
     forwardPE: number;
     pbRatio: number;
+    pegRatio: number | null;
     evToEbitda: number;
     evToRevenue: number;
     enterpriseValue: number;
     profitMargins: number;
+    industryPE: number | null;
+    industryPELabel: string | null;
   };
   efficiency: {
     returnOnEquity: number | null;
     returnOnAssets: number | null;
     debtToEquity: number;
+    debtGrowth: number | null;
     totalCash: number;
     totalDebt: number;
     totalCashPerShare: number;
+  };
+  ratios: {
+    roce: number | null;
+    roce3yAvg: number | null;
+    roe: number | null;
+    roe3yAvg: number | null;
+    debtStatus: string | null;
+  };
+  ownership: {
+    promoter: number | null;
+    institutions: number | null;
+    fii: number | null;
+    dii: number | null;
+    public: number | null;
+    publicLabel: string | null;
   };
   perShare: {
     eps: number;
@@ -112,5 +139,11 @@ export interface ScreenerData {
     fiftyDayAverage: number;
     twoHundredDayAverage: number;
     week52Change: number;
+  };
+  financials: {
+    eps_cagr_3y: number | null;
+    ebitda_ev_yield: number | null;
+    cfo_ebitda_pct: number | null;
+    net_debt_ebitda: number | null;
   };
 }

@@ -67,10 +67,7 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
               </TableHeader>
               <TableBody>
                 <TooltipProvider delayDuration={300}>
-                {records.filter((record) => {
-                  const isNA = (v: unknown) => v == null || String(v).trim().toUpperCase() === "N/A" || String(v).trim() === "";
-                  return !isNA(record.current_value) && !isNA(record.targeted_value);
-                }).filter((record, index, arr) => {
+                {records.filter((record, index, arr) => {
                   const key = `${record.metric}__${record.period}`;
                   return arr.findIndex(r => `${r.metric}__${r.period}` === key) === index;
                 }).map((record) => {

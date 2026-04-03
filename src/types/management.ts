@@ -54,6 +54,8 @@ export interface GovernanceSignal {
   id: string;
   text: string;
   isPositive: boolean;
+  targets?: Array<{ statement: string; severity?: string }>;
+  risks?: Array<{ risk: string; severity?: string }>;
 }
 
 // Consistency metrics

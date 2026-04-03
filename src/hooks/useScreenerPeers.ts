@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { BACKEND_URL } from "@/lib/constants";
+import { apiPost } from "@/lib/api";
 
 const DEFAULT_INDICATORS = [
   "cmp", "pe", "marketCap", "divYld", "npQtr",
@@ -39,27 +41,15 @@ export function useScreenerPeers(symbol: string) {
   useEffect(() => {
     if (!symbol?.trim()) return;
 
-    setLoading(true);
-    setError(null);
-    setData(null);
-
-    fetch(`/api/peers/${symbol}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ indicators: DEFAULT_INDICATORS }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
-        return res.json();
-      })
-      .then((json: ScreenerPeersResponse) => {
-        setData(json);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message || "Failed to load peer data");
-        setLoading(false);
-      });
+    apiPost<ScreenerPeersResponse>(
+      `${BACKEND_URL}/api/screener/${symbol}/peers`,
+      {
+        onStart: () => { setLoading(true); setError(null); setData(null); },
+        onSuccess: (json) => { setData(json); setLoading(false); },
+        onError: (err) => { setError(err); setLoading(false); },
+      },
+      { indicators: DEFAULT_INDICATORS }
+    );
   }, [symbol]);
 
   return { data, loading, error };

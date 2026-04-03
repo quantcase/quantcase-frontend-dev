@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { rawFetch } from "@/lib/api";
+import { BACKEND_URL } from "@/lib/constants";
 import type { TechnicalsResponse, TechnicalsDerived } from "@/types/technicals";
 
 function computeDerived(data: TechnicalsResponse): TechnicalsDerived {
@@ -23,7 +24,7 @@ export function useTechnicals(symbol: string) {
 
   useEffect(() => {
     if (!symbol?.trim()) return;
-    rawFetch<TechnicalsResponse>(`/api/technicals/${symbol}`, {
+    rawFetch<TechnicalsResponse>(`${BACKEND_URL}/api/screener/${symbol}/technicals`, {
       onStart: () => { setLoading(true); setError(null); setData(null); setDerived(null); },
       onSuccess: (response) => {
         setData(response);

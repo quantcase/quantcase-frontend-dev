@@ -10,9 +10,7 @@ import type { TimeframeOption, JobCreateResponse, JobStatusResponse, JobStatus }
 
 import { Badge } from "@/components/ui/badge";
 import { SectionPanel } from "@/components/molecules/section-panel";
-import { ScoreOverviewCards } from "@/components/management/score-overview-cards";
-import { TrustPanel } from "@/components/management/trust-panel";
-import { GovernanceSignals } from "@/components/management/governance-signals";
+import { ManagementCredibilityCard } from "@/components/management/management-credibility-card";
 import { ConsistencyAnalysis } from "@/components/management/consistency-analysis";
 import { GuidanceTrackTable } from "@/components/management/guidance-track-table";
 import { NotablePatterns } from "@/components/management/notable-patterns";
@@ -372,20 +370,17 @@ function ManagementDashboardContent() {
       {/* Page Content */}
       <div className="mx-auto space-y-6 ">
 
-        {/* Main Layout: 2 columns */}
+        {/* Unified Management Credibility Card */}
+        <ManagementCredibilityCard
+          scores={managementData.scores}
+          trust={managementData.trust}
+          consistency={managementData.consistency}
+        />
+
+        {/* Bottom Layout: 2 columns */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Left Column: Main Content (2/3) */}
           <div className="flex flex-col gap-6 lg:col-span-2">
-            {/* Score Overview Cards */}
-            <SectionPanel title="Management Factor Scores">
-              <ScoreOverviewCards scores={managementData.scores} />
-            </SectionPanel>
-
-            {/* Governance Signals */}
-            <SectionPanel title="Governance Signals & Evidence">
-              <GovernanceSignals signals={managementData.governanceSignals} />
-            </SectionPanel>
-
             {/* Consistency Analysis */}
             <SectionPanel
               title="Commentary Consistency Analysis"
@@ -403,9 +398,8 @@ function ManagementDashboardContent() {
             </SectionPanel>
           </div>
 
-          {/* Right Sidebar: Trust Panel + Notable Patterns (1/3) */}
+          {/* Right Sidebar: Notable Patterns (1/3) */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <TrustPanel trust={managementData.trust} consistency={managementData.consistency} />
             <div className="flex-1">
               <NotablePatterns patterns={managementData.notablePatterns} />
             </div>

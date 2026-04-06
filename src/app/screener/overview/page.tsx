@@ -14,6 +14,7 @@ import { useManagementAnalysis } from "@/hooks/useManagementAnalysis";
 import { useOpportunityAnalysis } from "@/hooks/useOpportunityAnalysis";
 import { useDealAnalysis } from "@/hooks/useDealAnalysis";
 import { useTechnicals } from "@/hooks/useTechnicals";
+import { KeyRatioTiles } from "@/components/overview/key-ratio-tiles";
 import type { ManagementDashboardData } from "@/types/management";
 import type { OFactorResponse } from "@/types/opportunity";
 import type { DFactorResponse } from "@/types/deal";
@@ -83,6 +84,7 @@ function OverviewContent() {
 
   return (
     <ScreenerPageShell navItems={OVERVIEW_NAV}>
+      {data && <KeyRatioTiles data={data} />}
       <div className="px-4 space-y-6 pt-6 mb-8">
 
         {error && (

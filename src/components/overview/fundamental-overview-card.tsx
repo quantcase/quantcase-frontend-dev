@@ -1,7 +1,7 @@
 "use client";
 
 import { TabularCard } from "@/components/molecules/tabular-card";
-import { formatINR, formatPrice } from "@/lib/utils";
+import { formatINR } from "@/lib/utils";
 import type { ScreenerData } from "@/types/screener";
 
 function pct(val: number | null | undefined, decimals = 1): string {
@@ -96,43 +96,8 @@ export function FundamentalOverviewCard({ data }: Props) {
   const fp = data.financialPerformance;
   const val = data.valuation;
   const eff = data.efficiency;
-  const rat = data.ratios;
   const own = data.ownership;
-  const qt = data.quote;
-  const ps = data.perShare;
-  const ks = data.keyStats;
-  const fin = data.financials;
-
-  // Market strip values
-  const priceDisplay = qt.price != null ? formatPrice(qt.price, 0) : "—";
-  const priceChange = qt.changePercent;
-  const priceChangeSublabel = priceChange != null
-    ? `${priceChange >= 0 ? "+" : ""}${(priceChange * 100).toFixed(1)}% today`
-    : null;
-
-  const week52Display = qt.week52Low != null && qt.week52High != null
-    ? `${formatPrice(qt.week52Low, 0)}–${formatPrice(qt.week52High, 0)}`
-    : "—";
-  const week52Spread = qt.week52Low != null && qt.week52High != null && qt.week52Low > 0
-    ? `±${Math.round(((qt.week52High - qt.week52Low) / qt.week52Low) * 100)}% spread`
-    : null;
-
-  const epsCagrRaw = fin.eps_cagr_3y;
-  const epsCagrDisplay = epsCagrRaw != null
-    ? epsCagrRaw
-    : ks.earningsQuarterlyGrowth != null
-      ? `${ks.earningsQuarterlyGrowth >= 0 ? "+" : ""}${(ks.earningsQuarterlyGrowth * 100).toFixed(1)}%`
-      : "—";
-  const epsCagrIsPositive = typeof epsCagrDisplay === "number"
-    ? epsCagrDisplay >= 0
-    : typeof epsCagrDisplay === "string" && epsCagrDisplay !== "—" && !epsCagrDisplay.startsWith("-");
-  const epsCagrFormatted = typeof epsCagrDisplay === "number"
-    ? `${epsCagrDisplay >= 0 ? "+" : ""}${(epsCagrDisplay * 100).toFixed(1)}%`
-    : epsCagrDisplay;
-
-  const dividendYieldDisplay = ps.dividendYield != null
-    ? `${(ps.dividendYield * 100).toFixed(1)}%`
-    : "—";
+  const ratios = data.ratios;
 
   const peLabel = val.peValuationLabel;
   const peLabelColor: "red" | "amber" | "green" | "zinc" =
@@ -154,66 +119,46 @@ export function FundamentalOverviewCard({ data }: Props) {
     <TabularCard title="Fundamentals">
       <div className="space-y-5">
 
-        {/* KEY METRICS + KEY RATIOS side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-          {/* Key Metrics */}
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Key Metrics</p>
-            <div className="rounded-[10px] border border-[#E2E2E2] px-4 divide-y-0">
-              <MetricRow label="Revenue" value={formatINR(fp.revenue)} growth={fp.revenueGrowth} />
-              <MetricRow label="EBITDA" value={formatINR(fp.ebitda)} growth={fp.ebitdaGrowth} />
-              <MetricRow label="Net Profit" value={formatINR(fp.netProfit)} growth={fp.netProfitGrowth} />
-              <MetricRow label="CFO" value={formatINR(fp.operatingCashflow)} growth={fp.cfoGrowth} />
-              <MetricRow label="FCF" value={formatINR(fp.freeCashflow)} growth={fp.fcfGrowth} />
-              <MetricRow label="Reserves" value={formatINR(fp.reserves)} growth={fp.reservesGrowth} />
-              <MetricRow label="Debt" value={formatINR(eff.totalDebt)} growth={eff.debtGrowth} invertGrowth />
+        {/* KEY METRICS */}
+        <div>
+          <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Key Metrics</p>
+          <div className="flex gap-3">
+            {/* Left card: 2-column table layout (2/3 width) */}
+            <div className="flex-[2] rounded-[10px] border border-[#E2E2E2] px-4">
+              <div className="grid grid-cols-2">
+                <div className="pr-4 border-r border-[#E2E2E2]">
+                  <MetricRow label="Revenue" value={formatINR(fp.revenue)} growth={fp.revenueGrowth} />
+                  <MetricRow label="EBITDA" value={formatINR(fp.ebitda)} growth={fp.ebitdaGrowth} />
+                  <MetricRow label="Net Profit" value={formatINR(fp.netProfit)} growth={fp.netProfitGrowth} />
+                  <MetricRow label="CFO" value={formatINR(fp.operatingCashflow)} growth={fp.cfoGrowth} />
+                </div>
+                <div className="pl-4">
+                  <MetricRow label="FCF" value={formatINR(fp.freeCashflow)} growth={fp.fcfGrowth} />
+                  <MetricRow label="Reserves" value={formatINR(fp.reserves)} growth={fp.reservesGrowth} />
+                  <MetricRow label="Debt" value={formatINR(eff.totalDebt)} growth={eff.debtGrowth} invertGrowth />
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Key Ratios */}
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Key Ratios</p>
-            <div className="rounded-[10px] border border-[#E2E2E2] px-4 divide-y-0">
-              <RatioRow
-                label="CMP"
-                value={priceDisplay}
-                sublabel={priceChangeSublabel}
-                trendIcon={priceChange != null ? (priceChange >= 0 ? "up" : "down") : null}
-              />
-              <RatioRow
-                label="52W Range"
-                value={week52Display}
-                sublabel={week52Spread}
-              />
-              <RatioRow
-                label="EPS CAGR 3Y"
-                value={epsCagrFormatted}
-                trendIcon={epsCagrFormatted !== "—" ? (epsCagrIsPositive ? "up" : "down") : null}
-              />
-              <RatioRow
-                label="Dividend Yield"
-                value={dividendYieldDisplay}
-                sublabel="Annual"
-              />
+            {/* Right card: Key Ratios (1/3 width) */}
+            <div className="flex-[1] rounded-[10px] border border-[#E2E2E2] px-4">
               <RatioRow
                 label="ROCE"
-                value={rat.roce != null ? `${(rat.roce * 100).toFixed(1)}%` : "—"}
-                sublabel={rat.roce3yAvg != null ? `3Y avg ${(rat.roce3yAvg * 100).toFixed(1)}%` : null}
-                trendIcon={rat.roce != null && rat.roce3yAvg != null ? (rat.roce >= rat.roce3yAvg ? "up" : "down") : null}
+                value={ratios.roce != null ? pct(ratios.roce) : "—"}
+                sublabel={ratios.roce3yAvg != null ? `3Y avg ${pct(ratios.roce3yAvg)}` : null}
+                trendIcon={ratios.roce != null && ratios.roce3yAvg != null ? (ratios.roce >= ratios.roce3yAvg ? "up" : "down") : null}
               />
               <RatioRow
                 label="ROE"
-                value={rat.roe != null ? `${(rat.roe * 100).toFixed(1)}%` : "—"}
-                sublabel={rat.roe3yAvg != null ? `3Y avg ${(rat.roe3yAvg * 100).toFixed(1)}%` : null}
-                trendIcon={rat.roe != null && rat.roe3yAvg != null ? (rat.roe >= rat.roe3yAvg ? "up" : "down") : null}
+                value={ratios.roe != null ? pct(ratios.roe) : "—"}
+                sublabel={ratios.roe3yAvg != null ? `3Y avg ${pct(ratios.roe3yAvg)}` : null}
+                trendIcon={ratios.roe != null && ratios.roe3yAvg != null ? (ratios.roe >= ratios.roe3yAvg ? "up" : "down") : null}
               />
               <RatioRow
                 label="Debt / Equity"
                 value={eff.debtToEquity != null ? `${eff.debtToEquity.toFixed(2)}x` : "—"}
-                sublabel={rat.debtStatus}
-                trendIcon={rat.debtStatus === "Near debt-free" || rat.debtStatus === "Low debt" ? "up" : rat.debtStatus === "High debt" ? "down" : null}
-                invertTrend
+                sublabel={ratios.debtStatus}
+                badge={null}
               />
             </div>
           </div>

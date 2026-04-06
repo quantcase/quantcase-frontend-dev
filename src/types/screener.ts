@@ -50,6 +50,7 @@ export interface ScreenerData {
     week52High: number;
     week52Low: number;
     marketCap: number;
+    marketCapLabel: string | null;
     currency: string;
     marketState: string;
     lastUpdated: string;
@@ -142,6 +143,7 @@ export interface ScreenerData {
   };
   financials: {
     eps_cagr_3y: number | null;
+    eps_cagr_3y_label: string | null;
     ebitda_ev_yield: number | null;
     cfo_ebitda_pct: number | null;
     net_debt_ebitda: number | null;

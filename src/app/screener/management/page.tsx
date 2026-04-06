@@ -393,6 +393,16 @@ function ManagementDashboardContent() {
             <SectionPanel
               title="Guidance Track Record"
               className="flex-1"
+              headerAction={
+                managementData.consistency?.hitRate != null ? (
+                  <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
+                    <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
+                    <span style={{ fontSize: 28, fontWeight: 700, color: "#0F172B", lineHeight: 1.1 }}>
+                      {managementData.consistency.hitRate}%
+                    </span>
+                  </div>
+                ) : undefined
+              }
             >
               <GuidanceTrackTable records={managementData.guidanceRecords} />
             </SectionPanel>

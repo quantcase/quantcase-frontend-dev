@@ -103,6 +103,72 @@ export interface NotablePattern {
   category: "positive" | "neutral" | "negative";
 }
 
+// Capital Allocation
+// ─── Capex Breakdown ──────────────────────────────────────────────────────────
+
+export type CapexTimeframe = "last_quarter" | "12_months" | "3_years" | "5_years";
+
+export interface CapexSlice {
+  name: string;
+  percentage: number;
+  amount_label: string;
+}
+
+export interface CapexBreakdownPeriod {
+  total_deployed: number;
+  total_deployed_label: string;
+  vs_5yr_avg_pct: number;
+  largest_allocation: string;
+  largest_allocation_pct: number;
+  slices: CapexSlice[];
+}
+
+/** All four timeframes pre-computed by the backend */
+export interface CapexBreakdown {
+  last_quarter: CapexBreakdownPeriod | null;
+  "12_months": CapexBreakdownPeriod | null;
+  "3_years": CapexBreakdownPeriod | null;
+  "5_years": CapexBreakdownPeriod | null;
+}
+
+// ─── ROCE Trend ───────────────────────────────────────────────────────────────
+
+export interface RoceTrendMetric {
+  label: string;
+  value: string;
+  /** Optional sub-label shown beneath the value (e.g. "-0.5pp vs 2023", "FY 2023") */
+  sub_label?: string | null;
+  sentiment: "positive" | "negative" | "neutral";
+}
+
+export interface RoceTrendDataPoint {
+  period: string;
+  roce: number;
+}
+
+export interface RoceTrendView {
+  /** Label shown as date-range in header, e.g. "2019 – 2024" */
+  date_range: string;
+  wacc_threshold: number | null;
+  period_avg_roce: number | null;
+  data_points: RoceTrendDataPoint[];
+  /** Exactly 4 metric cards: Latest ROCE, Peak ROCE, Avg ROCE, vs WACC */
+  metrics: RoceTrendMetric[];
+}
+
+export interface RoceTrend {
+  summary: string;
+  quarterly: RoceTrendView | null;
+  yearly: RoceTrendView | null;
+}
+
+// ─── Capital Allocation (top-level) ───────────────────────────────────────────
+
+export interface CapitalAllocation {
+  capex_breakdown: CapexBreakdown | null;
+  roce_trend: RoceTrend | null;
+}
+
 // Complete dashboard data
 export interface ManagementDashboardData {
   company: CompanyInfo;
@@ -114,6 +180,7 @@ export interface ManagementDashboardData {
   notablePatterns: NotablePattern[];
   selectedTimeframe: TimeframeOption;
   disclosures?: Disclosures | null;
+  capital_allocation?: CapitalAllocation | null;
 }
 
 export interface ManagementDashboardResponse {

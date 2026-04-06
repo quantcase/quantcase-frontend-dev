@@ -14,11 +14,14 @@ import { ManagementCredibilityCard } from "@/components/management/management-cr
 import { GuidanceTrackTable } from "@/components/management/guidance-track-table";
 import { DisclosuresTable } from "@/components/management/disclosures-table";
 import type { DisclosureRow, DisclosuresTableConfig } from "@/components/management/disclosures-table";
+import { CapexBreakdownChart } from "@/components/management/capex-breakdown-chart";
+import { RoceTrendChart } from "@/components/management/roce-trend-chart";
 
 const NAV_ITEMS = [
   { id: "section-score", label: "Score" },
   { id: "section-guidance", label: "Guidance Accuracy" },
   { id: "section-disclosures", label: "Disclosure Honesty" },
+  { id: "section-capital-allocation", label: "Capital Allocation" },
 ];
 
 function ManagementDashboardContent() {
@@ -460,6 +463,18 @@ function ManagementDashboardContent() {
               activeTab={activeDisclosureTab}
               onTabChange={(tab) => setActiveDisclosureTab(tab as "Risk" | "Bad News" | "Legal")}
             />
+          </div>
+        )}
+
+        {/* Capital Allocation */}
+        {managementData.capital_allocation && (
+          <div id="section-capital-allocation" className="flex flex-col gap-4">
+            {managementData.capital_allocation.capex_breakdown && (
+              <CapexBreakdownChart data={managementData.capital_allocation.capex_breakdown} />
+            )}
+            {managementData.capital_allocation.roce_trend && (
+              <RoceTrendChart data={managementData.capital_allocation.roce_trend} />
+            )}
           </div>
         )}
       </div>

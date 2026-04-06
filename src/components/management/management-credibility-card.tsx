@@ -1,5 +1,4 @@
 import { Target, Shield, Briefcase, Star, Users } from "lucide-react";
-import { formatLabel } from "@/lib/utils";
 import type { FactorScore, TrustScore, ConsistencyMetrics, TrustLevel } from "@/types/management";
 import type { LucideIcon } from "lucide-react";
 
@@ -57,7 +56,6 @@ export function ManagementCredibilityCard({
   const overallLevel = trust.overall;
   const overallLevelColor = getTrustLevelColor(overallLevel);
 
-  // Map subfactor keys to score entries so we can align them with the scores array order
   const subfactorKeyMap: Record<string, keyof typeof trust.subfactors> = {
     "Guidance Accuracy": "guidanceAccuracy",
     "Disclosure Honesty": "disclosureHonesty",
@@ -73,80 +71,91 @@ export function ManagementCredibilityCard({
         padding: 8,
       }}
     >
+      {/* Header — outside white box, same as TabularCard */}
+      <div
+        className="flex items-center justify-between"
+        style={{ paddingBottom: 8, paddingLeft: 8, paddingRight: 8 }}
+      >
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            color: "#0F172B",
+            textTransform: "uppercase",
+            letterSpacing: "0.01em",
+          }}
+        >
+          MANAGEMENT CREDIBILITY:{" "}
+          <span style={{ color: overallLevelColor }}>{getRatingDisplay(overallLevel)}</span>
+        </div>
+      </div>
+
       {/* Inner white card */}
       <div
         style={{
           borderRadius: 10,
           border: "1px solid rgba(226, 226, 226, 0.10)",
           background: "#FFF",
-          padding: 24,
+          padding: 8,
         }}
       >
-        <div className="flex items-start gap-12">
-          {/* Left: heading + factor rows */}
-          <div className="flex flex-col gap-5 flex-1 min-w-0">
-            {/* Title */}
-            <h4 className="font-semibold tracking-wide uppercase" style={{ color: "#0F172B" }}>
-              MANAGEMENT CREDIBILITY:{" "}
-              <span style={{ color: overallLevelColor }}>{getRatingDisplay(overallLevel)}</span>
-            </h4>
+        <div className="flex items-stretch gap-8">
+          {/* Left: factor rows */}
+          <div className="flex flex-col divide-y divide-zinc-100 flex-1 min-w-0">
+            {scores.map((score) => {
+              const Icon = iconMap[score.factor] ?? Star;
+              const ratingColor = getTrustLevelColor(score.rating);
+              const subfactorKey = subfactorKeyMap[score.factor];
+              const subfactorValue = subfactorKey != null ? trust.subfactors[subfactorKey] : null;
+              const filledBlocks = subfactorValue != null ? getFilledBlocks(subfactorValue) : null;
 
-            {/* Factor rows */}
-            <div className="flex flex-col divide-y divide-zinc-100">
-              {scores.map((score) => {
-                const Icon = iconMap[score.factor] ?? Star;
-                const ratingColor = getTrustLevelColor(score.rating);
-                const subfactorKey = subfactorKeyMap[score.factor];
-                const subfactorValue = subfactorKey != null ? trust.subfactors[subfactorKey] : null;
-                const filledBlocks = subfactorValue != null ? getFilledBlocks(subfactorValue) : null;
+              return (
+                <div key={score.factor} className="flex items-center gap-4 py-2 first:pt-0 last:pb-0">
+                  {/* Icon box */}
+                  <div
+                    style={{
+                      display: "flex",
+                      padding: 6,
+                      borderRadius: 6,
+                      border: "1px solid rgba(18,18,18,0.10)",
+                      background: "rgba(18,18,18,0.03)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Icon style={{ height: 14, width: 14, color: "#888888" }} />
+                  </div>
 
-                return (
-                  <div key={score.factor} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-                    {/* Icon box */}
-                    <div
-                      style={{
-                        display: "flex",
-                        padding: 6,
-                        borderRadius: 6,
-                        border: "1px solid rgba(18,18,18,0.10)",
-                        background: "rgba(18,18,18,0.03)",
-                        flexShrink: 0,
-                      }}
+                  {/* Label + descriptor */}
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="uppercase tracking-wider"
+                      style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em" }}
                     >
-                      <Icon style={{ height: 14, width: 14, color: "#888888" }} />
-                    </div>
-
-                    {/* Label + descriptor */}
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className="uppercase tracking-wider"
-                        style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em" }}
-                      >
-                        {score.factor}
-                      </p>
-                      {score.descriptor && (
-                        <p style={{ fontSize: 13, color: "#121212", marginTop: 2 }}>{score.descriptor}</p>
-                      )}
-                    </div>
-
-                    {/* Mini bar (if subfactor data available) */}
-                    {filledBlocks != null && (
-                      <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <div
-                            key={i}
-                            style={{
-                              width: 7,
-                              height: 18,
-                              borderRadius: 2,
-                              backgroundColor: i < filledBlocks ? ratingColor : "#E2E2E2",
-                            }}
-                          />
-                        ))}
-                      </div>
+                      {score.factor}
+                    </p>
+                    {score.descriptor && (
+                      <p style={{ fontSize: 13, color: "#121212" }}>{score.descriptor}</p>
                     )}
+                  </div>
 
-                    {/* Rating pill */}
+                  {/* Mini bar — fixed width so all rows align */}
+                  <div style={{ width: 47, flexShrink: 0, display: "flex", gap: 3 }}>
+                    {filledBlocks != null &&
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            flex: 1,
+                            height: 18,
+                            borderRadius: 2,
+                            backgroundColor: i < filledBlocks ? ratingColor : "#E2E2E2",
+                          }}
+                        />
+                      ))}
+                  </div>
+
+                  {/* Rating pill — fixed width for alignment */}
+                  <div style={{ width: 72, flexShrink: 0, display: "flex", justifyContent: "flex-end" }}>
                     <span
                       style={{
                         fontSize: 10,
@@ -158,20 +167,22 @@ export function ManagementCredibilityCard({
                         padding: "2px 7px",
                         textTransform: "uppercase",
                         letterSpacing: "0.05em",
-                        flexShrink: 0,
                         whiteSpace: "nowrap",
                       }}
                     >
                       {getRatingDisplay(score.rating)}
                     </span>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Right: overall score + segmented bar + subfactor labels */}
-          <div className="flex flex-col gap-3 flex-shrink-0" style={{ minWidth: 200 }}>
+          {/* Right: overall score + segmented bar */}
+          <div
+            className="flex flex-col justify-end items-end flex-shrink-0 gap-1"
+            style={{ width: 280, borderLeft: "1px solid #E2E2E2", paddingLeft: 24 }}
+          >
             <p
               style={{
                 fontSize: 10,
@@ -193,14 +204,14 @@ export function ManagementCredibilityCard({
             </div>
 
             {/* Segmented bar */}
-            <div className="space-y-1">
+            <div className="space-y-1 w-full" style={{ marginTop: 4 }}>
               <div style={{ display: "flex", gap: 3 }}>
                 {Array.from({ length: maxScore }).map((_, i) => (
                   <div
                     key={i}
                     style={{
                       flex: 1,
-                      height: 10,
+                      height: 14,
                       borderRadius: 2,
                       backgroundColor: i < totalScore ? barColor : "#E2E2E2",
                     }}
@@ -212,37 +223,6 @@ export function ManagementCredibilityCard({
                 <span style={{ fontSize: 9, color: "#888888", textTransform: "uppercase", letterSpacing: "0.06em" }}>Moderate</span>
                 <span style={{ fontSize: 9, color: "#888888", textTransform: "uppercase", letterSpacing: "0.06em" }}>High</span>
               </div>
-            </div>
-
-            {/* Subfactor rows — derived from trust.subfactors, aligned to scores order */}
-            <div className="border-t border-zinc-100 pt-3 space-y-2.5">
-              {scores.map((score) => {
-                const subfactorKey = subfactorKeyMap[score.factor];
-                if (subfactorKey == null) return null;
-                const value = trust.subfactors[subfactorKey];
-                const filled = getFilledBlocks(value);
-                const rowColor = getTrustLevelColor(score.rating);
-                return (
-                  <div key={score.factor} className="flex items-center justify-between gap-3">
-                    <span style={{ fontSize: 11, color: "#888888", whiteSpace: "nowrap" }}>
-                      {formatLabel(subfactorKey)}
-                    </span>
-                    <div style={{ display: "flex", gap: 3 }}>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            width: 8,
-                            height: 14,
-                            borderRadius: 2,
-                            backgroundColor: i < filled ? rowColor : "#E2E2E2",
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
         </div>

@@ -20,11 +20,11 @@ export function DecisionIntelligenceBanner({ di }: Props) {
   return (
     <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2 h-full">
       {/* Card header */}
-      <div className="flex items-center gap-2.5 px-3 pt-2 pb-3">
+      <div className="flex items-center gap-2.5 pb-3">
         <div className="p-1.5 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-white">
           <Brain className="h-4 w-4 text-zinc-600" />
         </div>
-        <h5 className="text-[#0F172B]">Decision Intelligence</h5>
+        <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", letterSpacing: "0.01em" }}>Decision Intelligence</span>
       </div>
 
       {/* Stacked vertical layout */}

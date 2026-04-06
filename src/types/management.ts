@@ -6,20 +6,6 @@ export type StatusType = "ACHIEVED" | "MISSED" | "PENDING";
 export type TargetType = "financial" | "conceptual";
 export type TimeframeOption = "current_quarter" | "rolling_3_year" | "full_history";
 
-// API Response types
-export interface Promise {
-  metric: string;
-  target: string;
-  timeline: string;
-  statement: string;
-}
-
-export interface RiskDisclosure {
-  risk: string;
-  severity: "high" | "medium" | "low";
-  disclosed_early: boolean;
-}
-
 // Company header
 export interface CompanyInfo {
   name: string | null;
@@ -55,7 +41,34 @@ export interface GovernanceSignal {
   text: string;
   isPositive: boolean;
   targets?: Array<{ statement: string; severity?: string }>;
-  risks?: Array<{ risk: string; severity?: string }>;
+}
+
+// Disclosures (structured 3-category object from backend)
+export interface RiskDisclosure {
+  risk_title: string;
+  risk_type?: string | null;
+  mitigation_strategy?: string | null;
+  severity?: "high" | "medium" | "low" | null;
+}
+
+export interface BadNewsDisclosure {
+  news_title: string;
+  disclosure_type?: string | null;
+  mitigation_strategy?: string | null;
+  severity?: "high" | "medium" | "low" | null;
+}
+
+export interface LegalIssueDisclosure {
+  issue_title: string;
+  issue_type?: string | null;
+  impact?: string | null;
+  severity?: "high" | "medium" | "low" | null;
+}
+
+export interface Disclosures {
+  risk?: RiskDisclosure[] | null;
+  bad_news?: BadNewsDisclosure[] | null;
+  legal_issues?: LegalIssueDisclosure[] | null;
 }
 
 // Consistency metrics
@@ -90,6 +103,72 @@ export interface NotablePattern {
   category: "positive" | "neutral" | "negative";
 }
 
+// Capital Allocation
+// ─── Capex Breakdown ──────────────────────────────────────────────────────────
+
+export type CapexTimeframe = "last_quarter" | "12_months" | "3_years" | "5_years";
+
+export interface CapexSlice {
+  name: string;
+  percentage: number;
+  amount_label: string;
+}
+
+export interface CapexBreakdownPeriod {
+  total_deployed: number;
+  total_deployed_label: string;
+  vs_5yr_avg_pct: number;
+  largest_allocation: string;
+  largest_allocation_pct: number;
+  slices: CapexSlice[];
+}
+
+/** All four timeframes pre-computed by the backend */
+export interface CapexBreakdown {
+  last_quarter: CapexBreakdownPeriod | null;
+  "12_months": CapexBreakdownPeriod | null;
+  "3_years": CapexBreakdownPeriod | null;
+  "5_years": CapexBreakdownPeriod | null;
+}
+
+// ─── ROCE Trend ───────────────────────────────────────────────────────────────
+
+export interface RoceTrendMetric {
+  label: string;
+  value: string;
+  /** Optional sub-label shown beneath the value (e.g. "-0.5pp vs 2023", "FY 2023") */
+  sub_label?: string | null;
+  sentiment: "positive" | "negative" | "neutral";
+}
+
+export interface RoceTrendDataPoint {
+  period: string;
+  roce: number;
+}
+
+export interface RoceTrendView {
+  /** Label shown as date-range in header, e.g. "2019 – 2024" */
+  date_range: string;
+  wacc_threshold: number | null;
+  period_avg_roce: number | null;
+  data_points: RoceTrendDataPoint[];
+  /** Exactly 4 metric cards: Latest ROCE, Peak ROCE, Avg ROCE, vs WACC */
+  metrics: RoceTrendMetric[];
+}
+
+export interface RoceTrend {
+  summary: string;
+  quarterly: RoceTrendView | null;
+  yearly: RoceTrendView | null;
+}
+
+// ─── Capital Allocation (top-level) ───────────────────────────────────────────
+
+export interface CapitalAllocation {
+  capex_breakdown: CapexBreakdown | null;
+  roce_trend: RoceTrend | null;
+}
+
 // Complete dashboard data
 export interface ManagementDashboardData {
   company: CompanyInfo;
@@ -100,6 +179,8 @@ export interface ManagementDashboardData {
   guidanceRecords: GuidanceRecord[];
   notablePatterns: NotablePattern[];
   selectedTimeframe: TimeframeOption;
+  disclosures?: Disclosures | null;
+  capital_allocation?: CapitalAllocation | null;
 }
 
 export interface ManagementDashboardResponse {

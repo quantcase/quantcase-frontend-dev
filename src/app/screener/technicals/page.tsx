@@ -20,14 +20,9 @@ import { VolumeAnalysis } from "./_components/VolumeAnalysis";
 import { SectionPanel } from "@/components/molecules/section-panel";
 
 const TECHNICALS_NAV = [
+  { id: "section-price-levels", label: "Price Levels" },
   { id: "section-price-chart", label: "Price Chart" },
   { id: "section-rule-engine", label: "Rule Engine" },
-  { id: "section-price-action", label: "Price Action" },
-  { id: "section-support-resistance", label: "Support & Resistance" },
-  { id: "section-signal-scorecard", label: "Signal Scorecard" },
-  { id: "section-momentum", label: "Momentum" },
-  { id: "section-moving-averages", label: "Moving Averages" },
-  { id: "section-key-insights", label: "Key Insights" },
 ];
 
 function TechnicalsContent() {
@@ -74,51 +69,53 @@ function TechnicalsContent() {
   }
 
   const changeIsPositive = data.price.changePercent >= 0;
-  const changeDisplay = `${changeIsPositive ? "+" : ""}${data.price.changePercent.toFixed(2)}%`;
+  const changeDisplay = `${changeIsPositive ? "+" : ""}${data.price.changePercent.toFixed(1)}%`;
 
   return (
     <ScreenerPageShell navItems={TECHNICALS_NAV}>
       <div className="mb-8 px-4 space-y-6 pt-6">
-        <LevelsStrip
-          price={data.price}
-          movingAverages={data.movingAverages}
-          supportResistance={data.supportResistance}
-          meta={data.meta}
-          changeDisplay={changeDisplay}
-          changeIsPositive={changeIsPositive}
-        />
+        <div id="section-price-levels">
+          <LevelsStrip
+            price={data.price}
+            movingAverages={data.movingAverages}
+            supportResistance={data.supportResistance}
+            meta={data.meta}
+            changeDisplay={changeDisplay}
+            changeIsPositive={changeIsPositive}
+          />
+        </div>
 
-        {/* Row 1: Price Chart (2/3) + Decision Intelligence (1/3) */}
-        <div className="grid grid-cols-3 gap-4">
-          <div id="section-price-chart" className="col-span-2">
-            <SectionPanel title="Price Chart">
-              <CandlestickChart
-                prices={prices}
-                indicators={indicators}
-                activeEngine={activeEngine}
-                loading={pricesLoading}
-                error={pricesError}
-              />
-            </SectionPanel>
+        {/* Row 1: Price Chart + Rule Engine (2/3) + Decision Intelligence (1/3) */}
+        <div className="grid grid-cols-3 gap-4 items-start">
+          <div className="col-span-2 flex flex-col gap-4">
+            <div id="section-price-chart">
+              <SectionPanel title="Price Chart">
+                <CandlestickChart
+                  prices={prices}
+                  indicators={indicators}
+                  activeEngine={activeEngine}
+                  loading={pricesLoading}
+                  error={pricesError}
+                />
+              </SectionPanel>
+            </div>
+            {data.ruleEngine && (
+              <div id="section-rule-engine">
+                <TechnicalsRuleEngine
+                  ruleEngine={data.ruleEngine}
+                  decisionIntelligence={data.decisionIntelligence}
+                  activeEngine={activeEngine}
+                  onEngineChange={setActiveEngine}
+                />
+              </div>
+            )}
           </div>
-          <div className="col-span-1">
+          <div className="col-span-1 sticky top-28">
             {data.decisionIntelligence && (
               <DecisionIntelligenceBanner di={data.decisionIntelligence} />
             )}
           </div>
         </div>
-
-        {/* Rule Engine */}
-        {data.ruleEngine && (
-          <div id="section-rule-engine">
-            <TechnicalsRuleEngine
-              ruleEngine={data.ruleEngine}
-              decisionIntelligence={data.decisionIntelligence}
-              activeEngine={activeEngine}
-              onEngineChange={setActiveEngine}
-            />
-          </div>
-        )}
 
         {/* <div id="section-price-action">
           <PriceActionOverview

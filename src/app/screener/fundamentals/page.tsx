@@ -37,13 +37,13 @@ const FUNDAMENTALS_NAV = [
 
 function fmt(value: number | null | undefined, format?: string): string {
   if (value === null || value === undefined) return "—";
-  if (format === "percent") return `${value}%`;
-  return value.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+  if (format === "percent") return `${parseFloat(value.toFixed(1))}%`;
+  return value.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
 function fmtPct(value: number | null | undefined): string {
   if (value === null || value === undefined) return "—";
-  return `${value > 0 ? "+" : ""}${value}%`;
+  return `${value > 0 ? "+" : ""}${parseFloat(value.toFixed(1))}%`;
 }
 
 function growthColor(value: number | null | undefined): string {
@@ -209,7 +209,7 @@ function ShareholdingTable({ sections, quarters, mode = "Quarterly" }: { section
 
   function fmtPctVal(v: number | null | undefined) {
     if (v === null || v === undefined) return "—";
-    return `${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })}%`;
+    return `${parseFloat(v.toFixed(1)).toLocaleString("en-IN")}%`;
   }
 
   const rows: { key: string; label: string; depth: number; isParent: boolean; isExpandable: boolean; parentId?: string; values: (number | null)[] }[] = [];
@@ -594,7 +594,7 @@ function ShareholdingCharts({ sections, quarters }: { sections: ShareholdingSect
       },
     },
     tooltip: {
-      y: { formatter: (val: number) => `${val.toFixed(2)}%` },
+      y: { formatter: (val: number) => `${val.toFixed(1)}%` },
     },
     stroke: { width: 2, colors: ["#ffffff"] },
   };
@@ -623,7 +623,7 @@ function ShareholdingCharts({ sections, quarters }: { sections: ShareholdingSect
                   />
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#0F172B", minWidth: 52, textAlign: "right" }}>
-                  {item.value.toFixed(2)}%
+                  {item.value.toFixed(1)}%
                 </div>
               </div>
             </div>

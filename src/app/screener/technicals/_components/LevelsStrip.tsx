@@ -1,6 +1,7 @@
 "use client";
 
 import { TechnicalsPriceRaw, TechnicalsMovingAveragesRaw, TechnicalsSupportResistanceRaw, TechnicalsMetaRaw } from "@/types/technicals";
+import { TabularCard } from "@/components/molecules/tabular-card";
 
 interface LevelsStripProps {
   price: TechnicalsPriceRaw;
@@ -11,10 +12,10 @@ interface LevelsStripProps {
   changeIsPositive: boolean;
 }
 
-const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+const fmt = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
 const pct = (n: number, positive?: boolean) => {
   const sign = positive === undefined ? (n >= 0 ? "+" : "") : positive ? "+" : "";
-  return `${sign}${Math.abs(n).toFixed(2)}%`;
+  return `${sign}${Math.abs(n).toFixed(1)}%`;
 };
 
 export function LevelsStrip({
@@ -31,7 +32,7 @@ export function LevelsStrip({
   const resistance = sr.resistance[0];
   const srRangeWidth =
     support && resistance
-      ? `${(((resistance - support) / support) * 100).toFixed(2)}%`
+      ? `${(((resistance - support) / support) * 100).toFixed(1)}%`
       : meta.srRange;
 
   const levels: { label: string; value: string; sub?: string; subColor?: string }[] = [
@@ -77,33 +78,37 @@ export function LevelsStrip({
     {
       label: "52W Low",
       value: fmt(price.low52w),
-      sub: `+${price.distanceFrom52wLow.toFixed(2)}%`,
+      sub: `+${price.distanceFrom52wLow.toFixed(1)}%`,
       subColor: "text-emerald-600",
     },
   ];
 
   return (
-    <div className="overflow-x-auto">
-      <div className="flex gap-3 min-w-max">
-        {levels.map(({ label, value, sub, subColor }) => (
-          <div
-            key={label}
-            className="rounded-lg border border-zinc-100 bg-white px-4 py-3 flex flex-col gap-1 min-w-[110px]"
-          >
-            <span className="text-[10px] font-medium uppercase tracking-wider text-[#888888]">
-              {label}
-            </span>
-            <span className="text-[15px] font-semibold text-[#0F172B] whitespace-nowrap">
-              {value}
-            </span>
-            {sub && (
-              <span className={`text-[11px] font-semibold ${subColor ?? "text-zinc-500"}`}>
-                {sub}
-              </span>
-            )}
-          </div>
-        ))}
+    <TabularCard title="Price Levels" titleCase>
+      <div className="overflow-x-auto">
+        <div className="flex w-full justify-between">
+          {levels.map(({ label, value, sub, subColor }, i) => (
+            <div key={label} className="flex">
+              {i > 0 && (
+                <div className="w-px bg-[#E2E2E2] self-stretch mx-0" />
+              )}
+              <div className="px-4 py-1 flex flex-col gap-1 min-w-[100px]">
+                <span className="text-[10px] font-medium uppercase tracking-wider text-[#888888]">
+                  {label}
+                </span>
+                <span className="text-[15px] font-semibold text-[#0F172B] whitespace-nowrap">
+                  {value}
+                </span>
+                {sub && (
+                  <span className={`text-[11px] font-semibold ${subColor ?? "text-zinc-500"}`}>
+                    {sub}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </TabularCard>
   );
 }

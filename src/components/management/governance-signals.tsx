@@ -17,10 +17,7 @@ export function GovernanceSignals({ signals }: GovernanceSignalsProps) {
           </div>
         ) : (
           signals.map((signal) => {
-            const statements = [
-              ...(signal.targets?.map((t) => t.statement) ?? []),
-              ...(signal.risks?.map((r) => r.risk) ?? []),
-            ].filter(Boolean);
+            const statements = (signal.targets?.map((t) => t.statement) ?? []).filter(Boolean);
 
             const Icon = signal.isPositive ? CheckCircle2 : XCircle;
             const iconColor = signal.isPositive ? "text-emerald-600" : "text-red-600";

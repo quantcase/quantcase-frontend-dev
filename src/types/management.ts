@@ -6,20 +6,6 @@ export type StatusType = "ACHIEVED" | "MISSED" | "PENDING";
 export type TargetType = "financial" | "conceptual";
 export type TimeframeOption = "current_quarter" | "rolling_3_year" | "full_history";
 
-// API Response types
-export interface Promise {
-  metric: string;
-  target: string;
-  timeline: string;
-  statement: string;
-}
-
-export interface RiskDisclosure {
-  risk: string;
-  severity: "high" | "medium" | "low";
-  disclosed_early: boolean;
-}
-
 // Company header
 export interface CompanyInfo {
   name: string | null;
@@ -55,7 +41,34 @@ export interface GovernanceSignal {
   text: string;
   isPositive: boolean;
   targets?: Array<{ statement: string; severity?: string }>;
-  risks?: Array<{ risk: string; severity?: string }>;
+}
+
+// Disclosures (structured 3-category object from backend)
+export interface RiskDisclosure {
+  risk_title: string;
+  risk_type?: string | null;
+  mitigation_strategy?: string | null;
+  severity?: "high" | "medium" | "low" | null;
+}
+
+export interface BadNewsDisclosure {
+  news_title: string;
+  disclosure_type?: string | null;
+  mitigation_strategy?: string | null;
+  severity?: "high" | "medium" | "low" | null;
+}
+
+export interface LegalIssueDisclosure {
+  issue_title: string;
+  issue_type?: string | null;
+  impact?: string | null;
+  severity?: "high" | "medium" | "low" | null;
+}
+
+export interface Disclosures {
+  risk?: RiskDisclosure[] | null;
+  bad_news?: BadNewsDisclosure[] | null;
+  legal_issues?: LegalIssueDisclosure[] | null;
 }
 
 // Consistency metrics
@@ -100,6 +113,7 @@ export interface ManagementDashboardData {
   guidanceRecords: GuidanceRecord[];
   notablePatterns: NotablePattern[];
   selectedTimeframe: TimeframeOption;
+  disclosures?: Disclosures | null;
 }
 
 export interface ManagementDashboardResponse {

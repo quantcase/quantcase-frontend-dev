@@ -8,18 +8,25 @@ import { apiPost, apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import type { TimeframeOption, JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 
-import { Badge } from "@/components/ui/badge";
 import { SectionPanel } from "@/components/molecules/section-panel";
+import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { ManagementCredibilityCard } from "@/components/management/management-credibility-card";
-import { ConsistencyAnalysis } from "@/components/management/consistency-analysis";
 import { GuidanceTrackTable } from "@/components/management/guidance-track-table";
-import { NotablePatterns } from "@/components/management/notable-patterns";
+import { DisclosuresTable } from "@/components/management/disclosures-table";
+import type { DisclosureRow, DisclosuresTableConfig } from "@/components/management/disclosures-table";
+
+const NAV_ITEMS = [
+  { id: "section-score", label: "Score" },
+  { id: "section-guidance", label: "Guidance Accuracy" },
+  { id: "section-disclosures", label: "Disclosure Honesty" },
+];
 
 function ManagementDashboardContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
 
   const [selectedTimeframe] = useState<TimeframeOption>("rolling_3_year");
+  const [activeDisclosureTab, setActiveDisclosureTab] = useState<"Risk" | "Bad News" | "Legal">("Risk");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const [jobStatuses, setJobStatuses] = useState<Record<string, JobStatus>>({});
@@ -335,88 +342,128 @@ function ManagementDashboardContent() {
     );
   }
 
-  const company = managementData?.company;
-  const ticker = company?.ticker ?? company?.name?.split("_")[0] ?? null;
-  const displayName = company?.company_name ?? company?.name ?? null;
+  // Build disclosure rows from the structured disclosures object
+  const disclosures = managementData.disclosures;
+
+  const riskRows: DisclosureRow[] = (disclosures?.risk ?? []).map((r) => ({
+    title: r.risk_title,
+    tag: r.risk_type ?? undefined,
+    severity: r.severity ?? undefined,
+    detail: r.mitigation_strategy ?? null,
+  }));
+
+  const badNewsRows: DisclosureRow[] = (disclosures?.bad_news ?? []).map((r) => ({
+    title: r.news_title,
+    tag: r.disclosure_type ?? undefined,
+    severity: r.severity ?? undefined,
+    detail: r.mitigation_strategy ?? null,
+  }));
+
+  const legalRows: DisclosureRow[] = (disclosures?.legal_issues ?? []).map((r) => ({
+    title: r.issue_title,
+    tag: r.issue_type ?? undefined,
+    severity: r.severity ?? undefined,
+    detail: r.impact ?? null,
+  }));
+
+  const allDisclosureRows = [...riskRows, ...badNewsRows, ...legalRows];
+
+  function ratingFromRows(rows: DisclosureRow[]): DisclosuresTableConfig["rating"] | undefined {
+    if (rows.length === 0) return undefined;
+    const highCount = rows.filter((r) => r.severity?.toLowerCase() === "high").length;
+    const ratio = highCount / rows.length;
+    return ratio <= 0.25
+      ? { label: "Strong", color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" }
+      : ratio <= 0.5
+      ? { label: "Moderate", color: "#d97706", bg: "#fffbeb", border: "#fde68a" }
+      : { label: "Weak", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" };
+  }
+
+  const disclosureTabConfigs: Record<string, { rows: DisclosureRow[]; config: DisclosuresTableConfig }> = {
+    Risk: {
+      rows: riskRows,
+      config: {
+        title: "Risk Disclosures",
+        subtitle: "Key risks identified by management",
+        leftHeader: "Risk & Type",
+        rightHeader: "Mitigation Strategy",
+        detailPlaceholder: "No mitigation guidance provided",
+        rating: ratingFromRows(riskRows),
+      },
+    },
+    "Bad News": {
+      rows: badNewsRows,
+      config: {
+        title: "Bad News Disclosures",
+        subtitle: "Adverse developments disclosed by management",
+        leftHeader: "News & Type",
+        rightHeader: "Mitigation Strategy",
+        detailPlaceholder: "No mitigation guidance provided",
+        rating: ratingFromRows(badNewsRows),
+      },
+    },
+    Legal: {
+      rows: legalRows,
+      config: {
+        title: "Legal Issues",
+        subtitle: "Legal and regulatory matters disclosed by management",
+        leftHeader: "Issue & Type",
+        rightHeader: "Impact",
+        detailPlaceholder: "No impact details provided",
+        rating: ratingFromRows(legalRows),
+      },
+    },
+  };
 
   return (
-    <div className="min-h-screen bg-white mb-8 px-4">
+    <ScreenerPageShell navItems={NAV_ITEMS}>
+      <div className="mb-8 px-4 space-y-6">
 
-      {/* Company Header — matches overview page style */}
-      <div className="flex items-start justify-between gap-4 mb-6 mt-8">
-        <div className="space-y-1.5">
-          <h2 className="leading-tight" style={{ fontSize: 32, fontWeight: 600 }}>
-            {displayName}
-          </h2>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge>{company?.exchange ?? "NSE"}: {ticker}</Badge>
-            <p className="text-[#888888]">{company?.industry?.split(", ").slice(0, 3).join(" • ")}</p>
-          </div>
+        {/* Score */}
+        <div id="section-score" className="pt-4">
+          <ManagementCredibilityCard
+            scores={managementData.scores}
+            trust={managementData.trust}
+            consistency={managementData.consistency}
+          />
         </div>
-        <div className="flex flex-col items-end gap-2 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="bg-zinc-900 text-white text-xs font-semibold px-3 py-1 rounded-md uppercase tracking-wide">
-              Full IM
-            </span>
-            {company?.confidenceLevel === "HIGH" && (
-              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1 rounded-md uppercase tracking-wide">
-                High Confidence
-              </span>
-            )}
-          </div>
+
+        {/* Guidance Accuracy */}
+        <div id="section-guidance">
+          <SectionPanel
+            title="Guidance Track Record"
+            headerAction={
+              managementData.consistency?.hitRate != null ? (
+                <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
+                  <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: "#0F172B", lineHeight: 1.1 }}>
+                    {managementData.consistency.hitRate}%
+                  </span>
+                </div>
+              ) : undefined
+            }
+          >
+            <GuidanceTrackTable records={managementData.guidanceRecords} />
+          </SectionPanel>
         </div>
+
+        {/* Disclosure Honesty */}
+        {allDisclosureRows.length > 0 && (
+          <div id="section-disclosures">
+            <DisclosuresTable
+              config={disclosureTabConfigs[activeDisclosureTab].config}
+              rows={disclosureTabConfigs[activeDisclosureTab].rows}
+              tabs={(["Risk", "Bad News", "Legal"] as const).map((tab) => ({
+                label: tab,
+                count: disclosureTabConfigs[tab].rows.length,
+              }))}
+              activeTab={activeDisclosureTab}
+              onTabChange={(tab) => setActiveDisclosureTab(tab as "Risk" | "Bad News" | "Legal")}
+            />
+          </div>
+        )}
       </div>
-
-      {/* Page Content */}
-      <div className="mx-auto space-y-6 ">
-
-        {/* Unified Management Credibility Card */}
-        <ManagementCredibilityCard
-          scores={managementData.scores}
-          trust={managementData.trust}
-          consistency={managementData.consistency}
-        />
-
-        {/* Bottom Layout: 2 columns */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* Left Column: Main Content (2/3) */}
-          <div className="flex flex-col gap-6 lg:col-span-2">
-            {/* Consistency Analysis */}
-            <SectionPanel
-              title="Commentary Consistency Analysis"
-              subtitle="Scoring methodology: Hit Rate = (MET + Adj) / (MET + MISS + Adj)"
-            >
-              <ConsistencyAnalysis consistency={managementData.consistency} />
-            </SectionPanel>
-
-            {/* Guidance Track Table */}
-            <SectionPanel
-              title="Guidance Track Record"
-              className="flex-1"
-              headerAction={
-                managementData.consistency?.hitRate != null ? (
-                  <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
-                    <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
-                    <span style={{ fontSize: 28, fontWeight: 700, color: "#0F172B", lineHeight: 1.1 }}>
-                      {managementData.consistency.hitRate}%
-                    </span>
-                  </div>
-                ) : undefined
-              }
-            >
-              <GuidanceTrackTable records={managementData.guidanceRecords} />
-            </SectionPanel>
-          </div>
-
-          {/* Right Sidebar: Notable Patterns (1/3) */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="flex-1">
-              <NotablePatterns patterns={managementData.notablePatterns} />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </ScreenerPageShell>
   );
 }
 

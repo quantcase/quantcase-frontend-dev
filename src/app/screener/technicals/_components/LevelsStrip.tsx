@@ -12,10 +12,10 @@ interface LevelsStripProps {
   changeIsPositive: boolean;
 }
 
-const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+const fmt = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
 const pct = (n: number, positive?: boolean) => {
   const sign = positive === undefined ? (n >= 0 ? "+" : "") : positive ? "+" : "";
-  return `${sign}${Math.abs(n).toFixed(2)}%`;
+  return `${sign}${Math.abs(n).toFixed(1)}%`;
 };
 
 export function LevelsStrip({
@@ -32,7 +32,7 @@ export function LevelsStrip({
   const resistance = sr.resistance[0];
   const srRangeWidth =
     support && resistance
-      ? `${(((resistance - support) / support) * 100).toFixed(2)}%`
+      ? `${(((resistance - support) / support) * 100).toFixed(1)}%`
       : meta.srRange;
 
   const levels: { label: string; value: string; sub?: string; subColor?: string }[] = [
@@ -78,7 +78,7 @@ export function LevelsStrip({
     {
       label: "52W Low",
       value: fmt(price.low52w),
-      sub: `+${price.distanceFrom52wLow.toFixed(2)}%`,
+      sub: `+${price.distanceFrom52wLow.toFixed(1)}%`,
       subColor: "text-emerald-600",
     },
   ];

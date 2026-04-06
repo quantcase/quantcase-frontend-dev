@@ -30,7 +30,7 @@ export function formatINR(value: number | null | undefined): string {
 }
 
 // Format a price (plain number) in INR with commas
-export function formatPrice(value: number | null | undefined, decimals = 2): string {
+export function formatPrice(value: number | null | undefined, decimals = 0): string {
   if (value == null) return "—";
   return `₹${value.toLocaleString("en-IN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
 }

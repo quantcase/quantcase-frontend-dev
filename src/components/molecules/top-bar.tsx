@@ -2,14 +2,19 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Bell, Search, ChevronDown } from "lucide-react";
-import { Suspense } from "react";
-import { DropdownMenu } from "radix-ui";
+import { Search, ChevronRight, Eye, CandlestickChart, BookOpen, Layers, LayoutDashboard, Users, PieChart, Wrench, LineChart } from "lucide-react";
+import { Suspense, useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 const quickSymbols = ["HDFC", "TCS", "INFY", "ICICI"];
 
 const QUANTCASE_FACTOR_PATHS = ["/screener/management", "/screener/opportunity", "/screener/deal"];
+
+const FACTOR_ITEMS = [
+  { label: "Management", href: "/screener/management" },
+  { label: "Opportunity", href: "/screener/opportunity" },
+  { label: "Deal",        href: "/screener/deal" },
+];
 
 function SearchZone() {
   return (
@@ -39,22 +44,25 @@ function SearchZone() {
 function TabLink({
   href,
   active,
+  icon,
   children,
 }: {
   href: string;
   active: boolean;
+  icon?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <Link
       href={href}
       className={cn(
-        "relative flex h-full items-center px-3 text-sm whitespace-nowrap transition-colors",
+        "relative flex h-full items-center gap-1.5 px-3 text-sm whitespace-nowrap transition-colors",
         active
           ? "text-[#0F172B] font-medium after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#0F172B]"
           : "text-[#888888] hover:text-[#0F172B]"
       )}
     >
+      {icon}
       {children}
     </Link>
   );
@@ -85,75 +93,99 @@ function TopBarInner() {
 
   const isFactorActive = QUANTCASE_FACTOR_PATHS.includes(pathname);
 
+  const [factorOpen, setFactorOpen] = useState(false);
+  const factorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!factorOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (factorRef.current && !factorRef.current.contains(e.target as Node)) {
+        setFactorOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [factorOpen]);
+
+  // Close the popover when navigating away from factor pages
+  useEffect(() => {
+    if (!isFactorActive) setFactorOpen(false);
+  }, [isFactorActive]);
+
   let leftZone: React.ReactNode = null;
 
   if (isHome || (isTerminal && !hasAssetSelected)) {
     leftZone = <SearchZone />;
   } else if (hasAssetSelected) {
     const terminalTabs = [
-      { label: "Overview",     href: "/screener/overview" },
-      { label: "Technicals",   href: "/screener/technicals" },
-      { label: "Fundamentals", href: "/screener/fundamentals" },
+      { label: "Overview",     href: "/screener/overview",     icon: <Eye className="size-3.5 shrink-0" /> },
+      { label: "Technicals",   href: "/screener/technicals",   icon: <CandlestickChart className="size-3.5 shrink-0" /> },
+      { label: "Fundamentals", href: "/screener/fundamentals", icon: <BookOpen className="size-3.5 shrink-0" /> },
     ];
+
+    // Expanded: factor active — show items inline
+    // Collapsed: not active — show trigger button, clicking expands inline
+    const showFactorItems = isFactorActive || factorOpen;
+
     leftZone = (
       <div className="flex h-full items-end gap-1">
         {terminalTabs.map((tab) => (
-          <TabLink key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href}>
+          <TabLink key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href} icon={tab.icon}>
             {tab.label}
           </TabLink>
         ))}
-        {/* QuantCase Factors dropdown */}
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <button
+
+        {/* QuantCase Factors — trigger + inline sub-items, all inside factorRef */}
+        <div ref={factorRef} className="flex h-full items-end">
+          <button
+            onClick={() => !isFactorActive && setFactorOpen((v) => !v)}
+            className={cn(
+              "relative flex h-full items-center gap-1.5 px-3 text-sm whitespace-nowrap transition-colors focus:outline-none",
+              isFactorActive
+                ? "text-[#0F172B] font-medium cursor-default"
+                : "text-[#888888] hover:text-[#0F172B]"
+            )}
+          >
+            <Layers className="size-3.5 shrink-0" />
+            QuantCase Factors
+            <ChevronRight
               className={cn(
-                "relative flex h-full items-center gap-1 px-3 text-sm whitespace-nowrap transition-colors focus:outline-none",
-                isFactorActive
-                  ? "text-[#0F172B] font-medium after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#0F172B]"
-                  : "text-[#888888] hover:text-[#0F172B]"
+                "size-3.5 shrink-0 transition-transform duration-200",
+                showFactorItems ? "rotate-180" : "rotate-0"
               )}
-            >
-              QuantCase Factors
-              <ChevronDown className="size-3.5 shrink-0" />
-            </button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content
-              sideOffset={0}
-              align="start"
-              className="z-50 min-w-[160px] rounded-md border border-[#E2E2E2] bg-white shadow-md"
-            >
-              {[
-                { label: "Management", href: "/screener/management" },
-                { label: "Opportunity", href: "/screener/opportunity" },
-                { label: "Deal",        href: "/screener/deal" },
-              ].map((item) => (
-                <DropdownMenu.Item key={item.href} asChild>
-                  <Link
-                    href={withSymbol(item.href)}
-                    className={cn(
-                      "block px-4 py-2 text-sm cursor-pointer select-none outline-none transition-colors",
-                      pathname === item.href
-                        ? "text-[#0F172B] font-medium"
-                        : "text-[#888888] hover:text-[#0F172B] hover:bg-gray-50"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                </DropdownMenu.Item>
+            />
+          </button>
+
+          {/* Factor sub-items — shown inline when expanded */}
+          {showFactorItems && (
+            <>
+              <span className="flex h-full items-center px-1 text-[#C8C8C8] select-none text-base">·</span>
+              {FACTOR_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={withSymbol(item.href)}
+                  className={cn(
+                    "relative flex h-full items-center px-3 text-sm whitespace-nowrap transition-colors",
+                    pathname === item.href
+                      ? "text-[#0F172B] font-medium after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#0F172B]"
+                      : "text-[#888888] hover:text-[#0F172B]"
+                  )}
+                >
+                  {item.label}
+                </Link>
               ))}
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
+            </>
+          )}
+        </div>
       </div>
     );
   } else if (isWealthOS) {
     const wealthTabs = [
-      { label: "Dashboard", href: "/wealthos/dashboard" },
-      { label: "Clients",   href: "/wealthos/clients" },
-      { label: "RMs",       href: "/wealthos/rms" },
-      { label: "Models",    href: "/wealthos/models" },
-      { label: "Analytics", href: "/wealthos/analytics" },
+      { label: "Dashboard", href: "/wealthos/dashboard", icon: <LayoutDashboard className="size-3.5 shrink-0" /> },
+      { label: "Clients",   href: "/wealthos/clients",   icon: <Users className="size-3.5 shrink-0" /> },
+      { label: "RMs",       href: "/wealthos/rms",       icon: <Users className="size-3.5 shrink-0" /> },
+      { label: "Models",    href: "/wealthos/models",    icon: <PieChart className="size-3.5 shrink-0" /> },
+      { label: "Analytics", href: "/wealthos/analytics", icon: <LineChart className="size-3.5 shrink-0" /> },
     ];
     leftZone = (
       <div className="flex h-full items-end gap-1">
@@ -162,6 +194,7 @@ function TopBarInner() {
             key={tab.href}
             href={withRmId(tab.href)}
             active={pathname.startsWith(tab.href)}
+            icon={tab.icon}
           >
             {tab.label}
           </TabLink>
@@ -170,13 +203,13 @@ function TopBarInner() {
     );
   } else if (isModels) {
     const modelTabs = [
-      { label: "Model Builder",   href: "/model-builder" },
-      { label: "Model Analytics", href: "/model-analytics" },
+      { label: "Model Builder",   href: "/model-builder",   icon: <Wrench className="size-3.5 shrink-0" /> },
+      { label: "Model Analytics", href: "/model-analytics", icon: <LineChart className="size-3.5 shrink-0" /> },
     ];
     leftZone = (
       <div className="flex h-full items-end gap-1">
         {modelTabs.map((tab) => (
-          <TabLink key={tab.href} href={tab.href} active={pathname === tab.href || (tab.href === "/model-builder" && pathname.startsWith("/model-builder/"))}>
+          <TabLink key={tab.href} href={tab.href} active={pathname === tab.href || (tab.href === "/model-builder" && pathname.startsWith("/model-builder/"))} icon={tab.icon}>
             {tab.label}
           </TabLink>
         ))}
@@ -185,12 +218,11 @@ function TopBarInner() {
   }
 
   return (
-    <header className="fixed left-14 right-0 top-0 z-30 flex h-12 items-center justify-between border-b border-[#E2E2E2] bg-white px-6 dark:border-gray-800 dark:bg-gray-950">
+    <header className="fixed left-14 right-0 top-0 z-30 flex h-12 items-center justify-between border-b border-[#E2E2E2] bg-[#F5F5F5] px-6 dark:border-gray-800 dark:bg-gray-950">
       <div className="flex h-full items-center">{leftZone}</div>
 
-      {/* Right: notification + user */}
+      {/* Right: user avatar */}
       <div className="flex items-center gap-4">
-
         <div className="flex items-center gap-2.5">
           <div className="flex size-9 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
             AM
@@ -205,7 +237,7 @@ export function TopBar() {
   return (
     <Suspense
       fallback={
-        <header className="fixed left-14 right-0 top-0 z-30 h-14 border-b border-[#E2E2E2] bg-white" />
+        <header className="fixed left-14 right-0 top-0 z-30 h-14 border-b border-[#E2E2E2] bg-[#F5F5F5]" />
       }
     >
       <TopBarInner />

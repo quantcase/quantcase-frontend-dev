@@ -12,6 +12,8 @@ interface TabularCardProps {
   defaultTab?: string;
   children: ReactNode | ((activeTab: string) => ReactNode);
   className?: string;
+  /** Override the default uppercase title transform */
+  titleCase?: boolean;
 }
 
 function OutlineToggle({
@@ -56,6 +58,7 @@ export function TabularCard({
   defaultTab,
   children,
   className,
+  titleCase,
 }: TabularCardProps) {
   const [activeTab, setActiveTab] = useState<string>(defaultTab ?? tabs?.[0] ?? "");
 
@@ -75,7 +78,7 @@ export function TabularCard({
       {/* Header */}
       <div
         className="flex items-center justify-between"
-        style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}
+        style={{ paddingBottom: 8, paddingLeft: 8, paddingRight: 8 }}
       >
         <div>
           <div
@@ -83,7 +86,7 @@ export function TabularCard({
               fontSize: 14,
               fontWeight: 600,
               color: "#0F172B",
-              textTransform: "uppercase",
+              textTransform: titleCase ? "none" : "uppercase",
               letterSpacing: "0.01em",
             }}
           >
@@ -107,7 +110,7 @@ export function TabularCard({
           borderRadius: 10,
           border: "1px solid rgba(226, 226, 226, 0.10)",
           background: "#FFF",
-          padding: 16,
+          padding: 8,
         }}
       >
         {resolvedContent}

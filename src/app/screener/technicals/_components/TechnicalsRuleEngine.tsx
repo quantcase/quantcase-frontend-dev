@@ -20,7 +20,7 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
 
   const titleNode = (
     <div className="flex items-center gap-3">
-      <h5 className="text-[#0F172B]">Rule Engine</h5>
+      <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", letterSpacing: "0.01em" }}>Rule Engine</span>
       <div className="flex items-center gap-0.5">
         {(["GROWTH", "VALUE"] as const).map((p, i) => (
           <>

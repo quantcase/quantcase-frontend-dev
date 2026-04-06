@@ -88,37 +88,37 @@ function TechnicalsContent() {
           changeIsPositive={changeIsPositive}
         />
 
-        {/* Row 1: Price Chart (2/3) + Decision Intelligence (1/3) */}
-        <div className="grid grid-cols-3 gap-4">
-          <div id="section-price-chart" className="col-span-2">
-            <SectionPanel title="Price Chart">
-              <CandlestickChart
-                prices={prices}
-                indicators={indicators}
-                activeEngine={activeEngine}
-                loading={pricesLoading}
-                error={pricesError}
-              />
-            </SectionPanel>
+        {/* Row 1: Price Chart + Rule Engine (2/3) + Decision Intelligence (1/3) */}
+        <div className="grid grid-cols-3 gap-4 items-start">
+          <div className="col-span-2 flex flex-col gap-4">
+            <div id="section-price-chart">
+              <SectionPanel title="Price Chart">
+                <CandlestickChart
+                  prices={prices}
+                  indicators={indicators}
+                  activeEngine={activeEngine}
+                  loading={pricesLoading}
+                  error={pricesError}
+                />
+              </SectionPanel>
+            </div>
+            {data.ruleEngine && (
+              <div id="section-rule-engine">
+                <TechnicalsRuleEngine
+                  ruleEngine={data.ruleEngine}
+                  decisionIntelligence={data.decisionIntelligence}
+                  activeEngine={activeEngine}
+                  onEngineChange={setActiveEngine}
+                />
+              </div>
+            )}
           </div>
-          <div className="col-span-1">
+          <div className="col-span-1 sticky top-28">
             {data.decisionIntelligence && (
               <DecisionIntelligenceBanner di={data.decisionIntelligence} />
             )}
           </div>
         </div>
-
-        {/* Rule Engine */}
-        {data.ruleEngine && (
-          <div id="section-rule-engine">
-            <TechnicalsRuleEngine
-              ruleEngine={data.ruleEngine}
-              decisionIntelligence={data.decisionIntelligence}
-              activeEngine={activeEngine}
-              onEngineChange={setActiveEngine}
-            />
-          </div>
-        )}
 
         {/* <div id="section-price-action">
           <PriceActionOverview

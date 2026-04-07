@@ -77,7 +77,7 @@ function BentoCard({ label, letter, score, max, weightPct, bullets, flex }: Bent
 
   return (
     <div
-      className="rounded-[10px] border border-[#E2E2E2] bg-white p-5 flex flex-col gap-3 min-w-0"
+      className="rounded-[10px] border border-[#E2E2E2] bg-white p-5 flex flex-col gap-3 min-w-0 h-full overflow-y-auto"
       style={{ flex }}
     >
       {/* Header row */}
@@ -223,34 +223,30 @@ export function IMScoreCard({
 
   const dBullets: string[] = dealOverview?.key_takeaway?.slice(0, 4) ?? [];
 
-  // Bento card flex sizing based on weights
-  const mFlex = cMW;
-  const oFlex = cOW;
-  const dFlex = cDW;
 
   return (
     <TabularCard title="QC Insight">
-      {/* Top row: Score circle + Insight + Sliders */}
-      <div className="grid grid-cols-1 lg:grid-cols-[auto_2fr_1fr] items-start gap-6 mb-4 pb-4 border-b border-[#E2E2E2]">
+      {/* Top: two-column layout — Col 1: radial chart, Col 2: rating + title + sliders */}
+      <div className="flex gap-6 mb-4 pb-4 border-b border-[#E2E2E2]">
 
-        {/* Col 1: Score circle */}
-        <div className="flex-shrink-0">
+        {/* Col 1: Radial score chart */}
+        <div className="flex-shrink-0 flex items-center justify-center">
           <div className="relative flex items-center justify-center">
-            <svg width={80} height={80} viewBox="0 0 80 80">
-              <circle cx={40} cy={40} r={34} fill="none" stroke="#E5E7EB" strokeWidth={6} />
+            <svg width={96} height={96} viewBox="0 0 96 96">
+              <circle cx={48} cy={48} r={40} fill="none" stroke="#E5E7EB" strokeWidth={7} />
               <circle
-                cx={40} cy={40} r={34}
+                cx={48} cy={48} r={40}
                 fill="none"
                 stroke="#0F172B"
-                strokeWidth={6}
-                strokeDasharray={`${2 * Math.PI * 34}`}
-                strokeDashoffset={`${2 * Math.PI * 34 * (1 - (displayScore ?? 0) / 100)}`}
+                strokeWidth={7}
+                strokeDasharray={`${2 * Math.PI * 40}`}
+                strokeDashoffset={`${2 * Math.PI * 40 * (1 - (displayScore ?? 0) / 100)}`}
                 strokeLinecap="round"
-                transform="rotate(-90 40 40)"
+                transform="rotate(-90 48 48)"
               />
             </svg>
             <div className="absolute flex flex-col items-center">
-              <span className="text-xl font-bold text-[#0F172B] leading-none">
+              <span className="text-2xl font-bold text-[#0F172B] leading-none">
                 {displayScore !== null ? displayScore : "—"}
               </span>
               <span className="text-[9px] text-zinc-400 font-semibold uppercase tracking-wide">/100</span>
@@ -258,83 +254,95 @@ export function IMScoreCard({
           </div>
         </div>
 
-        {/* Col 2: Rating badge + insight headline + subtext */}
-        <div className="min-w-0 flex flex-col gap-1">
-          {rating && (
-            <span className="self-start rounded-full bg-zinc-900 px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide">
-              {rating}
-            </span>
-          )}
-          {overallInsight && (
-            <p className="text-sm font-semibold text-[#0F172B] leading-snug">{overallInsight}</p>
-          )}
-          {opportunityTakeaways?.investment_thesis && (
-            <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
-              {opportunityTakeaways.investment_thesis}
+        {/* Col 2: Rating badge + headline + sliders stacked */}
+        <div className="flex-1 min-w-0 flex flex-col gap-3 justify-center">
+          {/* Rating + headline */}
+          <div className="flex flex-col gap-1">
+            {rating && (
+              <span className="self-start rounded-full bg-zinc-900 px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide">
+                {rating}
+              </span>
+            )}
+            {overallInsight && (
+              <p className="text-sm font-semibold text-[#0F172B] leading-snug">{overallInsight}</p>
+            )}
+          </div>
+
+          {/* Sliders */}
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold mb-2">
+              Adjust Weightings — must total 100%
             </p>
-          )}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
+              {[
+                { label: "Management", value: cMW, onChange: handleMWeight },
+                { label: "Opportunity", value: cOW, onChange: handleOWeight },
+                { label: "Deal", value: cDW, onChange: handleDWeight },
+              ].map(({ label, value, onChange }) => (
+                <div key={label} className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-[11px] text-zinc-500 w-20 flex-shrink-0">{label}</span>
+                  <input
+                    type="range"
+                    min={5}
+                    max={90}
+                    value={value}
+                    onChange={(e) => onChange(Number(e.target.value))}
+                    className="flex-1 min-w-0 accent-zinc-900 h-1"
+                  />
+                  <span className="text-[11px] font-semibold text-[#0F172B] w-8 text-right flex-shrink-0">
+                    {value}%
+                  </span>
+                </div>
+              ))}
+            </div>
+            {!weightValid && (
+              <p className="text-[10px] text-red-500 mt-1">Weightings must add up to 100% — adjust sliders.</p>
+            )}
+          </div>
         </div>
 
-        {/* Sliders */}
-        <div className="min-w-0 space-y-2">
-          <p className="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold mb-2">
-            Adjust Weightings — must total 100%
-          </p>
-          {[
-            { label: "Management", value: cMW, onChange: handleMWeight },
-            { label: "Opportunity", value: cOW, onChange: handleOWeight },
-            { label: "Deal", value: cDW, onChange: handleDWeight },
-          ].map(({ label, value, onChange }) => (
-            <div key={label} className="flex items-center gap-2">
-              <span className="text-[11px] text-zinc-500 w-20 flex-shrink-0">{label}</span>
-              <input
-                type="range"
-                min={5}
-                max={90}
-                value={value}
-                onChange={(e) => onChange(Number(e.target.value))}
-                className="flex-1 min-w-0 accent-zinc-900 h-1"
-              />
-              <span className="text-[11px] font-semibold text-[#0F172B] w-8 text-right flex-shrink-0">
-                {value}%
-              </span>
-            </div>
-          ))}
-          {!weightValid && (
-            <p className="text-[10px] text-red-500">Weightings must add up to 100% — adjust sliders.</p>
-          )}
-        </div>
       </div>
 
-      {/* Bento grid */}
-      <div className="flex flex-col lg:flex-row gap-4 divide-y lg:divide-y-0 lg:divide-x divide-[#E2E2E2]">
-        <BentoCard
-          label="Management"
-          letter="M"
-          score={mScore}
-          max={mMax}
-          weightPct={cMW}
-          bullets={mBullets}
-          flex={mFlex}
-        />
-        <BentoCard
-          label="Opportunity"
-          letter="O"
-          score={oScore}
-          max={oMax}
-          weightPct={cOW}
-          bullets={oBullets}
-          flex={oFlex}
-        />
-        <BentoCard
-          label="Deal"
-          letter="D"
-          score={dScore}
-          max={dMax}
-          weightPct={cDW}
-          bullets={dBullets}
-          flex={dFlex}
-        />
+      {/* Bento grid: left col = Opportunity (full height), right col = Management + Deal stacked */}
+      <div className="flex flex-col lg:flex-row gap-4" style={{ height: 480 }}>
+        {/* Left: Management — width proportional to mWeight */}
+        <div className="min-w-0 flex overflow-hidden" style={{ flex: cMW }}>
+          <BentoCard
+            label="Management"
+            letter="M"
+            score={mScore}
+            max={mMax}
+            weightPct={cMW}
+            bullets={mBullets}
+            flex={1}
+          />
+        </div>
+
+        {/* Right: Opportunity + Deal — width proportional to oWeight + dWeight, heights split by each weight */}
+        <div className="min-w-0 flex flex-col gap-4" style={{ flex: cOW + cDW }}>
+          <div className="flex flex-col overflow-hidden" style={{ flex: cOW }}>
+            <BentoCard
+              label="Opportunity"
+              letter="O"
+              score={oScore}
+              max={oMax}
+              weightPct={cOW}
+              bullets={oBullets}
+              flex={1}
+            />
+          </div>
+          <div className="flex flex-col overflow-hidden" style={{ flex: cDW }}>
+            <BentoCard
+              label="Deal"
+              letter="D"
+              score={dScore}
+              max={dMax}
+              weightPct={cDW}
+              bullets={dBullets}
+              flex={1}
+            />
+          </div>
+        </div>
       </div>
 
     </TabularCard>

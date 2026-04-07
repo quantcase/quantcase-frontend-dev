@@ -70,7 +70,7 @@ export function KeyRatioTiles({ data }: Props) {
   const divYield = ps.dividendYield != null ? `${(ps.dividendYield * 100).toFixed(1)}%` : "—";
 
   return (
-    <div className="px-4 pb-2">
+    <div className="px-4 pb-2 pt-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <MetricTile
           label="CMP"

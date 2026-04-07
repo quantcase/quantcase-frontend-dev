@@ -93,6 +93,7 @@ export interface GuidanceRecord {
   variance_pct?: number;
   status: StatusType;
   target_type: TargetType;
+  data_source?: string | null;
 }
 
 // Notable patterns

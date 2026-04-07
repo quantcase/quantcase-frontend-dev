@@ -103,6 +103,9 @@ export function GuidanceTrackTable({ records }: GuidanceTrackTableProps) {
                       <TableCell className="text-xs text-zinc-700 dark:text-zinc-300">
                         <div className="break-words whitespace-normal">
                           <DataValue value={record.current_value} />
+                          {record.data_source && (
+                            <span className="text-[10px] text-zinc-400 dark:text-zinc-500 ml-1">[{record.data_source}]</span>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="text-xs text-zinc-700 dark:text-zinc-300">

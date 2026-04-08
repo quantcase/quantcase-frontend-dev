@@ -10,6 +10,7 @@ import { historicalPerformanceData } from "@/components/deal/detailed-analysis-d
 
 interface HistoricalPerformanceProps {
   data?: HistoricalPerformanceSection;
+  hideHeader?: boolean;
 }
 
 const statColors: Record<string, { value: string; bg: string; border: string }> = {
@@ -18,7 +19,7 @@ const statColors: Record<string, { value: string; bg: string; border: string }> 
   purple:  { value: "text-[#0F172B]", bg: "bg-[#F5F5F5]", border: "border-[#E2E2E2]" },
 };
 
-export function HistoricalPerformance({ data }: HistoricalPerformanceProps) {
+export function HistoricalPerformance({ data, hideHeader }: HistoricalPerformanceProps) {
   // Fall back to static data during dev
   const title         = data?.meta?.title        ?? historicalPerformanceData.title;
   const subtitle      = data?.meta?.subtitle     ?? historicalPerformanceData.subtitle;
@@ -33,15 +34,17 @@ export function HistoricalPerformance({ data }: HistoricalPerformanceProps) {
   return (
     <div className="space-y-5">
       {/* Section Header */}
-      <div className="flex items-center gap-2.5">
-        <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] flex items-center justify-center flex-shrink-0">
-          <BarChart2 className="h-4 w-4 text-zinc-500" />
+      {!hideHeader && (
+        <div className="flex items-center gap-2.5">
+          <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] flex items-center justify-center flex-shrink-0">
+            <BarChart2 className="h-4 w-4 text-zinc-500" />
+          </div>
+          <div>
+            <h3 className="text-[14px] font-semibold text-[#0F172B] uppercase tracking-[0.01em] mb-0.5">{title}</h3>
+            {subtitle && <p className="text-[14px] text-[#888888]">{subtitle}</p>}
+          </div>
         </div>
-        <div>
-          <h3 className="text-[14px] font-semibold text-[#0F172B] uppercase tracking-[0.01em] mb-0.5">{title}</h3>
-          {subtitle && <p className="text-[14px] text-[#888888]">{subtitle}</p>}
-        </div>
-      </div>
+      )}
 
       {/* Top 2 stat tiles */}
       <div className="grid grid-cols-2 gap-4">

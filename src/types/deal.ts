@@ -24,6 +24,7 @@ export interface DPriceScenario {
   from_cmp?: string;
   cagr?: string;
   probability?: number;
+  tags?: string[];
 }
 
 export interface TargetPriceMatrixSection {
@@ -67,6 +68,8 @@ export interface EpsEngineSection {
   sub_section_subtitle?: string;
   scenarios?: { bear?: EpsScenario; base?: EpsScenario; bull?: EpsScenario };
   insight?: string;
+  top_upside_lever?: string;
+  primary_risk_factor?: string;
 }
 
 // ─── Historical Performance ───────────────────────────────────────────────────

@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { useTechnicals } from "@/hooks/useTechnicals";
 import { usePrices } from "@/hooks/usePrices";
-import { CandlestickChart } from "./_components/CandlestickChart";
+import { CandlestickChart, type ChartMode } from "./_components/CandlestickChart";
 import { DecisionIntelligenceBanner } from "./_components/DecisionIntelligenceBanner";
 import { TechnicalsRuleEngine, type EngineTab } from "./_components/TechnicalsRuleEngine";
 import { LevelsStrip } from "./_components/LevelsStrip";
@@ -30,6 +30,12 @@ function TechnicalsContent() {
   const symbol = searchParams.get("symbol") || "";
 
   const [activeEngine, setActiveEngine] = useState<EngineTab>("STRUCTURE");
+  const [chartMode, setChartMode] = useState<ChartMode>("DEFAULT");
+
+  const handleEngineChange = (tab: EngineTab) => {
+    setActiveEngine(tab);
+    setChartMode(tab);
+  };
 
   const { data, derived, loading, error } = useTechnicals(symbol);
   const { prices, indicators, loading: pricesLoading, error: pricesError } = usePrices(symbol);
@@ -89,13 +95,27 @@ function TechnicalsContent() {
         <div className="grid grid-cols-3 gap-4 items-start">
           <div className="col-span-2 flex flex-col gap-4">
             <div id="section-price-chart">
-              <SectionPanel title="Price Chart">
+              <SectionPanel
+                title="Price Chart"
+                headerAction={
+                  chartMode !== "DEFAULT" ? (
+                    <button
+                      onClick={() => setChartMode("DEFAULT")}
+                      className="px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wide border border-[#E2E2E2] bg-white text-[#0F172B] hover:bg-[#F5F5F5] transition-colors"
+                    >
+                      Default View
+                    </button>
+                  ) : null
+                }
+              >
                 <CandlestickChart
                   prices={prices}
                   indicators={indicators}
-                  activeEngine={activeEngine}
+                  chartMode={chartMode}
                   loading={pricesLoading}
                   error={pricesError}
+                  supportResistance={data.supportResistance}
+                  structureEngine={data.ruleEngine?.structureEngine}
                 />
               </SectionPanel>
             </div>
@@ -105,7 +125,7 @@ function TechnicalsContent() {
                   ruleEngine={data.ruleEngine}
                   decisionIntelligence={data.decisionIntelligence}
                   activeEngine={activeEngine}
-                  onEngineChange={setActiveEngine}
+                  onEngineChange={handleEngineChange}
                 />
               </div>
             )}

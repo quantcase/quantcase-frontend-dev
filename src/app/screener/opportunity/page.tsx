@@ -10,9 +10,9 @@ import { BACKEND_URL } from "@/lib/constants";
 import type { JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 import type { OFactorResponse } from "@/types/opportunity";
 
-import { Badge } from "@/components/ui/badge";
-import { FileText, Calendar, CheckCircle2, PanelRight, TrendingUp } from "lucide-react";
-import { IconBox } from "@/components/molecules/icon-box";
+import { PanelRight, TrendingUp, BarChart3, DollarSign, Users } from "lucide-react";
+import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
+import { ScreenerScorecard } from "@/components/molecules/screener-scorecard";
 import { PromptSideWindow } from "@/components/opportunity/prompt-side-window";
 import { IndustryOverviewCard } from "@/components/opportunity/industry-overview-card";
 import { CompetitionCard } from "@/components/opportunity/competition-card";
@@ -26,10 +26,8 @@ import { IndustryKpiTable } from "@/components/opportunity/industry-kpi-table";
 import { KpiBenchmarkingTable } from "@/components/opportunity/kpi-benchmarking-table";
 import { CustomerTractionCard } from "@/components/opportunity/customer-traction-card";
 import { SectionPanel } from "@/components/opportunity/section-panel";
-import { ScoringCard } from "@/components/molecules/scoring-card";
 import { SubsectionHeader } from "@/components/opportunity/subsection-header";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
-import { InsightsCard } from "@/components/opportunity/insights-card";
 
 function OpportunityContent() {
   const searchParams = useSearchParams();
@@ -305,7 +303,6 @@ function OpportunityContent() {
 
   // Analysis available — render full dashboard
   const data = { ...opportunityData, ...patchedSections } as OFactorResponse;
-  const transcriptCall = transcriptCalls[0];
 
   // Derive per-section scoring from final_takeaways.section_scores when individual final_scoring is absent
   const ft = data.final_takeaways;
@@ -324,34 +321,40 @@ function OpportunityContent() {
     setPatchedSections((prev) => ({ ...prev, [sectionKey]: sectionResult }));
   };
 
-  return (
-    <div className="min-h-screen bg-white mb-8 px-4">
+  const NAV_ITEMS = [
+    { id: "section-score", label: "Score" },
+    { id: "section-industry", label: "Industry Overview" },
+    { id: "section-competition", label: "Competition" },
+    { id: "section-financial", label: "Financial Strength" },
+    { id: "section-customer", label: "Customer Traction" },
+  ];
 
-      {/* Company Header */}
-      <div className="flex items-start justify-between gap-4 pt-6 mb-6">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-            <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
-          </div>
-          <div className="space-y-1.5">
-            <h2>{transcriptCall.company_name}</h2>
-            <div className="flex items-center gap-2">
-              <Badge>NSE: {symbol}</Badge>
-              <p>{transcriptCall.basic_industry}</p>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <Badge>
-            <FileText className="h-3.5 w-3.5 mr-1.5" />
-            FULL IM
-          </Badge>
-          <Badge>
-            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-            HIGH CONFIDENCE
-          </Badge>
-        </div>
-      </div>
+  const opportunityLevel = (() => {
+    const score = totalScore?.total_score ?? data.final_takeaways?.overall_score ?? 0;
+    const max = totalScore?.max_score ?? data.final_takeaways?.max_score ?? 40;
+    const pct = max > 0 ? score / max : 0;
+    if (pct <= 0.4) return "LOW";
+    if (pct <= 0.7) return "MODERATE";
+    return "HIGH";
+  })();
+
+  const iconMap: Record<string, typeof TrendingUp> = {
+    "Industry": TrendingUp,
+    "Competition": BarChart3,
+    "Financial Strength": DollarSign,
+    "Customer Traction": Users,
+  };
+
+  const scrollMap: Record<string, string> = {
+    "Industry": "section-industry",
+    "Competition": "section-competition",
+    "Financial Strength": "section-financial",
+    "Customer Traction": "section-customer",
+  };
+
+  return (
+    <ScreenerPageShell navItems={NAV_ITEMS}>
+      <div className="mb-8 px-4 space-y-6">
 
       {/* Floating Prompt Toggle */}
       <button
@@ -366,75 +369,42 @@ function OpportunityContent() {
         Prompt
       </button>
 
-      {/* Page Content */}
-      <div className="mx-auto space-y-6 ">
-
-        {/* Opportunity Factor Summary — two-column layout */}
-        {data.final_takeaways && (() => {
-          const ft = data.final_takeaways!;
-          const score = totalScore?.total_score ?? ft.overall_score;
-          const maxScore = totalScore?.max_score ?? ft.max_score;
-
-          const sectionRows = [
-            { name: "Industry", scoring: industryScoring },
-            { name: "Competition", scoring: competitionScoring },
-            { name: "Financial Strength", scoring: financialScoring },
-            { name: "Customer Traction", scoring: customerScoring },
-          ];
-
-          const assessmentRows = [
-            { name: "Industry Overview", key: "industry" as const },
-            { name: "Competition", key: "competition" as const },
-            { name: "Financial Strength", key: "financial_strength" as const },
-            { name: "Customer Traction", key: "customer_traction" as const },
-          ];
-
-          return (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-
-              {/* Left — Opportunity Factor Summary */}
-              <ScoringCard
-                title="Opportunity Factor Score"
-                score={score}
-                maxScore={maxScore}
-                rows={sectionRows.map((row) => {
-                  const s = row.scoring;
-                  const parsedScore = s ? parseFloat(String(s.score)) : NaN;
-                  return {
-                    name: row.name,
-                    score: isNaN(parsedScore) ? null : parsedScore,
-                    maxScore: s?.max_score ?? 10,
-                    status: s?.status,
-                  };
-                })}
-              />
-
-              {/* Right — Overall Opportunity Assessment */}
-              <SectionPanel title="Overall Opportunity Assessment">
-                <div className="flex flex-col justify-between h-90 pb-4">
-                  {assessmentRows.map((row, i) => {
-                    const s = ft.section_scores[row.key];
-                    return (
-                      <>
-                      <div key={row.key} className={`flex items-start gap-3 px-2`}>
-                        <IconBox icon={TrendingUp} />
-                        <div className="space-y-0.5">
-                          <h5>{row.name}</h5>
-                          <p className="line-clamp-2 text-truncate">{s.takeaway}</p>
-                        </div>
-                      </div>
-                      {i < assessmentRows.length - 1 && <hr className="border-zinc-200 dark:border-zinc-700 border-dashed"/> }
-                      </>
-                    );
-                  })}
-                </div>
-              </SectionPanel>
-
-            </div>
-          );
-        })()}
+        {/* Opportunity Factor Score */}
+        <div id="section-score" className="pt-4">
+          <ScreenerScorecard
+            title="OPPORTUNITY FACTOR"
+            overallLevel={opportunityLevel}
+            score={totalScore?.total_score ?? data.final_takeaways?.overall_score ?? 0}
+            maxScore={totalScore?.max_score ?? data.final_takeaways?.max_score ?? 40}
+            items={[
+              { name: "Industry", scoring: industryScoring },
+              { name: "Competition", scoring: competitionScoring },
+              { name: "Financial Strength", scoring: financialScoring },
+              { name: "Customer Traction", scoring: customerScoring },
+            ].map((row) => {
+              const s = row.scoring;
+              const parsedScore = s ? parseFloat(String(s.score)) : NaN;
+              const barValue = s?.max_score ? (parsedScore / s.max_score) * 100 : null;
+              return {
+                label: row.name,
+                descriptor: s?.status ?? undefined,
+                rating: (() => {
+                  const pct = s?.max_score ? parsedScore / s.max_score : 0;
+                  if (isNaN(parsedScore)) return undefined;
+                  if (pct <= 0.4) return "LOW";
+                  if (pct <= 0.7) return "MODERATE";
+                  return "HIGH";
+                })(),
+                barValue: isNaN(parsedScore) ? null : barValue,
+                icon: iconMap[row.name],
+                scrollToId: scrollMap[row.name],
+              };
+            })}
+          />
+        </div>
 
         {/* 4.1 Industry Overview & Market */}
+        <div id="section-industry">
         <SectionPanel
           title="Industry Overview & Market"
           subtitle="Synthesized from public company transcripts & filings"
@@ -442,8 +412,10 @@ function OpportunityContent() {
         >
           <IndustryOverviewCard data={data.industry_overview} competition={data.competition} />
         </SectionPanel>
+        </div>
 
         {/* 4.2 Competitive Benchmarking vs Industry Peers */}
+        <div id="section-competition">
         <SectionPanel
           title="Competitive Benchmarking vs Industry Peers"
           subtitle="Peer comparison from public filings & market data"
@@ -468,8 +440,10 @@ function OpportunityContent() {
           )}
           <TakeawayBox title="COMPETITION TAKEAWAY" text={data.competition?.text?.takeaway} color="emerald" />
         </SectionPanel>
+        </div>
 
         {/* 4.3 Financial Strength */}
+        <div id="section-financial">
         <SectionPanel
           title="Financial Strength"
           subtitle="Snapshot from financial statements, investor decks & management commentary"
@@ -526,8 +500,10 @@ function OpportunityContent() {
             <TakeawayBox title="FINANCIAL TAKEAWAY" text={data.financial_strength?.text?.key_takeaway} />
           </div>
         </SectionPanel>
+        </div>
 
         {/* 4.4 Client/Customer Traction */}
+        <div id="section-customer">
         <SectionPanel
           title="Client/Customer Traction"
           subtitle="Customer growth, retention & revenue trajectory with alt data projections"
@@ -536,8 +512,7 @@ function OpportunityContent() {
         >
           <CustomerTractionCard data={data.customer_traction} />
         </SectionPanel>
-
-      </div>
+        </div>
 
       {/* Prompt Side Window — fixed overlay */}
       {showSideWindow && (
@@ -549,7 +524,8 @@ function OpportunityContent() {
           onClose={() => setShowSideWindow(false)}
         />
       )}
-    </div>
+      </div>
+    </ScreenerPageShell>
   );
 }
 

@@ -96,11 +96,29 @@ export interface TechnicalsTimeframesRaw {
 
 export interface DecisionIntelligenceIndicator {
   name: string;
+  tag: string;
+  explanation: string;
+  sentiment: "positive" | "negative" | "transitional";
   growthWatchout: string | null;
   valueWatchout: string | null;
 }
 
+export interface ActionableInsight {
+  action: string;
+  firstShift: string;
+  existingHolderAction: string;
+  reEvaluateCondition: string;
+}
+
 export interface DecisionIntelligence {
+  tag: string;
+  lens: string;
+  idealFor: string;
+  timeframe: string;
+  actionableInsight: ActionableInsight;
+  convictionLevel: string;
+  indicators: DecisionIntelligenceIndicator[];
+  whatCanChange: string[];
   currentRegime: {
     label: string;
     description: string;
@@ -111,8 +129,6 @@ export interface DecisionIntelligence {
     value: string;
   };
   riskAlerts: string[];
-  convictionLevel: string;
-  indicators?: DecisionIntelligenceIndicator[];
 }
 
 export interface TechnicalsResponse {
@@ -148,9 +164,7 @@ export interface TechnicalsDerived {
 // Rule Engine types
 export interface RuleEngineIndicator {
   growthOutput: string | null;
-  growthWatchout: string | null;
   valueOutput: string | null;
-  valueWatchout: string | null;
 }
 
 export interface MarketPhaseIndicator extends RuleEngineIndicator {

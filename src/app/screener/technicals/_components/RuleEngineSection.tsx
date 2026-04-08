@@ -17,15 +17,11 @@ function resolveWatchout(
   indicators: DecisionIntelligenceIndicator[] | undefined,
   name: string,
   perspective: "GROWTH" | "VALUE",
-  fallback: string | null
 ): string | null {
-  if (indicators) {
-    const match = indicators.find((ind) => ind.name === name);
-    if (match) {
-      return perspective === "GROWTH" ? match.growthWatchout : match.valueWatchout;
-    }
-  }
-  return fallback;
+  if (!indicators) return null;
+  const match = indicators.find((ind) => ind.name === name);
+  if (!match) return null;
+  return perspective === "GROWTH" ? match.growthWatchout : match.valueWatchout;
 }
 
 function smaPositionColor(pos: string): string {
@@ -168,7 +164,7 @@ function StructureEnginePanel({ engine, perspective, indicators }: { engine: Str
         subtitle="Wyckoff Phase"
         badge={mp.wyckoffPhase}
         output={isGrowth ? mp.growthOutput : mp.valueOutput}
-        watchout={resolveWatchout(indicators, "Wyckoff Phase", perspective, isGrowth ? mp.growthWatchout : mp.valueWatchout)}
+        watchout={resolveWatchout(indicators, "Market Structure", perspective)}
       />
       <EngineCard
         title="Capital Participation"
@@ -179,14 +175,14 @@ function StructureEnginePanel({ engine, perspective, indicators }: { engine: Str
           <MetricPill label="CMF Signal" value={cp.cmfSignal} colorClass={engineSignalColor(cp.cmfSignal)} />
         </>}
         output={isGrowth ? cp.growthOutput : cp.valueOutput}
-        watchout={resolveWatchout(indicators, "Participation", perspective, isGrowth ? cp.growthWatchout : cp.valueWatchout)}
+        watchout={resolveWatchout(indicators, "Capital Participation", perspective)}
       />
       <EngineCard
         title="Price Structure"
         subtitle="Support & Resistance"
         badge={pa.zone ?? "N/A"}
         output={isGrowth ? pa.growthOutput : pa.valueOutput}
-        watchout={resolveWatchout(indicators, "Price Structure", perspective, isGrowth ? pa.growthWatchout : pa.valueWatchout)}
+        watchout={resolveWatchout(indicators, "Price Architecture", perspective)}
       />
     </div>
   );
@@ -210,7 +206,7 @@ function TrendEnginePanel({ engine, perspective, indicators }: { engine: TrendEn
           <MetricPill label="SMA 200" value={db.priceVsSMA200} colorClass={smaPositionColor(db.priceVsSMA200)} />
         </>}
         output={isGrowth ? db.growthOutput : db.valueOutput}
-        watchout={isGrowth ? db.growthWatchout : db.valueWatchout}
+        watchout={resolveWatchout(indicators, "Trend Direction", perspective)}
       />
       <EngineCard
         title="Trend Quality"
@@ -222,7 +218,7 @@ function TrendEnginePanel({ engine, perspective, indicators }: { engine: TrendEn
           <MetricPill label="Band" value={tm.adxBand} colorClass="text-zinc-500" />
         </>}
         output={isGrowth ? tm.growthOutput : tm.valueOutput}
-        watchout={resolveWatchout(indicators, "Trend Quality", perspective, isGrowth ? tm.growthWatchout : tm.valueWatchout)}
+        watchout={resolveWatchout(indicators, "Trend Quality", perspective)}
       />
     </div>
   );
@@ -247,7 +243,7 @@ function TimingEnginePanel({ engine, perspective, indicators }: { engine: Timing
         badge={rsiLabel(mt.rsiZone)}
         metrics={<MetricPill label="RSI" value={mt.rsi.toFixed(2)} colorClass={mt.rsiZone === "0-30" ? "text-emerald-600" : mt.rsiZone === "70-100" ? "text-red-600" : "text-zinc-600"} />}
         output={isGrowth ? mt.growthOutput : mt.valueOutput}
-        watchout={resolveWatchout(indicators, "Momentum", perspective, isGrowth ? mt.growthWatchout : mt.valueWatchout)}
+        watchout={resolveWatchout(indicators, "Momentum", perspective)}
       />
       <EngineCard
         title="Volatility"
@@ -258,13 +254,13 @@ function TimingEnginePanel({ engine, perspective, indicators }: { engine: Timing
           <MetricPill label="Direction" value={vr.expanding ? "Expanding" : "Contracting"} colorClass={vr.expanding ? "text-red-600" : "text-emerald-600"} />
         </>}
         output={isGrowth ? vr.growthOutput : vr.valueOutput}
-        watchout={isGrowth ? vr.growthWatchout : vr.valueWatchout}
+        watchout={resolveWatchout(indicators, "Volatility", perspective)}
       />
     </div>
   );
 }
 
-function RelativeStrengthCard({ title, subtitle, rs, perspective }: { title: string; subtitle: string; rs: RelativeStrengthSingle; perspective: "GROWTH" | "VALUE" }) {
+function RelativeStrengthCard({ title, subtitle, rs, perspective, indicatorName, indicators }: { title: string; subtitle: string; rs: RelativeStrengthSingle; perspective: "GROWTH" | "VALUE"; indicatorName: string; indicators: DecisionIntelligenceIndicator[] | undefined }) {
   const isGrowth = perspective === "GROWTH";
   const hasData = rs.signal !== null;
   return (
@@ -277,16 +273,16 @@ function RelativeStrengthCard({ title, subtitle, rs, perspective }: { title: str
         <MetricPill label="Prev CRS" value={rs.prevCrsValue?.toFixed(2) ?? "—"} />
       </> : undefined}
       output={isGrowth ? rs.growthOutput : rs.valueOutput}
-      watchout={isGrowth ? rs.growthWatchout : rs.valueWatchout}
+      watchout={resolveWatchout(indicators, indicatorName, perspective)}
     />
   );
 }
 
-function DominanceEnginePanel({ engine, perspective }: { engine: DominanceEngineData; perspective: "GROWTH" | "VALUE" }) {
+function DominanceEnginePanel({ engine, perspective, indicators }: { engine: DominanceEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined }) {
   return (
     <div className="space-y-4">
-      <RelativeStrengthCard title="Relative Strength vs Nifty" subtitle="Price Ratio vs Index" rs={engine.leadership.vsNifty} perspective={perspective} />
-      <RelativeStrengthCard title="Relative Strength vs Sector" subtitle="Price Ratio vs Sector ETF" rs={engine.leadership.vsSector} perspective={perspective} />
+      <RelativeStrengthCard title="Relative Strength vs Nifty" subtitle="Price Ratio vs Index" rs={engine.leadership.vsNifty} perspective={perspective} indicatorName="Relative Strength" indicators={indicators} />
+      <RelativeStrengthCard title="Relative Strength vs Sector" subtitle="Price Ratio vs Sector ETF" rs={engine.leadership.vsSector} perspective={perspective} indicatorName="Relative Strength" indicators={indicators} />
     </div>
   );
 }
@@ -316,7 +312,7 @@ export function RuleEngineSection({
         <TimingEnginePanel engine={ruleEngine.timingEngine} perspective={activePerspective} indicators={diIndicators} />
       )}
       {activeEngine === "DOMINANCE" && (
-        <DominanceEnginePanel engine={ruleEngine.dominanceEngine} perspective={activePerspective} />
+        <DominanceEnginePanel engine={ruleEngine.dominanceEngine} perspective={activePerspective} indicators={diIndicators} />
       )}
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useDealAnalysis } from "@/hooks/useDealAnalysis";
@@ -328,5 +328,9 @@ function DealContent() {
 }
 
 export default function DealFactorPage() {
-  return <DealContent />;
+  return (
+    <Suspense>
+      <DealContent />
+    </Suspense>
+  );
 }

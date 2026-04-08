@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useDealAnalysis } from "@/hooks/useDealAnalysis";
@@ -9,15 +9,25 @@ import { BACKEND_URL } from "@/lib/constants";
 import type { JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 import type { DFactorResponse } from "@/types/deal";
 
-import { Badge } from "@/components/ui/badge";
-import { FileText, CheckCircle2 } from "lucide-react";
-import { EntryPointCallout } from "@/components/deal/entry-point-callout";
-import { ScenarioFramework } from "@/components/deal/scenario-framework";
+import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { TargetPriceMatrix } from "@/components/deal/target-price-matrix";
 import { RiskRewardSummary } from "@/components/deal/risk-reward-summary";
 import { DetailedAnalysis } from "@/components/deal/detailed-analysis";
 import { DealOverview } from "@/components/deal/deal-overview";
+import { EpsEngine } from "@/components/deal/eps-engine";
+import { HistoricalPerformance } from "@/components/deal/historical-performance";
+import { PeReratingPotential } from "@/components/deal/pe-rerating-potential";
 import { SectionPanel } from "@/components/molecules/section-panel";
+import { TabularCard } from "@/components/molecules/tabular-card";
+import type { InPageNavItem } from "@/components/molecules/in-page-nav";
+
+const DEAL_NAV_ITEMS: InPageNavItem[] = [
+  { id: "score", label: "Score" },
+  { id: "target-price", label: "Target Price" },
+  { id: "past-trend", label: "Past Trend" },
+  { id: "forecast", label: "Forecast" },
+  { id: "pe-rerating", label: "P/E Re-Rating Potential" },
+];
 
 function DealContent() {
   const searchParams = useSearchParams();
@@ -147,59 +157,48 @@ function DealContent() {
     };
   }, [aggregateStatus]);
 
-  if (!symbol) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm text-red-600">Error: No symbol provided in query parameters</div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm">Loading...</div>
-      </div>
-    );
-  }
-
-  if (transcriptError) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm text-red-600">Error: {transcriptError}</div>
-      </div>
-    );
-  }
-
-  if (transcriptCalls.length === 0) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm">No transcript calls found for {symbol}</div>
-      </div>
-    );
-  }
-
-  // No analysis yet — show Analyze prompt
-  if (Object.keys(dealData).length === 0) {
-    const transcriptCall = transcriptCalls[0];
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="sticky top-0 w-full bg-zinc-900 dark:bg-zinc-700 py-2 px-4 text-center text-xs font-semibold text-white">
-          ⚠️ HIGHLY CONFIDENTIAL — FOR INVESTMENT COMMITTEE USE ONLY
+  // Render content based on state
+  const renderContent = () => {
+    if (!symbol) {
+      return (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-sm text-red-600">Error: No symbol provided in query parameters</div>
         </div>
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <h1 className="text-sm font-bold mb-6">Deal Factor Analysis</h1>
+      );
+    }
+
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-sm">Loading...</div>
+        </div>
+      );
+    }
+
+    if (transcriptError) {
+      return (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-sm text-red-600">Error: {transcriptError}</div>
+        </div>
+      );
+    }
+
+    if (transcriptCalls.length === 0) {
+      return (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-sm">No transcript calls found for {symbol}</div>
+        </div>
+      );
+    }
+
+    // No analysis yet — show Analyze prompt
+    if (Object.keys(dealData).length === 0) {
+      const transcriptCall = transcriptCalls[0];
+      return (
+        <div className="px-4 py-8 max-w-4xl mx-auto">
           <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
             <div className="space-y-4">
-              <div>
-                <h2 className="text-sm font-semibold mb-2">{transcriptCall.company_name}</h2>
-                <p className="text-sm text-muted-foreground">{transcriptCall.basic_industry}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 py-4 border-t border-border">
-                <div>
-                  <p className="text-sm text-muted-foreground">Ticker</p>
-                  <p className="font-semibold">{transcriptCall.company}</p>
-                </div>
+              <div className="grid grid-cols-2 gap-4 py-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Quarter</p>
                   <p className="font-semibold">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
@@ -207,10 +206,6 @@ function DealContent() {
                 <div>
                   <p className="text-sm text-muted-foreground">Call Date</p>
                   <p className="font-semibold">{transcriptCall.call_date}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Call ID</p>
-                  <p className="font-semibold text-xs">{transcriptCall.id}</p>
                 </div>
               </div>
               <div className="pt-4 border-t border-border">
@@ -278,93 +273,60 @@ function DealContent() {
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // Analysis available — render full dashboard
-  const data = dealData as DFactorResponse;
-  const transcriptCall = transcriptCalls[0];
+    // Analysis available — render full dashboard
+    const data = dealData as DFactorResponse;
 
-  return (
-    <div className="min-h-screen bg-white mb-8 px-4">
-
-      {/* Company Header — matches opportunity page style */}
-      <div className="flex items-start justify-between gap-4 mb-6 mt-8">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-            <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
-          </div>
-          <div className="space-y-1.5">
-            <h2>{transcriptCall.company_name}</h2>
-            <div className="flex items-center gap-2">
-              <Badge>NSE: {symbol}</Badge>
-              <p>{transcriptCall.basic_industry}</p>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <Badge>
-            <FileText className="h-3.5 w-3.5 mr-1.5" />
-            FULL IM
-          </Badge>
-          <Badge>
-            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-            DATA CONFIDENCE: HIGH
-          </Badge>
-          <span className="text-xs text-zinc-400">{transcriptCall.call_date}</span>
-        </div>
-      </div>
-
-      {/* Page Content */}
-      <div className="mx-auto space-y-6 ">
+    return (
+      <div className="mb-8 px-4 space-y-6 pt-6">
         {data.overview && (
+          <div id="score">
             <DealOverview data={data.overview} />
+          </div>
         )}
-        <SectionPanel
-          title={data.scenario_framework?.meta?.title ?? "Scenario Framework"}
-          contentClassName="px-6 pb-6"
-        >
-          <ScenarioFramework data={data.scenario_framework} />
-        </SectionPanel>
-        <SectionPanel
-          title={data.target_price_matrix?.meta?.title ?? "Target Price Matrix"}
-          subtitle={[
-            data.target_price_matrix?.holding_period,
-            data.target_price_matrix?.current_price ? `Current Price: ${data.target_price_matrix.current_price}` : undefined,
-          ].filter(Boolean).join(" | ") || undefined}
-          contentClassName="px-6 pb-6"
-        >
-          <TargetPriceMatrix data={data.target_price_matrix} />
-        </SectionPanel>
-        {data.risk_reward_summary && (
+        <div id="target-price">
           <SectionPanel
-            title={data.risk_reward_summary?.meta?.title ?? "Risk / Reward Summary"}
+            title={data.target_price_matrix?.meta?.title ?? "Target Price Matrix"}
+            subtitle={[
+              data.target_price_matrix?.holding_period,
+              data.target_price_matrix?.current_price ? `Current Price: ${data.target_price_matrix.current_price}` : undefined,
+            ].filter(Boolean).join(" | ") || undefined}
             contentClassName="px-6 pb-6"
           >
-            <RiskRewardSummary data={data.risk_reward_summary} />
+            <TargetPriceMatrix data={data.target_price_matrix} />
           </SectionPanel>
-        )}
-        <SectionPanel
-          title="Detailed Analysis"
-          subtitle="Earnings trajectory, quality of earnings, and valuation comparisons"
-          contentClassName="px-6 pb-6 space-y-6"
-        >
-          <DetailedAnalysis data={data.detailed_analysis} />
-        </SectionPanel>
+        </div>
+        <div id="past-trend">
+          <TabularCard
+            title={data.detailed_analysis?.historical_performance?.meta?.title ?? "Historical Performance: Company EPS CAGR vs Industry Earnings Growth"}
+            subtitle={data.detailed_analysis?.historical_performance?.meta?.subtitle}
+          >
+            <HistoricalPerformance data={data.detailed_analysis?.historical_performance} hideHeader />
+          </TabularCard>
+        </div>
+        <div id="forecast">
+          <TabularCard title="Forecast">
+            <EpsEngine data={data.detailed_analysis?.eps_engine} />
+          </TabularCard>
+        </div>
+        <div id="pe-rerating">
+          <TabularCard title="P/E Re-Rating Potential" titleCase>
+            <PeReratingPotential data={data.detailed_analysis?.valuation_vs_peers} />
+          </TabularCard>
+        </div>
       </div>
-    </div>
+    );
+  };
+
+  return (
+    <ScreenerPageShell navItems={dealData && Object.keys(dealData).length > 0 ? DEAL_NAV_ITEMS : undefined}>
+      {renderContent()}
+    </ScreenerPageShell>
   );
 }
 
 export default function DealFactorPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm">Loading...</div>
-      </div>
-    }>
-      <DealContent />
-    </Suspense>
-  );
+  return <DealContent />;
 }

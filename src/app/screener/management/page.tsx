@@ -6,11 +6,12 @@ import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useManagementAnalysis } from "@/hooks/useManagementAnalysis";
 import { apiPost, apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
+import { Target, Shield, Briefcase, Users } from "lucide-react";
 import type { TimeframeOption, JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
-import { ManagementCredibilityCard } from "@/components/management/management-credibility-card";
+import { ScreenerScorecard } from "@/components/molecules/screener-scorecard";
 import { GuidanceTrackTable } from "@/components/management/guidance-track-table";
 import { DisclosuresTable } from "@/components/management/disclosures-table";
 import type { DisclosureRow, DisclosuresTableConfig } from "@/components/management/disclosures-table";
@@ -424,10 +425,37 @@ function ManagementDashboardContent() {
 
         {/* Score */}
         <div id="section-score" className="pt-4">
-          <ManagementCredibilityCard
-            scores={managementData.scores}
-            trust={managementData.trust}
-            consistency={managementData.consistency}
+          <ScreenerScorecard
+            title="MANAGEMENT CREDIBILITY"
+            overallLevel={managementData.trust?.overall}
+            score={managementData.consistency?.score ?? 0}
+            maxScore={managementData.consistency?.maxScore ?? 20}
+            items={(() => {
+              const subfactorKeyMap: Record<string, keyof typeof managementData.trust.subfactors> = {
+                "Guidance Accuracy": "guidanceAccuracy",
+                "Disclosure Honesty": "disclosureHonesty",
+                "Capital Allocation": "capitalAllocation",
+              };
+              const iconMap: Record<string, typeof Target> = {
+                "Guidance Accuracy": Target,
+                "Disclosure Honesty": Shield,
+                "Capital Allocation": Briefcase,
+                "Customer Traction": Users,
+              };
+              const scrollMap: Record<string, string> = {
+                "Guidance Accuracy": "section-guidance",
+                "Disclosure Honesty": "section-disclosures",
+                "Capital Allocation": "section-capital-allocation",
+              };
+              return (managementData.scores ?? []).map((s) => ({
+                label: s.factor,
+                descriptor: s.descriptor,
+                rating: s.rating,
+                barValue: subfactorKeyMap[s.factor] ? managementData.trust?.subfactors?.[subfactorKeyMap[s.factor]] ?? null : null,
+                icon: iconMap[s.factor],
+                scrollToId: scrollMap[s.factor],
+              }));
+            })()}
           />
         </div>
 

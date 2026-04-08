@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { EpsEngine } from "@/components/deal/eps-engine";
-import { HistoricalPerformance } from "@/components/deal/historical-performance";
 import { QualityOfEarnings } from "@/components/deal/quality-of-earnings";
 import { ValuationVsPeers } from "@/components/deal/valuation-vs-peers";
 import { ExpandToggle } from "@/components/molecules/expand-toggle";
@@ -26,12 +24,6 @@ export function DetailedAnalysis({ data }: DetailedAnalysisProps) {
 
       {isOpen && (
         <div className="space-y-6">
-          <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-            <EpsEngine data={data?.eps_engine} />
-          </div>
-          <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-            <HistoricalPerformance data={data?.historical_performance} />
-          </div>
           <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
             <QualityOfEarnings data={data?.quality_of_earnings} />
           </div>

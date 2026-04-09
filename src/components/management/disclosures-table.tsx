@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { TabularCard } from "@/components/molecules/tabular-card";
 
 export interface DisclosureRow {
@@ -11,6 +12,8 @@ export interface DisclosureRow {
   severity?: "high" | "medium" | "low" | string;
   /** Right-column content */
   detail: string | null;
+  /** Timing badge: proactive | reactive | partial | forced | past */
+  timing?: string | null;
 }
 
 export interface DisclosuresTableConfig {
@@ -42,6 +45,36 @@ function severityDotColor(severity?: string): string {
   }
 }
 
+const TIMING_STYLES: Record<string, { color: string; bg: string; border: string }> = {
+  proactive: { color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
+  reactive:  { color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
+  partial:   { color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
+  forced:    { color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
+  past:      { color: "#71717a", bg: "#f5f5f5", border: "#e2e2e2" },
+};
+
+function TimingBadge({ timing }: { timing: string }) {
+  const style = TIMING_STYLES[timing.toLowerCase()] ?? TIMING_STYLES["past"];
+  return (
+    <span
+      style={{
+        fontSize: 10,
+        fontWeight: 600,
+        color: style.color,
+        background: style.bg,
+        border: `1px solid ${style.border}`,
+        borderRadius: 9999,
+        padding: "2px 8px",
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {timing}
+    </span>
+  );
+}
+
 export interface DisclosuresTab {
   label: string;
   count: number;
@@ -53,9 +86,10 @@ interface DisclosuresTableProps {
   tabs?: DisclosuresTab[];
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  headerAction?: ReactNode;
 }
 
-export function DisclosuresTable({ config, rows, tabs, activeTab, onTabChange }: DisclosuresTableProps) {
+export function DisclosuresTable({ config, rows, tabs, activeTab, onTabChange, headerAction }: DisclosuresTableProps) {
   const tabsEl = tabs && tabs.length > 0 ? (
     <div className="inline-flex items-center gap-1.5">
       {tabs.map((t) => (
@@ -98,19 +132,22 @@ export function DisclosuresTable({ config, rows, tabs, activeTab, onTabChange }:
     </div>
   ) : null;
 
-  const headerAction = (tabsEl || ratingEl) ? (
+  const composedHeaderAction = (tabsEl || ratingEl || headerAction) ? (
     <div className="flex items-center gap-3">
+      {headerAction}
       {tabsEl}
       {ratingEl}
     </div>
   ) : undefined;
+
+  const hasTimingColumn = rows.some((r) => r.timing);
 
   return (
     <TabularCard
       title={config.title}
       subtitle={config.subtitle}
       titleCase
-      headerAction={headerAction}
+      headerAction={composedHeaderAction}
     >
       {/* Key Finding */}
       {config.keyFinding && (
@@ -140,9 +177,14 @@ export function DisclosuresTable({ config, rows, tabs, activeTab, onTabChange }:
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
-                <th style={{ width: "45%", textAlign: "left", fontSize: 10, fontWeight: 500, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", paddingBottom: 8, borderBottom: "1px solid #E2E2E2" }}>
+                <th style={{ width: "38%", textAlign: "left", fontSize: 10, fontWeight: 500, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", paddingBottom: 8, borderBottom: "1px solid #E2E2E2" }}>
                   {config.leftHeader ?? "Item & Type"}
                 </th>
+                {hasTimingColumn && (
+                  <th style={{ width: "14%", textAlign: "left", fontSize: 10, fontWeight: 500, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", paddingBottom: 8, borderBottom: "1px solid #E2E2E2" }}>
+                    Timing
+                  </th>
+                )}
                 <th style={{ textAlign: "left", fontSize: 10, fontWeight: 500, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", paddingBottom: 8, borderBottom: "1px solid #E2E2E2" }}>
                   {config.rightHeader ?? "Detail"}
                 </th>
@@ -171,6 +213,11 @@ export function DisclosuresTable({ config, rows, tabs, activeTab, onTabChange }:
                       </div>
                     </div>
                   </td>
+                  {hasTimingColumn && (
+                    <td style={{ padding: "12px 8px 12px 0", verticalAlign: "top" }}>
+                      {row.timing ? <TimingBadge timing={row.timing} /> : null}
+                    </td>
+                  )}
                   <td style={{ padding: "12px 0 12px 16px", verticalAlign: "top" }}>
                     {row.detail ? (
                       <span style={{ fontSize: 14, color: "#121212" }}>{row.detail}</span>

@@ -102,8 +102,9 @@ function OverviewContent() {
             opportunityMax={oppTotalScore?.max_score ?? null}
             dealScore={derivedDealScore}
             dealMax={derivedDealMax}
-            governanceSignals={mgmtDashboard?.governanceSignals}
+            managementFactors={mgmtDashboard?.scores}
             opportunityTakeaways={oppData?.final_takeaways ?? null}
+            opportunityData={oppData}
             dealOverview={dFactorData?.overview ?? null}
           />
         </div>

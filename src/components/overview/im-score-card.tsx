@@ -2,9 +2,14 @@
 
 import { useState, useCallback } from "react";
 import { TabularCard } from "@/components/molecules/tabular-card";
-import type { GovernanceSignal } from "@/types/management";
-import type { FinalTakeaways } from "@/types/opportunity";
+import type { FactorScore } from "@/types/management";
+import type { FinalTakeaways, OFactorResponse } from "@/types/opportunity";
 import type { OverviewSection } from "@/types/deal";
+
+interface TitledBullet {
+  title: string;
+  text: string;
+}
 
 interface IMScoreCardProps {
   managementScore?: number | null;
@@ -13,9 +18,10 @@ interface IMScoreCardProps {
   opportunityMax?: number | null;
   dealScore?: number | null;
   dealMax?: number | null;
-  // Insight bullets
-  governanceSignals?: GovernanceSignal[];
+  // Structured insight items
+  managementFactors?: FactorScore[];
   opportunityTakeaways?: FinalTakeaways | null;
+  opportunityData?: OFactorResponse | null;
   dealOverview?: OverviewSection | null;
 }
 
@@ -67,11 +73,11 @@ interface BentoCardProps {
   score: number | null;
   max: number;
   weightPct: number;
-  bullets: string[];
+  items: TitledBullet[];
   flex: number; // css flex grow value
 }
 
-function BentoCard({ label, letter, score, max, weightPct, bullets, flex }: BentoCardProps) {
+function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoCardProps) {
   const pct = max > 0 && score !== null ? Math.min(score / max, 1) : 0;
   const ticks = max;
 
@@ -115,13 +121,16 @@ function BentoCard({ label, letter, score, max, weightPct, bullets, flex }: Bent
         })}
       </div>
 
-      {/* Bullets */}
-      {bullets.length > 0 ? (
-        <ul className="space-y-1 flex-1">
-          {bullets.map((b, i) => (
+      {/* Titled bullet items */}
+      {items.length > 0 ? (
+        <ul className="space-y-2.5 flex-1">
+          {items.map((item, i) => (
             <li key={i} className="flex items-start gap-2">
               <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-zinc-400 flex-shrink-0" />
-              <span className="text-xs text-zinc-500 leading-relaxed">{b}</span>
+              <div>
+                <p className="text-xs font-semibold text-[#0F172B] leading-snug">{item.title}</p>
+                <p className="text-xs text-zinc-500 leading-relaxed mt-0.5">{item.text}</p>
+              </div>
             </li>
           ))}
         </ul>
@@ -139,8 +148,9 @@ export function IMScoreCard({
   opportunityMax,
   dealScore,
   dealMax,
-  governanceSignals,
+  managementFactors,
   opportunityTakeaways,
+  opportunityData,
   dealOverview,
 }: IMScoreCardProps) {
   const mScore = managementScore ?? null;
@@ -205,23 +215,68 @@ export function IMScoreCard({
   const rating = hasAnyScore ? getRating(weightedPct) : null;
   const overallInsight = hasAnyScore ? getOverallInsight(weightedPct, opportunityTakeaways, dealOverview) : null;
 
-  // Bullets per card
-  const mBullets: string[] = governanceSignals
-    ? governanceSignals.slice(0, 4).map((s) => s.text)
+  // Titled items per card
+  const mItems: TitledBullet[] = managementFactors
+    ? managementFactors.slice(0, 4).map((f) => ({
+        title: f.factor,
+        text: f.descriptor ?? "",
+      }))
     : [];
 
-  const oBullets: string[] = (() => {
-    const bullets: string[] = [];
-    if (opportunityTakeaways?.key_highlights) {
-      bullets.push(...opportunityTakeaways.key_highlights.slice(0, 3));
+  const oItems: TitledBullet[] = (() => {
+    // Try final_takeaways.section_scores first
+    const scores = opportunityTakeaways?.section_scores;
+    if (scores) {
+      const entries: { key: string; label: string }[] = [
+        { key: "industry", label: "Industry" },
+        { key: "competition", label: "Competition" },
+        { key: "financial_strength", label: "Financial Strength" },
+        { key: "customer_traction", label: "Customer Traction" },
+      ];
+      const items = entries
+        .filter((e) => scores[e.key as keyof typeof scores]?.takeaway)
+        .map((e) => ({
+          title: e.label,
+          text: scores[e.key as keyof typeof scores].takeaway,
+        }));
+      if (items.length > 0) return items;
     }
-    if (bullets.length < 3 && opportunityTakeaways?.key_risks) {
-      bullets.push(...opportunityTakeaways.key_risks.slice(0, 3 - bullets.length));
-    }
-    return bullets.slice(0, 4);
+    // Fallback: read takeaway from each section's .text.takeaway
+    if (!opportunityData) return [];
+    const sectionMap: { key: keyof OFactorResponse; label: string }[] = [
+      { key: "industry_overview", label: "Industry" },
+      { key: "competition", label: "Competition" },
+      { key: "financial_strength", label: "Financial Strength" },
+      { key: "customer_traction", label: "Customer Traction" },
+    ];
+    return sectionMap
+      .filter((e) => {
+        const sec = opportunityData[e.key];
+        return sec && typeof sec === "object" && "text" in sec && sec.text?.takeaway;
+      })
+      .map((e) => ({
+        title: e.label,
+        text: (opportunityData[e.key] as { text?: { takeaway?: string } })!.text!.takeaway!,
+      }));
   })();
 
-  const dBullets: string[] = dealOverview?.key_takeaway?.slice(0, 4) ?? [];
+  const dItems: TitledBullet[] = (() => {
+    const items: TitledBullet[] = [];
+    const eps = dealOverview?.eps_engine_card;
+    if (eps?.drivers?.length) {
+      items.push({ title: "EPS Engine", text: eps.drivers.join("; ") });
+    }
+    const val = dealOverview?.valuation_rerating_card;
+    if (val?.drivers?.length) {
+      items.push({ title: "Valuation Re-Rating", text: val.drivers.join("; ") });
+    }
+    if (items.length === 0 && dealOverview?.key_takeaway?.length) {
+      dealOverview.key_takeaway.slice(0, 4).forEach((t) => {
+        items.push({ title: "Key Takeaway", text: t });
+      });
+    }
+    return items;
+  })();
 
 
   return (
@@ -313,7 +368,7 @@ export function IMScoreCard({
             score={mScore}
             max={mMax}
             weightPct={cMW}
-            bullets={mBullets}
+            items={mItems}
             flex={1}
           />
         </div>
@@ -327,7 +382,7 @@ export function IMScoreCard({
               score={oScore}
               max={oMax}
               weightPct={cOW}
-              bullets={oBullets}
+              items={oItems}
               flex={1}
             />
           </div>
@@ -338,7 +393,7 @@ export function IMScoreCard({
               score={dScore}
               max={dMax}
               weightPct={cDW}
-              bullets={dBullets}
+              items={dItems}
               flex={1}
             />
           </div>

@@ -2,6 +2,7 @@
 
 import { ArrowDown } from "lucide-react";
 import type { EpsEngineSection, EpsScenario } from "@/types/deal";
+import { fmtDealNum } from "@/lib/utils";
 import { epsEngineData } from "@/components/deal/detailed-analysis-data";
 
 interface EpsEngineProps {
@@ -63,7 +64,7 @@ function MetricRow({ label, scenarios, field, isLast }: MetricRowProps) {
               }`}
             >
               <p className={`text-lg font-semibold ${isEps ? colors.text : colors.text}`}>
-                {metric?.value}
+                {fmtDealNum(metric?.value)}
               </p>
               <p className={`text-xs mt-0.5 text-[#888888]`}>
                 {"note" in (metric || {}) ? (metric as { note?: string })?.note : ""}

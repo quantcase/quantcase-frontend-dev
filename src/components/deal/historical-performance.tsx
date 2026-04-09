@@ -6,6 +6,7 @@ import {
 } from "recharts";
 import { BarChart2 } from "lucide-react";
 import type { HistoricalPerformanceSection } from "@/types/deal";
+import { fmtDealNum } from "@/lib/utils";
 import { historicalPerformanceData } from "@/components/deal/detailed-analysis-data";
 
 interface HistoricalPerformanceProps {
@@ -52,14 +53,14 @@ export function HistoricalPerformance({ data, hideHeader }: HistoricalPerformanc
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">
             Company Earnings Growth
           </p>
-          <p className="text-[26px] font-normal text-[#0F172B]">{companyGrowth.value}</p>
+          <p className="text-[26px] font-normal text-[#0F172B]">{fmtDealNum(companyGrowth.value)}</p>
           <p className="text-xs text-[#888888] mt-0.5">{companyGrowth.label}</p>
         </div>
         <div className="rounded-lg bg-[#F5F5F5] border border-[#E2E2E2] p-4">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">
             Industry Earnings Growth
           </p>
-          <p className="text-[26px] font-normal text-[#0F172B]">{industryGrowth.value}</p>
+          <p className="text-[26px] font-normal text-[#0F172B]">{fmtDealNum(industryGrowth.value)}</p>
           <p className="text-xs text-[#888888] mt-0.5">{industryGrowth.label}</p>
         </div>
       </div>
@@ -102,7 +103,7 @@ export function HistoricalPerformance({ data, hideHeader }: HistoricalPerformanc
           const colors = statColors[stat.color] ?? statColors.emerald;
           return (
             <div key={i} className={`rounded-lg border ${colors.border} ${colors.bg} p-3 text-center`}>
-              <p className={`text-[26px] font-normal ${colors.value}`}>{stat.value}</p>
+              <p className={`text-[26px] font-normal ${colors.value}`}>{fmtDealNum(stat.value)}</p>
               <p className="text-[10px] text-[#888888] mt-0.5">{stat.label}</p>
             </div>
           );

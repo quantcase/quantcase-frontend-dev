@@ -35,6 +35,24 @@ export function formatPrice(value: number | null | undefined, decimals = 0): str
   return `₹${value.toLocaleString("en-IN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
 }
 
+// Re-format a numeric string from the deal API with Indian locale formatting.
+// Percent values → 1 decimal place. All other numbers → rounded to nearest integer.
+export function fmtDealNum(raw?: string): string {
+  if (!raw) return "—";
+  const isPercent = raw.includes("%");
+  return raw.replace(/(\d[\d,]*\.?\d*)/g, (match) => {
+    const num = parseFloat(match.replace(/,/g, ""));
+    if (isNaN(num)) return match;
+    if (isPercent) {
+      return parseFloat(num.toFixed(1)).toLocaleString("en-IN", {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      });
+    }
+    return Math.round(num).toLocaleString("en-IN");
+  });
+}
+
 // Date formatting
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);

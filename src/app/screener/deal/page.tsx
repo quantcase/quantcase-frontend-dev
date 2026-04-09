@@ -6,6 +6,7 @@ import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useDealAnalysis } from "@/hooks/useDealAnalysis";
 import { apiPost, apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
+import { fmtDealNum } from "@/lib/utils";
 import type { JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 import type { DFactorResponse } from "@/types/deal";
 
@@ -291,7 +292,7 @@ function DealContent() {
             title={data.target_price_matrix?.meta?.title ?? "Target Price Matrix"}
             subtitle={[
               data.target_price_matrix?.holding_period,
-              data.target_price_matrix?.current_price ? `Current Price: ${data.target_price_matrix.current_price}` : undefined,
+              data.target_price_matrix?.current_price ? `Current Price: ${fmtDealNum(data.target_price_matrix.current_price)}` : undefined,
             ].filter(Boolean).join(" | ") || undefined}
             contentClassName="px-6 pb-6"
           >

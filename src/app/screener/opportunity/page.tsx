@@ -377,17 +377,17 @@ function OpportunityContent() {
             score={totalScore?.total_score ?? data.final_takeaways?.overall_score ?? 0}
             maxScore={totalScore?.max_score ?? data.final_takeaways?.max_score ?? 40}
             items={[
-              { name: "Industry", scoring: industryScoring },
-              { name: "Competition", scoring: competitionScoring },
-              { name: "Financial Strength", scoring: financialScoring },
-              { name: "Customer Traction", scoring: customerScoring },
+              { name: "Industry", scoring: industryScoring, takeaway: data.industry_overview?.text?.takeaway },
+              { name: "Competition", scoring: competitionScoring, takeaway: data.competition?.text?.takeaway },
+              { name: "Financial Strength", scoring: financialScoring, takeaway: data.financial_strength?.text?.takeaway },
+              { name: "Customer Traction", scoring: customerScoring, takeaway: data.customer_traction?.text?.takeaway },
             ].map((row) => {
               const s = row.scoring;
               const parsedScore = s ? parseFloat(String(s.score)) : NaN;
               const barValue = s?.max_score ? (parsedScore / s.max_score) * 100 : null;
               return {
                 label: row.name,
-                descriptor: s?.status ?? undefined,
+                descriptor: row.takeaway ?? s?.status ?? undefined,
                 rating: (() => {
                   const pct = s?.max_score ? parsedScore / s.max_score : 0;
                   if (isNaN(parsedScore)) return undefined;

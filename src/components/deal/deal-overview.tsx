@@ -41,14 +41,14 @@ export function DealOverview({ data }: DealOverviewProps) {
                 icon: TrendingUp,
                 barValue: ((deal_factor_score.eps_engine ?? 0) / 10) * 100,
                 rating: (deal_factor_score.eps_engine ?? 0) >= 7 ? "HIGH" : (deal_factor_score.eps_engine ?? 0) >= 4 ? "MODERATE" : "LOW",
-                descriptor: `${deal_factor_score.eps_engine ?? 0}/10`,
+                descriptor: eps_engine_card?.drivers?.slice(0, 2)?.join("; ") ?? `${deal_factor_score.eps_engine ?? 0}/10`,
               },
               {
                 label: "Valuation Re-Rating",
                 icon: TrendingUp,
                 barValue: ((deal_factor_score.valuation_rerating ?? 0) / 10) * 100,
                 rating: (deal_factor_score.valuation_rerating ?? 0) >= 7 ? "HIGH" : (deal_factor_score.valuation_rerating ?? 0) >= 4 ? "MODERATE" : "LOW",
-                descriptor: `${deal_factor_score.valuation_rerating ?? 0}/10`,
+                descriptor: valuation_rerating_card?.drivers?.slice(0, 2)?.join("; ") ?? `${deal_factor_score.valuation_rerating ?? 0}/10`,
               },
             ]}
           />

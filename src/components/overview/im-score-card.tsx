@@ -264,11 +264,11 @@ export function IMScoreCard({
     const items: TitledBullet[] = [];
     const eps = dealOverview?.eps_engine_card;
     if (eps?.drivers?.length) {
-      items.push({ title: "EPS Engine", text: eps.drivers.join("; ") });
+      items.push({ title: "EPS Engine", text: eps.drivers?.slice(0, 2)?.join("; ") });
     }
     const val = dealOverview?.valuation_rerating_card;
     if (val?.drivers?.length) {
-      items.push({ title: "Valuation Re-Rating", text: val.drivers.join("; ") });
+      items.push({ title: "Valuation Re-Rating", text: val.drivers?.slice(0, 2)?.join("; ") });
     }
     if (items.length === 0 && dealOverview?.key_takeaway?.length) {
       dealOverview.key_takeaway.slice(0, 4).forEach((t) => {

@@ -295,16 +295,6 @@ function ShareholdingTable({ sections, quarters, mode = "Quarterly" }: { section
 
 // ── Balance Sheet Treemap ──────────────────────────────────────────────────────
 
-const ASSET_KEYS = ["net_block", "fixed_asset", "capital_wip", "cwip", "investments", "inventories", "inventory", "receivables", "debtors", "cash", "short_term_invest", "other_assets", "loans_advances"];
-const LIABILITY_KEYS = ["equity", "share_capital", "reserves", "borrowings", "debt", "payables", "creditors", "other_liabilities", "provisions"];
-
-function classifyRow(key: string): "asset" | "liability" | null {
-  const k = key.toLowerCase();
-  if (ASSET_KEYS.some((ak) => k.includes(ak))) return "asset";
-  if (LIABILITY_KEYS.some((lk) => k.includes(lk))) return "liability";
-  return null;
-}
-
 function fmtCr(value: number): string {
   return `₹${value.toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr`;
 }
@@ -316,46 +306,42 @@ function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
   const assets: { x: string; y: number }[] = [];
   const liabilities: { x: string; y: number }[] = [];
 
+  // Balance sheets list liabilities first, then assets (separated by a "Total Liabilities" row).
+  // Classify by position relative to the first "total" row.
+  let seenFirstTotal = false;
   for (const row of table.rows) {
+    const labelLower = row.label.toLowerCase();
+    const isTotal = labelLower.includes("total");
+    if (isTotal) {
+      seenFirstTotal = true;
+      continue;
+    }
     const val = row.values[lastIdx];
     if (val === null || val === undefined || val <= 0) continue;
-    if (row.label.toLowerCase().includes("total")) continue;
-    const side = classifyRow(row.key);
-    if (side === "asset") assets.push({ x: row.label, y: val });
-    else if (side === "liability") liabilities.push({ x: row.label, y: val });
-  }
-
-  // Fallback: split rows 50/50 if classification yields nothing
-  if (assets.length === 0 && liabilities.length === 0) {
-    const mid = Math.ceil(table.rows.length / 2);
-    table.rows.forEach((row, i) => {
-      const val = row.values[lastIdx];
-      if (val === null || val === undefined || val <= 0) return;
-      if (row.label.toLowerCase().includes("total")) return;
-      if (i < mid) assets.push({ x: row.label, y: val });
-      else liabilities.push({ x: row.label, y: val });
-    });
+    if (!seenFirstTotal) {
+      liabilities.push({ x: row.label, y: val });
+    } else {
+      assets.push({ x: row.label, y: val });
+    }
   }
 
   const assetTotal = assets.reduce((s, r) => s + r.y, 0);
   const liabilityTotal = liabilities.reduce((s, r) => s + r.y, 0);
 
-  const series = [
-    { name: "Assets", data: assets },
-    { name: "Liabilities", data: liabilities },
-  ];
+  const assetSeries = [{ name: "Assets", data: assets }];
+  const liabilitySeries = [{ name: "Liabilities", data: liabilities }];
 
-  const options: ApexCharts.ApexOptions = {
+  const baseOptions = (color: string): ApexCharts.ApexOptions => ({
     legend: { show: false },
     chart: {
       type: "treemap",
       toolbar: { show: false },
       animations: { enabled: false },
     },
-    colors: ["#4ade80", "#f87171"],
+    colors: [color],
     dataLabels: {
       enabled: true,
-      style: { fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" },
+      style: { fontSize: "12px", fontWeight: "600", fontFamily: "var(--font-ibm-plex-sans, sans-serif)", colors: ["#ffffff"] },
       formatter: (text: string, op?: ApexCharts.ApexFormatterOpts) =>
         op?.value !== undefined ? [`${text}`, fmtCr(op.value as number)] : text,
     },
@@ -366,26 +352,31 @@ function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
     plotOptions: {
       treemap: {
         distributed: false,
-        enableShades: false,
+        enableShades: true,
         useFillColorAsStroke: false,
       },
     },
-  };
+  });
 
   return (
     <div>
-      <div className="grid grid-cols-2 mb-3">
-        <div style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
-          Assets {assetTotal > 0 && <span style={{ fontWeight: 400, textTransform: "none" }}>· {fmtCr(assetTotal)}</span>}
-        </div>
-        <div style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
-          Liabilities {liabilityTotal > 0 && <span style={{ fontWeight: 400, textTransform: "none" }}>· {fmtCr(liabilityTotal)}</span>}
-        </div>
-      </div>
       <div style={{ fontSize: 11, color: "#888888", textAlign: "right", marginBottom: 4 }}>
         Period: {period}
       </div>
-      <ApexChart type="treemap" series={series} options={options} height={420} />
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center", marginBottom: 6 }}>
+            Assets {assetTotal > 0 && <span style={{ fontWeight: 400, textTransform: "none" }}>· {fmtCr(assetTotal)}</span>}
+          </div>
+          <ApexChart type="treemap" series={assetSeries} options={baseOptions("#4ade80")} height={380} />
+        </div>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center", marginBottom: 6 }}>
+            Liabilities {liabilityTotal > 0 && <span style={{ fontWeight: 400, textTransform: "none" }}>· {fmtCr(liabilityTotal)}</span>}
+          </div>
+          <ApexChart type="treemap" series={liabilitySeries} options={baseOptions("#f87171")} height={380} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -766,9 +757,18 @@ function FinancialsContent() {
                   </div>
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Strengths</span>
                 </div>
-                <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6 }}>
-                  Market leader with ~17 GW installed capacity and consistent EBITDA margins above 35%, backed by long-term PPAs that provide strong revenue visibility.
-                </p>
+                <ul className="space-y-2">
+                  {[
+                    "#1 thermal producer, ~17 GW capacity",
+                    "EBITDA margins >35%",
+                    "Long-term PPAs, 5–25 yr revenue lock-in",
+                  ].map((point) => (
+                    <li key={point} className="flex items-start gap-2" style={{ fontSize: 13, color: "#888888" }}>
+                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               {/* Weaknesses */}
@@ -779,9 +779,18 @@ function FinancialsContent() {
                   </div>
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-red-600">Weaknesses</span>
                 </div>
-                <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6 }}>
-                  High leverage (net D/E above 2x) combined with DISCOM receivables risk creates a fragile balance sheet sensitive to payment delays from state utilities.
-                </p>
+                <ul className="space-y-2">
+                  {[
+                    "Net D/E >2x, high interest burden",
+                    "DISCOM receivables delay cash flows",
+                    "Fuel cost pass-through lag hurts margins",
+                  ].map((point) => (
+                    <li key={point} className="flex items-start gap-2" style={{ fontSize: 13, color: "#888888" }}>
+                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               {/* Opportunities */}
@@ -792,9 +801,18 @@ function FinancialsContent() {
                   </div>
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-600">Opportunities</span>
                 </div>
-                <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6 }}>
-                  India&apos;s persistent peak power deficit and a 6+ GW capacity pipeline position the company to capture incremental demand while DISCOM reforms reduce payment friction.
-                </p>
+                <ul className="space-y-2">
+                  {[
+                    "India peak-power deficit drives baseload demand",
+                    "6+ GW pipeline to monetise post-reform",
+                    "Green-bond access as renewables expand",
+                  ].map((point) => (
+                    <li key={point} className="flex items-start gap-2" style={{ fontSize: 13, color: "#888888" }}>
+                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               {/* Threats */}
@@ -805,9 +823,18 @@ function FinancialsContent() {
                   </div>
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Threats</span>
                 </div>
-                <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6 }}>
-                  Accelerating renewables adoption and unresolved governance concerns post-Hindenburg report may compress long-run thermal valuations and limit institutional investor appetite.
-                </p>
+                <ul className="space-y-2">
+                  {[
+                    "Renewables may structurally reprice thermal",
+                    "Hindenburg report dampens institutional appetite",
+                    "CERC tariff revisions risk merchant margins",
+                  ].map((point) => (
+                    <li key={point} className="flex items-start gap-2" style={{ fontSize: 13, color: "#888888" }}>
+                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
               </div>
 
             </div>

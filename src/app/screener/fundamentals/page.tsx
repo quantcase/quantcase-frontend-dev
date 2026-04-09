@@ -41,17 +41,6 @@ function fmt(value: number | null | undefined, format?: string): string {
   return value.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
-function fmtPct(value: number | null | undefined): string {
-  if (value === null || value === undefined) return "—";
-  return `${value > 0 ? "+" : ""}${parseFloat(value.toFixed(1))}%`;
-}
-
-function growthColor(value: number | null | undefined): string {
-  if (value === null || value === undefined) return "text-zinc-400";
-  if (value > 0) return "text-emerald-600";
-  if (value < 0) return "text-red-600";
-  return "text-zinc-500";
-}
 
 function FinancialDataTable({
   table,
@@ -153,38 +142,32 @@ function FinancialDataTable({
   );
 }
 
-function GrowthMetricRow({
-  label,
-  ttm,
-  threeYear,
+function GrowthStatCard({
+  title,
+  rows,
 }: {
-  label: string;
-  ttm?: number | null;
-  threeYear?: number | null;
+  title: string;
+  rows: { label: string; value: number | null | undefined }[];
 }) {
   return (
-    <div
-      className="flex items-center justify-between py-3 px-2"
-      style={{ borderBottom: "1px solid #F5F5F5" }}
-    >
-      <span style={{ fontSize: 13, color: "#888888" }}>{label}</span>
-      <div className="flex items-center gap-6">
-        <div className="text-right">
-          <div style={{ fontSize: 10, color: "#888888", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-            TTM / Last
+    <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-5">
+      <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", marginBottom: 16 }}>{title}</div>
+      <div className="space-y-0">
+        {rows.map(({ label, value }, i) => (
+          <div
+            key={label}
+            className="flex items-center justify-between py-2"
+            style={{ borderTop: i > 0 ? "1px solid #F5F5F5" : undefined }}
+          >
+            <span style={{ fontSize: 13, color: "#888888" }}>{label}</span>
+            <span
+              style={{ fontSize: 13, fontWeight: 600 }}
+              className={value === null || value === undefined ? "text-zinc-400" : "text-[#0F172B]"}
+            >
+              {value === null || value === undefined ? "%" : `${parseFloat(value.toFixed(1))}%`}
+            </span>
           </div>
-          <div className={`text-sm font-semibold ${growthColor(ttm)}`}>
-            {fmtPct(ttm)}
-          </div>
-        </div>
-        <div className="text-right">
-          <div style={{ fontSize: 10, color: "#888888", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-            3 Year
-          </div>
-          <div className={`text-sm font-semibold ${growthColor(threeYear)}`}>
-            {fmtPct(threeYear)}
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -939,35 +922,49 @@ function FinancialsContent() {
 
         {/* Row 7 — Growth & Returns */}
         <div id="section-growth-returns">
-        <SectionPanel
-          title="Growth & Returns"
-          subtitle="Revenue growth, profitability trends, and return metrics"
-        >
-          <div className="pb-4">
-            <div className="grid grid-cols-2 gap-x-8">
-              <GrowthMetricRow
-                label="Sales Growth"
-                ttm={metrics.salesGrowth.ttm}
-                threeYear={metrics.salesGrowth["3y"]}
+          <SectionPanel
+            title="Growth & Returns"
+            subtitle="Compounded growth rates and return metrics"
+          >
+            <div className="grid grid-cols-4 gap-4 pb-2">
+              <GrowthStatCard
+                title="Compounded Sales Growth"
+                rows={[
+                  { label: "10 Years:", value: metrics.salesGrowth["10y"] },
+                  { label: "5 Years:", value: metrics.salesGrowth["5y"] },
+                  { label: "3 Years:", value: metrics.salesGrowth["3y"] },
+                  { label: "TTM:", value: metrics.salesGrowth.ttm },
+                ]}
               />
-              <GrowthMetricRow
-                label="Profit Growth"
-                ttm={metrics.profitGrowth.ttm}
-                threeYear={metrics.profitGrowth["3y"]}
+              <GrowthStatCard
+                title="Compounded Profit Growth"
+                rows={[
+                  { label: "10 Years:", value: metrics.profitGrowth["10y"] },
+                  { label: "5 Years:", value: metrics.profitGrowth["5y"] },
+                  { label: "3 Years:", value: metrics.profitGrowth["3y"] },
+                  { label: "TTM:", value: metrics.profitGrowth.ttm },
+                ]}
               />
-              <GrowthMetricRow
-                label="Return on Equity (ROE)"
-                ttm={metrics.roe.last}
-                threeYear={metrics.roe["3y"]}
+              <GrowthStatCard
+                title="Stock Price CAGR"
+                rows={[
+                  { label: "10 Years:", value: metrics.stockPriceCagr["10y"] },
+                  { label: "5 Years:", value: metrics.stockPriceCagr["5y"] },
+                  { label: "3 Years:", value: metrics.stockPriceCagr["3y"] },
+                  { label: "1 Year:", value: metrics.stockPriceCagr["1y"] },
+                ]}
               />
-              <GrowthMetricRow
-                label="Stock Price CAGR"
-                ttm={metrics.stockPriceCagr["1y"]}
-                threeYear={metrics.stockPriceCagr["3y"]}
+              <GrowthStatCard
+                title="Return on Equity"
+                rows={[
+                  { label: "10 Years:", value: metrics.roe["10y"] },
+                  { label: "5 Years:", value: metrics.roe["5y"] },
+                  { label: "3 Years:", value: metrics.roe["3y"] },
+                  { label: "Last Year:", value: metrics.roe.last },
+                ]}
               />
             </div>
-          </div>
-        </SectionPanel>
+          </SectionPanel>
         </div>
 
       </div>

@@ -24,6 +24,7 @@ import { BalanceSheetTreemap } from "@/components/fundamentals/balance-sheet-tre
 import { CashFlowWaterfall } from "@/components/fundamentals/cash-flow-waterfall";
 import { ShareholdingCharts } from "@/components/fundamentals/shareholding-charts";
 import { ViewToggle } from "@/components/fundamentals/view-toggle";
+import { PnLChart } from "@/components/fundamentals/pnl-chart";
 
 
 const FUNDAMENTALS_NAV = [
@@ -40,6 +41,7 @@ const FUNDAMENTALS_NAV = [
 function FinancialsContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
+  const [pnlView, setPnlView] = useState<"table" | "chart">("table");
   const [balanceSheetView, setBalanceSheetView] = useState<"table" | "chart">("table");
   const [cashFlowView, setCashFlowView] = useState<"table" | "chart">("table");
   const [shareholdingView, setShareholdingView] = useState<"table" | "chart">("table");
@@ -210,11 +212,17 @@ function FinancialsContent() {
           <TabularCard
             title="Profit & Loss"
             subtitle="All values in INR Crores"
-            tabs={["Quarterly", "Annual"]}
+            tabs={pnlView === "table" ? ["Quarterly", "Annual"] : undefined}
+            defaultTab="Quarterly"
+            headerAction={<ViewToggle view={pnlView} onChange={setPnlView} />}
           >
-            {(activeTab) => (
-              <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
-            )}
+            {(activeTab) =>
+              pnlView === "chart" ? (
+                <PnLChart table={quarterly} />
+              ) : (
+                <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
+              )
+            }
           </TabularCard>
         </div>
 

@@ -67,9 +67,16 @@ function clampWeights(m: number, o: number, d: number): [number, number, number]
   ];
 }
 
+// Color themes for each factor card
+const CARD_THEMES = {
+  M: { border: "#2563EB", fill: "#2563EB", bg: "rgba(37,99,235,0.04)", dot: "#2563EB" },   // Blue
+  O: { border: "#059669", fill: "#059669", bg: "rgba(5,150,105,0.04)", dot: "#059669" },     // Emerald
+  D: { border: "#D97706", fill: "#D97706", bg: "rgba(217,119,6,0.04)", dot: "#D97706" },     // Amber
+} as const;
+
 interface BentoCardProps {
   label: string;
-  letter: string;
+  letter: "M" | "O" | "D";
   score: number | null;
   max: number;
   weightPct: number;
@@ -80,16 +87,17 @@ interface BentoCardProps {
 function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoCardProps) {
   const pct = max > 0 && score !== null ? Math.min(score / max, 1) : 0;
   const ticks = max;
+  const theme = CARD_THEMES[letter];
 
   return (
     <div
-      className="rounded-[10px] border border-[#E2E2E2] bg-white p-5 flex flex-col gap-3 min-w-0 h-full overflow-y-auto"
-      style={{ flex }}
+      className="rounded-[10px] border bg-white p-5 flex flex-col gap-3 min-w-0 h-full overflow-y-auto"
+      style={{ flex, borderColor: theme.border, borderTopWidth: 3, backgroundColor: theme.bg }}
     >
       {/* Header row */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">
+          <p className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: theme.border }}>
             {label} ({letter})
           </p>
           <p className="text-xs text-zinc-400 mt-0.5">{weightPct}% weight</p>
@@ -113,7 +121,7 @@ function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoC
                 width: 4,
                 height: 12,
                 borderRadius: 1,
-                backgroundColor: i < filledCount ? "#0F172B" : "#d1d5db",
+                backgroundColor: i < filledCount ? theme.fill : "#e5e7eb",
                 flexShrink: 0,
               }}
             />
@@ -126,7 +134,10 @@ function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoC
         <ul className="space-y-2.5 flex-1">
           {items.map((item, i) => (
             <li key={i} className="flex items-start gap-2">
-              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-zinc-400 flex-shrink-0" />
+              <span
+                className="mt-1.5 h-1.5 w-1.5 rounded-full flex-shrink-0"
+                style={{ backgroundColor: theme.dot }}
+              />
               <div>
                 <p className="text-xs font-semibold text-[#0F172B] leading-snug">{item.title}</p>
                 <p className="text-xs text-zinc-500 leading-relaxed mt-0.5">{item.text}</p>
@@ -314,7 +325,16 @@ export function IMScoreCard({
           {/* Rating + headline */}
           <div className="flex flex-col gap-1">
             {rating && (
-              <span className="self-start rounded-full bg-zinc-900 px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide">
+              <span
+                className="self-start rounded-full px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide"
+                style={{
+                  background: rating === "Strong Buy" || rating === "Buy"
+                    ? CARD_THEMES.O.border
+                    : rating === "Hold"
+                    ? CARD_THEMES.D.border
+                    : "#dc2626",
+                }}
+              >
                 {rating}
               </span>
             )}
@@ -330,21 +350,22 @@ export function IMScoreCard({
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
               {[
-                { label: "Management", value: cMW, onChange: handleMWeight },
-                { label: "Opportunity", value: cOW, onChange: handleOWeight },
-                { label: "Deal", value: cDW, onChange: handleDWeight },
-              ].map(({ label, value, onChange }) => (
+                { label: "Management", value: cMW, onChange: handleMWeight, color: CARD_THEMES.M.border },
+                { label: "Opportunity", value: cOW, onChange: handleOWeight, color: CARD_THEMES.O.border },
+                { label: "Deal", value: cDW, onChange: handleDWeight, color: CARD_THEMES.D.border },
+              ].map(({ label, value, onChange, color }) => (
                 <div key={label} className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="text-[11px] text-zinc-500 w-20 flex-shrink-0">{label}</span>
+                  <span className="text-[11px] font-medium w-20 flex-shrink-0" style={{ color }}>{label}</span>
                   <input
                     type="range"
                     min={5}
                     max={90}
                     value={value}
                     onChange={(e) => onChange(Number(e.target.value))}
-                    className="flex-1 min-w-0 accent-zinc-900 h-1"
+                    className="flex-1 min-w-0 h-1"
+                    style={{ accentColor: color }}
                   />
-                  <span className="text-[11px] font-semibold text-[#0F172B] w-8 text-right flex-shrink-0">
+                  <span className="text-[11px] font-semibold w-8 text-right flex-shrink-0" style={{ color }}>
                     {value}%
                   </span>
                 </div>

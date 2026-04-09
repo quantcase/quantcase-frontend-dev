@@ -17,12 +17,25 @@ function convictionConfig(level: string) {
   return { color: "text-red-600", barColor: "bg-red-600", width: "33%" };
 }
 
+// Traffic-light theme derived from dominant indicator sentiment
+function biasTheme(indicators: DecisionIntelligenceIndicator[]) {
+  let pos = 0, neg = 0;
+  for (const ind of indicators) {
+    if (ind.sentiment === "positive") pos++;
+    else if (ind.sentiment === "negative") neg++;
+  }
+  if (pos > neg) return { border: "#059669", bg: "rgba(5,150,105,0.04)", text: "text-emerald-700", tagBg: "bg-emerald-600", insightBorder: "border-emerald-200", insightBg: "bg-emerald-50/50" };
+  if (neg > pos) return { border: "#dc2626", bg: "rgba(220,38,38,0.04)", text: "text-red-700", tagBg: "bg-red-600", insightBorder: "border-red-200", insightBg: "bg-red-50/50" };
+  return { border: "#D97706", bg: "rgba(217,119,6,0.04)", text: "text-amber-700", tagBg: "bg-amber-600", insightBorder: "border-amber-200", insightBg: "bg-amber-50/50" };
+}
+
 interface Props {
   di: DecisionIntelligence;
 }
 
 export function DecisionIntelligenceBanner({ di }: Props) {
   const conviction = convictionConfig(di.convictionLevel);
+  const theme = biasTheme(di.indicators);
 
   return (
     <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2 h-full">
@@ -37,33 +50,45 @@ export function DecisionIntelligenceBanner({ di }: Props) {
       </div>
 
       <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] px-5 py-5 flex flex-col gap-5">
-        {/* TAG */}
-        <div>
-          <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-2">Tag</p>
-          <span className="inline-block rounded-md border border-[#0F172B] px-3 py-1.5 text-[13px] font-semibold text-[#0F172B]">
-            {di.tag}
-          </span>
-        </div>
+        {/* Key insights — colored accent block */}
+        <div
+          className="rounded-[10px] border px-4 py-4 flex flex-col gap-4"
+          style={{ borderColor: theme.border, borderTopWidth: 3, backgroundColor: theme.bg }}
+        >
+          {/* TAG */}
+          <div>
+            <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-2">Tag</p>
+            <span
+              className={`inline-block rounded-full px-3 py-1 text-[13px] font-semibold text-white ${theme.tagBg}`}
+            >
+              {di.tag}
+            </span>
+          </div>
 
-        {/* Lens / Ideal For / Timeframe */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "Lens", value: di.lens },
-            { label: "Ideal For", value: di.idealFor },
-            { label: "Timeframe", value: di.timeframe },
-          ].map((item) => (
-            <div key={item.label} className="rounded-lg border border-[#E2E2E2] bg-[#F5F5F5] px-3 py-2.5 text-center">
-              <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-1">{item.label}</p>
-              <p className="text-[13px] font-semibold text-[#0F172B]">{item.value}</p>
+          {/* Lens / Ideal For / Timeframe */}
+          <div className="grid grid-cols-3 gap-2.5">
+            {[
+              { label: "Lens", value: di.lens },
+              { label: "Ideal For", value: di.idealFor },
+              { label: "Timeframe", value: di.timeframe },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-lg border bg-white px-3 py-2.5 text-center"
+                style={{ borderColor: theme.border, borderTopWidth: 2 }}
+              >
+                <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-1">{item.label}</p>
+                <p className={`text-[13px] font-semibold ${theme.text}`}>{item.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Actionable Insight */}
+          <div>
+            <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-2">Actionable Insight</p>
+            <div className={`rounded-lg border ${theme.insightBorder} ${theme.insightBg} px-4 py-3 text-[13px] text-[#121212] leading-relaxed`}>
+              {di.actionableInsight.action}. {di.actionableInsight.firstShift} {di.actionableInsight.existingHolderAction} {di.actionableInsight.reEvaluateCondition}
             </div>
-          ))}
-        </div>
-
-        {/* Actionable Insight */}
-        <div>
-          <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-2">Actionable Insight</p>
-          <div className="rounded-lg border border-[#E2E2E2] bg-[#FAFAFA] px-4 py-3 text-[13px] text-[#121212] leading-relaxed">
-            {di.actionableInsight.action}. {di.actionableInsight.firstShift} {di.actionableInsight.existingHolderAction} {di.actionableInsight.reEvaluateCondition}
           </div>
         </div>
 

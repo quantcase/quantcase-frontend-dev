@@ -1,6 +1,7 @@
 "use client";
 
 import type { ValuationVsPeersSection, ValuationRichSegment } from "@/types/deal";
+import { fmtDealNum } from "@/lib/utils";
 import { valuationVsPeersData, type DescriptionSegment } from "@/components/deal/detailed-analysis-data";
 
 interface PeReratingPotentialProps {
@@ -88,14 +89,14 @@ export function PeReratingPotential({ data }: PeReratingPotentialProps) {
 
               {/* P/E Value */}
               <p className={`text-[36px] font-medium leading-tight ${config.valueColor}`}>
-                {item.value}
+                {fmtDealNum(item.value)}
               </p>
 
               {/* Change tag */}
               <span
                 className={`inline-block text-xs font-medium px-2.5 py-1 rounded-full border ${config.tagBg} ${config.tagText}`}
               >
-                {item.change}
+                {fmtDealNum(item.change)}
               </span>
             </div>
           );

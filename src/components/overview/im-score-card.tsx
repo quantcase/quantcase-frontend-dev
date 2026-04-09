@@ -2,9 +2,14 @@
 
 import { useState, useCallback } from "react";
 import { TabularCard } from "@/components/molecules/tabular-card";
-import type { GovernanceSignal } from "@/types/management";
-import type { FinalTakeaways } from "@/types/opportunity";
+import type { FactorScore } from "@/types/management";
+import type { FinalTakeaways, OFactorResponse } from "@/types/opportunity";
 import type { OverviewSection } from "@/types/deal";
+
+interface TitledBullet {
+  title: string;
+  text: string;
+}
 
 interface IMScoreCardProps {
   managementScore?: number | null;
@@ -13,9 +18,10 @@ interface IMScoreCardProps {
   opportunityMax?: number | null;
   dealScore?: number | null;
   dealMax?: number | null;
-  // Insight bullets
-  governanceSignals?: GovernanceSignal[];
+  // Structured insight items
+  managementFactors?: FactorScore[];
   opportunityTakeaways?: FinalTakeaways | null;
+  opportunityData?: OFactorResponse | null;
   dealOverview?: OverviewSection | null;
 }
 
@@ -61,29 +67,37 @@ function clampWeights(m: number, o: number, d: number): [number, number, number]
   ];
 }
 
+// Color themes for each factor card
+const CARD_THEMES = {
+  M: { border: "#2563EB", fill: "#2563EB", bg: "rgba(37,99,235,0.04)", dot: "#2563EB" },   // Blue
+  O: { border: "#059669", fill: "#059669", bg: "rgba(5,150,105,0.04)", dot: "#059669" },     // Emerald
+  D: { border: "#D97706", fill: "#D97706", bg: "rgba(217,119,6,0.04)", dot: "#D97706" },     // Amber
+} as const;
+
 interface BentoCardProps {
   label: string;
-  letter: string;
+  letter: "M" | "O" | "D";
   score: number | null;
   max: number;
   weightPct: number;
-  bullets: string[];
+  items: TitledBullet[];
   flex: number; // css flex grow value
 }
 
-function BentoCard({ label, letter, score, max, weightPct, bullets, flex }: BentoCardProps) {
+function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoCardProps) {
   const pct = max > 0 && score !== null ? Math.min(score / max, 1) : 0;
   const ticks = max;
+  const theme = CARD_THEMES[letter];
 
   return (
     <div
-      className="rounded-[10px] border border-[#E2E2E2] bg-white p-5 flex flex-col gap-3 min-w-0 h-full overflow-y-auto"
-      style={{ flex }}
+      className="rounded-[10px] border bg-white p-5 flex flex-col gap-3 min-w-0 h-full overflow-y-auto"
+      style={{ flex, borderColor: theme.border, borderTopWidth: 3, backgroundColor: theme.bg }}
     >
       {/* Header row */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">
+          <p className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: theme.border }}>
             {label} ({letter})
           </p>
           <p className="text-xs text-zinc-400 mt-0.5">{weightPct}% weight</p>
@@ -107,7 +121,7 @@ function BentoCard({ label, letter, score, max, weightPct, bullets, flex }: Bent
                 width: 4,
                 height: 12,
                 borderRadius: 1,
-                backgroundColor: i < filledCount ? "#0F172B" : "#d1d5db",
+                backgroundColor: i < filledCount ? theme.fill : "#e5e7eb",
                 flexShrink: 0,
               }}
             />
@@ -115,13 +129,19 @@ function BentoCard({ label, letter, score, max, weightPct, bullets, flex }: Bent
         })}
       </div>
 
-      {/* Bullets */}
-      {bullets.length > 0 ? (
-        <ul className="space-y-1 flex-1">
-          {bullets.map((b, i) => (
+      {/* Titled bullet items */}
+      {items.length > 0 ? (
+        <ul className="space-y-2.5 flex-1">
+          {items.map((item, i) => (
             <li key={i} className="flex items-start gap-2">
-              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-zinc-400 flex-shrink-0" />
-              <span className="text-xs text-zinc-500 leading-relaxed">{b}</span>
+              <span
+                className="mt-1.5 h-1.5 w-1.5 rounded-full flex-shrink-0"
+                style={{ backgroundColor: theme.dot }}
+              />
+              <div>
+                <p className="text-xs font-semibold text-[#0F172B] leading-snug">{item.title}</p>
+                <p className="text-xs text-zinc-500 leading-relaxed mt-0.5">{item.text}</p>
+              </div>
             </li>
           ))}
         </ul>
@@ -139,8 +159,9 @@ export function IMScoreCard({
   opportunityMax,
   dealScore,
   dealMax,
-  governanceSignals,
+  managementFactors,
   opportunityTakeaways,
+  opportunityData,
   dealOverview,
 }: IMScoreCardProps) {
   const mScore = managementScore ?? null;
@@ -205,23 +226,68 @@ export function IMScoreCard({
   const rating = hasAnyScore ? getRating(weightedPct) : null;
   const overallInsight = hasAnyScore ? getOverallInsight(weightedPct, opportunityTakeaways, dealOverview) : null;
 
-  // Bullets per card
-  const mBullets: string[] = governanceSignals
-    ? governanceSignals.slice(0, 4).map((s) => s.text)
+  // Titled items per card
+  const mItems: TitledBullet[] = managementFactors
+    ? managementFactors.slice(0, 4).map((f) => ({
+        title: f.factor,
+        text: f.descriptor ?? "",
+      }))
     : [];
 
-  const oBullets: string[] = (() => {
-    const bullets: string[] = [];
-    if (opportunityTakeaways?.key_highlights) {
-      bullets.push(...opportunityTakeaways.key_highlights.slice(0, 3));
+  const oItems: TitledBullet[] = (() => {
+    // Try final_takeaways.section_scores first
+    const scores = opportunityTakeaways?.section_scores;
+    if (scores) {
+      const entries: { key: string; label: string }[] = [
+        { key: "industry", label: "Industry" },
+        { key: "competition", label: "Competition" },
+        { key: "financial_strength", label: "Financial Strength" },
+        { key: "customer_traction", label: "Customer Traction" },
+      ];
+      const items = entries
+        .filter((e) => scores[e.key as keyof typeof scores]?.takeaway)
+        .map((e) => ({
+          title: e.label,
+          text: scores[e.key as keyof typeof scores].takeaway,
+        }));
+      if (items.length > 0) return items;
     }
-    if (bullets.length < 3 && opportunityTakeaways?.key_risks) {
-      bullets.push(...opportunityTakeaways.key_risks.slice(0, 3 - bullets.length));
-    }
-    return bullets.slice(0, 4);
+    // Fallback: read takeaway from each section's .text.takeaway
+    if (!opportunityData) return [];
+    const sectionMap: { key: keyof OFactorResponse; label: string }[] = [
+      { key: "industry_overview", label: "Industry" },
+      { key: "competition", label: "Competition" },
+      { key: "financial_strength", label: "Financial Strength" },
+      { key: "customer_traction", label: "Customer Traction" },
+    ];
+    return sectionMap
+      .filter((e) => {
+        const sec = opportunityData[e.key];
+        return sec && typeof sec === "object" && "text" in sec && sec.text?.takeaway;
+      })
+      .map((e) => ({
+        title: e.label,
+        text: (opportunityData[e.key] as { text?: { takeaway?: string } })!.text!.takeaway!,
+      }));
   })();
 
-  const dBullets: string[] = dealOverview?.key_takeaway?.slice(0, 4) ?? [];
+  const dItems: TitledBullet[] = (() => {
+    const items: TitledBullet[] = [];
+    const eps = dealOverview?.eps_engine_card;
+    if (eps?.drivers?.length) {
+      items.push({ title: "EPS Engine", text: eps.drivers?.slice(0, 2)?.join("; ") });
+    }
+    const val = dealOverview?.valuation_rerating_card;
+    if (val?.drivers?.length) {
+      items.push({ title: "Valuation Re-Rating", text: val.drivers?.slice(0, 2)?.join("; ") });
+    }
+    if (items.length === 0 && dealOverview?.key_takeaway?.length) {
+      dealOverview.key_takeaway.slice(0, 4).forEach((t) => {
+        items.push({ title: "Key Takeaway", text: t });
+      });
+    }
+    return items;
+  })();
 
 
   return (
@@ -259,7 +325,16 @@ export function IMScoreCard({
           {/* Rating + headline */}
           <div className="flex flex-col gap-1">
             {rating && (
-              <span className="self-start rounded-full bg-zinc-900 px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide">
+              <span
+                className="self-start rounded-full px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide"
+                style={{
+                  background: rating === "Strong Buy" || rating === "Buy"
+                    ? CARD_THEMES.O.border
+                    : rating === "Hold"
+                    ? CARD_THEMES.D.border
+                    : "#dc2626",
+                }}
+              >
                 {rating}
               </span>
             )}
@@ -275,21 +350,22 @@ export function IMScoreCard({
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
               {[
-                { label: "Management", value: cMW, onChange: handleMWeight },
-                { label: "Opportunity", value: cOW, onChange: handleOWeight },
-                { label: "Deal", value: cDW, onChange: handleDWeight },
-              ].map(({ label, value, onChange }) => (
+                { label: "Management", value: cMW, onChange: handleMWeight, color: CARD_THEMES.M.border },
+                { label: "Opportunity", value: cOW, onChange: handleOWeight, color: CARD_THEMES.O.border },
+                { label: "Deal", value: cDW, onChange: handleDWeight, color: CARD_THEMES.D.border },
+              ].map(({ label, value, onChange, color }) => (
                 <div key={label} className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="text-[11px] text-zinc-500 w-20 flex-shrink-0">{label}</span>
+                  <span className="text-[11px] font-medium w-20 flex-shrink-0" style={{ color }}>{label}</span>
                   <input
                     type="range"
                     min={5}
                     max={90}
                     value={value}
                     onChange={(e) => onChange(Number(e.target.value))}
-                    className="flex-1 min-w-0 accent-zinc-900 h-1"
+                    className="flex-1 min-w-0 h-1"
+                    style={{ accentColor: color }}
                   />
-                  <span className="text-[11px] font-semibold text-[#0F172B] w-8 text-right flex-shrink-0">
+                  <span className="text-[11px] font-semibold w-8 text-right flex-shrink-0" style={{ color }}>
                     {value}%
                   </span>
                 </div>
@@ -313,7 +389,7 @@ export function IMScoreCard({
             score={mScore}
             max={mMax}
             weightPct={cMW}
-            bullets={mBullets}
+            items={mItems}
             flex={1}
           />
         </div>
@@ -327,7 +403,7 @@ export function IMScoreCard({
               score={oScore}
               max={oMax}
               weightPct={cOW}
-              bullets={oBullets}
+              items={oItems}
               flex={1}
             />
           </div>
@@ -338,7 +414,7 @@ export function IMScoreCard({
               score={dScore}
               max={dMax}
               weightPct={cDW}
-              bullets={dBullets}
+              items={dItems}
               flex={1}
             />
           </div>

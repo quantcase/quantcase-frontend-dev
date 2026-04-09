@@ -17,15 +17,18 @@ export interface BalanceSheetData {
 }
 
 export interface GrowthMetric {
-  "3y"?: number | null;
+  "10y"?: number | null;
   "5y"?: number | null;
+  "3y"?: number | null;
   ttm?: number | null;
   last?: number | null;
 }
 
 export interface StockPriceCagr {
-  "1y"?: number | null;
+  "10y"?: number | null;
+  "5y"?: number | null;
   "3y"?: number | null;
+  "1y"?: number | null;
 }
 
 export interface FinancialsMetrics {

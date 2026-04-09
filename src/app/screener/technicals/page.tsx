@@ -77,8 +77,37 @@ function TechnicalsContent() {
   const changeIsPositive = data.price.changePercent >= 0;
   const changeDisplay = `${changeIsPositive ? "+" : ""}${data.price.changePercent.toFixed(1)}%`;
 
+  const di = data.decisionIntelligence;
+  const trendIndicator = di?.indicators.find((i) => i.name.toLowerCase() === "trend");
+  const momentumIndicator = di?.indicators.find((i) => i.name.toLowerCase() === "momentum");
+  const volatilityIndicator = di?.indicators.find((i) => i.name.toLowerCase() === "volatility");
+
+  const insightCards = di ? (
+    <>
+      {[trendIndicator, momentumIndicator, volatilityIndicator]
+        .filter(Boolean)
+        .map((ind) => (
+          <div
+            key={ind!.name}
+            className="rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-center"
+          >
+            <p className="text-[9px] font-semibold text-[#888888] uppercase tracking-wider mb-px">
+              {ind!.name}
+            </p>
+            <p className="text-[12px] font-semibold text-[#0F172B]">{ind!.tag}</p>
+          </div>
+        ))}
+      <div className="rounded-md border border-[#0F172B] bg-white px-3 py-1.5 text-center">
+        <p className="text-[9px] font-semibold text-[#888888] uppercase tracking-wider mb-px">
+          Tag
+        </p>
+        <p className="text-[12px] font-semibold text-[#0F172B]">{di.tag}</p>
+      </div>
+    </>
+  ) : null;
+
   return (
-    <ScreenerPageShell navItems={TECHNICALS_NAV}>
+    <ScreenerPageShell navItems={TECHNICALS_NAV} headerRight={insightCards}>
       <div className="mb-8 px-4 space-y-6 pt-6">
         <div id="section-price-levels">
           <LevelsStrip

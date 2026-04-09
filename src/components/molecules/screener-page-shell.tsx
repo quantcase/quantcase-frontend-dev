@@ -9,10 +9,11 @@ import type { InPageNavItem } from "@/components/molecules/in-page-nav";
 
 interface ScreenerPageShellProps {
   navItems?: InPageNavItem[];
+  headerRight?: React.ReactNode;
   children: React.ReactNode;
 }
 
-function ShellInner({ navItems, children }: ScreenerPageShellProps) {
+function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps) {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") ?? "";
 
@@ -41,6 +42,7 @@ function ShellInner({ navItems, children }: ScreenerPageShellProps) {
             {industry && industry !== sector && <Badge>{industry}</Badge>}
           </div>
         </div>
+        {headerRight && <div className="flex items-center gap-3">{headerRight}</div>}
       </div>
 
       {/* In-page section nav (optional) */}
@@ -54,7 +56,7 @@ function ShellInner({ navItems, children }: ScreenerPageShellProps) {
   );
 }
 
-export function ScreenerPageShell({ navItems, children }: ScreenerPageShellProps) {
+export function ScreenerPageShell({ navItems, headerRight, children }: ScreenerPageShellProps) {
   return (
     <Suspense
       fallback={
@@ -65,7 +67,7 @@ export function ScreenerPageShell({ navItems, children }: ScreenerPageShellProps
         </div>
       }
     >
-      <ShellInner navItems={navItems}>{children}</ShellInner>
+      <ShellInner navItems={navItems} headerRight={headerRight}>{children}</ShellInner>
     </Suspense>
   );
 }

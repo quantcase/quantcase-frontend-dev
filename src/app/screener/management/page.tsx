@@ -30,7 +30,6 @@ function ManagementDashboardContent() {
   const symbol = searchParams.get("symbol") || "";
 
   const [selectedTimeframe] = useState<TimeframeOption>("rolling_3_year");
-  const [activeDisclosureTab, setActiveDisclosureTab] = useState<"Risk" | "Bad News" | "Legal">("Risk");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const [jobStatuses, setJobStatuses] = useState<Record<string, JobStatus>>({});
@@ -346,78 +345,49 @@ function ManagementDashboardContent() {
     );
   }
 
-  // Build disclosure rows from the structured disclosures object
-  const disclosures = managementData.disclosures;
-
-  const riskRows: DisclosureRow[] = (disclosures?.risk ?? []).map((r) => ({
-    title: r.risk_title,
-    tag: r.risk_type ?? undefined,
-    severity: r.severity ?? undefined,
-    detail: r.mitigation_strategy ?? null,
+  // Build disclosure rows from the flat disclosures array
+  const allDisclosureRows: DisclosureRow[] = (managementData.disclosures ?? []).map((d) => ({
+    title: d.disclosure_title,
+    tag: d.disclosure_type ?? undefined,
+    severity: d.severity ?? undefined,
+    timing: d.disclosure_timing ?? undefined,
+    detail: d.mitigation_strategy ?? null,
   }));
 
-  const badNewsRows: DisclosureRow[] = (disclosures?.bad_news ?? []).map((r) => ({
-    title: r.news_title,
-    tag: r.disclosure_type ?? undefined,
-    severity: r.severity ?? undefined,
-    detail: r.mitigation_strategy ?? null,
-  }));
-
-  const legalRows: DisclosureRow[] = (disclosures?.legal_issues ?? []).map((r) => ({
-    title: r.issue_title,
-    tag: r.issue_type ?? undefined,
-    severity: r.severity ?? undefined,
-    detail: r.impact ?? null,
-  }));
-
-  const allDisclosureRows = [...riskRows, ...badNewsRows, ...legalRows];
-
-  function ratingFromRows(rows: DisclosureRow[]): DisclosuresTableConfig["rating"] | undefined {
-    if (rows.length === 0) return undefined;
-    const highCount = rows.filter((r) => r.severity?.toLowerCase() === "high").length;
-    const ratio = highCount / rows.length;
-    return ratio <= 0.25
-      ? { label: "Strong", color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" }
-      : ratio <= 0.5
-      ? { label: "Moderate", color: "#d97706", bg: "#fffbeb", border: "#fde68a" }
-      : { label: "Weak", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" };
-  }
-
-  const disclosureTabConfigs: Record<string, { rows: DisclosureRow[]; config: DisclosuresTableConfig }> = {
-    Risk: {
-      rows: riskRows,
-      config: {
-        title: "Risk Disclosures",
-        subtitle: "Key risks identified by management",
-        leftHeader: "Risk & Type",
-        rightHeader: "Mitigation Strategy",
-        detailPlaceholder: "No mitigation guidance provided",
-        rating: ratingFromRows(riskRows),
-      },
-    },
-    "Bad News": {
-      rows: badNewsRows,
-      config: {
-        title: "Bad News Disclosures",
-        subtitle: "Adverse developments disclosed by management",
-        leftHeader: "News & Type",
-        rightHeader: "Mitigation Strategy",
-        detailPlaceholder: "No mitigation guidance provided",
-        rating: ratingFromRows(badNewsRows),
-      },
-    },
-    Legal: {
-      rows: legalRows,
-      config: {
-        title: "Legal Issues",
-        subtitle: "Legal and regulatory matters disclosed by management",
-        leftHeader: "Issue & Type",
-        rightHeader: "Impact",
-        detailPlaceholder: "No impact details provided",
-        rating: ratingFromRows(legalRows),
-      },
-    },
+const disclosureConfig: DisclosuresTableConfig = {
+    title: "Disclosures",
+    subtitle: "Key disclosures identified by management",
+    leftHeader: "Disclosure & Type",
+    rightHeader: "Mitigation Strategy",
+    detailPlaceholder: "No mitigation guidance provided",
   };
+
+  const totalDisclosures = allDisclosureRows.length;
+  const proactiveCount = allDisclosureRows.filter((r) => r.timing?.toLowerCase() === "proactive").length;
+  const mitigatedCount = allDisclosureRows.filter((r) => r.detail && r.detail.trim().length > 0).length;
+  const timingPct = totalDisclosures > 0 ? Math.round((proactiveCount / totalDisclosures) * 100) : null;
+  const planningPct = totalDisclosures > 0 ? Math.round((mitigatedCount / totalDisclosures) * 100) : null;
+
+  const disclosureHeaderAction = totalDisclosures > 0 ? (
+    <div className="flex items-center gap-2">
+      {timingPct !== null && (
+        <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
+          <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Proactive</span>
+          <span style={{ fontSize: 28, fontWeight: 700, color: "#0F172B", lineHeight: 1.1 }}>
+            {timingPct}%
+          </span>
+        </div>
+      )}
+      {planningPct !== null && (
+        <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
+          <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Mitigated</span>
+          <span style={{ fontSize: 28, fontWeight: 700, color: "#0F172B", lineHeight: 1.1 }}>
+            {planningPct}%
+          </span>
+        </div>
+      )}
+    </div>
+  ) : undefined;
 
   return (
     <ScreenerPageShell navItems={NAV_ITEMS}>
@@ -482,14 +452,9 @@ function ManagementDashboardContent() {
         {allDisclosureRows.length > 0 && (
           <div id="section-disclosures">
             <DisclosuresTable
-              config={disclosureTabConfigs[activeDisclosureTab].config}
-              rows={disclosureTabConfigs[activeDisclosureTab].rows}
-              tabs={(["Risk", "Bad News", "Legal"] as const).map((tab) => ({
-                label: tab,
-                count: disclosureTabConfigs[tab].rows.length,
-              }))}
-              activeTab={activeDisclosureTab}
-              onTabChange={(tab) => setActiveDisclosureTab(tab as "Risk" | "Bad News" | "Legal")}
+              config={disclosureConfig}
+              rows={allDisclosureRows}
+              headerAction={disclosureHeaderAction}
             />
           </div>
         )}

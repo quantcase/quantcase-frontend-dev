@@ -1,4 +1,5 @@
 import type { TargetPriceMatrixSection, DPriceScenario } from "@/types/deal";
+import { fmtDealNum } from "@/lib/utils";
 
 interface TargetPriceMatrixProps {
   data?: TargetPriceMatrixSection;
@@ -68,15 +69,15 @@ function PriceCard({
         <div className="space-y-1">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Target range</p>
           <p className={`text-[32px] font-medium leading-tight ${config.targetColor}`}>
-            {caseData?.target_range ?? "N/A"}
+            {fmtDealNum(caseData?.target_range) ?? "N/A"}
           </p>
           <div className="flex items-center gap-2">
             <span className={`text-sm font-semibold ${fromCmpColor}`}>
-              {caseData?.from_cmp ?? "N/A"}
+              {fmtDealNum(caseData?.from_cmp) ?? "N/A"}
             </span>
             <span className="text-[11px] text-zinc-500 dark:text-zinc-400">from CMP</span>
           </div>
-          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{caseData?.cagr}</p>
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{fmtDealNum(caseData?.cagr)}</p>
         </div>
 
         {/* Metrics table */}
@@ -84,19 +85,19 @@ function PriceCard({
           <div className="flex items-center justify-between py-1.5">
             <span className="text-xs text-zinc-500 dark:text-zinc-400">EPS CAGR</span>
             <span className={`text-sm font-semibold ${config.targetColor}`}>
-              {caseData?.eps_cagr ?? "N/A"}
+              {fmtDealNum(caseData?.eps_cagr) ?? "N/A"}
             </span>
           </div>
           <div className="flex items-center justify-between py-1.5">
             <span className="text-xs text-zinc-500 dark:text-zinc-400">FY EPS</span>
             <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-              {caseData?.fy_eps ?? "N/A"}
+              {fmtDealNum(caseData?.fy_eps) ?? "N/A"}
             </span>
           </div>
           <div className="flex items-center justify-between py-1.5">
             <span className="text-xs text-zinc-500 dark:text-zinc-400">Exit P/E</span>
             <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-              {caseData?.exit_pe ?? "N/A"}
+              {fmtDealNum(caseData?.exit_pe) ?? "N/A"}
             </span>
           </div>
 

@@ -6,6 +6,7 @@ import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useDealAnalysis } from "@/hooks/useDealAnalysis";
 import { apiPost, apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
+import { fmtDealNum } from "@/lib/utils";
 import type { JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 import type { DFactorResponse } from "@/types/deal";
 
@@ -24,8 +25,7 @@ import type { InPageNavItem } from "@/components/molecules/in-page-nav";
 const DEAL_NAV_ITEMS: InPageNavItem[] = [
   { id: "score", label: "Score" },
   { id: "target-price", label: "Target Price" },
-  { id: "past-trend", label: "Past Trend" },
-  { id: "forecast", label: "Forecast" },
+  { id: "eps-engine", label: "EPS Engine" },
   { id: "pe-rerating", label: "P/E Re-Rating Potential" },
 ];
 
@@ -291,22 +291,20 @@ function DealContent() {
             title={data.target_price_matrix?.meta?.title ?? "Target Price Matrix"}
             subtitle={[
               data.target_price_matrix?.holding_period,
-              data.target_price_matrix?.current_price ? `Current Price: ${data.target_price_matrix.current_price}` : undefined,
+              data.target_price_matrix?.current_price ? `Current Price: ${fmtDealNum(data.target_price_matrix.current_price)}` : undefined,
             ].filter(Boolean).join(" | ") || undefined}
             contentClassName="px-6 pb-6"
           >
             <TargetPriceMatrix data={data.target_price_matrix} />
           </SectionPanel>
         </div>
-        <div id="past-trend">
+        <div id="eps-engine" className="space-y-6">
           <TabularCard
             title={data.detailed_analysis?.historical_performance?.meta?.title ?? "Historical Performance: Company EPS CAGR vs Industry Earnings Growth"}
             subtitle={data.detailed_analysis?.historical_performance?.meta?.subtitle}
           >
             <HistoricalPerformance data={data.detailed_analysis?.historical_performance} hideHeader />
           </TabularCard>
-        </div>
-        <div id="forecast">
           <TabularCard title="Forecast">
             <EpsEngine data={data.detailed_analysis?.eps_engine} />
           </TabularCard>

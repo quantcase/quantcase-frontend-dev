@@ -358,7 +358,7 @@ export function MarketViewCard() {
           </div>
 
           {/* Summary tab: framework score badges */}
-          {activeTab === "Summary" && (
+          {activeTab === "Detailed" && (
             <>
               <span style={{ width: 1, height: 14, background: "#E2E2E2", display: "inline-block", flexShrink: 0 }} />
               <span style={{ fontSize: 12, color: "#888888" }}>Framework score</span>
@@ -384,7 +384,7 @@ export function MarketViewCard() {
           )}
 
           {/* Detailed tab: combined signal */}
-          {activeTab === "Detailed" && (
+          {activeTab === "Summary" && (
             <>
               <span style={{ width: 1, height: 14, background: "#E2E2E2", display: "inline-block", flexShrink: 0 }} />
               <span style={{ fontSize: 13, color: "#888888" }}>
@@ -422,7 +422,7 @@ export function MarketViewCard() {
       </div>
 
       {/* Content */}
-      {activeTab === "Summary" ? <SummaryView /> : <DetailedView />}
+      {activeTab === "Summary" ? <DetailedView /> : <SummaryView />}
     </div>
   );
 }

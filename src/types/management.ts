@@ -43,33 +43,19 @@ export interface GovernanceSignal {
   targets?: Array<{ statement: string; severity?: string }>;
 }
 
-// Disclosures (structured 3-category object from backend)
-export interface RiskDisclosure {
-  risk_title: string;
-  risk_type?: string | null;
+// Disclosures (flat array from backend)
+export type DisclosureType = "risk" | "bad_news" | "legal";
+export type DisclosureTiming = "proactive" | "reactive" | "partial" | "forced" | "past";
+
+export interface Disclosure {
+  disclosure_type: DisclosureType;
+  disclosure_title: string;
+  disclosure_timing?: DisclosureTiming | null;
   mitigation_strategy?: string | null;
   severity?: "high" | "medium" | "low" | null;
 }
 
-export interface BadNewsDisclosure {
-  news_title: string;
-  disclosure_type?: string | null;
-  mitigation_strategy?: string | null;
-  severity?: "high" | "medium" | "low" | null;
-}
-
-export interface LegalIssueDisclosure {
-  issue_title: string;
-  issue_type?: string | null;
-  impact?: string | null;
-  severity?: "high" | "medium" | "low" | null;
-}
-
-export interface Disclosures {
-  risk?: RiskDisclosure[] | null;
-  bad_news?: BadNewsDisclosure[] | null;
-  legal_issues?: LegalIssueDisclosure[] | null;
-}
+export type Disclosures = Disclosure[];
 
 // Consistency metrics
 export interface ConsistencyMetrics {
@@ -180,7 +166,7 @@ export interface ManagementDashboardData {
   guidanceRecords: GuidanceRecord[];
   notablePatterns: NotablePattern[];
   selectedTimeframe: TimeframeOption;
-  disclosures?: Disclosures | null;
+  disclosures?: Disclosures | null; // flat array
   capital_allocation?: CapitalAllocation | null;
 }
 

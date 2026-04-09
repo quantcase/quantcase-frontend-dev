@@ -5,7 +5,7 @@ import { SectionPanel } from "@/components/molecules/section-panel";
 import { RuleEngineSection } from "./RuleEngineSection";
 import type { RuleEngine, DecisionIntelligence } from "@/types/technicals";
 
-const ENGINE_TABS = ["STRUCTURE", "TREND", "TIMING", "DOMINANCE"] as const;
+const ENGINE_TABS = ["STRUCTURE", "TREND", "TIMING", "RELATIVE STRENGTH"] as const;
 export type EngineTab = typeof ENGINE_TABS[number];
 
 interface Props {
@@ -23,10 +23,9 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
       <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", letterSpacing: "0.01em" }}>Rule Engine</span>
       <div className="flex items-center gap-0.5">
         {(["GROWTH", "VALUE"] as const).map((p, i) => (
-          <>
-            {i > 0 && <span key={`sep-${p}`} className="text-[#E2E2E2] text-[10px] select-none">·</span>}
+          <span key={p} className="contents">
+            {i > 0 && <span className="text-[#E2E2E2] text-[10px] select-none">·</span>}
             <button
-              key={p}
               onClick={() => setActivePerspective(p)}
               className={`px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
                 activePerspective === p
@@ -36,7 +35,7 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
             >
               {p}
             </button>
-          </>
+          </span>
         ))}
       </div>
     </div>

@@ -80,7 +80,7 @@ const OVERLAY_CONFIGS: Record<ChartMode, LineConfig[]> = {
     { key: "bbMiddle", color: "#64748b", lineWidth: 1, title: "BB Mid" },
     { key: "bbLower",  color: "#94a3b8", lineWidth: 1, title: "BB Lower" },
   ],
-  DOMINANCE: [],
+  "RELATIVE STRENGTH": [],
 };
 
 const OSCILLATOR_CONFIGS: Record<ChartMode, OscillatorConfig | null> = {
@@ -88,7 +88,7 @@ const OSCILLATOR_CONFIGS: Record<ChartMode, OscillatorConfig | null> = {
   STRUCTURE: { key: "cmf14", color: "#3b82f6", title: "CMF (14)", height: 80 },
   TREND:     { key: "adx14", color: "#8b5cf6", title: "ADX (14)", height: 80 },
   TIMING:    { key: "rsi14", color: "#f59e0b", title: "RSI (14)", height: 80 },
-  DOMINANCE: null,
+  "RELATIVE STRENGTH": null,
 };
 
 // RSI divergence detection

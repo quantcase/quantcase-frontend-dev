@@ -2,123 +2,110 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, ShieldAlert, FileText } from "lucide-react";
-import { PageHeader } from "@/components/molecules/page-header";
-import { TabToggle } from "@/components/molecules/tab-toggle";
+import { AlertCircle } from "lucide-react";
 import { AutocompleteInput, AutocompleteOption } from "@/components/molecules/autocomplete-input";
-import { ResearchCard } from "@/components/molecules/research-card";
-import { InfoItem } from "@/components/molecules/info-item";
+import { BasketCard } from "@/components/molecules/basket-card";
+import { useBaskets } from "@/hooks/useBaskets";
 import { apiCall } from "@/lib/api";
-import { StocksApiResponse } from "@/types/screener";
 import { BACKEND_URL } from "@/lib/constants";
-import { StockSearchPanel } from "@/components/molecules/stock-search-panel";
+import type { StocksApiResponse } from "@/types/screener";
 
 export default function ScreenerHomePage() {
   const router = useRouter();
-  const [selectedTab, setSelectedTab] = useState("Equity");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [stockOptions, setStockOptions] = useState<AutocompleteOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch stock data on mount
   useEffect(() => {
     apiCall<StocksApiResponse>(`${BACKEND_URL}/api/transcript/stocks`, {
-      onStart: () => setIsLoading(true),
       onSuccess: (response) => {
-        const options: AutocompleteOption[] = response.data.map((stock) => ({
-          value: stock.company,
-          label: stock.company_name,
-          subtitle: stock.basic_industry,
-        }));
-        setStockOptions(options);
+        setStockOptions(
+          response.data.map((s) => ({
+            value: s.company,
+            label: s.company_name,
+            subtitle: s.basic_industry,
+          }))
+        );
       },
-      onError: (error) => {
-        console.error("Failed to fetch stocks:", error);
-      },
-      onComplete: () => setIsLoading(false),
+      onError: (err) => console.error("Failed to fetch stocks:", err),
     });
   }, []);
 
-  const researchStarters = [
-    "Screen industrial companies suitable for a conservative portfolio",
-    "Show assets with strong cash flows and low leverage",
-    "Identify businesses with improving ROCE and stable management",
-    "Help draft a balanced model portfolio using approved assets",
-  ];
-
-  const handleSearch = (stockSymbol: string) => {
-    if (stockSymbol) {
-      router.push(`/screener/overview?symbol=${encodeURIComponent(stockSymbol)}`);
-    }
+  const handleSearch = (symbol: string) => {
+    if (symbol) router.push(`/screener/overview?symbol=${encodeURIComponent(symbol)}`);
   };
 
-  const handleResearchClick = (starter: string) => {
-    console.log("Research starter clicked:", starter);
-    // Implement research starter logic here
-  };
+  const { data: basketsData, loading: basketsLoading, error: basketsError } = useBaskets();
 
   return (
-    <div>
-      <main className="max-w-4xl mx-auto px-8 py-16">
-        <div className="space-y-12">
-          {/* Header Section */}
-          <PageHeader
-            title="What would you like to research today?"
-            subtitle="Explore assets within the firm's investment framework."
-          />
+    <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
 
-          {/* Tab Toggle */}
-          <div className="flex justify-center">
-            <TabToggle
-              options={["Equity", "Mutual Funds"]}
-              value={selectedTab}
-              onChange={setSelectedTab}
-            />
+      {/* Search */}
+      <div className="max-w-2xl mx-auto space-y-4 text-center">
+        <h2 className="text-[28px] font-medium" style={{ color: "#0F172B" }}>
+          What would you like to research today?
+        </h2>
+        <p className="text-sm" style={{ color: "#888888" }}>
+          Search a company to open its screener, or pick a research basket below.
+        </p>
+        <AutocompleteInput
+          placeholder="Search by company name or ticker…"
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSubmit={handleSearch}
+          options={stockOptions}
+          maxSuggestions={8}
+        />
+      </div>
+
+      {/* Research Baskets */}
+      <div>
+        <h3
+          className="text-[11px] font-semibold uppercase tracking-[0.08em] mb-6"
+          style={{ color: "rgba(18,18,18,0.50)" }}
+        >
+          Research Baskets
+        </h3>
+
+        {basketsError && (
+          <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 mb-4">
+            <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+            <p className="text-sm text-red-600">{basketsError}</p>
           </div>
+        )}
 
-          {/* Search Input with Autocomplete */}
-          <AutocompleteInput
-            placeholder="Describe your research criteria..."
-            value={searchQuery}
-            onChange={setSearchQuery}
-            onSubmit={handleSearch}
-            options={stockOptions}
-            maxSuggestions={8}
-          />
-
-          {/* Research Starters Section */}
-          <div className="space-y-6">
-            <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-center">
-              Structured Research Starters
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {researchStarters.map((starter, index) => (
-                <ResearchCard
-                  key={index}
-                  title={starter}
-                  onClick={() => handleResearchClick(starter)}
-                />
-              ))}
-            </div>
+        {basketsLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-[10px] border border-[#E2E2E2] h-[148px] animate-pulse"
+                style={{ background: "#F5F5F5" }}
+              />
+            ))}
           </div>
+        )}
 
-          {/* Stock Browser */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-center">
-              Browse All Stocks
-            </h3>
-            <StockSearchPanel variant="screener" />
+        {!basketsLoading && !basketsError && basketsData && (
+          <div className="space-y-8">
+            {Object.entries(basketsData.grouped).map(([category, baskets]) => (
+              <section key={category} className="space-y-3">
+                <p
+                  className="text-[10px] font-semibold uppercase tracking-[0.1em]"
+                  style={{ color: "#888888" }}
+                >
+                  {category}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {baskets.map((basket) => (
+                    <BasketCard key={basket.id} basket={basket} />
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
-
-          {/* Info Footer */}
-          <div className="flex items-center justify-center gap-8 pt-8">
-            <InfoItem icon={CheckCircle2} text="Uses firm-approved frameworks" />
-            <InfoItem icon={ShieldAlert} text="Excludes unverified data" />
-            <InfoItem icon={FileText} text="Outputs are non-advisory drafts" />
-          </div>
-        </div>
-      </main>
+        )}
+      </div>
     </div>
   );
 }
-

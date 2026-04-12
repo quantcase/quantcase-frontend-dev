@@ -1,5 +1,89 @@
 // Screener type definitions
 
+// ── Basket types ──────────────────────────────────────────────────────────────
+
+export interface BasketCondition {
+  metric: string;
+  operator: string;
+  value: number | string;
+  label: string;
+}
+
+export interface Basket {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  searchIntent: string;
+  conditions: BasketCondition[];
+  columns: string[];
+}
+
+export interface BasketsApiResponse {
+  baskets: Basket[];
+  grouped: Record<string, Basket[]>;
+}
+
+export interface BasketStock {
+  symbol: string;
+  companyName: string;
+  pe?: number | null;
+  pb?: number | null;
+  adjEps?: number | null;
+  epsGrowth?: number | null;
+  dividendYield?: number | null;
+  totalIncomeCr?: number | null;
+  netProfitCr?: number | null;
+  marketCapCr?: number | null;
+  promoterPct?: number | null;
+  promoterChange?: number | null;
+  [key: string]: string | number | null | undefined;
+}
+
+export interface BasketStocksPagination {
+  page: number;
+  size: number;
+  total: number;
+  pages: number;
+}
+
+export interface BasketStocksApiResponse {
+  basket: Pick<Basket, "id" | "category" | "title" | "description" | "conditions" | "columns">;
+  latestQuarter: string;
+  pagination: BasketStocksPagination;
+  stocks: BasketStock[];
+}
+
+// ── Watchlist types ───────────────────────────────────────────────────────────
+
+export interface WatchlistAsset {
+  id: string;
+  watchlist_id: string;
+  symbol: string;
+  added_on: string;
+  notes: string | null;
+}
+
+export interface Watchlist {
+  id: string;
+  user_id: string;
+  name: string;
+  total_assets: number;
+  created_at: string;
+  updated_at: string;
+  assets: WatchlistAsset[];
+}
+
+export interface WatchlistsApiResponse {
+  watchlists: Watchlist[];
+}
+
+export interface WatchlistApiResponse {
+  watchlist: Watchlist;
+}
+
+// ── Stock types ───────────────────────────────────────────────────────────────
+
 export interface StockData {
   company: string;
   company_name: string;

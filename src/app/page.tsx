@@ -5,6 +5,7 @@ import { FrameworkIntegrityMonitor } from "@/components/dashboard/framework-inte
 import { ResearchMomentum } from "@/components/dashboard/research-momentum";
 import { OpportunityRadar } from "@/components/dashboard/opportunity-radar";
 import { MarketNarrativeShifts } from "@/components/dashboard/market-narrative-shifts";
+import { WatchlistPanel } from "@/components/dashboard/watchlist-panel";
 import type { InvestmentSignal } from "@/components/dashboard/investment-signal-changes";
 import type { FrameworkItem } from "@/components/dashboard/framework-integrity-monitor";
 import type { ResearchMetric } from "@/components/dashboard/research-momentum";
@@ -179,6 +180,9 @@ export default function Home() {
             Here is your daily IC briefing for {today}.
           </p>
         </div>
+
+        {/* Watchlist */}
+        <WatchlistPanel />
 
         {/* Investment Signal Changes */}
         <InvestmentSignalChanges signals={SIGNALS} />

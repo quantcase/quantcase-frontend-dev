@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Monitor, Briefcase, TrendingUp, Settings } from "lucide-react";
+import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TooltipProvider,
@@ -17,6 +17,7 @@ const navItems = [
   { label: "WealthOS", href: "/wealthos/dashboard", icon: Briefcase,  isActive: (p: string) => p.startsWith("/wealthos") },
   { label: "Models",   href: "/model-builder",      icon: TrendingUp, isActive: (p: string) => p === "/model-builder" || p.startsWith("/model-builder/") || p === "/model-analytics" },
   { label: "Settings", href: "/settings",           icon: Settings,   isActive: (p: string) => p.startsWith("/settings") },
+  { label: "Admin",    href: "/admin/pipelines",    icon: Shield,     isActive: (p: string) => p.startsWith("/admin") },
 ];
 
 export function AppSidebar() {

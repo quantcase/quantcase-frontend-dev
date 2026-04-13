@@ -9,6 +9,7 @@ import { PluginSidebar } from "./_components/PluginSidebar";
 import { PluginChainTab } from "./_components/PluginChainTab";
 import { SkillsLibraryTab } from "./_components/SkillsLibraryTab";
 import { SkillDrawer } from "./_components/SkillDrawer";
+import { NewSkillDialog } from "./_components/NewSkillDialog";
 
 export default function PipelinesPage() {
   // ── Data state ────────────────────────────────────────────────────────────
@@ -255,15 +256,10 @@ export default function PipelinesPage() {
           <SkillsLibraryTab
             skills={allSkills}
             loading={loading.skills}
-            showNewSkillForm={showNewSkillForm}
-            newSkillForm={newSkillForm}
             onRowClick={setDrawerSkill}
             onToggleActive={toggleSkillActive}
             onDelete={deleteSkill}
             onNewSkillFormOpen={() => { setShowNewSkillForm(true); setMutationError(null); }}
-            onNewSkillFormClose={() => { setShowNewSkillForm(false); setNewSkillForm(DEFAULT_NEW_SKILL); }}
-            onNewSkillFormChange={setNewSkillForm}
-            onNewSkillCreate={createSkill}
           />
         )}
       </main>
@@ -273,6 +269,17 @@ export default function PipelinesPage() {
         skill={drawerSkill}
         onClose={() => setDrawerSkill(null)}
         onSave={saveSkillFromDrawer}
+      />
+
+      {/* New skill dialog */}
+      <NewSkillDialog
+        open={showNewSkillForm}
+        form={newSkillForm}
+        creating={false}
+        error={mutationError}
+        onChange={setNewSkillForm}
+        onCreate={createSkill}
+        onClose={() => { setShowNewSkillForm(false); setNewSkillForm(DEFAULT_NEW_SKILL); }}
       />
     </div>
   );

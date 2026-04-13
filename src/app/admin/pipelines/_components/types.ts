@@ -40,6 +40,8 @@ export interface NewSkillForm {
   model: string;
   maxTokens: number;
   promptKey: string;
+  promptTemplate: string;
+  defaultInstructions: string;
   outputSchema: string;
   isActive: boolean;
 }
@@ -50,6 +52,8 @@ export const DEFAULT_NEW_SKILL: NewSkillForm = {
   model: "anthropic/claude-sonnet-4-6",
   maxTokens: 16000,
   promptKey: "",
+  promptTemplate: "",
+  defaultInstructions: "",
   outputSchema: "",
   isActive: true,
 };

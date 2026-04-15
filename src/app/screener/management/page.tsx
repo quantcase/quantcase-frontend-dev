@@ -111,22 +111,17 @@ function ManagementDashboardContent() {
     setProgress(0);
     setIsAnalyzing(true);
 
-    const callIds = transcriptCalls.slice(0, 4).map(c => c.id);
-    const submitCall = (callId: string): Promise<string> =>
-      new Promise<string>((resolve, reject) => {
-        apiPost<JobCreateResponse>(`${BACKEND_URL}/api/calls/${callId}/summarize`, {
+    try {
+      const jobId = await new Promise<string>((resolve, reject) => {
+        apiPost<JobCreateResponse>(`${BACKEND_URL}/api/management/${firstCallId}/analyze`, {
           onSuccess: (response) => resolve(response.job.id),
           onError: reject,
         });
       });
 
-    try {
-      const ids = await Promise.all(callIds.map(submitCall));
-      const initialStatuses: Record<string, JobStatus> = {};
-      ids.forEach(id => { initialStatuses[id] = "pending"; });
-      setJobStatuses(initialStatuses);
-      pollAllJobs(ids);
-      pollingIntervalRef.current = setInterval(() => pollAllJobs(ids), 2000);
+      setJobStatuses({ [jobId]: "pending" });
+      pollAllJobs([jobId]);
+      pollingIntervalRef.current = setInterval(() => pollAllJobs([jobId]), 2000);
     } catch (error: unknown) {
       setIsAnalyzing(false);
       setAnalyzeError(error instanceof Error ? error.message : "Failed to start analysis");
@@ -326,8 +321,67 @@ function ManagementDashboardContent() {
     },
   ] : [];
 
+  // Format an ISO date string as a short relative label
+  function formatRelativeTime(isoString: string): string {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return isoString;
+    const diffMs = Date.now() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return "just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return date.toLocaleDateString();
+  }
+
+  const analyzedAt = managementData.analyzedAt ?? null;
+
+  const reanalyzeButton = (
+    <div className="flex flex-col items-end gap-1">
+      {/* Progress bar while analyzing */}
+      {isAnalyzing && (
+        <div className="w-32 h-1 rounded-full overflow-hidden bg-zinc-200">
+          <div
+            className="h-full bg-[#0F172B] transition-all duration-300 ease-linear"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+      <button
+        onClick={handleAnalyzeClick}
+        disabled={isAnalyzing}
+        style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: isAnalyzing ? "#888888" : "#ffffff",
+          background: isAnalyzing ? "#F5F5F5" : "#0F172B",
+          border: "1px solid #E2E2E2",
+          borderRadius: 6,
+          padding: "6px 14px",
+          cursor: isAnalyzing ? "not-allowed" : "pointer",
+          whiteSpace: "nowrap",
+          letterSpacing: "0.01em",
+        }}
+      >
+        {isAnalyzing
+          ? aggregateStatus === "pending" ? "Queued…"
+          : aggregateStatus === "processing" ? `Analyzing… ${progress}%`
+          : "Starting…"
+          : "Reanalyze"}
+      </button>
+      {analyzedAt && !isAnalyzing && (
+        <span style={{ fontSize: 10, color: "#888888" }}>
+          Updated {formatRelativeTime(analyzedAt)}
+        </span>
+      )}
+      {analyzeError && (
+        <span style={{ fontSize: 10, color: "#dc2626" }}>{analyzeError}</span>
+      )}
+    </div>
+  );
+
   return (
-    <ScreenerPageShell navItems={NAV_ITEMS}>
+    <ScreenerPageShell navItems={NAV_ITEMS} headerRight={reanalyzeButton}>
       <div className="mb-8 px-4 space-y-6">
 
         {/* Score */}

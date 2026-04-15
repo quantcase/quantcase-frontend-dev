@@ -204,11 +204,13 @@ export interface ManagementDashboardData {
   investment_thesis?: InvestmentThesis;
   red_flags?: RedFlag[];
   promoter_activity?: PromoterActivity;
+  analyzedAt?: string | null;
 }
 
 export interface ManagementDashboardResponse {
   success: boolean;
   data: ManagementDashboardData;
+  analyzedAt?: string | null;
 }
 
 // ─── Transcript Call ──────────────────────────────────────────────────────────

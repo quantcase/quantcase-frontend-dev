@@ -20,7 +20,7 @@ export function useManagementAnalysis(callId: string, timeframe: TimeframeOption
         setData({});
       },
       onSuccess: (data) => {
-        setData(data.data);
+        setData({ ...data.data, analyzedAt: data.analyzedAt ?? null });
         setLoading(false);
       },
       onError: (error) => {

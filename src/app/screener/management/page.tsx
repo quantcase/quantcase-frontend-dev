@@ -6,24 +6,40 @@ import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useManagementAnalysis } from "@/hooks/useManagementAnalysis";
 import { apiPost, apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
-import { Target, Shield, Briefcase, Users } from "lucide-react";
+import { Target, Shield, Briefcase } from "lucide-react";
 import type { TimeframeOption, JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { ScreenerScorecard } from "@/components/molecules/screener-scorecard";
 import { GuidanceTrackTable } from "@/components/management/guidance-track-table";
-import { DisclosuresTable } from "@/components/management/disclosures-table";
-import type { DisclosureRow, DisclosuresTableConfig } from "@/components/management/disclosures-table";
-import { CapexBreakdownChart } from "@/components/management/capex-breakdown-chart";
-import { RoceTrendChart } from "@/components/management/roce-trend-chart";
+import { PromoterSection } from "@/components/management/promoter-section";
+import { RedFlagsSection } from "@/components/management/red-flags-section";
+import { InvestmentThesisSection } from "@/components/management/investment-thesis-section";
 
 const NAV_ITEMS = [
   { id: "section-score", label: "Score" },
   { id: "section-guidance", label: "Guidance Accuracy" },
-  { id: "section-disclosures", label: "Disclosure Honesty" },
-  { id: "section-capital-allocation", label: "Capital Allocation" },
+  { id: "section-red-flags", label: "Red Flags" },
+  { id: "section-thesis", label: "Investment Thesis" },
+  { id: "section-promoter", label: "Promoter Activity" },
 ];
+
+/** Map mqi_score.label to a colour-driving level string. */
+function mqiLabelToLevel(label: string): string {
+  const l = label.toLowerCase();
+  if (l === "high" || l === "strong" || l === "good") return "HIGH";
+  if (l === "low" || l === "poor" || l === "weak") return "LOW";
+  return label; // "Average", "Moderate", etc. → amber by default in scorecard
+}
+
+/** Derive HIGH / MODERATE / LOW from a dimension score percentage. */
+function pctToRating(score: number, max: number): string {
+  const pct = max > 0 ? score / max : 0;
+  if (pct >= 0.7) return "HIGH";
+  if (pct >= 0.4) return "MODERATE";
+  return "LOW";
+}
 
 function ManagementDashboardContent() {
   const searchParams = useSearchParams();
@@ -37,13 +53,8 @@ function ManagementDashboardContent() {
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // First, fetch all transcript calls for the symbol
   const { data: transcriptCalls, loading: transcriptLoading, error: transcriptError } = useTranscriptCalls(symbol);
-
-  // Get the first call ID from the transcript calls
   const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
-
-  // Then fetch the management analysis for the first call
   const { data: managementData, loading: managementLoading } = useManagementAnalysis(
     firstCallId,
     selectedTimeframe
@@ -51,39 +62,27 @@ function ManagementDashboardContent() {
 
   const loading = transcriptLoading || managementLoading;
 
-  // Derive an aggregate status from all job statuses for display
   const allStatuses = Object.values(jobStatuses);
   const aggregateStatus: JobStatus | null = allStatuses.length === 0
     ? null
-    : allStatuses.some(s => s === "failed")
-    ? "failed"
-    : allStatuses.every(s => s === "completed")
-    ? "completed"
-    : allStatuses.some(s => s === "processing")
-    ? "processing"
+    : allStatuses.some(s => s === "failed") ? "failed"
+    : allStatuses.every(s => s === "completed") ? "completed"
+    : allStatuses.some(s => s === "processing") ? "processing"
     : "pending";
 
   const stopPolling = () => {
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
-    }
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-      progressIntervalRef.current = null;
-    }
+    if (pollingIntervalRef.current) { clearInterval(pollingIntervalRef.current); pollingIntervalRef.current = null; }
+    if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
   };
 
   const pollAllJobs = (ids: string[]) => {
     ids.forEach(jobId => {
-      const url = `${BACKEND_URL}/api/jobs/${jobId}`;
-      apiCall<JobStatusResponse>(url, {
+      apiCall<JobStatusResponse>(`${BACKEND_URL}/api/jobs/${jobId}`, {
         onSuccess: (response) => {
           const status = response.data.status;
           setJobStatuses(prev => {
             const updated = { ...prev, [jobId]: status };
             const statuses = Object.values(updated);
-
             if (statuses.every(s => s === "completed")) {
               setProgress(100);
               stopPolling();
@@ -94,7 +93,6 @@ function ManagementDashboardContent() {
               setIsAnalyzing(false);
               setAnalyzeError(response.data.error || "One or more jobs failed");
             }
-
             return updated;
           });
         },
@@ -113,13 +111,10 @@ function ManagementDashboardContent() {
     setProgress(0);
     setIsAnalyzing(true);
 
-    // Take top 4 latest calls and submit all in parallel
     const callIds = transcriptCalls.slice(0, 4).map(c => c.id);
-
     const submitCall = (callId: string): Promise<string> =>
       new Promise<string>((resolve, reject) => {
-        const url = `${BACKEND_URL}/api/calls/${callId}/summarize`;
-        apiPost<JobCreateResponse>(url, {
+        apiPost<JobCreateResponse>(`${BACKEND_URL}/api/calls/${callId}/summarize`, {
           onSuccess: (response) => resolve(response.job.id),
           onError: reject,
         });
@@ -127,12 +122,9 @@ function ManagementDashboardContent() {
 
     try {
       const ids = await Promise.all(callIds.map(submitCall));
-
       const initialStatuses: Record<string, JobStatus> = {};
       ids.forEach(id => { initialStatuses[id] = "pending"; });
       setJobStatuses(initialStatuses);
-
-      // Initial poll then every 2 seconds
       pollAllJobs(ids);
       pollingIntervalRef.current = setInterval(() => pollAllJobs(ids), 2000);
     } catch (error: unknown) {
@@ -141,39 +133,27 @@ function ManagementDashboardContent() {
     }
   };
 
-  // Cleanup polling on unmount
-  useEffect(() => {
-    return () => stopPolling();
-  }, []);
+  useEffect(() => { return () => stopPolling(); }, []);
 
-  // Manage progress animation when any job is processing
   useEffect(() => {
     if (aggregateStatus === "processing") {
-      const totalDuration = 40000; // 40 seconds
+      const totalDuration = 40000;
       const targetProgress = 95;
       const updateInterval = 100;
       const progressPerStep = targetProgress / (totalDuration / updateInterval);
-
       let currentProgress = 0;
 
       progressIntervalRef.current = setInterval(() => {
         currentProgress += progressPerStep;
         if (currentProgress >= targetProgress) {
           currentProgress = targetProgress;
-          if (progressIntervalRef.current) {
-            clearInterval(progressIntervalRef.current);
-            progressIntervalRef.current = null;
-          }
+          if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
         }
         setProgress(Math.round(currentProgress));
       }, updateInterval);
     }
-
     return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
+      if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
     };
   }, [aggregateStatus]);
 
@@ -209,24 +189,18 @@ function ManagementDashboardContent() {
     );
   }
 
-  // Handle case where analysis is not found - show transcript details with Analyze button
   if (Object.keys(managementData).length === 0) {
     const transcriptCall = transcriptCalls[0];
     return (
       <div className="min-h-screen bg-background p-4">
-
-        {/* Main Container */}
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <h1 className="text-sm font-bold mb-6">Management Factor Analysis</h1>
-
-          {/* Transcript Details Card */}
           <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
             <div className="space-y-4">
               <div>
                 <h2 className="text-sm font-semibold mb-2">{transcriptCall.company_name}</h2>
                 <p className="text-sm text-muted-foreground">{transcriptCall.basic_industry}</p>
               </div>
-
               <div className="grid grid-cols-2 gap-4 py-4 border-t border-border">
                 <div>
                   <p className="text-sm text-muted-foreground">Ticker</p>
@@ -245,95 +219,61 @@ function ManagementDashboardContent() {
                   <p className="font-semibold text-xs">{transcriptCall.id}</p>
                 </div>
               </div>
-
               <div className="pt-4 border-t border-border">
                 <p className="text-sm text-muted-foreground mb-4">
                   No management analysis available for this transcript yet.
                 </p>
-
                 {analyzeError && (
-                  <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                    <p className="text-sm text-red-600 dark:text-red-400">{analyzeError}</p>
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-sm text-red-600">{analyzeError}</p>
                   </div>
                 )}
-
                 {aggregateStatus && (
                   <div className={`mb-4 p-3 rounded-md border ${
-                    aggregateStatus === "completed"
-                      ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                      : aggregateStatus === "failed"
-                      ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-                      : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                    aggregateStatus === "completed" ? "bg-green-50 border-green-200"
+                    : aggregateStatus === "failed" ? "bg-red-50 border-red-200"
+                    : "bg-blue-50 border-blue-200"
                   }`}>
                     {aggregateStatus === "processing" || aggregateStatus === "completed" ? (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <p className={`text-sm ${
-                            aggregateStatus === "completed"
-                              ? "text-green-600 dark:text-green-400"
-                              : "text-blue-600 dark:text-blue-400"
-                          }`}>
+                          <p className={`text-sm ${aggregateStatus === "completed" ? "text-green-600" : "text-blue-600"}`}>
                             {aggregateStatus === "completed" ? "Analysis complete!" : "Analyzing transcripts..."}
                           </p>
-                          <p className={`text-sm font-semibold ${
-                            aggregateStatus === "completed"
-                              ? "text-green-600 dark:text-green-400"
-                              : "text-blue-600 dark:text-blue-400"
-                          }`}>
+                          <p className={`text-sm font-semibold ${aggregateStatus === "completed" ? "text-green-600" : "text-blue-600"}`}>
                             {progress}%
                           </p>
                         </div>
-                        <div className={`w-full rounded-full h-2 overflow-hidden ${
-                          aggregateStatus === "completed"
-                            ? "bg-green-200 dark:bg-green-800"
-                            : "bg-blue-200 dark:bg-blue-800"
-                        }`}>
+                        <div className={`w-full rounded-full h-2 overflow-hidden ${aggregateStatus === "completed" ? "bg-green-200" : "bg-blue-200"}`}>
                           <div
-                            className={`h-full transition-all duration-300 ease-linear ${
-                              aggregateStatus === "completed"
-                                ? "bg-green-600 dark:bg-green-400"
-                                : "bg-blue-600 dark:bg-blue-400"
-                            }`}
+                            className={`h-full transition-all duration-300 ease-linear ${aggregateStatus === "completed" ? "bg-green-600" : "bg-blue-600"}`}
                             style={{ width: `${progress}%` }}
                           />
                         </div>
                       </div>
                     ) : (
-                      <p className={`text-sm ${
-                        aggregateStatus === "failed"
-                          ? "text-red-600 dark:text-red-400"
-                          : "text-blue-600 dark:text-blue-400"
-                      }`}>
+                      <p className={`text-sm ${aggregateStatus === "failed" ? "text-red-600" : "text-blue-600"}`}>
                         {aggregateStatus === "failed" && "Analysis failed"}
                         {aggregateStatus === "pending" && "Analysis jobs queued..."}
                       </p>
                     )}
                   </div>
                 )}
-
                 <button
                   onClick={handleAnalyzeClick}
                   disabled={isAnalyzing}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing
-                    ? aggregateStatus === "pending"
-                      ? "Queued..."
-                      : aggregateStatus === "processing"
-                      ? "Processing..."
-                      : "Starting..."
+                    ? aggregateStatus === "pending" ? "Queued..."
+                    : aggregateStatus === "processing" ? "Processing..."
+                    : "Starting..."
                     : "Analyze"}
                 </button>
               </div>
-
               {transcriptCall.ppt_url && (
                 <div className="pt-4 border-t border-border">
-                  <a
-                    href={transcriptCall.ppt_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline"
-                  >
+                  <a href={transcriptCall.ppt_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
                     View Presentation →
                   </a>
                 </div>
@@ -345,49 +285,46 @@ function ManagementDashboardContent() {
     );
   }
 
-  // Build disclosure rows from the flat disclosures array
-  const allDisclosureRows: DisclosureRow[] = (managementData.disclosures ?? []).map((d) => ({
-    title: d.disclosure_title,
-    tag: d.disclosure_type ?? undefined,
-    severity: d.severity ?? undefined,
-    timing: d.disclosure_timing ?? undefined,
-    detail: d.mitigation_strategy ?? null,
-  }));
+  // Hit rate from guidance_vs_actuals
+  const hitRate = managementData.guidance_vs_actuals?.hit_rate;
+  const hitRatePct = hitRate && hitRate.total_trackable > 0
+    ? Math.round((hitRate.met_or_beat / hitRate.total_trackable) * 100)
+    : null;
 
-const disclosureConfig: DisclosuresTableConfig = {
-    title: "Disclosures",
-    subtitle: "Key disclosures identified by management",
-    leftHeader: "Disclosure & Type",
-    rightHeader: "Mitigation Strategy",
-    detailPlaceholder: "No mitigation guidance provided",
-  };
-
-  const totalDisclosures = allDisclosureRows.length;
-  const proactiveCount = allDisclosureRows.filter((r) => r.timing?.toLowerCase() === "proactive").length;
-  const mitigatedCount = allDisclosureRows.filter((r) => r.detail && r.detail.trim().length > 0).length;
-  const timingPct = totalDisclosures > 0 ? Math.round((proactiveCount / totalDisclosures) * 100) : null;
-  const planningPct = totalDisclosures > 0 ? Math.round((mitigatedCount / totalDisclosures) * 100) : null;
-
-  const disclosureHeaderAction = totalDisclosures > 0 ? (
-    <div className="flex items-center gap-2">
-      {timingPct !== null && (
-        <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
-          <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Proactive</span>
-          <span style={{ fontSize: 28, fontWeight: 700, color: "#0F172B", lineHeight: 1.1 }}>
-            {timingPct}%
-          </span>
-        </div>
-      )}
-      {planningPct !== null && (
-        <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
-          <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Mitigated</span>
-          <span style={{ fontSize: 28, fontWeight: 700, color: "#0F172B", lineHeight: 1.1 }}>
-            {planningPct}%
-          </span>
-        </div>
-      )}
-    </div>
-  ) : undefined;
+  // Derive scorecard items from mqi_score.dimensions
+  const dims = managementData.mqi_score?.dimensions;
+  const scorecardItems = dims ? [
+    {
+      label: "Guidance Accuracy",
+      descriptor: hitRate
+        ? `${hitRatePct}% hit rate — ${hitRate.met_or_beat} met of ${hitRate.total_trackable} trackable`
+        : `${dims.guidance_credibility.score} / ${dims.guidance_credibility.max} points`,
+      rating: pctToRating(dims.guidance_credibility.score, dims.guidance_credibility.max),
+      barValue: dims.guidance_credibility.max > 0
+        ? (dims.guidance_credibility.score / dims.guidance_credibility.max) * 100
+        : null,
+      icon: Target,
+      scrollToId: "section-guidance",
+    },
+    {
+      label: "Disclosure Honesty",
+      descriptor: `${dims.disclosure_honesty.score} / ${dims.disclosure_honesty.max} points`,
+      rating: pctToRating(dims.disclosure_honesty.score, dims.disclosure_honesty.max),
+      barValue: dims.disclosure_honesty.max > 0
+        ? (dims.disclosure_honesty.score / dims.disclosure_honesty.max) * 100
+        : null,
+      icon: Shield,
+    },
+    {
+      label: "Capital Allocation",
+      descriptor: `${dims.capital_allocation.score} / ${dims.capital_allocation.max} points`,
+      rating: pctToRating(dims.capital_allocation.score, dims.capital_allocation.max),
+      barValue: dims.capital_allocation.max > 0
+        ? (dims.capital_allocation.score / dims.capital_allocation.max) * 100
+        : null,
+      icon: Briefcase,
+    },
+  ] : [];
 
   return (
     <ScreenerPageShell navItems={NAV_ITEMS}>
@@ -397,35 +334,10 @@ const disclosureConfig: DisclosuresTableConfig = {
         <div id="section-score" className="pt-4">
           <ScreenerScorecard
             title="MANAGEMENT CREDIBILITY"
-            overallLevel={managementData.trust?.overall}
-            score={managementData.consistency?.score ?? 0}
-            maxScore={managementData.consistency?.maxScore ?? 20}
-            items={(() => {
-              const subfactorKeyMap: Record<string, keyof typeof managementData.trust.subfactors> = {
-                "Guidance Accuracy": "guidanceAccuracy",
-                "Disclosure Honesty": "disclosureHonesty",
-                "Capital Allocation": "capitalAllocation",
-              };
-              const iconMap: Record<string, typeof Target> = {
-                "Guidance Accuracy": Target,
-                "Disclosure Honesty": Shield,
-                "Capital Allocation": Briefcase,
-                "Customer Traction": Users,
-              };
-              const scrollMap: Record<string, string> = {
-                "Guidance Accuracy": "section-guidance",
-                "Disclosure Honesty": "section-disclosures",
-                "Capital Allocation": "section-capital-allocation",
-              };
-              return (managementData.scores ?? []).map((s) => ({
-                label: s.factor,
-                descriptor: s.descriptor,
-                rating: s.rating,
-                barValue: subfactorKeyMap[s.factor] ? managementData.trust?.subfactors?.[subfactorKeyMap[s.factor]] ?? null : null,
-                icon: iconMap[s.factor],
-                scrollToId: scrollMap[s.factor],
-              }));
-            })()}
+            overallLevel={managementData.mqi_score ? mqiLabelToLevel(managementData.mqi_score.label) : undefined}
+            score={managementData.mqi_score?.total ?? 0}
+            maxScore={100}
+            items={scorecardItems}
           />
         </div>
 
@@ -434,42 +346,54 @@ const disclosureConfig: DisclosuresTableConfig = {
           <SectionPanel
             title="Guidance Track Record"
             headerAction={
-              managementData.consistency?.hitRate != null ? (
-                <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
-                  <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
-                  <span style={{ fontSize: 28, fontWeight: 700, color: "#0F172B", lineHeight: 1.1 }}>
-                    {managementData.consistency.hitRate}%
-                  </span>
+              hitRatePct !== null ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
+                    <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
+                    <span style={{ fontSize: 28, fontWeight: 700, color: "#0F172B", lineHeight: 1.1 }}>
+                      {hitRatePct}%
+                    </span>
+                  </div>
+                  {managementData.guidance_vs_actuals?.guidance_bias && (
+                    <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
+                      <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Bias</span>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: "#0F172B", lineHeight: 1.4 }}>
+                        {managementData.guidance_vs_actuals.guidance_bias}
+                      </span>
+                    </div>
+                  )}
                 </div>
               ) : undefined
             }
           >
-            <GuidanceTrackTable records={managementData.guidanceRecords} />
+            <GuidanceTrackTable rows={managementData.guidance_vs_actuals?.rows ?? []} />
           </SectionPanel>
         </div>
 
-        {/* Disclosure Honesty */}
-        {allDisclosureRows.length > 0 && (
-          <div id="section-disclosures">
-            <DisclosuresTable
-              config={disclosureConfig}
-              rows={allDisclosureRows}
-              headerAction={disclosureHeaderAction}
+        {/* Red Flags */}
+        {managementData.red_flags && managementData.red_flags.length > 0 && (
+          <div id="section-red-flags">
+            <RedFlagsSection flags={managementData.red_flags} />
+          </div>
+        )}
+
+        {/* Investment Thesis */}
+        {managementData.investment_thesis && (
+          <div id="section-thesis">
+            <InvestmentThesisSection thesis={managementData.investment_thesis} />
+          </div>
+        )}
+
+        {/* Promoter Activity */}
+        {managementData.promoter_activity && (
+          <div id="section-promoter">
+            <PromoterSection
+              promoterActivity={managementData.promoter_activity}
+              mqiScore={managementData.mqi_score}
             />
           </div>
         )}
 
-        {/* Capital Allocation */}
-        {managementData.capital_allocation && (
-          <div id="section-capital-allocation" className="flex flex-col gap-4">
-            {managementData.capital_allocation.capex_breakdown && (
-              <CapexBreakdownChart data={managementData.capital_allocation.capex_breakdown} />
-            )}
-            {managementData.capital_allocation.roce_trend && (
-              <RoceTrendChart data={managementData.capital_allocation.roce_trend} />
-            )}
-          </div>
-        )}
       </div>
     </ScreenerPageShell>
   );

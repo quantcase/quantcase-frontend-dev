@@ -1,12 +1,77 @@
 // Core type definitions for Management Factor Dashboard
 
+export type TimeframeOption = "current_quarter" | "rolling_3_year" | "full_history";
+
+// ─── MQI Score ────────────────────────────────────────────────────────────────
+
+export interface MqiDimension {
+  max: number;
+  score: number;
+  rationale: string;
+}
+
+export interface MqiScore {
+  label: string;
+  total: number;
+  dimensions: {
+    capital_allocation: MqiDimension;
+    disclosure_honesty: MqiDimension;
+    guidance_credibility: MqiDimension;
+  };
+  investment_implication: string;
+}
+
+// ─── Guidance vs Actuals ──────────────────────────────────────────────────────
+
+export type GuidanceSeverity =
+  | "beat"
+  | "major"
+  | "mediocre"
+  | "minor"
+  | "rolled_forward"
+  | "ongoing"
+  | "not_trackable";
+
+export type GuidanceTag =
+  | "order_book"
+  | "revenue_growth"
+  | "revenue"
+  | "deal_conversion"
+  | "disclosure_commitment"
+  | "vertical_recovery"
+  | "margin"
+  | "ai_revenue"
+  | "geography_recovery"
+  | "strategic_capex"
+  | "project_milestone"
+  | string;
+
+export interface GuidanceRow {
+  tag: GuidanceTag;
+  delta: string;
+  actual: string;
+  metric: string;
+  period: string;
+  guidance: string;
+  severity: GuidanceSeverity;
+  management_explanation: string;
+}
+
+export interface GuidanceVsActuals {
+  rows: GuidanceRow[];
+  misses: { major: number; minor: number; mediocre: number };
+  pattern: string;
+  hit_rate: { met_or_beat: number; total_trackable: number };
+  guidance_bias: string;
+}
+
+// ─── Legacy types (used by orphaned components, not by the active page) ───────
+
 export type TrustLevel = "HIGH" | "MODERATE" | "LOW";
 export type ConfidenceLevel = "HIGH" | "MEDIUM" | "LOW";
 export type StatusType = "ACHIEVED" | "MISSED" | "PENDING";
 export type TargetType = "financial" | "conceptual";
-export type TimeframeOption = "current_quarter" | "rolling_3_year" | "full_history";
 
-// Company header
 export interface CompanyInfo {
   name: string | null;
   company_name?: string | null;
@@ -18,24 +83,17 @@ export interface CompanyInfo {
   transcriptsAnalyzed?: number | null;
 }
 
-// Score cards
 export interface FactorScore {
-  factor: "Guidance Accuracy" | "Disclosure Honesty" | "Capital Allocation" | "Customer Traction" | string;
+  factor: string;
   rating: TrustLevel;
   descriptor: string | null;
 }
 
-// Trust panel
 export interface TrustScore {
   overall: TrustLevel;
-  subfactors: {
-    guidanceAccuracy: number;
-    disclosureHonesty: number;
-    capitalAllocation: number;
-  };
+  subfactors: { guidanceAccuracy: number; disclosureHonesty: number; capitalAllocation: number };
 }
 
-// Governance signals
 export interface GovernanceSignal {
   id: string;
   text: string;
@@ -43,21 +101,6 @@ export interface GovernanceSignal {
   targets?: Array<{ statement: string; severity?: string }>;
 }
 
-// Disclosures (flat array from backend)
-export type DisclosureType = "risk" | "bad_news" | "legal";
-export type DisclosureTiming = "proactive" | "reactive" | "partial" | "forced" | "past";
-
-export interface Disclosure {
-  disclosure_type: DisclosureType;
-  disclosure_title: string;
-  disclosure_timing?: DisclosureTiming | null;
-  mitigation_strategy?: string | null;
-  severity?: "high" | "medium" | "low" | null;
-}
-
-export type Disclosures = Disclosure[];
-
-// Consistency metrics
 export interface ConsistencyMetrics {
   score: number;
   maxScore: number;
@@ -65,7 +108,6 @@ export interface ConsistencyMetrics {
   disclosurePattern: string;
 }
 
-// Guidance table
 export interface GuidanceRecord {
   id: string;
   source_call?: string;
@@ -82,7 +124,6 @@ export interface GuidanceRecord {
   data_source?: string | null;
 }
 
-// Notable patterns
 export interface NotablePattern {
   id: string;
   title: string;
@@ -90,84 +131,79 @@ export interface NotablePattern {
   category: "positive" | "neutral" | "negative";
 }
 
-// Capital Allocation
-// ─── Capex Breakdown ──────────────────────────────────────────────────────────
-
 export type CapexTimeframe = "last_quarter" | "12_months" | "3_years" | "5_years";
 
-export interface CapexSlice {
-  name: string;
-  percentage: number;
-  amount_label: string;
-}
-
+export interface CapexSlice { name: string; percentage: number; amount_label: string }
 export interface CapexBreakdownPeriod {
-  total_deployed: number;
-  total_deployed_label: string;
-  vs_5yr_avg_pct: number;
-  largest_allocation: string;
-  largest_allocation_pct: number;
-  slices: CapexSlice[];
+  total_deployed: number; total_deployed_label: string; vs_5yr_avg_pct: number;
+  largest_allocation: string; largest_allocation_pct: number; slices: CapexSlice[];
 }
-
-/** All four timeframes pre-computed by the backend */
 export interface CapexBreakdown {
-  last_quarter: CapexBreakdownPeriod | null;
-  "12_months": CapexBreakdownPeriod | null;
-  "3_years": CapexBreakdownPeriod | null;
-  "5_years": CapexBreakdownPeriod | null;
+  last_quarter: CapexBreakdownPeriod | null; "12_months": CapexBreakdownPeriod | null;
+  "3_years": CapexBreakdownPeriod | null; "5_years": CapexBreakdownPeriod | null;
 }
 
-// ─── ROCE Trend ───────────────────────────────────────────────────────────────
-
-export interface RoceTrendMetric {
-  label: string;
-  value: string;
-  /** Optional sub-label shown beneath the value (e.g. "-0.5pp vs 2023", "FY 2023") */
-  sub_label?: string | null;
-  sentiment: "positive" | "negative" | "neutral";
-}
-
-export interface RoceTrendDataPoint {
-  period: string;
-  roce: number;
-}
-
+export interface RoceTrendMetric { label: string; value: string; sub_label?: string | null; sentiment: "positive" | "negative" | "neutral" }
+export interface RoceTrendDataPoint { period: string; roce: number }
 export interface RoceTrendView {
-  /** Label shown as date-range in header, e.g. "2019 – 2024" */
-  date_range: string;
-  wacc_threshold: number | null;
-  period_avg_roce: number | null;
-  data_points: RoceTrendDataPoint[];
-  /** Exactly 4 metric cards: Latest ROCE, Peak ROCE, Avg ROCE, vs WACC */
-  metrics: RoceTrendMetric[];
+  date_range: string; wacc_threshold: number | null; period_avg_roce: number | null;
+  data_points: RoceTrendDataPoint[]; metrics: RoceTrendMetric[];
+}
+export interface RoceTrend { summary: string; quarterly: RoceTrendView | null; yearly: RoceTrendView | null }
+export interface CapitalAllocation { capex_breakdown: CapexBreakdown | null; roce_trend: RoceTrend | null }
+
+// ─── Investment Thesis ────────────────────────────────────────────────────────
+
+export interface WatchlistItem {
+  number: number;
+  what_to_listen_for: string;
+  why_it_matters: string;
+  green_signal: string;
+  red_signal: string;
 }
 
-export interface RoceTrend {
-  summary: string;
-  quarterly: RoceTrendView | null;
-  yearly: RoceTrendView | null;
+export interface InvestmentThesis {
+  bull_case: string[];
+  bear_case: string[];
+  next_concall_watchlist: WatchlistItem[];
 }
 
-// ─── Capital Allocation (top-level) ───────────────────────────────────────────
+// ─── Red Flags ────────────────────────────────────────────────────────────────
 
-export interface CapitalAllocation {
-  capex_breakdown: CapexBreakdown | null;
-  roce_trend: RoceTrend | null;
+export type RedFlagSeverity = "caution" | "watch";
+
+export interface RedFlag {
+  title: string;
+  evidence: string;
+  severity: RedFlagSeverity;
+  implication: string;
 }
 
-// Complete dashboard data
+// ─── Promoter Activity ────────────────────────────────────────────────────────
+
+export interface ShareholdingEntry {
+  quarter: string;
+  promoter_pct: number | null;
+  pledge_pct: number | null;
+  change: number | null;
+  signal: string;
+}
+
+export interface PromoterActivity {
+  verdict: string;
+  shareholding: ShareholdingEntry[];
+  promoter_note: string;
+  verdict_rationale: string;
+}
+
+// ─── Dashboard Data ───────────────────────────────────────────────────────────
+
 export interface ManagementDashboardData {
-  company: CompanyInfo;
-  scores: FactorScore[];
-  trust: TrustScore;
-  governanceSignals: GovernanceSignal[];
-  consistency: ConsistencyMetrics;
-  guidanceRecords: GuidanceRecord[];
-  notablePatterns: NotablePattern[];
-  selectedTimeframe: TimeframeOption;
-  disclosures?: Disclosures | null; // flat array
-  capital_allocation?: CapitalAllocation | null;
+  mqi_score: MqiScore;
+  guidance_vs_actuals: GuidanceVsActuals;
+  investment_thesis?: InvestmentThesis;
+  red_flags?: RedFlag[];
+  promoter_activity?: PromoterActivity;
 }
 
 export interface ManagementDashboardResponse {
@@ -175,7 +211,8 @@ export interface ManagementDashboardResponse {
   data: ManagementDashboardData;
 }
 
-// Transcript Call types
+// ─── Transcript Call ──────────────────────────────────────────────────────────
+
 export interface TranscriptCall {
   id: string;
   company: string;
@@ -192,7 +229,8 @@ export interface TranscriptCallsResponse {
   data: TranscriptCall[];
 }
 
-// Job types
+// ─── Jobs ─────────────────────────────────────────────────────────────────────
+
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 
 export interface BullMQObject {

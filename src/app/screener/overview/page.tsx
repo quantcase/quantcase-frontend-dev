@@ -65,8 +65,8 @@ function OverviewContent() {
   const derivedDealMax = dealTotalScore?.max_score
     ?? (dFactorData?.overview?.deal_factor_score?.overall != null ? 20 : null);
 
-  const mScore = mgmtDashboard?.consistency.score ?? null;
-  const mMax = mgmtDashboard?.consistency.maxScore ?? 20;
+  const mScore = mgmtDashboard?.mqi_score?.total ?? null;
+  const mMax = 100;
   const oScore = oppTotalScore?.total_score ?? null;
   const oMax = oppTotalScore?.max_score ?? 40;
   const dScore = derivedDealScore;
@@ -96,13 +96,13 @@ function OverviewContent() {
         {/* Section: QC Insight */}
         <div id="section-qc-insight">
           <IMScoreCard
-            managementScore={mgmtDashboard?.consistency.score ?? null}
-            managementMax={mgmtDashboard?.consistency.maxScore ?? null}
+            managementScore={mgmtDashboard?.mqi_score?.total ?? null}
+            managementMax={100}
             opportunityScore={oppTotalScore?.total_score ?? null}
             opportunityMax={oppTotalScore?.max_score ?? null}
             dealScore={derivedDealScore}
             dealMax={derivedDealMax}
-            managementFactors={mgmtDashboard?.scores}
+            managementFactors={undefined}
             opportunityTakeaways={oppData?.final_takeaways ?? null}
             opportunityData={oppData}
             dealOverview={dFactorData?.overview ?? null}

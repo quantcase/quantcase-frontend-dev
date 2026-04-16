@@ -25,6 +25,7 @@ import { SectionPanel } from "@/components/opportunity/section-panel";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
 import { IndustryAnalysisCard } from "@/components/opportunity/industry-analysis-card";
 import { IndustryIntelligenceCard } from "@/components/opportunity/industry-intelligence-card";
+import { CompetitionIntelligenceCard } from "@/components/opportunity/competition-intelligence-card";
 import { TranscriptDriversCard } from "@/components/opportunity/transcript-drivers-card";
 import { CompanyMetricsTable } from "@/components/opportunity/company-metrics-table";
 import { InvestmentImplicationsCard } from "@/components/opportunity/investment-implications-card";
@@ -68,7 +69,6 @@ function OpportunityContent() {
   const [selectedSection, setSelectedSection] = useState("industry_overview");
   const [showSideWindow, setShowSideWindow] = useState(false);
   const [patchedSections, setPatchedSections] = useState<Partial<OFactorResponse>>({});
-  const [showCompetitionDetails, setShowCompetitionDetails] = useState(false);
   const [showFinancialDetails, setShowFinancialDetails] = useState(false);
 
   const { data: transcriptCalls, loading: transcriptLoading, error: transcriptError } = useTranscriptCalls(symbol);
@@ -215,23 +215,22 @@ function OpportunityContent() {
             scoring={competitionScoring}
             contentClassName="px-6 space-y-4"
           >
-            <CompetitionCard
-              data={data.competition}
-              showDetails={showCompetitionDetails}
-              onToggle={() => setShowCompetitionDetails(v => !v)}
-            />
-            {showCompetitionDetails && (
-              <>
+            <div className="flex gap-6">
+              <div className="flex-1 min-w-0 space-y-4">
+                <CompetitionCard data={data.competition} />
                 <div>
-                  <hr className="border-zinc-200 dark:border-zinc-700 border-dashed my-6" />
                   <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">KPI Benchmarking</h4>
                   <p className="text-xs text-zinc-400 mb-3">Latest KPI values across industry peers</p>
                   <KpiBenchmarkingTable data={peerData?.peer_kpi_timeseries} loading={peerLoading} />
                 </div>
                 <CompetitiveBenchmarking data={data.competition} peers={peerData?.competition?.peers ?? []} loading={peerLoading} />
-              </>
-            )}
-            <TakeawayBox title="COMPETITION TAKEAWAY" text={data.competition?.text?.takeaway} color="emerald" />
+              </div>
+              {data.competition?.final_scoring && (
+                <div className="w-[400px] shrink-0">
+                  <CompetitionIntelligenceCard data={data.competition} />
+                </div>
+              )}
+            </div>
           </SectionPanel>
         </div>
 

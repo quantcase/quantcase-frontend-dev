@@ -111,8 +111,10 @@ export interface CompetitionSection {
     };
     competitive_positioning?: {
       strengths?: string[];
-      areas_to_monitor?: string[];
+      weaknesses?: string[];
       opportunities?: string[];
+      threats?: string[];
+      areas_to_monitor?: string[];
     };
     takeaway?: string;
   };

@@ -194,19 +194,28 @@ interface WorkingCapitalCardProps {
 }
 
 export function WorkingCapitalCard({ data }: WorkingCapitalCardProps) {
-  const d = data ?? { quarters: [], rows: [] };
-  const latestIdx = d.quarters.length > 0 ? d.quarters.length - 1 : 0;
+  const quarters = data?.quarters ?? [];
+  const rows = data?.rows ?? [];
+  const d = { ...data, quarters, rows };
 
   const col1 = (
     <>
-      {d.rows.map((row) => (
-        <MetricTile
-          key={row.key}
-          label={row.label}
-          value={String(row.values[latestIdx] ?? "—")}
-          sublabel={d.quarters[latestIdx] ?? "Latest"}
-        />
-      ))}
+      {d.rows.map((row) => {
+        // Find the last index with a non-null value so the tile isn't empty
+        // when the most recent quarter hasn't been computed yet.
+        let displayIdx = d.quarters.length - 1;
+        for (let i = row.values.length - 1; i >= 0; i--) {
+          if (row.values[i] != null) { displayIdx = i; break; }
+        }
+        return (
+          <MetricTile
+            key={row.key}
+            label={row.label}
+            value={String(row.values[displayIdx] ?? "—")}
+            sublabel={d.quarters[displayIdx] ?? "Latest"}
+          />
+        );
+      })}
     </>
   );
 

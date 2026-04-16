@@ -33,6 +33,7 @@ import { InvestmentImplicationsCard } from "@/components/opportunity/investment-
 import { PageEmptyState } from "@/components/opportunity/page-empty-state";
 import { AnalyzePromptCard } from "@/components/opportunity/analyze-prompt-card";
 import { FinancialSubsection } from "@/components/opportunity/financial-subsection";
+import { FinancialIntelligenceCard } from "@/components/opportunity/financial-intelligence-card";
 
 const NAV_ITEMS = [
   { id: "section-score", label: "Score" },
@@ -148,7 +149,7 @@ function OpportunityContent() {
       <div className="mb-8 px-4 space-y-6">
 
         {/* Floating Prompt Toggle */}
-        <button
+        {/* <button
           onClick={() => setShowSideWindow(v => !v)}
           className={`fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg transition-all ${
             showSideWindow
@@ -158,7 +159,7 @@ function OpportunityContent() {
         >
           <PanelRight className="h-4 w-4" />
           Prompt
-        </button>
+        </button> */}
 
         {/* Score */}
         <div id="section-score" className="pt-4">
@@ -242,34 +243,40 @@ function OpportunityContent() {
             subtitle="Snapshot from financial statements, investor decks & management commentary"
             scoring={financialScoring}
           >
-            <div className="pb-4 space-y-4">
-              <FinancialStrengthCard
-                data={data.financial_strength}
-                showDetails={showFinancialDetails}
-                onToggle={() => setShowFinancialDetails(v => !v)}
-              />
-            </div>
-            {showFinancialDetails && (
-              <>
-                <FinancialSubsection title="Operating Leverage Analysis" subtitle="Fixed cost absorption, DOL trend & leverage verdict">
-                  <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />
-                </FinancialSubsection>
-                <FinancialSubsection title="Free Cash Flow Analysis" subtitle="FCF conversion, growth trajectory, capex drag & yield">
-                  <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />
-                </FinancialSubsection>
-                <FinancialSubsection title="Working Capital" subtitle="DSO, DIO, DPO, CCC trends & WC as % of revenue">
-                  <WorkingCapitalCard data={data.financial_strength?.working_capital} />
-                </FinancialSubsection>
-                <FinancialSubsection title="Capital Structure & Capex" subtitle="Balance sheet position, debt trajectory, equity allocation & capex intensity">
-                  <CapitalStructureCard data={data.financial_strength?.capital_structure} />
-                </FinancialSubsection>
-                <FinancialSubsection title="KPI Timeseries" subtitle="Industry-specific KPI trends over time" paddingBottom={false}>
-                  <IndustryKpiTable data={peerData?.industry_kpis} loading={peerLoading} />
-                </FinancialSubsection>
-              </>
-            )}
-            <div>
-              <TakeawayBox title="FINANCIAL TAKEAWAY" text={data.financial_strength?.text?.key_takeaway} />
+            <div className="flex gap-6">
+              <div className="flex-1 min-w-0 space-y-4">
+                <div className="pb-0 space-y-4">
+                  <FinancialStrengthCard
+                    data={data.financial_strength}
+                    showDetails={showFinancialDetails}
+                    onToggle={() => setShowFinancialDetails(v => !v)}
+                  />
+                </div>
+                {showFinancialDetails && (
+                  <>
+                    <FinancialSubsection title="Operating Leverage Analysis" subtitle="Fixed cost absorption, DOL trend & leverage verdict">
+                      <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />
+                    </FinancialSubsection>
+                    <FinancialSubsection title="Free Cash Flow Analysis" subtitle="FCF conversion, growth trajectory, capex drag & yield">
+                      <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />
+                    </FinancialSubsection>
+                    <FinancialSubsection title="Working Capital" subtitle="DSO, DIO, DPO, CCC trends & WC as % of revenue">
+                      <WorkingCapitalCard data={data.financial_strength?.working_capital} />
+                    </FinancialSubsection>
+                    <FinancialSubsection title="Capital Structure & Capex" subtitle="Balance sheet position, debt trajectory, equity allocation & capex intensity">
+                      <CapitalStructureCard data={data.financial_strength?.capital_structure} />
+                    </FinancialSubsection>
+                    <FinancialSubsection title="KPI Timeseries" subtitle="Industry-specific KPI trends over time" paddingBottom={false}>
+                      <IndustryKpiTable data={peerData?.industry_kpis} loading={peerLoading} />
+                    </FinancialSubsection>
+                  </>
+                )}
+              </div>
+              {data.financial_strength?.final_scoring && (
+                <div className="w-[400px] shrink-0">
+                  <FinancialIntelligenceCard data={data.financial_strength} />
+                </div>
+              )}
             </div>
           </SectionPanel>
         </div>

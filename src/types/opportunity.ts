@@ -229,13 +229,17 @@ export interface DolDataPoint {
 }
 
 export interface FixedCostLine {
-  name: string;
-  key: string;
-  color: string;
-  current_pct: number;
-  prior_pct: number;
-  change_bps: number;
-  note: string;
+  label: string;
+  current_pct: number | null;
+  prior_pct: number | null;
+  change_bps: number | null;
+  note?: string | null;
+}
+
+export interface OperatingLeverageMetric {
+  label: string;
+  value: string;
+  change?: string | null;
 }
 
 export interface OperatingLeverageSection {
@@ -244,21 +248,21 @@ export interface OperatingLeverageSection {
   dol_chart_data?: DolDataPoint[];
   fixed_cost_lines?: FixedCostLine[];
   total_fixed_costs?: {
-    current_pct: number;
-    prior_pct: number;
-    change_bps: number;
-    note: string;
+    current_pct: number | null;
+    prior_pct: number | null;
+    change_bps: number | null;
+    note?: string | null;
   };
   metrics?: {
-    revenue_growth_yoy?: OFactorMetric;
-    ebit_growth_yoy?: OFactorMetric;
-    leverage_spread?: OFactorMetric;
+    revenue_growth_yoy?: OperatingLeverageMetric;
+    ebit_growth_yoy?: OperatingLeverageMetric;
+    leverage_spread?: OperatingLeverageMetric;
   };
   verdict?: {
     status: string;
     label: string;
-    tag: string;
-    description: string;
+    tag?: string | null;
+    description?: string | null;
   };
   all_verdicts?: Array<{ status: string; label: string; is_current?: boolean }>;
 }

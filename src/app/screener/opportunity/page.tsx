@@ -28,6 +28,7 @@ import { CustomerTractionCard } from "@/components/opportunity/customer-traction
 import { SectionPanel } from "@/components/opportunity/section-panel";
 import { SubsectionHeader } from "@/components/opportunity/subsection-header";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
+import { IndustryAnalysisCard } from "@/components/opportunity/industry-analysis-card";
 
 function OpportunityContent() {
   const searchParams = useSearchParams();
@@ -324,6 +325,7 @@ function OpportunityContent() {
   const NAV_ITEMS = [
     { id: "section-score", label: "Score" },
     { id: "section-industry", label: "Industry Overview" },
+    ...(data.industry?.industry_analysis ? [{ id: "section-industry-analysis", label: "Industry Analysis" }] : []),
     { id: "section-competition", label: "Competition" },
     { id: "section-financial", label: "Financial Strength" },
     { id: "section-customer", label: "Customer Traction" },
@@ -413,6 +415,18 @@ function OpportunityContent() {
           <IndustryOverviewCard data={data.industry_overview} competition={data.competition} />
         </SectionPanel>
         </div>
+
+        {/* 4.1b Industry Analysis (from /industry endpoint) */}
+        {data.industry?.industry_analysis && (
+          <div id="section-industry-analysis">
+            <SectionPanel
+              title="Industry Analysis"
+              subtitle="Cross-company synthesis from earnings transcripts & filings"
+            >
+              <IndustryAnalysisCard data={data.industry.industry_analysis} />
+            </SectionPanel>
+          </div>
+        )}
 
         {/* 4.2 Competitive Benchmarking vs Industry Peers */}
         <div id="section-competition">

@@ -7,8 +7,6 @@ import {
   ChevronDown,
   RefreshCw,
   ArrowRight,
-  TrendingUp,
-  TrendingDown,
   Loader2,
   AlertCircle,
 } from "lucide-react";
@@ -28,19 +26,14 @@ function relDate(dateStr: string): string {
   return `${Math.floor(diffDays / 30)}mo ago`;
 }
 
-function fmtPrice(v: number): string {
-  return `₹${v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+function fmtBookValue(v: number | null | undefined): string {
+  if (v == null) return "—";
+  return `₹${Math.round(v).toLocaleString("en-IN")}`;
 }
 
-function fmtCap(v: number): string {
-  if (v >= 1e12) return `₹${(v / 1e12).toFixed(2)}T`;
-  if (v >= 1e9) return `₹${(v / 1e9).toFixed(1)}B`;
-  return `₹${(v / 1e6).toFixed(0)}M`;
-}
-
-function week52Pos(price: number, low: number, high: number): number {
-  if (high === low) return 50;
-  return Math.round(Math.max(0, Math.min(100, ((price - low) / (high - low)) * 100)));
+function fmtPct(v: number | null | undefined): string {
+  if (v == null) return "—";
+  return `${v.toFixed(1)}%`;
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -78,11 +71,9 @@ function AssetRow({
   isLast: boolean;
   onNavigate: (symbol: string) => void;
 }) {
-  const pct = quote?.changePercent ?? null;
-  const isUp = pct != null && pct > 0;
-  const isDown = pct != null && pct < 0;
-  const changeColor = isUp ? "#059669" : isDown ? "#dc2626" : "#888888";
-  const pos = quote ? week52Pos(quote.price, quote.week52Low, quote.week52High) : null;
+  const roeColor = quote?.roe != null
+    ? (quote.roe > 15 ? "#059669" : quote.roe < 0 ? "#dc2626" : "#888888")
+    : "#888888";
 
   return (
     <tr
@@ -109,60 +100,37 @@ function AssetRow({
         )}
       </td>
 
-      {/* Price */}
-      <td className="px-4 py-3 text-right">
-        <span className="text-[13px] font-semibold" style={{ color: "#0F172B" }}>
-          {quote ? fmtPrice(quote.price) : "—"}
-        </span>
-      </td>
-
-      {/* Day chg */}
-      <td className="px-4 py-3 text-right">
-        {pct != null ? (
-          <span className="inline-flex items-center gap-0.5 text-[12px] font-medium" style={{ color: changeColor }}>
-            {isUp ? <TrendingUp className="h-3 w-3" /> : isDown ? <TrendingDown className="h-3 w-3" /> : null}
-            {isUp ? "+" : ""}{(pct * 100).toFixed(2)}%
-          </span>
-        ) : <span style={{ color: "#888888" }}>—</span>}
-      </td>
-
-      {/* 52W position */}
-      <td className="px-4 py-3 text-right">
-        {pos != null ? (
-          <div className="flex items-center gap-2 justify-end">
-            <span className="text-[10px] w-6 text-right tabular-nums" style={{ color: "#888888" }}>
-              {pos}%
-            </span>
-            <div className="w-16 h-1.5 rounded-full bg-[#E2E2E2] overflow-hidden">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${pos}%`,
-                  background: pos > 70 ? "#059669" : pos < 30 ? "#dc2626" : "#0F172B",
-                }}
-              />
-            </div>
-          </div>
-        ) : <span style={{ color: "#888888" }}>—</span>}
-      </td>
-
       {/* P/E */}
       <td className="px-4 py-3 text-right">
-        <span className="text-[12px]" style={{ color: "#888888" }}>
+        <p className="text-[12px] tabular-nums" style={{ color: "#888888" }}>
           {quote?.pe != null ? quote.pe.toFixed(1) : "—"}
+        </p>
+        {quote?.peValuationLabel && (
+          <p className="text-[10px]" style={{ color: "rgba(18,18,18,0.40)" }}>
+            {quote.peValuationLabel}
+          </p>
+        )}
+      </td>
+
+      {/* P/B */}
+      <td className="px-4 py-3 text-right">
+        <span className="text-[12px] tabular-nums" style={{ color: "#888888" }}>
+          {quote?.pb != null ? quote.pb.toFixed(2) : "—"}
         </span>
       </td>
 
-      {/* Mkt Cap */}
+      {/* ROE */}
       <td className="px-4 py-3 text-right">
-        <p className="text-[12px]" style={{ color: "#888888" }}>
-          {quote ? fmtCap(quote.marketCap) : "—"}
-        </p>
-        {quote?.marketCapLabel && (
-          <p className="text-[10px]" style={{ color: "rgba(18,18,18,0.40)" }}>
-            {quote.marketCapLabel}
-          </p>
-        )}
+        <span className="text-[12px] tabular-nums font-medium" style={{ color: roeColor }}>
+          {fmtPct(quote?.roe)}
+        </span>
+      </td>
+
+      {/* Book Value */}
+      <td className="px-4 py-3 text-right">
+        <span className="text-[12px] tabular-nums" style={{ color: "#888888" }}>
+          {fmtBookValue(quote?.bookValue)}
+        </span>
       </td>
 
       {/* Added */}
@@ -199,8 +167,6 @@ function WatchlistAccordion({
   const preview = symbols.slice(0, 5);
   const overflow = symbols.length - preview.length;
 
-  const gainers = symbols.filter((s) => (quotes[s]?.changePercent ?? 0) > 0).length;
-  const losers = symbols.filter((s) => (quotes[s]?.changePercent ?? 0) < 0).length;
 
   return (
     <div className="last:border-b-0" style={{ borderBottom: "1px solid #E2E2E2" }}>
@@ -240,9 +206,7 @@ function WatchlistAccordion({
               {!quotesLoading && symbols.length > 0 && (
                 <>
                   <span className="mx-1.5" style={{ color: "#E2E2E2" }}>·</span>
-                  <span style={{ color: "#059669" }}>{gainers}↑</span>
-                  <span className="mx-1" style={{ color: "#888888" }}>·</span>
-                  <span style={{ color: "#dc2626" }}>{losers}↓</span>
+                  <span style={{ color: "#888888" }}>{symbols.filter((s) => quotes[s] != null).length} loaded</span>
                 </>
               )}
             </p>
@@ -292,14 +256,13 @@ function WatchlistAccordion({
                 <thead>
                   <tr style={{ background: "#F5F5F5", borderBottom: "1px solid #E2E2E2" }}>
                     {[
-                      { h: "Symbol",       align: "left"  },
-                      { h: "Company",      align: "left"  },
-                      { h: "Price",        align: "right" },
-                      { h: "Day Chg",      align: "right" },
-                      { h: "52W Range",    align: "right" },
-                      { h: "P/E",          align: "right" },
-                      { h: "Mkt Cap",      align: "right" },
-                      { h: "Added",        align: "right" },
+                      { h: "Symbol",      align: "left"  },
+                      { h: "Company",     align: "left"  },
+                      { h: "P/E",         align: "right" },
+                      { h: "P/B",         align: "right" },
+                      { h: "ROE",         align: "right" },
+                      { h: "Book Value",  align: "right" },
+                      { h: "Added",       align: "right" },
                     ].map(({ h, align }) => (
                       <th
                         key={h}
@@ -357,10 +320,10 @@ export function WatchlistPanel({ className }: { className?: string }) {
 
   // Aggregate stats
   const totalSymbols = watchlists.reduce((s, w) => s + w.total_assets, 0);
-  const gainers = allSymbols.filter((s) => (quotes[s]?.changePercent ?? 0) > 0).length;
-  const losers  = allSymbols.filter((s) => (quotes[s]?.changePercent ?? 0) < 0).length;
   const peVals  = allSymbols.map((s) => quotes[s]?.pe).filter((v): v is number => v != null && v > 0 && v < 200);
   const avgPE   = peVals.length > 0 ? peVals.reduce((a, b) => a + b, 0) / peVals.length : null;
+  const roeVals = allSymbols.map((s) => quotes[s]?.roe).filter((v): v is number => v != null);
+  const avgROE  = roeVals.length > 0 ? roeVals.reduce((a, b) => a + b, 0) / roeVals.length : null;
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -427,10 +390,10 @@ export function WatchlistPanel({ className }: { className?: string }) {
               <SummaryTile label="Watchlists" value={String(watchlists.length)} />
               <SummaryTile label="Tracked" value={String(totalSymbols)} sub="symbols" />
               <SummaryTile
-                label="Gainers"
-                value={quotesLoading ? "—" : String(gainers)}
-                sub={quotesLoading ? undefined : `${losers} declining`}
-                upDown={gainers > losers ? "up" : gainers < losers ? "down" : null}
+                label="Avg ROE"
+                value={quotesLoading || avgROE == null ? "—" : `${avgROE.toFixed(1)}%`}
+                sub={roeVals.length > 0 ? `${roeVals.length} stocks` : undefined}
+                upDown={avgROE != null ? (avgROE > 15 ? "up" : avgROE < 0 ? "down" : null) : null}
               />
               <SummaryTile
                 label="Avg P/E"

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Search, ChevronRight, Eye, CandlestickChart, BookOpen, Layers, LayoutDashboard, Users, PieChart, Wrench, LineChart } from "lucide-react";
+import { Search, ChevronRight, Eye, CandlestickChart, BookOpen, Sparkles, LayoutDashboard, Users, PieChart, Wrench, LineChart } from "lucide-react";
 import { Suspense, useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const quickSymbols = ["HDFC", "TCS", "INFY", "ICICI"];
@@ -11,9 +12,9 @@ const quickSymbols = ["HDFC", "TCS", "INFY", "ICICI"];
 const QUANTCASE_FACTOR_PATHS = ["/screener/management", "/screener/opportunity", "/screener/deal"];
 
 const FACTOR_ITEMS = [
-  { label: "Management", href: "/screener/management" },
-  { label: "Opportunity", href: "/screener/opportunity" },
-  { label: "Deal",        href: "/screener/deal" },
+  { label: "Management Factor", href: "/screener/management" },
+  { label: "Opportunity Factor", href: "/screener/opportunity" },
+  { label: "Deal Factor",        href: "/screener/deal" },
 ];
 
 function SearchZone() {
@@ -135,25 +136,45 @@ function TopBarInner() {
           </TabLink>
         ))}
 
-        {/* QuantCase Factors — trigger + inline sub-items, all inside factorRef */}
+        {/* QuantCase — trigger + inline sub-items, all inside factorRef */}
         <div ref={factorRef} className="flex h-full items-end">
           <button
             onClick={() => !isFactorActive && setFactorOpen((v) => !v)}
             className={cn(
-              "relative flex h-full items-center gap-1.5 px-3 text-sm whitespace-nowrap transition-colors focus:outline-none",
-              isFactorActive
-                ? "text-[#0F172B] font-medium cursor-default"
-                : "text-[#888888] hover:text-[#0F172B]"
+              "relative flex h-full items-center gap-0 px-1 focus:outline-none",
+              isFactorActive ? "cursor-default" : ""
             )}
           >
-            <Layers className="size-3.5 shrink-0" />
-            QuantCase Factors
-            <ChevronRight
-              className={cn(
-                "size-3.5 shrink-0 transition-transform duration-200",
-                showFactorItems ? "rotate-180" : "rotate-0"
+            {/* Pill badge with shimmer */}
+            <span className={cn(
+              "relative flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium overflow-hidden",
+              "border transition-colors duration-200",
+              isFactorActive
+                ? "bg-[#0F172B] text-white border-[#0F172B]"
+                : "bg-white text-[#0F172B] border-[#0F172B]/30 hover:border-[#0F172B]/60"
+            )}>
+              {/* Shimmer sweep — only when not active */}
+              {!isFactorActive && (
+                <motion.span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-full"
+                  style={{
+                    background: "linear-gradient(105deg, transparent 40%, rgba(15,23,43,0.08) 50%, transparent 60%)",
+                    backgroundSize: "200% 100%",
+                  }}
+                  animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
+                  transition={{ duration: 2.8, repeat: Infinity, ease: "linear", repeatDelay: 1.2 }}
+                />
               )}
-            />
+              <Sparkles className="size-3 shrink-0" />
+              QuantCase
+              <ChevronRight
+                className={cn(
+                  "size-3 shrink-0 transition-transform duration-200",
+                  showFactorItems ? "rotate-90" : "rotate-0"
+                )}
+              />
+            </span>
           </button>
 
           {/* Factor sub-items — shown inline when expanded */}

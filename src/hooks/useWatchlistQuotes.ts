@@ -6,14 +6,11 @@ export interface WatchlistQuote {
   symbol: string;
   name: string;
   sector: string;
-  price: number;
-  changePercent: number;
-  marketCap: number;
-  marketCapLabel: string | null;
-  week52High: number;
-  week52Low: number;
   pe: number | null;
   pb: number | null;
+  roe: number | null;
+  bookValue: number | null;
+  peValuationLabel: string | null;
 }
 
 // The screener endpoint returns the ScreenerData object directly (no success/data wrapper).
@@ -38,19 +35,16 @@ export function useWatchlistQuotes(symbols: string[]) {
             const d: ScreenerData | null = (json as unknown as ScreenerData).symbol
               ? (json as unknown as ScreenerData)
               : (json.data ?? null);
-            if (!d?.quote || !d?.valuation) return null;
+            if (!d?.company) return null;
             return {
               symbol: sym,
               name: d.company.name,
               sector: d.company.sector,
-              price: d.quote.price,
-              changePercent: d.quote.changePercent,
-              marketCap: d.quote.marketCap,
-              marketCapLabel: d.quote.marketCapLabel,
-              week52High: d.quote.week52High,
-              week52Low: d.quote.week52Low,
-              pe: d.valuation.peRatio ?? null,
-              pb: d.valuation.pbRatio ?? null,
+              pe: d.valuation?.peRatio ?? null,
+              pb: d.valuation?.pbRatio ?? null,
+              roe: d.efficiency?.returnOnEquity ?? null,
+              bookValue: d.perShare?.bookValue ?? null,
+              peValuationLabel: d.valuation?.peValuationLabel ?? null,
             } satisfies WatchlistQuote;
           })
           .catch(() => null)

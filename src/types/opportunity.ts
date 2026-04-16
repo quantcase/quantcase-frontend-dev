@@ -478,6 +478,7 @@ export interface FinalTakeaways {
 export interface OFactorResponse {
   final_takeaways?: FinalTakeaways;
   industry_overview?: IndustryOverviewSection;
+  industry?: { industry_analysis?: IndustryAnalysis };
   competition?: CompetitionSection;
   financial_strength?: FinancialStrengthSectionFull;
   customer_traction?: CustomerTractionSection;
@@ -492,6 +493,121 @@ export interface OFactorResponseWrapper {
   success: boolean;
   data: OFactorResponse;
   total_score?: TotalScore;
+}
+
+// ─── Industry Analysis (ofactor /industry endpoint) ───────────────────────────
+
+export interface IndustryScoreCardDimension {
+  max: number;
+  score: number;
+  status: string;
+}
+
+export interface IndustryScoreCard {
+  total: number;
+  status: string;
+  status_color: string;
+  dimensions: Record<string, IndustryScoreCardDimension>;
+}
+
+export interface IndustryKeyFinding {
+  body: string;
+  color: "green" | "red" | "amber" | "blue";
+  theme: string;
+}
+
+export interface IndustryCompanyRow {
+  company: string;
+  market_cap_cr: number | null;
+  revenue_latest_cr: number | null;
+  revenue_growth_yoy: string | null;
+  revenue_cagr_3y: string | null;
+  operating_margin_current: string | null;
+  operating_margin_prior: string | null;
+  receivable_days_current: number | string | null;
+  receivable_days_prior: number | string | null;
+  inventory_days_current: number | string | null;
+  roce: string | null;
+  sentiment: string | null;
+  capex_trend: string | null;
+  qoq_acceleration: string | null;
+}
+
+export interface IndustryDriverItem {
+  driver?: string;
+  concern?: string;
+  indicator?: string;
+  mentioned_by: number;
+  total_companies: number;
+}
+
+export interface IndustryDemandDrivers {
+  positive: IndustryDriverItem[];
+  negative: IndustryDriverItem[];
+  representative_quotes: string[];
+}
+
+export interface IndustrySupplyDrivers {
+  excess_indicators: IndustryDriverItem[];
+  tightness_indicators: IndustryDriverItem[];
+  representative_quotes: string[];
+}
+
+export interface IndustryCoherenceCheck {
+  type: "coherent" | "incoherent";
+  pattern: string;
+  explanation: string;
+}
+
+export interface IndustryMetricItem {
+  label: string;
+  value?: string | null;
+  count?: number;
+  total?: number;
+  direction?: string;
+  trend?: string;
+  vs_wacc_spread?: string;
+}
+
+export interface IndustryMetrics {
+  [key: string]: IndustryMetricItem;
+}
+
+export interface IndustryInvestmentRisk {
+  risk: string;
+  evidence: string;
+}
+
+export interface IndustryPositiveSignal {
+  signal: string;
+  evidence: string;
+}
+
+export interface IndustryRecommendedStrategy {
+  action: string;
+  thesis: string;
+  timing: string;
+  segment: string;
+  rationale: string;
+}
+
+export interface IndustryInvestmentImplications {
+  risks: IndustryInvestmentRisk[];
+  positive_signals: IndustryPositiveSignal[];
+  recommended_strategy: IndustryRecommendedStrategy;
+  next_quarter_watchpoints: string[];
+}
+
+export interface IndustryAnalysis {
+  score_card: IndustryScoreCard;
+  key_findings: IndustryKeyFinding[];
+  key_takeaway: string;
+  company_table: IndustryCompanyRow[];
+  demand_drivers: IndustryDemandDrivers;
+  supply_drivers: IndustrySupplyDrivers;
+  coherence_checks: IndustryCoherenceCheck[];
+  industry_metrics: IndustryMetrics;
+  investment_implications: IndustryInvestmentImplications;
 }
 
 // ─── Industry KPI Timeseries (from peer-data endpoint) ────────────────────────

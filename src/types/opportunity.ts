@@ -26,9 +26,21 @@ export function safeMetric(m?: OFactorMetric): { value: string; label: string; s
 
 // ─── Industry Overview ────────────────────────────────────────────────────────
 
+export interface IndustryKpiMetric {
+  label: string;
+  value: string;
+  change?: string | null;
+  sublabel?: string | null;
+}
+
 export interface IndustryOverviewSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
+  period?: string;
+  sector?: string;
+  subject_company?: string;
   final_scoring?: FinalScoringSection;
+  /** Dynamic KPI tiles rendered in the metrics grid (replaces hardcoded metrics when present) */
+  kpi_metrics?: IndustryKpiMetric[];
   metrics?: {
     industry_revenue_ttm?: OFactorMetric;
     industry_cagr?: IndustryCagrMetric;
@@ -99,8 +111,10 @@ export interface CompetitionSection {
     };
     competitive_positioning?: {
       strengths?: string[];
-      areas_to_monitor?: string[];
+      weaknesses?: string[];
       opportunities?: string[];
+      threats?: string[];
+      areas_to_monitor?: string[];
     };
     takeaway?: string;
   };
@@ -170,56 +184,38 @@ export interface FinancialStrengthSection {
 // ─── Customer Traction ────────────────────────────────────────────────────────
 
 export interface CustomerTractionSection {
-  meta?: { section_id?: string; title?: string; subtitle?: string };
-  final_scoring?: FinalScoringSection;
-  metrics?: {
-    active_customers?: OFactorMetric;
-    net_retention?: OFactorMetric;
-    top_10_concentration?: OFactorMetric;
-    avg_contract_value?: OFactorMetric;
-    churn_rate?: OFactorMetric;
-  };
-  text?: {
-    key_takeaway?: string;
-    customer_growth?: {
-      metrics?: {
-        current_base?: OFactorMetric;
-        five_year_growth?: OFactorMetric;
-        new_adds?: OFactorMetric;
-        churned?: OFactorMetric;
-      };
-      acquisition_dynamics?: string[];
+  core?: {
+    metrics?: {
+      active_customers?: OFactorMetric;
+      net_retention?: OFactorMetric;
+      top_10_concentration?: OFactorMetric;
+      avg_contract_value?: OFactorMetric;
+      churn_rate?: OFactorMetric;
     };
-    retention?: {
-      metrics?: {
-        net_revenue_retention?: OFactorMetric;
-        gross_revenue_retention?: OFactorMetric;
-        expansion_revenue?: OFactorMetric;
-        annual_churn?: OFactorMetric;
+    text?: {
+      takeaway?: string;
+      key_takeaway?: string;
+      customer_growth?: {
+        acquisition_dynamics?: string[];
       };
-      product_stickiness?: string[];
-      expansion_drivers?: string[];
-    };
-    alt_data_signals?: Array<{
-      source?: string;
-      insight?: string;
-    }>;
-    segmentation?: {
-      tiers?: Array<{
-        tier?: string;
-        customer_count?: string;
-        revenue_share?: string;
-        avg_acv?: string;
-        contract_terms?: string;
-        nrr?: string;
-        churn?: string;
-        nrr_label?: string;
-        churn_label?: string;
+      retention?: {
+        product_stickiness?: string[];
+        expansion_drivers?: string[];
+      };
+      alt_data_signals?: Array<{
+        source?: string;
+        insight?: string;
       }>;
-      revenue_quality?: string[];
-      growth_strategy?: string[];
+      segmentation?: {
+        tiers?: Array<{
+          name?: string;
+          description?: string;
+        }>;
+      };
     };
-    takeaway?: string;
+  };
+  analysis?: {
+    final_scoring?: FinalScoringSection;
   };
 }
 
@@ -233,13 +229,17 @@ export interface DolDataPoint {
 }
 
 export interface FixedCostLine {
-  name: string;
-  key: string;
-  color: string;
-  current_pct: number;
-  prior_pct: number;
-  change_bps: number;
-  note: string;
+  label: string;
+  current_pct: number | null;
+  prior_pct: number | null;
+  change_bps: number | null;
+  note?: string | null;
+}
+
+export interface OperatingLeverageMetric {
+  label: string;
+  value: string;
+  change?: string | null;
 }
 
 export interface OperatingLeverageSection {
@@ -248,21 +248,21 @@ export interface OperatingLeverageSection {
   dol_chart_data?: DolDataPoint[];
   fixed_cost_lines?: FixedCostLine[];
   total_fixed_costs?: {
-    current_pct: number;
-    prior_pct: number;
-    change_bps: number;
-    note: string;
+    current_pct: number | null;
+    prior_pct: number | null;
+    change_bps: number | null;
+    note?: string | null;
   };
   metrics?: {
-    revenue_growth_yoy?: OFactorMetric;
-    ebit_growth_yoy?: OFactorMetric;
-    leverage_spread?: OFactorMetric;
+    revenue_growth_yoy?: OperatingLeverageMetric;
+    ebit_growth_yoy?: OperatingLeverageMetric;
+    leverage_spread?: OperatingLeverageMetric;
   };
   verdict?: {
     status: string;
     label: string;
-    tag: string;
-    description: string;
+    tag?: string | null;
+    description?: string | null;
   };
   all_verdicts?: Array<{ status: string; label: string; is_current?: boolean }>;
 }
@@ -439,14 +439,31 @@ export interface CapitalStructureSection {
 
 // ─── Final Scoring ────────────────────────────────────────────────────────────
 
+export interface IndustrySignalBreakdownItem {
+  key: string;
+  label: string;
+  score: number;
+  max_score: number;
+  sentiment: "positive" | "negative" | "neutral";
+  details: string[];
+}
+
 export interface FinalScoringSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
   score: number;             // e.g. 6
-  max_score: number;         // e.g. 8
+  max_score?: number;        // e.g. 8 (may be absent when checks array is used instead)
   status: string;            // e.g. "HIGH QUALITY"
   status_color?: string;     // "green" | "yellow" | "red"
-  title: string;             // e.g. "Numbers support the thesis"
-  body: string;              // paragraph text
+  color?: string;            // alias for status_color used by industry_overview
+  title?: string;            // e.g. "Numbers support the thesis"
+  body?: string;             // paragraph text
+  signal_breakdown?: IndustrySignalBreakdownItem[];
+  checks?: Array<{
+    id: number;
+    points: number;
+    result: boolean;
+    description: string;
+  }>;
 }
 
 // ─── Root Response ────────────────────────────────────────────────────────────
@@ -478,7 +495,7 @@ export interface FinalTakeaways {
 export interface OFactorResponse {
   final_takeaways?: FinalTakeaways;
   industry_overview?: IndustryOverviewSection;
-  industry?: { industry_analysis?: IndustryAnalysis };
+  industry_analysis?: IndustryAnalysis;
   competition?: CompetitionSection;
   financial_strength?: FinancialStrengthSectionFull;
   customer_traction?: CustomerTractionSection;
@@ -531,6 +548,8 @@ export interface IndustryCompanyRow {
   sentiment: string | null;
   capex_trend: string | null;
   qoq_acceleration: string | null;
+  is_current?: boolean;
+  is_average?: boolean;
 }
 
 export interface IndustryDriverItem {

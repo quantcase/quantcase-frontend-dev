@@ -12,18 +12,10 @@ import {
   ReferenceLine,
 } from "recharts";
 import { TrendingUp, TrendingDown, Gauge } from "lucide-react";
-import { safeMetric, type OperatingLeverageSection, type DolDataPoint } from "@/types/opportunity";
+import { type OperatingLeverageSection, type DolDataPoint } from "@/types/opportunity";
 import { SegmentedBar } from "@/components/opportunity/segmented-bar";
 import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
-import { InsightsCard } from "@/components/opportunity/insights-card";
 import { MetricTile } from "@/components/molecules/metric-tile";
-
-
-const FIXED_COST_COLORS: Record<string, { bar: string }> = {
-  blue:   { bar: "bg-blue-500" },
-  orange: { bar: "bg-orange-500" },
-  slate:  { bar: "bg-slate-400" },
-};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -142,23 +134,19 @@ function FixedCostLinesPanel({
       {fixedCostLines.length > 0 && (
         <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
           {fixedCostLines.map((line, i) => {
-            const isHex = line.color?.startsWith("#");
-            const tailwindColors = FIXED_COST_COLORS[line.color] ?? FIXED_COST_COLORS.slate;
-            const isUp = line.change_bps > 0;
-            const barPct = Math.min((line.current_pct / 70) * 100, 100);
+            const currentPct = line.current_pct ?? 0;
+            const changeBps = line.change_bps ?? 0;
+            const isUp = changeBps > 0;
+            const barPct = Math.min((currentPct / 70) * 100, 100);
             return (
               <div key={i} className={i > 0 ? "pt-3 border-t border-zinc-100 dark:border-zinc-800" : ""}>
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{line.name} (% Revenue)</span>
-                  <span className="text-base font-bold text-zinc-900 dark:text-zinc-50">{line.current_pct}%</span>
+                  <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{line.label} (% Revenue)</span>
+                  <span className="text-base font-bold text-zinc-900 dark:text-zinc-50">{currentPct}%</span>
                 </div>
-                <SegmentedBar
-                  pct={barPct}
-                  color={isHex ? undefined : tailwindColors.bar}
-                  hexColor={isHex ? line.color : undefined}
-                />
+                <SegmentedBar pct={barPct} color="bg-slate-400" />
                 <p className="text-xs text-zinc-400 mt-1">
-                  FY24: {line.prior_pct}% | {isUp ? "+" : ""}{line.change_bps} bps {isUp ? "increase" : "improvement"}
+                  Prior: {line.prior_pct ?? "N/A"}% | {isUp ? "+" : ""}{changeBps} bps {isUp ? "increase" : "improvement"}
                 </p>
               </div>
             );
@@ -170,16 +158,18 @@ function FixedCostLinesPanel({
           <div className="flex items-center justify-between gap-2">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Total Fixed Costs</p>
-              <p className="text-xs text-zinc-400">was {totalFixed.prior_pct}%</p>
+              <p className="text-xs text-zinc-400">was {totalFixed.prior_pct ?? "N/A"}%</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50">{totalFixed.current_pct}%</span>
-              <span className={`text-xs font-semibold ${totalFixed.change_bps > 0 ? "text-red-500" : "text-emerald-500"}`}>
-                {totalFixed.change_bps > 0 ? "▲" : "▼"} {Math.abs(totalFixed.change_bps)}bps net
-              </span>
+              <span className="text-[26px] font-normal text-zinc-900 dark:text-zinc-50">{totalFixed.current_pct ?? "N/A"}%</span>
+              {totalFixed.change_bps != null && (
+                <span className={`text-xs font-semibold ${totalFixed.change_bps > 0 ? "text-red-500" : "text-emerald-500"}`}>
+                  {totalFixed.change_bps > 0 ? "▲" : "▼"} {Math.abs(totalFixed.change_bps)}bps net
+                </span>
+              )}
             </div>
           </div>
-          <p className="text-xs text-zinc-400">{totalFixed.note}</p>
+          {totalFixed.note && <p className="text-xs text-zinc-400">{totalFixed.note}</p>}
         </div>
       )}
     </>
@@ -199,10 +189,14 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
   const totalFixed     = d.total_fixed_costs;
   const verdict        = d.verdict;
 
-  const revGrowth  = safeMetric(d.metrics?.revenue_growth_yoy);
-  const ebitGrowth = safeMetric(d.metrics?.ebit_growth_yoy);
-  const levSpread  = safeMetric(d.metrics?.leverage_spread);
-  const revChange  = d.metrics?.revenue_growth_yoy?.change;
+  const revM       = d.metrics?.revenue_growth_yoy;
+  const ebitM      = d.metrics?.ebit_growth_yoy;
+  const spreadM    = d.metrics?.leverage_spread;
+
+  const revGrowth  = { label: revM?.label ?? "Revenue Growth YoY", value: revM?.value ?? "—", sublabel: "" };
+  const ebitGrowth = { label: ebitM?.label ?? "EBIT Growth YoY",   value: ebitM?.value ?? "—", sublabel: "" };
+  const levSpread  = { label: spreadM?.label ?? "Leverage Spread",  value: spreadM?.value ?? "—", sublabel: "" };
+  const revChange  = revM?.change ?? undefined;
 
   // Latest DOL value from chart data
   const latestDol = chartData.length > 0 ? chartData[chartData.length - 1].dol : null;
@@ -241,11 +235,6 @@ export function OperatingLeverageCard({ data }: OperatingLeverageCardProps) {
         col1={col1}
         col2={<DolChartPanel chartData={chartData} />}
         col3={<FixedCostLinesPanel fixedCostLines={fixedCostLines} totalFixed={totalFixed} />}
-        takeaway={
-          verdict
-            ? <InsightsCard title={verdict.tag ?? "OPERATING LEVERAGE"} text={verdict.description} />
-            : undefined
-        }
       />
     </div>
   );

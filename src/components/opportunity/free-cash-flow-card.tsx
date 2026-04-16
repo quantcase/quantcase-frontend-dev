@@ -223,26 +223,40 @@ function FcfInsightCardsPanel({
       </div>
 
       {/* Card 2 — Capex Drag (red) */}
-      <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-800/40 p-3 space-y-1">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-red-500 shrink-0" />
-          <p className="text-sm font-semibold text-red-700 dark:text-red-300">Capex Drag</p>
+      {ocf.capex != null && ocf.capex_ocf_pct != null && ocf.fcf_ttm != null ? (
+        <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-800/40 p-3 space-y-1">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-red-500 shrink-0" />
+            <p className="text-sm font-semibold text-red-700 dark:text-red-300">Capex Drag</p>
+          </div>
+          <p className="text-xs text-red-600 dark:text-red-400 leading-relaxed pl-6">
+            Capex of {ocf.capex.replace("-", "")} absorbed {ocf.capex_ocf_pct}% of OCF, reducing FCF to {ocf.fcf_ttm}
+          </p>
         </div>
-        <p className="text-xs text-red-600 dark:text-red-400 leading-relaxed pl-6">
-          Capex of {ocf.capex.replace("-", "")} absorbed {ocf.capex_ocf_pct}% of OCF, reducing FCF to {ocf.fcf_ttm}
-        </p>
-      </div>
+      ) : (
+        <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 p-3 space-y-1">
+          <div className="flex items-center gap-2">
+            <Info className="h-4 w-4 text-zinc-400 shrink-0" />
+            <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Capex Not Disclosed</p>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed pl-6">
+            Capex figures not available — FCF cannot be computed from reported data
+          </p>
+        </div>
+      )}
 
       {/* Card 3 — Capex Intensity (blue) */}
-      <div className="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800/40 p-3 space-y-1">
-        <div className="flex items-center gap-2">
-          <Info className="h-4 w-4 text-blue-500 shrink-0" />
-          <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">Capex Intensity</p>
+      {ocf.capex_revenue_pct != null && ocf.capex_ocf_pct != null && (
+        <div className="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800/40 p-3 space-y-1">
+          <div className="flex items-center gap-2">
+            <Info className="h-4 w-4 text-blue-500 shrink-0" />
+            <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">Capex Intensity</p>
+          </div>
+          <p className="text-xs text-blue-600 dark:text-blue-400 leading-relaxed pl-6">
+            Capex at {ocf.capex_revenue_pct}% of revenue — {ocf.capex_ocf_pct > 50 ? "3x above" : "at"} normal 5-6% maintenance level
+          </p>
         </div>
-        <p className="text-xs text-blue-600 dark:text-blue-400 leading-relaxed pl-6">
-          Capex at {ocf.capex_revenue_pct}% of revenue — {ocf.capex_ocf_pct > 50 ? "3x above" : "at"} normal 5-6% maintenance level
-        </p>
-      </div>
+      )}
 
       {/* Key stats row */}
       <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3 space-y-1 mt-auto">

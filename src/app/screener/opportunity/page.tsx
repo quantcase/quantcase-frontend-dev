@@ -1,20 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useOpportunityAnalysis } from "@/hooks/useOpportunityAnalysis";
 import { usePeerData } from "@/hooks/usePeerData";
-import { apiPost, apiCall } from "@/lib/api";
-import { BACKEND_URL } from "@/lib/constants";
-import type { JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 import type { OFactorResponse } from "@/types/opportunity";
 
 import { PanelRight, TrendingUp, BarChart3, DollarSign, Users } from "lucide-react";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { ScreenerScorecard } from "@/components/molecules/screener-scorecard";
 import { PromptSideWindow } from "@/components/opportunity/prompt-side-window";
-import { IndustryOverviewCard } from "@/components/opportunity/industry-overview-card";
 import { CompetitionCard } from "@/components/opportunity/competition-card";
 import { CompetitiveBenchmarking } from "@/components/opportunity/competitive-benchmarking";
 import { FinancialStrengthCard } from "@/components/opportunity/financial-strength-card";
@@ -26,9 +22,47 @@ import { IndustryKpiTable } from "@/components/opportunity/industry-kpi-table";
 import { KpiBenchmarkingTable } from "@/components/opportunity/kpi-benchmarking-table";
 import { CustomerTractionCard } from "@/components/opportunity/customer-traction-card";
 import { SectionPanel } from "@/components/opportunity/section-panel";
-import { SubsectionHeader } from "@/components/opportunity/subsection-header";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
 import { IndustryAnalysisCard } from "@/components/opportunity/industry-analysis-card";
+import { IndustryIntelligenceCard } from "@/components/opportunity/industry-intelligence-card";
+import { CompetitionIntelligenceCard } from "@/components/opportunity/competition-intelligence-card";
+import { CustomerIntelligenceCard } from "@/components/opportunity/customer-intelligence-card";
+import { TranscriptDriversCard } from "@/components/opportunity/transcript-drivers-card";
+import { CompanyMetricsTable } from "@/components/opportunity/company-metrics-table";
+import { InvestmentImplicationsCard } from "@/components/opportunity/investment-implications-card";
+import { PageEmptyState } from "@/components/opportunity/page-empty-state";
+import { AnalyzePromptCard } from "@/components/opportunity/analyze-prompt-card";
+import { FinancialSubsection } from "@/components/opportunity/financial-subsection";
+import { FinancialIntelligenceCard } from "@/components/opportunity/financial-intelligence-card";
+
+const NAV_ITEMS = [
+  { id: "section-score", label: "Score" },
+  { id: "section-industry-intelligence", label: "Industry" },
+  { id: "section-competition", label: "Competition" },
+  { id: "section-financial", label: "Financial Strength" },
+  { id: "section-customer", label: "Customer Traction" },
+];
+
+const ICON_MAP: Record<string, typeof TrendingUp> = {
+  "Industry": TrendingUp,
+  "Competition": BarChart3,
+  "Financial Strength": DollarSign,
+  "Customer Traction": Users,
+};
+
+const SCROLL_MAP: Record<string, string> = {
+  "Industry": "section-industry",
+  "Competition": "section-competition",
+  "Financial Strength": "section-financial",
+  "Customer Traction": "section-customer",
+};
+
+function opportunityLevel(score: number, max: number) {
+  const pct = max > 0 ? score / max : 0;
+  if (pct <= 0.4) return "LOW";
+  if (pct <= 0.7) return "MODERATE";
+  return "HIGH";
+}
 
 function OpportunityContent() {
   const searchParams = useSearchParams();
@@ -37,14 +71,7 @@ function OpportunityContent() {
   const [selectedSection, setSelectedSection] = useState("industry_overview");
   const [showSideWindow, setShowSideWindow] = useState(false);
   const [patchedSections, setPatchedSections] = useState<Partial<OFactorResponse>>({});
-  const [showCompetitionDetails, setShowCompetitionDetails] = useState(false);
   const [showFinancialDetails, setShowFinancialDetails] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
-  const [jobStatuses, setJobStatuses] = useState<Record<string, JobStatus>>({});
-  const [progress, setProgress] = useState(0);
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: transcriptCalls, loading: transcriptLoading, error: transcriptError } = useTranscriptCalls(symbol);
   const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
@@ -53,259 +80,26 @@ function OpportunityContent() {
 
   const loading = transcriptLoading || opportunityLoading;
 
-  const allStatuses = Object.values(jobStatuses);
-  const aggregateStatus: JobStatus | null = allStatuses.length === 0
-    ? null
-    : allStatuses.some(s => s === "failed")
-    ? "failed"
-    : allStatuses.every(s => s === "completed")
-    ? "completed"
-    : allStatuses.some(s => s === "processing")
-    ? "processing"
-    : "pending";
-
-  const stopPolling = () => {
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
-    }
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-      progressIntervalRef.current = null;
-    }
-  };
-
-  const pollAllJobs = (ids: string[]) => {
-    ids.forEach(jobId => {
-      const url = `${BACKEND_URL}/api/jobs/${jobId}`;
-      apiCall<JobStatusResponse>(url, {
-        onSuccess: (response) => {
-          const status = response.data.status;
-          setJobStatuses(prev => {
-            const updated = { ...prev, [jobId]: status };
-            const statuses = Object.values(updated);
-            if (statuses.every(s => s === "completed")) {
-              setProgress(100);
-              stopPolling();
-              setIsAnalyzing(false);
-              setTimeout(() => window.location.reload(), 1000);
-            } else if (statuses.some(s => s === "failed")) {
-              stopPolling();
-              setIsAnalyzing(false);
-              setAnalyzeError(response.data.error || "One or more jobs failed");
-            }
-            return updated;
-          });
-        },
-        onError: (error: string) => {
-          stopPolling();
-          setIsAnalyzing(false);
-          setAnalyzeError(error);
-        },
-      });
-    });
-  };
-
-  const handleAnalyzeClick = async () => {
-    setAnalyzeError(null);
-    setJobStatuses({});
-    setProgress(0);
-    setIsAnalyzing(true);
-
-    const sections = ["industry", "competition", "financial_strength", "customer_traction"] as const;
-    const url = `${BACKEND_URL}/api/calls/${firstCallId}/opportunity/analysis`;
-
-    try {
-      const jobIds = await Promise.all(
-        sections.map(
-          (section) =>
-            new Promise<string>((resolve, reject) => {
-              apiPost<JobCreateResponse>(url, {
-                onSuccess: (response) => resolve(response.job.id),
-                onError: reject,
-              }, { section });
-            })
-        )
-      );
-
-      const initialStatuses: Record<string, JobStatus> = Object.fromEntries(jobIds.map(id => [id, "pending"]));
-      setJobStatuses(initialStatuses);
-      pollAllJobs(jobIds);
-      pollingIntervalRef.current = setInterval(() => pollAllJobs(jobIds), 2000);
-    } catch (error: unknown) {
-      setIsAnalyzing(false);
-      setAnalyzeError(error instanceof Error ? error.message : "Failed to start analysis");
-    }
-  };
-
-  useEffect(() => {
-    return () => stopPolling();
-  }, []);
-
-  useEffect(() => {
-    if (aggregateStatus === "processing") {
-      const totalDuration = 40000;
-      const targetProgress = 95;
-      const updateInterval = 100;
-      const progressPerStep = targetProgress / (totalDuration / updateInterval);
-      let currentProgress = 0;
-
-      progressIntervalRef.current = setInterval(() => {
-        currentProgress += progressPerStep;
-        if (currentProgress >= targetProgress) {
-          currentProgress = targetProgress;
-          if (progressIntervalRef.current) {
-            clearInterval(progressIntervalRef.current);
-            progressIntervalRef.current = null;
-          }
-        }
-        setProgress(Math.round(currentProgress));
-      }, updateInterval);
-    }
-    return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-    };
-  }, [aggregateStatus]);
-
   if (!symbol) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm text-red-600">Error: No symbol provided in query parameters</div>
-      </div>
-    );
+    return <PageEmptyState><span className="text-red-600">Error: No symbol provided in query parameters</span></PageEmptyState>;
   }
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm">Loading...</div>
-      </div>
-    );
+    return <PageEmptyState>Loading...</PageEmptyState>;
   }
-
   if (transcriptError) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm text-red-600">Error: {transcriptError}</div>
-      </div>
-    );
+    return <PageEmptyState><span className="text-red-600">Error: {transcriptError}</span></PageEmptyState>;
   }
-
   if (transcriptCalls.length === 0) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm">No transcript calls found for {symbol}</div>
-      </div>
-    );
+    return <PageEmptyState>No transcript calls found for {symbol}</PageEmptyState>;
   }
 
-  // No analysis yet — show Analyze prompt
   if (Object.keys(opportunityData).length === 0) {
-    const transcriptCall = transcriptCalls[0];
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <h1 className="text-sm font-bold mb-6">Opportunity Factor Analysis</h1>
-          <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-sm font-semibold mb-2">{transcriptCall.company_name}</h2>
-                <p className="text-sm text-muted-foreground">{transcriptCall.basic_industry}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 py-4 border-t border-border">
-                <div>
-                  <p className="text-sm text-muted-foreground">Ticker</p>
-                  <p className="font-semibold">{transcriptCall.company}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Quarter</p>
-                  <p className="font-semibold">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Call Date</p>
-                  <p className="font-semibold">{transcriptCall.call_date}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Call ID</p>
-                  <p className="font-semibold text-xs">{transcriptCall.id}</p>
-                </div>
-              </div>
-              <div className="pt-4 border-t border-border">
-                <p className="text-sm text-muted-foreground mb-4">
-                  No opportunity analysis available for this transcript yet.
-                </p>
-
-                {analyzeError && (
-                  <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                    <p className="text-sm text-red-600 dark:text-red-400">{analyzeError}</p>
-                  </div>
-                )}
-
-                {aggregateStatus && (
-                  <div className={`mb-4 p-3 rounded-md border ${
-                    aggregateStatus === "completed"
-                      ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                      : aggregateStatus === "failed"
-                      ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-                      : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
-                  }`}>
-                    {aggregateStatus === "processing" || aggregateStatus === "completed" ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <p className={`text-sm ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
-                            {aggregateStatus === "completed" ? "Analysis complete!" : "Analyzing transcripts..."}
-                          </p>
-                          <p className={`text-sm font-semibold ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
-                            {progress}%
-                          </p>
-                        </div>
-                        <div className={`w-full rounded-full h-2 overflow-hidden ${aggregateStatus === "completed" ? "bg-green-200 dark:bg-green-800" : "bg-blue-200 dark:bg-blue-800"}`}>
-                          <div
-                            className={`h-full transition-all duration-300 ease-linear ${aggregateStatus === "completed" ? "bg-green-600 dark:bg-green-400" : "bg-blue-600 dark:bg-blue-400"}`}
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <p className={`text-sm ${aggregateStatus === "failed" ? "text-red-600 dark:text-red-400" : "text-blue-600 dark:text-blue-400"}`}>
-                        {aggregateStatus === "failed" && "Analysis failed"}
-                        {aggregateStatus === "pending" && "Analysis jobs queued..."}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                <button
-                  onClick={handleAnalyzeClick}
-                  disabled={isAnalyzing}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isAnalyzing
-                    ? aggregateStatus === "pending" ? "Queued..." : aggregateStatus === "processing" ? "Processing..." : "Starting..."
-                    : "Analyze"}
-                </button>
-              </div>
-              {transcriptCall.ppt_url && (
-                <div className="pt-4 border-t border-border">
-                  <a href={transcriptCall.ppt_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
-                    View Presentation →
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <AnalyzePromptCard transcriptCall={transcriptCalls[0]} />;
   }
 
   // Analysis available — render full dashboard
   const data = { ...opportunityData, ...patchedSections } as OFactorResponse;
 
-  // Derive per-section scoring from final_takeaways.section_scores when individual final_scoring is absent
   const ft = data.final_takeaways;
   const ftColor = ft?.status_color;
   function ftScoring(key: keyof NonNullable<typeof ft>["section_scores"], maxScore: number) {
@@ -313,231 +107,210 @@ function OpportunityContent() {
     if (!ss) return undefined;
     return { score: ss.score, max_score: maxScore, status: ss.status, status_color: ftColor, title: ss.takeaway, body: "" };
   }
-  const industryScoring = data.industry_overview?.final_scoring ?? ftScoring("industry", 10);
-  const competitionScoring = data.competition?.final_scoring ?? ftScoring("competition", 10);
-  const financialScoring = data.financial_strength?.final_scoring ?? ftScoring("financial_strength", 10);
-  const customerScoring = data.customer_traction?.final_scoring ?? ftScoring("customer_traction", 10);
+  function normScoring(s: { score: number; max_score?: number; status?: string; status_color?: string; title?: string; body?: string } | undefined, defaultMax: number) {
+    if (!s) return undefined;
+    return { ...s, max_score: s.max_score ?? defaultMax };
+  }
+
+  const industryScoring = normScoring(data.industry_overview?.final_scoring ?? ftScoring("industry", 10), 10);
+  const competitionScoring = normScoring(data.competition?.final_scoring ?? ftScoring("competition", 10), 10);
+  const financialScoring = normScoring(data.financial_strength?.final_scoring ?? ftScoring("financial_strength", 10), 10);
+  const customerScoring = normScoring(data.customer_traction?.analysis?.final_scoring ?? ftScoring("customer_traction", 10), 10);
 
   const handleSectionUpdate = (sectionKey: string, sectionResult: unknown) => {
-    setPatchedSections((prev) => ({ ...prev, [sectionKey]: sectionResult }));
+    setPatchedSections(prev => ({ ...prev, [sectionKey]: sectionResult }));
   };
 
-  const NAV_ITEMS = [
-    { id: "section-score", label: "Score" },
-    { id: "section-industry", label: "Industry Overview" },
-    ...(data.industry?.industry_analysis ? [{ id: "section-industry-analysis", label: "Industry Analysis" }] : []),
-    { id: "section-competition", label: "Competition" },
-    { id: "section-financial", label: "Financial Strength" },
-    { id: "section-customer", label: "Customer Traction" },
-  ];
+  const overallScore = totalScore?.total_score ?? data.final_takeaways?.overall_score ?? 0;
+  const overallMax = totalScore?.max_score ?? data.final_takeaways?.max_score ?? 40;
 
-  const opportunityLevel = (() => {
-    const score = totalScore?.total_score ?? data.final_takeaways?.overall_score ?? 0;
-    const max = totalScore?.max_score ?? data.final_takeaways?.max_score ?? 40;
-    const pct = max > 0 ? score / max : 0;
-    if (pct <= 0.4) return "LOW";
-    if (pct <= 0.7) return "MODERATE";
-    return "HIGH";
-  })();
-
-  const iconMap: Record<string, typeof TrendingUp> = {
-    "Industry": TrendingUp,
-    "Competition": BarChart3,
-    "Financial Strength": DollarSign,
-    "Customer Traction": Users,
-  };
-
-  const scrollMap: Record<string, string> = {
-    "Industry": "section-industry",
-    "Competition": "section-competition",
-    "Financial Strength": "section-financial",
-    "Customer Traction": "section-customer",
-  };
+  const scorecardItems = (
+    [
+      { name: "Industry", scoring: industryScoring, takeaway: data.industry_overview?.text?.takeaway },
+      { name: "Competition", scoring: competitionScoring, takeaway: data.competition?.text?.takeaway },
+      { name: "Financial Strength", scoring: financialScoring, takeaway: data.financial_strength?.text?.takeaway },
+      { name: "Customer Traction", scoring: customerScoring, takeaway: data.customer_traction?.core?.text?.takeaway },
+    ] as const
+  ).map((row) => {
+    const s = row.scoring;
+    const parsedScore = s ? parseFloat(String(s.score)) : NaN;
+    return {
+      label: row.name,
+      descriptor: row.takeaway ?? s?.status ?? undefined,
+      rating: s?.max_score && !isNaN(parsedScore) ? opportunityLevel(parsedScore, s.max_score) : undefined,
+      barValue: s?.max_score && !isNaN(parsedScore) ? (parsedScore / s.max_score) * 100 : null,
+      icon: ICON_MAP[row.name],
+      scrollToId: SCROLL_MAP[row.name],
+    };
+  });
 
   return (
     <ScreenerPageShell navItems={NAV_ITEMS}>
       <div className="mb-8 px-4 space-y-6">
 
-      {/* Floating Prompt Toggle */}
-      <button
-        onClick={() => setShowSideWindow((v) => !v)}
-        className={`fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg transition-all ${
-          showSideWindow
-            ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-zinc-900/30"
-            : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/40 hover:shadow-blue-600/60"
-        }`}
-      >
-        <PanelRight className="h-4 w-4" />
-        Prompt
-      </button>
+        {/* Floating Prompt Toggle */}
+        {/* <button
+          onClick={() => setShowSideWindow(v => !v)}
+          className={`fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg transition-all ${
+            showSideWindow
+              ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-zinc-900/30"
+              : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/40 hover:shadow-blue-600/60"
+          }`}
+        >
+          <PanelRight className="h-4 w-4" />
+          Prompt
+        </button> */}
 
-        {/* Opportunity Factor Score */}
+        {/* Score */}
         <div id="section-score" className="pt-4">
           <ScreenerScorecard
             title="OPPORTUNITY FACTOR"
-            overallLevel={opportunityLevel}
-            score={totalScore?.total_score ?? data.final_takeaways?.overall_score ?? 0}
-            maxScore={totalScore?.max_score ?? data.final_takeaways?.max_score ?? 40}
-            items={[
-              { name: "Industry", scoring: industryScoring, takeaway: data.industry_overview?.text?.takeaway },
-              { name: "Competition", scoring: competitionScoring, takeaway: data.competition?.text?.takeaway },
-              { name: "Financial Strength", scoring: financialScoring, takeaway: data.financial_strength?.text?.takeaway },
-              { name: "Customer Traction", scoring: customerScoring, takeaway: data.customer_traction?.text?.takeaway },
-            ].map((row) => {
-              const s = row.scoring;
-              const parsedScore = s ? parseFloat(String(s.score)) : NaN;
-              const barValue = s?.max_score ? (parsedScore / s.max_score) * 100 : null;
-              return {
-                label: row.name,
-                descriptor: row.takeaway ?? s?.status ?? undefined,
-                rating: (() => {
-                  const pct = s?.max_score ? parsedScore / s.max_score : 0;
-                  if (isNaN(parsedScore)) return undefined;
-                  if (pct <= 0.4) return "LOW";
-                  if (pct <= 0.7) return "MODERATE";
-                  return "HIGH";
-                })(),
-                barValue: isNaN(parsedScore) ? null : barValue,
-                icon: iconMap[row.name],
-                scrollToId: scrollMap[row.name],
-              };
-            })}
+            overallLevel={opportunityLevel(overallScore, overallMax)}
+            score={overallScore}
+            maxScore={overallMax}
+            items={scorecardItems}
           />
         </div>
 
-        {/* 4.1 Industry Overview & Market */}
-        <div id="section-industry">
-        <SectionPanel
-          title="Industry Overview & Market"
-          subtitle="Synthesized from public company transcripts & filings"
-          scoring={industryScoring}
-        >
-          <IndustryOverviewCard data={data.industry_overview} competition={data.competition} />
-        </SectionPanel>
+        {/* Industry Analysis */}
+        <div id="section-industry-intelligence">
+          <SectionPanel
+            title="Industry Analysis"
+            subtitle="Cross-company synthesis from earnings transcripts & filings"
+            scoring={industryScoring}
+          >
+            <div className="flex gap-6">
+              <div className="flex-1 min-w-0 space-y-6">
+                <IndustryAnalysisCard data={data.industry_overview} />
+                {data.industry_analysis && (
+                  <TranscriptDriversCard
+                    demandPositive={data.industry_analysis.demand_drivers?.positive ?? []}
+                    demandNegative={data.industry_analysis.demand_drivers?.negative ?? []}
+                    supplyPositive={data.industry_analysis.supply_drivers?.tightness_indicators ?? []}
+                    supplyNegative={data.industry_analysis.supply_drivers?.excess_indicators ?? []}
+                  />
+                )}
+                {data.industry_analysis && (
+                  <CompanyMetricsTable data={data.industry_analysis} period={data.industry_overview?.period} />
+                )}
+                {data.industry_analysis?.investment_implications && (
+                  <InvestmentImplicationsCard data={data.industry_analysis.investment_implications} />
+                )}
+              </div>
+              {data.industry_overview?.final_scoring && (
+                <div className="w-[400px] shrink-0">
+                  <IndustryIntelligenceCard
+                    data={data.industry_overview}
+                    investmentImplications={data.industry_analysis?.investment_implications}
+                  />
+                </div>
+              )}
+            </div>
+          </SectionPanel>
         </div>
 
-        {/* 4.1b Industry Analysis (from /industry endpoint) */}
-        {data.industry?.industry_analysis && (
-          <div id="section-industry-analysis">
-            <SectionPanel
-              title="Industry Analysis"
-              subtitle="Cross-company synthesis from earnings transcripts & filings"
-            >
-              <IndustryAnalysisCard data={data.industry.industry_analysis} />
-            </SectionPanel>
-          </div>
-        )}
-
-        {/* 4.2 Competitive Benchmarking vs Industry Peers */}
+        {/* Competition */}
         <div id="section-competition">
-        <SectionPanel
-          title="Competitive Benchmarking vs Industry Peers"
-          subtitle="Peer comparison from public filings & market data"
-          scoring={competitionScoring}
-          contentClassName="px-6 space-y-4"
-        >
-          <CompetitionCard
-            data={data.competition}
-            showDetails={showCompetitionDetails}
-            onToggle={() => setShowCompetitionDetails(v => !v)}
-          />
-          {showCompetitionDetails && (
-            <>
-              <div>
-                <hr className="border-zinc-200 dark:border-zinc-700 border-dashed my-6" />
-                <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">KPI Benchmarking</h4>
-                <p className="text-xs text-zinc-400 mb-3">Latest KPI values across industry peers</p>
-                <KpiBenchmarkingTable data={peerData?.peer_kpi_timeseries} loading={peerLoading} />
+          <SectionPanel
+            title="Competitive Benchmarking vs Industry Peers"
+            subtitle="Peer comparison from public filings & market data"
+            scoring={competitionScoring}
+            contentClassName="px-6 space-y-4"
+          >
+            <div className="flex gap-6">
+              <div className="flex-1 min-w-0 space-y-4">
+                <CompetitionCard data={data.competition} />
+                <div>
+                  <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">KPI Benchmarking</h4>
+                  <p className="text-xs text-zinc-400 mb-3">Latest KPI values across industry peers</p>
+                  <KpiBenchmarkingTable data={peerData?.peer_kpi_timeseries} loading={peerLoading} />
+                </div>
+                <CompetitiveBenchmarking data={data.competition} peers={peerData?.competition?.peers ?? []} loading={peerLoading} />
               </div>
-              <CompetitiveBenchmarking data={data.competition} peers={peerData?.competition?.peers ?? []} loading={peerLoading} />
-            </>
-          )}
-          <TakeawayBox title="COMPETITION TAKEAWAY" text={data.competition?.text?.takeaway} color="emerald" />
-        </SectionPanel>
+              {data.competition?.final_scoring && (
+                <div className="w-[400px] shrink-0">
+                  <CompetitionIntelligenceCard data={data.competition} />
+                </div>
+              )}
+            </div>
+          </SectionPanel>
         </div>
 
-        {/* 4.3 Financial Strength */}
+        {/* Financial Strength */}
         <div id="section-financial">
-        <SectionPanel
-          title="Financial Strength"
-          subtitle="Snapshot from financial statements, investor decks & management commentary"
-          scoring={financialScoring}
-          contentClassName=""
-        >
-          <div className="pb-4 space-y-4">
-            <FinancialStrengthCard
-              data={data.financial_strength}
-              showDetails={showFinancialDetails}
-              onToggle={() => setShowFinancialDetails(v => !v)}
-            />
-          </div>
-          {showFinancialDetails && (
-            <>
-              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 mt-4 space-y-4">
-                <SubsectionHeader
-                  title="Operating Leverage Analysis"
-                  subtitle="Fixed cost absorption, DOL trend & leverage verdict"
-                />
-                <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />
+          <SectionPanel
+            title="Financial Strength"
+            subtitle="Snapshot from financial statements, investor decks & management commentary"
+            scoring={financialScoring}
+          >
+            <div className="flex gap-6">
+              <div className="flex-1 min-w-0 space-y-4">
+                <div className="pb-0 space-y-4">
+                  <FinancialStrengthCard
+                    data={data.financial_strength}
+                    showDetails={showFinancialDetails}
+                    onToggle={() => setShowFinancialDetails(v => !v)}
+                  />
+                </div>
+                {showFinancialDetails && (
+                  <>
+                    <FinancialSubsection title="Operating Leverage Analysis" subtitle="Fixed cost absorption, DOL trend & leverage verdict">
+                      <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />
+                    </FinancialSubsection>
+                    <FinancialSubsection title="Free Cash Flow Analysis" subtitle="FCF conversion, growth trajectory, capex drag & yield">
+                      <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />
+                    </FinancialSubsection>
+                    <FinancialSubsection title="Working Capital" subtitle="DSO, DIO, DPO, CCC trends & WC as % of revenue">
+                      <WorkingCapitalCard data={data.financial_strength?.working_capital} />
+                    </FinancialSubsection>
+                    <FinancialSubsection title="Capital Structure & Capex" subtitle="Balance sheet position, debt trajectory, equity allocation & capex intensity">
+                      <CapitalStructureCard data={data.financial_strength?.capital_structure} />
+                    </FinancialSubsection>
+                    <FinancialSubsection title="KPI Timeseries" subtitle="Industry-specific KPI trends over time" paddingBottom={false}>
+                      <IndustryKpiTable data={peerData?.industry_kpis} loading={peerLoading} />
+                    </FinancialSubsection>
+                  </>
+                )}
               </div>
-              <div className="pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-                <SubsectionHeader
-                  title="Free Cash Flow Analysis"
-                  subtitle="FCF conversion, growth trajectory, capex drag & yield"
-                />
-                <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />
-              </div>
-              <div className="pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-                <SubsectionHeader
-                  title="Working Capital"
-                  subtitle="DSO, DIO, DPO, CCC trends & WC as % of revenue"
-                />
-                <WorkingCapitalCard data={data.financial_strength?.working_capital} />
-              </div>
-              <div className="pt-4 pb-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-                <SubsectionHeader
-                  title="Capital Structure & Capex"
-                  subtitle="Balance sheet position, debt trajectory, equity allocation & capex intensity"
-                />
-                <CapitalStructureCard data={data.financial_strength?.capital_structure} />
-              </div>
-              <div className="pt-4 pb-4 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-                <SubsectionHeader
-                  title="KPI Timeseries"
-                  subtitle="Industry-specific KPI trends over time"
-                />
-                <IndustryKpiTable data={peerData?.industry_kpis} loading={peerLoading} />
-              </div>
-            </>
-          )}
-          <div>
-            <TakeawayBox title="FINANCIAL TAKEAWAY" text={data.financial_strength?.text?.key_takeaway} />
-          </div>
-        </SectionPanel>
+              {data.financial_strength?.final_scoring && (
+                <div className="w-[400px] shrink-0">
+                  <FinancialIntelligenceCard data={data.financial_strength} />
+                </div>
+              )}
+            </div>
+          </SectionPanel>
         </div>
 
-        {/* 4.4 Client/Customer Traction */}
+        {/* Customer Traction */}
         <div id="section-customer">
-        <SectionPanel
-          title="Client/Customer Traction"
-          subtitle="Customer growth, retention & revenue trajectory with alt data projections"
-          scoring={customerScoring}
-          contentClassName="px-6"
-        >
-          <CustomerTractionCard data={data.customer_traction} />
-        </SectionPanel>
+          <SectionPanel
+            title="Client/Customer Traction"
+            subtitle="Customer growth, retention & revenue trajectory with alt data projections"
+            scoring={customerScoring}
+            contentClassName="px-6 space-y-4"
+          >
+            <div className="flex gap-6">
+              <div className="flex-1 min-w-0">
+                <CustomerTractionCard data={data.customer_traction} />
+              </div>
+              {data.customer_traction?.analysis?.final_scoring && (
+                <div className="w-[400px] shrink-0">
+                  <CustomerIntelligenceCard data={data.customer_traction} />
+                </div>
+              )}
+            </div>
+          </SectionPanel>
         </div>
 
-      {/* Prompt Side Window — fixed overlay */}
-      {showSideWindow && (
-        <PromptSideWindow
-          callId={firstCallId}
-          selectedSection={selectedSection}
-          onSectionChange={setSelectedSection}
-          onSectionUpdate={handleSectionUpdate}
-          onClose={() => setShowSideWindow(false)}
-        />
-      )}
+        {showSideWindow && (
+          <PromptSideWindow
+            callId={firstCallId}
+            selectedSection={selectedSection}
+            onSectionChange={setSelectedSection}
+            onSectionUpdate={handleSectionUpdate}
+            onClose={() => setShowSideWindow(false)}
+          />
+        )}
       </div>
     </ScreenerPageShell>
   );
@@ -545,11 +318,7 @@ function OpportunityContent() {
 
 export default function OpportunityFactorPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm">Loading...</div>
-      </div>
-    }>
+    <Suspense fallback={<PageEmptyState>Loading...</PageEmptyState>}>
       <OpportunityContent />
     </Suspense>
   );

@@ -263,7 +263,35 @@ export interface JobCreateResponse {
   job: Job;
 }
 
+export type PipelineStepStatus = "waiting" | "processing" | "completed" | "failed";
+
+export interface PipelineStep {
+  analysis_type: string;
+  label: string;
+  status: PipelineStepStatus;
+}
+
+export interface PipelineJob {
+  id: string;
+  callId: string;
+  type: string;
+  status: JobStatus;
+  all_steps: PipelineStep[];
+  error?: string;
+}
+
+export interface FullPipelineResponse {
+  success: boolean;
+  message: string;
+  job: PipelineJob;
+}
+
 export interface JobStatusResponse {
   success: boolean;
   data: Job;
+}
+
+export interface PipelineJobStatusResponse {
+  success: boolean;
+  data: PipelineJob;
 }

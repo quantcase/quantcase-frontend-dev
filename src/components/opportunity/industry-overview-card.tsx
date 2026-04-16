@@ -36,13 +36,13 @@ export function IndustryOverviewCard({ data, competition }: IndustryOverviewCard
   const cagr = cagrDisplay(m?.industry_cagr);
 
   const industryMetrics = [
-    { ...safeMetric(m?.industry_revenue_ttm), sublabel: undefined, change: m?.industry_revenue_ttm?.change, icon: DollarSign },
-    { label: m?.industry_cagr?.label ?? "Industry CAGR", value: cagr.value, sublabel: cagr.sublabel, change: null, icon: TrendingUp },
-    { ...safeMetric(m?.current_opm), sublabel: undefined, change: m?.current_opm?.change, icon: BarChart2 },
-    { ...safeMetric(m?.industry_aum), change: m?.industry_aum?.change, icon: Package },
-    { ...safeMetric(m?.industry_roce), sublabel: undefined, change: m?.industry_roce?.change, icon: BarChart2 },
-    { ...safeMetric(m?.demand_signal), change: null, icon: Zap },
-    { ...safeMetric(m?.supply_constraint), change: null, icon: AlertTriangle },
+    { label: "Industry Revenue (TTM)", value: m?.industry_revenue_ttm?.value ?? "N/A", sublabel: undefined, change: m?.industry_revenue_ttm?.change, icon: DollarSign },
+    { label: "Industry CAGR", value: cagr.value, sublabel: cagr.sublabel, change: null, icon: TrendingUp },
+    { label: "Industry OPM", value: m?.current_opm?.value ?? "N/A", sublabel: undefined, change: m?.current_opm?.change, icon: BarChart2 },
+    { label: m?.industry_aum?.label ?? "Industry AUM", value: m?.industry_aum?.value ?? "N/A", sublabel: undefined, change: m?.industry_aum?.change, icon: Package },
+    { label: "Industry ROCE", value: m?.industry_roce?.value ?? "N/A", sublabel: undefined, change: m?.industry_roce?.change, icon: BarChart2 },
+    { label: "Demand Signal", value: m?.demand_signal?.value ?? "N/A", sublabel: m?.demand_signal?.sublabel ?? undefined, change: m?.demand_signal?.change ?? null, icon: Zap },
+    { label: "Supply Constraint", value: m?.supply_constraint?.value ?? "N/A", sublabel: m?.supply_constraint?.sublabel ?? undefined, change: m?.supply_constraint?.change ?? null, icon: AlertTriangle },
   ];
 
   const dsd = data?.text?.demand_supply_dynamics;

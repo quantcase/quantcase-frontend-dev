@@ -115,57 +115,6 @@ export function CompetitiveBenchmarking({ data, peers, loading }: CompetitiveBen
         </Table>
       </div>
 
-      {/* Competitive Positioning Insights */}
-      <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-4 space-y-4">
-        <div className="flex items-center gap-1.5">
-          <Target className="h-3.5 w-3.5 text-zinc-500" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Competitive Positioning Insights</span>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <Target className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-              <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Strengths</p>
-            </div>
-            <div className="space-y-1.5">
-              {(positioning?.strengths ?? []).map((s, i) => (
-                <div key={i} className="flex gap-2">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{s}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <AlertCircle className="h-3.5 w-3.5 text-orange-500 shrink-0" />
-              <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Areas to Monitor</p>
-            </div>
-            <div className="space-y-1.5">
-              {(positioning?.areas_to_monitor ?? []).map((a, i) => (
-                <div key={i} className="flex gap-2">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{a}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <TrendingUp className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-              <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Opportunities</p>
-            </div>
-            <div className="space-y-1.5">
-              {(positioning?.opportunities ?? []).map((o, i) => (
-                <div key={i} className="flex gap-2">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{o}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

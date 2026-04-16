@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Bookmark,
-  ChevronRight,
   ChevronDown,
   RefreshCw,
   ArrowRight,
@@ -204,63 +203,79 @@ function WatchlistAccordion({
   const losers = symbols.filter((s) => (quotes[s]?.changePercent ?? 0) < 0).length;
 
   return (
-    <div style={{ borderBottom: "1px solid #E2E2E2" }} className="last:border-b-0">
+    <div className="last:border-b-0" style={{ borderBottom: "1px solid #E2E2E2" }}>
       {/* Row header */}
       <button
         onClick={onToggle}
-        className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-[#F5F5F5] transition-colors"
+        className="w-full text-left flex items-center gap-0 transition-colors group/header"
+        style={{ background: expanded ? "#F9FAFB" : "#F5F5F5" }}
       >
-        <div className="flex-shrink-0">
-          {expanded
-            ? <ChevronDown className="h-3.5 w-3.5" style={{ color: "#888888" }} />
-            : <ChevronRight className="h-3.5 w-3.5" style={{ color: "#888888" }} />
-          }
-        </div>
+        {/* Expand indicator strip */}
+        <div
+          className="self-stretch w-1 flex-shrink-0 transition-colors"
+          style={{ background: expanded ? "#0F172B" : "#D1D5DB" }}
+        />
 
-        <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold truncate" style={{ color: "#0F172B" }}>
-            {watchlist.name}
-          </p>
-          <p className="text-[11px] mt-0.5" style={{ color: "#888888" }}>
-            {relDate(watchlist.updated_at)}
-            {!quotesLoading && symbols.length > 0 && (
-              <>
-                <span className="mx-1.5" style={{ color: "#E2E2E2" }}>·</span>
-                <span style={{ color: "#059669" }}>{gainers}↑</span>
-                <span className="mx-1" style={{ color: "#888888" }}>·</span>
-                <span style={{ color: "#dc2626" }}>{losers}↓</span>
-              </>
+        <div className="flex-1 flex items-center gap-3 px-4 py-3.5 group-hover/header:bg-[#ECECEC] transition-colors min-w-0">
+          {/* Chevron */}
+          <div
+            className="flex-shrink-0 rounded-full p-0.5 transition-colors"
+            style={{ background: expanded ? "#0F172B" : "#0F172B" }}
+          >
+            <ChevronDown
+              className="h-3 w-3 transition-transform duration-200"
+              style={{
+                color: "#FFFFFF",
+                transform: expanded ? "rotate(0deg)" : "rotate(-90deg)",
+              }}
+            />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold truncate" style={{ color: "#0F172B" }}>
+              {watchlist.name}
+            </p>
+            <p className="text-[11px] mt-0.5" style={{ color: "#888888" }}>
+              {relDate(watchlist.updated_at)}
+              {!quotesLoading && symbols.length > 0 && (
+                <>
+                  <span className="mx-1.5" style={{ color: "#E2E2E2" }}>·</span>
+                  <span style={{ color: "#059669" }}>{gainers}↑</span>
+                  <span className="mx-1" style={{ color: "#888888" }}>·</span>
+                  <span style={{ color: "#dc2626" }}>{losers}↓</span>
+                </>
+              )}
+            </p>
+          </div>
+
+          {/* Symbol chips */}
+          <div className="hidden sm:flex items-center gap-1 flex-wrap justify-end max-w-[280px]">
+            {preview.map((sym) => (
+              <span
+                key={sym}
+                className="font-mono text-[10px] rounded-sm px-1.5 py-0.5"
+                style={{ background: "#F5F5F5", color: "#0F172B", border: "1px solid #E2E2E2" }}
+              >
+                {sym}
+              </span>
+            ))}
+            {overflow > 0 && (
+              <span
+                className="text-[10px] rounded-sm px-1.5 py-0.5"
+                style={{ background: "#F5F5F5", color: "#90A1B9", border: "1px solid #E2E2E2" }}
+              >
+                +{overflow}
+              </span>
             )}
-          </p>
-        </div>
+          </div>
 
-        {/* Symbol chips */}
-        <div className="hidden sm:flex items-center gap-1 flex-wrap justify-end max-w-[280px]">
-          {preview.map((sym) => (
-            <span
-              key={sym}
-              className="font-mono text-[10px] rounded-sm px-1.5 py-0.5"
-              style={{ background: "#F5F5F5", color: "#0F172B", border: "1px solid #E2E2E2" }}
-            >
-              {sym}
-            </span>
-          ))}
-          {overflow > 0 && (
-            <span
-              className="text-[10px] rounded-sm px-1.5 py-0.5"
-              style={{ background: "#F5F5F5", color: "#90A1B9", border: "1px solid #E2E2E2" }}
-            >
-              +{overflow}
-            </span>
-          )}
+          <span
+            className="flex-shrink-0 text-[11px] font-semibold rounded-sm px-2 py-0.5"
+            style={{ background: "#0F172B", color: "#FFFFFF" }}
+          >
+            {watchlist.total_assets}
+          </span>
         </div>
-
-        <span
-          className="flex-shrink-0 text-[11px] font-semibold rounded-sm px-2 py-0.5"
-          style={{ background: "#0F172B", color: "#FFFFFF" }}
-        >
-          {watchlist.total_assets}
-        </span>
       </button>
 
       {/* Expanded table */}
@@ -323,7 +338,14 @@ export function WatchlistPanel({ className }: { className?: string }) {
   const router = useRouter();
   const { watchlists, loading: wlLoading, error, refresh } = useWatchlists();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [didAutoExpand, setDidAutoExpand] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Auto-expand the first watchlist once data loads
+  if (!didAutoExpand && watchlists.length > 0) {
+    setExpandedId(watchlists[0].id);
+    setDidAutoExpand(true);
+  }
 
   const allSymbols = useMemo(() => {
     const seen = new Set<string>();

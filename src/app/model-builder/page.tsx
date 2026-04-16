@@ -1,77 +1,171 @@
 "use client";
 
-import Link from "next/link";
-import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Plus, X } from "lucide-react";
 import { useModels } from "@/hooks/useModels";
 import { ModelBuilderCard } from "@/components/model-builder/model-builder-card";
-import { SectionPanel } from "@/components/molecules/section-panel";
+import { PortfolioBuilderStepper } from "@/components/model-builder/portfolio-builder-stepper";
 
-export default function ModelBuilderPage() {
-  const { models, loading, error } = useModels();
+// ── Modal ─────────────────────────────────────────────────────────────────────
 
+function PortfolioBuilderModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess: (id: string) => void;
+}) {
   return (
-    <div className="min-h-screen bg-white mb-8 px-4">
-      <div className="mx-auto space-y-6 ">
-
-        {/* Header */}
-        <div className="flex items-start justify-between">
+    /* Backdrop */
+    <div
+      className="fixed inset-0 z-50 flex items-stretch justify-center"
+      style={{ background: "rgba(0,0,0,0.45)" }}
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      {/* Dialog */}
+      <div
+        className="relative flex flex-col w-full max-w-4xl mx-auto my-0 sm:my-6 sm:rounded-lg overflow-hidden"
+        style={{ background: "#F5F5F5", maxHeight: "100dvh" }}
+      >
+        {/* Fixed header */}
+        <div
+          className="shrink-0 flex items-center justify-between px-6 py-5 border-b"
+          style={{ borderColor: "#E2E2E2", background: "#F5F5F5" }}
+        >
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "#888888" }}>
-              Terminal
-            </p>
-            <h1 style={{ fontSize: 36, fontWeight: 500, color: "#0F172B", lineHeight: 1.1 }}>
-              Portfolio Models
-            </h1>
-            <p className="mt-1 text-sm" style={{ color: "#888888" }}>
-              Build, manage and edit client portfolio models.
+            <h2 className="text-xl font-semibold" style={{ color: "#0F172B" }}>
+              Portfolio Builder
+            </h2>
+            <p className="text-xs mt-0.5" style={{ color: "#888888" }}>
+              Model Portfolio Library — configure and save for relationship managers
             </p>
           </div>
-          <Link
-            href="/model-builder/new"
-            className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors"
-            style={{ background: "#0F172B" }}
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-200 transition-colors shrink-0"
+            style={{ color: "#888888" }}
           >
-            <Plus className="h-4 w-4" />
-            New Model
-          </Link>
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Models list panel */}
-        <SectionPanel title="All Models">
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto">
+          <PortfolioBuilderStepper onSuccess={onSuccess} onCancel={onClose} />
+        </div>
+
+        {/* Fixed footer */}
+        <div
+          className="shrink-0 flex items-center justify-between px-6 py-4 border-t"
+          style={{ borderColor: "#E2E2E2", background: "#F5F5F5" }}
+        >
+          <p className="text-xs" style={{ color: "#888888" }}>
+            All portfolios are saved to your model library.
+          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-xs font-medium hover:text-zinc-700 transition-colors"
+            style={{ color: "#888888" }}
+          >
+            Discard & close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+export default function ModelBuilderPage() {
+  const router = useRouter();
+  const { models, loading, error } = useModels();
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleSuccess = (id: string) => {
+    setModalOpen(false);
+    router.push(`/model-builder/${id}`);
+  };
+
+  return (
+    <>
+      <div className="min-h-screen bg-[#F5F5F5] mb-8 px-4 py-8">
+        <div className="mx-auto space-y-6">
+
+          {/* Header */}
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold" style={{ color: "#0F172B" }}>
+                Portfolio Builder
+              </h1>
+              <p className="mt-0.5 text-sm" style={{ color: "#888888" }}>
+                Model Portfolio Library — configure and save for relationship managers
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
+              style={{ background: "#0F172B" }}
+            >
+              <Plus className="h-4 w-4" />
+              New Portfolio
+            </button>
+          </div>
+
+          {/* Models list */}
           {loading ? (
-            <div className="flex items-center justify-center py-16">
+            <div className="flex items-center justify-center py-24">
               <p className="text-sm" style={{ color: "#888888" }}>Loading models...</p>
             </div>
           ) : error ? (
-            <div className="flex items-center justify-center py-16">
+            <div className="flex items-center justify-center py-24">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           ) : models.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-sm mb-1" style={{ color: "#0F172B", fontWeight: 500 }}>
-                No models yet
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                style={{ background: "#EBEBEB", border: "1px solid #E2E2E2" }}
+              >
+                <Plus className="w-5 h-5" style={{ color: "#888888" }} />
+              </div>
+              <p className="text-sm font-medium mb-1" style={{ color: "#0F172B" }}>
+                No portfolios yet
               </p>
               <p className="text-xs mb-6" style={{ color: "#888888" }}>
-                Create your first portfolio model to get started.
+                Build your first model portfolio to get started.
               </p>
-              <Link
-                href="/model-builder/new"
-                className="rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors"
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                className="rounded-md px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
                 style={{ background: "#0F172B" }}
               >
-                Create your first model
-              </Link>
+                Build your first portfolio
+              </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {models.map((model) => (
                 <ModelBuilderCard key={model.id} model={model} />
               ))}
             </div>
           )}
-        </SectionPanel>
 
+        </div>
       </div>
-    </div>
+
+      {/* Modal — rendered outside page flow so it overlays everything */}
+      {modalOpen && (
+        <PortfolioBuilderModal
+          onClose={() => setModalOpen(false)}
+          onSuccess={handleSuccess}
+        />
+      )}
+    </>
   );
 }

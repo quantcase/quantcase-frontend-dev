@@ -16,9 +16,10 @@ export interface WatchlistQuote {
   pb: number | null;
 }
 
+// The screener endpoint returns the ScreenerData object directly (no success/data wrapper).
 interface ApiWrapper {
-  success: boolean;
-  data: ScreenerData;
+  success?: boolean;
+  data?: ScreenerData;
 }
 
 export function useWatchlistQuotes(symbols: string[]) {
@@ -33,20 +34,23 @@ export function useWatchlistQuotes(symbols: string[]) {
         fetch(`${BACKEND_URL}/api/screener/${sym}`)
           .then((r) => r.json() as Promise<ApiWrapper>)
           .then((json) => {
-            if (!json.success || !json.data) return null;
-            const { company, quote, valuation } = json.data;
+            // API returns the ScreenerData object directly; fall back to wrapped form just in case
+            const d: ScreenerData | null = (json as unknown as ScreenerData).symbol
+              ? (json as unknown as ScreenerData)
+              : (json.data ?? null);
+            if (!d?.quote || !d?.valuation) return null;
             return {
               symbol: sym,
-              name: company.name,
-              sector: company.sector,
-              price: quote.price,
-              changePercent: quote.changePercent,
-              marketCap: quote.marketCap,
-              marketCapLabel: quote.marketCapLabel,
-              week52High: quote.week52High,
-              week52Low: quote.week52Low,
-              pe: valuation.peRatio ?? null,
-              pb: valuation.pbRatio ?? null,
+              name: d.company.name,
+              sector: d.company.sector,
+              price: d.quote.price,
+              changePercent: d.quote.changePercent,
+              marketCap: d.quote.marketCap,
+              marketCapLabel: d.quote.marketCapLabel,
+              week52High: d.quote.week52High,
+              week52Low: d.quote.week52Low,
+              pe: d.valuation.peRatio ?? null,
+              pb: d.valuation.pbRatio ?? null,
             } satisfies WatchlistQuote;
           })
           .catch(() => null)

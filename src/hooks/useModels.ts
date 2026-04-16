@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { BACKEND_URL } from "@/lib/constants";
-import type { StoredModel, PortfolioData, RiskProfileType } from "@/types/portfolio";
+import type { StoredModel, PortfolioData } from "@/types/portfolio";
 
-type CreateModelInput = Omit<PortfolioData, "id"> & { activeProfile: RiskProfileType };
+type CreateModelInput = Omit<PortfolioData, "id">;
 
 interface UseModelsReturn {
   models: StoredModel[];

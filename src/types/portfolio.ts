@@ -1,16 +1,25 @@
 export type RiskProfileType = "conservative" | "balanced" | "aggressive";
-export type AssetClass = "growth" | "quality_compounder" | "value" | "income";
-export type ValuationZone = "Attractive" | "Fair" | "High" | "Speculative";
-export type ConvictionLevel = "strong_buy" | "buy" | "hold" | "sell";
 
-export interface Position {
-  id: string;
-  company: string;
-  ticker: string;
-  assetClass: AssetClass;
-  score: number;
-  allocation: number; // percentage
+// ── New asset-class schema (matches backend) ────────────────────────────────
+
+export type AssetClassKey = "equity" | "debt" | "cash" | "commodities" | "alternatives";
+
+export interface SubClassEntry {
+  key: string;
+  label: string;
+  pct: number;
+  amount: number;
 }
+
+export interface AssetClassEntry {
+  key: AssetClassKey;
+  label: string;
+  pct: number;
+  amount: number;
+  subClasses: SubClassEntry[];
+}
+
+// ── Client context ──────────────────────────────────────────────────────────
 
 export interface ClientContext {
   clientName: string;
@@ -18,22 +27,48 @@ export interface ClientContext {
   latestUpdate: string;
 }
 
-export interface RiskProfileOption {
-  type: RiskProfileType;
-  label: string;
-  description: string;
-  allocation: string;
-  threshold: string;
-}
+// ── Core model ──────────────────────────────────────────────────────────────
 
 export interface PortfolioData {
   id: string;
   name: string;
-  style: string;
-  activeProfile: RiskProfileType;
+  riskProfile: RiskProfileType;
+  capital: number;
+  assetClasses: AssetClassEntry[];
   client: ClientContext;
-  positions: Position[];
+  positions: EquityPosition[];
   whyThisPortfolio: string[];
+}
+
+export interface StoredModel extends PortfolioData {
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Equity positions (within the equity asset class) ────────────────────────
+
+export interface EquityPosition {
+  id: string;
+  company: string;
+  ticker: string;
+  subClass: string; // e.g. "core", "growth", "satellite"
+  score: number;
+  allocation: number; // percentage within equity class
+}
+
+// ── Legacy types (used by model-analytics, ic-report, and older components) ──
+
+// Old 4-category asset class (model-analytics still uses this)
+export type AssetClass = "growth" | "quality_compounder" | "value" | "income";
+
+// Old position type (still referenced by allocated-positions-card)
+export interface Position {
+  id: string;
+  company: string;
+  ticker: string;
+  assetClass: AssetClass;
+  score: number;
+  allocation: number;
 }
 
 export interface RebalanceTrigger {
@@ -44,15 +79,12 @@ export interface RebalanceTrigger {
   severity: "warning" | "critical";
 }
 
-export interface AssetScreenerItem {
-  id: string;
-  company: string;
-  ticker: string;
-  assetClass: AssetClass;
-  score: number;
-  qualityScore: number;
-  growthScore: number;
-  pe: string;
+export interface RiskProfileOption {
+  type: RiskProfileType;
+  label: string;
+  description: string;
+  allocation: string;
+  threshold: string;
 }
 
 export interface AllocationSegment {
@@ -69,6 +101,9 @@ export interface DriftItem {
   driftPercent: number;
   direction: "up" | "down";
 }
+
+export type ConvictionLevel = "strong_buy" | "buy" | "hold" | "sell";
+export type ValuationZone   = "Attractive" | "Fair" | "High" | "Speculative";
 
 export interface ScoreDimension {
   label: string;
@@ -105,9 +140,4 @@ export interface ICConclusion {
   targetOwner: string;
   whyNow: string;
   imScore: number;
-}
-
-export interface StoredModel extends PortfolioData {
-  createdAt: string;
-  updatedAt: string;
 }

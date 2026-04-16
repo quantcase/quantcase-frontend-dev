@@ -40,14 +40,14 @@ const PRESET_ALLOCS: Record<RiskProfileType, Record<AssetClassKey, number>> = {
 };
 
 const CAPITAL_CHIPS: CapitalChipDef[] = [
-  { label: "₹5.0 L",    value: 500000    },
-  { label: "₹10.0 L",   value: 1000000   },
-  { label: "₹25.0 L",   value: 2500000   },
-  { label: "₹50.0 L",   value: 5000000   },
-  { label: "₹1.00 Cr",  value: 10000000  },
-  { label: "₹2.50 Cr",  value: 25000000  },
-  { label: "₹5.00 Cr",  value: 50000000  },
-  { label: "₹10.00 Cr", value: 100000000 },
+  { label: "₹5 L",   value: 500000    },
+  { label: "₹10 L",  value: 1000000   },
+  { label: "₹25 L",  value: 2500000   },
+  { label: "₹50 L",  value: 5000000   },
+  { label: "₹1 Cr",  value: 10000000  },
+  { label: "₹2 Cr",  value: 20000000  },
+  { label: "₹5 Cr",  value: 50000000  },
+  { label: "₹10 Cr", value: 100000000 },
 ];
 
 export const ASSET_CLASSES: AssetClassDef[] = [
@@ -100,9 +100,9 @@ const STEP_CONFIG = [
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 export function formatCapital(val: number): string {
-  if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
-  if (val >= 100000)   return `₹${(val / 100000).toFixed(1)} L`;
-  return `₹${val.toLocaleString("en-IN")}`;
+  if (val >= 10000000) return `₹${Math.round(val / 10000000)} Cr`;
+  if (val >= 100000)   return `₹${Math.round(val / 100000)} L`;
+  return `₹${Math.round(val).toLocaleString("en-IN")}`;
 }
 
 function parseCapitalInput(raw: string): number | null {

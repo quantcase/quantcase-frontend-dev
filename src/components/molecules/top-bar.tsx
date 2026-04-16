@@ -225,7 +225,7 @@ function TopBarInner() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2.5">
           <div className="flex size-9 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
-            AM
+            PJ
           </div>
         </div>
       </div>

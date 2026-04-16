@@ -1,4 +1,9 @@
-import { ShieldCheck, AlertTriangle, Clock, AlertCircle } from "lucide-react";
+import {
+  ShieldCheck,
+  AlertTriangle,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
 import { InvestmentSignalChanges } from "@/components/dashboard/investment-signal-changes";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { FrameworkIntegrityMonitor } from "@/components/dashboard/framework-integrity-monitor";
@@ -6,11 +11,152 @@ import { ResearchMomentum } from "@/components/dashboard/research-momentum";
 import { OpportunityRadar } from "@/components/dashboard/opportunity-radar";
 import { MarketNarrativeShifts } from "@/components/dashboard/market-narrative-shifts";
 import { WatchlistPanel } from "@/components/dashboard/watchlist-panel";
+import { ClientPortfolioOverview } from "@/components/dashboard/client-portfolio-overview";
+import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import { SectionDivider } from "@/components/dashboard/section-divider";
+import { AIInsights } from "@/components/dashboard/ai-insights";
+import { SmartClientSegments } from "@/components/dashboard/smart-client-segments";
+import { TodaysTasks } from "@/components/dashboard/todays-tasks";
 import type { InvestmentSignal } from "@/components/dashboard/investment-signal-changes";
 import type { FrameworkItem } from "@/components/dashboard/framework-integrity-monitor";
 import type { ResearchMetric } from "@/components/dashboard/research-momentum";
 import type { OpportunityItem } from "@/components/dashboard/opportunity-radar";
 import type { NarrativeShift } from "@/components/dashboard/market-narrative-shifts";
+import type { ClientAccount } from "@/components/dashboard/client-portfolio-overview";
+import type { ActivityItem } from "@/components/dashboard/activity-feed";
+import type { AIInsightItem } from "@/components/dashboard/ai-insights";
+import type { ClientSegment } from "@/components/dashboard/smart-client-segments";
+import type { TaskItem } from "@/components/dashboard/todays-tasks";
+
+// ── RM / Client data ──────────────────────────────────────────────────────────
+
+const AI_INSIGHTS: AIInsightItem[] = [
+  {
+    id: "1",
+    client: "Rahul Mehta",
+    category: "Small-cap",
+    risk: "moderate",
+    note: "Anxious about small-cap volatility. Portfolio drifted +6% mid-cap. No updated allocation before weekend.",
+    timeAgo: "2 days ago",
+    actionLabel: "View profile",
+  },
+  {
+    id: "2",
+    client: "Anita Shah",
+    category: "EV Interest",
+    risk: "low_risk",
+    note: "Interested in EV & Green Energy for 2025. Asked for sector update. Report not yet sent.",
+    timeAgo: "1 week ago",
+    actionLabel: "Send EV report",
+  },
+  {
+    id: "3",
+    client: "Varun Kapoor",
+    category: "Drift alert",
+    risk: "high_risk",
+    note: "Portfolio drift +9%. Mid-cap overweight. No interaction in 14 days.",
+    timeAgo: "16 days ago",
+    actionLabel: "Rebalance",
+  },
+];
+
+const CLIENT_SEGMENTS: ClientSegment[] = [
+  { id: "1", label: "Needs immediate action",    count: 4,  urgency: "alert"   },
+  { id: "2", label: "Portfolio drift alerts",    count: 3,  urgency: "warning" },
+  { id: "3", label: "High AUM clients",          count: 22, urgency: "neutral" },
+  { id: "4", label: "EV / Green Energy interest", count: 8,  urgency: "neutral" },
+  { id: "5", label: "Conservative clients",      count: 32, urgency: "neutral" },
+  { id: "6", label: "Inactive > 30 days",        count: 7,  urgency: "warning" },
+  { id: "7", label: "KYC expiring this month",   count: 2,  urgency: "alert"   },
+];
+
+const TODAYS_TASKS: TaskItem[] = [
+  { id: "1", label: "Send Rahul updated portfolio PDF", status: "overdue", meta: "Overdue" },
+  { id: "2", label: "Share EV report with Anita",       status: "pending", meta: "Today"   },
+  { id: "3", label: "KYC renewal — Suresh Nair",        status: "done",    meta: "Done"    },
+];
+
+const CLIENT_ACCOUNTS: ClientAccount[] = [
+  {
+    id: "1",
+    name: "Rahul Mehta",
+    aum: "₹3.2 Cr",
+    pnlPercent: -6.0,
+    tag: "HNI",
+    lastContact: "2 days ago",
+    actionLabel: "Call Now",
+  },
+  {
+    id: "2",
+    name: "Anita Shah",
+    aum: "₹5.8 Cr",
+    pnlPercent: +1.4,
+    tag: "HNI",
+    lastContact: "1 week ago",
+    actionLabel: "Send Report",
+  },
+  {
+    id: "3",
+    name: "Varun Kapoor",
+    aum: "₹7.1 Cr",
+    pnlPercent: -9.2,
+    tag: "HNI",
+    lastContact: "16 days ago",
+    actionLabel: "Rebalance",
+  },
+  {
+    id: "4",
+    name: "Suresh Nair",
+    aum: "₹2.4 Cr",
+    pnlPercent: +0.8,
+    tag: "HNI",
+    lastContact: "Today",
+  },
+  {
+    id: "5",
+    name: "Priya Venkat",
+    aum: "₹4.6 Cr",
+    pnlPercent: +2.1,
+    tag: "HNI",
+    lastContact: "3 days ago",
+  },
+];
+
+const ACTIVITY_ITEMS: ActivityItem[] = [
+  {
+    id: "1",
+    time: "9:42 AM",
+    company: "Meridian Holdings",
+    description: "Portfolio value dropped below threshold",
+    tag: "Alert",
+    tagColor: "alert",
+  },
+  {
+    id: "2",
+    time: "8:15 AM",
+    description: "New research note published on emerging markets outlook",
+    tag: "Research",
+    tagColor: "neutral",
+  },
+  {
+    id: "3",
+    time: "7:50 AM",
+    company: "Northwind Capital",
+    description: "Rebalance order executed successfully across 6 holdings",
+    tag: "Completed",
+    tagColor: "positive",
+  },
+  {
+    id: "4",
+    time: "Yesterday",
+    company: "Apex Ventures",
+    description: "Redemption request of ₹8.2 Cr submitted by client",
+    tag: "Action",
+    tagColor: "alert",
+  },
+];
+
+// ── Investment / terminal data ────────────────────────────────────────────────
 
 const SIGNALS: InvestmentSignal[] = [
   {
@@ -65,65 +211,17 @@ const FRAMEWORK_ITEMS: FrameworkItem[] = [
 ];
 
 const RESEARCH_METRICS: ResearchMetric[] = [
-  {
-    id: "1",
-    label: "IC Drafts Created",
-    value: 3,
-    sublabel: "This Week",
-  },
-  {
-    id: "2",
-    label: "Models Updated",
-    value: 8,
-    sublabel: "Since Monday",
-  },
-  {
-    id: "3",
-    label: "Decision Milestones",
-    value: 2,
-    sublabel: "Approaching",
-  },
-  {
-    id: "4",
-    label: "New Watchlist Adds",
-    value: 4,
-    sublabel: "Last 7 Days",
-  },
+  { id: "1", label: "IC Drafts Created",    value: 3, sublabel: "This Week"    },
+  { id: "2", label: "Models Updated",       value: 8, sublabel: "Since Monday" },
+  { id: "3", label: "Decision Milestones",  value: 2, sublabel: "Approaching"  },
+  { id: "4", label: "New Watchlist Adds",   value: 4, sublabel: "Last 7 Days"  },
 ];
 
 const OPPORTUNITIES: OpportunityItem[] = [
-  {
-    id: "1",
-    company: "Tata Motors",
-    ticker: "TATAMOTORS",
-    conviction: "positive",
-    valuationZone: "Attractive",
-    nextCatalyst: "Earnings (Feb 14)",
-  },
-  {
-    id: "2",
-    company: "Titan Company",
-    ticker: "TITAN",
-    conviction: "neutral",
-    valuationZone: "Fair",
-    nextCatalyst: "None Near-term",
-  },
-  {
-    id: "3",
-    company: "Adani Enterprises",
-    ticker: "ADANIENT",
-    conviction: "watch",
-    valuationZone: "High",
-    nextCatalyst: "AGM (Aug 12)",
-  },
-  {
-    id: "4",
-    company: "Zomato",
-    ticker: "ZOMATO",
-    conviction: "review",
-    valuationZone: "Speculative",
-    nextCatalyst: "Q4 Results",
-  },
+  { id: "1", company: "Tata Motors",       ticker: "TATAMOTORS", conviction: "positive", valuationZone: "Attractive",  nextCatalyst: "Earnings (Feb 14)" },
+  { id: "2", company: "Titan Company",     ticker: "TITAN",      conviction: "neutral",  valuationZone: "Fair",        nextCatalyst: "None Near-term"    },
+  { id: "3", company: "Adani Enterprises", ticker: "ADANIENT",   conviction: "watch",    valuationZone: "High",        nextCatalyst: "AGM (Aug 12)"      },
+  { id: "4", company: "Zomato",            ticker: "ZOMATO",     conviction: "review",   valuationZone: "Speculative", nextCatalyst: "Q4 Results"        },
 ];
 
 const NARRATIVE_SHIFTS: NarrativeShift[] = [
@@ -131,24 +229,23 @@ const NARRATIVE_SHIFTS: NarrativeShift[] = [
     id: "1",
     category: "MACRO POLICY",
     sentiment: "neutral",
-    description:
-      "RBI maintains rate stance — rate-sensitive rerating unlikely near-term.",
+    description: "RBI maintains rate stance — rate-sensitive rerating unlikely near-term.",
   },
   {
     id: "2",
     category: "SECTOR: IT",
     sentiment: "caution",
-    description:
-      "Discretionary spend remains muted across US geos; expect margin compression.",
+    description: "Discretionary spend remains muted across US geos; expect margin compression.",
   },
   {
     id: "3",
     category: "FLOWS",
     sentiment: "positive",
-    description:
-      "DII inflows sustaining support levels despite FII selling pressure.",
+    description: "DII inflows sustaining support levels despite FII selling pressure.",
   },
 ];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -165,62 +262,109 @@ function getTodayLabel(): string {
   });
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function Home() {
   const greeting = getGreeting();
   const today = getTodayLabel();
 
   return (
-    <div className="min-h-screen bg-white mb-8 px-4">
+    <div className="min-h-screen bg-white mb-12 px-4">
       <div className="container mx-auto max-w-7xl space-y-4">
 
-        {/* Page header */}
-        <div className="mb-6">
-          <h2 style={{ color: "#0F172B", fontWeight: 500 }}>{greeting}, Alex</h2>
+        {/* ── Page header ────────────────────────────────────────────── */}
+        <div className="pt-2 pb-1">
+          <h2 style={{ color: "#0F172B", fontWeight: 500 }}>{greeting}, Palash</h2>
           <p style={{ fontSize: 14, color: "#888888", marginTop: 4 }}>
             Here is your daily IC briefing for {today}.
           </p>
         </div>
 
-        {/* Watchlist */}
-        <WatchlistPanel />
+        {/* ════════════════════════════════════════════════════════════
+            SECTION 1 — RM & CLIENT RELATIONSHIP
+        ═══════════════════════════════════════════════════════════════ */}
 
-        {/* Investment Signal Changes */}
-        <InvestmentSignalChanges signals={SIGNALS} />
+        {/* Unified two-column bento — columns stay aligned across both rows */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 items-start">
+          {/* Left column */}
+          <div className="flex flex-col gap-4">
+            <AIInsights items={AI_INSIGHTS} />
+            <ClientPortfolioOverview
+              clients={CLIENT_ACCOUNTS}
+              totalAUM="₹796 Cr"
+              totalClients={18}
+              activeAlerts={3}
+            />
+            <ActivityFeed items={ACTIVITY_ITEMS} />
+          </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard
-            value={12}
-            label="Thesis Strengthening"
-            icon={<ShieldCheck className="size-4 text-zinc-500" />}
-          />
-          <StatCard
-            value={3}
-            label="Thesis Weakening"
-            icon={<AlertTriangle className="size-4 text-zinc-500" />}
-          />
-          <StatCard
-            value={5}
-            label="Near Catalysts"
-            icon={<Clock className="size-4 text-zinc-500" />}
-          />
-          <StatCard
-            value={2}
-            label="Risk Flags Active"
-            icon={<AlertCircle className="size-4 text-zinc-500" />}
-          />
+          {/* Right column */}
+          <div className="flex flex-col gap-4">
+            <SmartClientSegments segments={CLIENT_SEGMENTS} />
+            <TodaysTasks tasks={TODAYS_TASKS} />
+          </div>
         </div>
 
-        {/* Framework Integrity + Research Momentum */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FrameworkIntegrityMonitor items={FRAMEWORK_ITEMS} />
-          <ResearchMomentum metrics={RESEARCH_METRICS} />
-        </div>
+        {/* ════════════════════════════════════════════════════════════
+            SECTION 2 — RESEARCH TERMINAL
+        ═══════════════════════════════════════════════════════════════ */}
 
-        {/* Opportunity Radar + Market Narrative Shifts */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-4">
-          <OpportunityRadar items={OPPORTUNITIES} />
-          <MarketNarrativeShifts shifts={NARRATIVE_SHIFTS} />
+        <SectionDivider label="Research Terminal" sublabel="Watchlists, signals & portfolio intelligence" />
+
+        {/* Unified two-column bento — mirrors top section layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 items-start">
+
+          {/* Left column */}
+          <div className="flex flex-col gap-4">
+            <WatchlistPanel />
+            <InvestmentSignalChanges signals={SIGNALS} />
+            <OpportunityRadar items={OPPORTUNITIES} />
+            <FrameworkIntegrityMonitor items={FRAMEWORK_ITEMS} />
+          </div>
+
+          {/* Right column */}
+          <div className="flex flex-col gap-4">
+            {/* 4 stat cards grouped into a single panel */}
+            <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+              <div className="grid grid-cols-2 gap-2">
+                <StatCard
+                  flat
+                  value={12}
+                  label="Thesis Strengthening"
+                  icon={<ShieldCheck className="size-4 text-zinc-500" />}
+                  sublabel="+4 this week"
+                  trend="up"
+                />
+                <StatCard
+                  flat
+                  value={3}
+                  label="Thesis Weakening"
+                  icon={<AlertTriangle className="size-4 text-zinc-500" />}
+                  sublabel="1 new today"
+                  trend="down"
+                />
+                <StatCard
+                  flat
+                  value={5}
+                  label="Near Catalysts"
+                  icon={<Clock className="size-4 text-zinc-500" />}
+                  sublabel="Next 30 days"
+                />
+                <StatCard
+                  flat
+                  value={2}
+                  label="Risk Flags Active"
+                  icon={<AlertCircle className="size-4 text-zinc-500" />}
+                  sublabel="Needs review"
+                  trend="down"
+                />
+              </div>
+            </div>
+
+            <ResearchMomentum metrics={RESEARCH_METRICS} />
+            <MarketNarrativeShifts shifts={NARRATIVE_SHIFTS} />
+          </div>
+
         </div>
 
       </div>

@@ -184,56 +184,38 @@ export interface FinancialStrengthSection {
 // ─── Customer Traction ────────────────────────────────────────────────────────
 
 export interface CustomerTractionSection {
-  meta?: { section_id?: string; title?: string; subtitle?: string };
-  final_scoring?: FinalScoringSection;
-  metrics?: {
-    active_customers?: OFactorMetric;
-    net_retention?: OFactorMetric;
-    top_10_concentration?: OFactorMetric;
-    avg_contract_value?: OFactorMetric;
-    churn_rate?: OFactorMetric;
-  };
-  text?: {
-    key_takeaway?: string;
-    customer_growth?: {
-      metrics?: {
-        current_base?: OFactorMetric;
-        five_year_growth?: OFactorMetric;
-        new_adds?: OFactorMetric;
-        churned?: OFactorMetric;
-      };
-      acquisition_dynamics?: string[];
+  core?: {
+    metrics?: {
+      active_customers?: OFactorMetric;
+      net_retention?: OFactorMetric;
+      top_10_concentration?: OFactorMetric;
+      avg_contract_value?: OFactorMetric;
+      churn_rate?: OFactorMetric;
     };
-    retention?: {
-      metrics?: {
-        net_revenue_retention?: OFactorMetric;
-        gross_revenue_retention?: OFactorMetric;
-        expansion_revenue?: OFactorMetric;
-        annual_churn?: OFactorMetric;
+    text?: {
+      takeaway?: string;
+      key_takeaway?: string;
+      customer_growth?: {
+        acquisition_dynamics?: string[];
       };
-      product_stickiness?: string[];
-      expansion_drivers?: string[];
-    };
-    alt_data_signals?: Array<{
-      source?: string;
-      insight?: string;
-    }>;
-    segmentation?: {
-      tiers?: Array<{
-        tier?: string;
-        customer_count?: string;
-        revenue_share?: string;
-        avg_acv?: string;
-        contract_terms?: string;
-        nrr?: string;
-        churn?: string;
-        nrr_label?: string;
-        churn_label?: string;
+      retention?: {
+        product_stickiness?: string[];
+        expansion_drivers?: string[];
+      };
+      alt_data_signals?: Array<{
+        source?: string;
+        insight?: string;
       }>;
-      revenue_quality?: string[];
-      growth_strategy?: string[];
+      segmentation?: {
+        tiers?: Array<{
+          name?: string;
+          description?: string;
+        }>;
+      };
     };
-    takeaway?: string;
+  };
+  analysis?: {
+    final_scoring?: FinalScoringSection;
   };
 }
 

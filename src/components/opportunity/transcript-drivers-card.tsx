@@ -65,7 +65,7 @@ function DriverColumn({ title, subtitle, items, sentiment }: DriverColumnProps) 
       {items.length === 0 ? (
         <p className="text-[12px] text-[#888888] italic">No data available</p>
       ) : (
-        <div>
+        <div className="overflow-y-auto" style={{ maxHeight: 180 }}>
           {items.map((item, i) => (
             <DriverRow key={i} item={item} sentiment={sentiment} />
           ))}

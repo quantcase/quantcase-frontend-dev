@@ -28,7 +28,7 @@ function ImplicationColumn({ title, subtitle, items, sentiment }: ImplicationCol
       {items.length === 0 ? (
         <p className="text-[12px] text-[#888888] italic">No data available</p>
       ) : (
-        <div className="space-y-3">
+        <div className="overflow-y-auto space-y-3" style={{ maxHeight: 260 }}>
           {items.map((item, i) => (
             <div key={i} className="space-y-1">
               <p className="text-[12px] font-semibold text-[#0F172B]">— {item.heading}</p>

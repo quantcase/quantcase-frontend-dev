@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import {
   TrendingUp, Package, BarChart2, Zap, AlertTriangle,
   DollarSign, CheckCircle2, XCircle, Info,
 } from "lucide-react";
 import type { IndustryOverviewSection } from "@/types/opportunity";
 import { MetricTile } from "@/components/molecules/metric-tile";
-import { ExpandToggle } from "@/components/molecules/expand-toggle";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
 import { InsightsCard } from "@/components/opportunity/insights-card";
 
@@ -108,8 +106,6 @@ function ChecksList({ data }: { data: IndustryOverviewSection }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function IndustryAnalysisCard({ data }: IndustryAnalysisCardProps) {
-  const [showDeepDive, setShowDeepDive] = useState(false);
-
   if (!data) return null;
 
   const m = data.metrics;
@@ -159,97 +155,7 @@ export function IndustryAnalysisCard({ data }: IndustryAnalysisCardProps) {
         }
       </div>
 
-      <ExpandToggle
-        expanded={showDeepDive}
-        onToggle={() => setShowDeepDive(!showDeepDive)}
-        label="Show Detailed Analysis"
-        collapseLabel="Hide Detailed Analysis"
-      />
-
-      {showDeepDive && (
-        <div className="space-y-4">
-
-          {/* Demand-Supply Dynamics */}
-          {dsd && (
-            <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
-              <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                Demand-Supply Dynamics
-              </p>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <p style={{ fontSize: 10, fontWeight: 700, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.06em" }}>Demand Side</p>
-                  <ul className="space-y-1">
-                    {(Array.isArray(dsd.demand) ? dsd.demand : []).map((pt, i) => (
-                      <li key={i} style={{ fontSize: 12, color: "#888888", lineHeight: 1.6 }}>• {pt}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="space-y-2">
-                  <p style={{ fontSize: 10, fontWeight: 700, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.06em" }}>Supply Side</p>
-                  <ul className="space-y-1">
-                    {(Array.isArray(dsd.supply) ? dsd.supply : []).map((pt, i) => (
-                      <li key={i} style={{ fontSize: 12, color: "#888888", lineHeight: 1.6 }}>• {pt}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              {dsd.net_impact && <InsightsCard title="Net Impact" text={dsd.net_impact} />}
-            </div>
-          )}
-
-          {/* Margin Trend Analysis */}
-          {opmTrend && (
-            <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
-              <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                Margin Trend Analysis
-              </p>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                    <p style={{ fontSize: 12, fontWeight: 700, color: "#0F172B" }}>Key Observations</p>
-                  </div>
-                  <ul className="space-y-1.5">
-                    {(opmTrend.key_observations ?? []).map((s, i) => {
-                      const ci = s.indexOf(":");
-                      const hasBold = ci > 0 && ci < 40;
-                      return (
-                        <li key={i} className="flex gap-1.5" style={{ fontSize: 12, color: "#888888", lineHeight: 1.6 }}>
-                          <span className="text-zinc-400 shrink-0">•</span>
-                          {hasBold
-                            ? <span><span style={{ fontWeight: 700, color: "#0F172B" }}>{s.slice(0, ci)}:</span>{s.slice(ci + 1)}</span>
-                            : <span>{s}</span>}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5">
-                    <Info className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                    <p style={{ fontSize: 12, fontWeight: 700, color: "#0F172B" }}>Margin Drivers</p>
-                  </div>
-                  <ul className="space-y-1.5">
-                    {(opmTrend.margin_drivers ?? []).map((s, i) => {
-                      const ci = s.indexOf(":");
-                      const hasBold = ci > 0 && ci < 40;
-                      return (
-                        <li key={i} className="flex gap-1.5" style={{ fontSize: 12, color: "#888888", lineHeight: 1.6 }}>
-                          <span className="text-zinc-400 shrink-0">•</span>
-                          {hasBold
-                            ? <span><span style={{ fontWeight: 700, color: "#0F172B" }}>{s.slice(0, ci)}:</span>{s.slice(ci + 1)}</span>
-                            : <span>{s}</span>}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              </div>
-              {opmTrend.forward_outlook && (
-                <InsightsCard title="Forward Outlook" text={opmTrend.forward_outlook} />
-              )}
-            </div>
-          )}
+      <div className="space-y-4">
 
           {/* Scoring Criteria */}
           {fs?.checks && !Array.isArray(fs.checks) && (
@@ -261,8 +167,7 @@ export function IndustryAnalysisCard({ data }: IndustryAnalysisCardProps) {
             </div>
           )}
 
-        </div>
-      )}
+      </div>
 
 
     </div>

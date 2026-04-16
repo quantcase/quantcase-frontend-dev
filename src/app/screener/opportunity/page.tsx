@@ -26,6 +26,7 @@ import { TakeawayBox } from "@/components/opportunity/takeaway-box";
 import { IndustryAnalysisCard } from "@/components/opportunity/industry-analysis-card";
 import { IndustryIntelligenceCard } from "@/components/opportunity/industry-intelligence-card";
 import { CompetitionIntelligenceCard } from "@/components/opportunity/competition-intelligence-card";
+import { CustomerIntelligenceCard } from "@/components/opportunity/customer-intelligence-card";
 import { TranscriptDriversCard } from "@/components/opportunity/transcript-drivers-card";
 import { CompanyMetricsTable } from "@/components/opportunity/company-metrics-table";
 import { InvestmentImplicationsCard } from "@/components/opportunity/investment-implications-card";
@@ -113,7 +114,7 @@ function OpportunityContent() {
   const industryScoring = normScoring(data.industry_overview?.final_scoring ?? ftScoring("industry", 10), 10);
   const competitionScoring = normScoring(data.competition?.final_scoring ?? ftScoring("competition", 10), 10);
   const financialScoring = normScoring(data.financial_strength?.final_scoring ?? ftScoring("financial_strength", 10), 10);
-  const customerScoring = normScoring(data.customer_traction?.final_scoring ?? ftScoring("customer_traction", 10), 10);
+  const customerScoring = normScoring(data.customer_traction?.analysis?.final_scoring ?? ftScoring("customer_traction", 10), 10);
 
   const handleSectionUpdate = (sectionKey: string, sectionResult: unknown) => {
     setPatchedSections(prev => ({ ...prev, [sectionKey]: sectionResult }));
@@ -127,7 +128,7 @@ function OpportunityContent() {
       { name: "Industry", scoring: industryScoring, takeaway: data.industry_overview?.text?.takeaway },
       { name: "Competition", scoring: competitionScoring, takeaway: data.competition?.text?.takeaway },
       { name: "Financial Strength", scoring: financialScoring, takeaway: data.financial_strength?.text?.takeaway },
-      { name: "Customer Traction", scoring: customerScoring, takeaway: data.customer_traction?.text?.takeaway },
+      { name: "Customer Traction", scoring: customerScoring, takeaway: data.customer_traction?.core?.text?.takeaway },
     ] as const
   ).map((row) => {
     const s = row.scoring;
@@ -279,9 +280,18 @@ function OpportunityContent() {
             title="Client/Customer Traction"
             subtitle="Customer growth, retention & revenue trajectory with alt data projections"
             scoring={customerScoring}
-            contentClassName="px-6"
+            contentClassName="px-6 space-y-4"
           >
-            <CustomerTractionCard data={data.customer_traction} />
+            <div className="flex gap-6">
+              <div className="flex-1 min-w-0">
+                <CustomerTractionCard data={data.customer_traction} />
+              </div>
+              {data.customer_traction?.analysis?.final_scoring && (
+                <div className="w-[400px] shrink-0">
+                  <CustomerIntelligenceCard data={data.customer_traction} />
+                </div>
+              )}
+            </div>
           </SectionPanel>
         </div>
 

@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { IconBox } from "@/components/molecules/icon-box";
 
 function changeTextColor(change: string): string {
   if (change.startsWith("+") || change.startsWith("▲")) return "text-emerald-600 dark:text-emerald-400";
@@ -30,21 +29,20 @@ export function MetricTile({
   label,
   value,
   sublabel,
-  icon: Icon,
+  icon: _Icon,
   change,
   className,
 }: MetricTileProps) {
   return (
-    <div className={cn("rounded-lg border border-zinc-100 bg-white px-4 py-4 flex flex-col gap-2", className)}>
-      {Icon && <IconBox icon={Icon} />}
-      <small className="uppercase tracking-wider">{label}</small>
-      <h3>{value}</h3>
+    <div className={cn("rounded-lg border border-zinc-100 bg-white px-3 py-3 flex flex-col gap-1", className)}>
+      <p className="text-[10px] font-500 uppercase tracking-wider text-[#888888] leading-tight">{label}</p>
+      <p className="text-[15px] font-semibold text-[#0F172B] leading-snug">{value}</p>
       {change && (
-        <small className={cn("text-[11px] font-semibold", changeTextColor(change))}>
+        <p className={cn("text-[10px] font-semibold", changeTextColor(change))}>
           {change}
-        </small>
+        </p>
       )}
-      {sublabel && <small className="line-clamp-2">{sublabel}</small>}
+      {sublabel && <p className="text-[10px] text-[#888888] line-clamp-2">{sublabel}</p>}
     </div>
   );
 }

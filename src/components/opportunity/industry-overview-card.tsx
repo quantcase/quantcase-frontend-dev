@@ -6,7 +6,7 @@ import {
   DollarSign, Info, CheckCircle2,
   TrendingUpIcon,
 } from "lucide-react";
-import { type IndustryOverviewSection, type CompetitionSection, type IndustryCagrMetric } from "@/types/opportunity";
+import { safeMetric, type IndustryOverviewSection, type CompetitionSection, type IndustryCagrMetric } from "@/types/opportunity";
 import { OperatingMetrics } from "@/components/opportunity/operating-metrics";
 import { MetricTile } from "@/components/molecules/metric-tile";
 import { ExpandToggle } from "@/components/molecules/expand-toggle";

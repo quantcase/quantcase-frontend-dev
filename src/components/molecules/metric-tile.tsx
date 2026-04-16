@@ -3,8 +3,9 @@ import { cn } from "@/lib/utils";
 import { IconBox } from "@/components/molecules/icon-box";
 
 function changeTextColor(change: string): string {
-  if (change.startsWith("+")) return "text-emerald-600 dark:text-emerald-400";
-  if (change.startsWith("-")) return "text-red-500 dark:text-red-400";
+  if (change.startsWith("+") || change.startsWith("▲")) return "text-emerald-600 dark:text-emerald-400";
+  if (change.startsWith("-") || change.startsWith("▼")) return "text-red-500 dark:text-red-400";
+  if (change.startsWith("→")) return "text-amber-600 dark:text-amber-400";
   return "text-zinc-500 dark:text-zinc-400";
 }
 

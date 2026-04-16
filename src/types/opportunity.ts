@@ -26,9 +26,21 @@ export function safeMetric(m?: OFactorMetric): { value: string; label: string; s
 
 // ─── Industry Overview ────────────────────────────────────────────────────────
 
+export interface IndustryKpiMetric {
+  label: string;
+  value: string;
+  change?: string | null;
+  sublabel?: string | null;
+}
+
 export interface IndustryOverviewSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
+  period?: string;
+  sector?: string;
+  subject_company?: string;
   final_scoring?: FinalScoringSection;
+  /** Dynamic KPI tiles rendered in the metrics grid (replaces hardcoded metrics when present) */
+  kpi_metrics?: IndustryKpiMetric[];
   metrics?: {
     industry_revenue_ttm?: OFactorMetric;
     industry_cagr?: IndustryCagrMetric;
@@ -439,14 +451,31 @@ export interface CapitalStructureSection {
 
 // ─── Final Scoring ────────────────────────────────────────────────────────────
 
+export interface IndustrySignalBreakdownItem {
+  key: string;
+  label: string;
+  score: number;
+  max_score: number;
+  sentiment: "positive" | "negative" | "neutral";
+  details: string[];
+}
+
 export interface FinalScoringSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
   score: number;             // e.g. 6
-  max_score: number;         // e.g. 8
+  max_score?: number;        // e.g. 8 (may be absent when checks array is used instead)
   status: string;            // e.g. "HIGH QUALITY"
   status_color?: string;     // "green" | "yellow" | "red"
-  title: string;             // e.g. "Numbers support the thesis"
-  body: string;              // paragraph text
+  color?: string;            // alias for status_color used by industry_overview
+  title?: string;            // e.g. "Numbers support the thesis"
+  body?: string;             // paragraph text
+  signal_breakdown?: IndustrySignalBreakdownItem[];
+  checks?: Array<{
+    id: number;
+    points: number;
+    result: boolean;
+    description: string;
+  }>;
 }
 
 // ─── Root Response ────────────────────────────────────────────────────────────
@@ -478,7 +507,7 @@ export interface FinalTakeaways {
 export interface OFactorResponse {
   final_takeaways?: FinalTakeaways;
   industry_overview?: IndustryOverviewSection;
-  industry?: { industry_analysis?: IndustryAnalysis };
+  industry_analysis?: IndustryAnalysis;
   competition?: CompetitionSection;
   financial_strength?: FinancialStrengthSectionFull;
   customer_traction?: CustomerTractionSection;
@@ -531,6 +560,8 @@ export interface IndustryCompanyRow {
   sentiment: string | null;
   capex_trend: string | null;
   qoq_acceleration: string | null;
+  is_current?: boolean;
+  is_average?: boolean;
 }
 
 export interface IndustryDriverItem {

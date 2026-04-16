@@ -1,92 +1,74 @@
 "use client";
 
 import { useState } from "react";
-import { Quote } from "lucide-react";
-import type { IndustryAnalysis } from "@/types/opportunity";
-import { ScoringCard } from "@/components/molecules/scoring-card";
+import {
+  TrendingUp, Package, BarChart2, Zap, AlertTriangle,
+  DollarSign, CheckCircle2, XCircle, Info,
+} from "lucide-react";
+import type { IndustryOverviewSection } from "@/types/opportunity";
+import { MetricTile } from "@/components/molecules/metric-tile";
+import { ExpandToggle } from "@/components/molecules/expand-toggle";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
 import { InsightsCard } from "@/components/opportunity/insights-card";
-import { GrowthRisks } from "@/components/opportunity/growth-risks";
-import { IndustryCompanyTable } from "@/components/opportunity/industry-company-table";
-import { ExpandToggle } from "@/components/molecules/expand-toggle";
-import { MetricTile } from "@/components/molecules/metric-tile";
-import {
-  TrendingUp, TrendingDown, BarChart2, Activity, Package,
-  CheckCircle2, XCircle, AlertTriangle, Clock,
-} from "lucide-react";
 
 interface IndustryAnalysisCardProps {
-  data: IndustryAnalysis;
+  data?: IndustryOverviewSection;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+function sentimentToColor(sentiment: string): string {
+  if (sentiment === "positive") return "green";
+  if (sentiment === "negative") return "red";
+  return "amber";
+}
+
 const FINDING_COLORS: Record<string, { border: string; label: string; labelColor: string }> = {
-  green:  { border: "#22c55e", label: "POSITIVE",  labelColor: "#22c55e" },
-  red:    { border: "#ef4444", label: "NEGATIVE",  labelColor: "#ef4444" },
-  amber:  { border: "#f59e0b", label: "MIXED",     labelColor: "#f59e0b" },
-  blue:   { border: "#3b82f6", label: "STRUCTURAL",labelColor: "#3b82f6" },
+  green: { border: "#22c55e", label: "POSITIVE",   labelColor: "#22c55e" },
+  red:   { border: "#ef4444", label: "NEGATIVE",   labelColor: "#ef4444" },
+  amber: { border: "#f59e0b", label: "MIXED",      labelColor: "#f59e0b" },
 };
 
-function FindingsGrid({ findings }: { findings: IndustryAnalysis["key_findings"] }) {
+function scoreColor(score: number, max: number) {
+  const pct = max > 0 ? score / max : 0;
+  if (pct >= 0.7) return "#059669";
+  if (pct >= 0.4) return "#D97706";
+  return "#dc2626";
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function FindingsGrid({ data }: { data: IndustryOverviewSection }) {
+  const signals = data.final_scoring?.signal_breakdown ?? [];
+  if (!signals.length) return null;
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      {findings.map((f, i) => {
-        const cfg = FINDING_COLORS[f.color] ?? FINDING_COLORS.amber;
+      {signals.map((s) => {
+        const color = sentimentToColor(s.sentiment);
+        const cfg = FINDING_COLORS[color];
+        const fill = scoreColor(s.score, s.max_score);
         return (
           <div
-            key={i}
+            key={s.key}
             style={{
               borderLeft: `4px solid ${cfg.border}`,
-              paddingLeft: 12,
-              paddingTop: 10,
-              paddingBottom: 10,
-              paddingRight: 12,
-              background: "#F9F9F9",
-              borderRadius: "0 6px 6px 0",
+              paddingLeft: 12, paddingTop: 10, paddingBottom: 10, paddingRight: 12,
+              background: "#F9F9F9", borderRadius: "0 6px 6px 0",
             }}
           >
-            <p style={{ fontSize: 10, fontWeight: 600, color: cfg.labelColor, letterSpacing: "0.05em", marginBottom: 4 }}>
-              {f.theme.toUpperCase()}
-            </p>
-            <p style={{ fontSize: 12, color: "#121212", lineHeight: 1.6 }}>{f.body}</p>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function CoherenceChecks({ checks }: { checks: IndustryAnalysis["coherence_checks"] }) {
-  return (
-    <div className="space-y-3">
-      {checks.map((c, i) => {
-        const isCoherent = c.type === "coherent";
-        const border = isCoherent ? "#22c55e" : "#ef4444";
-        const labelColor = isCoherent ? "#22c55e" : "#ef4444";
-        const label = isCoherent ? "COHERENT" : "INCOHERENT";
-        return (
-          <div
-            key={i}
-            style={{
-              borderLeft: `4px solid ${border}`,
-              paddingLeft: 12,
-              paddingTop: 10,
-              paddingBottom: 10,
-              paddingRight: 12,
-              background: "#F9F9F9",
-              borderRadius: "0 6px 6px 0",
-            }}
-          >
-            <div className="flex items-center gap-2 mb-1.5">
-              {isCoherent
-                ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: labelColor }} />
-                : <XCircle className="h-3.5 w-3.5 shrink-0" style={{ color: labelColor }} />
-              }
-              <p style={{ fontSize: 11, fontWeight: 700, color: labelColor, letterSpacing: "0.05em" }}>{label}</p>
+            <div className="flex items-center justify-between mb-1.5">
+              <p style={{ fontSize: 10, fontWeight: 600, color: cfg.labelColor, letterSpacing: "0.05em" }}>
+                {s.label.toUpperCase()}
+              </p>
+              <span style={{ fontSize: 11, fontWeight: 700, color: fill }}>
+                {s.score}/{s.max_score}
+              </span>
             </div>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#0F172B", marginBottom: 4 }}>{c.pattern}</p>
-            <p style={{ fontSize: 12, color: "#888888", lineHeight: 1.6 }}>{c.explanation}</p>
+            <ul className="space-y-0.5">
+              {s.details.map((d, i) => (
+                <li key={i} style={{ fontSize: 12, color: "#121212", lineHeight: 1.6 }}>• {d}</li>
+              ))}
+            </ul>
           </div>
         );
       })}
@@ -94,114 +76,31 @@ function CoherenceChecks({ checks }: { checks: IndustryAnalysis["coherence_check
   );
 }
 
-function IndustryMetricsGrid({ metrics }: { metrics: IndustryAnalysis["industry_metrics"] }) {
-  const tiles = [
-    {
-      key: "industry_roce",
-      icon: TrendingUp,
-      format: (m: typeof metrics[string]) => ({
-        value: m.value ?? "N/A",
-        sublabel: m.vs_wacc_spread ?? "",
-      }),
-    },
-    {
-      key: "revenue_growth_yoy",
-      icon: BarChart2,
-      format: (m: typeof metrics[string]) => ({ value: m.value ?? "N/A", sublabel: "" }),
-    },
-    {
-      key: "operating_margin",
-      icon: Activity,
-      format: (m: typeof metrics[string]) => ({
-        value: m.value ?? "N/A",
-        sublabel: m.trend ?? "",
-      }),
-    },
-    {
-      key: "avg_capacity_utilization",
-      icon: Package,
-      format: (m: typeof metrics[string]) => ({ value: m.value ?? "N/A", sublabel: "" }),
-    },
-    {
-      key: "rising_capex_count",
-      icon: TrendingUp,
-      format: (m: typeof metrics[string]) => ({
-        value: m.count != null && m.total != null ? `${m.count}/${m.total}` : "N/A",
-        sublabel: "",
-      }),
-    },
-    {
-      key: "bullish_sentiment",
-      icon: Activity,
-      format: (m: typeof metrics[string]) => ({
-        value: m.count != null && m.total != null ? `${m.count}/${m.total}` : "N/A",
-        sublabel: "",
-      }),
-    },
-    {
-      key: "inventory_trend",
-      icon: Package,
-      format: (m: typeof metrics[string]) => ({
-        value: m.direction ? m.direction.charAt(0).toUpperCase() + m.direction.slice(1) : "N/A",
-        sublabel: m.count != null && m.total != null ? `${m.count}/${m.total} cos` : "",
-      }),
-    },
-    {
-      key: "falling_receivables_count",
-      icon: TrendingDown,
-      format: (m: typeof metrics[string]) => ({
-        value: m.count != null && m.total != null ? `${m.count}/${m.total}` : "N/A",
-        sublabel: "",
-      }),
-    },
-  ] as const;
+function ChecksList({ data }: { data: IndustryOverviewSection }) {
+  const checks = data.final_scoring?.checks;
+  if (!checks || Array.isArray(checks)) return null;
+  const entries = Object.entries(checks as Record<string, { score: number; result: boolean }>);
+  if (!entries.length) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {tiles.map(({ key, icon, format }) => {
-        const m = metrics[key];
-        if (!m) return null;
-        const { value, sublabel } = format(m);
+    <div className="space-y-1.5">
+      {entries.map(([key, c]) => {
+        const label = key.replace(/_/g, " ").replace(/\b\w/g, ch => ch.toUpperCase());
         return (
-          <MetricTile
-            key={key}
-            label={m.label}
-            value={value}
-            sublabel={sublabel || undefined}
-            icon={icon}
-          />
+          <div key={key} className="flex items-start gap-2">
+            <span className="mt-0.5 shrink-0">
+              {c.result
+                ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                : <XCircle className="h-3.5 w-3.5 text-zinc-300" />
+              }
+            </span>
+            <p style={{ fontSize: 11, color: c.result ? "#121212" : "#888888", lineHeight: 1.5 }}>
+              {label}
+              {c.score > 0 && <span style={{ color: "#059669", fontWeight: 600 }}> +{c.score}</span>}
+            </p>
+          </div>
         );
       })}
-    </div>
-  );
-}
-
-function WatchpointsList({ points }: { points: string[] }) {
-  return (
-    <div className="space-y-2">
-      {points.map((p, i) => (
-        <div key={i} className="flex gap-2.5">
-          <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5 text-zinc-400" />
-          <p style={{ fontSize: 12, color: "#888888", lineHeight: 1.6 }}>{p}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function RepresentativeQuotes({ quotes }: { quotes: string[] }) {
-  if (!quotes.length) return null;
-  return (
-    <div className="space-y-2 pt-2 border-t border-zinc-100">
-      <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-        Representative Quotes
-      </p>
-      {quotes.map((q, i) => (
-        <div key={i} className="flex gap-2.5">
-          <Quote className="h-3 w-3 shrink-0 mt-0.5 text-zinc-300" />
-          <p style={{ fontSize: 11, color: "#888888", lineHeight: 1.6 }}>{q}</p>
-        </div>
-      ))}
     </div>
   );
 }
@@ -211,146 +110,161 @@ function RepresentativeQuotes({ quotes }: { quotes: string[] }) {
 export function IndustryAnalysisCard({ data }: IndustryAnalysisCardProps) {
   const [showDeepDive, setShowDeepDive] = useState(false);
 
-  const sc = data.score_card;
-  const scoringRows = Object.entries(sc.dimensions).map(([key, dim]) => ({
-    name: key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
-    score: dim.score,
-    maxScore: dim.max,
-    status: dim.status,
-  }));
+  if (!data) return null;
 
-  const impl = data.investment_implications;
-  const strategy = impl.recommended_strategy;
+  const m = data.metrics;
+  const dsd = data.text?.demand_supply_dynamics;
+  const opmTrend = data.text?.opm_trend;
+  const fs = data.final_scoring;
+
+  const kpiMetrics = data.kpi_metrics;
+
+  const industryMetrics = [
+    { label: "Industry Revenue (TTM)", value: m?.industry_revenue_ttm?.value ?? "N/A", sublabel: undefined, change: m?.industry_revenue_ttm?.change, icon: DollarSign },
+    { label: "Industry CAGR",          value: (() => { const c = m?.industry_cagr; return c?.one_year ?? c?.three_year ?? c?.qoq ?? "N/A"; })(),
+      sublabel: (() => { const c = m?.industry_cagr; return [c?.qoq && `QoQ: ${c.qoq}`, c?.one_year && `1Y: ${c.one_year}`, c?.three_year && `3Y: ${c.three_year}`].filter(Boolean).join(" | ") || undefined; })(),
+      change: null, icon: TrendingUp },
+    { label: "Industry OPM",           value: m?.current_opm?.value ?? "N/A", sublabel: undefined, change: m?.current_opm?.change, icon: BarChart2 },
+    { label: m?.industry_aum?.label ?? "Industry AUM", value: m?.industry_aum?.value ?? "N/A", sublabel: undefined, change: m?.industry_aum?.change, icon: Package },
+    { label: "Industry ROCE",          value: m?.industry_roce?.value ?? "N/A", sublabel: undefined, change: m?.industry_roce?.change, icon: BarChart2 },
+    { label: "Demand Signal",          value: m?.demand_signal?.value ?? "N/A", sublabel: m?.demand_signal?.sublabel ?? undefined, change: m?.demand_signal?.change ?? null, icon: Zap },
+    { label: "Supply Constraint",      value: m?.supply_constraint?.value ?? "N/A", sublabel: m?.supply_constraint?.sublabel ?? undefined, change: m?.supply_constraint?.change ?? null, icon: AlertTriangle },
+  ];
 
   return (
     <div className="space-y-4">
-      {/* Score card + metrics tiles */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div>
-          <ScoringCard
-            title={sc.status.replace(/_/g, " ")}
-            scoreLabel="INDUSTRY SCORE"
-            score={sc.total}
-            maxScore={Object.values(sc.dimensions).reduce((sum, d) => sum + d.max, 0)}
-            rows={scoringRows}
-          />
-        </div>
-        <div className="lg:col-span-2">
-          <IndustryMetricsGrid metrics={data.industry_metrics} />
-        </div>
-      </div>
 
-      {/* Key Findings */}
-      <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
-        <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-          Key Findings
-        </p>
-        <FindingsGrid findings={data.key_findings} />
+      {/* Metric tiles — use kpi_metrics array when provided by the backend */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {kpiMetrics && kpiMetrics.length > 0
+          ? kpiMetrics.map((metric, i) => (
+              <MetricTile
+                key={i}
+                label={metric.label}
+                value={metric.value}
+                sublabel={metric.sublabel ?? undefined}
+                change={metric.change ?? undefined}
+              />
+            ))
+          : industryMetrics.map((metric, i) => (
+              <MetricTile
+                key={i}
+                label={metric.label}
+                value={metric.value}
+                sublabel={metric.sublabel}
+                icon={metric.icon}
+                change={metric.change ?? undefined}
+              />
+            ))
+        }
       </div>
 
       <ExpandToggle
         expanded={showDeepDive}
         onToggle={() => setShowDeepDive(!showDeepDive)}
-        label="Show Deep Dive"
-        collapseLabel="Hide Deep Dive"
+        label="Show Detailed Analysis"
+        collapseLabel="Hide Detailed Analysis"
       />
 
       {showDeepDive && (
         <div className="space-y-4">
 
-          {/* Company Table */}
-          <div className="space-y-2">
-            <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Peer Company Snapshot
-            </p>
-            <IndustryCompanyTable rows={data.company_table} />
-          </div>
-
-          {/* Demand Drivers */}
-          <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
-            <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Demand Drivers
-            </p>
-            <GrowthRisks
-              positiveTitle="Positive Drivers"
-              negativeTitle="Headwinds / Concerns"
-              positiveItems={data.demand_drivers.positive.map(d => d.driver ?? "")}
-              negativeItems={data.demand_drivers.negative.map(d => d.concern ?? "")}
-            />
-            <RepresentativeQuotes quotes={data.demand_drivers.representative_quotes} />
-          </div>
-
-          {/* Supply Drivers */}
-          <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
-            <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Supply Dynamics
-            </p>
-            <GrowthRisks
-              positiveTitle="Tightness Indicators"
-              negativeTitle="Excess / Slack Indicators"
-              positiveItems={data.supply_drivers.tightness_indicators.map(d => d.indicator ?? "")}
-              negativeItems={data.supply_drivers.excess_indicators.map(d => d.indicator ?? "")}
-            />
-            <RepresentativeQuotes quotes={data.supply_drivers.representative_quotes} />
-          </div>
-
-          {/* Coherence Checks */}
-          <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
-            <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Signal Coherence Checks
-            </p>
-            <CoherenceChecks checks={data.coherence_checks} />
-          </div>
-
-          {/* Investment Implications */}
-          <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
-            <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Investment Implications
-            </p>
-            <GrowthRisks
-              positiveTitle="Positive Signals"
-              negativeTitle="Key Risks"
-              positiveItems={impl.positive_signals.map(s => `${s.signal} — ${s.evidence}`)}
-              negativeItems={impl.risks.map(r => `${r.risk} — ${r.evidence}`)}
-            />
-          </div>
-
-          {/* Recommended Strategy */}
-          <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-3.5 w-3.5 text-zinc-400" />
+          {/* Demand-Supply Dynamics */}
+          {dsd && (
+            <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
               <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                Recommended Strategy
+                Demand-Supply Dynamics
               </p>
-              <span style={{
-                fontSize: 10, fontWeight: 700, color: "#fff",
-                background: "#0F172B", borderRadius: 4, padding: "2px 8px",
-                letterSpacing: "0.05em",
-              }}>
-                {strategy.action}
-              </span>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.06em" }}>Demand Side</p>
+                  <ul className="space-y-1">
+                    {(Array.isArray(dsd.demand) ? dsd.demand : []).map((pt, i) => (
+                      <li key={i} style={{ fontSize: 12, color: "#888888", lineHeight: 1.6 }}>• {pt}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="space-y-2">
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.06em" }}>Supply Side</p>
+                  <ul className="space-y-1">
+                    {(Array.isArray(dsd.supply) ? dsd.supply : []).map((pt, i) => (
+                      <li key={i} style={{ fontSize: 12, color: "#888888", lineHeight: 1.6 }}>• {pt}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              {dsd.net_impact && <InsightsCard title="Net Impact" text={dsd.net_impact} />}
             </div>
-            <InsightsCard title="THESIS" text={strategy.thesis} />
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-              <InsightsCard title="SEGMENT" text={strategy.segment} />
-              <InsightsCard title="RATIONALE" text={strategy.rationale} />
-            </div>
-            <InsightsCard title="TIMING" text={strategy.timing} />
-          </div>
+          )}
 
-          {/* Next Quarter Watchpoints */}
-          <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
-            <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Next Quarter Watchpoints
-            </p>
-            <WatchpointsList points={impl.next_quarter_watchpoints} />
-          </div>
+          {/* Margin Trend Analysis */}
+          {opmTrend && (
+            <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
+              <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                Margin Trend Analysis
+              </p>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#0F172B" }}>Key Observations</p>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {(opmTrend.key_observations ?? []).map((s, i) => {
+                      const ci = s.indexOf(":");
+                      const hasBold = ci > 0 && ci < 40;
+                      return (
+                        <li key={i} className="flex gap-1.5" style={{ fontSize: 12, color: "#888888", lineHeight: 1.6 }}>
+                          <span className="text-zinc-400 shrink-0">•</span>
+                          {hasBold
+                            ? <span><span style={{ fontWeight: 700, color: "#0F172B" }}>{s.slice(0, ci)}:</span>{s.slice(ci + 1)}</span>
+                            : <span>{s}</span>}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5">
+                    <Info className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#0F172B" }}>Margin Drivers</p>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {(opmTrend.margin_drivers ?? []).map((s, i) => {
+                      const ci = s.indexOf(":");
+                      const hasBold = ci > 0 && ci < 40;
+                      return (
+                        <li key={i} className="flex gap-1.5" style={{ fontSize: 12, color: "#888888", lineHeight: 1.6 }}>
+                          <span className="text-zinc-400 shrink-0">•</span>
+                          {hasBold
+                            ? <span><span style={{ fontWeight: 700, color: "#0F172B" }}>{s.slice(0, ci)}:</span>{s.slice(ci + 1)}</span>
+                            : <span>{s}</span>}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+              {opmTrend.forward_outlook && (
+                <InsightsCard title="Forward Outlook" text={opmTrend.forward_outlook} />
+              )}
+            </div>
+          )}
+
+          {/* Scoring Criteria */}
+          {fs?.checks && !Array.isArray(fs.checks) && (
+            <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
+              <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                Scoring Criteria
+              </p>
+              <ChecksList data={data} />
+            </div>
+          )}
 
         </div>
       )}
 
-      {/* Key Takeaway */}
-      <TakeawayBox title="INDUSTRY TAKEAWAY" text={data.key_takeaway} noBleed />
+
     </div>
   );
 }

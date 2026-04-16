@@ -7,14 +7,13 @@ import { useOpportunityAnalysis } from "@/hooks/useOpportunityAnalysis";
 import { usePeerData } from "@/hooks/usePeerData";
 import { apiPost, apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
-import type { JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
+import type { FullPipelineResponse, PipelineJobStatusResponse, PipelineStep } from "@/types/management";
 import type { OFactorResponse } from "@/types/opportunity";
 
 import { PanelRight, TrendingUp, BarChart3, DollarSign, Users } from "lucide-react";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { ScreenerScorecard } from "@/components/molecules/screener-scorecard";
 import { PromptSideWindow } from "@/components/opportunity/prompt-side-window";
-import { IndustryOverviewCard } from "@/components/opportunity/industry-overview-card";
 import { CompetitionCard } from "@/components/opportunity/competition-card";
 import { CompetitiveBenchmarking } from "@/components/opportunity/competitive-benchmarking";
 import { FinancialStrengthCard } from "@/components/opportunity/financial-strength-card";
@@ -29,6 +28,10 @@ import { SectionPanel } from "@/components/opportunity/section-panel";
 import { SubsectionHeader } from "@/components/opportunity/subsection-header";
 import { TakeawayBox } from "@/components/opportunity/takeaway-box";
 import { IndustryAnalysisCard } from "@/components/opportunity/industry-analysis-card";
+import { IndustryIntelligenceCard } from "@/components/opportunity/industry-intelligence-card";
+import { TranscriptDriversCard } from "@/components/opportunity/transcript-drivers-card";
+import { CompanyMetricsTable } from "@/components/opportunity/company-metrics-table";
+import { InvestmentImplicationsCard } from "@/components/opportunity/investment-implications-card";
 
 function OpportunityContent() {
   const searchParams = useSearchParams();
@@ -41,10 +44,8 @@ function OpportunityContent() {
   const [showFinancialDetails, setShowFinancialDetails] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
-  const [jobStatuses, setJobStatuses] = useState<Record<string, JobStatus>>({});
-  const [progress, setProgress] = useState(0);
+  const [pipelineSteps, setPipelineSteps] = useState<PipelineStep[]>([]);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: transcriptCalls, loading: transcriptLoading, error: transcriptError } = useTranscriptCalls(symbol);
   const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
@@ -53,122 +54,67 @@ function OpportunityContent() {
 
   const loading = transcriptLoading || opportunityLoading;
 
-  const allStatuses = Object.values(jobStatuses);
-  const aggregateStatus: JobStatus | null = allStatuses.length === 0
-    ? null
-    : allStatuses.some(s => s === "failed")
-    ? "failed"
-    : allStatuses.every(s => s === "completed")
-    ? "completed"
-    : allStatuses.some(s => s === "processing")
-    ? "processing"
-    : "pending";
-
   const stopPolling = () => {
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
     }
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-      progressIntervalRef.current = null;
-    }
   };
 
-  const pollAllJobs = (ids: string[]) => {
-    ids.forEach(jobId => {
-      const url = `${BACKEND_URL}/api/jobs/${jobId}`;
-      apiCall<JobStatusResponse>(url, {
-        onSuccess: (response) => {
-          const status = response.data.status;
-          setJobStatuses(prev => {
-            const updated = { ...prev, [jobId]: status };
-            const statuses = Object.values(updated);
-            if (statuses.every(s => s === "completed")) {
-              setProgress(100);
-              stopPolling();
-              setIsAnalyzing(false);
-              setTimeout(() => window.location.reload(), 1000);
-            } else if (statuses.some(s => s === "failed")) {
-              stopPolling();
-              setIsAnalyzing(false);
-              setAnalyzeError(response.data.error || "One or more jobs failed");
-            }
-            return updated;
-          });
-        },
-        onError: (error: string) => {
+  const pollJob = (jobId: string) => {
+    const url = `${BACKEND_URL}/api/jobs/${jobId}`;
+    apiCall<PipelineJobStatusResponse>(url, {
+      onSuccess: (response) => {
+        const job = response.data;
+        const steps = job.all_steps ?? [];
+        if (steps.length > 0) setPipelineSteps(steps);
+
+        // Derive pipeline completion from steps, not from the root job's own status
+        // (the root job completes after its first step, not after the full pipeline)
+        const failedStep = steps.find(s => s.status === "failed");
+        const allDone = steps.length > 0 && steps.every(s => s.status === "completed");
+
+        if (failedStep) {
           stopPolling();
           setIsAnalyzing(false);
-          setAnalyzeError(error);
-        },
-      });
+          setAnalyzeError(`Step "${failedStep.label}" failed`);
+        } else if (allDone) {
+          stopPolling();
+          setIsAnalyzing(false);
+          setTimeout(() => window.location.reload(), 1500);
+        }
+      },
+      onError: (error: string) => {
+        stopPolling();
+        setIsAnalyzing(false);
+        setAnalyzeError(error);
+      },
     });
   };
 
-  const handleAnalyzeClick = async () => {
+  const handleAnalyzeClick = () => {
     setAnalyzeError(null);
-    setJobStatuses({});
-    setProgress(0);
+    setPipelineSteps([]);
     setIsAnalyzing(true);
 
-    const sections = ["industry", "competition", "financial_strength", "customer_traction"] as const;
-    const url = `${BACKEND_URL}/api/calls/${firstCallId}/opportunity/analysis`;
-
-    try {
-      const jobIds = await Promise.all(
-        sections.map(
-          (section) =>
-            new Promise<string>((resolve, reject) => {
-              apiPost<JobCreateResponse>(url, {
-                onSuccess: (response) => resolve(response.job.id),
-                onError: reject,
-              }, { section });
-            })
-        )
-      );
-
-      const initialStatuses: Record<string, JobStatus> = Object.fromEntries(jobIds.map(id => [id, "pending"]));
-      setJobStatuses(initialStatuses);
-      pollAllJobs(jobIds);
-      pollingIntervalRef.current = setInterval(() => pollAllJobs(jobIds), 2000);
-    } catch (error: unknown) {
-      setIsAnalyzing(false);
-      setAnalyzeError(error instanceof Error ? error.message : "Failed to start analysis");
-    }
+    const url = `${BACKEND_URL}/api/calls/${firstCallId}/opportunity/analysis/full`;
+    apiPost<FullPipelineResponse>(url, {
+      onSuccess: (response) => {
+        const job = response.job;
+        if (job.all_steps) setPipelineSteps(job.all_steps);
+        pollJob(job.id);
+        pollingIntervalRef.current = setInterval(() => pollJob(job.id), 2000);
+      },
+      onError: (error: string) => {
+        setIsAnalyzing(false);
+        setAnalyzeError(error);
+      },
+    });
   };
 
   useEffect(() => {
     return () => stopPolling();
   }, []);
-
-  useEffect(() => {
-    if (aggregateStatus === "processing") {
-      const totalDuration = 40000;
-      const targetProgress = 95;
-      const updateInterval = 100;
-      const progressPerStep = targetProgress / (totalDuration / updateInterval);
-      let currentProgress = 0;
-
-      progressIntervalRef.current = setInterval(() => {
-        currentProgress += progressPerStep;
-        if (currentProgress >= targetProgress) {
-          currentProgress = targetProgress;
-          if (progressIntervalRef.current) {
-            clearInterval(progressIntervalRef.current);
-            progressIntervalRef.current = null;
-          }
-        }
-        setProgress(Math.round(currentProgress));
-      }, updateInterval);
-    }
-    return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-    };
-  }, [aggregateStatus]);
 
   if (!symbol) {
     return (
@@ -205,97 +151,160 @@ function OpportunityContent() {
   // No analysis yet — show Analyze prompt
   if (Object.keys(opportunityData).length === 0) {
     const transcriptCall = transcriptCalls[0];
+
+    const completedCount = pipelineSteps.filter(s => s.status === "completed").length;
+    const totalSteps = pipelineSteps.length;
+    const progressPct = totalSteps > 0 ? Math.round((completedCount / totalSteps) * 100) : 0;
+    const overallFailed = pipelineSteps.some(s => s.status === "failed");
+    const overallDone = totalSteps > 0 && completedCount === totalSteps;
+
     return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <h1 className="text-sm font-bold mb-6">Opportunity Factor Analysis</h1>
-          <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
-            <div className="space-y-4">
+      <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center p-6">
+        <div className="w-full max-w-lg space-y-4">
+
+          {/* Company header card */}
+          <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-5">
+            <p className="text-[11px] uppercase tracking-wider text-[#888888] font-medium mb-1">Opportunity Factor Analysis</p>
+            <h2 className="text-[22px] font-[400] text-[#0F172B] leading-tight">{transcriptCall.company_name}</h2>
+            <p className="text-[13px] text-[#888888] mt-0.5">{transcriptCall.basic_industry}</p>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-4 pt-4 border-t border-[#E2E2E2]">
               <div>
-                <h2 className="text-sm font-semibold mb-2">{transcriptCall.company_name}</h2>
-                <p className="text-sm text-muted-foreground">{transcriptCall.basic_industry}</p>
+                <p className="text-[11px] uppercase tracking-wider text-[#888888]">Ticker</p>
+                <p className="text-[13px] font-semibold text-[#0F172B] mt-0.5">{transcriptCall.company}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4 py-4 border-t border-border">
-                <div>
-                  <p className="text-sm text-muted-foreground">Ticker</p>
-                  <p className="font-semibold">{transcriptCall.company}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Quarter</p>
-                  <p className="font-semibold">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Call Date</p>
-                  <p className="font-semibold">{transcriptCall.call_date}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Call ID</p>
-                  <p className="font-semibold text-xs">{transcriptCall.id}</p>
-                </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-[#888888]">Quarter</p>
+                <p className="text-[13px] font-semibold text-[#0F172B] mt-0.5">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
               </div>
-              <div className="pt-4 border-t border-border">
-                <p className="text-sm text-muted-foreground mb-4">
-                  No opportunity analysis available for this transcript yet.
-                </p>
-
-                {analyzeError && (
-                  <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                    <p className="text-sm text-red-600 dark:text-red-400">{analyzeError}</p>
-                  </div>
-                )}
-
-                {aggregateStatus && (
-                  <div className={`mb-4 p-3 rounded-md border ${
-                    aggregateStatus === "completed"
-                      ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                      : aggregateStatus === "failed"
-                      ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-                      : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
-                  }`}>
-                    {aggregateStatus === "processing" || aggregateStatus === "completed" ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <p className={`text-sm ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
-                            {aggregateStatus === "completed" ? "Analysis complete!" : "Analyzing transcripts..."}
-                          </p>
-                          <p className={`text-sm font-semibold ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
-                            {progress}%
-                          </p>
-                        </div>
-                        <div className={`w-full rounded-full h-2 overflow-hidden ${aggregateStatus === "completed" ? "bg-green-200 dark:bg-green-800" : "bg-blue-200 dark:bg-blue-800"}`}>
-                          <div
-                            className={`h-full transition-all duration-300 ease-linear ${aggregateStatus === "completed" ? "bg-green-600 dark:bg-green-400" : "bg-blue-600 dark:bg-blue-400"}`}
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <p className={`text-sm ${aggregateStatus === "failed" ? "text-red-600 dark:text-red-400" : "text-blue-600 dark:text-blue-400"}`}>
-                        {aggregateStatus === "failed" && "Analysis failed"}
-                        {aggregateStatus === "pending" && "Analysis jobs queued..."}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                <button
-                  onClick={handleAnalyzeClick}
-                  disabled={isAnalyzing}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isAnalyzing
-                    ? aggregateStatus === "pending" ? "Queued..." : aggregateStatus === "processing" ? "Processing..." : "Starting..."
-                    : "Analyze"}
-                </button>
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-[#888888]">Call Date</p>
+                <p className="text-[13px] font-semibold text-[#0F172B] mt-0.5">{transcriptCall.call_date}</p>
               </div>
-              {transcriptCall.ppt_url && (
-                <div className="pt-4 border-t border-border">
-                  <a href={transcriptCall.ppt_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
-                    View Presentation →
-                  </a>
-                </div>
-              )}
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-[#888888]">Call ID</p>
+                <p className="text-[11px] font-semibold text-[#0F172B] mt-0.5 font-mono">{transcriptCall.id}</p>
+              </div>
             </div>
+          </div>
+
+          {/* Analysis card */}
+          <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-5 space-y-4">
+
+            {/* Idle state */}
+            {!isAnalyzing && pipelineSteps.length === 0 && !analyzeError && (
+              <p className="text-[13px] text-[#888888]">
+                No opportunity analysis available for this transcript yet.
+              </p>
+            )}
+
+            {/* Error banner */}
+            {analyzeError && (
+              <div className="flex items-start gap-2.5 p-3 rounded-[8px] bg-red-50 border border-red-200">
+                <svg className="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <p className="text-[12px] text-red-600">{analyzeError}</p>
+              </div>
+            )}
+
+            {/* Step tracker */}
+            {pipelineSteps.length > 0 && (
+              <div className="space-y-3">
+                {/* Header row */}
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] uppercase tracking-wider font-semibold text-[#0F172B]">
+                    {overallDone ? "Analysis Complete" : overallFailed ? "Analysis Failed" : "Running Analysis Pipeline"}
+                  </p>
+                  <span className="text-[11px] font-semibold text-[#888888]">
+                    {completedCount}/{totalSteps} steps
+                  </span>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full h-1.5 rounded-full bg-[#E2E2E2] overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ease-out ${overallFailed ? "bg-red-500" : overallDone ? "bg-emerald-600" : "bg-[#0F172B]"}`}
+                    style={{ width: `${overallDone ? 100 : progressPct}%` }}
+                  />
+                </div>
+
+                {/* Steps list */}
+                <div className="space-y-0 border border-[#E2E2E2] rounded-[8px] overflow-hidden">
+                  {pipelineSteps.map((step, idx) => {
+                    const isProcessing = step.status === "processing";
+                    const isDone = step.status === "completed";
+                    const isFailed = step.status === "failed";
+                    const isWaiting = step.status === "waiting";
+                    return (
+                      <div
+                        key={step.analysis_type}
+                        className={`flex items-center gap-3 px-4 py-3 ${idx !== pipelineSteps.length - 1 ? "border-b border-[#E2E2E2]" : ""} ${isProcessing ? "bg-[#F5F5F5]" : "bg-white"}`}
+                      >
+                        {/* Status icon */}
+                        <div className="shrink-0 w-5 h-5 flex items-center justify-center">
+                          {isDone && (
+                            <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                          {isFailed && (
+                            <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          )}
+                          {isProcessing && (
+                            <svg className="w-4 h-4 text-[#0F172B] animate-spin" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/>
+                              <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                            </svg>
+                          )}
+                          {isWaiting && (
+                            <div className="w-3.5 h-3.5 rounded-full border-2 border-[#D1D5DB]" />
+                          )}
+                        </div>
+
+                        {/* Label */}
+                        <span className={`text-[13px] flex-1 ${isDone ? "text-[#0F172B]" : isFailed ? "text-red-600" : isProcessing ? "text-[#0F172B] font-medium" : "text-[#888888]"}`}>
+                          {step.label}
+                        </span>
+
+                        {/* Status badge */}
+                        <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-sm ${
+                          isDone    ? "bg-emerald-50 text-emerald-700" :
+                          isFailed  ? "bg-red-50 text-red-600" :
+                          isProcessing ? "bg-[#0F172B]/5 text-[#0F172B]" :
+                          "bg-[#F5F5F5] text-[#888888]"
+                        }`}>
+                          {step.status}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* CTA button */}
+            <button
+              onClick={handleAnalyzeClick}
+              disabled={isAnalyzing}
+              className="w-full bg-[#0F172B] text-white hover:bg-[#1e293b] font-semibold py-3 px-4 rounded-[8px] text-[13px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAnalyzing
+                ? pipelineSteps.length === 0 ? "Starting..." : "Analyzing..."
+                : analyzeError ? "Retry Analysis" : "Analyze"}
+            </button>
+
+            {transcriptCall.ppt_url && (
+              <a
+                href={transcriptCall.ppt_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-center text-[12px] text-[#888888] hover:text-[#0F172B] transition-colors"
+              >
+                View Presentation →
+              </a>
+            )}
           </div>
         </div>
       </div>
@@ -313,10 +322,14 @@ function OpportunityContent() {
     if (!ss) return undefined;
     return { score: ss.score, max_score: maxScore, status: ss.status, status_color: ftColor, title: ss.takeaway, body: "" };
   }
-  const industryScoring = data.industry_overview?.final_scoring ?? ftScoring("industry", 10);
-  const competitionScoring = data.competition?.final_scoring ?? ftScoring("competition", 10);
-  const financialScoring = data.financial_strength?.final_scoring ?? ftScoring("financial_strength", 10);
-  const customerScoring = data.customer_traction?.final_scoring ?? ftScoring("customer_traction", 10);
+  function normScoring(s: { score: number; max_score?: number; status?: string; status_color?: string; title?: string; body?: string } | undefined, defaultMax: number) {
+    if (!s) return undefined;
+    return { ...s, max_score: s.max_score ?? defaultMax };
+  }
+  const industryScoring = normScoring(data.industry_overview?.final_scoring ?? ftScoring("industry", 10), 10);
+  const competitionScoring = normScoring(data.competition?.final_scoring ?? ftScoring("competition", 10), 10);
+  const financialScoring = normScoring(data.financial_strength?.final_scoring ?? ftScoring("financial_strength", 10), 10);
+  const customerScoring = normScoring(data.customer_traction?.final_scoring ?? ftScoring("customer_traction", 10), 10);
 
   const handleSectionUpdate = (sectionKey: string, sectionResult: unknown) => {
     setPatchedSections((prev) => ({ ...prev, [sectionKey]: sectionResult }));
@@ -324,8 +337,8 @@ function OpportunityContent() {
 
   const NAV_ITEMS = [
     { id: "section-score", label: "Score" },
-    { id: "section-industry", label: "Industry Overview" },
-    ...(data.industry?.industry_analysis ? [{ id: "section-industry-analysis", label: "Industry Analysis" }] : []),
+    { id: "section-industry-intelligence", label: "Industry" },
+    ...(data.industry_analysis ? [{ id: "section-industry-analysis", label: "Industry Analysis" }] : []),
     { id: "section-competition", label: "Competition" },
     { id: "section-financial", label: "Financial Strength" },
     { id: "section-customer", label: "Customer Traction" },
@@ -405,28 +418,48 @@ function OpportunityContent() {
           />
         </div>
 
-        {/* 4.1 Industry Overview & Market */}
-        <div id="section-industry">
-        <SectionPanel
-          title="Industry Overview & Market"
-          subtitle="Synthesized from public company transcripts & filings"
-          scoring={industryScoring}
-        >
-          <IndustryOverviewCard data={data.industry_overview} competition={data.competition} />
-        </SectionPanel>
-        </div>
 
-        {/* 4.1b Industry Analysis (from /industry endpoint) */}
-        {data.industry?.industry_analysis && (
-          <div id="section-industry-analysis">
-            <SectionPanel
-              title="Industry Analysis"
-              subtitle="Cross-company synthesis from earnings transcripts & filings"
-            >
-              <IndustryAnalysisCard data={data.industry.industry_analysis} />
-            </SectionPanel>
-          </div>
-        )}
+        {/* 4.1 Industry — left: analysis card, right: intelligence card */}
+        <div id="section-industry-intelligence">
+          <SectionPanel
+            title="Industry Analysis"
+            subtitle="Cross-company synthesis from earnings transcripts & filings"
+            scoring={industryScoring}
+          >
+            <div className="flex gap-6">
+              {/* Left (~80%) */}
+              <div className="flex-1 min-w-0 space-y-6">
+                <IndustryAnalysisCard data={data.industry_overview} />
+                {data.industry_analysis && (
+                  <TranscriptDriversCard
+                    demandPositive={data.industry_analysis.demand_drivers?.positive ?? []}
+                    demandNegative={data.industry_analysis.demand_drivers?.negative ?? []}
+                    supplyPositive={data.industry_analysis.supply_drivers?.tightness_indicators ?? []}
+                    supplyNegative={data.industry_analysis.supply_drivers?.excess_indicators ?? []}
+                  />
+                )}
+                {data.industry_analysis && (
+                  <CompanyMetricsTable
+                    data={data.industry_analysis}
+                    period={data.industry_overview?.period}
+                  />
+                )}
+                {data.industry_analysis?.investment_implications && (
+                  <InvestmentImplicationsCard data={data.industry_analysis.investment_implications} />
+                )}
+              </div>
+              {/* Right (~20%): intelligence card */}
+              {data.industry_overview?.final_scoring && (
+                <div className="w-[400px] shrink-0">
+                  <IndustryIntelligenceCard
+                    data={data.industry_overview}
+                    investmentImplications={data.industry_analysis?.investment_implications}
+                  />
+                </div>
+              )}
+            </div>
+          </SectionPanel>
+        </div>
 
         {/* 4.2 Competitive Benchmarking vs Industry Peers */}
         <div id="section-competition">

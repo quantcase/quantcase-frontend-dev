@@ -52,6 +52,7 @@ interface SectionPanelProps {
   subtitle?: string;
   scoring?: SectionScoring;
   headerAction?: ReactNode;
+  subHeader?: ReactNode;
   children: ReactNode;
   className?: string;
   contentClassName?: string;
@@ -62,6 +63,7 @@ export function SectionPanel({
   subtitle,
   scoring,
   headerAction,
+  subHeader,
   children,
   className,
   contentClassName,
@@ -70,11 +72,12 @@ export function SectionPanel({
     <div className={`flex flex-col${className ? ` ${className}` : ""}`} style={{ borderRadius: 10, border: "1px solid #E2E2E2", background: "#F5F5F5", padding: 8 }}>
       {/* Header */}
       <div className="flex items-center justify-between" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
-        <div>
+        <div className="flex flex-col" style={{ gap: subHeader ? 6 : 0 }}>
           {typeof title === "string" ? (
             <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", letterSpacing: "0.01em" }}>{title}</div>
           ) : title}
           {subtitle && <p>{subtitle}</p>}
+          {subHeader && <div>{subHeader}</div>}
         </div>
         {scoring && <SectionScoreBar scoring={scoring} />}
         {headerAction && <div>{headerAction}</div>}

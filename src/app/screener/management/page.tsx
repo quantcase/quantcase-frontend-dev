@@ -12,7 +12,7 @@ import type { TimeframeOption, JobCreateResponse, JobStatusResponse, JobStatus }
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { ScreenerScorecard } from "@/components/molecules/screener-scorecard";
-import { GuidanceTrackTable } from "@/components/management/guidance-track-table";
+import { GuidanceTrackTable, GuidanceFilterControls, useGuidanceFilterState } from "@/components/management/guidance-track-table";
 import { PromoterSection } from "@/components/management/promoter-section";
 import { RedFlagsSection } from "@/components/management/red-flags-section";
 import { InvestmentThesisSection } from "@/components/management/investment-thesis-section";
@@ -61,6 +61,7 @@ function ManagementDashboardContent() {
   );
 
   const loading = transcriptLoading || managementLoading;
+  const guidanceFilterState = useGuidanceFilterState();
 
   const allStatuses = Object.values(jobStatuses);
   const aggregateStatus: JobStatus | null = allStatuses.length === 0
@@ -404,7 +405,7 @@ function ManagementDashboardContent() {
                 <div className="flex items-center gap-2">
                   <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
                     <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
-                    <span style={{ fontSize: 28, fontWeight: 700, color: "#0F172B", lineHeight: 1.1 }}>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: "#0F172B", lineHeight: 1.4 }}>
                       {hitRatePct}%
                     </span>
                   </div>
@@ -419,8 +420,9 @@ function ManagementDashboardContent() {
                 </div>
               ) : undefined
             }
+            subHeader={<GuidanceFilterControls state={guidanceFilterState} />}
           >
-            <GuidanceTrackTable rows={managementData.guidance_vs_actuals?.rows ?? []} />
+            <GuidanceTrackTable rows={managementData.guidance_vs_actuals?.rows ?? []} filterState={guidanceFilterState} />
           </SectionPanel>
         </div>
 

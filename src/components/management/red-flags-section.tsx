@@ -69,8 +69,8 @@ export function RedFlagsSection({ flags }: RedFlagsSectionProps) {
   );
 
   return (
-    <SectionPanel title="Red Flags" headerAction={headerAction} contentClassName="!p-0">
-      <div className="divide-y divide-zinc-100">
+    <SectionPanel title="Red Flags" headerAction={headerAction} contentClassName="!p-0 overflow-hidden">
+      <div className="divide-y divide-zinc-100 overflow-y-auto" style={{ maxHeight: 400 }}>
         {flags.map((flag, i) => {
           const style = severityStyle(flag.severity);
           return (

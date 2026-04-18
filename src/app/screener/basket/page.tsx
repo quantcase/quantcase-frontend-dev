@@ -516,88 +516,94 @@ function BasketContent() {
         />
       )}
 
-      <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
+      <div className="min-h-screen bg-white">
 
-        {/* Back link */}
-        <button
-          onClick={() => router.push("/screener/home")}
-          className="inline-flex items-center gap-1.5 text-[12px] font-medium transition-opacity hover:opacity-70"
-          style={{ color: "#888888" }}
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Research Baskets
-        </button>
+        {/* ── Hero header — mirrors /screener/home layout ── */}
+        <div className="bg-white border-b border-[#E2E2E2]">
+          <div className="max-w-[1400px] mx-auto px-8 pt-8 pb-8">
 
-        {/* Loading */}
-        {isLoading && !basket && (
-          <div className="flex items-center gap-2 py-20 justify-center" style={{ color: "#888888" }}>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm">Loading basket…</span>
-          </div>
-        )}
-
-        {/* Top-level error */}
-        {topError && (
-          <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-            <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-            <p className="text-sm text-red-600">{topError}</p>
-          </div>
-        )}
-
-        {basket && (
-          <>
-            {/* Basket header */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono" style={{ color: "#888888" }}>{icon}</span>
-                <span
-                  className="text-[11px] font-semibold uppercase tracking-[0.08em]"
-                  style={{ color: "#888888" }}
-                >
-                  {basket.category}
-                </span>
+            {/* Loading state */}
+            {isLoading && !basket && (
+              <div className="flex items-center gap-2 py-16 justify-center" style={{ color: "#888888" }}>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Loading basket…</span>
               </div>
+            )}
 
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div className="space-y-1.5">
-                  <h2 className="text-[22px] font-medium" style={{ color: "#0F172B" }}>
-                    {basket.title}
-                  </h2>
-                  <p className="text-sm max-w-2xl" style={{ color: "#888888" }}>
+            {/* Top-level error */}
+            {topError && (
+              <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+                <p className="text-sm text-red-600">{topError}</p>
+              </div>
+            )}
+
+            {basket && (
+              <div className="flex items-center justify-between gap-6 flex-wrap">
+                {/* Left: title + description */}
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  {/* Title row with back button */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => router.push("/screener/home")}
+                      className="flex-shrink-0 transition-opacity hover:opacity-60"
+                      style={{ color: "#0F172B" }}
+                    >
+                      <ArrowLeft className="h-8 w-8" strokeWidth={1.5} />
+                    </button>
+                    <h1 className="text-[32px] font-medium leading-tight" style={{ color: "#0F172B" }}>
+                      {basket.title}
+                    </h1>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-[14px] max-w-2xl leading-relaxed pl-10" style={{ color: "#888888" }}>
                     {basket.description}
                   </p>
                 </div>
 
-                {/* Stats badges */}
-                <div className="flex items-center gap-2 flex-shrink-0 mt-1">
-                  {latestQuarter && (
+                {/* Right: category tag + stat pills */}
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  {/* Category tag */}
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] border border-[#E2E2E2] bg-[#F5F5F5]">
+                    <span className="text-[11px] font-mono" style={{ color: "#888888" }}>{icon}</span>
                     <span
-                      className="text-[10px] font-medium rounded-sm px-2 py-1"
-                      style={{ background: "#F5F5F5", color: "#90A1B9", border: "1px solid #E2E2E2" }}
+                      className="text-[11px] font-semibold uppercase tracking-[0.10em]"
+                      style={{ color: "#888888" }}
                     >
-                      {latestQuarter}
+                      {basket.category}
                     </span>
+                  </div>
+
+                  {latestQuarter && (
+                    <div className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border border-[#E2E2E2]">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888888" }}>Quarter</span>
+                      <span className="text-[15px] font-semibold" style={{ color: "#0F172B" }}>{latestQuarter}</span>
+                    </div>
                   )}
                   {pagination && (
-                    <span
-                      className="text-[12px] font-semibold rounded-sm px-2 py-1"
-                      style={{ background: "#F5F5F5", color: "#0F172B", border: "1px solid #E2E2E2" }}
-                    >
-                      {pagination.total} stocks
-                    </span>
+                    <div className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border border-[#E2E2E2]">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888888" }}>Stocks</span>
+                      <span className="text-[15px] font-semibold" style={{ color: "#0F172B" }}>{pagination.total}</span>
+                    </div>
                   )}
                   {conditions.length > 0 && (
-                    <span
-                      className="text-[10px] font-medium rounded-sm px-2 py-1"
-                      style={{ background: "#F5F5F5", color: "#90A1B9", border: "1px solid #E2E2E2" }}
-                    >
-                      {conditions.length} conditions
-                    </span>
+                    <div className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border border-[#E2E2E2]">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888888" }}>Conditions</span>
+                      <span className="text-[15px] font-semibold" style={{ color: "#0F172B" }}>{conditions.length}</span>
+                    </div>
                   )}
                 </div>
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
+        {/* ── Body content ── */}
+        <div className="max-w-[1400px] mx-auto px-8 py-8 space-y-6">
+
+        {basket && (
+          <>
             {/* Conditions panel */}
             {conditions.length > 0 && (
               <div
@@ -836,7 +842,8 @@ function BasketContent() {
             </div>
           </>
         )}
-      </div>
+        </div>{/* end body content */}
+      </div>{/* end min-h-screen */}
     </>
   );
 }

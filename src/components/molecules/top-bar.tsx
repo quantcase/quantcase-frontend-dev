@@ -76,6 +76,9 @@ function TopBarInner() {
   const rmId = searchParams.get("rm_id");
 
   const isHome = pathname === "/";
+  const isScreenerHomePage = pathname === "/screener/home";
+  const isBasketPage = pathname === "/screener/basket";
+
   const isTerminal = pathname.startsWith("/screener");
   const isWealthOS = pathname.startsWith("/wealthos");
   const isModels =
@@ -83,8 +86,7 @@ function TopBarInner() {
     pathname.startsWith("/model-builder/") ||
     pathname === "/model-analytics";
 
-  const isScreenerHome = pathname === "/screener/home";
-  const hasAssetSelected = isTerminal && !isScreenerHome;
+  const hasAssetSelected = isTerminal && !isScreenerHomePage && !isBasketPage;
 
   const withSymbol = (href: string) =>
     symbol ? `${href}?symbol=${encodeURIComponent(symbol)}` : href;
@@ -112,6 +114,8 @@ function TopBarInner() {
   useEffect(() => {
     if (!isFactorActive) setFactorOpen(false);
   }, [isFactorActive]);
+
+  if (isHome || isScreenerHomePage || isBasketPage) return null;
 
   let leftZone: React.ReactNode = null;
 

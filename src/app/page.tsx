@@ -426,13 +426,13 @@ export default function Home() {
   const today = getTodayLabel();
 
   return (
-    <div className="min-h-screen bg-white mb-12 px-4">
-      <div className="container mx-auto max-w-7xl space-y-4">
+    <div className="min-h-screen bg-white mb-12 px-6">
+      <div className="space-y-4">
 
         {/* ── Page header ────────────────────────────────────────────── */}
-        <div className="pt-2 pb-1">
-          <h2 style={{ color: "#0F172B", fontWeight: 500 }}>{greeting}, Palash</h2>
-          <p style={{ fontSize: 14, color: "#888888", marginTop: 4 }}>
+        <div className="pt-6 pb-2">
+          <h3 style={{ color: "#0F172B", fontWeight: 500, fontSize: 28 }}>{greeting}, Palash</h3>
+          <p style={{ fontSize: 13, color: "#888888", marginTop: 2 }}>
             Here is your daily IC briefing for {today}.
           </p>
         </div>

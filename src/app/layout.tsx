@@ -3,6 +3,7 @@ import { IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { AppSidebar } from "@/components/molecules/app-sidebar";
 import { TopBar } from "@/components/molecules/top-bar";
+import { MainContentWrapper } from "@/components/molecules/main-content-wrapper";
 
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex-sans",
@@ -27,10 +28,7 @@ export default function RootLayout({
       >
         <AppSidebar />
         <TopBar />
-        {/* Main content offset for fixed sidebar (w-56) and top bar (h-14) */}
-        <div className="ml-14 pt-14 min-h-screen bg-gray-50 dark:bg-black">
-          {children}
-        </div>
+        <MainContentWrapper>{children}</MainContentWrapper>
       </body>
     </html>
   );

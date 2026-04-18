@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
+    "@xyflow/react": "^12.10.2",
     "apexcharts": "^5.10.4",
     "axios": "^1.13.5",
     "class-variance-authority": "^0.7.1",

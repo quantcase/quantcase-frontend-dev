@@ -85,11 +85,11 @@ export function OpportunityRadar({ items, className }: OpportunityRadarProps) {
       </div>
 
       {/* Inner white box */}
-      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] overflow-hidden">
+      <div className="rounded-[10px] bg-white border border-[#E2E2E2] overflow-hidden">
         {/* Table header */}
         <div
           className="grid gap-4 px-4 py-2.5 border-b border-[#E2E2E2]"
-          style={{ gridTemplateColumns: "2.2fr 1fr 1.1fr 1.5fr 1rem", background: "#F5F5F5" }}
+          style={{ gridTemplateColumns: "2.2fr 1fr 1.1fr 1.5fr 1rem", background: "#FAFAFA" }}
         >
           {["Asset", "Conviction", "Valuation Zone", "Next Catalyst"].map((col) => (
             <span

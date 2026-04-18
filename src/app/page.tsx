@@ -4,6 +4,8 @@ import {
   Clock,
   AlertCircle,
 } from "lucide-react";
+import { RMPortfolioSignalGraph } from "@/components/dashboard/rm-portfolio-signal-graph";
+import type { RMNode } from "@/components/dashboard/rm-portfolio-signal-graph";
 import { InvestmentSignalChanges } from "@/components/dashboard/investment-signal-changes";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { FrameworkIntegrityMonitor } from "@/components/dashboard/framework-integrity-monitor";
@@ -27,6 +29,152 @@ import type { ActivityItem } from "@/components/dashboard/activity-feed";
 import type { AIInsightItem } from "@/components/dashboard/ai-insights";
 import type { ClientSegment } from "@/components/dashboard/smart-client-segments";
 import type { TaskItem } from "@/components/dashboard/todays-tasks";
+
+// ── RM Signal Graph data ──────────────────────────────────────────────────────
+
+const RM_GRAPH_DATA: RMNode[] = [
+  {
+    id: "rm-palash",
+    name: "Palash Jain",
+    initials: "PJ",
+    severity: "critical",
+    clients: [
+      {
+        id: "cli-rahul",
+        name: "Rahul Mehta",
+        aum: "₹3.2 Cr",
+        severity: "critical",
+        assetClasses: [
+          {
+            id: "ac-eq-rm",
+            label: "Equity",
+            severity: "critical",
+            subclasses: [
+              { id: "sub-midcap", label: "Mid-cap",    severity: "critical", signal: "Drift +6%" },
+              { id: "sub-lrgcap", label: "Large-cap",  severity: "clean",   signal: "On track"  },
+            ],
+          },
+          {
+            id: "ac-mf-rm",
+            label: "Mutual Funds",
+            severity: "moderate",
+            subclasses: [
+              { id: "sub-hybrid", label: "Hybrid",   severity: "moderate", signal: "Rebalance due" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "cli-varun",
+        name: "Varun Kapoor",
+        aum: "₹7.1 Cr",
+        severity: "critical",
+        assetClasses: [
+          {
+            id: "ac-eq-vk",
+            label: "Equity",
+            severity: "critical",
+            subclasses: [
+              { id: "sub-midcap-vk", label: "Mid-cap",    severity: "critical", signal: "Overweight +9%" },
+              { id: "sub-smcap-vk", label: "Small-cap",   severity: "warning",  signal: "Threshold near" },
+            ],
+          },
+          {
+            id: "ac-bonds-vk",
+            label: "Bonds",
+            severity: "clean",
+            subclasses: [
+              { id: "sub-gsec", label: "G-Sec", severity: "clean", signal: "Normal" },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "rm-sonal",
+    name: "Sonal Batra",
+    initials: "SB",
+    severity: "warning",
+    clients: [
+      {
+        id: "cli-anita",
+        name: "Anita Shah",
+        aum: "₹5.8 Cr",
+        severity: "warning",
+        assetClasses: [
+          {
+            id: "ac-eq-as",
+            label: "Equity",
+            severity: "warning",
+            subclasses: [
+              { id: "sub-ev",    label: "EV / Green", severity: "warning",  signal: "Report pending" },
+              { id: "sub-it-as", label: "IT",         severity: "moderate", signal: "Watch"         },
+            ],
+          },
+          {
+            id: "ac-realty-as",
+            label: "Realty",
+            severity: "clean",
+            subclasses: [
+              { id: "sub-realty", label: "REITs", severity: "clean", signal: "Stable" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "cli-suresh",
+        name: "Suresh Nair",
+        aum: "₹2.4 Cr",
+        severity: "clean",
+        assetClasses: [
+          {
+            id: "ac-mf-sn",
+            label: "Mutual Funds",
+            severity: "clean",
+            subclasses: [
+              { id: "sub-debt-sn",  label: "Debt",   severity: "clean", signal: "Stable" },
+              { id: "sub-equity-sn", label: "Equity", severity: "clean", signal: "Stable" },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "rm-arjun",
+    name: "Arjun Rao",
+    initials: "AR",
+    severity: "moderate",
+    clients: [
+      {
+        id: "cli-priya",
+        name: "Priya Venkat",
+        aum: "₹4.6 Cr",
+        severity: "moderate",
+        assetClasses: [
+          {
+            id: "ac-eq-pv",
+            label: "Equity",
+            severity: "moderate",
+            subclasses: [
+              { id: "sub-infra",   label: "Infra",      severity: "moderate", signal: "Pending review" },
+              { id: "sub-pharma",  label: "Pharma",     severity: "clean",    signal: "On track"      },
+            ],
+          },
+          {
+            id: "ac-intl-pv",
+            label: "Intl Funds",
+            severity: "warning",
+            subclasses: [
+              { id: "sub-us",  label: "US Equity", severity: "warning", signal: "FX exposure" },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
 
 // ── RM / Client data ──────────────────────────────────────────────────────────
 
@@ -134,6 +282,7 @@ const ACTIVITY_ITEMS: ActivityItem[] = [
   {
     id: "2",
     time: "8:15 AM",
+    company: "Emerging Markets Outlook",
     description: "New research note published on emerging markets outlook",
     tag: "Research",
     tagColor: "neutral",
@@ -153,6 +302,14 @@ const ACTIVITY_ITEMS: ActivityItem[] = [
     description: "Redemption request of ₹8.2 Cr submitted by client",
     tag: "Action",
     tagColor: "alert",
+  },
+  {
+    id: "5",
+    time: "Yesterday",
+    company: "Bluechip Growth Fund",
+    description: "Q4 earnings call transcript available — management tone flagged for review",
+    tag: "Research",
+    tagColor: "neutral",
   },
 ];
 
@@ -281,6 +438,14 @@ export default function Home() {
         </div>
 
         {/* ════════════════════════════════════════════════════════════
+            SECTION 0 — RM PORTFOLIO SIGNAL MAP + ACTIVITY FEED
+        ═══════════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-[30%_1fr] gap-4 items-stretch">
+          <ActivityFeed items={ACTIVITY_ITEMS} className="h-full" />
+          <RMPortfolioSignalGraph rms={RM_GRAPH_DATA} className="h-full" />
+        </div>
+
+        {/* ════════════════════════════════════════════════════════════
             SECTION 1 — RM & CLIENT RELATIONSHIP
         ═══════════════════════════════════════════════════════════════ */}
 
@@ -295,7 +460,6 @@ export default function Home() {
               totalClients={18}
               activeAlerts={3}
             />
-            <ActivityFeed items={ACTIVITY_ITEMS} />
           </div>
 
           {/* Right column */}

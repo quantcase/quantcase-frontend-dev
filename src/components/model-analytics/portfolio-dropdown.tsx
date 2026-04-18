@@ -21,11 +21,25 @@ export function PortfolioDropdown({ portfolios, selected, onChange }: Props) {
         className="flex items-center gap-3 rounded-[10px] border border-[#E2E2E2] bg-white px-4 py-3 hover:bg-[#F5F5F5] transition-colors"
         style={{ minWidth: 280 }}
       >
-        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: riskColor(selected.riskProfile) }} />
         <div className="flex-1 text-left">
-          <div style={{ fontSize: 14, fontWeight: 500, color: "#0F172B" }}>{selected.name}</div>
+          <div className="flex items-center gap-2">
+            <span style={{ fontSize: 14, fontWeight: 500, color: "#0F172B" }}>{selected.name}</span>
+            <span
+              className="rounded-sm px-1.5 py-0.5"
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                background: riskColor(selected.riskProfile) + "18",
+                color: riskColor(selected.riskProfile),
+              }}
+            >
+              {riskLabel(selected.riskProfile)}
+            </span>
+          </div>
           <div style={{ fontSize: 11, color: "#888888", marginTop: 1 }}>
-            {selected.client.clientName} · {riskLabel(selected.riskProfile)}
+            {selected.client.clientName} · {selected.client.aum}
           </div>
         </div>
         <ChevronDown

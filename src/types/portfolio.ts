@@ -27,6 +27,15 @@ export interface ClientContext {
   latestUpdate: string;
 }
 
+// ── Model holding (stock with weight) ───────────────────────────────────────
+
+export interface ModelHolding {
+  ticker: string;       // e.g. "CANFINHOME"
+  companyName: string;  // e.g. "Can Fin Homes Ltd"
+  industry: string;
+  weight: number;       // percentage, 0–100
+}
+
 // ── Core model ──────────────────────────────────────────────────────────────
 
 export interface PortfolioData {
@@ -38,6 +47,8 @@ export interface PortfolioData {
   client: ClientContext;
   positions: EquityPosition[];
   whyThisPortfolio: string[];
+  linkedClientIds?: string[];
+  holdings?: ModelHolding[];
 }
 
 export interface StoredModel extends PortfolioData {

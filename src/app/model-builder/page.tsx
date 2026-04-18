@@ -25,13 +25,13 @@ function PortfolioBuilderModal({
     >
       {/* Dialog */}
       <div
-        className="relative flex flex-col w-full max-w-4xl mx-auto my-0 sm:my-6 sm:rounded-lg overflow-hidden"
-        style={{ background: "#F5F5F5", maxHeight: "100dvh" }}
+        className="relative flex flex-col w-full max-w-4xl mx-auto my-0 sm:my-10 sm:rounded-lg overflow-hidden"
+        style={{ background: "#fff", maxHeight: "calc(100dvh - 80px)" }}
       >
         {/* Fixed header */}
         <div
-          className="shrink-0 flex items-center justify-between px-6 py-5 border-b"
-          style={{ borderColor: "#E2E2E2", background: "#F5F5F5" }}
+          className="shrink-0 flex items-center justify-between px-6 py-4 border-b"
+          style={{ borderColor: "#E2E2E2", background: "#fff" }}
         >
           <div>
             <h2 className="text-xl font-semibold" style={{ color: "#0F172B" }}>
@@ -51,27 +51,9 @@ function PortfolioBuilderModal({
           </button>
         </div>
 
-        {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Stepper — owns scrollable content + footer buttons internally */}
+        <div className="flex flex-col flex-1 min-h-0">
           <PortfolioBuilderStepper onSuccess={onSuccess} onCancel={onClose} />
-        </div>
-
-        {/* Fixed footer */}
-        <div
-          className="shrink-0 flex items-center justify-between px-6 py-4 border-t"
-          style={{ borderColor: "#E2E2E2", background: "#F5F5F5" }}
-        >
-          <p className="text-xs" style={{ color: "#888888" }}>
-            All portfolios are saved to your model library.
-          </p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-xs font-medium hover:text-zinc-700 transition-colors"
-            style={{ color: "#888888" }}
-          >
-            Discard & close
-          </button>
         </div>
       </div>
     </div>

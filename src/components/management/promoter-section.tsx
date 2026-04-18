@@ -86,9 +86,10 @@ function MqiDonut({ score, label }: { score: number; label: string }) {
 
 function DimensionBars({ dimensions }: { dimensions: MqiScore["dimensions"] }) {
   const items = [
-    { label: "Guidance Credibility", score: dimensions.guidance_credibility.score, max: dimensions.guidance_credibility.max },
-    { label: "Capital Allocation", score: dimensions.capital_allocation.score, max: dimensions.capital_allocation.max },
-    { label: "Disclosure Honesty", score: dimensions.disclosure_honesty.score, max: dimensions.disclosure_honesty.max },
+    { label: "Guidance Accuracy", score: dimensions.guidance_accuracy.score, max: dimensions.guidance_accuracy.max },
+    { label: "Red Flags", score: dimensions.red_flags.score, max: dimensions.red_flags.max },
+    { label: "Investment Thesis", score: dimensions.investment_thesis.score, max: dimensions.investment_thesis.max },
+    { label: "Promoter Activity", score: dimensions.promoter_activity.score, max: dimensions.promoter_activity.max },
   ];
 
   return (
@@ -132,7 +133,7 @@ function DimensionBars({ dimensions }: { dimensions: MqiScore["dimensions"] }) {
 }
 
 export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionProps) {
-  const { verdict, shareholding, promoter_note, verdict_rationale } = promoterActivity;
+  const { verdict, shareholding, promoter_note, verdict_rationale, mqi_rationale } = promoterActivity;
   const vColor = verdictColor(verdict);
 
   const headerAction = (
@@ -223,7 +224,7 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
       </div>
 
       {/* Bottom: notes */}
-      {(promoter_note || verdict_rationale) && (
+      {(promoter_note || verdict_rationale || mqi_rationale) && (
         <div
           className="flex flex-col gap-2 mt-4 pt-4"
           style={{ borderTop: "1px solid #E2E2E2" }}
@@ -236,8 +237,14 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
           )}
           {verdict_rationale && (
             <p style={{ fontSize: 12, color: "#121212", lineHeight: 1.6 }}>
-              <span style={{ fontWeight: 600 }}>MQI rationale: </span>
+              <span style={{ fontWeight: 600 }}>Verdict rationale: </span>
               {verdict_rationale}
+            </p>
+          )}
+          {mqi_rationale && (
+            <p style={{ fontSize: 12, color: "#121212", lineHeight: 1.6 }}>
+              <span style={{ fontWeight: 600 }}>MQI impact: </span>
+              {mqi_rationale}
             </p>
           )}
         </div>

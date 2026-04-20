@@ -13,7 +13,7 @@ interface Props {
 }
 
 function verdictColor(rating: string | null): string {
-  if (!rating) return "text-[#0F172B]";
+  if (!rating) return "text-[var(--qc-text-heading)]";
   const r = rating.toLowerCase();
   if (r === "strong buy" || r === "buy") return "text-emerald-600";
   if (r === "sell" || r === "underperform") return "text-red-600";
@@ -48,11 +48,11 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
       <div className="space-y-5">
 
         {/* Header row: Verdict (narrow) · Entry Trigger · Market Context */}
-        <div className="flex gap-0 divide-x divide-[#E2E2E2]">
+        <div className="flex gap-0 divide-x divide-[var(--qc-border-default)]">
 
           {/* Verdict */}
           <div className="flex flex-col gap-1 pr-6" style={{ minWidth: 200 }}>
-            <small className="text-[10px] uppercase tracking-wider text-[#888888] font-medium">Verdict</small>
+            <small className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">Verdict</small>
             <p className={`text-sm font-semibold leading-snug ${verdictColor(rating)}`}>
               {verdictTitle ?? "—"}
             </p>
@@ -60,22 +60,22 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
 
           {/* Entry Trigger */}
           <div className="flex flex-col gap-1 flex-1 px-6">
-            <small className="text-[10px] uppercase tracking-wider text-[#888888] font-medium">Entry Trigger</small>
+            <small className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">Entry Trigger</small>
             {entryTrigger ? (
               <>
-                <p className="text-sm font-semibold text-[#0F172B] leading-snug">{entryTrigger}</p>
+                <p className="text-sm font-semibold text-[var(--qc-text-heading)] leading-snug">{entryTrigger}</p>
                 {entryPe && (
-                  <small className="text-[11px] text-[#888888]">{entryPe}</small>
+                  <small className="text-[11px] text-[var(--qc-text-muted)]">{entryPe}</small>
                 )}
               </>
             ) : (
-              <p className="text-sm font-semibold text-[#888888]">—</p>
+              <p className="text-sm font-semibold text-[var(--qc-text-muted)]">—</p>
             )}
           </div>
 
           {/* Market Context */}
           <div className="flex flex-col gap-1 flex-1 pl-6">
-            <small className="text-[10px] uppercase tracking-wider text-[#888888] font-medium">Market Context</small>
+            <small className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">Market Context</small>
             {marketSignalCounts ? (
               <p className={`text-sm font-semibold leading-snug ${
                 marketBiasLabel?.toLowerCase().includes("bear") ? "text-red-600" : "text-emerald-600"
@@ -83,20 +83,20 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
                 {marketSignalCounts}
               </p>
             ) : (
-              <p className="text-sm font-semibold text-[#888888]">—</p>
+              <p className="text-sm font-semibold text-[var(--qc-text-muted)]">—</p>
             )}
             {marketSummary && (
-              <small className="text-[11px] text-[#888888] line-clamp-2">{marketSummary}</small>
+              <small className="text-[11px] text-[var(--qc-text-muted)] line-clamp-2">{marketSummary}</small>
             )}
           </div>
         </div>
 
         {/* Divider */}
-        <div className="border-t border-[#E2E2E2]" />
+        <div className="border-t border-[var(--qc-border-default)]" />
 
         {/* Investment thesis paragraph */}
         {investmentThesis && (
-          <p className="text-sm text-[#888888] leading-relaxed">{investmentThesis}</p>
+          <p className="text-sm text-[var(--qc-text-muted)] leading-relaxed">{investmentThesis}</p>
         )}
 
         {/* Highlights + Risks */}
@@ -104,10 +104,10 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {keyHighlights.length > 0 && (
               <div>
-                <p className="text-[11px] font-semibold text-[#0F172B] uppercase tracking-wider mb-2">Key Highlights</p>
+                <p className="text-[11px] font-semibold text-[var(--qc-text-heading)] uppercase tracking-wider mb-2">Key Highlights</p>
                 <ul className="space-y-0">
                   {keyHighlights.map((h, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-[#888888]">
+                    <li key={i} className="flex items-start gap-2 text-xs text-[var(--qc-text-muted)]">
                       <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
                       {h}
                     </li>
@@ -117,10 +117,10 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
             )}
             {keyRisks.length > 0 && (
               <div>
-                <p className="text-[11px] font-semibold text-[#0F172B] uppercase tracking-wider mb-2">Key Risks</p>
+                <p className="text-[11px] font-semibold text-[var(--qc-text-heading)] uppercase tracking-wider mb-2">Key Risks</p>
                 <ul className="space-y-0">
                   {keyRisks.map((r, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-[#888888]">
+                    <li key={i} className="flex items-start gap-2 text-xs text-[var(--qc-text-muted)]">
                       <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
                       {r}
                     </li>
@@ -133,9 +133,9 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
 
         {/* Best Action callout box */}
         {bestAction && (
-          <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
-            <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1">Best Action</p>
-            <p className="text-sm font-semibold text-[#0F172B] leading-snug">{bestAction}</p>
+          <div className="rounded-[10px] border border-[var(--qc-border-default)] bg-[var(--qc-surface-panel)] px-4 py-3">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-1">Best Action</p>
+            <p className="text-sm font-semibold text-[var(--qc-text-heading)] leading-snug">{bestAction}</p>
           </div>
         )}
 

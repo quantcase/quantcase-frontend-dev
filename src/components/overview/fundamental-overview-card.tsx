@@ -30,10 +30,10 @@ function MetricTileCard({ label, value, growth, invertGrowth }: MetricTileCardPr
     : null;
 
   return (
-    <div className="rounded-lg border border-zinc-100 bg-white px-4 py-4 flex flex-col gap-1.5 min-w-0">
-      <p className="text-[11px] uppercase tracking-wider text-[#888888] font-medium">{label}</p>
+    <div className="rounded-lg border border-[var(--qc-border-default)] bg-[var(--qc-surface-white)] px-4 py-4 flex flex-col gap-1.5 min-w-0">
+      <p className="text-[11px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">{label}</p>
       <div className="flex items-center gap-1.5">
-        <p className="text-[20px] font-medium text-[#0F172B] leading-none truncate">{value}</p>
+        <p className="text-[20px] font-medium text-[var(--qc-text-heading)] leading-none truncate">{value}</p>
         {hasGrowth && (
           <span className={`text-[12px] leading-none ${isPositive ? "text-emerald-600" : "text-red-600"}`}>
             {isPositive ? "▲" : "▼"}
@@ -59,10 +59,10 @@ interface RatioTileCardProps {
 function RatioTileCard({ label, value, sublabel, trendIcon }: RatioTileCardProps) {
   const isPositive = trendIcon === "up";
   return (
-    <div className="rounded-lg border border-zinc-100 bg-white px-4 py-4 flex flex-col gap-1.5 min-w-0">
-      <p className="text-[11px] uppercase tracking-wider text-[#888888] font-medium">{label}</p>
+    <div className="rounded-lg border border-[var(--qc-border-default)] bg-[var(--qc-surface-white)] px-4 py-4 flex flex-col gap-1.5 min-w-0">
+      <p className="text-[11px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">{label}</p>
       <div className="flex items-center gap-1.5">
-        <p className="text-[20px] font-medium text-[#0F172B] leading-none">{value}</p>
+        <p className="text-[20px] font-medium text-[var(--qc-text-heading)] leading-none">{value}</p>
         {trendIcon && (
           <span className={`text-[12px] leading-none ${isPositive ? "text-emerald-600" : "text-red-600"}`}>
             {isPositive ? "▲" : "▼"}
@@ -70,7 +70,7 @@ function RatioTileCard({ label, value, sublabel, trendIcon }: RatioTileCardProps
         )}
       </div>
       {sublabel && (
-        <p className="text-[11px] text-[#888888]">{sublabel}</p>
+        <p className="text-[11px] text-[var(--qc-text-muted)]">{sublabel}</p>
       )}
     </div>
   );
@@ -93,17 +93,17 @@ function RatioRow({ label, value, sublabel, badge, badgeColor = "zinc" }: RatioR
   }[badgeColor];
 
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-[#E2E2E2] last:border-0">
-      <span className="text-sm text-[#121212]">{label}</span>
+    <div className="flex items-center justify-between py-2.5 border-b border-[var(--qc-border-default)] last:border-0">
+      <span className="text-sm text-[var(--qc-text-body)]">{label}</span>
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-[#0F172B]">{value}</span>
+        <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{value}</span>
         {badge && (
           <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-sm ${badgeClass}`}>
             {badge}
           </span>
         )}
         {sublabel && !badge && (
-          <span className="text-[11px] text-[#888888]">{sublabel}</span>
+          <span className="text-[11px] text-[var(--qc-text-muted)]">{sublabel}</span>
         )}
       </div>
     </div>
@@ -143,7 +143,7 @@ export function FundamentalOverviewCard({ data }: Props) {
 
         {/* KEY METRICS */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Key Metrics</p>
+          <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Key Metrics</p>
           <div className="flex flex-col gap-3">
             {/* Row 1: always 4 cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -163,7 +163,7 @@ export function FundamentalOverviewCard({ data }: Props) {
 
         {/* KEY RATIOS */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Key Ratios</p>
+          <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Key Ratios</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <RatioTileCard
               label="ROCE"
@@ -190,8 +190,8 @@ export function FundamentalOverviewCard({ data }: Props) {
 
           {/* Valuation */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Valuation</p>
-            <div className="rounded-[10px] border border-[#E2E2E2] px-4">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Valuation</p>
+            <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4">
               <RatioRow
                 label="P/E"
                 value={val.peRatio != null ? `${val.peRatio.toFixed(1)}x` : "—"}
@@ -217,8 +217,8 @@ export function FundamentalOverviewCard({ data }: Props) {
 
           {/* Ownership */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Ownership</p>
-            <div className="rounded-[10px] border border-[#E2E2E2] px-4">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Ownership</p>
+            <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4">
               <RatioRow label="Promoter" value={pct(own.promoter)} />
               <RatioRow
                 label="FII"

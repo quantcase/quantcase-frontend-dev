@@ -37,7 +37,7 @@ export default function RootLayout({
       <head>
         <ThemeScript />
       </head>
-      <body className={`${ibmPlexSans.variable} antialiased`}>
+      <body className={ibmPlexSans.variable}>
         <ThemeProvider>
           <AppSidebar />
           <TopBar />

@@ -150,8 +150,8 @@ function FrameworkBlockCard({ block, style }: { block: FrameworkBlock; style?: R
     <div style={{ padding: 16, ...style }}>
       <div className="flex items-start justify-between gap-2 mb-3">
         <div>
-          <p style={{ fontSize: 13, fontWeight: 600, color: "#0F172B" }}>{block.title}</p>
-          <p style={{ fontSize: 11, color: "#888888", marginTop: 2 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>{block.title}</p>
+          <p style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 2 }}>
             {block.timeframe} · {block.signalCount} signals
           </p>
         </div>
@@ -160,7 +160,7 @@ function FrameworkBlockCard({ block, style }: { block: FrameworkBlock; style?: R
       <div className="space-y-1.5">
         {block.signals.map((sig) => (
           <div key={sig.label} className="flex items-center justify-between">
-            <span style={{ fontSize: 13, color: "#888888" }}>{sig.label}</span>
+            <span style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>{sig.label}</span>
             <span style={{ fontSize: 13, fontWeight: 500, color: signalValueColor(sig.sentiment) }}>
               {sig.value}
             </span>
@@ -176,17 +176,16 @@ function SummaryView() {
     <div
       style={{
         borderRadius: 10,
-        border: "1px solid rgba(226,226,226,0.10)",
-        background: "#fff",
+        border: "1px solid var(--qc-border-inner)",
+        background: "var(--qc-surface-white)",
         padding: 16,
       }}
     >
-      {/* 3-column grid with dividers */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
-          border: "1px solid #E2E2E2",
+          border: "1px solid var(--qc-border-default)",
           borderRadius: 8,
           overflow: "hidden",
         }}
@@ -200,8 +199,8 @@ function SummaryView() {
               key={block.title}
               block={block}
               style={{
-                borderRight: col < 2 ? "1px solid #E2E2E2" : undefined,
-                borderBottom: row < totalRows - 1 ? "1px solid #E2E2E2" : undefined,
+                borderRight: col < 2 ? "1px solid var(--qc-border-default)" : undefined,
+                borderBottom: row < totalRows - 1 ? "1px solid var(--qc-border-default)" : undefined,
               }}
             />
           );
@@ -216,8 +215,8 @@ function DetailedView() {
     <div
       style={{
         borderRadius: 10,
-        border: "1px solid rgba(226,226,226,0.10)",
-        background: "#fff",
+        border: "1px solid var(--qc-border-inner)",
+        background: "var(--qc-surface-white)",
         padding: 16,
       }}
     >
@@ -231,12 +230,12 @@ function DetailedView() {
                   style={{
                     fontSize: 10,
                     fontWeight: 500,
-                    color: "#888888",
+                    color: "var(--qc-text-muted)",
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
                     padding: "8px 12px 8px 0",
                     whiteSpace: "nowrap",
-                    borderBottom: "1px solid #E2E2E2",
+                    borderBottom: "1px solid var(--qc-border-default)",
                   }}
                 >
                   {h}
@@ -249,23 +248,23 @@ function DetailedView() {
               <tr
                 key={block.title}
                 style={{
-                  background: idx % 2 === 0 ? "#ffffff" : "#fafafa",
+                  background: idx % 2 === 0 ? "var(--qc-surface-white)" : "var(--qc-surface-row-alt)",
                   borderTop: "1px solid transparent",
                 }}
               >
-                <td style={{ fontSize: 13, fontWeight: 600, color: "#0F172B", padding: "10px 12px 10px 0", whiteSpace: "nowrap" }}>
+                <td style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", padding: "10px 12px 10px 0", whiteSpace: "nowrap" }}>
                   {block.title}
                 </td>
-                <td style={{ fontSize: 13, color: "#888888", padding: "10px 12px", whiteSpace: "nowrap" }}>
+                <td style={{ fontSize: 13, color: "var(--qc-text-muted)", padding: "10px 12px", whiteSpace: "nowrap" }}>
                   {block.timeframe}
                 </td>
-                <td style={{ fontSize: 13, color: "#888888", padding: "10px 12px", whiteSpace: "nowrap" }}>
+                <td style={{ fontSize: 13, color: "var(--qc-text-muted)", padding: "10px 12px", whiteSpace: "nowrap" }}>
                   {block.signalCount}
                 </td>
-                <td style={{ fontSize: 12, color: "#888888", padding: "10px 12px", maxWidth: 260 }}>
+                <td style={{ fontSize: 12, color: "var(--qc-text-muted)", padding: "10px 12px", maxWidth: 260 }}>
                   {block.signals.map((sig) => (
                     <span key={sig.label} className="inline-block mr-3 whitespace-nowrap">
-                      <span style={{ color: "#888888" }}>{sig.label}: </span>
+                      <span style={{ color: "var(--qc-text-muted)" }}>{sig.label}: </span>
                       <span style={{ color: signalValueColor(sig.sentiment), fontWeight: 500 }}>{sig.value}</span>
                     </span>
                   ))}
@@ -282,7 +281,7 @@ function DetailedView() {
   );
 }
 
-// ─── OutlineToggle (local, same pattern as TabularCard) ────────────────────────
+// ─── OutlineToggle ────────────────────────────────────────────────────────────
 
 function OutlineToggle({
   options,
@@ -304,9 +303,9 @@ function OutlineToggle({
             fontWeight: 500,
             padding: "4px 12px",
             borderRadius: 6,
-            border: `1px solid ${value === option ? "#0F172B" : "#E2E2E2"}`,
-            background: value === option ? "#0F172B" : "transparent",
-            color: value === option ? "#ffffff" : "#888888",
+            border: `1px solid ${value === option ? "var(--qc-accent-primary)" : "var(--qc-border-default)"}`,
+            background: value === option ? "var(--qc-accent-primary)" : "transparent",
+            color: value === option ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
             cursor: "pointer",
             whiteSpace: "nowrap",
           }}
@@ -333,8 +332,8 @@ export function MarketViewCard() {
     <div
       style={{
         borderRadius: 10,
-        border: "1px solid #E2E2E2",
-        background: "#F5F5F5",
+        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-surface-panel)",
         padding: 8,
       }}
     >
@@ -343,13 +342,12 @@ export function MarketViewCard() {
         className="flex items-center justify-between flex-wrap gap-2"
         style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}
       >
-        {/* Left: title + tab-specific context */}
         <div className="flex items-center gap-3 flex-wrap">
           <div
             style={{
               fontSize: 14,
               fontWeight: 600,
-              color: "#0F172B",
+              color: "var(--qc-text-heading)",
               textTransform: "uppercase",
               letterSpacing: "0.01em",
             }}
@@ -357,11 +355,10 @@ export function MarketViewCard() {
             Market View
           </div>
 
-          {/* Summary tab: framework score badges */}
           {activeTab === "Detailed" && (
             <>
-              <span style={{ width: 1, height: 14, background: "#E2E2E2", display: "inline-block", flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: "#888888" }}>Framework score</span>
+              <span style={{ width: 1, height: 14, background: "var(--qc-border-default)", display: "inline-block", flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>Framework score</span>
               {bear > 0 && (
                 <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 9px", borderRadius: 20, background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA" }}>
                   {bear} Bear
@@ -383,12 +380,11 @@ export function MarketViewCard() {
             </>
           )}
 
-          {/* Detailed tab: combined signal */}
           {activeTab === "Summary" && (
             <>
-              <span style={{ width: 1, height: 14, background: "#E2E2E2", display: "inline-block", flexShrink: 0 }} />
-              <span style={{ fontSize: 13, color: "#888888" }}>
-                Combined signal: <span style={{ fontWeight: 600, color: "#0F172B" }}>Cautious</span>
+              <span style={{ width: 1, height: 14, background: "var(--qc-border-default)", display: "inline-block", flexShrink: 0 }} />
+              <span style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
+                Combined signal: <span style={{ fontWeight: 600, color: "var(--qc-text-heading)" }}>Cautious</span>
               </span>
               <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 9px", borderRadius: 20, background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA" }}>
                 Bearish bias

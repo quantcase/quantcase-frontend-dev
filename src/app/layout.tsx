@@ -20,9 +20,9 @@ export const metadata: Metadata = {
 function ThemeScript() {
   const script = `(function(){
     var t=localStorage.getItem('qc-theme')||'light-modern';
-    var m={'dark-modern':'theme-dark-modern','light-enterprise':'theme-light-enterprise','dark-enterprise':'theme-dark-enterprise'};
+    var m={'dark-modern':'theme-dark-modern','light-enterprise':'theme-light-enterprise','dark-enterprise':'theme-dark-enterprise','luxury':'theme-luxury'};
     var c=m[t];if(c)document.documentElement.classList.add(c);
-    if(t==='dark-modern'||t==='dark-enterprise')document.documentElement.classList.add('dark');
+    if(t==='dark-modern'||t==='dark-enterprise'||t==='luxury')document.documentElement.classList.add('dark');
   })();`;
   return <script dangerouslySetInnerHTML={{ __html: script }} />;
 }

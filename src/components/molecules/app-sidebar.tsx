@@ -19,7 +19,7 @@ import { useTheme } from "@/components/providers/ThemeProvider";
 import type { ThemeId } from "@/lib/theme";
 import { THEME_LABELS } from "@/lib/theme";
 
-const THEMES: ThemeId[] = ["light-modern", "dark-modern", "light-enterprise", "dark-enterprise"];
+const THEMES: ThemeId[] = ["light-modern", "dark-modern", "light-enterprise", "dark-enterprise", "luxury"];
 
 const navItems = [
   { label: "Home",     href: "/",                  icon: Home,       isActive: (p: string) => p === "/" },

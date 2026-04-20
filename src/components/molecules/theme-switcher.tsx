@@ -5,7 +5,7 @@ import type { ThemeId } from "@/lib/theme";
 import { THEME_LABELS } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
-const THEMES: ThemeId[] = ["light-modern", "dark-modern", "light-enterprise", "dark-enterprise"];
+const THEMES: ThemeId[] = ["light-modern", "dark-modern", "light-enterprise", "dark-enterprise", "luxury"];
 
 export function ThemeSwitcher({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();

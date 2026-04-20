@@ -20,19 +20,21 @@ const FACTOR_ITEMS = [
 function SearchZone() {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 dark:border-gray-700 dark:bg-gray-900">
-        <Search className="size-3.5 shrink-0 text-gray-400" />
+      <div className="flex items-center gap-2 rounded-md border px-3 py-1.5" style={{ background: "var(--qc-topbar-search-bg)", borderColor: "var(--qc-topbar-search-border)" }}>
+        <Search className="size-3.5 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
         <input
           type="text"
           placeholder="Search Indian companies (e.g. HDFC, Reliance)..."
-          className="w-72 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none dark:text-gray-200 dark:placeholder:text-gray-500"
+          className="w-72 bg-transparent text-sm focus:outline-none"
+          style={{ color: "var(--qc-text-body)" }}
         />
       </div>
       <div className="flex items-center gap-2">
         {quickSymbols.map((sym) => (
           <span
             key={sym}
-            className="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 dark:border-gray-700 dark:text-gray-300"
+            className="rounded-full border px-3 py-1 text-xs font-medium"
+            style={{ borderColor: "var(--qc-border-default)", color: "var(--qc-text-muted)" }}
           >
             {sym}
           </span>
@@ -59,12 +61,19 @@ function TabLink({
       className={cn(
         "relative flex h-full items-center gap-1.5 px-3 text-sm whitespace-nowrap transition-colors",
         active
-          ? "text-[#0F172B] font-medium after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#0F172B]"
-          : "text-[#888888] hover:text-[#0F172B]"
+          ? "font-medium after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5"
+          : ""
       )}
+      style={active
+        ? { color: "var(--qc-topbar-tab-active-fg)", ["--tw-after-bg" as string]: "var(--qc-topbar-tab-active-fg)" }
+        : { color: "var(--qc-topbar-tab-idle-fg)" }
+      }
     >
       {icon}
       {children}
+      {active && (
+        <span className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: "var(--qc-topbar-tab-active-fg)" }} />
+      )}
     </Link>
   );
 }
@@ -110,7 +119,6 @@ function TopBarInner() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [factorOpen]);
 
-  // Close the popover when navigating away from factor pages
   useEffect(() => {
     if (!isFactorActive) setFactorOpen(false);
   }, [isFactorActive]);
@@ -128,8 +136,6 @@ function TopBarInner() {
       { label: "Fundamentals", href: "/screener/fundamentals", icon: <BookOpen className="size-3.5 shrink-0" /> },
     ];
 
-    // Expanded: factor active — show items inline
-    // Collapsed: not active — show trigger button, clicking expands inline
     const showFactorItems = isFactorActive || factorOpen;
 
     leftZone = (
@@ -140,7 +146,6 @@ function TopBarInner() {
           </TabLink>
         ))}
 
-        {/* QuantCase — trigger + inline sub-items, all inside factorRef */}
         <div ref={factorRef} className="flex h-full items-end">
           <button
             onClick={() => !isFactorActive && setFactorOpen((v) => !v)}
@@ -149,15 +154,15 @@ function TopBarInner() {
               isFactorActive ? "cursor-default" : ""
             )}
           >
-            {/* Pill badge with shimmer */}
-            <span className={cn(
-              "relative flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium overflow-hidden",
-              "border transition-colors duration-200",
-              isFactorActive
-                ? "bg-[#0F172B] text-white border-[#0F172B]"
-                : "bg-white text-[#0F172B] border-[#0F172B]/30 hover:border-[#0F172B]/60"
-            )}>
-              {/* Shimmer sweep — only when not active */}
+            <span
+              className={cn(
+                "relative flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium overflow-hidden border transition-colors duration-200"
+              )}
+              style={isFactorActive
+                ? { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)", borderColor: "var(--qc-accent-primary)" }
+                : { background: "var(--qc-surface-white)", color: "var(--qc-accent-primary)", borderColor: "var(--qc-border-active)" }
+              }
+            >
               {!isFactorActive && (
                 <motion.span
                   aria-hidden
@@ -181,22 +186,23 @@ function TopBarInner() {
             </span>
           </button>
 
-          {/* Factor sub-items — shown inline when expanded */}
           {showFactorItems && (
             <>
-              <span className="flex h-full items-center px-1 text-[#C8C8C8] select-none text-base">·</span>
+              <span className="flex h-full items-center px-1 select-none text-base" style={{ color: "var(--qc-topbar-separator)" }}>·</span>
               {FACTOR_ITEMS.map((item) => (
                 <Link
                   key={item.href}
                   href={withSymbol(item.href)}
                   className={cn(
                     "relative flex h-full items-center px-3 text-sm whitespace-nowrap transition-colors",
-                    pathname === item.href
-                      ? "text-[#0F172B] font-medium after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#0F172B]"
-                      : "text-[#888888] hover:text-[#0F172B]"
+                    pathname === item.href ? "font-medium" : ""
                   )}
+                  style={{ color: pathname === item.href ? "var(--qc-topbar-tab-active-fg)" : "var(--qc-topbar-tab-idle-fg)" }}
                 >
                   {item.label}
+                  {pathname === item.href && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: "var(--qc-topbar-tab-active-fg)" }} />
+                  )}
                 </Link>
               ))}
             </>
@@ -243,13 +249,13 @@ function TopBarInner() {
   }
 
   return (
-    <header className="fixed left-14 right-0 top-0 z-30 flex h-12 items-center justify-between border-b border-[#E2E2E2] bg-[#F5F5F5] px-6 dark:border-gray-800 dark:bg-gray-950">
+    <header className="fixed left-14 right-0 top-0 z-30 flex h-12 items-center justify-between border-b px-6" style={{ background: "var(--qc-topbar-bg)", borderColor: "var(--qc-topbar-border)" }}>
       <div className="flex h-full items-center">{leftZone}</div>
 
       {/* Right: user avatar */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-9 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
+          <div className="flex size-9 items-center justify-center rounded-full text-sm font-semibold text-white" style={{ background: "var(--qc-topbar-avatar-bg)" }}>
             PJ
           </div>
         </div>
@@ -262,7 +268,7 @@ export function TopBar() {
   return (
     <Suspense
       fallback={
-        <header className="fixed left-14 right-0 top-0 z-30 h-14 border-b border-[#E2E2E2] bg-[#F5F5F5]" />
+        <header className="fixed left-14 right-0 top-0 z-30 h-14 border-b" style={{ background: "var(--qc-topbar-bg)", borderColor: "var(--qc-topbar-border)" }} />
       }
     >
       <TopBarInner />

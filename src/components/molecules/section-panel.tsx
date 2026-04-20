@@ -69,12 +69,20 @@ export function SectionPanel({
   contentClassName,
 }: SectionPanelProps) {
   return (
-    <div className={`flex flex-col${className ? ` ${className}` : ""}`} style={{ borderRadius: 10, border: "1px solid #E2E2E2", background: "#F5F5F5", padding: 8 }}>
+    <div
+      className={`flex flex-col${className ? ` ${className}` : ""}`}
+      style={{
+        borderRadius: 10,
+        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-surface-panel)",
+        padding: 8,
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
         <div className="flex flex-col" style={{ gap: subHeader ? 6 : 0 }}>
           {typeof title === "string" ? (
-            <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", letterSpacing: "0.01em" }}>{title}</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>{title}</div>
           ) : title}
           {subtitle && <p>{subtitle}</p>}
           {subHeader && <div>{subHeader}</div>}
@@ -87,8 +95,8 @@ export function SectionPanel({
         className={`flex-1 ${contentClassName ?? ""}`}
         style={{
           borderRadius: 10,
-          border: "1px solid rgba(226, 226, 226, 0.10)",
-          background: "#FFF",
+          border: "1px solid var(--qc-border-inner)",
+          background: "var(--qc-surface-white)",
           paddingTop: 16,
           paddingBottom: 16,
           paddingLeft: 16,

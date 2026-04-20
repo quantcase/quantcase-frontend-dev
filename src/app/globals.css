@@ -3,53 +3,9 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
-
-/* Range input — cross-browser track + thumb */
-@layer base {
-  input[type="range"] {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    background: transparent;
-    cursor: pointer;
-    width: 100%;
-  }
-  input[type="range"]::-webkit-slider-container {
-    background: transparent;
-  }
-  input[type="range"]::-webkit-slider-runnable-track {
-    height: 4px !important;
-    border-radius: 9999px !important;
-    background: #E2E2E2 !important;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    width: 14px !important;
-    height: 14px !important;
-    border-radius: 9999px !important;
-    background: #0F172B !important;
-    margin-top: -5px !important;
-    box-shadow: none !important;
-    border: none !important;
-  }
-  input[type="range"]::-moz-range-track {
-    height: 4px !important;
-    border-radius: 9999px !important;
-    background: #E2E2E2 !important;
-  }
-  input[type="range"]::-moz-range-thumb {
-    width: 14px !important;
-    height: 14px !important;
-    border-radius: 9999px !important;
-    background: #0F172B !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-  input[type="range"]:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
+@custom-variant theme-dark-modern (&:is(.theme-dark-modern *));
+@custom-variant theme-light-enterprise (&:is(.theme-light-enterprise *));
+@custom-variant theme-dark-enterprise (&:is(.theme-dark-enterprise *));
 
 @theme inline {
   --color-background: var(--background);
@@ -91,10 +47,32 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* QuantCase design token aliases */
+  --color-heading:           var(--qc-text-heading);
+  --color-body:              var(--qc-text-body);
+  --color-muted-text:        var(--qc-text-muted);
+  --color-dimmed:            var(--qc-text-dimmed);
+  --color-on-dark:           var(--qc-text-on-dark);
+  --color-surface:           var(--qc-surface-base);
+  --color-surface-white:     var(--qc-surface-white);
+  --color-surface-panel:     var(--qc-surface-panel);
+  --color-surface-alt:       var(--qc-surface-row-alt);
+  --color-surface-hover:     var(--qc-surface-hover);
+  --color-border-default:    var(--qc-border-default);
+  --color-border-inner:      var(--qc-border-inner);
+  --color-border-subtle:     var(--qc-border-subtle);
+  --color-border-active:     var(--qc-border-active);
+  --color-primary-action:    var(--qc-accent-primary);
+  --color-primary-action-fg: var(--qc-accent-primary-fg);
+  --color-logo:              var(--qc-accent-logo);
 }
 
+/* ── Light Modern (default) ──────────────────────────────────────── */
 :root {
   --radius: 0.625rem;
+
+  /* shadcn tokens — light-modern */
   --background: oklch(1 0 0);
   --foreground: #121212;
   --card: oklch(1 0 0);
@@ -126,8 +104,272 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* QuantCase design tokens — light-modern */
+  --qc-text-heading:          #0F172B;
+  --qc-text-body:             #121212;
+  --qc-text-muted:            #888888;
+  --qc-text-dimmed:           rgba(18, 18, 18, 0.40);
+  --qc-text-on-dark:          #FFFFFF;
+
+  --qc-surface-base:          #F9F9F9;
+  --qc-surface-white:         #FFFFFF;
+  --qc-surface-panel:         #F5F5F5;
+  --qc-surface-row-alt:       #FAFAFA;
+  --qc-surface-hover:         #F5F5F5;
+
+  --qc-border-default:        #E2E2E2;
+  --qc-border-inner:          rgba(226, 226, 226, 0.10);
+  --qc-border-subtle:         rgba(18, 18, 18, 0.10);
+  --qc-border-active:         #0F172B;
+
+  --qc-accent-primary:        #0F172B;
+  --qc-accent-primary-fg:     #FFFFFF;
+  --qc-accent-logo:           #2563EB;
+
+  --qc-sidebar-bg:            #FFFFFF;
+  --qc-sidebar-border:        #E2E2E2;
+  --qc-sidebar-icon-active-bg:#F3F4F6;
+  --qc-sidebar-icon-active-fg:#0F172B;
+  --qc-sidebar-icon-idle-fg:  #888888;
+  --qc-sidebar-icon-hover-bg: #F9FAFB;
+
+  --qc-topbar-bg:             #F5F5F5;
+  --qc-topbar-border:         #E2E2E2;
+  --qc-topbar-tab-active-fg:  #0F172B;
+  --qc-topbar-tab-idle-fg:    #888888;
+  --qc-topbar-separator:      #C8C8C8;
+  --qc-topbar-avatar-bg:      #2563EB;
+  --qc-topbar-search-bg:      #F9FAFB;
+  --qc-topbar-search-border:  #E5E7EB;
+
+  --qc-range-track:           #E2E2E2;
+  --qc-range-thumb:           #0F172B;
+
+  --qc-icon-box-bg:           rgba(18, 18, 18, 0.03);
+  --qc-icon-box-border:       rgba(18, 18, 18, 0.10);
 }
 
+/* ── Dark Modern ─────────────────────────────────────────────────── */
+.theme-dark-modern {
+  /* shadcn overrides */
+  --background: #0F172B;
+  --foreground: #CBD5E1;
+  --card: #1E293B;
+  --card-foreground: #E2E8F0;
+  --popover: #1E293B;
+  --popover-foreground: #E2E8F0;
+  --primary: #60A5FA;
+  --primary-foreground: #0F172B;
+  --secondary: #162032;
+  --secondary-foreground: #E2E8F0;
+  --muted: #162032;
+  --muted-foreground: #64748B;
+  --accent: #162032;
+  --accent-foreground: #E2E8F0;
+  --border: rgba(226, 232, 240, 0.12);
+  --input: rgba(226, 232, 240, 0.15);
+  --ring: #60A5FA;
+  --sidebar: #0B1120;
+  --sidebar-foreground: #E2E8F0;
+  --sidebar-primary: #60A5FA;
+  --sidebar-primary-foreground: #0F172B;
+  --sidebar-accent: #1E293B;
+  --sidebar-accent-foreground: #E2E8F0;
+  --sidebar-border: rgba(226, 232, 240, 0.10);
+
+  /* QuantCase tokens */
+  --qc-text-heading:          #E2E8F0;
+  --qc-text-body:             #CBD5E1;
+  --qc-text-muted:            #64748B;
+  --qc-text-dimmed:           rgba(226, 232, 240, 0.40);
+  --qc-text-on-dark:          #0F172B;
+
+  --qc-surface-base:          #0F172B;
+  --qc-surface-white:         #1E293B;
+  --qc-surface-panel:         #162032;
+  --qc-surface-row-alt:       #172135;
+  --qc-surface-hover:         #1E293B;
+
+  --qc-border-default:        rgba(226, 232, 240, 0.12);
+  --qc-border-inner:          rgba(226, 232, 240, 0.06);
+  --qc-border-subtle:         rgba(226, 232, 240, 0.08);
+  --qc-border-active:         #60A5FA;
+
+  --qc-accent-primary:        #60A5FA;
+  --qc-accent-primary-fg:     #0F172B;
+  --qc-accent-logo:           #60A5FA;
+
+  --qc-sidebar-bg:            #0B1120;
+  --qc-sidebar-border:        rgba(226, 232, 240, 0.10);
+  --qc-sidebar-icon-active-bg:#1E293B;
+  --qc-sidebar-icon-active-fg:#E2E8F0;
+  --qc-sidebar-icon-idle-fg:  #475569;
+  --qc-sidebar-icon-hover-bg: #162032;
+
+  --qc-topbar-bg:             #0B1120;
+  --qc-topbar-border:         rgba(226, 232, 240, 0.10);
+  --qc-topbar-tab-active-fg:  #E2E8F0;
+  --qc-topbar-tab-idle-fg:    #64748B;
+  --qc-topbar-separator:      #334155;
+  --qc-topbar-avatar-bg:      #1D4ED8;
+  --qc-topbar-search-bg:      #162032;
+  --qc-topbar-search-border:  rgba(226, 232, 240, 0.12);
+
+  --qc-range-track:           rgba(226, 232, 240, 0.15);
+  --qc-range-thumb:           #60A5FA;
+
+  --qc-icon-box-bg:           rgba(226, 232, 240, 0.05);
+  --qc-icon-box-border:       rgba(226, 232, 240, 0.12);
+}
+
+/* ── Light Enterprise ────────────────────────────────────────────── */
+.theme-light-enterprise {
+  /* shadcn overrides */
+  --background: #F4F2EE;
+  --foreground: #2D2D2D;
+  --card: #FAFAF8;
+  --card-foreground: #1A1A2E;
+  --popover: #FAFAF8;
+  --popover-foreground: #1A1A2E;
+  --primary: #1A1A2E;
+  --primary-foreground: #FFFFFF;
+  --secondary: #ECEAE5;
+  --secondary-foreground: #1A1A2E;
+  --muted: #ECEAE5;
+  --muted-foreground: #6B7280;
+  --accent: #ECEAE5;
+  --accent-foreground: #1A1A2E;
+  --border: #D1CFC9;
+  --input: #D1CFC9;
+  --ring: #1A1A2E;
+  --sidebar: #FAFAF8;
+  --sidebar-foreground: #1A1A2E;
+  --sidebar-primary: #1A1A2E;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #ECEAE5;
+  --sidebar-accent-foreground: #1A1A2E;
+  --sidebar-border: #D1CFC9;
+
+  /* QuantCase tokens */
+  --qc-text-heading:          #1A1A2E;
+  --qc-text-body:             #2D2D2D;
+  --qc-text-muted:            #6B7280;
+  --qc-text-dimmed:           rgba(45, 45, 45, 0.40);
+  --qc-text-on-dark:          #FFFFFF;
+
+  --qc-surface-base:          #F4F2EE;
+  --qc-surface-white:         #FAFAF8;
+  --qc-surface-panel:         #ECEAE5;
+  --qc-surface-row-alt:       #F0EDE8;
+  --qc-surface-hover:         #E8E5DF;
+
+  --qc-border-default:        #D1CFC9;
+  --qc-border-inner:          rgba(209, 207, 201, 0.15);
+  --qc-border-subtle:         rgba(45, 45, 45, 0.12);
+  --qc-border-active:         #1A1A2E;
+
+  --qc-accent-primary:        #1A1A2E;
+  --qc-accent-primary-fg:     #FFFFFF;
+  --qc-accent-logo:           #1D4ED8;
+
+  --qc-sidebar-bg:            #FAFAF8;
+  --qc-sidebar-border:        #D1CFC9;
+  --qc-sidebar-icon-active-bg:#ECEAE5;
+  --qc-sidebar-icon-active-fg:#1A1A2E;
+  --qc-sidebar-icon-idle-fg:  #6B7280;
+  --qc-sidebar-icon-hover-bg: #F0EDE8;
+
+  --qc-topbar-bg:             #ECEAE5;
+  --qc-topbar-border:         #D1CFC9;
+  --qc-topbar-tab-active-fg:  #1A1A2E;
+  --qc-topbar-tab-idle-fg:    #6B7280;
+  --qc-topbar-separator:      #B5B2AB;
+  --qc-topbar-avatar-bg:      #1D4ED8;
+  --qc-topbar-search-bg:      #F4F2EE;
+  --qc-topbar-search-border:  #D1CFC9;
+
+  --qc-range-track:           #D1CFC9;
+  --qc-range-thumb:           #1A1A2E;
+
+  --qc-icon-box-bg:           rgba(45, 45, 45, 0.04);
+  --qc-icon-box-border:       rgba(45, 45, 45, 0.12);
+}
+
+/* ── Dark Enterprise ─────────────────────────────────────────────── */
+.theme-dark-enterprise {
+  /* shadcn overrides */
+  --background: #0A0A0A;
+  --foreground: #CCCCCC;
+  --card: #111111;
+  --card-foreground: #F0F0F0;
+  --popover: #111111;
+  --popover-foreground: #F0F0F0;
+  --primary: #F0F0F0;
+  --primary-foreground: #0A0A0A;
+  --secondary: #161616;
+  --secondary-foreground: #F0F0F0;
+  --muted: #161616;
+  --muted-foreground: #666666;
+  --accent: #161616;
+  --accent-foreground: #F0F0F0;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.10);
+  --ring: #F0F0F0;
+  --sidebar: #070707;
+  --sidebar-foreground: #F0F0F0;
+  --sidebar-primary: #F0F0F0;
+  --sidebar-primary-foreground: #0A0A0A;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #F0F0F0;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+
+  /* QuantCase tokens */
+  --qc-text-heading:          #F0F0F0;
+  --qc-text-body:             #CCCCCC;
+  --qc-text-muted:            #666666;
+  --qc-text-dimmed:           rgba(240, 240, 240, 0.35);
+  --qc-text-on-dark:          #000000;
+
+  --qc-surface-base:          #0A0A0A;
+  --qc-surface-white:         #111111;
+  --qc-surface-panel:         #161616;
+  --qc-surface-row-alt:       #131313;
+  --qc-surface-hover:         #1A1A1A;
+
+  --qc-border-default:        rgba(255, 255, 255, 0.08);
+  --qc-border-inner:          rgba(255, 255, 255, 0.04);
+  --qc-border-subtle:         rgba(255, 255, 255, 0.06);
+  --qc-border-active:         #F0F0F0;
+
+  --qc-accent-primary:        #F0F0F0;
+  --qc-accent-primary-fg:     #0A0A0A;
+  --qc-accent-logo:           #3B82F6;
+
+  --qc-sidebar-bg:            #070707;
+  --qc-sidebar-border:        rgba(255, 255, 255, 0.07);
+  --qc-sidebar-icon-active-bg:#1A1A1A;
+  --qc-sidebar-icon-active-fg:#F0F0F0;
+  --qc-sidebar-icon-idle-fg:  #555555;
+  --qc-sidebar-icon-hover-bg: #111111;
+
+  --qc-topbar-bg:             #070707;
+  --qc-topbar-border:         rgba(255, 255, 255, 0.07);
+  --qc-topbar-tab-active-fg:  #F0F0F0;
+  --qc-topbar-tab-idle-fg:    #555555;
+  --qc-topbar-separator:      #333333;
+  --qc-topbar-avatar-bg:      #1D4ED8;
+  --qc-topbar-search-bg:      #111111;
+  --qc-topbar-search-border:  rgba(255, 255, 255, 0.08);
+
+  --qc-range-track:           rgba(255, 255, 255, 0.10);
+  --qc-range-thumb:           #F0F0F0;
+
+  --qc-icon-box-bg:           rgba(255, 255, 255, 0.03);
+  --qc-icon-box-border:       rgba(255, 255, 255, 0.08);
+}
+
+/* Generic .dark fallback (shadcn default) */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -162,6 +404,17 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* theme-dark-modern and theme-dark-enterprise both add .dark —
+   higher specificity here prevents generic .dark from overriding theme tokens */
+.theme-dark-modern.dark,
+.theme-dark-enterprise.dark {
+  --background: var(--qc-surface-base);
+  --foreground: var(--qc-text-body);
+  --card: var(--qc-surface-white);
+  --card-foreground: var(--qc-text-heading);
+}
+
+/* ── Base layer ──────────────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -171,43 +424,43 @@
     overscroll-behavior-x: none;
   }
   h1 {
-    color: #0F172B;
+    color: var(--qc-text-heading);
     font-size: 56px;
     font-weight: 500;
     line-height: 64px;
   }
   h2 {
-    color: #0F172B;
+    color: var(--qc-text-heading);
     font-size: 36px;
     font-weight: 500;
     line-height: 40px;
   }
   h3 {
-    color: #0F172B;
+    color: var(--qc-text-heading);
     font-size: 28px;
     font-weight: 400;
     line-height: 36px;
   }
   h4 {
-    color: #0F172B;
+    color: var(--qc-text-heading);
     font-size: 22px;
     font-weight: 400;
     line-height: 30px;
   }
   h5 {
-    color: #0F172B;
+    color: var(--qc-text-heading);
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
   }
   h6 {
-    color: rgba(18, 18, 18, 0.50);
+    color: var(--qc-text-muted);
     font-size: 12px;
     font-weight: 500;
     line-height: 20px;
   }
   p {
-    color: #888;
+    color: var(--qc-text-muted);
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
@@ -218,7 +471,7 @@
     gap: 12px;
   }
   li {
-    color: #888;
+    color: var(--qc-text-muted);
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
@@ -226,9 +479,53 @@
     margin-left: 1.25rem;
   }
   small {
-    color: #888;
+    color: var(--qc-text-muted);
     font-size: 11px;
     font-weight: 400;
     line-height: 18px;
+  }
+  /* Range input — cross-browser track + thumb */
+  input[type="range"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+  }
+  input[type="range"]::-webkit-slider-container {
+    background: transparent;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px !important;
+    border-radius: 9999px !important;
+    background: var(--qc-range-track) !important;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 9999px !important;
+    background: var(--qc-range-thumb) !important;
+    margin-top: -5px !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  input[type="range"]::-moz-range-track {
+    height: 4px !important;
+    border-radius: 9999px !important;
+    background: var(--qc-range-track) !important;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 9999px !important;
+    background: var(--qc-range-thumb) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  input[type="range"]:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 }

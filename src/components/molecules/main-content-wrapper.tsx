@@ -10,7 +10,10 @@ export function MainContentWrapper({ children }: { children: React.ReactNode }) 
   const hideTopBar = HIDE_TOPBAR_PATHS.includes(pathname);
 
   return (
-    <div className={cn("ml-14 min-h-screen bg-gray-50 dark:bg-black", !hideTopBar && "pt-14")}>
+    <div
+      className={cn("ml-14 min-h-screen", !hideTopBar && "pt-14")}
+      style={{ background: "var(--qc-surface-base)" }}
+    >
       {children}
     </div>
   );

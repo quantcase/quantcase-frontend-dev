@@ -9,6 +9,11 @@ function pct(val: number | null | undefined, decimals = 1): string {
   return `${(val * 100).toFixed(decimals)}%`;
 }
 
+function pctRaw(val: number | null | undefined, decimals = 1): string {
+  if (val == null) return "—";
+  return `${val.toFixed(decimals)}%`;
+}
+
 interface MetricTileCardProps {
   label: string;
   value: string;
@@ -162,14 +167,14 @@ export function FundamentalOverviewCard({ data }: Props) {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <RatioTileCard
               label="ROCE"
-              value={ratios.roce != null ? pct(ratios.roce) : "—"}
-              sublabel={ratios.roce3yAvg != null ? `3Y avg ${pct(ratios.roce3yAvg)}` : null}
+              value={ratios.roce != null ? pctRaw(ratios.roce) : "—"}
+              sublabel={ratios.roce3yAvg != null ? `3Y avg ${pctRaw(ratios.roce3yAvg)}` : null}
               trendIcon={ratios.roce != null && ratios.roce3yAvg != null ? (ratios.roce >= ratios.roce3yAvg ? "up" : "down") : null}
             />
             <RatioTileCard
               label="ROE"
-              value={ratios.roe != null ? pct(ratios.roe) : "—"}
-              sublabel={ratios.roe3yAvg != null ? `3Y avg ${pct(ratios.roe3yAvg)}` : null}
+              value={ratios.roe != null ? pctRaw(ratios.roe) : "—"}
+              sublabel={ratios.roe3yAvg != null ? `3Y avg ${pctRaw(ratios.roe3yAvg)}` : null}
               trendIcon={ratios.roe != null && ratios.roe3yAvg != null ? (ratios.roe >= ratios.roe3yAvg ? "up" : "down") : null}
             />
             <RatioTileCard

@@ -4,9 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft, AlertCircle, Building2, CalendarDays, Loader2,
+  AlertTriangle, Eye,
 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
-import type { DrhpApiResponse, DrhpRecord, DrhpRedFlagsAndRisks, DrhpInsight } from "@/types/drhp";
+import type {
+  DrhpApiResponse, DrhpRecord, DrhpRedFlagsAndRisks, DrhpInsight,
+  DrhpIntelligenceData, DrhpIntelligenceFlag,
+} from "@/types/drhp";
 import { VerdictBadge } from "@/components/drhp/verdict-badge";
 import { OfsDonut } from "@/components/drhp/ofs-donut";
 import { RiskCard } from "@/components/drhp/risk-card";
@@ -20,14 +24,20 @@ import { SectionPanel } from "@/components/molecules/section-panel";
 const TABS = ["Verdict", "Red Flags", "Pricing"] as const;
 type Tab = (typeof TABS)[number];
 
+// ─── Severity config ──────────────────────────────────────────────────────────
+
+const SEVERITY = {
+  high:   { Icon: AlertTriangle, color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
+  medium: { Icon: AlertCircle,   color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
+  low:    { Icon: Eye,           color: "#ca8a04", bg: "#fefce8", border: "#fef08a" },
+} as const;
+
 // ─── Hero header ──────────────────────────────────────────────────────────────
 
-function HeroHeader({ insight }: { insight: DrhpInsight }) {
+function HeroHeader({ insight, intel }: { insight: DrhpInsight; intel: DrhpIntelligenceData }) {
   const { heroHeader, quickVerdict } = insight.core;
-  const { ofsVsFreshSplit } = quickVerdict;
-  const totalIssue = heroHeader.totalIssueSizeCr > 0
-    ? heroHeader.totalIssueSizeCr
-    : ofsVsFreshSplit.freshIssueCr + ofsVsFreshSplit.ofsCr;
+  const totalIssue = intel.total_issue_size_cr || heroHeader.totalIssueSizeCr;
+  const ofsPct = intel.ofs_ratio_pct || quickVerdict.ofsVsFreshSplit.ofsPct;
 
   return (
     <div className="rounded-[10px] border border-[#E2E2E2] bg-white overflow-hidden">
@@ -65,21 +75,27 @@ function HeroHeader({ insight }: { insight: DrhpInsight }) {
           {totalIssue > 0 && (
             <MetricTile label="Total Issue Size" value={`₹${totalIssue.toLocaleString("en-IN")} Cr`} />
           )}
-          {ofsVsFreshSplit.ofsPct > 0 && (
+          {ofsPct > 0 && (
             <MetricTile
               label="OFS Ratio"
-              value={`${ofsVsFreshSplit.ofsPct.toFixed(1)}%`}
-              change={ofsVsFreshSplit.ofsHeavyFlag ? "▲ OFS-heavy" : undefined}
+              value={`${ofsPct.toFixed(1)}%`}
+              change={ofsPct > 40 ? "▲ OFS-heavy" : undefined}
             />
           )}
-          {ofsVsFreshSplit.freshIssueCr > 0 && (
-            <MetricTile label="Fresh Issue" value={`₹${ofsVsFreshSplit.freshIssueCr.toLocaleString("en-IN")} Cr`} />
+          {intel.fresh_issue_cr > 0 && (
+            <MetricTile label="Fresh Issue" value={`₹${intel.fresh_issue_cr.toLocaleString("en-IN")} Cr`} />
           )}
-          {heroHeader.nineMonthRevenueCr > 0 && (
-            <MetricTile label="9M Revenue" value={`₹${heroHeader.nineMonthRevenueCr.toLocaleString("en-IN")} Cr`} />
+          {intel.revenue_9m_fy25_cr > 0 && (
+            <MetricTile label="9M FY25 Revenue" value={`₹${intel.revenue_9m_fy25_cr.toLocaleString("en-IN")} Cr`} />
           )}
-          {heroHeader.adjEbitdaMarginPct > 0 && (
-            <MetricTile label="Adj. EBITDA Margin" value={`${heroHeader.adjEbitdaMarginPct}%`} />
+          {intel.adj_ebitda_margin_pct !== undefined && intel.adj_ebitda_margin_pct !== null && (
+            <MetricTile label="Adj. EBITDA Margin" value={`${Number(intel.adj_ebitda_margin_pct).toFixed(1)}%`} />
+          )}
+          {intel.fair_value_est_low && intel.fair_value_est_high && (
+            <MetricTile
+              label="Fair Value Est."
+              value={`₹${intel.fair_value_est_low}–${intel.fair_value_est_high}`}
+            />
           )}
         </div>
       </div>
@@ -94,51 +110,81 @@ function HeroHeader({ insight }: { insight: DrhpInsight }) {
   );
 }
 
+// ─── Intelligence: Quick Verdict section ─────────────────────────────────────
+
+function FlagCard({ item }: { item: DrhpIntelligenceFlag }) {
+  const { Icon, color, bg, border } = SEVERITY[item.severity] ?? SEVERITY.low;
+  return (
+    <div
+      className="flex items-start gap-3 rounded-[8px] border px-3 py-2.5"
+      style={{ background: bg, borderColor: border }}
+    >
+      <Icon className="size-3.5 flex-shrink-0 mt-0.5" style={{ color }} />
+      <span className="text-[12px] leading-relaxed" style={{ color: "#121212" }}>{item.flag}</span>
+    </div>
+  );
+}
+
+function IntelligenceVerdictSection({ intel, insight }: { intel: DrhpIntelligenceData; insight: DrhpInsight }) {
+  const { quickVerdict } = insight.core;
+  const ofsCr = intel.ofs_amount_cr || quickVerdict.ofsVsFreshSplit.ofsCr;
+  const freshCr = intel.fresh_issue_cr || quickVerdict.ofsVsFreshSplit.freshIssueCr;
+  const ofsPct = intel.ofs_ratio_pct || quickVerdict.ofsVsFreshSplit.ofsPct;
+
+  return (
+    <SectionPanel
+      title={
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "#F5F5F5", color: "#888888" }}>01</span>
+          <span className="text-[14px] font-semibold" style={{ color: "#0F172B" }}>Quick Verdict</span>
+        </div>
+      }
+    >
+      {intel.quick_verdict_title && (
+        <h3 className="text-[16px] font-medium mb-4 leading-snug" style={{ color: "#0F172B" }}>
+          {intel.quick_verdict_title}
+        </h3>
+      )}
+
+      <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
+        {/* Left: donut + analysis prose */}
+        {(ofsCr > 0 || intel.quick_verdict_issue_split_analysis) && (
+          <div className="flex-shrink-0 sm:w-[320px]">
+            {ofsCr > 0 && (
+              <div className="mb-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: "#888888" }}>Issue Split</p>
+                <OfsDonut ofsCr={ofsCr} freshIssueCr={freshCr} ofsPct={ofsPct} />
+              </div>
+            )}
+            {intel.quick_verdict_issue_split_analysis && (
+              <p className="text-[12px] leading-relaxed" style={{ color: "#888888" }}>
+                {intel.quick_verdict_issue_split_analysis}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Right: flag cards */}
+        {intel.quick_verdict_flags.length > 0 && (
+          <div className="flex-1 min-w-0 flex flex-col gap-2">
+            {intel.quick_verdict_flags.map((f, i) => (
+              <FlagCard key={i} item={f} />
+            ))}
+          </div>
+        )}
+      </div>
+    </SectionPanel>
+  );
+}
+
 // ─── Verdict tab ──────────────────────────────────────────────────────────────
 
-function VerdictTab({ insight }: { insight: DrhpInsight }) {
-  const { quickVerdict } = insight.core;
-  const { ofsVsFreshSplit } = quickVerdict;
+function VerdictTab({ insight, intel }: { insight: DrhpInsight; intel: DrhpIntelligenceData }) {
   const shareholders = insight.analysis.sellingShareholdersList;
 
   return (
     <div className="flex flex-col gap-4">
-      <SectionPanel
-        title={
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "#F5F5F5", color: "#888888" }}>01</span>
-            <span className="text-[14px] font-semibold" style={{ color: "#0F172B" }}>Quick Verdict</span>
-          </div>
-        }
-      >
-        <div className="flex flex-col gap-5 sm:flex-row sm:gap-8">
-          {ofsVsFreshSplit.ofsCr > 0 && (
-            <div className="flex-shrink-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: "#888888" }}>Issue Split</p>
-              <OfsDonut
-                ofsCr={ofsVsFreshSplit.ofsCr}
-                freshIssueCr={ofsVsFreshSplit.freshIssueCr}
-                ofsPct={ofsVsFreshSplit.ofsPct}
-              />
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            {quickVerdict.verdictHeadline && (
-              <h3 className="text-[16px] font-medium mb-3 leading-snug" style={{ color: "#0F172B" }}>
-                {quickVerdict.verdictHeadline}
-              </h3>
-            )}
-            <ul className="flex flex-col gap-2">
-              {quickVerdict.verdictBullets.slice(0, 8).map((bullet, i) => (
-                <li key={i} className="flex gap-2.5 items-start">
-                  <span className="mt-1.5 size-1.5 rounded-full flex-shrink-0 bg-red-500" />
-                  <span className="text-[13px] leading-relaxed" style={{ color: "#121212" }}>{bullet}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </SectionPanel>
+      <IntelligenceVerdictSection intel={intel} insight={insight} />
 
       {shareholders.length > 0 && (
         <SectionPanel
@@ -260,7 +306,7 @@ function PricingTab({ insight }: { insight: DrhpInsight }) {
         </SectionPanel>
       )}
 
-      {pricing.useOfProceedsBreakdown.length > 0 && (
+      {(pricing.useOfProceedsBreakdown?.length ?? 0) > 0 && (
         <SectionPanel
           title={
             <div className="flex items-center gap-2">
@@ -273,7 +319,7 @@ function PricingTab({ insight }: { insight: DrhpInsight }) {
         </SectionPanel>
       )}
 
-      {pricing.useOfProceedsRedFlags.length > 0 && (
+      {(pricing.useOfProceedsRedFlags?.length ?? 0) > 0 && (
         <SectionPanel
           title={
             <div className="flex items-center gap-2">
@@ -322,18 +368,25 @@ export default function PreIpoDetailPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Verdict");
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     fetch(`${BACKEND_URL}/api/private-equity/drhp-analyses?id=${id}`)
       .then((r) => r.json())
       .then((json: DrhpApiResponse) => {
+        if (cancelled) return;
         if (!json.success) throw new Error(json.message ?? "Failed to load analysis");
         setRecord(json.data);
+        setLoading(false);
       })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err.message);
+        setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [id]);
 
   const insight = record?.insight;
+  const intel = record?.intelligence?.intelligence;
   const companyName = insight?.core.heroHeader.companyName;
   const redFlagCount = insight
     ? insight.core.redFlagsAndRisks.critical.length
@@ -388,7 +441,19 @@ export default function PreIpoDetailPage() {
               </button>
             </div>
 
-            <HeroHeader insight={insight} />
+            <HeroHeader insight={insight} intel={intel ?? {
+              ofs_amount_cr: insight.core.quickVerdict.ofsVsFreshSplit.ofsCr,
+              ofs_ratio_pct: insight.core.quickVerdict.ofsVsFreshSplit.ofsPct,
+              fresh_issue_cr: insight.core.quickVerdict.ofsVsFreshSplit.freshIssueCr,
+              fair_value_est_low: null,
+              fair_value_est_high: null,
+              revenue_9m_fy25_cr: insight.core.heroHeader.nineMonthRevenueCr,
+              quick_verdict_flags: [],
+              quick_verdict_title: insight.core.quickVerdict.verdictHeadline,
+              total_issue_size_cr: insight.core.heroHeader.totalIssueSizeCr,
+              adj_ebitda_margin_pct: insight.core.heroHeader.adjEbitdaMarginPct,
+              quick_verdict_issue_split_analysis: "",
+            }} />
 
             <div className="flex items-center gap-1 rounded-full border border-[#E2E2E2] bg-[#F5F5F5] p-1 self-start">
               {TABS.map((tab) => (
@@ -409,7 +474,21 @@ export default function PreIpoDetailPage() {
               ))}
             </div>
 
-            {activeTab === "Verdict"   && <VerdictTab insight={insight} />}
+            {activeTab === "Verdict"   && (
+              <VerdictTab insight={insight} intel={intel ?? {
+                ofs_amount_cr: insight.core.quickVerdict.ofsVsFreshSplit.ofsCr,
+                ofs_ratio_pct: insight.core.quickVerdict.ofsVsFreshSplit.ofsPct,
+                fresh_issue_cr: insight.core.quickVerdict.ofsVsFreshSplit.freshIssueCr,
+                fair_value_est_low: null,
+                fair_value_est_high: null,
+                revenue_9m_fy25_cr: insight.core.heroHeader.nineMonthRevenueCr,
+                quick_verdict_flags: insight.core.quickVerdict.verdictBullets.map((b) => ({ flag: b, severity: "medium" as const })),
+                quick_verdict_title: insight.core.quickVerdict.verdictHeadline,
+                total_issue_size_cr: insight.core.heroHeader.totalIssueSizeCr,
+                adj_ebitda_margin_pct: insight.core.heroHeader.adjEbitdaMarginPct,
+                quick_verdict_issue_split_analysis: "",
+              }} />
+            )}
             {activeTab === "Red Flags" && <RedFlagsTab risks={insight.core.redFlagsAndRisks} />}
             {activeTab === "Pricing"   && <PricingTab insight={insight} />}
           </div>

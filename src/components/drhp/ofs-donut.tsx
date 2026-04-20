@@ -1,6 +1,6 @@
 "use client";
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
 
 interface OfsDonutProps {
   ofsCr: number;
@@ -16,20 +16,18 @@ export function OfsDonut({ ofsCr, freshIssueCr, ofsPct }: OfsDonutProps) {
 
   return (
     <div className="flex items-center gap-6">
-      <div className="relative" style={{ width: 100, height: 100 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie data={data} cx="50%" cy="50%" innerRadius={28} outerRadius={46} dataKey="value" strokeWidth={0}>
-              {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-            </Pie>
-            <Tooltip
-              formatter={(val: number) => [`₹${val.toLocaleString("en-IN")} Cr`]}
-              contentStyle={{ fontSize: 11, border: "1px solid #E2E2E2", borderRadius: 6 }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+      <div className="relative flex-shrink-0" style={{ width: 100, height: 100 }}>
+        <PieChart width={100} height={100}>
+          <Pie data={data} cx={50} cy={50} innerRadius={28} outerRadius={46} dataKey="value" strokeWidth={0}>
+            {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+          </Pie>
+          <Tooltip
+            formatter={(val: number) => [`₹${val.toLocaleString("en-IN")} Cr`]}
+            contentStyle={{ fontSize: 11, border: "1px solid #E2E2E2", borderRadius: 6 }}
+          />
+        </PieChart>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-[14px] font-bold" style={{ color: "#dc2626" }}>{ofsPct.toFixed(0)}%</span>
+          <span className="text-[14px] font-bold" style={{ color: "#dc2626" }}>{Number(ofsPct).toFixed(0)}%</span>
           <span className="text-[9px] uppercase tracking-wider" style={{ color: "#888888" }}>OFS</span>
         </div>
       </div>

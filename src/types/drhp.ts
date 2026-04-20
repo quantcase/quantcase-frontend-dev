@@ -67,6 +67,33 @@ export interface DrhpInsight {
   };
 }
 
+// ─── Intelligence ─────────────────────────────────────────────────────────────
+
+export interface DrhpIntelligenceFlag {
+  flag: string;
+  severity: "high" | "medium" | "low";
+}
+
+export interface DrhpIntelligenceData {
+  ofs_amount_cr: number;
+  ofs_ratio_pct: number;
+  fresh_issue_cr: number;
+  fair_value_est_low: number | null;
+  fair_value_est_high: number | null;
+  revenue_9m_fy25_cr: number;
+  quick_verdict_flags: DrhpIntelligenceFlag[];
+  quick_verdict_title: string;
+  total_issue_size_cr: number;
+  adj_ebitda_margin_pct: number;
+  quick_verdict_issue_split_analysis: string;
+}
+
+export interface DrhpIntelligence {
+  intelligence: DrhpIntelligenceData;
+}
+
+// ─── Record ───────────────────────────────────────────────────────────────────
+
 export interface DrhpRecord {
   id: string;
   ticker: string;
@@ -74,6 +101,7 @@ export interface DrhpRecord {
   created_at: string;
   updated_at: string;
   insight: DrhpInsight;
+  intelligence: DrhpIntelligence;
 }
 
 export interface DrhpApiResponse {

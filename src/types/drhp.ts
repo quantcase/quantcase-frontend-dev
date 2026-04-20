@@ -1,9 +1,7 @@
 export interface DrhpHeroHeader {
   companyName: string;
   companyDescription: string;
-  listingExchanges?: string[];
   totalIssueSizeCr: number;
-  fairValueRange?: { low?: number; high?: number };
   listingGainPotential: string;
   adjEbitdaMarginPct: number;
   nineMonthRevenueCr: number;
@@ -21,24 +19,18 @@ export interface DrhpQuickVerdict {
   verdict: string;
   verdictHeadline: string;
   verdictBullets: string[];
-  summary: string;
-  businessQualityAssessment: string;
   ofsVsFreshSplit: DrhpOfsVsFreshSplit;
 }
 
 export interface DrhpShareholder {
   name: string;
-  holdingPct?: number | null;
   status: "EXIT" | "HOLDING";
-  exitCr?: number | null;
 }
 
 export interface DrhpRiskItem {
   flag: string;
   evidence: string;
   implication: string;
-  impact?: { label: string; severity: "high" | "medium" | "low" | "extreme" };
-  probability?: string;
 }
 
 export interface DrhpRedFlagsAndRisks {
@@ -63,7 +55,7 @@ export interface DrhpIpoPricingAssessment {
   anchorInvestorQuality?: string;
 }
 
-export interface DrhpAnalysis {
+export interface DrhpInsight {
   core: {
     heroHeader: DrhpHeroHeader;
     quickVerdict: DrhpQuickVerdict;
@@ -75,8 +67,23 @@ export interface DrhpAnalysis {
   };
 }
 
+export interface DrhpRecord {
+  id: string;
+  ticker: string;
+  type: string;
+  created_at: string;
+  updated_at: string;
+  insight: DrhpInsight;
+}
+
 export interface DrhpApiResponse {
   success: boolean;
   message?: string;
-  data: DrhpAnalysis;
+  data: DrhpRecord;
+}
+
+export interface DrhpListApiResponse {
+  success: boolean;
+  message?: string;
+  data: DrhpRecord[];
 }

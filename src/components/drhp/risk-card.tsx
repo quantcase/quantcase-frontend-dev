@@ -12,13 +12,6 @@ const TIER_CONFIG: Record<Tier, { label: string; bg: string; text: string; borde
   watch:    { label: "WATCH",    bg: "bg-yellow-50", text: "text-yellow-700", border: "border-l-yellow-500" },
 };
 
-const SEVERITY_COLOR: Record<string, string> = {
-  high:    "text-red-600",
-  extreme: "text-red-700",
-  medium:  "text-amber-600",
-  low:     "text-zinc-500",
-};
-
 interface RiskCardProps {
   item: DrhpRiskItem;
   tier: Tier;
@@ -27,7 +20,6 @@ interface RiskCardProps {
 export function RiskCard({ item, tier }: RiskCardProps) {
   const [open, setOpen] = useState(false);
   const { label, bg, text, border } = TIER_CONFIG[tier];
-  const severity = item.impact?.severity ?? "";
 
   return (
     <div className={`rounded-[8px] border border-[#E2E2E2] border-l-4 ${border} overflow-hidden`}>
@@ -48,18 +40,7 @@ export function RiskCard({ item, tier }: RiskCardProps) {
           )}
         </div>
 
-        {/* Impact + Probability */}
-        <div className="flex-shrink-0 flex flex-col items-end gap-1 ml-2">
-          {item.impact && (
-            <span className={`text-[10px] font-semibold uppercase ${SEVERITY_COLOR[severity] ?? "text-zinc-500"}`}>
-              {item.impact.severity}
-            </span>
-          )}
-          {item.probability && (
-            <span className="text-[10px] uppercase tracking-wider" style={{ color: "#888888" }}>
-              {item.probability}
-            </span>
-          )}
+        <div className="flex-shrink-0 ml-2">
           {open ? <ChevronUp className="size-3.5 mt-0.5" style={{ color: "#888888" }} /> : <ChevronDown className="size-3.5 mt-0.5" style={{ color: "#888888" }} />}
         </div>
       </button>

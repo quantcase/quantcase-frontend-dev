@@ -14,9 +14,10 @@ export interface MqiScore {
   label: string;
   total: number;
   dimensions: {
-    capital_allocation: MqiDimension;
-    disclosure_honesty: MqiDimension;
-    guidance_credibility: MqiDimension;
+    guidance_accuracy: MqiDimension;
+    red_flags: MqiDimension;
+    investment_thesis: MqiDimension;
+    promoter_activity: MqiDimension;
   };
   investment_implication: string;
 }
@@ -194,6 +195,33 @@ export interface PromoterActivity {
   shareholding: ShareholdingEntry[];
   promoter_note: string;
   verdict_rationale: string;
+  mqi_rationale?: string;
+}
+
+// ─── Management Intelligence ──────────────────────────────────────────────────
+
+export interface IntelligenceSignalItem {
+  key: string;
+  label: string;
+  score: number;
+  max_score: number;
+  sentiment: "positive" | "negative" | "neutral";
+  details: string[];
+}
+
+export interface IntelligenceRecommendedStrategy {
+  action: string;
+  thesis?: string | null;
+  timing?: string | null;
+  segment?: string | null;
+  rationale?: string | null;
+}
+
+export interface ManagementIntelligence {
+  key_takeaways: string[];
+  signals_breakdown: IntelligenceSignalItem[];
+  recommended_strategy: IntelligenceRecommendedStrategy | null;
+  watchouts: string[];
 }
 
 // ─── Dashboard Data ───────────────────────────────────────────────────────────
@@ -204,6 +232,7 @@ export interface ManagementDashboardData {
   investment_thesis?: InvestmentThesis;
   red_flags?: RedFlag[];
   promoter_activity?: PromoterActivity;
+  management_intelligence?: ManagementIntelligence;
   analyzedAt?: string | null;
 }
 

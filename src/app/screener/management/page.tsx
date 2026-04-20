@@ -16,6 +16,7 @@ import { GuidanceTrackTable, GuidanceFilterControls, useGuidanceFilterState } fr
 import { PromoterSection } from "@/components/management/promoter-section";
 import { RedFlagsSection } from "@/components/management/red-flags-section";
 import { InvestmentThesisSection } from "@/components/management/investment-thesis-section";
+import { ManagementIntelligenceCard } from "@/components/management/management-intelligence-card";
 
 const NAV_ITEMS = [
   { id: "section-score", label: "Score" },
@@ -294,31 +295,43 @@ function ManagementDashboardContent() {
       label: "Guidance Accuracy",
       descriptor: hitRate
         ? `${hitRatePct}% hit rate — ${hitRate.met_or_beat} met of ${hitRate.total_trackable} trackable`
-        : `${dims.guidance_credibility.score} / ${dims.guidance_credibility.max} points`,
-      rating: pctToRating(dims.guidance_credibility.score, dims.guidance_credibility.max),
-      barValue: dims.guidance_credibility.max > 0
-        ? (dims.guidance_credibility.score / dims.guidance_credibility.max) * 100
+        : `${dims.guidance_accuracy.score} / ${dims.guidance_accuracy.max} points`,
+      rating: pctToRating(dims.guidance_accuracy.score, dims.guidance_accuracy.max),
+      barValue: dims.guidance_accuracy.max > 0
+        ? (dims.guidance_accuracy.score / dims.guidance_accuracy.max) * 100
         : null,
       icon: Target,
       scrollToId: "section-guidance",
     },
     {
-      label: "Disclosure Honesty",
-      descriptor: `${dims.disclosure_honesty.score} / ${dims.disclosure_honesty.max} points`,
-      rating: pctToRating(dims.disclosure_honesty.score, dims.disclosure_honesty.max),
-      barValue: dims.disclosure_honesty.max > 0
-        ? (dims.disclosure_honesty.score / dims.disclosure_honesty.max) * 100
+      label: "Red Flags",
+      descriptor: `${dims.red_flags.score} / ${dims.red_flags.max} points`,
+      rating: pctToRating(dims.red_flags.score, dims.red_flags.max),
+      barValue: dims.red_flags.max > 0
+        ? (dims.red_flags.score / dims.red_flags.max) * 100
         : null,
       icon: Shield,
+      scrollToId: "section-red-flags",
     },
     {
-      label: "Capital Allocation",
-      descriptor: `${dims.capital_allocation.score} / ${dims.capital_allocation.max} points`,
-      rating: pctToRating(dims.capital_allocation.score, dims.capital_allocation.max),
-      barValue: dims.capital_allocation.max > 0
-        ? (dims.capital_allocation.score / dims.capital_allocation.max) * 100
+      label: "Investment Thesis",
+      descriptor: `${dims.investment_thesis.score} / ${dims.investment_thesis.max} points`,
+      rating: pctToRating(dims.investment_thesis.score, dims.investment_thesis.max),
+      barValue: dims.investment_thesis.max > 0
+        ? (dims.investment_thesis.score / dims.investment_thesis.max) * 100
         : null,
       icon: Briefcase,
+      scrollToId: "section-thesis",
+    },
+    {
+      label: "Promoter Activity",
+      descriptor: `${dims.promoter_activity.score} / ${dims.promoter_activity.max} points`,
+      rating: pctToRating(dims.promoter_activity.score, dims.promoter_activity.max),
+      barValue: dims.promoter_activity.max > 0
+        ? (dims.promoter_activity.score / dims.promoter_activity.max) * 100
+        : null,
+      icon: Target,
+      scrollToId: "section-promoter",
     },
   ] : [];
 
@@ -383,68 +396,83 @@ function ManagementDashboardContent() {
 
   return (
     <ScreenerPageShell navItems={NAV_ITEMS} headerRight={reanalyzeButton}>
-      <div className="mb-8 px-4 space-y-6">
+      <div className="mb-8 px-4 flex gap-6 items-start pt-4">
 
-        {/* Score */}
-        <div id="section-score" className="pt-4">
-          <ScreenerScorecard
-            title="MANAGEMENT CREDIBILITY"
-            overallLevel={managementData.mqi_score ? mqiLabelToLevel(managementData.mqi_score.label) : undefined}
-            score={managementData.mqi_score?.total ?? 0}
-            maxScore={100}
-            items={scorecardItems}
-          />
-        </div>
+        {/* Left column: all sections stacked */}
+        <div className="flex-1 min-w-0 space-y-6">
 
-        {/* Guidance Accuracy */}
-        <div id="section-guidance">
-          <SectionPanel
-            title="Guidance Track Record"
-            headerAction={
-              hitRatePct !== null ? (
-                <div className="flex items-center gap-2">
-                  <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
-                    <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
-                    <span style={{ fontSize: 16, fontWeight: 700, color: "#0F172B", lineHeight: 1.4 }}>
-                      {hitRatePct}%
-                    </span>
-                  </div>
-                  {managementData.guidance_vs_actuals?.guidance_bias && (
+          {/* Score */}
+          <div id="section-score">
+            <ScreenerScorecard
+              title="MANAGEMENT CREDIBILITY"
+              overallLevel={managementData.mqi_score ? mqiLabelToLevel(managementData.mqi_score.label) : undefined}
+              score={managementData.mqi_score?.total ?? 0}
+              maxScore={100}
+              items={scorecardItems}
+            />
+          </div>
+
+          {/* Guidance Accuracy */}
+          <div id="section-guidance">
+            <SectionPanel
+              title="Guidance Track Record"
+              headerAction={
+                hitRatePct !== null ? (
+                  <div className="flex items-center gap-2">
                     <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
-                      <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Bias</span>
+                      <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
                       <span style={{ fontSize: 16, fontWeight: 700, color: "#0F172B", lineHeight: 1.4 }}>
-                        {managementData.guidance_vs_actuals.guidance_bias}
+                        {hitRatePct}%
                       </span>
                     </div>
-                  )}
-                </div>
-              ) : undefined
-            }
-            subHeader={<GuidanceFilterControls state={guidanceFilterState} />}
-          >
-            <GuidanceTrackTable rows={managementData.guidance_vs_actuals?.rows ?? []} filterState={guidanceFilterState} />
-          </SectionPanel>
+                    {managementData.guidance_vs_actuals?.guidance_bias && (
+                      <div className="flex flex-col items-end gap-0.5 rounded-xl border border-[#E2E2E2] bg-white px-4 py-2 min-w-[90px]">
+                        <span style={{ fontSize: 10, fontWeight: 500, color: "#888888", letterSpacing: "0.08em", textTransform: "uppercase" }}>Bias</span>
+                        <span style={{ fontSize: 16, fontWeight: 700, color: "#0F172B", lineHeight: 1.4 }}>
+                          {managementData.guidance_vs_actuals.guidance_bias}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : undefined
+              }
+              subHeader={<GuidanceFilterControls state={guidanceFilterState} />}
+            >
+              <GuidanceTrackTable rows={managementData.guidance_vs_actuals?.rows ?? []} filterState={guidanceFilterState} />
+            </SectionPanel>
+          </div>
+
+          {/* Red Flags */}
+          {managementData.red_flags && managementData.red_flags.length > 0 && (
+            <div id="section-red-flags">
+              <RedFlagsSection flags={managementData.red_flags} />
+            </div>
+          )}
+
+          {/* Investment Thesis */}
+          {managementData.investment_thesis && (
+            <div id="section-thesis">
+              <InvestmentThesisSection thesis={managementData.investment_thesis} />
+            </div>
+          )}
+
+          {/* Promoter Activity */}
+          {managementData.promoter_activity && (
+            <div id="section-promoter">
+              <PromoterSection
+                promoterActivity={managementData.promoter_activity}
+                mqiScore={managementData.mqi_score}
+              />
+            </div>
+          )}
+
         </div>
 
-        {/* Red Flags */}
-        {managementData.red_flags && managementData.red_flags.length > 0 && (
-          <div id="section-red-flags">
-            <RedFlagsSection flags={managementData.red_flags} />
-          </div>
-        )}
-
-        {/* Investment Thesis */}
-        {managementData.investment_thesis && (
-          <div id="section-thesis">
-            <InvestmentThesisSection thesis={managementData.investment_thesis} />
-          </div>
-        )}
-
-        {/* Promoter Activity */}
-        {managementData.promoter_activity && (
-          <div id="section-promoter">
-            <PromoterSection
-              promoterActivity={managementData.promoter_activity}
+        {/* Right column: sticky intelligence card */}
+        {managementData.management_intelligence && managementData.mqi_score && (
+          <div className="w-[380px] shrink-0 sticky top-4">
+            <ManagementIntelligenceCard
+              intelligence={managementData.management_intelligence}
               mqiScore={managementData.mqi_score}
             />
           </div>

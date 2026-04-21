@@ -426,7 +426,7 @@ export default function Home() {
   const today = getTodayLabel();
 
   return (
-    <div className="min-h-screen mb-12 px-6" style={{ background: "var(--qc-surface-base)" }}>
+    <div className="min-h-screen mb-12 px-6" style={{ background: "var(--qc-surface-white)" }}>
       <div className="space-y-4">
 
         {/* ── Page header ────────────────────────────────────────────── */}

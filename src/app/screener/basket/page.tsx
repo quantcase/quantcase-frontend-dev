@@ -103,12 +103,12 @@ function ConditionPill({ condition }: { condition: BasketCondition }) {
   return (
     <div
       className="inline-flex items-center gap-1.5 rounded-[6px] border px-2.5 py-1.5"
-      style={{ borderColor: "#E2E2E2", background: "#F5F5F5" }}
+      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
     >
-      <span className="text-[11px] font-medium" style={{ color: "#0F172B" }}>
+      <span className="text-[11px] font-medium" style={{ color: "var(--qc-text-heading)" }}>
         {condition.label}
       </span>
-      <span className="text-[11px]" style={{ color: "#888888" }}>
+      <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
         {condition.operator} {condition.value}
       </span>
     </div>
@@ -173,19 +173,24 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
 
       {/* Panel */}
       <div
-        className="relative z-10 w-full max-w-sm rounded-[12px] bg-white shadow-xl"
-        style={{ border: "1px solid #E2E2E2" }}
+        className="relative z-10 w-full max-w-sm rounded-[12px] shadow-xl"
+        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: "1px solid #E2E2E2" }}>
+        <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
           <div>
-            <p className="text-[14px] font-semibold" style={{ color: "#0F172B" }}>Add to Watchlist</p>
-            <p className="text-[11px] mt-0.5" style={{ color: "#888888" }}>
+            <p className="text-[14px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>Add to Watchlist</p>
+            <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
               {symbols.length} stock{symbols.length !== 1 ? "s" : ""} selected
             </p>
           </div>
-          <button onClick={onClose} className="rounded-md p-1 hover:bg-[#F5F5F5] transition-colors">
-            <X className="h-4 w-4" style={{ color: "#888888" }} />
+          <button
+            onClick={onClose}
+            className="rounded-md p-1 transition-colors"
+            onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "")}
+          >
+            <X className="h-4 w-4" style={{ color: "var(--qc-text-muted)" }} />
           </button>
         </div>
 
@@ -201,15 +206,18 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
           {/* Mode toggle */}
           {!done && (
             <>
-              <div className="flex rounded-[8px] p-0.5" style={{ background: "#F5F5F5", border: "1px solid #E2E2E2" }}>
+              <div
+                className="flex rounded-[8px] p-0.5"
+                style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}
+              >
                 {(["existing", "new"] as const).map((m) => (
                   <button
                     key={m}
                     onClick={() => setMode(m)}
                     className="flex-1 rounded-[6px] py-1.5 text-[11px] font-medium transition-all"
                     style={{
-                      background: mode === m ? "#0F172B" : "transparent",
-                      color: mode === m ? "#ffffff" : "#888888",
+                      background: mode === m ? "var(--qc-text-heading)" : "transparent",
+                      color: mode === m ? "var(--qc-surface-white)" : "var(--qc-text-muted)",
                     }}
                   >
                     {m === "existing" ? "Existing" : "New list"}
@@ -220,10 +228,10 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
               {mode === "existing" ? (
                 loading ? (
                   <div className="flex justify-center py-4">
-                    <Loader2 className="h-4 w-4 animate-spin" style={{ color: "#888888" }} />
+                    <Loader2 className="h-4 w-4 animate-spin" style={{ color: "var(--qc-text-muted)" }} />
                   </div>
                 ) : watchlists.length === 0 ? (
-                  <p className="text-[12px] text-center py-3" style={{ color: "#888888" }}>
+                  <p className="text-[12px] text-center py-3" style={{ color: "var(--qc-text-muted)" }}>
                     No watchlists yet. Create a new one.
                   </p>
                 ) : (
@@ -234,19 +242,19 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
                         onClick={() => setSelectedId(wl.id)}
                         className="w-full flex items-center justify-between rounded-[8px] px-3 py-2.5 text-left transition-colors"
                         style={{
-                          background: selectedId === wl.id ? "#0F172B" : "#F5F5F5",
-                          border: `1px solid ${selectedId === wl.id ? "#0F172B" : "#E2E2E2"}`,
+                          background: selectedId === wl.id ? "var(--qc-text-heading)" : "var(--qc-surface-panel)",
+                          border: `1px solid ${selectedId === wl.id ? "var(--qc-text-heading)" : "var(--qc-border-default)"}`,
                         }}
                       >
                         <span
                           className="text-[12px] font-medium"
-                          style={{ color: selectedId === wl.id ? "#ffffff" : "#0F172B" }}
+                          style={{ color: selectedId === wl.id ? "var(--qc-surface-white)" : "var(--qc-text-heading)" }}
                         >
                           {wl.name}
                         </span>
                         <span
                           className="text-[10px] font-mono"
-                          style={{ color: selectedId === wl.id ? "rgba(255,255,255,0.6)" : "#888888" }}
+                          style={{ color: selectedId === wl.id ? "rgba(255,255,255,0.6)" : "var(--qc-text-muted)" }}
                         >
                           {wl.total_assets} stocks
                         </span>
@@ -256,7 +264,7 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
                 )
               ) : (
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#888888" }}>
+                  <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>
                     Watchlist name
                   </label>
                   <input
@@ -266,9 +274,9 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
                     placeholder="e.g. Value Picks"
                     className="w-full rounded-[8px] px-3 py-2 text-[13px] outline-none"
                     style={{
-                      border: "1px solid #E2E2E2",
-                      background: "#F5F5F5",
-                      color: "#0F172B",
+                      border: "1px solid var(--qc-border-default)",
+                      background: "var(--qc-surface-panel)",
+                      color: "var(--qc-text-heading)",
                     }}
                     onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                   />
@@ -281,13 +289,13 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
                   <span
                     key={s}
                     className="text-[10px] font-mono rounded-sm px-1.5 py-0.5"
-                    style={{ background: "#F5F5F5", color: "#888888", border: "1px solid #E2E2E2" }}
+                    style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)", border: "1px solid var(--qc-border-default)" }}
                   >
                     {s}
                   </span>
                 ))}
                 {symbols.length > 8 && (
-                  <span className="text-[10px] rounded-sm px-1.5 py-0.5" style={{ color: "#888888" }}>
+                  <span className="text-[10px] rounded-sm px-1.5 py-0.5" style={{ color: "var(--qc-text-muted)" }}>
                     +{symbols.length - 8} more
                   </span>
                 )}
@@ -305,7 +313,7 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
                 <button
                   onClick={onClose}
                   className="flex-1 rounded-[8px] py-2 text-[12px] font-medium transition-colors"
-                  style={{ border: "1px solid #E2E2E2", color: "#888888" }}
+                  style={{ border: "1px solid var(--qc-border-default)", color: "var(--qc-text-muted)" }}
                 >
                   Cancel
                 </button>
@@ -313,7 +321,7 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
                   onClick={handleSubmit}
                   disabled={submitting}
                   className="flex-1 rounded-[8px] py-2 text-[12px] font-medium transition-opacity disabled:opacity-60"
-                  style={{ background: "#0F172B", color: "#ffffff" }}
+                  style={{ background: "var(--qc-text-heading)", color: "var(--qc-surface-white)" }}
                 >
                   {submitting ? (
                     <span className="flex items-center justify-center gap-1.5">
@@ -497,7 +505,7 @@ function BasketContent() {
   if (!basketId) {
     return (
       <div className="max-w-6xl mx-auto px-6 py-20 text-center">
-        <p className="text-sm" style={{ color: "#888888" }}>No basket selected.</p>
+        <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>No basket selected.</p>
       </div>
     );
   }
@@ -516,15 +524,25 @@ function BasketContent() {
         />
       )}
 
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen" style={{ background: "var(--qc-surface-base)" }}>
 
-        {/* ── Hero header — mirrors /screener/home layout ── */}
-        <div className="bg-white border-b border-[#E2E2E2]">
-          <div className="max-w-[1400px] mx-auto px-8 pt-8 pb-8">
+        {/* ── Hero header ── */}
+        <div className="relative" style={{ background: "var(--qc-surface-base)" }}>
+          {/* Lime radial bloom */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-56 overflow-hidden">
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-accent-lime-bg) 0%, transparent 70%)",
+              }}
+            />
+          </div>
+
+          <div className="relative max-w-[1400px] mx-auto px-8 pt-10 pb-8">
 
             {/* Loading state */}
             {isLoading && !basket && (
-              <div className="flex items-center gap-2 py-16 justify-center" style={{ color: "#888888" }}>
+              <div className="flex items-center gap-2 py-16 justify-center" style={{ color: "var(--qc-text-muted)" }}>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm">Loading basket…</span>
               </div>
@@ -539,58 +557,64 @@ function BasketContent() {
             )}
 
             {basket && (
-              <div className="flex items-center justify-between gap-6 flex-wrap">
-                {/* Left: title + description */}
-                <div className="space-y-1.5 flex-1 min-w-0">
-                  {/* Title row with back button */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => router.push("/screener/home")}
-                      className="flex-shrink-0 transition-opacity hover:opacity-60"
-                      style={{ color: "#0F172B" }}
-                    >
-                      <ArrowLeft className="h-8 w-8" strokeWidth={1.5} />
-                    </button>
-                    <h1 className="text-[32px] font-medium leading-tight" style={{ color: "#0F172B" }}>
-                      {basket.title}
-                    </h1>
-                  </div>
+              <div className="flex items-start justify-between gap-6 flex-wrap">
+                {/* Left: back + title + description */}
+                <div className="space-y-2 flex-1 min-w-0">
+                  {/* Back button */}
+                  <button
+                    onClick={() => router.push("/screener/home")}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-medium mb-1 transition-opacity hover:opacity-60"
+                    style={{ color: "var(--qc-text-muted)" }}
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Research Baskets
+                  </button>
 
-                  {/* Description */}
-                  <p className="text-[14px] max-w-2xl leading-relaxed pl-10" style={{ color: "#888888" }}>
-                    {basket.description}
-                  </p>
-                </div>
-
-                {/* Right: category tag + stat pills */}
-                <div className="flex items-center gap-3 flex-shrink-0">
                   {/* Category tag */}
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] border border-[#E2E2E2] bg-[#F5F5F5]">
-                    <span className="text-[11px] font-mono" style={{ color: "#888888" }}>{icon}</span>
-                    <span
-                      className="text-[11px] font-semibold uppercase tracking-[0.10em]"
-                      style={{ color: "#888888" }}
-                    >
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] border"
+                    style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+                  >
+                    <span className="text-[11px] font-mono" style={{ color: "var(--qc-text-muted)" }}>{icon}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.10em]" style={{ color: "var(--qc-text-muted)" }}>
                       {basket.category}
                     </span>
                   </div>
 
+                  <h1 className="text-[32px] font-medium leading-tight" style={{ color: "var(--qc-text-heading)" }}>
+                    {basket.title}
+                  </h1>
+                  <p className="text-[14px] max-w-2xl leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>
+                    {basket.description}
+                  </p>
+                </div>
+
+                {/* Right: stat pills */}
+                <div className="flex items-center gap-3 flex-shrink-0 pt-6">
                   {latestQuarter && (
-                    <div className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border border-[#E2E2E2]">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888888" }}>Quarter</span>
-                      <span className="text-[15px] font-semibold" style={{ color: "#0F172B" }}>{latestQuarter}</span>
+                    <div
+                      className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border"
+                      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+                    >
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--qc-text-muted)" }}>Quarter</span>
+                      <span className="text-[15px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{latestQuarter}</span>
                     </div>
                   )}
                   {pagination && (
-                    <div className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border border-[#E2E2E2]">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888888" }}>Stocks</span>
-                      <span className="text-[15px] font-semibold" style={{ color: "#0F172B" }}>{pagination.total}</span>
+                    <div
+                      className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border"
+                      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+                    >
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--qc-text-muted)" }}>Stocks</span>
+                      <span className="text-[15px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{pagination.total}</span>
                     </div>
                   )}
                   {conditions.length > 0 && (
-                    <div className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border border-[#E2E2E2]">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888888" }}>Conditions</span>
-                      <span className="text-[15px] font-semibold" style={{ color: "#0F172B" }}>{conditions.length}</span>
+                    <div
+                      className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border"
+                      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-accent-lime-bg)" }}
+                    >
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--qc-text-heading)" }}>Conditions</span>
+                      <span className="text-[15px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{conditions.length}</span>
                     </div>
                   )}
                 </div>
@@ -600,7 +624,7 @@ function BasketContent() {
         </div>
 
         {/* ── Body content ── */}
-        <div className="max-w-[1400px] mx-auto px-8 py-8 space-y-6">
+        <div className="max-w-[1400px] mx-auto px-8 py-8 space-y-4">
 
         {basket && (
           <>
@@ -608,11 +632,11 @@ function BasketContent() {
             {conditions.length > 0 && (
               <div
                 className="rounded-[10px] border p-4 space-y-3"
-                style={{ borderColor: "#E2E2E2", background: "#F5F5F5" }}
+                style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
               >
                 <p
-                  className="text-[10px] font-semibold uppercase tracking-[0.08em]"
-                  style={{ color: "rgba(18,18,18,0.50)" }}
+                  className="text-[10px] font-bold uppercase tracking-[0.10em]"
+                  style={{ color: "var(--qc-text-heading)" }}
                 >
                   Screening Conditions
                 </p>
@@ -625,12 +649,15 @@ function BasketContent() {
             )}
 
             {/* Stocks table panel */}
-            <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+            <div
+              className="rounded-[10px] border p-2"
+              style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+            >
               {/* Toolbar */}
               <div className="px-2 pt-1 pb-3 flex items-center justify-between gap-3 flex-wrap">
                 <p
-                  className="text-[10px] font-semibold uppercase tracking-[0.08em]"
-                  style={{ color: "rgba(18,18,18,0.50)" }}
+                  className="text-[10px] font-bold uppercase tracking-[0.10em]"
+                  style={{ color: "var(--qc-text-heading)" }}
                 >
                   Matching Stocks
                 </p>
@@ -639,20 +666,20 @@ function BasketContent() {
                   {/* Global search */}
                   <div
                     className="flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5"
-                    style={{ background: "#ffffff", border: "1px solid #E2E2E2" }}
+                    style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
                   >
-                    <Search className="h-3 w-3 flex-shrink-0" style={{ color: "#888888" }} />
+                    <Search className="h-3 w-3 flex-shrink-0" style={{ color: "var(--qc-text-muted)" }} />
                     <input
                       type="text"
                       value={globalFilter}
                       onChange={(e) => setGlobalFilter(e.target.value)}
                       placeholder="Search stocks…"
                       className="w-36 text-[12px] outline-none bg-transparent"
-                      style={{ color: "#0F172B" }}
+                      style={{ color: "var(--qc-text-heading)" }}
                     />
                     {globalFilter && (
                       <button onClick={() => setGlobalFilter("")}>
-                        <X className="h-3 w-3" style={{ color: "#888888" }} />
+                        <X className="h-3 w-3" style={{ color: "var(--qc-text-muted)" }} />
                       </button>
                     )}
                   </div>
@@ -665,7 +692,7 @@ function BasketContent() {
                       table.setPageSize(Number(e.target.value));
                     }}
                     className="rounded-[8px] px-2 py-1.5 text-[11px] outline-none cursor-pointer"
-                    style={{ background: "#ffffff", border: "1px solid #E2E2E2", color: "#888888" }}
+                    style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", color: "var(--qc-text-muted)" }}
                   >
                     {[10, 20, 50, 100].map((n) => (
                       <option key={n} value={n}>{n} / page</option>
@@ -677,7 +704,7 @@ function BasketContent() {
                     <button
                       onClick={() => setShowWatchlistModal(true)}
                       className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[11px] font-semibold transition-opacity hover:opacity-80"
-                      style={{ background: "#0F172B", color: "#ffffff" }}
+                      style={{ background: "var(--qc-text-heading)", color: "var(--qc-surface-white)" }}
                     >
                       <Bookmark className="h-3 w-3" />
                       Add {selectedCount} to watchlist
@@ -686,7 +713,7 @@ function BasketContent() {
                     <button
                       disabled
                       className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[11px] font-medium opacity-40"
-                      style={{ background: "#F5F5F5", color: "#888888", border: "1px solid #E2E2E2" }}
+                      style={{ background: "var(--qc-surface-white)", color: "var(--qc-text-muted)", border: "1px solid var(--qc-border-default)" }}
                     >
                       <Bookmark className="h-3 w-3" />
                       Watchlist
@@ -697,11 +724,11 @@ function BasketContent() {
 
               {/* Table */}
               <div
-                className="rounded-[10px] bg-white overflow-hidden"
-                style={{ border: "1px solid rgba(226,226,226,0.10)" }}
+                className="rounded-[10px] overflow-hidden"
+                style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-inner)" }}
               >
                 {stocksLoading && (
-                  <div className="flex items-center justify-center py-16 gap-2" style={{ color: "#888888" }}>
+                  <div className="flex items-center justify-center py-16 gap-2" style={{ color: "var(--qc-text-muted)" }}>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span className="text-sm">Loading stocks…</span>
                   </div>
@@ -715,7 +742,7 @@ function BasketContent() {
                 )}
 
                 {!stocksLoading && !stocksError && stocks.length === 0 && (
-                  <p className="text-sm text-center py-14" style={{ color: "#888888" }}>
+                  <p className="text-sm text-center py-14" style={{ color: "var(--qc-text-muted)" }}>
                     No stocks matched this basket&apos;s criteria.
                   </p>
                 )}
@@ -726,7 +753,7 @@ function BasketContent() {
                       <table className="w-full">
                         <thead>
                           {table.getHeaderGroups().map((hg) => (
-                            <tr key={hg.id} style={{ borderBottom: "1px solid #E2E2E2" }}>
+                            <tr key={hg.id} style={{ borderBottom: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
                               {hg.headers.map((header) => {
                                 const meta = header.column.id !== "select" &&
                                   header.column.id !== "index" &&
@@ -741,7 +768,7 @@ function BasketContent() {
                                     className={`px-4 py-2.5 text-[10px] font-medium uppercase tracking-wider whitespace-nowrap select-none ${
                                       header.column.getCanSort() ? "cursor-pointer hover:opacity-70" : ""
                                     } ${meta.align === "right" ? "text-right" : "text-left"}`}
-                                    style={{ color: "#888888" }}
+                                    style={{ color: "var(--qc-text-muted)" }}
                                   >
                                     {flexRender(header.column.columnDef.header, header.getContext())}
                                     {header.column.getCanSort() && (
@@ -764,10 +791,12 @@ function BasketContent() {
                                     `/screener/overview?symbol=${encodeURIComponent(row.original.symbol)}`
                                   )
                                 }
-                                className="cursor-pointer hover:bg-[#F5F5F5] transition-colors group"
+                                className="cursor-pointer transition-colors group"
+                                onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+                                onMouseLeave={e => (e.currentTarget.style.background = row.getIsSelected() ? "var(--qc-accent-lime-bg)" : "")}
                                 style={{
-                                  borderBottom: !isLast ? "1px solid #E2E2E2" : undefined,
-                                  background: row.getIsSelected() ? "#F8F9FC" : undefined,
+                                  borderBottom: !isLast ? "1px solid var(--qc-border-inner)" : undefined,
+                                  background: row.getIsSelected() ? "var(--qc-accent-lime-bg)" : undefined,
                                 }}
                               >
                                 {row.getVisibleCells().map((cell) => {
@@ -784,8 +813,8 @@ function BasketContent() {
                                       style={{
                                         color:
                                           cell.column.id === "companyName"
-                                            ? "#0F172B"
-                                            : "#888888",
+                                            ? "var(--qc-text-heading)"
+                                            : "var(--qc-text-muted)",
                                         fontWeight:
                                           cell.column.id === "companyName" ? 500 : 400,
                                       }}
@@ -804,13 +833,13 @@ function BasketContent() {
                     {/* Pagination footer */}
                     <div
                       className="flex items-center justify-between px-4 py-3"
-                      style={{ borderTop: "1px solid #E2E2E2" }}
+                      style={{ borderTop: "1px solid var(--qc-border-default)" }}
                     >
-                      <p className="text-[11px]" style={{ color: "#888888" }}>
+                      <p className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
                         {table.getFilteredRowModel().rows.length} result
                         {table.getFilteredRowModel().rows.length !== 1 ? "s" : ""}
                         {selectedCount > 0 && (
-                          <span className="ml-2 font-semibold" style={{ color: "#0F172B" }}>
+                          <span className="ml-2 font-semibold" style={{ color: "var(--qc-text-heading)" }}>
                             · {selectedCount} selected
                           </span>
                         )}
@@ -820,19 +849,23 @@ function BasketContent() {
                         <button
                           onClick={() => table.previousPage()}
                           disabled={!table.getCanPreviousPage()}
-                          className="rounded-[6px] p-1 disabled:opacity-30 hover:bg-[#F5F5F5] transition-colors"
+                          className="rounded-[6px] p-1 disabled:opacity-30 transition-colors"
+                          onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "")}
                         >
-                          <ChevronLeft className="h-4 w-4" style={{ color: "#0F172B" }} />
+                          <ChevronLeft className="h-4 w-4" style={{ color: "var(--qc-text-heading)" }} />
                         </button>
-                        <span className="text-[11px]" style={{ color: "#888888" }}>
+                        <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
                           {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
                         </span>
                         <button
                           onClick={() => table.nextPage()}
                           disabled={!table.getCanNextPage()}
-                          className="rounded-[6px] p-1 disabled:opacity-30 hover:bg-[#F5F5F5] transition-colors"
+                          className="rounded-[6px] p-1 disabled:opacity-30 transition-colors"
+                          onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "")}
                         >
-                          <ChevronRight className="h-4 w-4" style={{ color: "#0F172B" }} />
+                          <ChevronRight className="h-4 w-4" style={{ color: "var(--qc-text-heading)" }} />
                         </button>
                       </div>
                     </div>
@@ -854,7 +887,7 @@ export default function BasketPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center py-32 gap-2" style={{ color: "#888888" }}>
+        <div className="flex items-center justify-center py-32 gap-2" style={{ color: "var(--qc-text-muted)" }}>
           <Loader2 className="h-4 w-4 animate-spin" />
           <span className="text-sm">Loading…</span>
         </div>

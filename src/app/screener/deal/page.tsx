@@ -20,6 +20,7 @@ import { HistoricalPerformance } from "@/components/deal/historical-performance"
 import { PeReratingPotential } from "@/components/deal/pe-rerating-potential";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { TabularCard } from "@/components/molecules/tabular-card";
+import { DealIntelligenceCard } from "@/components/deal/deal-intelligence-card";
 import type { InPageNavItem } from "@/components/molecules/in-page-nav";
 
 const DEAL_NAV_ITEMS: InPageNavItem[] = [
@@ -280,40 +281,52 @@ function DealContent() {
     const data = dealData as DFactorResponse;
 
     return (
-      <div className="mb-8 px-4 space-y-6 pt-6">
-        {data.overview && (
-          <div id="score">
-            <DealOverview data={data.overview} />
+      <div className="mb-8 px-4 flex gap-6 items-start pt-6">
+
+        {/* Left column: all sections stacked */}
+        <div className="flex-1 min-w-0 space-y-6">
+          {data.overview && (
+            <div id="score">
+              <DealOverview data={data.overview} />
+            </div>
+          )}
+          <div id="target-price">
+            <SectionPanel
+              title={data.target_price_matrix?.meta?.title ?? "Target Price Matrix"}
+              subtitle={[
+                data.target_price_matrix?.holding_period,
+                data.target_price_matrix?.current_price ? `Current Price: ${fmtDealNum(data.target_price_matrix.current_price)}` : undefined,
+              ].filter(Boolean).join(" | ") || undefined}
+              contentClassName="px-6 pb-6"
+            >
+              <TargetPriceMatrix data={data.target_price_matrix} />
+            </SectionPanel>
+          </div>
+          <div id="eps-engine" className="space-y-6">
+            <TabularCard
+              title={data.detailed_analysis?.historical_performance?.meta?.title ?? "Historical Performance: Company EPS CAGR vs Industry Earnings Growth"}
+              subtitle={data.detailed_analysis?.historical_performance?.meta?.subtitle}
+            >
+              <HistoricalPerformance data={data.detailed_analysis?.historical_performance} hideHeader />
+            </TabularCard>
+            <TabularCard title="Forecast">
+              <EpsEngine data={data.detailed_analysis?.eps_engine} />
+            </TabularCard>
+          </div>
+          <div id="pe-rerating">
+            <TabularCard title="P/E Re-Rating Potential" titleCase>
+              <PeReratingPotential data={data.detailed_analysis?.valuation_vs_peers} />
+            </TabularCard>
+          </div>
+        </div>
+
+        {/* Right column: sticky intelligence card */}
+        {data.deal_intelligence && (
+          <div className="w-[380px] shrink-0 sticky top-4">
+            <DealIntelligenceCard intelligence={data.deal_intelligence} />
           </div>
         )}
-        <div id="target-price">
-          <SectionPanel
-            title={data.target_price_matrix?.meta?.title ?? "Target Price Matrix"}
-            subtitle={[
-              data.target_price_matrix?.holding_period,
-              data.target_price_matrix?.current_price ? `Current Price: ${fmtDealNum(data.target_price_matrix.current_price)}` : undefined,
-            ].filter(Boolean).join(" | ") || undefined}
-            contentClassName="px-6 pb-6"
-          >
-            <TargetPriceMatrix data={data.target_price_matrix} />
-          </SectionPanel>
-        </div>
-        <div id="eps-engine" className="space-y-6">
-          <TabularCard
-            title={data.detailed_analysis?.historical_performance?.meta?.title ?? "Historical Performance: Company EPS CAGR vs Industry Earnings Growth"}
-            subtitle={data.detailed_analysis?.historical_performance?.meta?.subtitle}
-          >
-            <HistoricalPerformance data={data.detailed_analysis?.historical_performance} hideHeader />
-          </TabularCard>
-          <TabularCard title="Forecast">
-            <EpsEngine data={data.detailed_analysis?.eps_engine} />
-          </TabularCard>
-        </div>
-        <div id="pe-rerating">
-          <TabularCard title="P/E Re-Rating Potential" titleCase>
-            <PeReratingPotential data={data.detailed_analysis?.valuation_vs_peers} />
-          </TabularCard>
-        </div>
+
       </div>
     );
   };

@@ -1,28 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Brain, Info } from "lucide-react";
+import { Brain, Info, AlertTriangle, Zap } from "lucide-react";
 import type { DecisionIntelligence, DecisionIntelligenceIndicator } from "@/types/technicals";
 
-function sentimentStyle(sentiment: DecisionIntelligenceIndicator["sentiment"]) {
-  if (sentiment === "positive") return {
-    text: "var(--qc-up)",
-    bg: "var(--qc-up-soft)",
-    border: "var(--qc-up)",
-    dot: "var(--qc-up)",
-  };
-  if (sentiment === "negative") return {
-    text: "var(--qc-down)",
-    bg: "var(--qc-down-soft)",
-    border: "var(--qc-down)",
-    dot: "var(--qc-down)",
-  };
-  return {
-    text: "var(--qc-warn)",
-    bg: "var(--qc-warn-soft)",
-    border: "var(--qc-warn)",
-    dot: "var(--qc-warn)",
-  };
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function sentimentVars(sentiment: DecisionIntelligenceIndicator["sentiment"]) {
+  if (sentiment === "positive") return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "#BBD9C6" };
+  if (sentiment === "negative") return { color: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "#F0C0BB" };
+  return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "#E8D4A0" };
 }
 
 function convictionConfig(level: string) {
@@ -32,182 +19,16 @@ function convictionConfig(level: string) {
   return { color: "var(--qc-down)", barColor: "var(--qc-down)", width: "33%" };
 }
 
-function biasTheme(indicators: DecisionIntelligenceIndicator[]) {
-  let pos = 0, neg = 0;
-  for (const ind of indicators) {
-    if (ind.sentiment === "positive") pos++;
-    else if (ind.sentiment === "negative") neg++;
-  }
-  if (pos > neg) return {
-    borderColor: "var(--qc-up)",
-    bg: "var(--qc-up-soft)",
-    textColor: "var(--qc-up)",
-    tagBg: "var(--qc-up)",
-    insightBorderColor: "var(--qc-up)",
-    insightBg: "var(--qc-up-soft)",
-  };
-  if (neg > pos) return {
-    borderColor: "var(--qc-down)",
-    bg: "var(--qc-down-soft)",
-    textColor: "var(--qc-down)",
-    tagBg: "var(--qc-down)",
-    insightBorderColor: "var(--qc-down)",
-    insightBg: "var(--qc-down-soft)",
-  };
-  return {
-    borderColor: "var(--qc-warn)",
-    bg: "var(--qc-warn-soft)",
-    textColor: "var(--qc-warn)",
-    tagBg: "var(--qc-warn)",
-    insightBorderColor: "var(--qc-warn)",
-    insightBg: "var(--qc-warn-soft)",
-  };
-}
-
-interface Props {
-  di: DecisionIntelligence;
-}
-
-export function DecisionIntelligenceBanner({ di }: Props) {
-  const conviction = convictionConfig(di.convictionLevel);
-  const theme = biasTheme(di.indicators);
-
-  return (
-    <div
-      className="rounded-[14px] border p-2 h-full"
-      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
-    >
-      {/* Card header */}
-      <div className="flex items-center gap-2.5 pb-3 px-1 pt-1">
-        <div
-          className="p-1.5 rounded-[6px] border"
-          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
-        >
-          <Brain className="h-4 w-4" style={{ color: "var(--qc-text-muted)" }} />
-        </div>
-        <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>
-          Decision Intelligence
-        </span>
-      </div>
-
-      <div
-        className="rounded-[14px] border px-5 py-5 flex flex-col gap-5"
-        style={{ background: "var(--qc-surface-white)", borderColor: "var(--qc-border-inner)" }}
-      >
-        {/* Key insights — colored accent block */}
-        <div
-          className="rounded-[10px] border px-4 py-4 flex flex-col gap-4"
-          style={{ borderColor: theme.borderColor, borderTopWidth: 3, backgroundColor: theme.bg }}
-        >
-          {/* TAG */}
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-2" style={{ color: "var(--qc-text-muted)" }}>Tag</p>
-            <span
-              className="inline-block rounded-full px-3 py-1 text-[13px] font-semibold text-white"
-              style={{ background: theme.tagBg }}
-            >
-              {di.tag}
-            </span>
-          </div>
-
-          {/* Lens / Ideal For / Timeframe */}
-          <div className="grid grid-cols-3 gap-2.5">
-            {[
-              { label: "Lens", value: di.lens },
-              { label: "Ideal For", value: di.idealFor },
-              { label: "Timeframe", value: di.timeframe },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-[8px] border px-3 py-2.5 text-center"
-                style={{ borderColor: theme.borderColor, borderTopWidth: 2, background: "var(--qc-surface-white)" }}
-              >
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-1" style={{ color: "var(--qc-text-muted)" }}>{item.label}</p>
-                <p className="text-[13px] font-semibold" style={{ color: theme.textColor }}>{item.value}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Actionable Insight */}
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-2" style={{ color: "var(--qc-text-muted)" }}>Actionable Insight</p>
-            <div
-              className="rounded-[8px] border px-4 py-3 text-[13px] leading-relaxed"
-              style={{ borderColor: theme.insightBorderColor, background: theme.insightBg, color: "var(--qc-text-body)" }}
-            >
-              {di.actionableInsight.action}. {di.actionableInsight.firstShift} {di.actionableInsight.existingHolderAction} {di.actionableInsight.reEvaluateCondition}
-            </div>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ borderTop: "1px solid var(--qc-border-default)" }} />
-
-        {/* Signal Breakdown */}
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-3" style={{ color: "var(--qc-text-muted)" }}>Signal Breakdown</p>
-          <div className="grid grid-cols-2 gap-2.5">
-            {di.indicators.map((ind) => {
-              const sc = sentimentStyle(ind.sentiment);
-              return (
-                <SignalBucket key={ind.name} indicator={ind} sc={sc} />
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ borderTop: "1px solid var(--qc-border-default)" }} />
-
-        {/* Conviction Meter */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>Conviction Meter</p>
-            <span className="text-[11px] font-semibold" style={{ color: conviction.color }}>{di.convictionLevel}</span>
-          </div>
-          <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: "var(--qc-surface-row-alt)" }}>
-            <div
-              className="h-full rounded-full transition-all"
-              style={{ width: conviction.width, background: conviction.barColor }}
-            />
-          </div>
-          <div className="flex justify-between mt-1">
-            <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Low</span>
-            <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Medium</span>
-            <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>High</span>
-          </div>
-        </div>
-
-        {/* What Can Change */}
-        {di.whatCanChange.length > 0 && (
-          <>
-            <div style={{ borderTop: "1px solid var(--qc-border-default)" }} />
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-2" style={{ color: "var(--qc-text-muted)" }}>What Can Change</p>
-              <ul className="space-y-1.5">
-                {di.whatCanChange.map((item, i) => (
-                  <li key={i} className="flex gap-2 text-[12px] leading-relaxed" style={{ color: "var(--qc-text-body)" }}>
-                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "var(--qc-text-muted)" }} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
+// ─── Signal Bucket (2-col colored tile grid) ──────────────────────────────────
 
 function SignalBucket({
   indicator,
-  sc,
 }: {
   indicator: DecisionIntelligenceIndicator;
-  sc: ReturnType<typeof sentimentStyle>;
 }) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const sc = sentimentVars(indicator.sentiment);
+  const watchout = indicator.growthWatchout || indicator.valueWatchout;
 
   return (
     <div
@@ -224,15 +45,322 @@ function SignalBucket({
           <Info className="h-3 w-3 cursor-help" style={{ color: "var(--qc-text-muted)" }} />
           {showTooltip && (
             <div
-              className="absolute bottom-full right-0 mb-1.5 z-50 w-48 rounded-[8px] border px-3 py-2 shadow-lg"
+              className="absolute bottom-full right-0 mb-1.5 z-50 w-56 rounded-[10px] border shadow-lg overflow-hidden"
               style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
             >
-              <p className="text-[11px] leading-relaxed" style={{ color: "var(--qc-text-body)" }}>{indicator.explanation}</p>
+              <div style={{
+                padding: "8px 12px", borderBottom: "1px solid var(--qc-border-default)",
+                background: sc.bg,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+              }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}>{indicator.name}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: sc.color }}>{indicator.tag}</span>
+              </div>
+              <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
+                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>{indicator.explanation}</p>
+                {watchout && (
+                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-text-muted)", lineHeight: 1.45 }}>
+                    <span style={{ fontWeight: 600 }}>Watchout: </span>{watchout}
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </div>
       </div>
-      <p className="text-[12px] font-semibold" style={{ color: sc.text }}>{indicator.tag}</p>
+      <p className="text-[12px] font-semibold" style={{ color: sc.color }}>{indicator.tag}</p>
+    </div>
+  );
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
+interface Props {
+  di: DecisionIntelligence;
+}
+
+export function DecisionIntelligenceBanner({ di }: Props) {
+  const conviction = convictionConfig(di.convictionLevel);
+
+  return (
+    <div style={{
+      background: "var(--qc-surface-row-alt)",
+      border: "1px solid var(--qc-border-default)",
+      borderRadius: 18,
+      padding: 8,
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+    }}>
+
+      {/* Card header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 6px 2px" }}>
+        <div style={{
+          padding: 6, borderRadius: 8, display: "grid", placeItems: "center",
+          border: "1px solid var(--qc-icon-box-border)",
+          background: "var(--qc-icon-box-bg)",
+        }}>
+          <Brain style={{ width: 14, height: 14, color: "var(--qc-text-body)" }} />
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>
+          Decision Intelligence
+        </span>
+      </div>
+
+      {/* ── 1. Score card (Tag + meta + actionable insight) ── */}
+      <div style={{
+        background: "var(--qc-surface-white)",
+        border: "1px solid var(--qc-border-default)",
+        borderRadius: 14,
+        overflow: "hidden",
+        position: "relative",
+      }}>
+        {/* lime gradient overlay */}
+        <div style={{
+          position: "absolute", inset: "auto 0 0 0", height: "50%",
+          background: "linear-gradient(180deg, transparent 0%, var(--qc-accent-lime-bg, #E9F4C4) 100%)",
+          zIndex: 0, pointerEvents: "none",
+        }} />
+
+        <div style={{ position: "relative", zIndex: 1, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+
+          {/* Tag row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <div>
+              <div style={{
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+                letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const, marginBottom: 6,
+              }}>
+                Tag
+              </div>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "var(--qc-text-heading)", lineHeight: 1.3 }}>
+                {di.tag}
+              </p>
+            </div>
+          </div>
+
+          {/* Lens / Ideal For / Timeframe — compact inline grid */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6,
+          }}>
+            {[
+              { label: "Lens", value: di.lens },
+              { label: "Ideal For", value: di.idealFor },
+              { label: "Timeframe", value: di.timeframe },
+            ].map((item) => (
+              <div key={item.label} style={{
+                background: "var(--qc-surface-row-alt)",
+                border: "1px solid var(--qc-border-default)",
+                borderRadius: 8,
+                padding: "6px 8px",
+              }}>
+                <p style={{
+                  margin: 0, fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+                  color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+                  letterSpacing: ".1em", marginBottom: 3,
+                }}>
+                  {item.label}
+                </p>
+                <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "var(--qc-text-heading)", lineHeight: 1.3 }}>
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Separator */}
+          <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+
+          {/* Actionable Insight */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+              letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+            }}>
+              Actionable Insight
+            </div>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
+              {di.actionableInsight.action}
+            </p>
+            {di.actionableInsight.firstShift && (
+              <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>
+                {di.actionableInsight.firstShift}
+              </p>
+            )}
+          </div>
+
+          {/* Bias */}
+          {di.actionBias && (
+            <>
+              <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+                  letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+                }}>
+                  Bias
+                </div>
+                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>
+                  {di.actionBias}
+                </p>
+                {di.actionableInsight.existingHolderAction && (
+                  <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>
+                    {di.actionableInsight.existingHolderAction}
+                  </p>
+                )}
+                {di.actionableInsight.reEvaluateCondition && (
+                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-text-muted)", lineHeight: 1.5 }}>
+                    Re-evaluate: {di.actionableInsight.reEvaluateCondition}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
+        </div>
+      </div>
+
+      {/* ── 2. Signal Breakdown ── */}
+      <div style={{
+        background: "var(--qc-surface-white)",
+        border: "1px solid var(--qc-border-default)",
+        borderRadius: 14,
+        padding: "14px 16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <Zap style={{ width: 11, height: 11, color: "var(--qc-text-muted)" }} />
+          <span style={{
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+            letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+          }}>
+            Signal Breakdown · hover for details
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-2.5">
+          {di.indicators.map((ind) => (
+            <SignalBucket key={ind.name} indicator={ind} />
+          ))}
+        </div>
+
+        {/* Conviction Meter */}
+        <div style={{ borderTop: "1px solid var(--qc-border-default)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+              letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+            }}>
+              Conviction
+            </span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: conviction.color }}>{di.convictionLevel}</span>
+          </div>
+          <div style={{ height: 4, borderRadius: 999, background: "rgba(0,0,0,0.10)", overflow: "hidden" }}>
+            <div style={{ height: "100%", borderRadius: 999, width: conviction.width, background: conviction.barColor, transition: "width .4s" }} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            {["Low", "Medium", "High"].map((l) => (
+              <span key={l} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--qc-text-muted)" }}>{l}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── 3. Current Regime ── */}
+      {di.currentRegime && (
+        <div style={{
+          background: "var(--qc-surface-white)",
+          border: "1px solid var(--qc-border-default)",
+          borderRadius: 14,
+          padding: "14px 16px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 6,
+        }}>
+          <div style={{
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+            letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+          }}>
+            Current Regime
+          </div>
+          <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", lineHeight: 1.3 }}>
+            {di.currentRegime.label}
+          </p>
+          {di.currentRegime.description && (
+            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>
+              {di.currentRegime.description}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* ── 4. Risk Alerts + What Can Change ── */}
+      {(di.riskAlerts.length > 0 || di.whatCanChange.length > 0) && (
+        <div style={{
+          background: "var(--qc-surface-white)",
+          border: "1px solid var(--qc-border-default)",
+          borderRadius: 14,
+          padding: "14px 16px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}>
+          {di.riskAlerts.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <AlertTriangle style={{ width: 11, height: 11, color: "var(--qc-text-muted)" }} />
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+                  letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+                }}>
+                  Risk Alerts
+                </span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {di.riskAlerts.map((item, i) => (
+                  <div key={i} style={{
+                    display: "flex", alignItems: "flex-start", gap: 8,
+                    padding: "5px 0",
+                    borderBottom: i < di.riskAlerts.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+                  }}>
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--qc-down)", flexShrink: 0, marginTop: 5 }} />
+                    <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {di.riskAlerts.length > 0 && di.whatCanChange.length > 0 && (
+            <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+          )}
+
+          {di.whatCanChange.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+                letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+              }}>
+                What Can Change
+              </span>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {di.whatCanChange.map((item, i) => (
+                  <div key={i} style={{
+                    display: "flex", alignItems: "flex-start", gap: 8,
+                    padding: "5px 0",
+                    borderBottom: i < di.whatCanChange.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+                  }}>
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--qc-text-muted)", flexShrink: 0, marginTop: 5 }} />
+                    <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
     </div>
   );
 }

@@ -168,6 +168,44 @@ export interface OverviewSection {
   deal_factor_score?: DealFactorScore;
 }
 
+// ─── Deal Intelligence ────────────────────────────────────────────────────────
+
+export interface DealIntelligenceSignal {
+  key: string;
+  label: string;
+  score: number;
+  max_score: number;
+  sentiment: "positive" | "negative" | "neutral";
+  details: string[];
+}
+
+export interface DealScore {
+  label: string;
+  total: number;
+  max_score: number;
+  signals_breakdown: DealIntelligenceSignal[];
+}
+
+export interface DealRecommendedStrategy {
+  action: string;
+  thesis?: string | null;
+  timing?: string | null;
+  segment?: string | null;
+  rationale?: string | null;
+}
+
+export interface DealWatchout {
+  title: string;
+  description: string;
+}
+
+export interface DealIntelligence {
+  deal_score: DealScore;
+  key_takeaways: string[];
+  recommended_strategy: DealRecommendedStrategy;
+  watchouts: DealWatchout[];
+}
+
 // ─── Root Response ────────────────────────────────────────────────────────────
 
 export interface DFactorResponse {
@@ -176,6 +214,7 @@ export interface DFactorResponse {
   risk_reward_summary?: RiskRewardSummarySection;
   overview?: OverviewSection;
   detailed_analysis?: DetailedAnalysisSection;
+  deal_intelligence?: DealIntelligence;
 }
 
 export interface DFactorTotalScore {

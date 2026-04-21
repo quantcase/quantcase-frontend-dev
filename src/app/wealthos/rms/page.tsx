@@ -3,15 +3,571 @@
 import { useState, Suspense } from "react";
 import { useWealthRMList, useWealthRM } from "@/hooks/useWealthRM";
 import { useWealthRMAnalytics } from "@/hooks/useWealthAnalytics";
-import { RMCard } from "@/components/wealthos/rm-card";
-import { ClientCard } from "@/components/wealthos/client-card";
 import { CreateRMForm } from "@/components/wealthos/create-rm-form";
-import { MetricTile } from "@/components/molecules/metric-tile";
-import { SectionPanel } from "@/components/molecules/section-panel";
-import { Button } from "@/components/ui/button";
-import { Users, TrendingUp, BarChart2, Activity } from "lucide-react";
-import type { WealthRM } from "@/types/wealthos";
+import { SegmentBadge } from "@/components/wealthos/segment-badge";
+import {
+  Users,
+  BarChart2,
+  ArrowRight,
+  ChevronRight,
+  Plus,
+  Phone,
+  Mail,
+  Star,
+  AlertTriangle,
+} from "lucide-react";
+import type { WealthRM, WealthClient, RMAnalytics } from "@/types/wealthos";
 
+// ─── RM Row ────────────────────────────────────────────────────────────────────
+function RMRow({
+  rm,
+  rank,
+  isSelected,
+  onClick,
+}: {
+  rm: WealthRM;
+  rank: number;
+  isSelected: boolean;
+  onClick: () => void;
+}) {
+  const score = rm.performance_score ?? 0;
+  const scoreColor =
+    score >= 85 ? "var(--qc-up)" : score >= 70 ? "var(--qc-warn)" : "var(--qc-down)";
+  const clientCount = rm._count?.clients ?? 0;
+
+  return (
+    <div
+      onClick={onClick}
+      className="group flex items-center gap-4 cursor-pointer transition-all duration-150"
+      style={{
+        padding: "10px 16px",
+        borderBottom: "1px solid var(--qc-border-default)",
+        background: isSelected ? "rgba(200,245,105,0.07)" : "transparent",
+        borderLeft: isSelected ? "2px solid #a8e63d" : "2px solid transparent",
+      }}
+    >
+      {/* Rank */}
+      <span
+        style={{
+          fontSize: 10,
+          fontFamily: "var(--font-ibm-plex-mono, monospace)",
+          color: "var(--qc-text-muted)",
+          width: 20,
+          flexShrink: 0,
+          textAlign: "right",
+        }}
+      >
+        {String(rank).padStart(2, "0")}
+      </span>
+
+      {/* Avatar */}
+      <div
+        className="flex items-center justify-center shrink-0"
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: "50%",
+          background: isSelected
+            ? "linear-gradient(135deg, #c8f569 0%, #a8e63d 100%)"
+            : "var(--qc-surface-panel)",
+          border: "1px solid var(--qc-border-default)",
+          fontSize: 11,
+          fontWeight: 700,
+          color: isSelected ? "#1a3a00" : "var(--qc-text-heading)",
+          letterSpacing: "0.02em",
+        }}
+      >
+        {rm.name
+          .split(" ")
+          .map((w) => w[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase()}
+      </div>
+
+      {/* Name + team */}
+      <div className="flex-1 min-w-0">
+        <div
+          className="truncate"
+          style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}
+        >
+          {rm.name}
+        </div>
+        {rm.team && (
+          <div
+            className="truncate"
+            style={{ fontSize: 10, color: "var(--qc-text-muted)", marginTop: 1 }}
+          >
+            {rm.team}
+          </div>
+        )}
+      </div>
+
+      {/* Clients */}
+      <div className="flex flex-col items-end shrink-0" style={{ minWidth: 40 }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
+            color: "var(--qc-text-heading)",
+          }}
+        >
+          {clientCount}
+        </span>
+        <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase" }}>
+          clients
+        </span>
+      </div>
+
+      {/* Score */}
+      <div className="flex flex-col items-end shrink-0" style={{ minWidth: 44 }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
+            color: scoreColor,
+          }}
+        >
+          {score.toFixed(1)}
+        </span>
+        <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase" }}>
+          score
+        </span>
+      </div>
+
+      {/* Arrow */}
+      <ChevronRight
+        className="size-3.5 transition-opacity shrink-0"
+        style={{
+          color: isSelected ? "#a8e63d" : "var(--qc-text-muted)",
+          opacity: isSelected ? 1 : 0,
+        }}
+      />
+    </div>
+  );
+}
+
+// ─── Client Row (inside RM detail) ─────────────────────────────────────────────
+function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
+  const churnColor =
+    client.churn_probability > 0.6
+      ? "var(--qc-down)"
+      : client.churn_probability > 0.3
+      ? "var(--qc-warn)"
+      : "var(--qc-up)";
+
+  return (
+    <div
+      className="group flex items-center gap-3 transition-all duration-150 cursor-pointer"
+      style={{
+        padding: "8px 16px",
+        borderBottom: "1px solid var(--qc-border-default)",
+      }}
+    >
+      <span
+        style={{
+          fontSize: 10,
+          fontFamily: "var(--font-ibm-plex-mono, monospace)",
+          color: "var(--qc-text-muted)",
+          width: 18,
+          flexShrink: 0,
+          textAlign: "right",
+        }}
+      >
+        {String(rank).padStart(2, "0")}
+      </span>
+
+      <div
+        className="flex items-center justify-center shrink-0"
+        style={{
+          width: 26,
+          height: 26,
+          borderRadius: "50%",
+          background: "var(--qc-surface-panel)",
+          border: "1px solid var(--qc-border-default)",
+          fontSize: 9,
+          fontWeight: 700,
+          color: "var(--qc-text-heading)",
+        }}
+      >
+        {client.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span
+            className="truncate"
+            style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}
+          >
+            {client.name}
+          </span>
+          <SegmentBadge segment={client.segment} />
+        </div>
+        <div style={{ fontSize: 10, color: "var(--qc-text-muted)", marginTop: 1 }}>
+          {client.risk_profile}
+        </div>
+      </div>
+
+      <div className="flex flex-col items-end shrink-0" style={{ minWidth: 44 }}>
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
+            color: churnColor,
+          }}
+        >
+          {(client.churn_probability * 100).toFixed(0)}%
+        </span>
+        <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase" }}>
+          churn
+        </span>
+      </div>
+
+      <div className="flex flex-col items-end shrink-0" style={{ minWidth: 32 }}>
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
+            color: "var(--qc-text-heading)",
+          }}
+        >
+          {client.engagement_score}
+        </span>
+        <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase" }}>
+          eng
+        </span>
+      </div>
+
+      <ArrowRight
+        className="size-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+        style={{ color: "var(--qc-text-muted)" }}
+      />
+    </div>
+  );
+}
+
+// ─── Analytics stat pill ────────────────────────────────────────────────────────
+function StatPill({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color?: string;
+}) {
+  return (
+    <div
+      className="flex flex-col gap-0.5"
+      style={{
+        padding: "10px 14px",
+        borderRadius: 10,
+        background: "var(--qc-surface-panel)",
+        border: "1px solid var(--qc-border-default)",
+        flex: 1,
+        minWidth: 0,
+      }}
+    >
+      <span
+        style={{
+          fontSize: 9,
+          color: "var(--qc-text-muted)",
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+        }}
+      >
+        {label}
+      </span>
+      <span
+        style={{
+          fontSize: 16,
+          fontWeight: 700,
+          fontFamily: "var(--font-ibm-plex-mono, monospace)",
+          color: color ?? "var(--qc-text-heading)",
+          letterSpacing: "-0.02em",
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+// ─── Right Panel ────────────────────────────────────────────────────────────────
+function RightPanel({
+  rms,
+  selectedRM,
+  analytics,
+  analyticsLoading,
+}: {
+  rms: WealthRM[];
+  selectedRM: WealthRM | null;
+  analytics: RMAnalytics | null;
+  analyticsLoading: boolean;
+}) {
+  const totalClients = rms.reduce((s, rm) => s + (rm._count?.clients ?? 0), 0);
+  const avgScore =
+    rms.length > 0
+      ? rms.reduce((s, rm) => s + (rm.performance_score ?? 0), 0) / rms.length
+      : 0;
+  const topRM = rms.slice().sort((a, b) => (b.performance_score ?? 0) - (a.performance_score ?? 0))[0];
+
+  return (
+    <div className="flex flex-col gap-3" style={{ position: "sticky", top: 16 }}>
+      {/* Lime hero */}
+      <div
+        className="rounded-[14px] overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, #c8f569 0%, #a8e63d 40%, #7ecb1a 100%)",
+          padding: "20px 18px 16px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: 9,
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            color: "#2d5a00",
+            textTransform: "uppercase",
+            marginBottom: 8,
+          }}
+        >
+          RM Overview
+        </p>
+        <div className="flex items-end gap-3 mb-4">
+          <div>
+            <p
+              style={{
+                fontSize: 40,
+                fontWeight: 800,
+                fontFamily: "var(--font-ibm-plex-mono, monospace)",
+                color: "#1a3a00",
+                letterSpacing: "-0.04em",
+                lineHeight: 1,
+              }}
+            >
+              {rms.length}
+            </p>
+            <p style={{ fontSize: 11, color: "#3a6e00", marginTop: 2 }}>
+              Relationship Managers
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
+            style={{ background: "rgba(26,58,0,0.15)" }}
+          >
+            <Users className="size-2.5" style={{ color: "#2d5a00" }} />
+            <span style={{ fontSize: 10, fontWeight: 700, color: "#1a3a00", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+              {totalClients}
+            </span>
+            <span style={{ fontSize: 10, color: "#3a6e00" }}>total clients</span>
+          </div>
+          <div
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
+            style={{ background: "rgba(26,58,0,0.15)" }}
+          >
+            <Star className="size-2.5" style={{ color: "#2d5a00" }} />
+            <span style={{ fontSize: 10, fontWeight: 700, color: "#1a3a00", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+              {avgScore.toFixed(1)}
+            </span>
+            <span style={{ fontSize: 10, color: "#3a6e00" }}>avg score</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Top performer */}
+      {topRM && (
+        <div
+          className="rounded-[14px]"
+          style={{
+            background: "var(--qc-surface-card)",
+            border: "1px solid var(--qc-border-default)",
+            padding: "14px 16px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: 9,
+              color: "var(--qc-text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              marginBottom: 10,
+            }}
+          >
+            Top Performer
+          </p>
+          <div className="flex items-center gap-2.5 mb-3">
+            <div
+              className="flex items-center justify-center shrink-0"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #c8f569 0%, #a8e63d 100%)",
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#1a3a00",
+              }}
+            >
+              {topRM.name
+                .split(" ")
+                .map((w) => w[0])
+                .slice(0, 2)
+                .join("")
+                .toUpperCase()}
+            </div>
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>
+                {topRM.name}
+              </p>
+              {topRM.team && (
+                <p style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>{topRM.team}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <StatPill
+              label="Score"
+              value={(topRM.performance_score ?? 0).toFixed(1)}
+              color="var(--qc-up)"
+            />
+            <StatPill label="Clients" value={String(topRM._count?.clients ?? 0)} />
+          </div>
+        </div>
+      )}
+
+      {/* Selected RM analytics */}
+      {selectedRM && (
+        <div
+          className="rounded-[14px]"
+          style={{
+            background: "var(--qc-surface-card)",
+            border: "1px solid var(--qc-border-default)",
+            padding: "14px 16px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: 9,
+              color: "var(--qc-text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              marginBottom: 10,
+            }}
+          >
+            {selectedRM.name} · Analytics
+          </p>
+          {analyticsLoading || !analytics ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-12 rounded-[10px] animate-pulse"
+                  style={{ background: "var(--qc-surface-panel)" }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <StatPill
+                  label="Avg Churn"
+                  value={`${(analytics.avg_churn_probability * 100).toFixed(0)}%`}
+                  color={
+                    analytics.avg_churn_probability > 0.5
+                      ? "var(--qc-down)"
+                      : analytics.avg_churn_probability > 0.3
+                      ? "var(--qc-warn)"
+                      : "var(--qc-up)"
+                  }
+                />
+                <StatPill
+                  label="Avg Eng"
+                  value={analytics.avg_engagement_score.toFixed(1)}
+                  color="var(--qc-text-heading)"
+                />
+              </div>
+              <div className="flex gap-2">
+                <StatPill
+                  label="Interactions"
+                  value={String(analytics.interactions_last_30d)}
+                />
+                <StatPill
+                  label="Adoption"
+                  value={`${(analytics.suggestion_adoption_rate * 100).toFixed(0)}%`}
+                  color={
+                    analytics.suggestion_adoption_rate > 0.6
+                      ? "var(--qc-up)"
+                      : "var(--qc-warn)"
+                  }
+                />
+              </div>
+              <StatPill
+                label="Avg Portfolio Risk Score"
+                value={analytics.avg_portfolio_risk_score.toFixed(1)}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Quick actions */}
+      <div
+        className="rounded-[14px]"
+        style={{
+          background: "var(--qc-surface-card)",
+          border: "1px solid var(--qc-border-default)",
+          padding: "14px 16px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: 9,
+            color: "var(--qc-text-muted)",
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            marginBottom: 10,
+          }}
+        >
+          Quick Actions
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { icon: Phone, label: "Schedule Call" },
+            { icon: Mail, label: "Send Briefing" },
+            { icon: BarChart2, label: "Performance Report" },
+            { icon: AlertTriangle, label: "Risk Review" },
+          ].map(({ icon: Icon, label }) => (
+            <button
+              key={label}
+              className="flex flex-col items-center gap-1.5 rounded-[10px] transition-all"
+              style={{
+                padding: "10px 8px",
+                background: "var(--qc-surface-panel)",
+                border: "1px solid var(--qc-border-default)",
+                cursor: "pointer",
+              }}
+            >
+              <Icon className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
+              <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textAlign: "center", lineHeight: 1.3 }}>
+                {label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main content ───────────────────────────────────────────────────────────────
 function RMPageContent() {
   const [showForm, setShowForm] = useState(false);
   const [selectedRmId, setSelectedRmId] = useState("");
@@ -25,92 +581,331 @@ function RMPageContent() {
     setSelectedRmId(rm.id);
   };
 
+  const sortedRMs = rms.slice().sort((a, b) => (b.performance_score ?? 0) - (a.performance_score ?? 0));
+
   return (
-    <div className="p-6 space-y-5" style={{ background: "var(--qc-surface-base)", minHeight: "100vh" }}>
-      <div className="flex items-center justify-between">
-        <h1
-          className="uppercase tracking-wide"
-          style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.05em" }}
+    <div
+      style={{
+        background: "#FBFAF7",
+        minHeight: "100vh",
+        padding: "20px 24px",
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-5">
+        <div>
+          <p
+            style={{
+              fontSize: 9,
+              fontFamily: "var(--font-ibm-plex-mono, monospace)",
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              color: "var(--qc-text-muted)",
+              textTransform: "uppercase",
+              marginBottom: 4,
+            }}
+          >
+            WealthOS · Team Registry
+          </p>
+          <h1
+            style={{
+              fontSize: 24,
+              fontWeight: 700,
+              color: "var(--qc-text-heading)",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.1,
+            }}
+          >
+            Relationship Managers{" "}
+            {rms.length > 0 && (
+              <span
+                style={{
+                  fontSize: 14,
+                  fontWeight: 400,
+                  color: "var(--qc-text-muted)",
+                  fontFamily: "var(--font-ibm-plex-mono, monospace)",
+                  letterSpacing: 0,
+                }}
+              >
+                {rms.length}
+              </span>
+            )}
+          </h1>
+        </div>
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          className="flex items-center gap-1.5 transition-all"
+          style={{
+            padding: "8px 14px",
+            borderRadius: 8,
+            background: showForm ? "var(--qc-surface-panel)" : "var(--qc-accent-primary)",
+            color: showForm ? "var(--qc-text-heading)" : "var(--qc-accent-primary-fg)",
+            border: showForm ? "1px solid var(--qc-border-default)" : "none",
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
         >
-          Relationship Managers
-        </h1>
-        <Button size="sm" onClick={() => setShowForm(v => !v)}>
-          {showForm ? "Cancel" : "+ New RM"}
-        </Button>
+          <Plus className="size-3.5" />
+          {showForm ? "Cancel" : "New RM"}
+        </button>
       </div>
 
-      {showForm && <CreateRMForm onSuccess={handleRMCreated} onCancel={() => setShowForm(false)} />}
+      {/* Create form */}
+      {showForm && (
+        <div className="mb-4">
+          <CreateRMForm onSuccess={handleRMCreated} onCancel={() => setShowForm(false)} />
+        </div>
+      )}
 
-      {/* RM Grid */}
-      <SectionPanel title="All RMs" subtitle={`${rms.length} relationship managers`} contentClassName="px-6 pb-6">
-        {loading && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {[1, 2, 3].map(i => (
-              <div
-                key={i}
-                className="h-24 rounded-xl animate-pulse"
-                style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}
+      {/* Two-column layout */}
+      <div className="grid gap-4" style={{ gridTemplateColumns: "1fr 290px", alignItems: "start" }}>
+        {/* Left: RM list */}
+        <div className="flex flex-col gap-3">
+          {/* RM list card */}
+          <div
+            className="rounded-[14px] overflow-hidden"
+            style={{
+              background: "var(--qc-surface-card)",
+              border: "1px solid var(--qc-border-default)",
+            }}
+          >
+            {/* Table header */}
+            <div
+              className="flex items-center gap-4"
+              style={{
+                padding: "8px 16px",
+                borderBottom: "1px solid var(--qc-border-default)",
+                background: "var(--qc-surface-panel)",
+              }}
+            >
+              <span style={{ width: 20, flexShrink: 0 }} />
+              <span style={{ width: 32, flexShrink: 0 }} />
+              <span
+                className="flex-1"
+                style={{
+                  fontSize: 9,
+                  color: "var(--qc-text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                Name
+              </span>
+              <span
+                style={{
+                  fontSize: 9,
+                  color: "var(--qc-text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  minWidth: 40,
+                  textAlign: "right",
+                }}
+              >
+                Clients
+              </span>
+              <span
+                style={{
+                  fontSize: 9,
+                  color: "var(--qc-text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  minWidth: 44,
+                  textAlign: "right",
+                }}
+              >
+                Score
+              </span>
+              <span style={{ width: 14, flexShrink: 0 }} />
+            </div>
+
+            {loading && (
+              <div className="p-4 space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-12 rounded-xl animate-pulse"
+                    style={{ background: "var(--qc-surface-panel)" }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {error && (
+              <p className="p-4" style={{ fontSize: 13, color: "var(--qc-down)" }}>
+                {error}
+              </p>
+            )}
+
+            {!loading && rms.length === 0 && (
+              <p
+                className="py-10 text-center"
+                style={{ fontSize: 13, color: "var(--qc-text-muted)" }}
+              >
+                No RMs found. Create one to get started.
+              </p>
+            )}
+
+            {sortedRMs.map((rm, i) => (
+              <RMRow
+                key={rm.id}
+                rm={rm}
+                rank={i + 1}
+                isSelected={rm.id === selectedRmId}
+                onClick={() => setSelectedRmId(rm.id === selectedRmId ? "" : rm.id)}
               />
             ))}
           </div>
-        )}
-        {error && <p style={{ fontSize: 13, color: "var(--qc-down)" }} className="py-4">{error}</p>}
-        {!loading && rms.length === 0 && (
-          <p className="py-6 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
-            No RMs found. Create one to get started.
-          </p>
-        )}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {rms.map(rm => (
-            <RMCard
-              key={rm.id}
-              rm={rm}
-              isSelected={rm.id === selectedRmId}
-              onClick={() => setSelectedRmId(rm.id === selectedRmId ? "" : rm.id)}
-            />
-          ))}
-        </div>
-      </SectionPanel>
 
-      {/* RM Detail Panel */}
-      {selectedRmId && (
-        <>
-          {!analyticsLoading && analytics && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              <MetricTile label="Total Clients" value={String(analytics.total_clients ?? "—")} icon={Users} />
-              <MetricTile label="Avg Engagement" value={analytics.avg_engagement_score != null ? analytics.avg_engagement_score.toFixed(1) : "—"} icon={Activity} />
-              <MetricTile label="Avg Churn" value={analytics.avg_churn_probability != null ? `${(analytics.avg_churn_probability * 100).toFixed(0)}%` : "—"} icon={TrendingUp} />
-              <MetricTile label="Interactions (30d)" value={String(analytics.interactions_last_30d ?? "—")} icon={BarChart2} />
-              <MetricTile label="Adoption Rate" value={analytics.suggestion_adoption_rate != null ? `${(analytics.suggestion_adoption_rate * 100).toFixed(0)}%` : "—"} icon={TrendingUp} />
-              <MetricTile label="Avg Risk Score" value={analytics.avg_portfolio_risk_score != null ? analytics.avg_portfolio_risk_score.toFixed(1) : "—"} icon={BarChart2} />
+          {/* Selected RM client list */}
+          {selectedRmId && (
+            <div
+              className="rounded-[14px] overflow-hidden"
+              style={{
+                background: "var(--qc-surface-card)",
+                border: "1px solid var(--qc-border-default)",
+              }}
+            >
+              {/* Section header */}
+              <div
+                style={{
+                  padding: "12px 16px",
+                  borderBottom: "1px solid var(--qc-border-default)",
+                  background: "var(--qc-surface-panel)",
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p
+                      style={{
+                        fontSize: 9,
+                        color: "var(--qc-text-muted)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                        marginBottom: 2,
+                      }}
+                    >
+                      Assigned Clients
+                    </p>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>
+                      {selectedRM?.name ?? "Loading…"}
+                    </p>
+                  </div>
+                  {selectedRM?.clients && (
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontFamily: "var(--font-ibm-plex-mono, monospace)",
+                        color: "var(--qc-text-muted)",
+                      }}
+                    >
+                      {selectedRM.clients.length} clients
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Client table header */}
+              {!rmLoading && selectedRM?.clients && selectedRM.clients.length > 0 && (
+                <div
+                  className="flex items-center gap-3"
+                  style={{
+                    padding: "6px 16px",
+                    borderBottom: "1px solid var(--qc-border-default)",
+                    background: "rgba(0,0,0,0.015)",
+                  }}
+                >
+                  <span style={{ width: 18, flexShrink: 0 }} />
+                  <span style={{ width: 26, flexShrink: 0 }} />
+                  <span
+                    className="flex-1"
+                    style={{
+                      fontSize: 9,
+                      color: "var(--qc-text-muted)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    Client
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      color: "var(--qc-text-muted)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      minWidth: 44,
+                      textAlign: "right",
+                    }}
+                  >
+                    Churn
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      color: "var(--qc-text-muted)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      minWidth: 32,
+                      textAlign: "right",
+                    }}
+                  >
+                    Eng
+                  </span>
+                  <span style={{ width: 12, flexShrink: 0 }} />
+                </div>
+              )}
+
+              {rmLoading && (
+                <div className="p-4 space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="h-10 rounded-xl animate-pulse"
+                      style={{ background: "var(--qc-surface-panel)" }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {!rmLoading && (!selectedRM?.clients || selectedRM.clients.length === 0) && (
+                <p
+                  className="py-8 text-center"
+                  style={{ fontSize: 13, color: "var(--qc-text-muted)" }}
+                >
+                  No clients assigned to this RM
+                </p>
+              )}
+
+              {!rmLoading &&
+                selectedRM?.clients?.map((client, i) => (
+                  <ClientRow key={client.id} client={client} rank={i + 1} />
+                ))}
             </div>
           )}
+        </div>
 
-          <SectionPanel
-            title={selectedRM ? `${selectedRM.name}'s Clients` : "Clients"}
-            contentClassName="px-6 pb-6 space-y-3"
-          >
-            {rmLoading && (
-              <p className="py-4" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>Loading clients...</p>
-            )}
-            {!rmLoading && selectedRM?.clients?.length === 0 && (
-              <p className="py-6 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
-                No clients assigned to this RM
-              </p>
-            )}
-            {selectedRM?.clients?.map(client => (
-              <ClientCard key={client.id} mode="list" item={client} />
-            ))}
-          </SectionPanel>
-        </>
-      )}
+        {/* Right panel */}
+        <RightPanel
+          rms={rms}
+          selectedRM={selectedRM}
+          analytics={analytics}
+          analyticsLoading={analyticsLoading}
+        />
+      </div>
     </div>
   );
 }
 
 export default function WealthOSRMPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="p-6 text-sm" style={{ color: "var(--qc-text-muted)" }}>
+          Loading…
+        </div>
+      }
+    >
       <RMPageContent />
     </Suspense>
   );

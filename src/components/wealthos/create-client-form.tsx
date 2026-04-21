@@ -11,6 +11,28 @@ import type { WealthClient, Segment, RiskProfile } from "@/types/wealthos";
 const SEGMENTS: Segment[] = ["HNI", "UHNI", "Retail", "Institutional", "Private"];
 const RISK_PROFILES: RiskProfile[] = ["conservative", "moderate", "aggressive"];
 
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  borderRadius: 6,
+  border: "1px solid var(--qc-border-default)",
+  background: "var(--qc-surface-card)",
+  color: "var(--qc-text-heading)",
+  fontSize: 13,
+  padding: "7px 12px",
+  outline: "none",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 11,
+  fontWeight: 500,
+  color: "var(--qc-text-muted)",
+  marginBottom: 4,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  fontFamily: "var(--font-ibm-plex-mono, monospace)",
+};
+
 export function CreateClientForm() {
   const router = useRouter();
   const { data: rms } = useWealthRMList();
@@ -55,54 +77,51 @@ export function CreateClientForm() {
     );
   };
 
-  const inputClass = "w-full rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-blue-500";
-  const labelClass = "text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1 block";
-
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className={labelClass}>Full Name *</label>
-          <input type="text" value={name} onChange={e => setName(e.target.value)} required placeholder="Rajan Mehta" className={inputClass} />
+          <label style={labelStyle}>Full Name *</label>
+          <input type="text" value={name} onChange={e => setName(e.target.value)} required placeholder="Rajan Mehta" style={inputStyle} />
         </div>
         <div>
-          <label className={labelClass}>Email</label>
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="rajan@example.com" className={inputClass} />
+          <label style={labelStyle}>Email</label>
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="rajan@example.com" style={inputStyle} />
         </div>
         <div>
-          <label className={labelClass}>Phone</label>
-          <input type="text" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91-9876543210" className={inputClass} />
+          <label style={labelStyle}>Phone</label>
+          <input type="text" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91-9876543210" style={inputStyle} />
         </div>
         <div>
-          <label className={labelClass}>Relationship Manager</label>
-          <select value={rmId} onChange={e => setRmId(e.target.value)} className={inputClass}>
+          <label style={labelStyle}>Relationship Manager</label>
+          <select value={rmId} onChange={e => setRmId(e.target.value)} style={inputStyle}>
             <option value="">— Unassigned —</option>
             {rms.map(rm => <option key={rm.id} value={rm.id}>{rm.name}</option>)}
           </select>
         </div>
         <div>
-          <label className={labelClass}>Segment *</label>
-          <select value={segment} onChange={e => setSegment(e.target.value as Segment)} required className={inputClass}>
+          <label style={labelStyle}>Segment *</label>
+          <select value={segment} onChange={e => setSegment(e.target.value as Segment)} required style={inputStyle}>
             {SEGMENTS.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         <div>
-          <label className={labelClass}>Risk Profile *</label>
-          <select value={riskProfile} onChange={e => setRiskProfile(e.target.value as RiskProfile)} required className={inputClass}>
+          <label style={labelStyle}>Risk Profile *</label>
+          <select value={riskProfile} onChange={e => setRiskProfile(e.target.value as RiskProfile)} required style={inputStyle}>
             {RISK_PROFILES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
           </select>
         </div>
         <div>
-          <label className={labelClass}>Engagement Score (0–100)</label>
-          <input type="number" value={engagementScore} onChange={e => setEngagementScore(e.target.value)} min={0} max={100} placeholder="e.g. 60" className={inputClass} />
+          <label style={labelStyle}>Engagement Score (0–100)</label>
+          <input type="number" value={engagementScore} onChange={e => setEngagementScore(e.target.value)} min={0} max={100} placeholder="e.g. 60" style={inputStyle} />
         </div>
         <div>
-          <label className={labelClass}>Churn Probability (0–1)</label>
-          <input type="number" value={churnProbability} onChange={e => setChurnProbability(e.target.value)} min={0} max={1} step={0.01} placeholder="e.g. 0.3" className={inputClass} />
+          <label style={labelStyle}>Churn Probability (0–1)</label>
+          <input type="number" value={churnProbability} onChange={e => setChurnProbability(e.target.value)} min={0} max={1} step={0.01} placeholder="e.g. 0.3" style={inputStyle} />
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p style={{ fontSize: 13, color: "var(--qc-down)" }}>{error}</p>}
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={loading}>

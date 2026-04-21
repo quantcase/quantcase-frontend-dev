@@ -78,7 +78,11 @@ export function SentimentPill({
       ? "var(--qc-down-soft)"
       : "var(--qc-warn-soft)";
   const border =
-    sentiment === "up" ? "#BBD9C6" : sentiment === "down" ? "#F0C0BB" : "#E8D4A0";
+    sentiment === "up"
+      ? "rgba(31, 122, 74, 0.25)"
+      : sentiment === "down"
+      ? "rgba(178, 58, 47, 0.25)"
+      : "rgba(180, 115, 26, 0.25)";
   const color =
     sentiment === "up"
       ? "var(--qc-up)"

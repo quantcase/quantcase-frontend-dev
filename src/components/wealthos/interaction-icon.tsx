@@ -15,15 +15,7 @@ const iconMap: Record<InteractionType, React.ElementType> = {
   sms: MessageCircle,
 };
 
-const colorMap: Record<InteractionType, string> = {
-  call: "text-blue-500",
-  email: "text-gray-500",
-  whatsapp: "text-green-500",
-  meeting: "text-purple-500",
-  sms: "text-amber-500",
-};
-
 export function InteractionIcon({ type, className }: InteractionIconProps) {
   const Icon = iconMap[type];
-  return <Icon className={cn("size-4", colorMap[type], className)} />;
+  return <Icon className={cn("size-4", className)} style={{ color: "var(--qc-text-muted)" }} />;
 }

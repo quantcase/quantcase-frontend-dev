@@ -29,17 +29,27 @@ export function ClientCard({ mode, item, className }: ClientCardProps) {
   const segment = mode === "dashboard" ? item.client.segment : item.segment;
   const churnProb = mode === "dashboard" ? item.client.churn_probability : item.churn_probability;
 
+  const churnColor =
+    churnProb > 0.6 ? "var(--qc-down)" : churnProb > 0.3 ? "var(--qc-warn)" : "var(--qc-up)";
+
   return (
     <div
       onClick={() => router.push(`/wealthos/clients/${id}`)}
-      className={cn(
-        "rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-sm transition-all",
-        className
-      )}
+      className={cn("rounded-[14px] cursor-pointer transition-all", className)}
+      style={{
+        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-surface-card)",
+        padding: "14px 16px",
+      }}
     >
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">{name}</span>
+          <span
+            className="truncate"
+            style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-text-heading)" }}
+          >
+            {name}
+          </span>
           <SegmentBadge segment={segment} />
         </div>
         {mode === "dashboard" && (
@@ -47,21 +57,26 @@ export function ClientCard({ mode, item, className }: ClientCardProps) {
         )}
       </div>
 
-      <div className="flex items-center gap-4 text-xs text-zinc-500 dark:text-zinc-400 mb-3">
+      <div className="flex items-center gap-4 mb-3" style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>
         <span>
-          Churn <span className={cn("font-medium", churnProb > 0.6 ? "text-red-600 dark:text-red-400" : churnProb > 0.3 ? "text-amber-600 dark:text-amber-400" : "text-green-600 dark:text-green-400")}>
+          Churn{" "}
+          <span style={{ fontFamily: "var(--font-ibm-plex-mono, monospace)", fontWeight: 600, color: churnColor }}>
             {(churnProb * 100).toFixed(0)}%
           </span>
         </span>
         {mode === "list" && (
           <span>
-            Engagement <span className="font-medium text-zinc-700 dark:text-zinc-300">{item.engagement_score}</span>
+            Engagement{" "}
+            <span style={{ fontWeight: 600, color: "var(--qc-text-heading)" }}>
+              {(item as WealthClient).engagement_score}
+            </span>
           </span>
         )}
-        {mode === "list" && item.last_contact_at && (
+        {mode === "list" && (item as WealthClient).last_contact_at && (
           <span>
-            Last contact <span className="font-medium text-zinc-700 dark:text-zinc-300">
-              {new Date(item.last_contact_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+            Last contact{" "}
+            <span style={{ fontWeight: 600, color: "var(--qc-text-heading)" }}>
+              {new Date((item as WealthClient).last_contact_at!).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
             </span>
           </span>
         )}
@@ -70,7 +85,9 @@ export function ClientCard({ mode, item, className }: ClientCardProps) {
       {mode === "dashboard" && (
         <>
           <ScoreBar score={item.score} components={item.score_components} className="mb-3" />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">{item.suggested_action}</p>
+          <p style={{ fontSize: 12, color: "var(--qc-text-muted)" }} className="line-clamp-2">
+            {item.suggested_action}
+          </p>
         </>
       )}
     </div>

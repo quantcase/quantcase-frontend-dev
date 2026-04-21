@@ -3,7 +3,7 @@
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Target, AlertCircle, TrendingUp, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import type { CompetitionSection, PeerRow } from "@/types/opportunity";
 
 interface CompetitiveBenchmarkingProps {
@@ -30,19 +30,19 @@ function formatValue(key: string, value: number | null): string {
   return String(value);
 }
 
-export function CompetitiveBenchmarking({ data, peers, loading }: CompetitiveBenchmarkingProps) {
-
-  const positioning = data?.text?.competitive_positioning;
-
+export function CompetitiveBenchmarking({ peers, loading }: CompetitiveBenchmarkingProps) {
   return (
     <div className="space-y-4">
-      {/* Table */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+      <div style={{ borderRadius: 8, border: "1px solid var(--qc-border-default)", overflow: "hidden" }}>
         <Table>
           <TableHeader>
-            <TableRow className="border-0">
+            <TableRow style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
               {columns.map((col) => (
-                <TableHead key={col.key} className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 py-2.5">
+                <TableHead
+                  key={col.key}
+                  className="text-[10px] font-semibold uppercase tracking-wider py-2.5"
+                  style={{ color: "var(--qc-text-muted)", background: "var(--qc-surface-panel)" }}
+                >
                   {col.label}
                 </TableHead>
               ))}
@@ -51,13 +51,13 @@ export function CompetitiveBenchmarking({ data, peers, loading }: CompetitiveBen
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center text-xs text-zinc-400 py-6">
+                <TableCell colSpan={columns.length} className="text-center text-xs py-6" style={{ color: "var(--qc-text-muted)" }}>
                   Loading peers...
                 </TableCell>
               </TableRow>
             ) : peers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center text-xs text-zinc-400 py-6">
+                <TableCell colSpan={columns.length} className="text-center text-xs py-6" style={{ color: "var(--qc-text-muted)" }}>
                   No peer data available.
                 </TableCell>
               </TableRow>
@@ -65,47 +65,76 @@ export function CompetitiveBenchmarking({ data, peers, loading }: CompetitiveBen
               peers.map((row) => (
                 <TableRow
                   key={row.company}
-                  className={
-                    row.is_current
-                      ? "bg-blue-50 dark:bg-blue-900/10 border-zinc-100 dark:border-zinc-800"
+                  style={{
+                    background: row.is_current
+                      ? "var(--qc-blue-soft)"
                       : row.is_average
-                      ? "bg-zinc-50 dark:bg-zinc-800/40 border-zinc-100 dark:border-zinc-800 font-semibold"
-                      : "border-zinc-100 dark:border-zinc-800"
-                  }
+                      ? "var(--qc-surface-panel)"
+                      : "var(--qc-surface-white)",
+                    borderBottom: "1px solid var(--qc-border-inner)",
+                  }}
                 >
                   <TableCell className="py-2.5">
                     <div className="flex items-center gap-2">
-                      {row.is_current && <div className="w-0.5 h-4 bg-blue-500 rounded-full -ml-px shrink-0" />}
-                      <span className={`text-xs font-semibold ${row.is_current ? "text-blue-700 dark:text-blue-300" : "text-zinc-800 dark:text-zinc-200"}`}>
+                      {row.is_current && (
+                        <div className="w-0.5 h-4 rounded-full -ml-px shrink-0" style={{ background: "var(--qc-blue)" }} />
+                      )}
+                      <span
+                        className="text-xs font-semibold"
+                        style={{ color: row.is_current ? "var(--qc-blue)" : "var(--qc-text-heading)" }}
+                      >
                         {row.company}
                       </span>
                       {row.is_current && (
-                        <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-semibold px-1.5 py-0.5 uppercase tracking-wide">
+                        <span
+                          className="rounded-full text-[10px] font-semibold px-1.5 py-0.5 uppercase tracking-wide"
+                          style={{ background: "var(--qc-blue-soft)", color: "var(--qc-blue)" }}
+                        >
                           CURRENT
                         </span>
                       )}
-                      {row.is_average && <span className="text-[10px] text-zinc-400 font-normal italic">(avg)</span>}
+                      {row.is_average && (
+                        <span className="text-[10px] font-normal italic" style={{ color: "var(--qc-text-muted)" }}>(avg)</span>
+                      )}
                     </div>
                   </TableCell>
-                  <TableCell className={`text-xs py-2.5 ${row.is_current ? "text-blue-700 dark:text-blue-300 font-semibold" : "text-zinc-600 dark:text-zinc-400"}`}>
+                  <TableCell
+                    className="text-xs py-2.5"
+                    style={{ color: row.is_current ? "var(--qc-blue)" : "var(--qc-text-muted)", fontWeight: row.is_current ? 600 : 400 }}
+                  >
                     {formatValue("revenue", row.revenue)}
                   </TableCell>
                   <TableCell className="text-xs py-2.5">
-                    <span className={`flex items-center gap-0.5 ${row.revenue_growth !== null ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-zinc-400"}`}>
+                    <span
+                      className="flex items-center gap-0.5 font-semibold"
+                      style={{ color: row.revenue_growth !== null ? "var(--qc-up)" : "var(--qc-text-muted)" }}
+                    >
                       {row.revenue_growth !== null && <ArrowUpRight className="h-3 w-3 shrink-0" />}
                       {formatValue("revenue_growth", row.revenue_growth)}
                     </span>
                   </TableCell>
-                  <TableCell className={`text-xs py-2.5 font-semibold ${row.is_current ? "text-blue-700 dark:text-blue-300" : "text-zinc-700 dark:text-zinc-300"}`}>
+                  <TableCell
+                    className="text-xs py-2.5 font-semibold"
+                    style={{ color: row.is_current ? "var(--qc-blue)" : "var(--qc-text-body)" }}
+                  >
                     {formatValue("opm", row.opm)}
                   </TableCell>
-                  <TableCell className={`text-xs py-2.5 font-semibold ${row.is_current ? "text-blue-700 dark:text-blue-300" : "text-zinc-700 dark:text-zinc-300"}`}>
+                  <TableCell
+                    className="text-xs py-2.5 font-semibold"
+                    style={{ color: row.is_current ? "var(--qc-blue)" : "var(--qc-text-body)" }}
+                  >
                     {formatValue("roce", row.roce)}
                   </TableCell>
-                  <TableCell className={`text-xs py-2.5 font-semibold ${row.is_current ? "text-blue-700 dark:text-blue-300" : "text-zinc-700 dark:text-zinc-300"}`}>
+                  <TableCell
+                    className="text-xs py-2.5 font-semibold"
+                    style={{ color: row.is_current ? "var(--qc-blue)" : "var(--qc-text-body)" }}
+                  >
                     {formatValue("market_share", row.market_share)}
                   </TableCell>
-                  <TableCell className={`text-xs py-2.5 ${row.is_current ? "text-blue-700 dark:text-blue-300 font-semibold" : "text-zinc-600 dark:text-zinc-400"}`}>
+                  <TableCell
+                    className="text-xs py-2.5"
+                    style={{ color: row.is_current ? "var(--qc-blue)" : "var(--qc-text-muted)", fontWeight: row.is_current ? 600 : 400 }}
+                  >
                     {formatValue("debt_equity", row.debt_equity)}
                   </TableCell>
                 </TableRow>
@@ -114,7 +143,6 @@ export function CompetitiveBenchmarking({ data, peers, loading }: CompetitiveBen
           </TableBody>
         </Table>
       </div>
-
     </div>
   );
 }

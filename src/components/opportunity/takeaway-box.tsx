@@ -1,26 +1,59 @@
-import { Badge } from "@/components/ui/badge";
 import { BoldText } from "@/components/opportunity/bold-text";
 
 interface TakeawayBoxProps {
   title: string;
   text: string | null | undefined;
-  color?: string; // kept for API compatibility, unused in new design
+  color?: string;
   inline?: boolean;
-  noBleed?: boolean; // omits -mx-6, uses rounded-lg (for use outside px-6 containers)
+  noBleed?: boolean;
 }
 
 export function TakeawayBox({ title, text, inline = false, noBleed = false }: TakeawayBoxProps) {
   return (
-    <div className={`bg-zinc-900 dark:bg-zinc-950 ${noBleed ? "rounded-lg" : "-mx-4 rounded-b-lg"} p-[20px]`}>
+    <div
+      className={noBleed ? "rounded-lg" : "-mx-4 rounded-b-lg"}
+      style={{ background: "var(--qc-text-heading)", padding: 20 }}
+    >
       {inline ? (
-        <p className="text-xs font-light text-zinc-200 leading-relaxed">
-          <Badge variant="destructive" className="mr-1.5">{title}</Badge>
-          <h4 className="text-[#FAFAFAE5]"><BoldText text={text ?? "N/A"} /></h4>
+        <p style={{ fontSize: 12, fontWeight: 300, color: "var(--qc-accent-lime)", lineHeight: 1.5 }}>
+          <span
+            style={{
+              display: "inline-block",
+              marginRight: 6,
+              fontSize: 9,
+              fontWeight: 600,
+              color: "var(--qc-text-heading)",
+              background: "var(--qc-accent-lime)",
+              borderRadius: 4,
+              padding: "2px 6px",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+            }}
+          >
+            {title}
+          </span>
+          <span style={{ color: "var(--qc-accent-primary-fg)" }}><BoldText text={text ?? "N/A"} /></span>
         </p>
       ) : (
         <>
-          <Badge variant="destructive">{title}</Badge>
-          <h4 className="text-[#FAFAFAE5] pt-4 line-clamp-2 text-truncate"><BoldText text={text ?? "N/A"} /></h4>
+          <span
+            style={{
+              display: "inline-block",
+              fontSize: 9,
+              fontWeight: 600,
+              color: "var(--qc-text-heading)",
+              background: "var(--qc-accent-lime)",
+              borderRadius: 4,
+              padding: "2px 6px",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+            }}
+          >
+            {title}
+          </span>
+          <p style={{ color: "var(--qc-accent-primary-fg)", paddingTop: 16, fontSize: 13, lineHeight: 1.5 }}>
+            <BoldText text={text ?? "N/A"} />
+          </p>
         </>
       )}
     </div>

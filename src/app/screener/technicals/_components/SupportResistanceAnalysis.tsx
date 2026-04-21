@@ -149,7 +149,7 @@ export function SupportResistanceAnalysis({
                             className="relative z-10 pl-2 font-semibold"
                             style={{
                               fontSize: 11,
-                              color: isCurrent ? "#fff" : "var(--qc-text-heading)",
+                              color: isCurrent ? "var(--qc-text-on-dark)" : "var(--qc-text-heading)",
                             }}
                           >
                             ₹{level.toFixed(2)}

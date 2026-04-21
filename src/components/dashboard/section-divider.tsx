@@ -6,24 +6,25 @@ interface SectionDividerProps {
 export function SectionDivider({ label, sublabel }: SectionDividerProps) {
   return (
     <div className="flex items-center gap-4 py-1">
-      <div className="flex-1 h-px bg-[#E2E2E2]" />
+      <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />
       <div className="flex flex-col items-center gap-0.5 px-1">
         <span
           style={{
             fontSize: 10,
             fontWeight: 700,
-            color: "#0F172B",
+            color: "var(--qc-text-heading)",
             textTransform: "uppercase",
             letterSpacing: "0.12em",
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
           }}
         >
           {label}
         </span>
         {sublabel && (
-          <span style={{ fontSize: 10, color: "#888888", letterSpacing: "0.02em" }}>{sublabel}</span>
+          <span style={{ fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: "0.02em" }}>{sublabel}</span>
         )}
       </div>
-      <div className="flex-1 h-px bg-[#E2E2E2]" />
+      <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />
     </div>
   );
 }

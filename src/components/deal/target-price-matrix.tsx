@@ -9,26 +9,20 @@ const scenarioConfig = [
   {
     key: "bear" as const,
     label: "Bear case",
-    borderColor: "border-orange-400",
-    badgeBg: "bg-orange-100 text-orange-700",
-    targetColor: "text-red-500",
-    progressColor: "bg-orange-400",
+    accentColor: "var(--qc-warn)",
+    targetColor: "var(--qc-down)",
   },
   {
     key: "base" as const,
     label: "Base case",
-    borderColor: "border-blue-400",
-    badgeBg: "bg-blue-100 text-blue-700",
-    targetColor: "text-blue-600",
-    progressColor: "bg-blue-500",
+    accentColor: "var(--qc-blue)",
+    targetColor: "var(--qc-blue)",
   },
   {
     key: "bull" as const,
     label: "Bull case",
-    borderColor: "border-emerald-400",
-    badgeBg: "bg-emerald-100 text-emerald-700",
-    targetColor: "text-emerald-600",
-    progressColor: "bg-emerald-400",
+    accentColor: "var(--qc-up)",
+    targetColor: "var(--qc-up)",
   },
 ];
 
@@ -43,84 +37,84 @@ function PriceCard({
   config: (typeof scenarioConfig)[number];
   caseData?: DPriceScenario;
 }) {
-  const fromCmpColor = isPositive(caseData?.from_cmp)
-    ? "text-emerald-600"
-    : "text-red-500";
+  const fromCmpColor = isPositive(caseData?.from_cmp) ? "var(--qc-up)" : "var(--qc-down)";
 
   return (
-    <div className={`rounded-lg border-2 ${config.borderColor} bg-white dark:bg-zinc-900 overflow-hidden`}>
+    <div
+      className="rounded-lg overflow-hidden"
+      style={{ border: `2px solid ${config.accentColor}`, background: "var(--qc-surface-white)" }}
+    >
       <div className="p-5 space-y-4">
-        {/* Badges */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${config.badgeBg}`}>
+          <span
+            className="text-xs font-semibold px-2.5 py-1 rounded-full"
+            style={{ background: `${config.accentColor}18`, color: config.accentColor, border: `1px solid ${config.accentColor}` }}
+          >
             {config.label}
           </span>
           {(caseData?.tags ?? []).map((tag) => (
             <span
               key={tag}
-              className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+              className="text-xs font-medium px-2.5 py-1 rounded-full"
+              style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)", border: "1px solid var(--qc-border-default)" }}
             >
               {tag}
             </span>
           ))}
         </div>
 
-        {/* Target Range — prominent */}
         <div className="space-y-1">
-          <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Target range</p>
-          <p className={`text-[32px] font-medium leading-tight ${config.targetColor}`}>
+          <p className="text-[11px] uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>Target range</p>
+          <p className="text-[32px] font-medium leading-tight" style={{ color: config.targetColor }}>
             {fmtDealNum(caseData?.target_range) ?? "N/A"}
           </p>
           <div className="flex items-center gap-2">
-            <span className={`text-sm font-semibold ${fromCmpColor}`}>
+            <span className="text-sm font-semibold" style={{ color: fromCmpColor }}>
               {fmtDealNum(caseData?.from_cmp) ?? "N/A"}
             </span>
-            <span className="text-[11px] text-zinc-500 dark:text-zinc-400">from CMP</span>
+            <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>from CMP</span>
           </div>
-          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{fmtDealNum(caseData?.cagr)}</p>
+          <p className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{fmtDealNum(caseData?.cagr)}</p>
         </div>
 
-        {/* Metrics table */}
-        <div className="space-y-0 border-t border-zinc-100 dark:border-zinc-800 pt-3">
+        <div className="space-y-0 pt-3" style={{ borderTop: "1px solid var(--qc-border-inner)" }}>
           <div className="flex items-center justify-between py-1.5">
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">EPS CAGR</span>
-            <span className={`text-sm font-semibold ${config.targetColor}`}>
+            <span className="text-xs" style={{ color: "var(--qc-text-muted)" }}>EPS CAGR</span>
+            <span className="text-sm font-semibold" style={{ color: config.targetColor }}>
               {fmtDealNum(caseData?.eps_cagr) ?? "N/A"}
             </span>
           </div>
           <div className="flex items-center justify-between py-1.5">
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">FY EPS</span>
-            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+            <span className="text-xs" style={{ color: "var(--qc-text-muted)" }}>FY EPS</span>
+            <span className="text-sm font-semibold" style={{ color: "var(--qc-text-heading)" }}>
               {fmtDealNum(caseData?.fy_eps) ?? "N/A"}
             </span>
           </div>
           <div className="flex items-center justify-between py-1.5">
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">Exit P/E</span>
-            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+            <span className="text-xs" style={{ color: "var(--qc-text-muted)" }}>Exit P/E</span>
+            <span className="text-sm font-semibold" style={{ color: "var(--qc-text-heading)" }}>
               {fmtDealNum(caseData?.exit_pe) ?? "N/A"}
             </span>
           </div>
 
-          {/* Probability */}
-          <div className="flex items-center justify-between py-1.5 border-t border-zinc-100 dark:border-zinc-800 mt-1 pt-2.5">
+          <div className="flex items-center justify-between py-1.5 mt-1 pt-2.5" style={{ borderTop: "1px solid var(--qc-border-inner)" }}>
             <div className="flex items-center gap-2 flex-1">
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">Probability</span>
-              <div className="h-1.5 flex-1 max-w-[100px] rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+              <span className="text-xs" style={{ color: "var(--qc-text-muted)" }}>Probability</span>
+              <div className="h-1.5 flex-1 max-w-[100px] rounded-full overflow-hidden" style={{ background: "var(--qc-surface-panel)" }}>
                 <div
-                  className={`h-full rounded-full ${config.progressColor}`}
-                  style={{ width: `${caseData?.probability ?? 0}%` }}
+                  className="h-full rounded-full"
+                  style={{ width: `${caseData?.probability ?? 0}%`, background: config.accentColor }}
                 />
               </div>
             </div>
-            <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+            <span className="text-sm font-semibold" style={{ color: "var(--qc-text-muted)" }}>
               {caseData?.probability ?? 0}%
             </span>
           </div>
         </div>
 
-        {/* PE Rationale */}
         {caseData?.pe_rationale && (
-          <p className="text-[12px] leading-relaxed text-zinc-500 dark:text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-3">
+          <p className="text-[12px] leading-relaxed pt-3" style={{ color: "var(--qc-text-muted)", borderTop: "1px solid var(--qc-border-inner)" }}>
             {caseData.pe_rationale}
           </p>
         )}

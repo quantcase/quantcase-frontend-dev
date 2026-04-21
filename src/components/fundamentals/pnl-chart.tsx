@@ -32,13 +32,13 @@ function fmtCr(val: number | null | undefined): string {
   return `${Math.round(Math.abs(val)).toLocaleString("en-IN")} Cr`;
 }
 
-// Design-system palette for chart series
+// Maps to --qc-* tokens (resolved hex for SVG fill compatibility)
 const COLORS = {
-  revenue:  "#A5B4FC",  // soft indigo bar
-  expenses: "#F0C8A0",  // warm amber bar (down)
-  interest: "#E09090",  // muted red bar (down)
-  opProfit: "#0E0E0C",  // ink line
-  netProfit:"#9A9A92",  // ink-3 dashed line
+  revenue:  "#C8C6C0",  // --qc-text-muted lighter: neutral bar for revenue
+  expenses: "#E9E7E1",  // --qc-border-default: muted expenses bar
+  interest: "#B23A2F",  // --qc-down: interest is a cost drag
+  opProfit: "#0E0E0C",  // --qc-text-heading: primary line
+  netProfit:"#9A9A92",  // --qc-text-muted: secondary dashed line
 };
 
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {

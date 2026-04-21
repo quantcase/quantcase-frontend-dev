@@ -163,7 +163,7 @@ function DealContent() {
     if (!symbol) {
       return (
         <div className="flex items-center justify-center py-20">
-          <div className="text-sm text-red-600">Error: No symbol provided in query parameters</div>
+          <div className="text-sm" style={{ color: "var(--qc-down)" }}>Error: No symbol provided in query parameters</div>
         </div>
       );
     }
@@ -171,7 +171,7 @@ function DealContent() {
     if (loading) {
       return (
         <div className="flex items-center justify-center py-20">
-          <div className="text-sm">Loading...</div>
+          <div className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading...</div>
         </div>
       );
     }
@@ -179,7 +179,7 @@ function DealContent() {
     if (transcriptError) {
       return (
         <div className="flex items-center justify-center py-20">
-          <div className="text-sm text-red-600">Error: {transcriptError}</div>
+          <div className="text-sm" style={{ color: "var(--qc-down)" }}>Error: {transcriptError}</div>
         </div>
       );
     }
@@ -187,7 +187,7 @@ function DealContent() {
     if (transcriptCalls.length === 0) {
       return (
         <div className="flex items-center justify-center py-20">
-          <div className="text-sm">No transcript calls found for {symbol}</div>
+          <div className="text-sm" style={{ color: "var(--qc-text-muted)" }}>No transcript calls found for {symbol}</div>
         </div>
       );
     }
@@ -197,56 +197,53 @@ function DealContent() {
       const transcriptCall = transcriptCalls[0];
       return (
         <div className="px-4 py-8 max-w-4xl mx-auto">
-          <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+          <div className="rounded-lg p-6" style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-default)" }}>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 py-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Quarter</p>
-                  <p className="font-semibold">{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
+                  <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Quarter</p>
+                  <p className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Call Date</p>
-                  <p className="font-semibold">{transcriptCall.call_date}</p>
+                  <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Call Date</p>
+                  <p className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>{transcriptCall.call_date}</p>
                 </div>
               </div>
-              <div className="pt-4 border-t border-border">
-                <p className="text-sm text-muted-foreground mb-4">
+              <div className="pt-4" style={{ borderTop: "1px solid var(--qc-border-default)" }}>
+                <p className="text-sm mb-4" style={{ color: "var(--qc-text-muted)" }}>
                   No deal analysis available for this transcript yet.
                 </p>
 
                 {analyzeError && (
-                  <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                    <p className="text-sm text-red-600 dark:text-red-400">{analyzeError}</p>
+                  <div className="mb-4 p-3 rounded-md" style={{ background: "var(--qc-down-soft)", border: "1px solid var(--qc-down)" }}>
+                    <p className="text-sm" style={{ color: "var(--qc-down)" }}>{analyzeError}</p>
                   </div>
                 )}
 
                 {aggregateStatus && (
-                  <div className={`mb-4 p-3 rounded-md border ${
-                    aggregateStatus === "completed"
-                      ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                      : aggregateStatus === "failed"
-                      ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-                      : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
-                  }`}>
+                  <div className="mb-4 p-3 rounded-md" style={{
+                    background: aggregateStatus === "completed" ? "var(--qc-up-soft)" : aggregateStatus === "failed" ? "var(--qc-down-soft)" : "var(--qc-blue-soft)",
+                    border: `1px solid ${aggregateStatus === "completed" ? "var(--qc-up)" : aggregateStatus === "failed" ? "var(--qc-down)" : "var(--qc-blue)"}`,
+                  }}>
                     {aggregateStatus === "processing" || aggregateStatus === "completed" ? (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <p className={`text-sm ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
+                          <p className="text-sm" style={{ color: aggregateStatus === "completed" ? "var(--qc-up)" : "var(--qc-blue)" }}>
                             {aggregateStatus === "completed" ? "Analysis complete!" : "Analyzing transcripts..."}
                           </p>
-                          <p className={`text-sm font-semibold ${aggregateStatus === "completed" ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"}`}>
+                          <p className="text-sm font-semibold" style={{ color: aggregateStatus === "completed" ? "var(--qc-up)" : "var(--qc-blue)" }}>
                             {progress}%
                           </p>
                         </div>
-                        <div className={`w-full rounded-full h-2 overflow-hidden ${aggregateStatus === "completed" ? "bg-green-200 dark:bg-green-800" : "bg-blue-200 dark:bg-blue-800"}`}>
+                        <div className="w-full rounded-full h-2 overflow-hidden" style={{ background: aggregateStatus === "completed" ? "var(--qc-up-soft)" : "var(--qc-blue-soft)" }}>
                           <div
-                            className={`h-full transition-all duration-300 ease-linear ${aggregateStatus === "completed" ? "bg-green-600 dark:bg-green-400" : "bg-blue-600 dark:bg-blue-400"}`}
-                            style={{ width: `${progress}%` }}
+                            className="h-full transition-all duration-300 ease-linear"
+                            style={{ width: `${progress}%`, background: aggregateStatus === "completed" ? "var(--qc-up)" : "var(--qc-blue)" }}
                           />
                         </div>
                       </div>
                     ) : (
-                      <p className={`text-sm ${aggregateStatus === "failed" ? "text-red-600 dark:text-red-400" : "text-blue-600 dark:text-blue-400"}`}>
+                      <p className="text-sm" style={{ color: aggregateStatus === "failed" ? "var(--qc-down)" : "var(--qc-blue)" }}>
                         {aggregateStatus === "failed" && "Analysis failed"}
                         {aggregateStatus === "pending" && "Analysis jobs queued..."}
                       </p>
@@ -257,7 +254,8 @@ function DealContent() {
                 <button
                   onClick={handleAnalyzeClick}
                   disabled={isAnalyzing}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}
                 >
                   {isAnalyzing
                     ? aggregateStatus === "pending" ? "Queued..." : aggregateStatus === "processing" ? "Processing..." : "Starting..."
@@ -265,8 +263,8 @@ function DealContent() {
                 </button>
               </div>
               {transcriptCall.ppt_url && (
-                <div className="pt-4 border-t border-border">
-                  <a href={transcriptCall.ppt_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                <div className="pt-4" style={{ borderTop: "1px solid var(--qc-border-default)" }}>
+                  <a href={transcriptCall.ppt_url} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: "var(--qc-accent-primary)" }}>
                     View Presentation →
                   </a>
                 </div>

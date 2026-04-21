@@ -13,6 +13,28 @@ interface CreateModelFormProps {
 
 const MODEL_TYPES: ModelType[] = ["equity", "debt", "hybrid", "structured", "pms", "aif"];
 
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  borderRadius: 6,
+  border: "1px solid var(--qc-border-default)",
+  background: "var(--qc-surface-card)",
+  color: "var(--qc-text-heading)",
+  fontSize: 13,
+  padding: "7px 12px",
+  outline: "none",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 11,
+  fontWeight: 500,
+  color: "var(--qc-text-muted)",
+  marginBottom: 4,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  fontFamily: "var(--font-ibm-plex-mono, monospace)",
+};
+
 export function CreateModelForm({ onSuccess, onCancel }: CreateModelFormProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -50,42 +72,55 @@ export function CreateModelForm({ onSuccess, onCancel }: CreateModelFormProps) {
     );
   };
 
-  const inputClass = "w-full rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-blue-500";
-  const labelClass = "text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1 block";
-
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 rounded-[14px] p-5"
+      style={{
+        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-surface-card)",
+      }}
+    >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">New Approved Model</h3>
-        <button type="button" onClick={onCancel} className="text-xs text-zinc-400 hover:text-zinc-600">Cancel</button>
+        <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>
+          New Approved Model
+        </h3>
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{ fontSize: 12, color: "var(--qc-text-muted)" }}
+          className="hover:opacity-70 transition-opacity"
+        >
+          Cancel
+        </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="md:col-span-2">
-          <label className={labelClass}>Model Name *</label>
-          <input type="text" value={name} onChange={e => setName(e.target.value)} required placeholder="Conservative Debt Ladder" className={inputClass} />
+          <label style={labelStyle}>Model Name *</label>
+          <input type="text" value={name} onChange={e => setName(e.target.value)} required placeholder="Conservative Debt Ladder" style={inputStyle} />
         </div>
         <div>
-          <label className={labelClass}>Type *</label>
-          <select value={modelType} onChange={e => setModelType(e.target.value as ModelType)} required className={inputClass}>
+          <label style={labelStyle}>Type *</label>
+          <select value={modelType} onChange={e => setModelType(e.target.value as ModelType)} required style={inputStyle}>
             {MODEL_TYPES.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
           </select>
         </div>
         <div>
-          <label className={labelClass}>Description</label>
-          <input type="text" value={description} onChange={e => setDescription(e.target.value)} placeholder="Short description..." className={inputClass} />
+          <label style={labelStyle}>Description</label>
+          <input type="text" value={description} onChange={e => setDescription(e.target.value)} placeholder="Short description..." style={inputStyle} />
         </div>
         <div className="md:col-span-2">
-          <label className={labelClass}>Model Data (JSON, optional)</label>
+          <label style={labelStyle}>Model Data (JSON, optional)</label>
           <textarea
             value={dataJson}
             onChange={e => setDataJson(e.target.value)}
             rows={3}
             placeholder='{"target_duration": 3, "max_credit_risk": "AA"}'
-            className={`${inputClass} resize-none font-mono text-xs`}
+            style={{ ...inputStyle, resize: "none", fontFamily: "var(--font-ibm-plex-mono, monospace)", fontSize: 12 }}
           />
         </div>
       </div>
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p style={{ fontSize: 13, color: "var(--qc-down)" }}>{error}</p>}
       <Button type="submit" size="sm" disabled={loading}>
         {loading ? "Creating..." : "Create Model"}
       </Button>

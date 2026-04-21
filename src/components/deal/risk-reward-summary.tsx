@@ -4,24 +4,23 @@ interface RiskRewardSummaryProps {
   data?: RiskRewardSummarySection;
 }
 
-// Starts with "+" → emerald, starts with "-" → zinc, no sign → emerald
-function valueColor(value?: string) {
-  if (!value) return "text-zinc-900 dark:text-zinc-50";
-  if (value.startsWith("+")) return "text-emerald-600 dark:text-emerald-400";
-  if (value.startsWith("-")) return "text-zinc-900 dark:text-zinc-50";
-  return "text-emerald-600 dark:text-emerald-400";
+function valueCssColor(value?: string): string {
+  if (!value) return "var(--qc-text-heading)";
+  if (value.startsWith("+")) return "var(--qc-up)";
+  if (value.startsWith("-")) return "var(--qc-text-heading)";
+  return "var(--qc-up)";
 }
 
 function MetricCard({ metric }: { metric?: RiskRewardMetric }) {
   return (
-    <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 p-5 space-y-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+    <div className="rounded-xl p-5 space-y-3" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
+      <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>
         {metric?.label ?? "—"}
       </p>
-      <p className={`text-[26px] font-normal leading-none ${valueColor(metric?.value)}`}>
+      <p className="text-[26px] font-normal leading-none" style={{ color: valueCssColor(metric?.value) }}>
         {metric?.value ?? "N/A"}
       </p>
-      <p className="text-xs text-zinc-400 dark:text-zinc-500 pt-1">
+      <p className="text-xs pt-1" style={{ color: "var(--qc-text-muted)" }}>
         {metric?.subtitle}
       </p>
     </div>

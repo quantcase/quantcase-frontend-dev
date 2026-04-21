@@ -7,9 +7,9 @@ import type { DecisionIntelligence, DecisionIntelligenceIndicator } from "@/type
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function sentimentVars(sentiment: DecisionIntelligenceIndicator["sentiment"]) {
-  if (sentiment === "positive") return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "#BBD9C6" };
-  if (sentiment === "negative") return { color: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "#F0C0BB" };
-  return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "#E8D4A0" };
+  if (sentiment === "positive") return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "rgba(31, 122, 74, 0.25)" };
+  if (sentiment === "negative") return { color: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "rgba(178, 58, 47, 0.25)" };
+  return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "rgba(180, 115, 26, 0.25)" };
 }
 
 function convictionConfig(level: string) {
@@ -306,35 +306,6 @@ export function DecisionIntelligenceBanner({ di }: Props) {
           flexDirection: "column",
           gap: 10,
         }}>
-          {di.riskAlerts.length > 0 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <AlertTriangle style={{ width: 11, height: 11, color: "var(--qc-text-muted)" }} />
-                <span style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                  letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
-                }}>
-                  Risk Alerts
-                </span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {di.riskAlerts.map((item, i) => (
-                  <div key={i} style={{
-                    display: "flex", alignItems: "flex-start", gap: 8,
-                    padding: "5px 0",
-                    borderBottom: i < di.riskAlerts.length - 1 ? "1px solid var(--qc-border-default)" : "none",
-                  }}>
-                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--qc-down)", flexShrink: 0, marginTop: 5 }} />
-                    <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>{item}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {di.riskAlerts.length > 0 && di.whatCanChange.length > 0 && (
-            <div style={{ height: 1, background: "var(--qc-border-default)" }} />
-          )}
 
           {di.whatCanChange.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

@@ -14,16 +14,19 @@ function ModelsContent() {
 
   const handleModelCreated = (model: WealthModel) => {
     setShowForm(false);
-    // Model list will refresh on next render if we add refetch support
-    // For now, page reload works since the hook re-runs on mount
     void model;
     window.location.reload();
   };
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-6 space-y-5" style={{ background: "var(--qc-surface-base)", minHeight: "100vh" }}>
       <div className="flex items-center justify-between">
-        <h1 className="text-base font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wide">Approved Investment Models</h1>
+        <h1
+          className="uppercase tracking-wide"
+          style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.05em" }}
+        >
+          Approved Investment Models
+        </h1>
         <Button size="sm" onClick={() => setShowForm(v => !v)}>
           {showForm ? "Cancel" : "+ Add Model"}
         </Button>
@@ -34,12 +37,18 @@ function ModelsContent() {
       <SectionPanel title="All Models" subtitle={`${models.length} approved models`} contentClassName="px-6 pb-6">
         {loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[1, 2, 3].map(i => <div key={i} className="h-24 bg-zinc-100 dark:bg-zinc-800 rounded-xl animate-pulse" />)}
+            {[1, 2, 3].map(i => (
+              <div
+                key={i}
+                className="h-24 rounded-xl animate-pulse"
+                style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}
+              />
+            ))}
           </div>
         )}
-        {error && <p className="text-sm text-red-500 py-4">{error}</p>}
+        {error && <p className="py-4" style={{ fontSize: 13, color: "var(--qc-down)" }}>{error}</p>}
         {!loading && models.length === 0 && (
-          <p className="text-sm text-zinc-400 dark:text-zinc-500 py-6 text-center">
+          <p className="py-6 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
             No approved models yet. Add one to enable AI suggestions.
           </p>
         )}
@@ -55,7 +64,7 @@ function ModelsContent() {
 
 export default function WealthOSModelsPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-zinc-400">Loading...</div>}>
+    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading...</div>}>
       <ModelsContent />
     </Suspense>
   );

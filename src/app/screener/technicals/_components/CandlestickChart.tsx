@@ -76,12 +76,12 @@ const OVERLAY_CONFIGS: Record<ChartMode, LineConfig[]> = {
     { key: "bbLower",  color: "#9A9A92", lineWidth: 1, title: "BB Lower" },
   ],
   TREND: [
-    { key: "sma20",  color: "#B4731A", lineWidth: 1, title: "SMA 20" },
-    { key: "sma50",  color: "#3A6BEF", lineWidth: 1, title: "SMA 50" },
-    { key: "sma100", color: "#7C3AED", lineWidth: 1, title: "SMA 100" },
-    { key: "sma200", color: QC_DOWN,   lineWidth: 2, title: "SMA 200" },
-    { key: "ema20",  color: "#D97706", lineWidth: 1, title: "EMA 20" },
-    { key: "ema50",  color: "#0891B2", lineWidth: 1, title: "EMA 50" },
+    { key: "sma20",  color: QC_MUTED,   lineWidth: 1, title: "SMA 20" },
+    { key: "sma50",  color: "#7A7A72",  lineWidth: 1, title: "SMA 50" },  // mid-muted step
+    { key: "sma100", color: "#5A5A54",  lineWidth: 1, title: "SMA 100" }, // --qc-text-body
+    { key: "sma200", color: QC_HEADING, lineWidth: 2, title: "SMA 200" }, // dominant, thicker
+    { key: "ema20",  color: QC_UP,      lineWidth: 1, title: "EMA 20" },  // --qc-up for EMA pair
+    { key: "ema50",  color: QC_DOWN,    lineWidth: 1, title: "EMA 50" },  // --qc-down for EMA pair
   ],
   TIMING: [
     { key: "bbUpper",  color: "#9A9A92", lineWidth: 1, title: "BB Upper" },
@@ -92,10 +92,10 @@ const OVERLAY_CONFIGS: Record<ChartMode, LineConfig[]> = {
 };
 
 const OSCILLATOR_CONFIGS: Record<ChartMode, OscillatorConfig | null> = {
-  DEFAULT:   { key: "rsi14", color: "#7C3AED", title: "RSI (14)", height: 80 },
-  STRUCTURE: { key: "cmf14", color: "#3A6BEF", title: "CMF (14)", height: 80 },
-  TREND:     { key: "adx14", color: "#7C3AED", title: "ADX (14)", height: 80 },
-  TIMING:    { key: "rsi14", color: "#B4731A", title: "RSI (14)", height: 80 },
+  DEFAULT:   { key: "rsi14", color: QC_HEADING, title: "RSI (14)", height: 80 },
+  STRUCTURE: { key: "cmf14", color: QC_HEADING, title: "CMF (14)", height: 80 },
+  TREND:     { key: "adx14", color: QC_HEADING, title: "ADX (14)", height: 80 },
+  TIMING:    { key: "rsi14", color: QC_HEADING, title: "RSI (14)", height: 80 },
   "RELATIVE STRENGTH": null,
 };
 
@@ -200,7 +200,7 @@ export function CandlestickChart({
 
     const chart = createChart(containerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: "#FFFFFF" },
+        background: { type: ColorType.Solid, color: "#FBFAF7" }, // --qc-surface-white
         textColor: QC_MUTED,
         fontFamily: "IBM Plex Mono, monospace",
         fontSize: 11,
@@ -478,7 +478,7 @@ export function CandlestickChart({
           if (oscCfg.key === "cmf14") {
             // CMF zero-line
             const zeroLine = chart.addSeries(LineSeries, {
-              color: "#d1d5db", lineWidth: 1, lineStyle: 2,
+              color: QC_BORDER, lineWidth: 1, lineStyle: 2,
               priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
             }, 1);
             zeroLine.setData([{ time: firstDate, value: 0 }, { time: lastDate, value: 0 }]);
@@ -489,7 +489,7 @@ export function CandlestickChart({
             // RSI 30/70 reference lines
             for (const [refVal, label] of [[30, "__rsi_30"], [70, "__rsi_70"]] as const) {
               const refLine = chart.addSeries(LineSeries, {
-                color: "#d1d5db", lineWidth: 1, lineStyle: 2,
+                color: QC_BORDER, lineWidth: 1, lineStyle: 2,
                 priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
               }, 1);
               refLine.setData([{ time: firstDate, value: refVal }, { time: lastDate, value: refVal }]);
@@ -528,7 +528,7 @@ export function CandlestickChart({
       }
       if (avgVolData.length > 0) {
         const avgVolSeries = chart.addSeries(LineSeries, {
-          color: "#3A6BEF",
+          color: QC_MUTED,
           lineWidth: 1,
           priceScaleId: "volume",
           priceLineVisible: false,
@@ -538,7 +538,7 @@ export function CandlestickChart({
         });
         avgVolSeries.setData(avgVolData);
         overlayMapRef.current.set("Avg Vol (20)", { series: avgVolSeries, isOsc: false });
-        nextLegend.push({ key: "Avg Vol (20)", title: "Avg Vol (20)", color: "#3A6BEF", isOsc: false, visible: true });
+        nextLegend.push({ key: "Avg Vol (20)", title: "Avg Vol (20)", color: QC_MUTED, isOsc: false, visible: true });
       }
     }
 

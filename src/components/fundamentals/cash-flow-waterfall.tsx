@@ -74,7 +74,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         dataLabels: { position: "top" },
       },
     },
-    // transparent spacer, ds-up, ds-down, neutral ink
+    // transparent spacer, --qc-up, --qc-down, --qc-text-body (ApexCharts requires hex)
     colors: ["transparent", "#1F7A4A", "#B23A2F", "#5A5A54"],
     dataLabels: {
       enabled: true,
@@ -87,7 +87,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         fontSize: "10px",
         fontWeight: "500",
         fontFamily: "'IBM Plex Mono', monospace",
-        colors: ["#0E0E0C"],
+        colors: ["#0E0E0C"], // --qc-text-heading
       },
       offsetY: -4,
     },
@@ -97,7 +97,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         rotate: -45,
         style: {
           fontSize: "10px",
-          colors: "#9A9A92",
+          colors: "#9A9A92", // --qc-text-muted
           fontFamily: "'IBM Plex Mono', monospace",
         },
       },
@@ -109,13 +109,13 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         formatter: (val: number) => `${Math.round(val).toLocaleString("en-IN")}`,
         style: {
           fontSize: "10px",
-          colors: ["#9A9A92"],
+          colors: ["#9A9A92"], // --qc-text-muted
           fontFamily: "'IBM Plex Mono', monospace",
         },
       },
     },
     grid: {
-      borderColor: "#EFEDE7",
+      borderColor: "#EFEDE7", // --qc-surface-row-alt / --qc-border-inner
       strokeDashArray: 3,
       xaxis: { lines: { show: false } },
     },
@@ -129,7 +129,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
       markers: { size: 8 },
       onItemClick: { toggleDataSeries: false },
       formatter: (seriesName: string) => (seriesName === "spacer" ? "" : seriesName),
-      labels: { colors: "#5A5A54" },
+      labels: { colors: "#5A5A54" }, // --qc-text-body
     },
     tooltip: {
       shared: false,

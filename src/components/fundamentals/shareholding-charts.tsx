@@ -2,8 +2,8 @@ import ApexChart from "@/components/molecules/apex-chart";
 import type { ShareholdingSection } from "@/hooks/useShareholding";
 import { MonoEyebrow } from "@/components/overview/primitives";
 
-// Ink-family palette: heading → body → muted → ink-3 variants
-const SHAREHOLDING_COLORS = ["#0E0E0C", "#5A5A54", "#9A9A92", "#C8C6C0", "#3A3A38", "#2A2A28", "#1A1A18"];
+// Ink-family steps from --qc-text-heading down to lighter tones for donut segments
+const SHAREHOLDING_COLORS = ["#0E0E0C", "#3A3A38", "#5A5A54", "#7A7A72", "#9A9A92", "#B8B6B0", "#C8C6C0"];
 
 export function ShareholdingCharts({
   sections,
@@ -51,7 +51,7 @@ export function ShareholdingCharts({
               label: "Total",
               fontSize: "11px",
               fontFamily: "'IBM Plex Mono', monospace",
-              color: "#9A9A92",
+              color: "#9A9A92", // --qc-text-muted resolved (ApexCharts requires hex)
               formatter: () => "100%",
             },
           },
@@ -62,7 +62,7 @@ export function ShareholdingCharts({
       theme: "light",
       y: { formatter: (val: number) => `${val.toFixed(1)}%` },
     },
-    stroke: { width: 2, colors: ["var(--qc-surface-white, #FBFAF7)"] },
+    stroke: { width: 2, colors: ["#FBFAF7"] },
   };
 
   return (
@@ -98,7 +98,7 @@ export function ShareholdingCharts({
                     style={{
                       width: `${(item.value / maxValue) * 100}%`,
                       height: "100%",
-                      background: SHAREHOLDING_COLORS[i % SHAREHOLDING_COLORS.length],
+                      background: "var(--qc-text-heading)",
                       borderRadius: 6,
                       transition: "width 0.4s ease",
                     }}

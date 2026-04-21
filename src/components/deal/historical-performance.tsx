@@ -9,71 +9,68 @@ import type { HistoricalPerformanceSection } from "@/types/deal";
 import { fmtDealNum } from "@/lib/utils";
 import { historicalPerformanceData } from "@/components/deal/detailed-analysis-data";
 
+// Chart hex colors (Recharts can't use CSS vars)
+const CHART = {
+  grid: "#f4f4f5",
+  axis: "#a1a1aa",
+  companyBar: "#0E0E0C",   // --qc-text-heading approx
+  industryLine: "#9A9A92", // --qc-text-muted approx
+};
+
 interface HistoricalPerformanceProps {
   data?: HistoricalPerformanceSection;
   hideHeader?: boolean;
 }
 
-const statColors: Record<string, { value: string; bg: string; border: string }> = {
-  emerald: { value: "text-[#0F172B]", bg: "bg-[#F5F5F5]", border: "border-[#E2E2E2]" },
-  blue:    { value: "text-[#0F172B]", bg: "bg-[#F5F5F5]", border: "border-[#E2E2E2]" },
-  purple:  { value: "text-[#0F172B]", bg: "bg-[#F5F5F5]", border: "border-[#E2E2E2]" },
-};
-
 export function HistoricalPerformance({ data, hideHeader }: HistoricalPerformanceProps) {
-  // Fall back to static data during dev
-  const title         = data?.meta?.title        ?? historicalPerformanceData.title;
-  const subtitle      = data?.meta?.subtitle     ?? historicalPerformanceData.subtitle;
-  const companyGrowth = data?.company_growth     ?? historicalPerformanceData.companyGrowth;
-  const industryGrowth= data?.industry_growth    ?? historicalPerformanceData.industryGrowth;
-  const companyName   = data?.company_name       ?? historicalPerformanceData.companyName;
-  const industryName  = data?.industry_name      ?? historicalPerformanceData.industryName;
-  const chartData     = data?.chart_data         ?? historicalPerformanceData.chartData;
-  const stats         = data?.stats?.map(s => ({ ...s, color: s.color }))
-                        ?? historicalPerformanceData.stats;
+  const title          = data?.meta?.title        ?? historicalPerformanceData.title;
+  const subtitle       = data?.meta?.subtitle     ?? historicalPerformanceData.subtitle;
+  const companyGrowth  = data?.company_growth     ?? historicalPerformanceData.companyGrowth;
+  const industryGrowth = data?.industry_growth    ?? historicalPerformanceData.industryGrowth;
+  const companyName    = data?.company_name       ?? historicalPerformanceData.companyName;
+  const industryName   = data?.industry_name      ?? historicalPerformanceData.industryName;
+  const chartData      = data?.chart_data         ?? historicalPerformanceData.chartData;
+  const stats          = data?.stats?.map(s => ({ ...s, color: s.color })) ?? historicalPerformanceData.stats;
 
   return (
     <div className="space-y-5">
-      {/* Section Header */}
       {!hideHeader && (
         <div className="flex items-center gap-2.5">
-          <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] flex items-center justify-center flex-shrink-0">
-            <BarChart2 className="h-4 w-4 text-zinc-500" />
+          <div className="flex items-center justify-center flex-shrink-0" style={{ padding: 4, borderRadius: 6, border: "1px solid var(--qc-icon-box-border)", background: "var(--qc-icon-box-bg)" }}>
+            <BarChart2 className="h-4 w-4" style={{ color: "var(--qc-text-muted)" }} />
           </div>
           <div>
-            <h3 className="text-[14px] font-semibold text-[#0F172B] uppercase tracking-[0.01em] mb-0.5">{title}</h3>
-            {subtitle && <p className="text-[14px] text-[#888888]">{subtitle}</p>}
+            <h3 className="text-[14px] font-semibold uppercase tracking-[0.01em] mb-0.5" style={{ color: "var(--qc-text-heading)" }}>{title}</h3>
+            {subtitle && <p className="text-[14px]" style={{ color: "var(--qc-text-muted)" }}>{subtitle}</p>}
           </div>
         </div>
       )}
 
-      {/* Top 2 stat tiles */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-lg bg-[#F5F5F5] border border-[#E2E2E2] p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">
+        <div className="rounded-lg p-4" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--qc-text-muted)" }}>
             Company Earnings Growth
           </p>
-          <p className="text-[26px] font-normal text-[#0F172B]">{fmtDealNum(companyGrowth.value)}</p>
-          <p className="text-xs text-[#888888] mt-0.5">{companyGrowth.label}</p>
+          <p className="text-[26px] font-normal" style={{ color: "var(--qc-text-heading)" }}>{fmtDealNum(companyGrowth.value)}</p>
+          <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{companyGrowth.label}</p>
         </div>
-        <div className="rounded-lg bg-[#F5F5F5] border border-[#E2E2E2] p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">
+        <div className="rounded-lg p-4" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--qc-text-muted)" }}>
             Industry Earnings Growth
           </p>
-          <p className="text-[26px] font-normal text-[#0F172B]">{fmtDealNum(industryGrowth.value)}</p>
-          <p className="text-xs text-[#888888] mt-0.5">{industryGrowth.label}</p>
+          <p className="text-[26px] font-normal" style={{ color: "var(--qc-text-heading)" }}>{fmtDealNum(industryGrowth.value)}</p>
+          <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{industryGrowth.label}</p>
         </div>
       </div>
 
-      {/* Combo chart */}
-      <div className="rounded-lg border border-[#E2E2E2] bg-white p-4">
+      <div className="rounded-lg p-4" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
         <div className="h-60">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 10, fill: "#a1a1aa" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "#a1a1aa" }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e4e4e7", backgroundColor: "white" }} itemStyle={{ padding: '0px 10px' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} vertical={false} />
+              <XAxis dataKey="year" tick={{ fontSize: 10, fill: CHART.axis }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: CHART.axis }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e4e4e7", backgroundColor: "white" }} itemStyle={{ padding: "0px 10px" }} />
               <Legend
                 iconSize={8}
                 wrapperStyle={{ fontSize: 10 }}
@@ -83,31 +80,20 @@ export function HistoricalPerformance({ data, hideHeader }: HistoricalPerformanc
                     : `${industryName} Earnings Growth (%)`
                 }
               />
-              <Bar dataKey="company" fill="#0F172B" radius={[3, 3, 0, 0]} maxBarSize={50} />
-              <Line
-                type="monotone"
-                dataKey="industry"
-                stroke="#71717a"
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={{ r: 4, fill: "#71717a" }}
-              />
+              <Bar dataKey="company" fill={CHART.companyBar} radius={[3, 3, 0, 0]} maxBarSize={50} />
+              <Line type="monotone" dataKey="industry" stroke={CHART.industryLine} strokeWidth={2} strokeDasharray="5 5" dot={{ r: 4, fill: CHART.industryLine }} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Bottom 3 stats */}
       <div className="grid grid-cols-3 gap-3">
-        {stats.map((stat, i) => {
-          const colors = statColors[stat.color] ?? statColors.emerald;
-          return (
-            <div key={i} className={`rounded-lg border ${colors.border} ${colors.bg} p-3 text-center`}>
-              <p className={`text-[26px] font-normal ${colors.value}`}>{fmtDealNum(stat.value)}</p>
-              <p className="text-[10px] text-[#888888] mt-0.5">{stat.label}</p>
-            </div>
-          );
-        })}
+        {stats.map((stat, i) => (
+          <div key={i} className="rounded-lg p-3 text-center" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
+            <p className="text-[26px] font-normal" style={{ color: "var(--qc-text-heading)" }}>{fmtDealNum(stat.value)}</p>
+            <p className="text-[10px] mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{stat.label}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

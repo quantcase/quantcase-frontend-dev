@@ -44,7 +44,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
         fontSize: "12px",
         fontWeight: "500",
         fontFamily: "'IBM Plex Mono', monospace",
-        colors: ["#FBFAF7"],
+        colors: ["#FBFAF7"], // --qc-surface-white resolved (text on dark treemap fills)
       },
       formatter: (text: string, op?: ApexCharts.ApexFormatterOpts) =>
         op?.value !== undefined ? [`${text}`, fmtCr(op.value as number)] : text,
@@ -98,7 +98,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
               </span>
             )}
           </div>
-          <ApexChart type="treemap" series={[{ name: "Assets", data: assets }]} options={baseOptions("#1F7A4A")} height={380} />
+          <ApexChart type="treemap" series={[{ name: "Assets", data: assets }]} options={baseOptions("#1F7A4A" /* --qc-up */)} height={380} />
         </div>
         <div>
           <div
@@ -120,7 +120,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
               </span>
             )}
           </div>
-          <ApexChart type="treemap" series={[{ name: "Liabilities", data: liabilities }]} options={baseOptions("#B23A2F")} height={380} />
+          <ApexChart type="treemap" series={[{ name: "Liabilities", data: liabilities }]} options={baseOptions("#B23A2F" /* --qc-down */)} height={380} />
         </div>
       </div>
     </div>

@@ -24,7 +24,8 @@ import { CashFlowWaterfall } from "@/components/fundamentals/cash-flow-waterfall
 import { ShareholdingCharts } from "@/components/fundamentals/shareholding-charts";
 import { ViewToggle } from "@/components/fundamentals/view-toggle";
 import { PnLChart } from "@/components/fundamentals/pnl-chart";
-import { SectionShell, SectionLabel, MonoEyebrow } from "@/components/overview/primitives";
+import { SectionPanel } from "@/components/molecules/section-panel";
+
 
 
 const FUNDAMENTALS_NAV = [
@@ -95,17 +96,16 @@ const SENTIMENT_COLOR: Record<string, string> = {
 function SwotSection() {
   return (
     <div id="section-swot">
-      <SectionShell>
-        <SectionLabel>SWOT Analysis</SectionLabel>
-        <MonoEyebrow style={{ marginBottom: 14 }}>Strategic assessment across four dimensions</MonoEyebrow>
+      <SectionPanel title="SWOT Analysis" subtitle="Strategic assessment across four dimensions">
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
             gap: 1,
             background: "var(--qc-border-default)",
-            borderRadius: 14,
+            borderRadius: 10,
             overflow: "hidden",
+            margin: "-16px",
           }}
         >
           {SWOT_ITEMS.map(({ key, icon: Icon, label, sentiment, points }) => {
@@ -122,9 +122,9 @@ function SwotSection() {
                   <div
                     style={{
                       padding: 5,
-                      borderRadius: 8,
-                      border: "1px solid var(--qc-border-default)",
-                      background: "var(--qc-surface-panel)",
+                      borderRadius: 6,
+                      border: "1px solid var(--qc-icon-box-border)",
+                      background: "var(--qc-icon-box-bg)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -177,7 +177,7 @@ function SwotSection() {
             );
           })}
         </div>
-      </SectionShell>
+      </SectionPanel>
     </div>
   );
 }
@@ -377,9 +377,7 @@ function FinancialsContent() {
 
         {/* Growth & Returns */}
         <div id="section-growth-returns">
-          <SectionShell>
-            <SectionLabel>Growth &amp; Returns</SectionLabel>
-            <MonoEyebrow style={{ marginBottom: 14 }}>Compounded growth rates and return metrics</MonoEyebrow>
+          <SectionPanel title="Growth & Returns" subtitle="Compounded growth rates and return metrics">
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
               <GrowthStatCard
                 title="Compounded Sales Growth"
@@ -418,7 +416,7 @@ function FinancialsContent() {
                 ]}
               />
             </div>
-          </SectionShell>
+          </SectionPanel>
         </div>
 
       </div>

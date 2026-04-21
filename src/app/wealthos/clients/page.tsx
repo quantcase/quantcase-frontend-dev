@@ -19,6 +19,16 @@ const SEGMENTS: Array<{ label: string; value: string }> = [
   { label: "Private", value: "Private" },
 ];
 
+const selectStyle: React.CSSProperties = {
+  borderRadius: 6,
+  border: "1px solid var(--qc-border-default)",
+  background: "var(--qc-surface-card)",
+  color: "var(--qc-text-heading)",
+  fontSize: 13,
+  padding: "6px 10px",
+  outline: "none",
+};
+
 function ClientsContent() {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -49,17 +59,26 @@ function ClientsContent() {
   const totalPages = clientsData ? Math.ceil(clientsData.total / 20) : 0;
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-6 space-y-5" style={{ background: "var(--qc-surface-base)", minHeight: "100vh" }}>
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-zinc-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5" style={{ color: "var(--qc-text-muted)" }} />
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search clients..."
-            className="w-full rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-8 pr-3 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            style={{
+              width: "100%",
+              borderRadius: 6,
+              border: "1px solid var(--qc-border-default)",
+              background: "var(--qc-surface-card)",
+              color: "var(--qc-text-heading)",
+              fontSize: 13,
+              padding: "6px 10px 6px 32px",
+              outline: "none",
+            }}
           />
         </div>
         <div className="flex items-center gap-1">
@@ -67,11 +86,16 @@ function ClientsContent() {
             <button
               key={s.value}
               onClick={() => { setSegment(s.value); setPage(1); }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                segment === s.value
-                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                  : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
-              }`}
+              className="transition-colors"
+              style={{
+                padding: "5px 12px",
+                borderRadius: 6,
+                fontSize: 12,
+                fontWeight: 500,
+                border: segment === s.value ? "1px solid var(--qc-border-active)" : "1px solid var(--qc-border-default)",
+                background: segment === s.value ? "var(--qc-accent-primary)" : "var(--qc-surface-card)",
+                color: segment === s.value ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
+              }}
             >
               {s.label}
             </button>
@@ -80,7 +104,7 @@ function ClientsContent() {
         <select
           value={rmFilter}
           onChange={e => { setRmFilter(e.target.value); setPage(1); }}
-          className="rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          style={selectStyle}
         >
           <option value="">All RMs</option>
           {rms.map(rm => <option key={rm.id} value={rm.id}>{rm.name}</option>)}
@@ -98,13 +122,17 @@ function ClientsContent() {
         {loading && (
           <div className="space-y-3">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 h-20 animate-pulse" />
+              <div
+                key={i}
+                className="rounded-xl h-20 animate-pulse"
+                style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+              />
             ))}
           </div>
         )}
-        {error && <p className="text-sm text-red-500 py-4 text-center">{error}</p>}
+        {error && <p className="py-4 text-center" style={{ fontSize: 13, color: "var(--qc-down)" }}>{error}</p>}
         {!loading && (clientsData?.items?.length ?? 0) === 0 && !error && (
-          <p className="text-sm text-zinc-400 dark:text-zinc-500 py-8 text-center">No clients found</p>
+          <p className="py-8 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>No clients found</p>
         )}
         {clientsData?.items?.map(client => (
           <ClientCard key={client.id} mode="list" item={client} />
@@ -120,7 +148,7 @@ function ClientsContent() {
             >
               <ChevronLeft className="size-3.5 mr-1" /> Prev
             </Button>
-            <span className="text-xs text-zinc-500">Page {page} of {totalPages}</span>
+            <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>Page {page} of {totalPages}</span>
             <Button
               size="sm"
               variant="outline"
@@ -138,7 +166,7 @@ function ClientsContent() {
 
 export default function WealthOSClientsPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-zinc-400">Loading...</div>}>
+    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading...</div>}>
       <ClientsContent />
     </Suspense>
   );

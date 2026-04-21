@@ -2,39 +2,33 @@
 
 import {
   TrendingUp, Package, BarChart2, Zap, AlertTriangle,
-  DollarSign, CheckCircle2, XCircle, Info,
+  DollarSign, CheckCircle2, XCircle,
 } from "lucide-react";
 import type { IndustryOverviewSection } from "@/types/opportunity";
 import { MetricTile } from "@/components/molecules/metric-tile";
-import { TakeawayBox } from "@/components/opportunity/takeaway-box";
-import { InsightsCard } from "@/components/opportunity/insights-card";
 
 interface IndustryAnalysisCardProps {
   data?: IndustryOverviewSection;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function sentimentToColor(sentiment: string): string {
-  if (sentiment === "positive") return "green";
-  if (sentiment === "negative") return "red";
-  return "amber";
+function sentimentToLevel(sentiment: string): "up" | "down" | "warn" {
+  if (sentiment === "positive") return "up";
+  if (sentiment === "negative") return "down";
+  return "warn";
 }
 
-const FINDING_COLORS: Record<string, { border: string; label: string; labelColor: string }> = {
-  green: { border: "#22c55e", label: "POSITIVE",   labelColor: "#22c55e" },
-  red:   { border: "#ef4444", label: "NEGATIVE",   labelColor: "#ef4444" },
-  amber: { border: "#f59e0b", label: "MIXED",      labelColor: "#f59e0b" },
-};
+function levelCssColor(level: "up" | "down" | "warn"): string {
+  if (level === "up") return "var(--qc-up)";
+  if (level === "down") return "var(--qc-down)";
+  return "var(--qc-warn)";
+}
 
-function scoreColor(score: number, max: number) {
+function scoreColor(score: number, max: number): string {
   const pct = max > 0 ? score / max : 0;
-  if (pct >= 0.7) return "#059669";
-  if (pct >= 0.4) return "#D97706";
-  return "#dc2626";
+  if (pct >= 0.7) return "var(--qc-up)";
+  if (pct >= 0.4) return "var(--qc-warn)";
+  return "var(--qc-down)";
 }
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function FindingsGrid({ data }: { data: IndustryOverviewSection }) {
   const signals = data.final_scoring?.signal_breakdown ?? [];
@@ -42,20 +36,20 @@ function FindingsGrid({ data }: { data: IndustryOverviewSection }) {
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
       {signals.map((s) => {
-        const color = sentimentToColor(s.sentiment);
-        const cfg = FINDING_COLORS[color];
+        const level = sentimentToLevel(s.sentiment);
+        const borderColor = levelCssColor(level);
         const fill = scoreColor(s.score, s.max_score);
         return (
           <div
             key={s.key}
             style={{
-              borderLeft: `4px solid ${cfg.border}`,
+              borderLeft: `4px solid ${borderColor}`,
               paddingLeft: 12, paddingTop: 10, paddingBottom: 10, paddingRight: 12,
-              background: "#F9F9F9", borderRadius: "0 6px 6px 0",
+              background: "var(--qc-surface-panel)", borderRadius: "0 6px 6px 0",
             }}
           >
             <div className="flex items-center justify-between mb-1.5">
-              <p style={{ fontSize: 10, fontWeight: 600, color: cfg.labelColor, letterSpacing: "0.05em" }}>
+              <p style={{ fontSize: 10, fontWeight: 600, color: borderColor, letterSpacing: "0.05em" }}>
                 {s.label.toUpperCase()}
               </p>
               <span style={{ fontSize: 11, fontWeight: 700, color: fill }}>
@@ -64,7 +58,7 @@ function FindingsGrid({ data }: { data: IndustryOverviewSection }) {
             </div>
             <ul className="space-y-0.5">
               {s.details.map((d, i) => (
-                <li key={i} style={{ fontSize: 12, color: "#121212", lineHeight: 1.6 }}>• {d}</li>
+                <li key={i} style={{ fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>• {d}</li>
               ))}
             </ul>
           </div>
@@ -88,13 +82,13 @@ function ChecksList({ data }: { data: IndustryOverviewSection }) {
           <div key={key} className="flex items-start gap-2">
             <span className="mt-0.5 shrink-0">
               {c.result
-                ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                : <XCircle className="h-3.5 w-3.5 text-zinc-300" />
+                ? <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "var(--qc-up)" }} />
+                : <XCircle className="h-3.5 w-3.5" style={{ color: "var(--qc-text-muted)" }} />
               }
             </span>
-            <p style={{ fontSize: 11, color: c.result ? "#121212" : "#888888", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 11, color: c.result ? "var(--qc-text-body)" : "var(--qc-text-muted)", lineHeight: 1.5 }}>
               {label}
-              {c.score > 0 && <span style={{ color: "#059669", fontWeight: 600 }}> +{c.score}</span>}
+              {c.score > 0 && <span style={{ color: "var(--qc-up)", fontWeight: 600 }}> +{c.score}</span>}
             </p>
           </div>
         );
@@ -103,73 +97,48 @@ function ChecksList({ data }: { data: IndustryOverviewSection }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 export function IndustryAnalysisCard({ data }: IndustryAnalysisCardProps) {
   if (!data) return null;
 
   const m = data.metrics;
-  const dsd = data.text?.demand_supply_dynamics;
-  const opmTrend = data.text?.opm_trend;
   const fs = data.final_scoring;
-
   const kpiMetrics = data.kpi_metrics;
 
   const industryMetrics = [
     { label: "Industry Revenue (TTM)", value: m?.industry_revenue_ttm?.value ?? "N/A", sublabel: undefined, change: m?.industry_revenue_ttm?.change, icon: DollarSign },
-    { label: "Industry CAGR",          value: (() => { const c = m?.industry_cagr; return c?.one_year ?? c?.three_year ?? c?.qoq ?? "N/A"; })(),
+    { label: "Industry CAGR", value: (() => { const c = m?.industry_cagr; return c?.one_year ?? c?.three_year ?? c?.qoq ?? "N/A"; })(),
       sublabel: (() => { const c = m?.industry_cagr; return [c?.qoq && `QoQ: ${c.qoq}`, c?.one_year && `1Y: ${c.one_year}`, c?.three_year && `3Y: ${c.three_year}`].filter(Boolean).join(" | ") || undefined; })(),
       change: null, icon: TrendingUp },
-    { label: "Industry OPM",           value: m?.current_opm?.value ?? "N/A", sublabel: undefined, change: m?.current_opm?.change, icon: BarChart2 },
+    { label: "Industry OPM", value: m?.current_opm?.value ?? "N/A", sublabel: undefined, change: m?.current_opm?.change, icon: BarChart2 },
     { label: m?.industry_aum?.label ?? "Industry AUM", value: m?.industry_aum?.value ?? "N/A", sublabel: undefined, change: m?.industry_aum?.change, icon: Package },
-    { label: "Industry ROCE",          value: m?.industry_roce?.value ?? "N/A", sublabel: undefined, change: m?.industry_roce?.change, icon: BarChart2 },
-    { label: "Demand Signal",          value: m?.demand_signal?.value ?? "N/A", sublabel: m?.demand_signal?.sublabel ?? undefined, change: m?.demand_signal?.change ?? null, icon: Zap },
-    { label: "Supply Constraint",      value: m?.supply_constraint?.value ?? "N/A", sublabel: m?.supply_constraint?.sublabel ?? undefined, change: m?.supply_constraint?.change ?? null, icon: AlertTriangle },
+    { label: "Industry ROCE", value: m?.industry_roce?.value ?? "N/A", sublabel: undefined, change: m?.industry_roce?.change, icon: BarChart2 },
+    { label: "Demand Signal", value: m?.demand_signal?.value ?? "N/A", sublabel: m?.demand_signal?.sublabel ?? undefined, change: m?.demand_signal?.change ?? null, icon: Zap },
+    { label: "Supply Constraint", value: m?.supply_constraint?.value ?? "N/A", sublabel: m?.supply_constraint?.sublabel ?? undefined, change: m?.supply_constraint?.change ?? null, icon: AlertTriangle },
   ];
 
   return (
     <div className="space-y-4">
-
-      {/* Metric tiles — use kpi_metrics array when provided by the backend */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {kpiMetrics && kpiMetrics.length > 0
           ? kpiMetrics.map((metric, i) => (
-              <MetricTile
-                key={i}
-                label={metric.label}
-                value={metric.value}
-                sublabel={metric.sublabel ?? undefined}
-                change={metric.change ?? undefined}
-              />
+              <MetricTile key={i} label={metric.label} value={metric.value} sublabel={metric.sublabel ?? undefined} change={metric.change ?? undefined} />
             ))
           : industryMetrics.map((metric, i) => (
-              <MetricTile
-                key={i}
-                label={metric.label}
-                value={metric.value}
-                sublabel={metric.sublabel}
-                icon={metric.icon}
-                change={metric.change ?? undefined}
-              />
+              <MetricTile key={i} label={metric.label} value={metric.value} sublabel={metric.sublabel} icon={metric.icon} change={metric.change ?? undefined} />
             ))
         }
       </div>
 
       <div className="space-y-4">
-
-          {/* Scoring Criteria */}
-          {fs?.checks && !Array.isArray(fs.checks) && (
-            <div className="rounded-lg border border-zinc-100 bg-white p-4 space-y-3">
-              <p style={{ fontSize: 10, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                Scoring Criteria
-              </p>
-              <ChecksList data={data} />
-            </div>
-          )}
-
+        {fs?.checks && !Array.isArray(fs.checks) && (
+          <div className="rounded-lg p-4 space-y-3" style={{ border: "1px solid var(--qc-border-inner)", background: "var(--qc-surface-white)" }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              Scoring Criteria
+            </p>
+            <ChecksList data={data} />
+          </div>
+        )}
       </div>
-
-
     </div>
   );
 }

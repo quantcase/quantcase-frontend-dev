@@ -22,67 +22,81 @@ export function MomentumIndicators({ momentum }: MomentumIndicatorsProps) {
       subtitle="RSI, MACD, and Stochastic oscillator readings"
     >
       <div className="pb-4">
-        <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
+        <div
+          className="rounded-[10px] border overflow-hidden"
+          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+        >
           {/* RSI Row */}
-          <div className="flex items-center gap-4 px-4 py-3 border-b border-dashed border-zinc-200">
+          <div
+            className="flex items-center gap-4 px-4 py-3"
+            style={{ borderBottom: "1px dashed var(--qc-border-inner)" }}
+          >
             <div className="flex items-center gap-2 w-36 shrink-0">
-              <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
                 RSI (14)
               </span>
             </div>
             <div className="flex-1">
-              <div className="relative h-1.5 rounded-full bg-zinc-100">
+              <div className="relative h-1.5 rounded-full" style={{ background: "var(--qc-surface-row-alt)" }}>
                 <div
-                  className="absolute left-0 top-0 h-full rounded-full bg-zinc-900"
-                  style={{ width: `${Math.min(momentum.rsi.value, 100)}%` }}
+                  className="absolute left-0 top-0 h-full rounded-full"
+                  style={{ width: `${Math.min(momentum.rsi.value, 100)}%`, background: "var(--qc-text-heading)" }}
                 />
               </div>
               <div className="flex justify-between mt-0.5">
-                <span className="text-[10px] text-zinc-400">0</span>
-                <span className="text-[10px] text-zinc-400">100</span>
+                <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>0</span>
+                <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>100</span>
               </div>
             </div>
             <div className="text-right w-28 shrink-0">
-              <span className={`text-lg font-semibold ${rsiZoneColor(momentum.rsi.zone)}`}>
+              <span className="text-lg font-semibold" style={{ color: rsiZoneColor(momentum.rsi.zone) }}>
                 {momentum.rsi.value.toFixed(2)}
               </span>
-              <p className="text-[10px] uppercase tracking-wider text-[#888888] mt-0.5">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
                 {momentum.rsi.zone}
               </p>
             </div>
           </div>
 
           {/* MACD Row */}
-          <div className="border-b border-dashed border-zinc-200">
+          <div style={{ borderBottom: "1px dashed var(--qc-border-inner)" }}>
             <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-              <Zap className="h-3 w-3 text-zinc-400" />
-              <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">
+              <Zap className="h-3 w-3" style={{ color: "var(--qc-text-muted)" }} />
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
                 MACD
               </span>
               <span
-                className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
-                  momentum.macd.crossover === "ABOVE"
-                    ? "bg-emerald-50 text-emerald-600"
-                    : "bg-red-50 text-red-600"
-                }`}
+                className="font-mono text-[10px] font-semibold px-1.5 py-0.5 rounded-[4px]"
+                style={momentum.macd.crossover === "ABOVE"
+                  ? { background: "var(--qc-up-soft)", color: "var(--qc-up)" }
+                  : { background: "var(--qc-down-soft)", color: "var(--qc-down)" }
+                }
               >
                 {momentum.macd.crossover}
               </span>
             </div>
-            <div className="grid grid-cols-3 divide-x divide-dashed divide-zinc-200 border-t border-dashed border-zinc-200">
-              {macdItems.map(({ label, value, colored }) => (
-                <div key={label} className="px-4 py-3 flex flex-col gap-0.5">
-                  <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">
+            <div
+              className="grid grid-cols-3"
+              style={{ borderTop: "1px dashed var(--qc-border-inner)" }}
+            >
+              {macdItems.map(({ label, value, colored }, i) => (
+                <div
+                  key={label}
+                  className="px-4 py-3 flex flex-col gap-0.5"
+                  style={i > 0 ? { borderLeft: "1px dashed var(--qc-border-inner)" } : undefined}
+                >
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
                     {label}
                   </span>
                   <span
-                    className={`text-lg font-semibold leading-tight ${
-                      colored
+                    className="text-lg font-semibold leading-tight"
+                    style={{
+                      color: colored
                         ? momentum.macd.histogram >= 0
-                          ? "text-emerald-600"
-                          : "text-red-600"
-                        : "text-[#0F172B]"
-                    }`}
+                          ? "var(--qc-up)"
+                          : "var(--qc-down)"
+                        : "var(--qc-text-heading)"
+                    }}
                   >
                     {value}
                   </span>
@@ -93,23 +107,23 @@ export function MomentumIndicators({ momentum }: MomentumIndicatorsProps) {
 
           {/* Stochastic Row */}
           <div className="flex items-center gap-4 px-4 py-3">
-            <Layers className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+            <Layers className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
             <div className="flex-1">
-              <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
                 Stochastic
               </span>
-              <p className="text-sm text-[#0F172B] font-medium mt-0.5">
+              <p className="text-sm font-medium mt-0.5" style={{ color: "var(--qc-text-heading)" }}>
                 K: {momentum.stochastic.k.toFixed(2)} / D: {momentum.stochastic.d.toFixed(2)}
               </p>
             </div>
             <span
-              className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${
-                momentum.stochastic.signal === "BUY"
-                  ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-                  : momentum.stochastic.signal === "SELL"
-                    ? "bg-red-50 text-red-600 border-red-200"
-                    : "bg-amber-50 text-amber-600 border-amber-200"
-              }`}
+              className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-[4px] border"
+              style={momentum.stochastic.signal === "BUY"
+                ? { background: "var(--qc-up-soft)", color: "var(--qc-up)", borderColor: "var(--qc-up)" }
+                : momentum.stochastic.signal === "SELL"
+                  ? { background: "var(--qc-down-soft)", color: "var(--qc-down)", borderColor: "var(--qc-down)" }
+                  : { background: "var(--qc-warn-soft)", color: "var(--qc-warn)", borderColor: "var(--qc-warn)" }
+              }
             >
               {momentum.stochastic.signal}
             </span>

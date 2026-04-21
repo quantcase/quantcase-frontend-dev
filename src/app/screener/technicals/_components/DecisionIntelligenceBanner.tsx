@@ -4,29 +4,64 @@ import { useState } from "react";
 import { Brain, Info } from "lucide-react";
 import type { DecisionIntelligence, DecisionIntelligenceIndicator } from "@/types/technicals";
 
-function sentimentColor(sentiment: DecisionIntelligenceIndicator["sentiment"]) {
-  if (sentiment === "positive") return { text: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-500" };
-  if (sentiment === "negative") return { text: "text-red-600", bg: "bg-red-50", border: "border-red-200", dot: "bg-red-500" };
-  return { text: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", dot: "bg-amber-500" };
+function sentimentStyle(sentiment: DecisionIntelligenceIndicator["sentiment"]) {
+  if (sentiment === "positive") return {
+    text: "var(--qc-up)",
+    bg: "var(--qc-up-soft)",
+    border: "var(--qc-up)",
+    dot: "var(--qc-up)",
+  };
+  if (sentiment === "negative") return {
+    text: "var(--qc-down)",
+    bg: "var(--qc-down-soft)",
+    border: "var(--qc-down)",
+    dot: "var(--qc-down)",
+  };
+  return {
+    text: "var(--qc-warn)",
+    bg: "var(--qc-warn-soft)",
+    border: "var(--qc-warn)",
+    dot: "var(--qc-warn)",
+  };
 }
 
 function convictionConfig(level: string) {
   const l = level.toLowerCase();
-  if (l === "high") return { color: "text-emerald-600", barColor: "bg-emerald-600", width: "100%" };
-  if (l === "medium") return { color: "text-amber-600", barColor: "bg-amber-600", width: "66%" };
-  return { color: "text-red-600", barColor: "bg-red-600", width: "33%" };
+  if (l === "high") return { color: "var(--qc-up)", barColor: "var(--qc-up)", width: "100%" };
+  if (l === "medium") return { color: "var(--qc-warn)", barColor: "var(--qc-warn)", width: "66%" };
+  return { color: "var(--qc-down)", barColor: "var(--qc-down)", width: "33%" };
 }
 
-// Traffic-light theme derived from dominant indicator sentiment
 function biasTheme(indicators: DecisionIntelligenceIndicator[]) {
   let pos = 0, neg = 0;
   for (const ind of indicators) {
     if (ind.sentiment === "positive") pos++;
     else if (ind.sentiment === "negative") neg++;
   }
-  if (pos > neg) return { border: "#059669", bg: "rgba(5,150,105,0.04)", text: "text-emerald-700", tagBg: "bg-emerald-600", insightBorder: "border-emerald-200", insightBg: "bg-emerald-50/50" };
-  if (neg > pos) return { border: "#dc2626", bg: "rgba(220,38,38,0.04)", text: "text-red-700", tagBg: "bg-red-600", insightBorder: "border-red-200", insightBg: "bg-red-50/50" };
-  return { border: "#D97706", bg: "rgba(217,119,6,0.04)", text: "text-amber-700", tagBg: "bg-amber-600", insightBorder: "border-amber-200", insightBg: "bg-amber-50/50" };
+  if (pos > neg) return {
+    borderColor: "var(--qc-up)",
+    bg: "var(--qc-up-soft)",
+    textColor: "var(--qc-up)",
+    tagBg: "var(--qc-up)",
+    insightBorderColor: "var(--qc-up)",
+    insightBg: "var(--qc-up-soft)",
+  };
+  if (neg > pos) return {
+    borderColor: "var(--qc-down)",
+    bg: "var(--qc-down-soft)",
+    textColor: "var(--qc-down)",
+    tagBg: "var(--qc-down)",
+    insightBorderColor: "var(--qc-down)",
+    insightBg: "var(--qc-down-soft)",
+  };
+  return {
+    borderColor: "var(--qc-warn)",
+    bg: "var(--qc-warn-soft)",
+    textColor: "var(--qc-warn)",
+    tagBg: "var(--qc-warn)",
+    insightBorderColor: "var(--qc-warn)",
+    insightBg: "var(--qc-warn-soft)",
+  };
 }
 
 interface Props {
@@ -38,28 +73,38 @@ export function DecisionIntelligenceBanner({ di }: Props) {
   const theme = biasTheme(di.indicators);
 
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2 h-full">
+    <div
+      className="rounded-[14px] border p-2 h-full"
+      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+    >
       {/* Card header */}
       <div className="flex items-center gap-2.5 pb-3 px-1 pt-1">
-        <div className="p-1.5 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-white">
-          <Brain className="h-4 w-4 text-zinc-600" />
+        <div
+          className="p-1.5 rounded-[6px] border"
+          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+        >
+          <Brain className="h-4 w-4" style={{ color: "var(--qc-text-muted)" }} />
         </div>
-        <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", letterSpacing: "0.01em" }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>
           Decision Intelligence
         </span>
       </div>
 
-      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] px-5 py-5 flex flex-col gap-5">
+      <div
+        className="rounded-[14px] border px-5 py-5 flex flex-col gap-5"
+        style={{ background: "var(--qc-surface-white)", borderColor: "var(--qc-border-inner)" }}
+      >
         {/* Key insights — colored accent block */}
         <div
           className="rounded-[10px] border px-4 py-4 flex flex-col gap-4"
-          style={{ borderColor: theme.border, borderTopWidth: 3, backgroundColor: theme.bg }}
+          style={{ borderColor: theme.borderColor, borderTopWidth: 3, backgroundColor: theme.bg }}
         >
           {/* TAG */}
           <div>
-            <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-2">Tag</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-2" style={{ color: "var(--qc-text-muted)" }}>Tag</p>
             <span
-              className={`inline-block rounded-full px-3 py-1 text-[13px] font-semibold text-white ${theme.tagBg}`}
+              className="inline-block rounded-full px-3 py-1 text-[13px] font-semibold text-white"
+              style={{ background: theme.tagBg }}
             >
               {di.tag}
             </span>
@@ -74,33 +119,36 @@ export function DecisionIntelligenceBanner({ di }: Props) {
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-lg border bg-white px-3 py-2.5 text-center"
-                style={{ borderColor: theme.border, borderTopWidth: 2 }}
+                className="rounded-[8px] border px-3 py-2.5 text-center"
+                style={{ borderColor: theme.borderColor, borderTopWidth: 2, background: "var(--qc-surface-white)" }}
               >
-                <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-1">{item.label}</p>
-                <p className={`text-[13px] font-semibold ${theme.text}`}>{item.value}</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-1" style={{ color: "var(--qc-text-muted)" }}>{item.label}</p>
+                <p className="text-[13px] font-semibold" style={{ color: theme.textColor }}>{item.value}</p>
               </div>
             ))}
           </div>
 
           {/* Actionable Insight */}
           <div>
-            <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-2">Actionable Insight</p>
-            <div className={`rounded-lg border ${theme.insightBorder} ${theme.insightBg} px-4 py-3 text-[13px] text-[#121212] leading-relaxed`}>
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-2" style={{ color: "var(--qc-text-muted)" }}>Actionable Insight</p>
+            <div
+              className="rounded-[8px] border px-4 py-3 text-[13px] leading-relaxed"
+              style={{ borderColor: theme.insightBorderColor, background: theme.insightBg, color: "var(--qc-text-body)" }}
+            >
               {di.actionableInsight.action}. {di.actionableInsight.firstShift} {di.actionableInsight.existingHolderAction} {di.actionableInsight.reEvaluateCondition}
             </div>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="border-t border-[#E2E2E2]" />
+        <div style={{ borderTop: "1px solid var(--qc-border-default)" }} />
 
         {/* Signal Breakdown */}
         <div>
-          <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-3">Signal Breakdown</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-3" style={{ color: "var(--qc-text-muted)" }}>Signal Breakdown</p>
           <div className="grid grid-cols-2 gap-2.5">
             {di.indicators.map((ind) => {
-              const sc = sentimentColor(ind.sentiment);
+              const sc = sentimentStyle(ind.sentiment);
               return (
                 <SignalBucket key={ind.name} indicator={ind} sc={sc} />
               );
@@ -109,37 +157,37 @@ export function DecisionIntelligenceBanner({ di }: Props) {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-[#E2E2E2]" />
+        <div style={{ borderTop: "1px solid var(--qc-border-default)" }} />
 
         {/* Conviction Meter */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider">Conviction Meter</p>
-            <span className={`text-[11px] font-semibold ${conviction.color}`}>{di.convictionLevel}</span>
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>Conviction Meter</p>
+            <span className="text-[11px] font-semibold" style={{ color: conviction.color }}>{di.convictionLevel}</span>
           </div>
-          <div className="h-2 w-full rounded-full bg-[#E2E2E2] overflow-hidden">
+          <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: "var(--qc-surface-row-alt)" }}>
             <div
-              className={`h-full rounded-full ${conviction.barColor} transition-all`}
-              style={{ width: conviction.width }}
+              className="h-full rounded-full transition-all"
+              style={{ width: conviction.width, background: conviction.barColor }}
             />
           </div>
           <div className="flex justify-between mt-1">
-            <span className="text-[10px] text-[#888888]">Low</span>
-            <span className="text-[10px] text-[#888888]">Medium</span>
-            <span className="text-[10px] text-[#888888]">High</span>
+            <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Low</span>
+            <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Medium</span>
+            <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>High</span>
           </div>
         </div>
 
         {/* What Can Change */}
         {di.whatCanChange.length > 0 && (
           <>
-            <div className="border-t border-[#E2E2E2]" />
+            <div style={{ borderTop: "1px solid var(--qc-border-default)" }} />
             <div>
-              <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-2">What Can Change</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-2" style={{ color: "var(--qc-text-muted)" }}>What Can Change</p>
               <ul className="space-y-1.5">
                 {di.whatCanChange.map((item, i) => (
-                  <li key={i} className="flex gap-2 text-[12px] text-[#888888] leading-relaxed">
-                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-zinc-400 shrink-0" />
+                  <li key={i} className="flex gap-2 text-[12px] leading-relaxed" style={{ color: "var(--qc-text-body)" }}>
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "var(--qc-text-muted)" }} />
                     {item}
                   </li>
                 ))}
@@ -157,28 +205,34 @@ function SignalBucket({
   sc,
 }: {
   indicator: DecisionIntelligenceIndicator;
-  sc: ReturnType<typeof sentimentColor>;
+  sc: ReturnType<typeof sentimentStyle>;
 }) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div className={`relative rounded-lg border ${sc.border} ${sc.bg} px-3 py-2.5`}>
+    <div
+      className="relative rounded-[8px] border px-3 py-2.5"
+      style={{ borderColor: sc.border, background: sc.bg }}
+    >
       <div className="flex items-center justify-between mb-1">
-        <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider">{indicator.name}</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>{indicator.name}</p>
         <div
           className="relative"
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
-          <Info className="h-3 w-3 text-[#AAAAAA] cursor-help" />
+          <Info className="h-3 w-3 cursor-help" style={{ color: "var(--qc-text-muted)" }} />
           {showTooltip && (
-            <div className="absolute bottom-full right-0 mb-1.5 z-50 w-48 rounded-md border border-[#E2E2E2] bg-white px-3 py-2 shadow-lg">
-              <p className="text-[11px] text-[#555555] leading-relaxed">{indicator.explanation}</p>
+            <div
+              className="absolute bottom-full right-0 mb-1.5 z-50 w-48 rounded-[8px] border px-3 py-2 shadow-lg"
+              style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+            >
+              <p className="text-[11px] leading-relaxed" style={{ color: "var(--qc-text-body)" }}>{indicator.explanation}</p>
             </div>
           )}
         </div>
       </div>
-      <p className={`text-[12px] font-semibold ${sc.text}`}>{indicator.tag}</p>
+      <p className="text-[12px] font-semibold" style={{ color: sc.text }}>{indicator.tag}</p>
     </div>
   );
 }

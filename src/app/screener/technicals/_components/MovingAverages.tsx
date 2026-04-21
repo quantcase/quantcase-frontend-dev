@@ -21,11 +21,11 @@ export function MovingAverages({ price, movingAverages, volatility }: MovingAver
   ];
 
   const bbValues = [
-    { label: "BB Upper", value: `₹${volatility.bollingerBands.upper.toFixed(2)}`, sub: "Upper band", squeeze: undefined },
-    { label: "BB Middle", value: `₹${volatility.bollingerBands.middle.toFixed(2)}`, sub: "Middle band", squeeze: undefined },
-    { label: "BB Lower", value: `₹${volatility.bollingerBands.lower.toFixed(2)}`, sub: "Lower band", squeeze: undefined },
-    { label: "ATR (14)", value: `₹${volatility.atr14.toFixed(2)}`, sub: `${volatility.atrPercent.toFixed(2)}% of price`, squeeze: undefined },
-    { label: "BB Width", value: volatility.bollingerBands.width.toFixed(2), sub: "Band width", squeeze: undefined },
+    { label: "BB Upper", value: `₹${volatility.bollingerBands.upper.toFixed(2)}`, sub: "Upper band", squeeze: undefined as boolean | undefined },
+    { label: "BB Middle", value: `₹${volatility.bollingerBands.middle.toFixed(2)}`, sub: "Middle band", squeeze: undefined as boolean | undefined },
+    { label: "BB Lower", value: `₹${volatility.bollingerBands.lower.toFixed(2)}`, sub: "Lower band", squeeze: undefined as boolean | undefined },
+    { label: "ATR (14)", value: `₹${volatility.atr14.toFixed(2)}`, sub: `${volatility.atrPercent.toFixed(2)}% of price`, squeeze: undefined as boolean | undefined },
+    { label: "BB Width", value: volatility.bollingerBands.width.toFixed(2), sub: "Band width", squeeze: undefined as boolean | undefined },
     {
       label: "BB Squeeze",
       value: volatility.bollingerBands.squeeze ? "YES" : "NO",
@@ -38,14 +38,14 @@ export function MovingAverages({ price, movingAverages, volatility }: MovingAver
     {
       label: "Golden Cross",
       active: movingAverages.crossovers.goldenCross,
-      activeClass: "bg-emerald-50 text-emerald-600 border-emerald-200",
-      inactiveClass: "bg-zinc-100 text-zinc-500 border-zinc-200",
+      activeStyle: { background: "var(--qc-up-soft)", color: "var(--qc-up)", borderColor: "var(--qc-up)" },
+      inactiveStyle: { background: "var(--qc-surface-row-alt)", color: "var(--qc-text-muted)", borderColor: "var(--qc-border-inner)" },
     },
     {
       label: "Death Cross",
       active: movingAverages.crossovers.deathCross,
-      activeClass: "bg-red-50 text-red-600 border-red-200",
-      inactiveClass: "bg-zinc-100 text-zinc-500 border-zinc-200",
+      activeStyle: { background: "var(--qc-down-soft)", color: "var(--qc-down)", borderColor: "var(--qc-down)" },
+      inactiveStyle: { background: "var(--qc-surface-row-alt)", color: "var(--qc-text-muted)", borderColor: "var(--qc-border-inner)" },
     },
   ];
 
@@ -61,19 +61,29 @@ export function MovingAverages({ price, movingAverages, volatility }: MovingAver
       subtitle="Price position relative to key SMAs and EMAs"
     >
       {/* MA values table */}
-      <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden mb-4">
-        <div className="grid grid-cols-6 divide-x divide-dashed divide-zinc-200">
-          {maValues.map(({ label, value }) => {
+      <div
+        className="rounded-[10px] border overflow-hidden mb-4"
+        style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+      >
+        <div
+          className="grid grid-cols-6"
+          style={{ borderBottom: "none" }}
+        >
+          {maValues.map(({ label, value }, i) => {
             const above = price.cmp > value;
             return (
-              <div key={label} className="flex flex-col gap-0.5 px-4 py-3">
-                <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">
+              <div
+                key={label}
+                className="flex flex-col gap-0.5 px-4 py-3"
+                style={i > 0 ? { borderLeft: "1px dashed var(--qc-border-inner)" } : undefined}
+              >
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
                   {label}
                 </span>
-                <span className="text-base font-semibold text-[#0F172B]">
+                <span className="text-base font-semibold" style={{ color: "var(--qc-text-heading)" }}>
                   ₹{value.toFixed(2)}
                 </span>
-                <span className={`text-[10px] font-semibold ${above ? "text-emerald-600" : "text-red-600"}`}>
+                <span className="text-[10px] font-semibold" style={{ color: above ? "var(--qc-up)" : "var(--qc-down)" }}>
                   {above ? "▲ Above" : "▼ Below"}
                 </span>
               </div>
@@ -98,37 +108,51 @@ export function MovingAverages({ price, movingAverages, volatility }: MovingAver
       />
 
       {/* Crossovers + Price Position */}
-      <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden mt-4 mb-4">
-        <div className="flex items-center divide-x divide-dashed divide-zinc-200">
-          {crossoverItems.map(({ label, active, activeClass, inactiveClass }) => (
-            <div key={label} className="flex items-center gap-2 px-4 py-3">
-              <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">
+      <div
+        className="rounded-[10px] border overflow-hidden mt-4 mb-4"
+        style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+      >
+        <div className="flex items-center">
+          {crossoverItems.map(({ label, active, activeStyle, inactiveStyle }, i) => (
+            <div
+              key={label}
+              className="flex items-center gap-2 px-4 py-3"
+              style={i > 0 ? { borderLeft: "1px dashed var(--qc-border-inner)" } : undefined}
+            >
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
                 {label}
               </span>
               <span
-                className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${active ? activeClass : inactiveClass}`}
+                className="font-mono text-[10px] font-semibold px-1.5 py-0.5 rounded-[4px] border"
+                style={active ? activeStyle : inactiveStyle}
               >
                 {active ? "ACTIVE" : "INACTIVE"}
               </span>
             </div>
           ))}
-          <div className="flex items-center gap-2 px-4 py-3">
-            <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">
+          <div
+            className="flex items-center gap-2 px-4 py-3"
+            style={{ borderLeft: "1px dashed var(--qc-border-inner)" }}
+          >
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
               Last Crossover
             </span>
-            <span className="text-[13px] font-medium text-[#0F172B]">
+            <span className="text-[13px] font-medium" style={{ color: "var(--qc-text-heading)" }}>
               {movingAverages.crossovers.lastCrossoverDate}
             </span>
           </div>
-          <div className="flex items-center gap-2 px-4 py-3 ml-auto">
+          <div
+            className="flex items-center gap-2 px-4 py-3 ml-auto"
+            style={{ borderLeft: "1px dashed var(--qc-border-inner)" }}
+          >
             {pricePositionItems.map(({ label, above }) => (
               <span
                 key={label}
-                className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
-                  above
-                    ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-                    : "bg-red-50 text-red-600 border-red-200"
-                }`}
+                className="font-mono text-[10px] font-semibold px-1.5 py-0.5 rounded-[4px] border"
+                style={above
+                  ? { background: "var(--qc-up-soft)", color: "var(--qc-up)", borderColor: "var(--qc-up)" }
+                  : { background: "var(--qc-down-soft)", color: "var(--qc-down)", borderColor: "var(--qc-down)" }
+                }
               >
                 {above ? "▲" : "▼"} {above ? "Above" : "Below"} {label}
               </span>
@@ -139,28 +163,39 @@ export function MovingAverages({ price, movingAverages, volatility }: MovingAver
 
       {/* Bollinger Bands & Volatility */}
       <div className="mb-1">
-        <span className="text-[10px] uppercase tracking-wider font-semibold text-[#0F172B] mb-2 block">
+        <span
+          className="font-mono text-[10px] uppercase tracking-[0.14em] mb-2 block"
+          style={{ color: "var(--qc-text-heading)" }}
+        >
           Bollinger Bands &amp; Volatility
         </span>
-        <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
-          <div className="grid grid-cols-6 divide-x divide-dashed divide-zinc-200">
-            {bbValues.map(({ label, value, sub, squeeze }) => (
-              <div key={label} className="flex flex-col gap-0.5 px-4 py-3">
-                <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">
+        <div
+          className="rounded-[10px] border overflow-hidden"
+          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+        >
+          <div className="grid grid-cols-6">
+            {bbValues.map(({ label, value, sub, squeeze }, i) => (
+              <div
+                key={label}
+                className="flex flex-col gap-0.5 px-4 py-3"
+                style={i > 0 ? { borderLeft: "1px dashed var(--qc-border-inner)" } : undefined}
+              >
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
                   {label}
                 </span>
                 <span
-                  className={`text-base font-semibold ${
-                    squeeze === true
-                      ? "text-amber-600"
+                  className="text-base font-semibold"
+                  style={{
+                    color: squeeze === true
+                      ? "var(--qc-warn)"
                       : squeeze === false
-                        ? "text-zinc-500"
-                        : "text-[#0F172B]"
-                  }`}
+                        ? "var(--qc-text-muted)"
+                        : "var(--qc-text-heading)"
+                  }}
                 >
                   {value}
                 </span>
-                <span className="text-[10px] text-[#888888]">{sub}</span>
+                <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>{sub}</span>
               </div>
             ))}
           </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { BarChart2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { MetricTile } from "@/components/molecules/metric-tile";
 import { TechnicalsVolumeRaw } from "@/types/technicals";
@@ -17,13 +16,24 @@ const SIGNAL_ROWS = [
   { label: "Distribution", key: "distribution" as const, positiveIsTrue: false },
 ] as const;
 
+function TrendBadge({ label, color }: { label: string; color: string }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-[4px] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.10em]"
+      style={{ color, background: color + "1A", border: `1px solid ${color}33` }}
+    >
+      {label}
+    </span>
+  );
+}
+
 export function VolumeAnalysis({ volume }: VolumeAnalysisProps) {
   const volumeTrendColor =
     volume.trend === "INCREASING"
-      ? "text-emerald-600"
+      ? "var(--qc-up)"
       : volume.trend === "DECREASING"
-        ? "text-red-600"
-        : "text-amber-600";
+        ? "var(--qc-down)"
+        : "var(--qc-warn)";
 
   return (
     <SectionPanel
@@ -49,17 +59,24 @@ export function VolumeAnalysis({ volume }: VolumeAnalysisProps) {
           }
         />
       </div>
-      <div className="flex items-center justify-between py-3 border-t border-zinc-100 px-2">
-        <h6 className="uppercase tracking-wider">Volume Trend</h6>
-        <Badge className={volumeTrendColor}>{volume.trend}</Badge>
+      <div
+        className="flex items-center justify-between py-2.5 px-2"
+        style={{ borderTop: "1px solid var(--qc-border-inner)" }}
+      >
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-heading)" }}>Volume Trend</p>
+        <TrendBadge label={volume.trend} color={volumeTrendColor} />
       </div>
       {SIGNAL_ROWS.map(({ label, key, positiveIsTrue }) => (
         <div
           key={key}
-          className="flex items-center justify-between py-3 px-2 border-t border-zinc-100"
+          className="flex items-center justify-between py-2.5 px-2"
+          style={{ borderTop: "1px solid var(--qc-border-inner)" }}
         >
-          <p>{label}</p>
-          <span className={`text-xs font-semibold ${booleanColor(volume.signals[key], positiveIsTrue)}`}>
+          <p className="text-[12px]" style={{ color: "var(--qc-text-body)" }}>{label}</p>
+          <span
+            className="font-mono text-[11px] font-semibold"
+            style={{ color: booleanColor(volume.signals[key], positiveIsTrue) }}
+          >
             {volume.signals[key] ? "YES" : "NO"}
           </span>
         </div>

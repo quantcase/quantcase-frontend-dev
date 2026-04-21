@@ -34,37 +34,45 @@ export function MAPositionChart({
   const BOT_H = 48;
   const TOTAL_H = TOP_LABEL_H + TRACK_H + BOT_H;
 
+  // Design token hex values for SVG (can't use CSS vars in SVG attributes)
+  const QC_UP = "#1F7A4A";
+  const QC_DOWN = "#B23A2F";
+  const QC_HEADING = "#0E0E0C";
+  const QC_GRID = "#EFEDE7";
+  const QC_BORDER = "#E9E7E1";
+  const QC_MUTED = "#9A9A92";
+
   return (
     <div className="px-4 py-6 select-none">
       {/* Header row */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <span style={{ fontSize: 11, color: "#888888", fontWeight: 600, letterSpacing: "0.06em" }}>
+          <span style={{ fontSize: 11, color: QC_MUTED, fontWeight: 600, letterSpacing: "0.06em", fontFamily: "IBM Plex Mono, monospace", textTransform: "uppercase" }}>
             52W LOW
           </span>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#0F172B" }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: QC_HEADING }}>
             ₹{low52w.toLocaleString("en-IN")}
           </span>
         </div>
         <div className="flex flex-col items-center gap-0.5">
-          <span style={{ fontSize: 10, color: "#888888", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          <span style={{ fontSize: 10, color: QC_MUTED, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "IBM Plex Mono, monospace" }}>
             Current Price
           </span>
           <span
-            className="inline-flex items-center rounded-md px-3 py-1 text-sm font-bold"
-            style={{ background: "#0F172B", color: "#fff", letterSpacing: "0.01em" }}
+            className="inline-flex items-center rounded-[6px] px-3 py-1 text-sm font-bold"
+            style={{ background: QC_HEADING, color: "#fff", letterSpacing: "0.01em" }}
           >
             ₹{price.toLocaleString("en-IN")}
           </span>
-          <span style={{ fontSize: 10, color: "#888888" }}>
+          <span style={{ fontSize: 10, color: QC_MUTED, fontFamily: "IBM Plex Mono, monospace" }}>
             {pricePct.toFixed(1)}% of 52W range
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#0F172B" }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: QC_HEADING }}>
             ₹{high52w.toLocaleString("en-IN")}
           </span>
-          <span style={{ fontSize: 11, color: "#888888", fontWeight: 600, letterSpacing: "0.06em" }}>
+          <span style={{ fontSize: 11, color: QC_MUTED, fontWeight: 600, letterSpacing: "0.06em", fontFamily: "IBM Plex Mono, monospace", textTransform: "uppercase" }}>
             52W HIGH
           </span>
         </div>
@@ -90,7 +98,7 @@ export function MAPositionChart({
                 key={ma.label + "-line"}
                 x1={x} y1={lineTop}
                 x2={x} y2={lineBot}
-                stroke={ma.above ? "#16a34a" : "#dc2626"}
+                stroke={ma.above ? QC_UP : QC_DOWN}
                 strokeWidth={1.5}
                 strokeDasharray="3 2"
                 opacity={0.7}
@@ -103,8 +111,8 @@ export function MAPositionChart({
             x={0} y={TOP_LABEL_H}
             width={1000} height={TRACK_H}
             rx={TRACK_H / 2} ry={TRACK_H / 2}
-            fill="#F1F5F9"
-            stroke="#E2E2E2"
+            fill={QC_GRID}
+            stroke={QC_BORDER}
             strokeWidth={1}
           />
 
@@ -113,8 +121,8 @@ export function MAPositionChart({
             x={0} y={TOP_LABEL_H}
             width={(pricePct / 100) * 1000} height={TRACK_H}
             rx={TRACK_H / 2} ry={TRACK_H / 2}
-            fill="#0F172B"
-            opacity={0.15}
+            fill={QC_HEADING}
+            opacity={0.18}
           />
 
           {/* MA tick marks on the track */}
@@ -125,7 +133,7 @@ export function MAPositionChart({
                 key={ma.label + "-tick"}
                 x={x - 1} y={TOP_LABEL_H}
                 width={2} height={TRACK_H}
-                fill={ma.above ? "#16a34a" : "#dc2626"}
+                fill={ma.above ? QC_UP : QC_DOWN}
               />
             );
           })}
@@ -135,7 +143,7 @@ export function MAPositionChart({
             cx={(pricePct / 100) * 1000}
             cy={TOP_LABEL_H + TRACK_H / 2}
             r={8}
-            fill="#0F172B"
+            fill={QC_HEADING}
             stroke="white"
             strokeWidth={2.5}
           />
@@ -146,7 +154,7 @@ export function MAPositionChart({
             y1={TOP_LABEL_H + TRACK_H}
             x2={(pricePct / 100) * 1000}
             y2={TOP_LABEL_H + TRACK_H + 10}
-            stroke="#0F172B"
+            stroke={QC_HEADING}
             strokeWidth={1.5}
             opacity={0.3}
           />
@@ -170,11 +178,12 @@ export function MAPositionChart({
               }}
             >
               <span
-                className={`text-[10px] font-bold uppercase tracking-wide ${ma.above ? "text-emerald-600" : "text-red-600"}`}
+                className="font-mono text-[10px] font-bold uppercase tracking-[0.12em]"
+                style={{ color: ma.above ? "var(--qc-up)" : "var(--qc-down)" }}
               >
                 {ma.label}
               </span>
-              <span style={{ fontSize: 11, color: "#0F172B", fontWeight: 600 }}>
+              <span style={{ fontSize: 11, color: "var(--qc-text-heading)", fontWeight: 600 }}>
                 ₹{ma.value.toFixed(2)}
               </span>
             </div>
@@ -192,23 +201,23 @@ export function MAPositionChart({
             pointerEvents: "none",
           }}
         >
-          <span style={{ fontSize: 10, color: "#0F172B", fontWeight: 700 }}>CMP</span>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: "var(--qc-text-heading)" }}>CMP</span>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-6 mt-2 pt-3 border-t border-zinc-100">
+      <div className="flex items-center gap-6 mt-2 pt-3" style={{ borderTop: "1px solid var(--qc-border-inner)" }}>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-0.5 bg-emerald-600 rounded-full" />
-          <span style={{ fontSize: 11, color: "#888888" }}>Price above MA</span>
+          <div className="w-3 h-0.5 rounded-full" style={{ background: "var(--qc-up)" }} />
+          <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Price above MA</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-0.5 bg-red-600 rounded-full" />
-          <span style={{ fontSize: 11, color: "#888888" }}>Price below MA</span>
+          <div className="w-3 h-0.5 rounded-full" style={{ background: "var(--qc-down)" }} />
+          <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Price below MA</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-zinc-900 border-2 border-white shadow-sm" />
-          <span style={{ fontSize: 11, color: "#888888" }}>Current price</span>
+          <div className="w-3 h-3 rounded-full border-2 border-white shadow-sm" style={{ background: "var(--qc-text-heading)" }} />
+          <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Current price</span>
         </div>
       </div>
     </div>

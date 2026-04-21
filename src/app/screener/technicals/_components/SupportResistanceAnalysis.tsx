@@ -36,30 +36,30 @@ export function SupportResistanceAnalysis({
       label: "Support",
       value: `₹${derived.supportNum.toLocaleString("en-IN")}`,
       sub: "Key floor level",
-      change: null,
+      change: null as null | "positive" | "negative",
     },
     {
       icon: Target,
       label: "Resistance",
       value: `₹${derived.resistanceNum.toLocaleString("en-IN")}`,
       sub: "Key ceiling level",
-      change: null,
+      change: null as null | "positive" | "negative",
     },
     {
       icon: TrendingUp,
       label: "Upside to Resistance",
       value: `+${derived.upsideToResistance.toFixed(2)}%`,
-      sub: null,
-      change: "positive",
+      sub: null as string | null,
+      change: "positive" as null | "positive" | "negative",
     },
     {
       icon: TrendingDown,
       label: "Downside to Support",
       value: `-${derived.downsideToSupport.toFixed(2)}%`,
-      sub: null,
-      change: "negative",
+      sub: null as string | null,
+      change: "negative" as null | "positive" | "negative",
     },
-  ] as const;
+  ];
 
   const row2Items = [
     {
@@ -86,7 +86,7 @@ export function SupportResistanceAnalysis({
       value: `₹${supportResistance.pivotPoints.s1.toFixed(2)}`,
       sub: `S2: ₹${supportResistance.pivotPoints.s2.toFixed(2)}`,
     },
-  ] as const;
+  ];
 
   return (
     <SectionPanel
@@ -103,10 +103,13 @@ export function SupportResistanceAnalysis({
             positionInRange={derived.positionInRange}
           />
           {supportResistance.fibonacci.length > 0 && (
-            <div className="border-t border-zinc-100 pt-4">
-              <h6 className="uppercase tracking-wider mb-3 px-2">
+            <div className="pt-4" style={{ borderTop: "1px solid var(--qc-border-inner)" }}>
+              <span
+                className="font-mono text-[10px] uppercase tracking-[0.14em] mb-3 block px-2"
+                style={{ color: "var(--qc-text-muted)" }}
+              >
                 Fibonacci Retracement Levels
-              </h6>
+              </span>
               <div className="px-2 pb-2 space-y-2">
                 {(() => {
                   const fibs = [...supportResistance.fibonacci].sort((a, b) => b - a);
@@ -120,9 +123,9 @@ export function SupportResistanceAnalysis({
                     return (
                       <div key={i} className="flex items-center gap-2">
                         <span
+                          className="font-mono text-[10px]"
                           style={{
-                            fontSize: 10,
-                            color: "#888888",
+                            color: "var(--qc-text-muted)",
                             width: 36,
                             textAlign: "right",
                             flexShrink: 0,
@@ -131,20 +134,22 @@ export function SupportResistanceAnalysis({
                           {FIB_LABELS[i] ?? ""}
                         </span>
                         <div className="flex-1 relative h-5 flex items-center">
-                          <div className="absolute inset-0 rounded-sm bg-zinc-50 border border-zinc-100" />
                           <div
-                            className="absolute left-0 top-0 h-full rounded-sm"
+                            className="absolute inset-0 rounded-[4px]"
+                            style={{ background: "var(--qc-surface-row-alt)", border: "1px solid var(--qc-border-inner)" }}
+                          />
+                          <div
+                            className="absolute left-0 top-0 h-full rounded-[4px]"
                             style={{
                               width: `${pct}%`,
-                              background: isCurrent ? "#0F172B" : "rgba(15,23,43,0.12)",
+                              background: isCurrent ? "var(--qc-text-heading)" : "rgba(14,14,12,0.12)",
                             }}
                           />
                           <span
-                            className="relative z-10 pl-2"
+                            className="relative z-10 pl-2 font-semibold"
                             style={{
                               fontSize: 11,
-                              fontWeight: 600,
-                              color: isCurrent ? "#fff" : "#0F172B",
+                              color: isCurrent ? "#fff" : "var(--qc-text-heading)",
                             }}
                           >
                             ₹{level.toFixed(2)}
@@ -161,45 +166,57 @@ export function SupportResistanceAnalysis({
 
         {/* Right: metrics grid */}
         <div className="col-span-2 pb-4">
-          <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
-            <div className="grid grid-cols-4 divide-x divide-dashed divide-zinc-200">
-              {row1Items.map(({ icon: Icon, label, value, sub, change }) => (
-                <div key={label} className="flex flex-col gap-1 px-4 py-3">
+          <div
+            className="rounded-[10px] border overflow-hidden"
+            style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+          >
+            <div className="grid grid-cols-4">
+              {row1Items.map(({ icon: Icon, label, value, sub, change }, i) => (
+                <div
+                  key={label}
+                  className="flex flex-col gap-1 px-4 py-3"
+                  style={i > 0 ? { borderLeft: "1px dashed var(--qc-border-inner)" } : undefined}
+                >
                   <div className="flex items-center gap-1.5">
-                    <Icon className="w-3 h-3 text-zinc-400" />
-                    <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">
+                    <Icon className="w-3 h-3" style={{ color: "var(--qc-text-muted)" }} />
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
                       {label}
                     </span>
                   </div>
                   <span
-                    className={`text-lg font-semibold leading-tight ${
-                      change === "positive"
-                        ? "text-emerald-600"
+                    className="text-lg font-semibold leading-tight"
+                    style={{
+                      color: change === "positive"
+                        ? "var(--qc-up)"
                         : change === "negative"
-                          ? "text-red-600"
-                          : "text-[#0F172B]"
-                    }`}
+                          ? "var(--qc-down)"
+                          : "var(--qc-text-heading)"
+                    }}
                   >
                     {value}
                   </span>
-                  {sub && <span className="text-[11px] text-[#888888]">{sub}</span>}
+                  {sub && <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{sub}</span>}
                 </div>
               ))}
             </div>
-            <div className="border-t border-dashed border-zinc-200" />
-            <div className="grid grid-cols-4 divide-x divide-dashed divide-zinc-200">
-              {row2Items.map(({ icon: Icon, label, value, sub }) => (
-                <div key={label} className="flex flex-col gap-1 px-4 py-3">
+            <div style={{ borderTop: "1px dashed var(--qc-border-inner)" }} />
+            <div className="grid grid-cols-4">
+              {row2Items.map(({ icon: Icon, label, value, sub }, i) => (
+                <div
+                  key={label}
+                  className="flex flex-col gap-1 px-4 py-3"
+                  style={i > 0 ? { borderLeft: "1px dashed var(--qc-border-inner)" } : undefined}
+                >
                   <div className="flex items-center gap-1.5">
-                    <Icon className="w-3 h-3 text-zinc-400" />
-                    <span className="text-[10px] uppercase tracking-wider font-medium text-[#888888]">
+                    <Icon className="w-3 h-3" style={{ color: "var(--qc-text-muted)" }} />
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
                       {label}
                     </span>
                   </div>
-                  <span className="text-lg font-semibold leading-tight text-[#0F172B]">
+                  <span className="text-lg font-semibold leading-tight" style={{ color: "var(--qc-text-heading)" }}>
                     {value}
                   </span>
-                  {sub && <span className="text-[11px] text-[#888888]">{sub}</span>}
+                  {sub && <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{sub}</span>}
                 </div>
               ))}
             </div>

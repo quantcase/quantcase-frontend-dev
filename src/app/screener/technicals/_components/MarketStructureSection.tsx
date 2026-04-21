@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { TechnicalsTrendRaw, TechnicalsPattern } from "@/types/technicals";
 import { directionColor } from "./helpers";
@@ -10,69 +9,97 @@ interface MarketStructureSectionProps {
   patterns: TechnicalsPattern[];
 }
 
+function StatusBadge({ label, color }: { label: string; color: string }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-[4px] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.10em]"
+      style={{ color, background: color + "1A", border: `1px solid ${color}33` }}
+    >
+      {label}
+    </span>
+  );
+}
+
 export function MarketStructureSection({ trend, patterns }: MarketStructureSectionProps) {
   const trendStrengthColor =
     trend.strength === "STRONG" && trend.direction === "UPTREND"
-      ? "text-emerald-600"
+      ? "var(--qc-up)"
       : trend.strength === "STRONG" && trend.direction === "DOWNTREND"
-        ? "text-red-600"
-        : "text-amber-600";
+        ? "var(--qc-down)"
+        : "var(--qc-warn)";
 
   const phaseColor =
     trend.phase === "MARK-DOWN" || trend.phase === "DISTRIBUTION"
-      ? "text-red-600"
-      : "text-emerald-600";
+      ? "var(--qc-down)"
+      : "var(--qc-up)";
 
   return (
     <SectionPanel
       title="Market Structure"
       subtitle="Trend direction, Wyckoff phase & identified price pattern"
     >
-      <div className="divide-y divide-zinc-100 pb-4">
-        <div className="flex items-center justify-between py-2 px-2">
-          <div className="space-y-0.5">
-            <h6 className="uppercase tracking-wider">Trend</h6>
-            <p>Medium-term price direction</p>
+      <div className="pb-4" style={{ borderColor: "var(--qc-border-inner)" }}>
+        {[
+          {
+            title: "Trend",
+            desc: "Medium-term price direction",
+            right: <StatusBadge label={trend.direction} color={directionColor(trend.direction)} />,
+          },
+          {
+            title: "Trend Strength",
+            desc: `ADX ${trend.adx14.toFixed(1)}`,
+            right: <StatusBadge label={trend.strength} color={trendStrengthColor} />,
+          },
+          {
+            title: "Wyckoff Phase",
+            desc: "Current market cycle phase",
+            right: <StatusBadge label={trend.phase} color={phaseColor} />,
+          },
+          {
+            title: "Price Pattern",
+            desc: "Identified chart formation",
+            right: (
+              <span
+                className="inline-flex items-center rounded-[4px] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.10em]"
+                style={{ color: "var(--qc-text-muted)", background: "var(--qc-surface-row-alt)", border: "1px solid var(--qc-border-inner)" }}
+              >
+                {patterns[0]?.name ?? "None"}
+              </span>
+            ),
+          },
+          {
+            title: "Market Structure",
+            desc: "Price action sequence",
+            right: (
+              <div className="flex flex-col gap-1 items-end">
+                <span
+                  className="font-mono text-[10px] font-semibold"
+                  style={{ color: trend.structure.higherHighs ? "var(--qc-up)" : "var(--qc-down)" }}
+                >
+                  {trend.structure.higherHighs ? "Higher Highs" : "Lower Highs"}
+                </span>
+                <span
+                  className="font-mono text-[10px] font-semibold"
+                  style={{ color: trend.structure.higherLows ? "var(--qc-up)" : "var(--qc-down)" }}
+                >
+                  {trend.structure.higherLows ? "Higher Lows" : "Lower Lows"}
+                </span>
+              </div>
+            ),
+          },
+        ].map(({ title, desc, right }, i) => (
+          <div
+            key={title}
+            className="flex items-center justify-between py-2.5 px-2"
+            style={i > 0 ? { borderTop: "1px solid var(--qc-border-inner)" } : undefined}
+          >
+            <div className="space-y-0.5">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-heading)" }}>{title}</p>
+              <p className="text-[12px]" style={{ color: "var(--qc-text-body)" }}>{desc}</p>
+            </div>
+            {right}
           </div>
-          <Badge className={`uppercase font-semibold ${directionColor(trend.direction)}`}>
-            {trend.direction}
-          </Badge>
-        </div>
-        <div className="flex items-center justify-between py-2 px-2">
-          <div className="space-y-0.5">
-            <h6 className="uppercase tracking-wider">Trend Strength</h6>
-            <p>ADX {trend.adx14.toFixed(1)}</p>
-          </div>
-          <Badge className={`font-semibold ${trendStrengthColor}`}>{trend.strength}</Badge>
-        </div>
-        <div className="flex items-center justify-between py-2 px-2">
-          <div className="space-y-0.5">
-            <h6 className="uppercase tracking-wider">Wyckoff Phase</h6>
-            <p>Current market cycle phase</p>
-          </div>
-          <Badge className={`font-semibold ${phaseColor}`}>{trend.phase}</Badge>
-        </div>
-        <div className="flex items-center justify-between py-2 px-2">
-          <div className="space-y-0.5">
-            <h6 className="uppercase tracking-wider">Price Pattern</h6>
-            <p>Identified chart formation</p>
-          </div>
-          <Badge>{patterns[0]?.name ?? "None"}</Badge>
-        </div>
-        <div className="flex items-center justify-between py-2 px-2">
-          <div className="space-y-0.5">
-            <h6 className="uppercase tracking-wider">Market Structure</h6>
-            <p>Price action sequence</p>
-          </div>
-          <div className="flex flex-col gap-1 items-end">
-            <span className={`text-xs font-semibold ${trend.structure.higherHighs ? "text-emerald-600" : "text-red-600"}`}>
-              {trend.structure.higherHighs ? "Higher Highs" : "Lower Highs"}
-            </span>
-            <span className={`text-xs font-semibold ${trend.structure.higherLows ? "text-emerald-600" : "text-red-600"}`}>
-              {trend.structure.higherLows ? "Higher Lows" : "Lower Lows"}
-            </span>
-          </div>
-        </div>
+        ))}
       </div>
     </SectionPanel>
   );

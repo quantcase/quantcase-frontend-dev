@@ -15,7 +15,6 @@ import {
 } from "recharts";
 import type { FinancialTable } from "@/types/financials";
 
-// Exact row keys returned by the backend API
 const ROW_KEYS = {
   revenue:         "revenue",
   expenses:        "expenses",
@@ -33,27 +32,38 @@ function fmtCr(val: number | null | undefined): string {
   return `${Math.round(Math.abs(val)).toLocaleString("en-IN")} Cr`;
 }
 
+// Design-system palette for chart series
+const COLORS = {
+  revenue:  "#A5B4FC",  // soft indigo bar
+  expenses: "#F0C8A0",  // warm amber bar (down)
+  interest: "#E09090",  // muted red bar (down)
+  opProfit: "#0E0E0C",  // ink line
+  netProfit:"#9A9A92",  // ink-3 dashed line
+};
+
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{
-      background: "#fff",
-      border: "1px solid #E2E2E2",
-      borderRadius: 8,
+      background: "var(--qc-surface-white)",
+      border: "1px solid var(--qc-border-default)",
+      borderRadius: 10,
       padding: "10px 14px",
       fontSize: 12,
-      fontFamily: "var(--font-ibm-plex-sans, sans-serif)",
+      fontFamily: "'IBM Plex Mono', monospace",
       minWidth: 180,
-      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+      boxShadow: "0 4px 16px rgba(14,14,12,0.08)",
     }}>
-      <div style={{ fontWeight: 600, color: "#0F172B", marginBottom: 6 }}>{label}</div>
+      <div style={{ fontWeight: 600, color: "var(--qc-text-heading)", marginBottom: 8, fontFamily: "inherit" }}>
+        {label}
+      </div>
       {payload.map((entry) => (
-        <div key={entry.name} style={{ display: "flex", justifyContent: "space-between", gap: 16, color: "#888888", marginBottom: 3 }}>
+        <div key={entry.name} style={{ display: "flex", justifyContent: "space-between", gap: 16, color: "var(--qc-text-body)", marginBottom: 3 }}>
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: entry.color as string, display: "inline-block", flexShrink: 0 }} />
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: entry.color as string, display: "inline-block", flexShrink: 0 }} />
             {entry.name}:
           </span>
-          <span style={{ fontWeight: 600, color: "#0F172B" }}>{fmtCr(entry.value)}</span>
+          <span style={{ fontWeight: 600, color: "var(--qc-text-heading)" }}>{fmtCr(entry.value)}</span>
         </div>
       ))}
     </div>
@@ -71,18 +81,13 @@ export function PnLChart({ table }: { table: FinancialTable }) {
 
   const chartData = periods.map((period, i) => ({
     period,
-    // Revenue: positive → bar grows upward from 0
     revenue: revenueVals[i] as number | null,
-    // Expenses (excl. interest): negative → bar grows downward from 0
     expenses: expenseVals[i] != null ? -((expenseVals[i] as number) - (interestVals[i] ?? 0)) : null,
-    // Interest: negative → stacked below expenses
     interest: interestVals[i] != null ? -(interestVals[i] as number) : null,
-    // Lines at actual positive values (~operating profit, net profit)
     operatingProfit: opProfitVals[i]  as number | null,
     netProfit:       netProfitVals[i] as number | null,
   }));
 
-  // Y-axis domain: symmetric enough to show both positive bars and negative expense bars
   const posVals = chartData.map((d) => d.revenue).filter((v): v is number => v != null);
   const negVals = chartData.flatMap((d) => [d.expenses, d.interest]).filter((v): v is number => v != null);
   const dataMax = posVals.length ? Math.max(...posVals) : 3000;
@@ -97,7 +102,6 @@ export function PnLChart({ table }: { table: FinancialTable }) {
     return `${Math.round(val)}`;
   };
 
-  // barGap={-barSize} makes the negative stack overlap the positive stack at the same x position
   const barSize = 48;
 
   return (
@@ -108,17 +112,17 @@ export function PnLChart({ table }: { table: FinancialTable }) {
         barCategoryGap="20%"
         barGap={-barSize}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="#E2E2E2" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--qc-border-inner)" vertical={false} />
         <XAxis
           dataKey="period"
-          tick={{ fontSize: 11, fill: "#888888", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" }}
+          tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
           domain={[yMin, yMax]}
           tickFormatter={yFmt}
-          tick={{ fontSize: 11, fill: "#888888", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" }}
+          tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}
           axisLine={false}
           tickLine={false}
           width={52}
@@ -126,22 +130,27 @@ export function PnLChart({ table }: { table: FinancialTable }) {
         <Tooltip content={<CustomTooltip />} />
         <Legend
           content={() => (
-            <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: "12px 20px", paddingTop: 12, fontSize: 12, fontFamily: "var(--font-ibm-plex-sans, sans-serif)" }}>
+            <div style={{
+              display: "flex", flexDirection: "row", flexWrap: "wrap",
+              justifyContent: "center", gap: "10px 20px", paddingTop: 12,
+              fontSize: 11, fontFamily: "'IBM Plex Mono', monospace",
+              color: "var(--qc-text-body)",
+            }}>
               {[
-                { color: "#93c5fd", label: "Revenue",          line: false },
-                { color: "#fca5a5", label: "Expenses",         line: false },
-                { color: "#f87171", label: "Interest",         line: false },
-                { color: "#0F172B", label: "Operating Profit", line: true, dash: "6 4" },
-                { color: "#6b7280", label: "Net Profit",       line: true, dash: "8 5" },
+                { color: COLORS.revenue,  label: "Revenue",          line: false },
+                { color: COLORS.expenses, label: "Expenses",         line: false },
+                { color: COLORS.interest, label: "Interest",         line: false },
+                { color: COLORS.opProfit, label: "Operating Profit", line: true, dash: "6 4" },
+                { color: COLORS.netProfit,label: "Net Profit",       line: true, dash: "8 5" },
               ].map(({ color, label, line, dash }) => (
-                <span key={label} style={{ display: "flex", alignItems: "center", gap: 6, color: "#0F172B" }}>
+                <span key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   {line ? (
-                    <svg width="24" height="12">
-                      <line x1="0" y1="6" x2="24" y2="6" stroke={color} strokeWidth="2" strokeDasharray={dash} />
-                      <circle cx="12" cy="6" r="3" fill={color} />
+                    <svg width="22" height="10">
+                      <line x1="0" y1="5" x2="22" y2="5" stroke={color} strokeWidth="2" strokeDasharray={dash} />
+                      <circle cx="11" cy="5" r="2.5" fill={color} />
                     </svg>
                   ) : (
-                    <span style={{ width: 12, height: 12, borderRadius: 2, background: color, display: "inline-block" }} />
+                    <span style={{ width: 10, height: 10, borderRadius: 2, background: color, display: "inline-block" }} />
                   )}
                   {label}
                 </span>
@@ -149,24 +158,20 @@ export function PnLChart({ table }: { table: FinancialTable }) {
             </div>
           )}
         />
-        <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1} />
+        <ReferenceLine y={0} stroke="var(--qc-border-default)" strokeWidth={1} />
 
-        {/* Revenue: positive stack — grows up from 0 */}
-        <Bar dataKey="revenue" name="Revenue" stackId="pos" fill="#93c5fd" barSize={barSize} />
+        <Bar dataKey="revenue"  name="Revenue"  stackId="pos" fill={COLORS.revenue}  barSize={barSize} />
+        <Bar dataKey="expenses" name="Expenses" stackId="neg" fill={COLORS.expenses} barSize={barSize} />
+        <Bar dataKey="interest" name="Interest" stackId="neg" fill={COLORS.interest} barSize={barSize} />
 
-        {/* Expenses + Interest: negative stack — grows down from 0, overlaid at same x via barGap={-barSize} */}
-        <Bar dataKey="expenses" name="Expenses" stackId="neg" fill="#fca5a5" barSize={barSize} />
-        <Bar dataKey="interest" name="Interest" stackId="neg" fill="#f87171" barSize={barSize} />
-
-        {/* Profit lines overlaid at their actual values */}
         <Line
           dataKey="operatingProfit"
           name="Operating Profit"
           type="monotone"
-          stroke="#0F172B"
+          stroke={COLORS.opProfit}
           strokeWidth={2}
           strokeDasharray="6 4"
-          dot={{ r: 3, fill: "#0F172B", strokeWidth: 0 }}
+          dot={{ r: 3, fill: COLORS.opProfit, strokeWidth: 0 }}
           activeDot={{ r: 5 }}
           connectNulls
         />
@@ -174,10 +179,10 @@ export function PnLChart({ table }: { table: FinancialTable }) {
           dataKey="netProfit"
           name="Net Profit"
           type="monotone"
-          stroke="#6b7280"
+          stroke={COLORS.netProfit}
           strokeWidth={2}
           strokeDasharray="8 5"
-          dot={{ r: 3, fill: "#6b7280", strokeWidth: 0 }}
+          dot={{ r: 3, fill: COLORS.netProfit, strokeWidth: 0 }}
           activeDot={{ r: 5 }}
           connectNulls
         />

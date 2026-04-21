@@ -19,16 +19,18 @@ export function FinancialDataTable({
         <thead>
           <tr>
             <th
-              className="sticky left-0 bg-white"
+              className="sticky left-0"
               style={{
                 fontSize: 10,
                 fontWeight: 500,
-                color: "#888888",
+                color: "var(--qc-text-muted)",
                 textTransform: "uppercase",
-                letterSpacing: "0.08em",
+                letterSpacing: "0.12em",
                 padding: "8px 12px 8px 0",
                 whiteSpace: "nowrap",
                 minWidth: 160,
+                background: "var(--qc-surface-white)",
+                fontFamily: "'IBM Plex Mono', monospace",
               }}
             >
               Item
@@ -39,12 +41,13 @@ export function FinancialDataTable({
                 style={{
                   fontSize: 10,
                   fontWeight: 500,
-                  color: "#888888",
+                  color: "var(--qc-text-muted)",
                   textTransform: "uppercase",
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.12em",
                   padding: "8px 12px",
                   whiteSpace: "nowrap",
                   textAlign: "right",
+                  fontFamily: "'IBM Plex Mono', monospace",
                 }}
               >
                 {period}
@@ -55,12 +58,19 @@ export function FinancialDataTable({
         <tbody>
           {table.rows.map((row: FinancialRow, idx: number) => {
             const isHighlighted = row.highlight;
+            const rowBg = isHighlighted
+              ? "var(--qc-surface-panel)"
+              : idx % 2 === 0
+              ? "var(--qc-surface-white)"
+              : "var(--qc-surface-row-alt)";
             return (
               <tr
                 key={row.key}
                 style={{
-                  background: isHighlighted ? "#F5F5F5" : idx % 2 === 0 ? "#ffffff" : "#fafafa",
-                  borderTop: isHighlighted ? "1px solid #E2E2E2" : "1px solid transparent",
+                  background: rowBg,
+                  borderTop: isHighlighted
+                    ? "1px solid var(--qc-border-default)"
+                    : "1px solid transparent",
                 }}
               >
                 <td
@@ -68,18 +78,18 @@ export function FinancialDataTable({
                   style={{
                     fontSize: 13,
                     fontWeight: isHighlighted ? 600 : 400,
-                    color: isHighlighted ? "#0F172B" : "#888888",
+                    color: isHighlighted ? "var(--qc-text-heading)" : "var(--qc-text-body)",
                     padding: "8px 12px 8px 0",
                     whiteSpace: "nowrap",
-                    background: isHighlighted ? "#F5F5F5" : idx % 2 === 0 ? "#ffffff" : "#fafafa",
+                    background: rowBg,
                   }}
                 >
                   {row.label}
                 </td>
                 {row.values.map((val, vi) => {
-                  let cellColor = isHighlighted ? "#0F172B" : "#121212";
+                  let cellColor = isHighlighted ? "var(--qc-text-heading)" : "var(--qc-text-heading)";
                   if (cashFlowMode && val !== null && val !== undefined) {
-                    cellColor = val >= 0 ? "#16a34a" : "#dc2626";
+                    cellColor = val >= 0 ? "var(--qc-up)" : "var(--qc-down)";
                   }
                   return (
                     <td
@@ -87,10 +97,13 @@ export function FinancialDataTable({
                       style={{
                         fontSize: 13,
                         fontWeight: isHighlighted ? 600 : 400,
-                        color: val === null || val === undefined ? "#888888" : cellColor,
+                        color: val === null || val === undefined ? "var(--qc-text-muted)" : cellColor,
                         padding: "8px 12px",
                         textAlign: "right",
                         whiteSpace: "nowrap",
+                        fontVariantNumeric: "tabular-nums",
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        letterSpacing: "0.02em",
                       }}
                     >
                       {fmt(val, row.format)}

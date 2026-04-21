@@ -8,7 +8,6 @@ import {
   Lightbulb,
   Zap,
 } from "lucide-react";
-import { SectionPanel } from "@/components/molecules/section-panel";
 import { TabularCard } from "@/components/molecules/tabular-card";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { useFinancials } from "@/hooks/useFinancials";
@@ -25,6 +24,7 @@ import { CashFlowWaterfall } from "@/components/fundamentals/cash-flow-waterfall
 import { ShareholdingCharts } from "@/components/fundamentals/shareholding-charts";
 import { ViewToggle } from "@/components/fundamentals/view-toggle";
 import { PnLChart } from "@/components/fundamentals/pnl-chart";
+import { SectionShell, SectionLabel, MonoEyebrow } from "@/components/overview/primitives";
 
 
 const FUNDAMENTALS_NAV = [
@@ -37,6 +37,150 @@ const FUNDAMENTALS_NAV = [
   { id: "section-shareholding",     label: "Shareholding Pattern" },
   { id: "section-growth-returns",   label: "Growth & Returns" },
 ];
+
+const SWOT_ITEMS = [
+  {
+    key: "strengths",
+    icon: ShieldCheck,
+    label: "Strengths",
+    sentiment: "up" as const,
+    points: [
+      "#1 thermal producer, ~17 GW capacity",
+      "EBITDA margins >35%",
+      "Long-term PPAs, 5–25 yr revenue lock-in",
+    ],
+  },
+  {
+    key: "weaknesses",
+    icon: AlertTriangle,
+    label: "Weaknesses",
+    sentiment: "down" as const,
+    points: [
+      "Net D/E >2x, high interest burden",
+      "DISCOM receivables delay cash flows",
+      "Fuel cost pass-through lag hurts margins",
+    ],
+  },
+  {
+    key: "opportunities",
+    icon: Lightbulb,
+    label: "Opportunities",
+    sentiment: "warn" as const,
+    points: [
+      "India peak-power deficit drives baseload demand",
+      "6+ GW pipeline to monetise post-reform",
+      "Green-bond access as renewables expand",
+    ],
+  },
+  {
+    key: "threats",
+    icon: Zap,
+    label: "Threats",
+    sentiment: "neutral" as const,
+    points: [
+      "Renewables may structurally reprice thermal",
+      "Hindenburg report dampens institutional appetite",
+      "CERC tariff revisions risk merchant margins",
+    ],
+  },
+];
+
+const SENTIMENT_COLOR: Record<string, string> = {
+  up: "var(--qc-up)",
+  down: "var(--qc-down)",
+  warn: "var(--qc-warn)",
+  neutral: "var(--qc-text-muted)",
+};
+
+function SwotSection() {
+  return (
+    <div id="section-swot">
+      <SectionShell>
+        <SectionLabel>SWOT Analysis</SectionLabel>
+        <MonoEyebrow style={{ marginBottom: 14 }}>Strategic assessment across four dimensions</MonoEyebrow>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: 1,
+            background: "var(--qc-border-default)",
+            borderRadius: 14,
+            overflow: "hidden",
+          }}
+        >
+          {SWOT_ITEMS.map(({ key, icon: Icon, label, sentiment, points }) => {
+            const color = SENTIMENT_COLOR[sentiment];
+            return (
+              <div
+                key={key}
+                style={{
+                  background: "var(--qc-surface-white)",
+                  padding: "16px 18px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                  <div
+                    style={{
+                      padding: 5,
+                      borderRadius: 8,
+                      border: "1px solid var(--qc-border-default)",
+                      background: "var(--qc-surface-panel)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon size={14} style={{ color: "var(--qc-text-muted)" }} />
+                  </div>
+                  <span
+                    style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 10,
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.12em",
+                      color,
+                    }}
+                  >
+                    {label}
+                  </span>
+                </div>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+                  {points.map((point) => (
+                    <li
+                      key={point}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 8,
+                        fontSize: 12.5,
+                        color: "var(--qc-text-body)",
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      <span
+                        style={{
+                          marginTop: 6,
+                          width: 5,
+                          height: 5,
+                          borderRadius: "50%",
+                          background: "var(--qc-text-muted)",
+                          flexShrink: 0,
+                          display: "inline-block",
+                        }}
+                      />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      </SectionShell>
+    </div>
+  );
+}
 
 function FinancialsContent() {
   const searchParams = useSearchParams();
@@ -54,7 +198,9 @@ function FinancialsContent() {
   if (!symbol) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div className="text-sm text-red-600 px-4 pt-6">Error: No symbol provided in query parameters</div>
+        <div style={{ fontSize: 13, color: "var(--qc-down)", padding: "24px 16px" }}>
+          Error: No symbol provided in query parameters
+        </div>
       </ScreenerPageShell>
     );
   }
@@ -62,7 +208,7 @@ function FinancialsContent() {
   if (loading) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div className="text-sm px-4 pt-6">Loading...</div>
+        <div style={{ fontSize: 13, color: "var(--qc-text-muted)", padding: "24px 16px" }}>Loading…</div>
       </ScreenerPageShell>
     );
   }
@@ -70,7 +216,7 @@ function FinancialsContent() {
   if (error) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div className="text-sm text-red-600 px-4 pt-6">Error: {error}</div>
+        <div style={{ fontSize: 13, color: "var(--qc-down)", padding: "24px 16px" }}>Error: {error}</div>
       </ScreenerPageShell>
     );
   }
@@ -78,7 +224,9 @@ function FinancialsContent() {
   if (!data) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div className="text-sm px-4 pt-6">No financial data found for {symbol}</div>
+        <div style={{ fontSize: 13, color: "var(--qc-text-muted)", padding: "24px 16px" }}>
+          No financial data found for {symbol}
+        </div>
       </ScreenerPageShell>
     );
   }
@@ -88,7 +236,7 @@ function FinancialsContent() {
 
   return (
     <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-      <div className="mx-auto space-y-6 px-4 pt-6">
+      <div className="mx-auto space-y-6 px-4 pt-6 pb-8">
 
         {/* Price / PE / Sales chart */}
         {chartsData && (
@@ -103,109 +251,7 @@ function FinancialsContent() {
         )}
 
         {/* SWOT Analysis */}
-        <div id="section-swot" className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
-          <div className="px-2 pt-1 pb-3 flex items-center justify-between">
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.01em" }}>
-                SWOT Analysis
-              </div>
-              <div style={{ fontSize: 12, color: "#888888", marginTop: 2 }}>Strategic assessment across four dimensions</div>
-            </div>
-          </div>
-          <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4">
-            <div className="grid grid-cols-4 divide-x divide-[#E2E2E2]">
-
-              {/* Strengths */}
-              <div className="pr-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)]">
-                    <ShieldCheck className="h-4 w-4 text-zinc-500" />
-                  </div>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Strengths</span>
-                </div>
-                <ul className="space-y-2">
-                  {[
-                    "#1 thermal producer, ~17 GW capacity",
-                    "EBITDA margins >35%",
-                    "Long-term PPAs, 5–25 yr revenue lock-in",
-                  ].map((point) => (
-                    <li key={point} className="flex items-start gap-2" style={{ fontSize: 13, color: "#888888" }}>
-                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Weaknesses */}
-              <div className="px-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)]">
-                    <AlertTriangle className="h-4 w-4 text-zinc-500" />
-                  </div>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-red-600">Weaknesses</span>
-                </div>
-                <ul className="space-y-2">
-                  {[
-                    "Net D/E >2x, high interest burden",
-                    "DISCOM receivables delay cash flows",
-                    "Fuel cost pass-through lag hurts margins",
-                  ].map((point) => (
-                    <li key={point} className="flex items-start gap-2" style={{ fontSize: 13, color: "#888888" }}>
-                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Opportunities */}
-              <div className="px-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)]">
-                    <Lightbulb className="h-4 w-4 text-zinc-500" />
-                  </div>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-600">Opportunities</span>
-                </div>
-                <ul className="space-y-2">
-                  {[
-                    "India peak-power deficit drives baseload demand",
-                    "6+ GW pipeline to monetise post-reform",
-                    "Green-bond access as renewables expand",
-                  ].map((point) => (
-                    <li key={point} className="flex items-start gap-2" style={{ fontSize: 13, color: "#888888" }}>
-                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Threats */}
-              <div className="pl-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)]">
-                    <Zap className="h-4 w-4 text-zinc-500" />
-                  </div>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Threats</span>
-                </div>
-                <ul className="space-y-2">
-                  {[
-                    "Renewables may structurally reprice thermal",
-                    "Hindenburg report dampens institutional appetite",
-                    "CERC tariff revisions risk merchant margins",
-                  ].map((point) => (
-                    <li key={point} className="flex items-start gap-2" style={{ fontSize: 13, color: "#888888" }}>
-                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-            </div>
-          </div>
-        </div>
+        <SwotSection />
 
         {/* P&L Table */}
         <div id="section-pnl">
@@ -277,8 +323,17 @@ function FinancialsContent() {
               subtitle={peersData ? `${peersData.basicIndustry} · ${peersData.latestQuarter} · ${peersData.count} companies` : undefined}
             >
               {peersLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="w-5 h-5 rounded-full border-2 border-zinc-200 border-t-zinc-600 animate-spin" />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 0" }}>
+                  <div
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: "50%",
+                      border: "2px solid var(--qc-border-default)",
+                      borderTopColor: "var(--qc-text-body)",
+                      animation: "spin 0.7s linear infinite",
+                    }}
+                  />
                 </div>
               ) : (
                 <PeerComparisonDataTable peers={peersData!.peers} />
@@ -298,8 +353,17 @@ function FinancialsContent() {
             >
               {(activeTab) =>
                 shareholdingLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="w-5 h-5 rounded-full border-2 border-zinc-200 border-t-zinc-600 animate-spin" />
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 0" }}>
+                    <div
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: "50%",
+                        border: "2px solid var(--qc-border-default)",
+                        borderTopColor: "var(--qc-text-body)",
+                        animation: "spin 0.7s linear infinite",
+                      }}
+                    />
                   </div>
                 ) : shareholdingView === "chart" ? (
                   <ShareholdingCharts sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} />
@@ -313,11 +377,10 @@ function FinancialsContent() {
 
         {/* Growth & Returns */}
         <div id="section-growth-returns">
-          <SectionPanel
-            title="Growth & Returns"
-            subtitle="Compounded growth rates and return metrics"
-          >
-            <div className="grid grid-cols-4 gap-4 pb-2">
+          <SectionShell>
+            <SectionLabel>Growth &amp; Returns</SectionLabel>
+            <MonoEyebrow style={{ marginBottom: 14 }}>Compounded growth rates and return metrics</MonoEyebrow>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
               <GrowthStatCard
                 title="Compounded Sales Growth"
                 rows={[
@@ -355,7 +418,7 @@ function FinancialsContent() {
                 ]}
               />
             </div>
-          </SectionPanel>
+          </SectionShell>
         </div>
 
       </div>

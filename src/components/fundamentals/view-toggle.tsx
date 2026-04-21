@@ -9,8 +9,15 @@ export function ViewToggle({
 }) {
   return (
     <div
-      className="inline-flex items-center gap-0.5"
-      style={{ border: "1px solid #E2E2E2", borderRadius: 6, padding: 2 }}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 2,
+        background: "var(--qc-surface-panel)",
+        border: "1px solid var(--qc-border-default)",
+        borderRadius: 10,
+        padding: 3,
+      }}
     >
       {(["table", "chart"] as const).map((v) => {
         const active = view === v;
@@ -24,10 +31,10 @@ export function ViewToggle({
               justifyContent: "center",
               width: 28,
               height: 28,
-              borderRadius: 4,
+              borderRadius: 8,
               border: "none",
-              background: active ? "#0F172B" : "transparent",
-              color: active ? "#fff" : "#888888",
+              background: active ? "var(--qc-accent-primary)" : "transparent",
+              color: active ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
               cursor: "pointer",
             }}
           >

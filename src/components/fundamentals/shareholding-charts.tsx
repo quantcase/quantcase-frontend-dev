@@ -1,7 +1,9 @@
 import ApexChart from "@/components/molecules/apex-chart";
 import type { ShareholdingSection } from "@/hooks/useShareholding";
+import { MonoEyebrow } from "@/components/overview/primitives";
 
-const SHAREHOLDING_COLORS = ["#0F172B", "#71717a", "#a1a1aa", "#d4d4d8", "#52525b", "#3f3f46", "#27272a"];
+// Ink-family palette: heading → body → muted → ink-3 variants
+const SHAREHOLDING_COLORS = ["#0E0E0C", "#5A5A54", "#9A9A92", "#C8C6C0", "#3A3A38", "#2A2A28", "#1A1A18"];
 
 export function ShareholdingCharts({
   sections,
@@ -28,7 +30,12 @@ export function ShareholdingCharts({
   const maxValue = Math.max(...items.map((i) => i.value));
 
   const donutOptions: ApexCharts.ApexOptions = {
-    chart: { type: "donut", toolbar: { show: false }, animations: { enabled: false } },
+    chart: {
+      type: "donut",
+      toolbar: { show: false },
+      animations: { enabled: false },
+      background: "transparent",
+    },
     labels: items.map((i) => i.label),
     colors: SHAREHOLDING_COLORS,
     legend: { show: false },
@@ -42,9 +49,9 @@ export function ShareholdingCharts({
             total: {
               show: true,
               label: "Total",
-              fontSize: "12px",
-              fontFamily: "var(--font-ibm-plex-sans, sans-serif)",
-              color: "#888888",
+              fontSize: "11px",
+              fontFamily: "'IBM Plex Mono', monospace",
+              color: "#9A9A92",
               formatter: () => "100%",
             },
           },
@@ -52,49 +59,61 @@ export function ShareholdingCharts({
       },
     },
     tooltip: {
+      theme: "light",
       y: { formatter: (val: number) => `${val.toFixed(1)}%` },
     },
-    stroke: { width: 2, colors: ["#ffffff"] },
+    stroke: { width: 2, colors: ["var(--qc-surface-white, #FBFAF7)"] },
   };
 
   return (
     <div className="grid grid-cols-2 gap-8" style={{ alignItems: "start" }}>
       {/* Left — horizontal bar chart */}
       <div>
-        <div
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: "#888888",
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            marginBottom: 16,
-          }}
-        >
-          Latest Quarter · {period}
-        </div>
+        <MonoEyebrow style={{ marginBottom: 14 }}>Latest Quarter · {period}</MonoEyebrow>
         <div className="space-y-4">
           {items.map((item, i) => (
             <div key={item.label}>
-              <div style={{ fontSize: 13, fontWeight: 500, color: "#0F172B", marginBottom: 6 }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: "var(--qc-text-body)",
+                  marginBottom: 6,
+                }}
+              >
                 {item.label}
               </div>
-              <div className="flex items-center gap-3">
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div
-                  style={{ flex: 1, height: 28, background: "#F5F5F5", borderRadius: 4, overflow: "hidden" }}
+                  style={{
+                    flex: 1,
+                    height: 24,
+                    background: "var(--qc-surface-panel)",
+                    borderRadius: 6,
+                    overflow: "hidden",
+                    border: "1px solid var(--qc-border-inner)",
+                  }}
                 >
                   <div
                     style={{
                       width: `${(item.value / maxValue) * 100}%`,
                       height: "100%",
                       background: SHAREHOLDING_COLORS[i % SHAREHOLDING_COLORS.length],
-                      borderRadius: 4,
+                      borderRadius: 6,
                       transition: "width 0.4s ease",
                     }}
                   />
                 </div>
                 <div
-                  style={{ fontSize: 13, fontWeight: 600, color: "#0F172B", minWidth: 52, textAlign: "right" }}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "var(--qc-text-heading)",
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    letterSpacing: "0.02em",
+                    minWidth: 52,
+                    textAlign: "right",
+                  }}
                 >
                   {item.value.toFixed(1)}%
                 </div>
@@ -106,39 +125,28 @@ export function ShareholdingCharts({
 
       {/* Right — donut chart */}
       <div>
-        <div
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: "#888888",
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            marginBottom: 16,
-          }}
-        >
-          Shareholding Summary
-        </div>
+        <MonoEyebrow style={{ marginBottom: 14 }}>Shareholding Summary</MonoEyebrow>
         <ApexChart
           type="donut"
           series={items.map((i) => i.value)}
           options={donutOptions}
-          height={300}
+          height={280}
         />
-        <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3 justify-center">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: 12, justifyContent: "center" }}>
           {items.map((item, i) => (
-            <div key={item.label} className="flex items-center gap-1.5">
+            <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div
                 style={{
-                  width: 8,
-                  height: 8,
+                  width: 7,
+                  height: 7,
                   borderRadius: "50%",
                   background: SHAREHOLDING_COLORS[i % SHAREHOLDING_COLORS.length],
                   flexShrink: 0,
                 }}
               />
-              <span style={{ fontSize: 11, color: "#888888" }}>
+              <span style={{ fontSize: 11, color: "var(--qc-text-body)", fontFamily: "'IBM Plex Mono', monospace" }}>
                 {item.label}:{" "}
-                <strong style={{ color: "#0F172B" }}>{item.value.toFixed(1)}</strong>
+                <strong style={{ color: "var(--qc-text-heading)" }}>{item.value.toFixed(1)}</strong>
               </span>
             </div>
           ))}

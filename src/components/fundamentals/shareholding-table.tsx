@@ -76,16 +76,18 @@ export function ShareholdingTable({
         <thead>
           <tr>
             <th
-              className="sticky left-0 bg-white"
+              className="sticky left-0"
               style={{
                 fontSize: 10,
                 fontWeight: 500,
-                color: "#888888",
+                color: "var(--qc-text-muted)",
                 textTransform: "uppercase",
-                letterSpacing: "0.08em",
+                letterSpacing: "0.12em",
                 padding: "8px 12px 8px 0",
                 whiteSpace: "nowrap",
                 minWidth: 200,
+                background: "var(--qc-surface-white)",
+                fontFamily: "'IBM Plex Mono', monospace",
               }}
             >
               Category
@@ -96,12 +98,13 @@ export function ShareholdingTable({
                 style={{
                   fontSize: 10,
                   fontWeight: 500,
-                  color: "#888888",
+                  color: "var(--qc-text-muted)",
                   textTransform: "uppercase",
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.12em",
                   padding: "8px 12px",
                   whiteSpace: "nowrap",
                   textAlign: "right",
+                  fontFamily: "'IBM Plex Mono', monospace",
                 }}
               >
                 {q}
@@ -111,23 +114,28 @@ export function ShareholdingTable({
         </thead>
         <tbody>
           {rows.map((row, idx) => {
-            const bg = row.depth === 1 ? "#ffffff" : idx % 2 === 0 ? "#ffffff" : "#fafafa";
+            const rowBg = row.depth === 1
+              ? "var(--qc-surface-white)"
+              : idx % 2 === 0
+              ? "var(--qc-surface-white)"
+              : "var(--qc-surface-row-alt)";
             return (
               <tr
                 key={row.key}
                 style={{
-                  background: bg,
-                  borderTop:
-                    row.depth === 0 && row.isParent ? "1px solid #F0F0F0" : "1px solid transparent",
+                  background: rowBg,
+                  borderTop: row.depth === 0 && row.isParent
+                    ? "1px solid var(--qc-border-inner)"
+                    : "1px solid transparent",
                 }}
               >
                 <td
                   className="sticky left-0"
                   style={{
-                    background: bg,
+                    background: rowBg,
                     fontSize: 13,
                     fontWeight: row.depth === 0 ? 600 : 400,
-                    color: row.depth === 0 ? "#0F172B" : "#888888",
+                    color: row.depth === 0 ? "var(--qc-text-heading)" : "var(--qc-text-body)",
                     padding: "8px 12px 8px 0",
                     whiteSpace: "nowrap",
                     paddingLeft: row.depth === 1 ? 20 : 0,
@@ -155,10 +163,10 @@ export function ShareholdingTable({
                           width: 16,
                           height: 16,
                           borderRadius: 4,
-                          border: "1px solid #E2E2E2",
-                          background: "#F5F5F5",
+                          border: "1px solid var(--qc-border-default)",
+                          background: "var(--qc-surface-panel)",
                           fontSize: 10,
-                          color: "#888888",
+                          color: "var(--qc-text-muted)",
                           flexShrink: 0,
                           transition: "transform 0.15s",
                           transform: expanded.has(row.key) ? "rotate(90deg)" : "none",
@@ -178,15 +186,15 @@ export function ShareholdingTable({
                     style={{
                       fontSize: 13,
                       fontWeight: row.depth === 0 ? 600 : 400,
-                      color:
-                        val === null || val === undefined
-                          ? "#888888"
-                          : row.depth === 0
-                          ? "#0F172B"
-                          : "#121212",
+                      color: val === null || val === undefined
+                        ? "var(--qc-text-muted)"
+                        : "var(--qc-text-heading)",
                       padding: "8px 12px",
                       textAlign: "right",
                       whiteSpace: "nowrap",
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontVariantNumeric: "tabular-nums",
+                      letterSpacing: "0.02em",
                     }}
                   >
                     {fmtPctVal(val)}

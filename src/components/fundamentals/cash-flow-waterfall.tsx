@@ -53,10 +53,10 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
   }
 
   const series = [
-    { name: "spacer", data: spacerData },
+    { name: "spacer",   data: spacerData },
     { name: "Increase", data: positiveData },
     { name: "Decrease", data: negativeData },
-    { name: "Total", data: totalData },
+    { name: "Total",    data: totalData },
   ];
 
   const options: ApexCharts.ApexOptions = {
@@ -65,15 +65,17 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
       stacked: true,
       toolbar: { show: false },
       animations: { enabled: false },
+      background: "transparent",
     },
     plotOptions: {
       bar: {
         columnWidth: "60%",
-        borderRadius: 2,
+        borderRadius: 3,
         dataLabels: { position: "top" },
       },
     },
-    colors: ["transparent", "#6bba7f", "#e07070", "#5b9bd5"],
+    // transparent spacer, ds-up, ds-down, neutral ink
+    colors: ["transparent", "#1F7A4A", "#B23A2F", "#5A5A54"],
     dataLabels: {
       enabled: true,
       enabledOnSeries: [1, 2, 3],
@@ -82,10 +84,10 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         return `${Math.round(val).toLocaleString("en-IN")} Cr`;
       },
       style: {
-        fontSize: "11px",
+        fontSize: "10px",
         fontWeight: "500",
-        fontFamily: "var(--font-ibm-plex-sans, sans-serif)",
-        colors: ["#0F172B"],
+        fontFamily: "'IBM Plex Mono', monospace",
+        colors: ["#0E0E0C"],
       },
       offsetY: -4,
     },
@@ -93,7 +95,11 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
       categories,
       labels: {
         rotate: -45,
-        style: { fontSize: "11px", colors: "#888888", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" },
+        style: {
+          fontSize: "10px",
+          colors: "#9A9A92",
+          fontFamily: "'IBM Plex Mono', monospace",
+        },
       },
       axisBorder: { show: false },
       axisTicks: { show: false },
@@ -101,11 +107,15 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
     yaxis: {
       labels: {
         formatter: (val: number) => `${Math.round(val).toLocaleString("en-IN")}`,
-        style: { fontSize: "11px", colors: ["#888888"], fontFamily: "var(--font-ibm-plex-sans, sans-serif)" },
+        style: {
+          fontSize: "10px",
+          colors: ["#9A9A92"],
+          fontFamily: "'IBM Plex Mono', monospace",
+        },
       },
     },
     grid: {
-      borderColor: "#F0F0F0",
+      borderColor: "#EFEDE7",
       strokeDashArray: 3,
       xaxis: { lines: { show: false } },
     },
@@ -113,19 +123,19 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
       show: true,
       position: "top",
       horizontalAlign: "left",
-      fontSize: "12px",
-      fontFamily: "var(--font-ibm-plex-sans, sans-serif)",
+      fontSize: "11px",
+      fontFamily: "'IBM Plex Mono', monospace",
       fontWeight: 500,
-      markers: { size: 10 },
+      markers: { size: 8 },
       onItemClick: { toggleDataSeries: false },
       formatter: (seriesName: string) => (seriesName === "spacer" ? "" : seriesName),
+      labels: { colors: "#5A5A54" },
     },
     tooltip: {
       shared: false,
       intersect: true,
-      y: {
-        formatter: (val: number) => `${Math.round(val).toLocaleString("en-IN")} Cr`,
-      },
+      theme: "light",
+      y: { formatter: (val: number) => `${Math.round(val).toLocaleString("en-IN")} Cr` },
     },
     states: {
       hover: { filter: { type: "lighten" } },
@@ -134,7 +144,17 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
 
   return (
     <div>
-      <div style={{ fontSize: 11, color: "#888888", textAlign: "right", marginBottom: 4 }}>
+      <div
+        style={{
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 10,
+          color: "var(--qc-text-muted)",
+          textAlign: "right",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          marginBottom: 8,
+        }}
+      >
         Period: {period}
       </div>
       <ApexChart type="bar" series={series} options={options} height={420} />

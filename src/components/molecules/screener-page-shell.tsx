@@ -2,7 +2,6 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import { InPageNav } from "@/components/molecules/in-page-nav";
 import { useScreenerInfo } from "@/hooks/useScreenerInfo";
 import type { InPageNavItem } from "@/components/molecules/in-page-nav";
@@ -11,6 +10,22 @@ interface ScreenerPageShellProps {
   navItems?: InPageNavItem[];
   headerRight?: React.ReactNode;
   children: React.ReactNode;
+}
+
+/* Design-sample chip: .chip style — rounded-full, warm bg, border, small text */
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-[10px] py-1 text-[11.5px] font-medium"
+      style={{
+        background: "var(--qc-chip-bg, #F2F1EC)",
+        border: "1px solid var(--qc-chip-border, #E9E7E1)",
+        color: "var(--qc-text-muted)",
+      }}
+    >
+      {children}
+    </span>
+  );
 }
 
 function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps) {
@@ -26,26 +41,28 @@ function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps)
 
   return (
     <div className="min-h-screen" style={{ background: "var(--qc-surface-white)" }}>
-      {/* Company Header */}
-      <div className="flex items-center justify-between gap-4 pt-4 pb-4 px-4">
-        <div className="space-y-1">
-          <h2 style={{ fontSize: 22, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.2 }}>
+      {/* Company Header — design-sample style */}
+      <div className="flex items-start justify-between gap-4" style={{ padding: "20px 24px 16px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <h1
+            style={{ margin: 0, fontSize: 30, fontWeight: 500, letterSpacing: "-0.015em", color: "var(--qc-text-heading)", lineHeight: 1.2 }}
+          >
             {companyName}
-          </h2>
-          <div className="flex items-center gap-2 flex-wrap">
+          </h1>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {symbol && (
-              <Badge>
-                {exchange}: {symbol}
-              </Badge>
+              <Chip>
+                <span style={{ color: "var(--qc-text-muted)" }}>{exchange}:</span>&nbsp;{symbol}
+              </Chip>
             )}
-            {sector && <Badge>{sector}</Badge>}
-            {industry && industry !== sector && <Badge>{industry}</Badge>}
+            {sector && <Chip>{sector}</Chip>}
+            {industry && industry !== sector && <Chip>{industry}</Chip>}
           </div>
         </div>
-        {headerRight && <div className="flex items-center gap-3">{headerRight}</div>}
+        {headerRight && <div className="flex items-center gap-3 pt-1">{headerRight}</div>}
       </div>
 
-      {/* In-page section nav (optional) */}
+      {/* In-page section nav */}
       {navItems && navItems.length > 0 && (
         <InPageNav items={navItems} />
       )}
@@ -61,8 +78,8 @@ export function ScreenerPageShell({ navItems, headerRight, children }: ScreenerP
     <Suspense
       fallback={
         <div className="min-h-screen" style={{ background: "var(--qc-surface-white)" }}>
-          <div className="h-20 px-4 pt-8">
-            <div className="h-6 w-48 rounded bg-zinc-100 animate-pulse" />
+          <div className="h-20 px-6 pt-8">
+            <div className="h-7 w-64 rounded animate-pulse" style={{ background: "var(--qc-surface-panel)" }} />
           </div>
         </div>
       }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, Palette } from "lucide-react";
+import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TooltipProvider,
@@ -10,16 +10,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useTheme } from "@/components/providers/ThemeProvider";
-import type { ThemeId } from "@/lib/theme";
-import { THEME_LABELS } from "@/lib/theme";
-
-const THEMES: ThemeId[] = ["light-modern", "dark-modern", "light-enterprise", "dark-enterprise", "luxury"];
 
 const navItems = [
   { label: "Home",     href: "/",                  icon: Home,       isActive: (p: string) => p === "/" },
@@ -32,17 +23,31 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark-modern" || theme === "dark-enterprise" || theme === "luxury";
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-14 flex-col border-r bg-[var(--qc-sidebar-bg)]" style={{ borderColor: "var(--qc-sidebar-border)" }}>
-      {/* Logo */}
-      <div className="flex h-12 items-center justify-center border-b" style={{ borderColor: "var(--qc-sidebar-border)" }}>
-        <span className="text-base font-bold" style={{ color: "var(--qc-accent-logo)" }}>Q</span>
+    <aside
+      className="fixed left-0 top-0 z-40 flex h-screen w-[72px] flex-col items-center py-[22px] gap-1.5"
+      style={{
+        borderRight: "1px solid var(--qc-sidebar-border)",
+        background: "var(--qc-sidebar-bg)",
+      }}
+    >
+      {/* Logo mark — lime circle */}
+      <div
+        className="mb-2 flex items-center justify-center rounded-full"
+        style={{ width: 40, height: 40, background: "var(--qc-accent-lime, #D4F26A)" }}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0E0E0C" strokeWidth="2">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
       </div>
 
       {/* Nav icons */}
       <TooltipProvider delayDuration={300}>
-        <nav className="flex flex-1 flex-col gap-1 py-3 px-2">
+        <nav className="flex flex-1 flex-col items-center gap-1.5">
           {navItems.map(({ label, href, icon: Icon, isActive }) => {
             const active = isActive(pathname);
             return (
@@ -51,13 +56,28 @@ export function AppSidebar() {
                   <Link
                     href={href}
                     className={cn(
-                      "flex w-full items-center justify-center rounded-md p-2 transition-colors",
-                      active
-                        ? "bg-[var(--qc-sidebar-icon-active-bg)] text-[var(--qc-sidebar-icon-active-fg)]"
-                        : "text-[var(--qc-sidebar-icon-idle-fg)] hover:bg-[var(--qc-sidebar-icon-hover-bg)] hover:text-[var(--qc-sidebar-icon-active-fg)]"
+                      "flex items-center justify-center rounded-[10px] transition-colors",
                     )}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      background: active ? "var(--qc-sidebar-icon-active-bg)" : "transparent",
+                      color: active ? "var(--qc-sidebar-icon-active-fg)" : "var(--qc-sidebar-icon-idle-fg)",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!active) {
+                        (e.currentTarget as HTMLElement).style.background = "var(--qc-sidebar-icon-hover-bg)";
+                        (e.currentTarget as HTMLElement).style.color = "var(--qc-text-heading)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) {
+                        (e.currentTarget as HTMLElement).style.background = "transparent";
+                        (e.currentTarget as HTMLElement).style.color = "var(--qc-sidebar-icon-idle-fg)";
+                      }
+                    }}
                   >
-                    <Icon className="size-5 shrink-0" />
+                    <Icon size={18} strokeWidth={1.8} />
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="right">{label}</TooltipContent>
@@ -67,67 +87,50 @@ export function AppSidebar() {
         </nav>
       </TooltipProvider>
 
-      {/* Footer */}
-      <div className="border-t py-3 flex flex-col items-center gap-2" style={{ borderColor: "var(--qc-sidebar-border)" }}>
-        <ThemeSwitcherButton />
-        <p className="text-[8px]" style={{ color: "var(--qc-text-muted)" }}>v2.4</p>
+      {/* Footer — theme toggle (light/dark inline pills) */}
+      <div
+        className="flex flex-col items-center rounded-full gap-0.5 p-[3px]"
+        style={{ background: "var(--qc-chip-bg, #F2F1EC)", border: "1px solid var(--qc-chip-border, #E9E7E1)", width: 36 }}
+      >
+        <TooltipProvider delayDuration={300}>
+          <TooltipRoot>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setTheme("light-modern")}
+                className="flex items-center justify-center rounded-full transition-all"
+                style={{
+                  width: "100%",
+                  padding: "7px 0",
+                  background: !isDark ? "var(--qc-surface-card, #FFFFFF)" : "transparent",
+                  color: !isDark ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+                  boxShadow: !isDark ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
+                }}
+              >
+                <Sun size={14} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Light</TooltipContent>
+          </TooltipRoot>
+          <TooltipRoot>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setTheme("dark-modern")}
+                className="flex items-center justify-center rounded-full transition-all"
+                style={{
+                  width: "100%",
+                  padding: "7px 0",
+                  background: isDark ? "var(--qc-surface-card, #FFFFFF)" : "transparent",
+                  color: isDark ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+                  boxShadow: isDark ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
+                }}
+              >
+                <Moon size={14} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Dark</TooltipContent>
+          </TooltipRoot>
+        </TooltipProvider>
       </div>
     </aside>
-  );
-}
-
-function ThemeSwitcherButton() {
-  const { theme, setTheme } = useTheme();
-
-  return (
-    <Popover>
-      <TooltipProvider delayDuration={300}>
-      <TooltipRoot>
-        <TooltipTrigger asChild>
-          <PopoverTrigger asChild>
-            <button
-              className={cn(
-                "flex items-center justify-center rounded-md p-2 transition-colors",
-                "text-[var(--qc-sidebar-icon-idle-fg)] hover:bg-[var(--qc-sidebar-icon-hover-bg)] hover:text-[var(--qc-sidebar-icon-active-fg)]"
-              )}
-            >
-              <Palette className="size-5 shrink-0" />
-            </button>
-          </PopoverTrigger>
-        </TooltipTrigger>
-        <TooltipContent side="right">Theme</TooltipContent>
-      </TooltipRoot>
-      </TooltipProvider>
-      <PopoverContent
-        side="right"
-        align="end"
-        className="w-52 p-2"
-        style={{
-          background: "var(--qc-sidebar-bg)",
-          border: "1px solid var(--qc-sidebar-border)",
-          borderRadius: 10,
-        }}
-      >
-        <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>
-          Theme
-        </p>
-        <div className="flex flex-col gap-0.5">
-          {THEMES.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTheme(t)}
-              className={cn(
-                "w-full rounded-md px-2 py-1.5 text-left text-xs transition-colors",
-                theme === t
-                  ? "font-medium bg-[var(--qc-sidebar-icon-active-bg)] text-[var(--qc-sidebar-icon-active-fg)]"
-                  : "text-[var(--qc-sidebar-icon-idle-fg)] hover:bg-[var(--qc-sidebar-icon-hover-bg)] hover:text-[var(--qc-sidebar-icon-active-fg)]"
-              )}
-            >
-              {THEME_LABELS[t]}
-            </button>
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
   );
 }

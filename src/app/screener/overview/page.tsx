@@ -15,6 +15,7 @@ import { useOpportunityAnalysis } from "@/hooks/useOpportunityAnalysis";
 import { useDealAnalysis } from "@/hooks/useDealAnalysis";
 import { useTechnicals } from "@/hooks/useTechnicals";
 import { KeyRatioTiles } from "@/components/overview/key-ratio-tiles";
+import { QcScoreHeroCard } from "@/components/overview/qc-score-hero-card";
 import type { ManagementDashboardData } from "@/types/management";
 import type { OFactorResponse } from "@/types/opportunity";
 import type { DFactorResponse } from "@/types/deal";
@@ -84,6 +85,12 @@ function OverviewContent() {
 
   return (
     <ScreenerPageShell navItems={OVERVIEW_NAV}>
+      <QcScoreHeroCard
+        score={hasAnyScore ? Math.round((partialScore / totalMax) * 100) : null}
+        ratingLabel={rating}
+        mqiLabel={mgmtDashboard?.mqi_score?.label ?? null}
+        thesisHeadline={mgmtDashboard?.management_intelligence?.key_takeaways?.[0] ?? null}
+      />
       {data && <KeyRatioTiles data={data} />}
       <div className="px-4 space-y-6 pt-6 mb-8">
 

@@ -1,227 +1,233 @@
 "use client";
 
-import { useState } from "react";
-import { TabularCard } from "@/components/molecules/tabular-card";
 import { formatINR } from "@/lib/utils";
 import type { ScreenerData, QuarterlyTrend } from "@/types/screener";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 
-function pct(val: number | null | undefined, decimals = 1): string {
-  if (val == null) return "—";
-  return `${(val * 100).toFixed(decimals)}%`;
+
+function yoyText(growth: number | null | undefined, invert = false): { text: string; cls: string } {
+  if (growth == null) return { text: "—", cls: "na" };
+  const sign = growth >= 0 ? "+" : "";
+  const pctStr = `${sign}${(growth * 100).toFixed(1)}% YoY`;
+  const isPositiveRaw = growth >= 0;
+  const isPositive = invert ? !isPositiveRaw : isPositiveRaw;
+  return { text: pctStr, cls: isPositive ? "pos" : "neg" };
 }
 
-function pctRaw(val: number | null | undefined, decimals = 1): string {
-  if (val == null) return "—";
-  return `${val.toFixed(decimals)}%`;
+function sparkPoints(data: QuarterlyTrend[], key: keyof QuarterlyTrend, invert = false): string {
+  const vals = data
+    .map((q) => q[key] as number | null)
+    .filter((v) => v != null) as number[];
+  if (vals.length === 0) return "";
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const range = max - min || 1;
+  const step = 100 / Math.max(vals.length - 1, 1);
+  return vals
+    .map((v, i) => {
+      const x = i * step;
+      const normalized = (v - min) / range;
+      const y = invert ? normalized * 18 + 2 : (1 - normalized) * 18 + 2;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
 }
 
-type MetricKey = "revenue" | "ebitda" | "netProfit" | "cfo" | "fcf" | "reserves" | "debt";
-
-interface MetricTileCardProps {
-  label: string;
-  value: string;
-  growth?: number | null;
-  invertGrowth?: boolean;
-  metricKey: MetricKey;
-  selected: boolean;
-  onClick: (key: MetricKey) => void;
+interface SparklineProps {
+  data: QuarterlyTrend[];
+  dataKey: keyof QuarterlyTrend;
+  positive: boolean;
+  invert?: boolean;
 }
 
-function MetricTileCard({ label, value, growth, invertGrowth, metricKey, selected, onClick }: MetricTileCardProps) {
-  const hasGrowth = growth != null;
-  const isPositiveRaw = hasGrowth && growth! >= 0;
-  const isPositive = invertGrowth ? !isPositiveRaw : isPositiveRaw;
-  const growthText = hasGrowth
-    ? `${growth! >= 0 ? "+" : ""}${(growth! * 100).toFixed(1)}% YoY`
-    : null;
-
+function Sparkline({ data, dataKey, positive, invert = false }: SparklineProps) {
+  const points = sparkPoints(data, dataKey, invert);
+  if (!points) return null;
+  const color = positive ? "var(--qc-up, #1F7A4A)" : "var(--qc-down, #B23A2F)";
   return (
-    <button
-      type="button"
-      onClick={() => onClick(metricKey)}
-      className={`rounded-lg border px-4 py-4 flex flex-col gap-1.5 min-w-0 text-left transition-colors cursor-pointer w-full ${
-        selected
-          ? "border-[var(--qc-accent-primary)] bg-[var(--qc-accent-primary)]/5"
-          : "border-[var(--qc-border-default)] bg-[var(--qc-surface-white)] hover:border-[var(--qc-accent-primary)]/40"
-      }`}
+    <svg
+      viewBox="0 0 100 22"
+      preserveAspectRatio="none"
+      style={{ height: 22, marginTop: 2, display: "block", width: "100%" }}
     >
-      <p className="text-[11px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">{label}</p>
-      <div className="flex items-center gap-1.5">
-        <p className="text-[20px] font-medium text-[var(--qc-text-heading)] leading-none truncate">{value}</p>
-        {hasGrowth && (
-          <span className={`text-[12px] leading-none ${isPositive ? "text-emerald-600" : "text-red-600"}`}>
-            {isPositive ? "▲" : "▼"}
-          </span>
-        )}
-      </div>
-      {growthText && (
-        <p className={`text-[11px] font-semibold ${isPositive ? "text-emerald-600" : "text-red-600"}`}>
-          {growthText}
-        </p>
-      )}
-    </button>
+      <polyline fill="none" stroke={color} strokeWidth="1.5" points={points} />
+    </svg>
   );
 }
 
-interface RatioTileCardProps {
+interface KpiCardProps {
   label: string;
   value: string;
-  sublabel?: string | null;
-  trendIcon?: "up" | "down" | null;
+  unit?: string;
+  yoy: { text: string; cls: string };
+  muted?: boolean;
+  spark?: React.ReactNode;
 }
 
-function RatioTileCard({ label, value, sublabel, trendIcon }: RatioTileCardProps) {
-  const isPositive = trendIcon === "up";
+function KpiCard({ label, value, unit, yoy, muted, spark }: KpiCardProps) {
   return (
-    <div className="rounded-lg border border-[var(--qc-border-default)] bg-[var(--qc-surface-white)] px-4 py-4 flex flex-col gap-1.5 min-w-0">
-      <p className="text-[11px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">{label}</p>
-      <div className="flex items-center gap-1.5">
-        <p className="text-[20px] font-medium text-[var(--qc-text-heading)] leading-none">{value}</p>
-        {trendIcon && (
-          <span className={`text-[12px] leading-none ${isPositive ? "text-emerald-600" : "text-red-600"}`}>
-            {isPositive ? "▲" : "▼"}
-          </span>
-        )}
+    <div
+      style={{
+        background: muted ? "var(--qc-surface-tinted, #F5F5F5)" : "var(--qc-surface-white, #FFFFFF)",
+        padding: "14px 16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
+        minHeight: 112,
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <span style={{ fontSize: 11.5, color: "var(--qc-text-body, #5A5A54)", letterSpacing: ".01em" }}>
+          {label}
+        </span>
+        <span
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 10.5,
+            padding: "2px 6px",
+            borderRadius: 4,
+            letterSpacing: ".02em",
+            fontWeight: 500,
+            lineHeight: 1.3,
+            background:
+              yoy.cls === "pos"
+                ? "var(--qc-up-soft, #E3F1E8)"
+                : yoy.cls === "neg"
+                ? "var(--qc-down-soft, #F7E6E3)"
+                : "var(--qc-chip, #F2F1EC)",
+            color:
+              yoy.cls === "pos"
+                ? "var(--qc-up, #1F7A4A)"
+                : yoy.cls === "neg"
+                ? "var(--qc-down, #B23A2F)"
+                : "var(--qc-text-muted, #9A9A92)",
+          }}
+        >
+          {yoy.text}
+        </span>
       </div>
-      {sublabel && (
-        <p className="text-[11px] text-[var(--qc-text-muted)]">{sublabel}</p>
-      )}
-    </div>
-  );
-}
-
-interface RatioRowProps {
-  label: string;
-  value: string;
-  sublabel?: string | null;
-  badge?: string | null;
-  badgeColor?: "red" | "amber" | "green" | "zinc";
-}
-
-function RatioRow({ label, value, sublabel, badge, badgeColor = "zinc" }: RatioRowProps) {
-  const badgeClass = {
-    red: "bg-red-100 text-red-700",
-    amber: "bg-amber-100 text-amber-700",
-    green: "bg-emerald-100 text-emerald-700",
-    zinc: "bg-zinc-100 text-zinc-600",
-  }[badgeColor];
-
-  return (
-    <div className="flex items-center justify-between py-2.5 border-b border-[var(--qc-border-default)] last:border-0">
-      <span className="text-sm text-[var(--qc-text-body)]">{label}</span>
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{value}</span>
-        {badge && (
-          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-sm ${badgeClass}`}>
-            {badge}
-          </span>
-        )}
-        {sublabel && !badge && (
-          <span className="text-[11px] text-[var(--qc-text-muted)]">{sublabel}</span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-const METRIC_CONFIG: Record<MetricKey, { label: string; dataKey: keyof QuarterlyTrend }> = {
-  revenue:   { label: "Revenue Trend",   dataKey: "revenue" },
-  ebitda:    { label: "EBITDA Trend",    dataKey: "ebitda" },
-  netProfit: { label: "Net Profit Trend", dataKey: "netIncome" },
-  cfo:       { label: "CFO Trend",       dataKey: "revenue" },
-  fcf:       { label: "FCF Trend",       dataKey: "revenue" },
-  reserves:  { label: "Reserves Trend",  dataKey: "totalEquity" },
-  debt:      { label: "Debt Trend",      dataKey: "totalDebt" },
-};
-
-interface MetricChartProps {
-  metricKey: MetricKey;
-  quarterlyTrend: QuarterlyTrend[];
-}
-
-function MetricChart({ metricKey, quarterlyTrend }: MetricChartProps) {
-  const config = METRIC_CONFIG[metricKey];
-  const chartData = quarterlyTrend
-    .filter((q) => q[config.dataKey] != null)
-    .map((q) => ({
-      period: q.period,
-      value: parseFloat(((q[config.dataKey] as number) / 1e7).toFixed(1)),
-    }));
-
-  if (chartData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full text-[var(--qc-text-muted)] text-sm">
-        No data available
-      </div>
-    );
-  }
-
-  const values = chartData.map((d) => d.value).filter((v) => v != null) as number[];
-  const minVal = Math.min(...values);
-  const maxVal = Math.max(...values);
-  const padding = (maxVal - minVal) * 0.15 || maxVal * 0.1 || 1;
-  const yMin = Math.max(0, Math.floor(minVal - padding));
-  const yMax = Math.ceil(maxVal + padding);
-
-  return (
-    <div className="flex flex-col h-full gap-3">
-      <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">
-        {config.label}
-      </p>
-      <div className="flex-1 min-h-0">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-            <defs>
-              <linearGradient id="metricGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--qc-accent-primary)" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="var(--qc-accent-primary)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis
-              dataKey="period"
-              tick={{ fontSize: 10, fill: "var(--qc-text-muted)" }}
-              axisLine={false}
-              tickLine={false}
-              interval="preserveStartEnd"
-            />
-            <YAxis
-              domain={[yMin, yMax]}
-              tick={{ fontSize: 10, fill: "var(--qc-text-muted)" }}
-              axisLine={false}
-              tickLine={false}
-              width={40}
-              tickFormatter={(v) => `${v}`}
-            />
-            <Tooltip
-              contentStyle={{
-                background: "var(--qc-surface-white)",
-                border: "1px solid var(--qc-border-default)",
-                borderRadius: 8,
+      {muted ? (
+        <div
+          style={{
+            fontSize: 18,
+            fontWeight: 400,
+            color: "var(--qc-text-muted, #9A9A92)",
+            fontVariantNumeric: "tabular-nums",
+            lineHeight: 1.1,
+            marginTop: "auto",
+          }}
+        >
+          —
+        </div>
+      ) : (
+        <div
+          style={{
+            fontSize: 22,
+            fontWeight: 500,
+            letterSpacing: "-0.015em",
+            color: "var(--qc-text-heading, #0E0E0C)",
+            fontVariantNumeric: "tabular-nums",
+            lineHeight: 1.1,
+            marginTop: "auto",
+          }}
+        >
+          {value}
+          {unit && (
+            <span
+              style={{
                 fontSize: 12,
-                padding: "6px 10px",
+                fontWeight: 400,
+                color: "var(--qc-text-muted, #9A9A92)",
+                marginLeft: 3,
+                letterSpacing: 0,
               }}
-              formatter={(v: number) => [`₹${v} Cr`, config.label.replace(" Trend", "")]}
-              labelStyle={{ fontSize: 11, color: "var(--qc-text-muted)" }}
-            />
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke="var(--qc-accent-primary)"
-              strokeWidth={1.5}
-              fill="url(#metricGradient)"
-              dot={{ r: 2, fill: "var(--qc-accent-primary)", strokeWidth: 0 }}
-              activeDot={{ r: 3, fill: "var(--qc-accent-primary)", strokeWidth: 0 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+            >
+              {unit}
+            </span>
+          )}
+        </div>
+      )}
+      {spark}
+    </div>
+  );
+}
+
+interface QBarProps {
+  label: string;
+  value: string;
+  fillPct: number;
+  fillColor: string;
+  benchmarkPct: number;
+  subLeft: string;
+  subRight: string;
+}
+
+function QBar({ label, value, fillPct, fillColor, benchmarkPct, subLeft, subRight }: QBarProps) {
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+        <span style={{ fontSize: 12, color: "var(--qc-text-body, #5A5A54)", fontWeight: 500 }}>{label}</span>
+        <span
+          style={{
+            fontSize: 17,
+            fontWeight: 500,
+            letterSpacing: "-0.015em",
+            color: "var(--qc-text-heading, #0E0E0C)",
+            fontVariantNumeric: "tabular-nums",
+            lineHeight: 1,
+          }}
+        >
+          {value}
+        </span>
+      </div>
+      <div
+        style={{
+          height: 6,
+          background: "var(--qc-chip, #F2F1EC)",
+          borderRadius: 999,
+          overflow: "visible",
+          marginBottom: 6,
+          position: "relative",
+        }}
+      >
+        <span
+          style={{
+            display: "block",
+            height: "100%",
+            borderRadius: 999,
+            width: `${Math.min(fillPct, 100)}%`,
+            background: fillColor,
+          }}
+        />
+        <span
+          style={{
+            position: "absolute",
+            top: -3,
+            bottom: -3,
+            width: 2,
+            left: `${benchmarkPct}%`,
+            background: "var(--qc-text-heading, #0E0E0C)",
+            opacity: 0.5,
+          }}
+        />
+      </div>
+      <div
+        style={{
+          fontSize: 11,
+          color: "var(--qc-text-muted, #9A9A92)",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <span>{subLeft}</span>
+        <b
+          style={{
+            color: "var(--qc-text-body, #5A5A54)",
+            fontWeight: 500,
+            fontFamily: "'IBM Plex Mono', monospace",
+          }}
+        >
+          {subRight}
+        </b>
       </div>
     </div>
   );
@@ -232,147 +238,751 @@ interface Props {
 }
 
 export function FundamentalOverviewCard({ data }: Props) {
-  const [selectedMetric, setSelectedMetric] = useState<MetricKey>("revenue");
-
   const fp = data.financialPerformance;
   const val = data.valuation;
   const eff = data.efficiency;
   const own = data.ownership;
   const ratios = data.ratios;
+  const perShare = data.perShare;
+  const qt = fp.quarterlyTrend ?? [];
 
-  const peLabel = val.peValuationLabel;
-  const peLabelColor: "red" | "amber" | "green" | "zinc" =
-    peLabel === "Premium" ? "red" : peLabel === "Fair" ? "amber" : peLabel === "Discount" ? "green" : "zinc";
+  const pe = val.peRatio;
+  const industryPE = val.industryPE;
 
-  const industryPELabelColor: "red" | "amber" | "green" | "zinc" =
-    val.industryPELabel === "Premium" ? "red"
-    : val.industryPELabel === "Fair" ? "amber"
-    : val.industryPELabel === "Discount" ? "green"
-    : "zinc";
+  const verdictLabel =
+    val.peValuationLabel === "Discount" || val.peValuationLabel === "Undervalued"
+      ? "Undervalued"
+      : val.peValuationLabel === "Premium" || val.peValuationLabel === "Overvalued"
+      ? "Overvalued"
+      : val.peValuationLabel === "Fair"
+      ? "Fair Value"
+      : val.peValuationLabel ?? "—";
 
-  const publicLabelColor: "red" | "amber" | "green" | "zinc" =
-    own.publicLabel === "High" ? "red"
-    : own.publicLabel === "Moderate" ? "amber"
-    : own.publicLabel === "Low" ? "green"
-    : "zinc";
+  const benchmarkPct =
+    industryPE && pe
+      ? Math.min(Math.max((pe / (industryPE * 2)) * 100, 5), 95)
+      : 33;
 
-  const quarterlyTrend = fp.quarterlyTrend ?? [];
+  const roceVal = ratios.roce;
+  const roeVal = ratios.roe;
+  const deVal = eff.debtToEquity;
+
+  const roceFillPct = roceVal != null ? Math.min((roceVal / 50) * 100, 100) : 0;
+  const roeFillPct = roeVal != null ? Math.min((roeVal / 50) * 100, 100) : 0;
+  const deFillPct = deVal != null ? Math.min((deVal / 3) * 100, 100) : 0;
+
+  const roceIsGood = roceVal != null && roceVal > 15;
+  const roeIsGood = roeVal != null && roeVal > 12;
+  const deIsGood = deVal != null && deVal < 1;
+
+  const promoterPct = own.promoter != null ? own.promoter * 100 : null;
+  const fiiPct = own.fii != null ? own.fii * 100 : own.institutions != null ? own.institutions * 100 : null;
+  const diiPct = own.dii != null ? own.dii * 100 : null;
+  const publicPct = own.public != null ? own.public * 100 : null;
+
+  const ownTotal = (promoterPct ?? 0) + (fiiPct ?? 0) + (diiPct ?? 0) + (publicPct ?? 0);
+  const hasOwnData = ownTotal > 0;
+
+  const ownSegments = [
+    { label: "Promoter", pct: promoterPct, color: "var(--qc-text-heading, #0E0E0C)" },
+    { label: "FII", pct: fiiPct, color: "var(--qc-blue, #3A6BEF)" },
+    { label: "DII", pct: diiPct, color: "var(--qc-up, #1F7A4A)" },
+    { label: "Public", pct: publicPct, color: "var(--qc-text-muted, #9A9A92)" },
+  ];
+
+  const revenueYoy = yoyText(fp.revenueGrowth);
+  const ebitdaYoy = yoyText(fp.ebitdaGrowth);
+  const netProfitYoy = yoyText(fp.netProfitGrowth);
+  const cfoYoy = yoyText(fp.cfoGrowth);
+  const fcfYoy = yoyText(fp.fcfGrowth);
+  const reservesYoy = yoyText(fp.reservesGrowth);
+  const debtYoy = yoyText(eff.debtGrowth, true);
+
+  const narr = (() => {
+    const parts: string[] = [];
+    if (verdictLabel === "Undervalued") parts.push("Trading at a discount to the sector median.");
+    else if (verdictLabel === "Overvalued") parts.push("Trading at a premium to the sector median.");
+    else parts.push("Valuation is broadly in line with sector peers.");
+    if (roceIsGood) parts.push("Returns on capital are strong.");
+    if (deIsGood) parts.push("Balance sheet leverage is modest.");
+    return parts.join(" ");
+  })();
+
+  const tags: { label: string; color: string }[] = [];
+  if (verdictLabel === "Undervalued") tags.push({ label: "Undervalued", color: "var(--qc-up, #1F7A4A)" });
+  if (verdictLabel === "Overvalued") tags.push({ label: "Overvalued", color: "var(--qc-down, #B23A2F)" });
+  if (roceIsGood) tags.push({ label: "High ROCE", color: "var(--qc-up, #1F7A4A)" });
+  if (roeIsGood) tags.push({ label: "High ROE", color: "var(--qc-up, #1F7A4A)" });
+  if (!deIsGood && deVal != null) tags.push({ label: "Elevated D/E", color: "var(--qc-warn, #B4731A)" });
+  if (deIsGood && deVal != null) tags.push({ label: "Low leverage", color: "var(--qc-text-muted, #9A9A92)" });
 
   return (
-    <TabularCard title="Fundamentals">
-      <div className="space-y-5">
-
-        {/* KEY METRICS — two-column layout: 60% metrics, 40% chart */}
-        <div>
-          <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Key Metrics</p>
-          <div className="flex gap-4">
-            {/* Left: metric tiles (60%) */}
-            <div className="flex flex-col gap-3" style={{ flex: "0 0 60%" }}>
-              <div className="grid grid-cols-2 gap-3">
-                <MetricTileCard label="Revenue" value={formatINR(fp.revenue)} growth={fp.revenueGrowth} metricKey="revenue" selected={selectedMetric === "revenue"} onClick={setSelectedMetric} />
-                <MetricTileCard label="EBITDA" value={formatINR(fp.ebitda)} growth={fp.ebitdaGrowth} metricKey="ebitda" selected={selectedMetric === "ebitda"} onClick={setSelectedMetric} />
-                <MetricTileCard label="Net Profit" value={formatINR(fp.netProfit)} growth={fp.netProfitGrowth} metricKey="netProfit" selected={selectedMetric === "netProfit"} onClick={setSelectedMetric} />
-                <MetricTileCard label="CFO" value={formatINR(fp.operatingCashflow)} growth={fp.cfoGrowth} metricKey="cfo" selected={selectedMetric === "cfo"} onClick={setSelectedMetric} />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <MetricTileCard label="FCF" value={formatINR(fp.freeCashflow)} growth={fp.fcfGrowth} metricKey="fcf" selected={selectedMetric === "fcf"} onClick={setSelectedMetric} />
-                <MetricTileCard label="Reserves" value={formatINR(fp.reserves)} growth={fp.reservesGrowth} metricKey="reserves" selected={selectedMetric === "reserves"} onClick={setSelectedMetric} />
-                <MetricTileCard label="Debt" value={formatINR(eff.totalDebt)} growth={eff.debtGrowth} invertGrowth metricKey="debt" selected={selectedMetric === "debt"} onClick={setSelectedMetric} />
-              </div>
-            </div>
-
-            {/* Right: trend chart (40%) */}
-            <div
-              className="rounded-lg border border-[var(--qc-border-default)] bg-[var(--qc-surface-white)] px-4 py-4"
-              style={{ flex: "0 0 40%" }}
-            >
-              {quarterlyTrend.length > 0 ? (
-                <MetricChart metricKey={selectedMetric} quarterlyTrend={quarterlyTrend} />
-              ) : (
-                <div className="flex items-center justify-center h-full text-[var(--qc-text-muted)] text-sm">
-                  No trend data
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* KEY RATIOS */}
-        <div>
-          <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Key Ratios</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <RatioTileCard
-              label="ROCE"
-              value={ratios.roce != null ? pctRaw(ratios.roce) : "—"}
-              sublabel={ratios.roce3yAvg != null ? `3Y avg ${pctRaw(ratios.roce3yAvg)}` : null}
-              trendIcon={ratios.roce != null && ratios.roce3yAvg != null ? (ratios.roce >= ratios.roce3yAvg ? "up" : "down") : null}
-            />
-            <RatioTileCard
-              label="ROE"
-              value={ratios.roe != null ? pctRaw(ratios.roe) : "—"}
-              sublabel={ratios.roe3yAvg != null ? `3Y avg ${pctRaw(ratios.roe3yAvg)}` : null}
-              trendIcon={ratios.roe != null && ratios.roe3yAvg != null ? (ratios.roe >= ratios.roe3yAvg ? "up" : "down") : null}
-            />
-            <RatioTileCard
-              label="Debt / Equity"
-              value={eff.debtToEquity != null ? `${eff.debtToEquity.toFixed(2)}x` : "—"}
-              sublabel={ratios.debtStatus}
-            />
-          </div>
-        </div>
-
-        {/* VALUATION + OWNERSHIP */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-          {/* Valuation */}
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Valuation</p>
-            <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4">
-              <RatioRow
-                label="P/E"
-                value={val.peRatio != null ? `${val.peRatio.toFixed(1)}x` : "—"}
-                badge={val.peValuationLabel}
-                badgeColor={peLabelColor}
-              />
-              <RatioRow
-                label="PEG"
-                value={val.pegRatio != null ? `${val.pegRatio.toFixed(1)}x` : "—"}
-              />
-              <RatioRow
-                label="EV / EBITDA"
-                value={val.evToEbitda != null ? `${val.evToEbitda.toFixed(1)}x` : "—"}
-              />
-              <RatioRow
-                label="Industry P/E"
-                value={val.industryPE != null ? `${val.industryPE.toFixed(1)}x` : "—"}
-                badge={val.industryPELabel}
-                badgeColor={industryPELabelColor}
-              />
-            </div>
-          </div>
-
-          {/* Ownership */}
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Ownership</p>
-            <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4">
-              <RatioRow label="Promoter" value={pct(own.promoter)} />
-              <RatioRow
-                label="FII"
-                value={own.fii != null ? pct(own.fii) : own.institutions != null ? pct(own.institutions) : "—"}
-                sublabel={own.fii == null && own.institutions != null ? "Institutions" : null}
-              />
-              <RatioRow label="DII" value={own.dii != null ? pct(own.dii) : "—"} />
-              <RatioRow
-                label="Public"
-                value={pct(own.public)}
-                badge={own.publicLabel}
-                badgeColor={publicLabelColor}
-              />
-            </div>
-          </div>
-        </div>
-
+    <div
+      style={{
+        background: "var(--qc-surface-row-alt, #EFEDE7)",
+        border: "1px solid var(--qc-border-default, #E9E7E1)",
+        borderRadius: 18,
+        padding: 16,
+      }}
+    >
+      {/* Section title */}
+      <div
+        style={{
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 11,
+          letterSpacing: ".12em",
+          color: "var(--qc-text-body, #5A5A54)",
+          textTransform: "uppercase",
+          marginBottom: 14,
+        }}
+      >
+        Fundamentals
       </div>
-    </TabularCard>
+
+      {/* Hero row: Valuation hero (left) + Narrative (right) */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 14, marginBottom: 14 }}>
+
+        {/* LEFT: Valuation hero card */}
+        <section
+          style={{
+            background: "var(--qc-surface-white, #FFFFFF)",
+            border: "1px solid var(--qc-border-default, #E9E7E1)",
+            borderRadius: 18,
+            padding: "18px 22px 20px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Top row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+            <span
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10,
+                letterSpacing: ".16em",
+                color: "var(--qc-text-muted, #9A9A92)",
+                textTransform: "uppercase",
+              }}
+            >
+              Valuation · P/E
+            </span>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "5px 10px",
+                borderRadius: 999,
+                background: "var(--qc-lime-soft, #EAF7BC)",
+                border: "1px solid #D9E8A6",
+                color: "#2E4A0A",
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: ".04em",
+                textTransform: "uppercase",
+              }}
+            >
+              <span
+                style={{ width: 6, height: 6, borderRadius: "50%", background: "#6B9E1F", display: "inline-block" }}
+              />
+              {verdictLabel}
+            </span>
+          </div>
+
+          {/* Main: PE figure + benchmark bar */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr auto",
+              gap: 24,
+              alignItems: "end",
+              paddingBottom: 18,
+              borderBottom: "1px solid var(--qc-border-inner, #EFEDE7)",
+              marginBottom: 16,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 12.5, color: "var(--qc-text-body, #5A5A54)", marginBottom: 4 }}>
+                Current P/E ratio
+              </div>
+              <div
+                style={{
+                  fontSize: 64,
+                  fontWeight: 500,
+                  letterSpacing: "-0.035em",
+                  lineHeight: 1,
+                  color: "var(--qc-text-heading, #0E0E0C)",
+                  fontVariantNumeric: "tabular-nums",
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 6,
+                }}
+              >
+                {pe != null ? pe.toFixed(1) : "—"}
+                <span
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 500,
+                    letterSpacing: "-0.02em",
+                    color: "var(--qc-text-muted, #9A9A92)",
+                  }}
+                >
+                  x
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: 12.5,
+                  color: "var(--qc-text-body, #5A5A54)",
+                  marginTop: 8,
+                  lineHeight: 1.4,
+                  maxWidth: 340,
+                }}
+              >
+                {narr}
+              </div>
+            </div>
+
+            {/* Benchmark bar */}
+            <div style={{ minWidth: 260 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  marginBottom: 8,
+                  fontSize: 12,
+                  color: "var(--qc-text-body, #5A5A54)",
+                }}
+              >
+                <span>vs. Industry</span>
+                <b
+                  style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontWeight: 500,
+                    color: "var(--qc-text-heading, #0E0E0C)",
+                  }}
+                >
+                  {industryPE != null ? `${industryPE.toFixed(1)}x` : "—"}
+                </b>
+              </div>
+              <div
+                style={{
+                  position: "relative",
+                  height: 22,
+                  background: "linear-gradient(90deg,#E8F3C9 0%, #F3EBC8 55%, #F7D8C8 100%)",
+                  borderRadius: 6,
+                  overflow: "visible",
+                }}
+              >
+                {/* Median tick at 50% */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: -3,
+                    bottom: -3,
+                    left: "50%",
+                    width: 2,
+                    background: "rgba(14,14,12,0.3)",
+                  }}
+                />
+                {/* Current PE marker */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: -6,
+                    bottom: -6,
+                    left: `calc(${benchmarkPct}% - 6px)`,
+                    width: 12,
+                    borderRadius: 4,
+                    background: "#0E0E0C",
+                    border: "2px solid #fff",
+                    boxShadow: "0 1px 4px rgba(0,0,0,.18)",
+                  }}
+                  title={`P/E ${pe?.toFixed(1)}x`}
+                />
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginTop: 6,
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 10,
+                  color: "var(--qc-text-muted, #9A9A92)",
+                  letterSpacing: ".06em",
+                  textTransform: "uppercase",
+                }}
+              >
+                <span>Cheap</span>
+                <span>Median</span>
+                <span>Rich</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Sub metrics: PEG / EV·EBITDA / P/B / Div Yield */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4,1fr)",
+              gap: 0,
+            }}
+          >
+            {[
+              { k: "PEG", v: val.pegRatio != null ? `${val.pegRatio.toFixed(1)}x` : "—", sub: "Growth-adjusted" },
+              { k: "EV / EBITDA", v: val.evToEbitda != null ? `${val.evToEbitda.toFixed(1)}x` : "—", sub: "Enterprise multiple" },
+              { k: "P / B", v: perShare.bookValue != null && pe != null ? `${(pe / (pe / (val.pbRatio ?? 1))).toFixed(1)}x` : (val.pbRatio != null ? `${val.pbRatio.toFixed(1)}x` : "—"), sub: "Book value" },
+              { k: "Dividend Yield", v: perShare.dividendYield != null ? `${(perShare.dividendYield * 100).toFixed(2)}%` : "—", sub: "Trailing 12M" },
+            ].map(({ k, v, sub }, i, arr) => (
+              <div
+                key={k}
+                style={{
+                  padding: "0 16px",
+                  borderRight: i < arr.length - 1 ? "1px solid var(--qc-border-inner, #EFEDE7)" : "none",
+                  minWidth: 0,
+                  paddingLeft: i === 0 ? 0 : undefined,
+                  paddingRight: i === arr.length - 1 ? 0 : undefined,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "var(--qc-text-muted, #9A9A92)",
+                    letterSpacing: ".02em",
+                    marginBottom: 4,
+                  }}
+                >
+                  {k}
+                </div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: v === "—" ? 400 : 500,
+                    letterSpacing: "-0.01em",
+                    color: v === "—" ? "var(--qc-text-muted, #9A9A92)" : "var(--qc-text-heading, #0E0E0C)",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {v}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--qc-text-muted, #9A9A92)", marginTop: 2 }}>{sub}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* RIGHT: Narrative card */}
+        <aside
+          style={{
+            background: "var(--qc-surface-white, #FFFFFF)",
+            border: "1px solid var(--qc-border-default, #E9E7E1)",
+            borderRadius: 18,
+            padding: "20px 22px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Lime gradient overlay at bottom */}
+          <div
+            style={{
+              position: "absolute",
+              inset: "auto 0 0 0",
+              height: "60%",
+              background: "linear-gradient(180deg, transparent 0%, var(--qc-lime-bg, #E9F4C4) 100%)",
+              zIndex: 0,
+              pointerEvents: "none",
+            }}
+          />
+          <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 14, height: "100%" }}>
+            <div
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10,
+                letterSpacing: ".16em",
+                color: "var(--qc-text-muted, #9A9A92)",
+                textTransform: "uppercase",
+              }}
+            >
+              What the numbers say
+            </div>
+            <div
+              style={{
+                fontSize: 16,
+                fontWeight: 500,
+                letterSpacing: "-0.01em",
+                lineHeight: 1.3,
+                color: "var(--qc-text-heading, #0E0E0C)",
+              }}
+            >
+              {verdictLabel === "Undervalued"
+                ? "Cheap on earnings — potential upside if growth holds."
+                : verdictLabel === "Overvalued"
+                ? "Priced at a premium — execution must justify the multiple."
+                : "Fairly valued against sector peers."}
+            </div>
+            <p
+              style={{
+                fontSize: 12.5,
+                lineHeight: 1.6,
+                color: "var(--qc-text-body, #5A5A54)",
+                margin: 0,
+              }}
+            >
+              {narr}
+              {roceIsGood || roeIsGood
+                ? " Return metrics indicate efficient capital deployment."
+                : " Return metrics warrant monitoring."}
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: "auto" }}>
+              {tags.map(({ label, color }) => (
+                <span
+                  key={label}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "5px 10px",
+                    borderRadius: 999,
+                    background: "var(--qc-surface-white, #FFFFFF)",
+                    border: "1px solid var(--qc-border-default, #E9E7E1)",
+                    fontSize: 11.5,
+                    color: "var(--qc-text-body, #5A5A54)",
+                    fontWeight: 500,
+                  }}
+                >
+                  <span
+                    style={{ width: 6, height: 6, borderRadius: "50%", background: color, display: "inline-block" }}
+                  />
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      {/* Key Metrics eyebrow */}
+      <div
+        style={{
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 10,
+          letterSpacing: ".14em",
+          color: "var(--qc-text-muted, #9A9A92)",
+          textTransform: "uppercase",
+          margin: "4px 0 10px",
+        }}
+      >
+        Key Metrics · Latest fiscal
+      </div>
+
+      {/* KPI grid — 4 columns, 2 rows */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4,1fr)",
+          gap: 1,
+          background: "var(--qc-border-default, #E9E7E1)",
+          border: "1px solid var(--qc-border-default, #E9E7E1)",
+          borderRadius: 14,
+          overflow: "hidden",
+          marginBottom: 14,
+        }}
+      >
+        <KpiCard
+          label="Revenue"
+          value={formatINR(fp.revenue)}
+          yoy={revenueYoy}
+          spark={
+            <Sparkline
+              data={qt}
+              dataKey="revenue"
+              positive={revenueYoy.cls === "pos"}
+            />
+          }
+        />
+        <KpiCard
+          label="EBITDA"
+          value={fp.ebitda != null ? formatINR(fp.ebitda) : "—"}
+          yoy={ebitdaYoy}
+          muted={fp.ebitda == null}
+          spark={
+            fp.ebitda != null ? (
+              <Sparkline data={qt} dataKey="ebitda" positive={ebitdaYoy.cls === "pos"} />
+            ) : undefined
+          }
+        />
+        <KpiCard
+          label="Net Profit"
+          value={fp.netProfit != null ? formatINR(fp.netProfit) : "—"}
+          yoy={netProfitYoy}
+          muted={fp.netProfit == null}
+          spark={
+            fp.netProfit != null ? (
+              <Sparkline data={qt} dataKey="netIncome" positive={netProfitYoy.cls === "pos"} />
+            ) : undefined
+          }
+        />
+        <KpiCard
+          label="CFO"
+          value={fp.operatingCashflow != null ? formatINR(fp.operatingCashflow) : "—"}
+          yoy={cfoYoy}
+          muted={fp.operatingCashflow == null}
+          spark={
+            fp.operatingCashflow != null ? (
+              <Sparkline data={qt} dataKey="revenue" positive={cfoYoy.cls === "pos"} />
+            ) : undefined
+          }
+        />
+        <KpiCard
+          label="FCF"
+          value={fp.freeCashflow != null ? formatINR(fp.freeCashflow) : "—"}
+          yoy={fcfYoy}
+          muted={fp.freeCashflow == null}
+          spark={
+            fp.freeCashflow != null ? (
+              <Sparkline data={qt} dataKey="revenue" positive={fcfYoy.cls === "pos"} />
+            ) : undefined
+          }
+        />
+        <KpiCard
+          label="Reserves"
+          value={fp.reserves != null ? formatINR(fp.reserves) : "—"}
+          yoy={reservesYoy}
+          muted={fp.reserves == null}
+          spark={
+            fp.reserves != null ? (
+              <Sparkline data={qt} dataKey="totalEquity" positive={reservesYoy.cls === "pos"} />
+            ) : undefined
+          }
+        />
+        <KpiCard
+          label="Debt"
+          value={eff.totalDebt != null ? formatINR(eff.totalDebt) : "—"}
+          yoy={debtYoy}
+          muted={eff.totalDebt == null}
+          spark={
+            eff.totalDebt != null ? (
+              <Sparkline data={qt} dataKey="totalDebt" positive={debtYoy.cls === "pos"} invert />
+            ) : undefined
+          }
+        />
+        <KpiCard
+          label="Interest Coverage"
+          value="—"
+          yoy={{ text: "—", cls: "na" }}
+          muted
+        />
+      </div>
+
+      {/* Quality: ROCE / ROE / D/E with benchmarks */}
+      <div
+        style={{
+          background: "var(--qc-surface-white, #FFFFFF)",
+          border: "1px solid var(--qc-border-default, #E9E7E1)",
+          borderRadius: 14,
+          padding: "16px 18px",
+          marginBottom: 14,
+          display: "grid",
+          gridTemplateColumns: "auto 1fr",
+          gap: 16,
+          alignItems: "start",
+        }}
+      >
+        <div
+          style={{
+            minWidth: 160,
+            paddingRight: 16,
+            borderRight: "1px solid var(--qc-border-inner, #EFEDE7)",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10,
+              letterSpacing: ".16em",
+              color: "var(--qc-text-muted, #9A9A92)",
+              textTransform: "uppercase",
+              marginBottom: 6,
+            }}
+          >
+            Returns &amp; Leverage
+          </div>
+          <h4 style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }}>
+            {roceIsGood && roeIsGood
+              ? "Strong capital efficiency"
+              : deIsGood
+              ? "Conservative balance sheet"
+              : "Capital metrics in review"}
+          </h4>
+          <p style={{ margin: 0, fontSize: 11.5, color: "var(--qc-text-body, #5A5A54)", lineHeight: 1.45 }}>
+            {roceIsGood
+              ? "ROCE is comfortably above industry benchmarks, reflecting efficient use of capital."
+              : "Return metrics are being tracked against industry peers."}
+          </p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+          <QBar
+            label="ROCE"
+            value={roceVal != null ? `${roceVal.toFixed(1)}%` : "—"}
+            fillPct={roceFillPct}
+            fillColor={roceIsGood ? "var(--qc-up, #1F7A4A)" : "var(--qc-warn, #B4731A)"}
+            benchmarkPct={30}
+            subLeft="Industry avg"
+            subRight={ratios.roce3yAvg != null ? `~${ratios.roce3yAvg.toFixed(0)}%` : "~15%"}
+          />
+          <QBar
+            label="ROE"
+            value={roeVal != null ? `${roeVal.toFixed(1)}%` : "—"}
+            fillPct={roeFillPct}
+            fillColor={roeIsGood ? "var(--qc-up, #1F7A4A)" : "var(--qc-warn, #B4731A)"}
+            benchmarkPct={25}
+            subLeft="Industry avg"
+            subRight={ratios.roe3yAvg != null ? `~${ratios.roe3yAvg.toFixed(0)}%` : "~12%"}
+          />
+          <QBar
+            label="Debt / Equity"
+            value={deVal != null ? `${deVal.toFixed(2)}x` : "—"}
+            fillPct={deFillPct}
+            fillColor={deIsGood ? "var(--qc-warn, #B4731A)" : "var(--qc-down, #B23A2F)"}
+            benchmarkPct={33}
+            subLeft={deIsGood ? "Moderate" : "Elevated"}
+            subRight="≤1.0 healthy"
+          />
+        </div>
+      </div>
+
+      {/* Ownership */}
+      <div
+        style={{
+          background: "var(--qc-surface-white, #FFFFFF)",
+          border: "1px solid var(--qc-border-default, #E9E7E1)",
+          borderRadius: 14,
+          padding: "16px 18px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            marginBottom: 10,
+          }}
+        >
+          <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>Shareholding</h4>
+          <span
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10.5,
+              color: "var(--qc-text-muted, #9A9A92)",
+              letterSpacing: ".06em",
+              textTransform: "uppercase",
+            }}
+          >
+            Latest disclosure
+          </span>
+        </div>
+
+        {/* Stacked ownership bar */}
+        <div
+          style={{
+            display: "flex",
+            height: 28,
+            borderRadius: 8,
+            overflow: "hidden",
+            gap: 2,
+            marginBottom: 10,
+          }}
+        >
+          {hasOwnData ? (
+            ownSegments
+              .filter((s) => s.pct != null && s.pct > 0)
+              .map(({ label, pct: p, color }) => (
+                <div
+                  key={label}
+                  style={{
+                    flex: p ?? 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    padding: "0 10px",
+                    color: "#fff",
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 11,
+                    fontWeight: 500,
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    background: color,
+                    minWidth: 0,
+                  }}
+                >
+                  {(p ?? 0) > 10 ? `${p?.toFixed(1)}%` : ""}
+                </div>
+              ))
+          ) : (
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                padding: "0 10px",
+                color: "var(--qc-text-muted, #9A9A92)",
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 11,
+                fontWeight: 500,
+                background:
+                  "repeating-linear-gradient(45deg,#F2F1EC,#F2F1EC 6px,#EAE9E2 6px,#EAE9E2 12px)",
+              }}
+            >
+              Awaiting disclosure
+            </div>
+          )}
+        </div>
+
+        {/* Legend */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>
+          {ownSegments.map(({ label, pct: p, color }) => (
+            <div
+              key={label}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                paddingLeft: 10,
+                borderLeft: `2px solid ${color}`,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "var(--qc-text-muted, #9A9A92)",
+                  letterSpacing: ".02em",
+                }}
+              >
+                {label}
+              </span>
+              <span
+                style={{
+                  fontSize: 14,
+                  fontWeight: p != null ? 500 : 400,
+                  color:
+                    p != null
+                      ? "var(--qc-text-heading, #0E0E0C)"
+                      : "var(--qc-text-muted, #9A9A92)",
+                  fontVariantNumeric: "tabular-nums",
+                  letterSpacing: "-0.005em",
+                }}
+              >
+                {p != null ? `${p.toFixed(1)}%` : "—"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

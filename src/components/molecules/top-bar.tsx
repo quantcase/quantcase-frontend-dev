@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Search, ChevronRight, Eye, CandlestickChart, BookOpen, Sparkles, LayoutDashboard, Users, PieChart, Wrench, LineChart } from "lucide-react";
+import { ChevronRight, Eye, CandlestickChart, BookOpen, Sparkles, LayoutDashboard, Users, PieChart, Wrench, LineChart } from "lucide-react";
 import { Suspense, useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -17,15 +17,67 @@ const FACTOR_ITEMS = [
   { label: "Deal Factor",        href: "/screener/deal" },
 ];
 
+/* Pill-style tab button matching design-sample */
+function PillTab({
+  href,
+  active,
+  icon,
+  children,
+  className,
+  style,
+  onClick,
+}: {
+  href?: string;
+  active: boolean;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+}) {
+  const base: React.CSSProperties = active
+    ? { background: "#0E0E0C", color: "#FFFFFF" }
+    : { background: "transparent", color: "var(--qc-text-muted)" };
+
+  const content = (
+    <span
+      className={cn("flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] transition-colors whitespace-nowrap", className)}
+      style={{ ...base, ...style }}
+    >
+      {icon}
+      {children}
+    </span>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className="flex">
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button onClick={onClick} className="flex">
+      {content}
+    </button>
+  );
+}
+
 function SearchZone() {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2 rounded-md border px-3 py-1.5" style={{ background: "var(--qc-topbar-search-bg)", borderColor: "var(--qc-topbar-search-border)" }}>
-        <Search className="size-3.5 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
+      <div
+        className="flex items-center gap-2 rounded-full px-3 py-1.5"
+        style={{ background: "var(--qc-surface-card, #FFFFFF)", border: "1px solid var(--qc-border-default)" }}
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ color: "var(--qc-text-muted)" }}>
+          <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+        </svg>
         <input
           type="text"
           placeholder="Search Indian companies (e.g. HDFC, Reliance)..."
-          className="w-72 bg-transparent text-sm focus:outline-none"
+          className="w-72 bg-transparent text-[13px] focus:outline-none"
           style={{ color: "var(--qc-text-body)" }}
         />
       </div>
@@ -33,48 +85,14 @@ function SearchZone() {
         {quickSymbols.map((sym) => (
           <span
             key={sym}
-            className="rounded-full border px-3 py-1 text-xs font-medium"
-            style={{ borderColor: "var(--qc-border-default)", color: "var(--qc-text-muted)" }}
+            className="rounded-full px-3 py-1 text-xs font-medium"
+            style={{ background: "var(--qc-chip-bg, #F2F1EC)", border: "1px solid var(--qc-chip-border, #E9E7E1)", color: "var(--qc-text-muted)" }}
           >
             {sym}
           </span>
         ))}
       </div>
     </div>
-  );
-}
-
-function TabLink({
-  href,
-  active,
-  icon,
-  children,
-}: {
-  href: string;
-  active: boolean;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "relative flex h-full items-center gap-1.5 px-3 text-sm whitespace-nowrap transition-colors",
-        active
-          ? "font-medium after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5"
-          : ""
-      )}
-      style={active
-        ? { color: "var(--qc-topbar-tab-active-fg)", ["--tw-after-bg" as string]: "var(--qc-topbar-tab-active-fg)" }
-        : { color: "var(--qc-topbar-tab-idle-fg)" }
-      }
-    >
-      {icon}
-      {children}
-      {active && (
-        <span className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: "var(--qc-topbar-tab-active-fg)" }} />
-      )}
-    </Link>
   );
 }
 
@@ -131,36 +149,41 @@ function TopBarInner() {
     leftZone = <SearchZone />;
   } else if (hasAssetSelected) {
     const terminalTabs = [
-      { label: "Overview",     href: "/screener/overview",     icon: <Eye className="size-3.5 shrink-0" /> },
-      { label: "Technicals",   href: "/screener/technicals",   icon: <CandlestickChart className="size-3.5 shrink-0" /> },
-      { label: "Fundamentals", href: "/screener/fundamentals", icon: <BookOpen className="size-3.5 shrink-0" /> },
+      { label: "Overview",     href: "/screener/overview",     icon: <Eye size={13} strokeWidth={1.8} /> },
+      { label: "Technicals",   href: "/screener/technicals",   icon: <CandlestickChart size={13} strokeWidth={1.8} /> },
+      { label: "Fundamentals", href: "/screener/fundamentals", icon: <BookOpen size={13} strokeWidth={1.8} /> },
     ];
 
     const showFactorItems = isFactorActive || factorOpen;
 
     leftZone = (
-      <div className="flex h-full items-end gap-1">
+      /* pill-tabs container — card bg, border, rounded-full pill, small gap */
+      <div
+        className="flex items-center gap-0.5 rounded-full p-1"
+        style={{ background: "var(--qc-surface-card, #FFFFFF)", border: "1px solid var(--qc-border-default)" }}
+      >
         {terminalTabs.map((tab) => (
-          <TabLink key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href} icon={tab.icon}>
+          <PillTab key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href} icon={tab.icon}>
             {tab.label}
-          </TabLink>
+          </PillTab>
         ))}
 
-        <div ref={factorRef} className="flex h-full items-end">
+        {/* QuantCase pill (lime gradient when inactive, solid when active) */}
+        <div ref={factorRef} className="flex items-center">
           <button
             onClick={() => !isFactorActive && setFactorOpen((v) => !v)}
-            className={cn(
-              "relative flex h-full items-center gap-0 px-1 focus:outline-none",
-              isFactorActive ? "cursor-default" : ""
-            )}
+            className={cn("flex", !isFactorActive ? "cursor-pointer" : "cursor-default")}
           >
             <span
-              className={cn(
-                "relative flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium overflow-hidden border transition-colors duration-200"
-              )}
-              style={isFactorActive
-                ? { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)", borderColor: "var(--qc-accent-primary)" }
-                : { background: "var(--qc-surface-white)", color: "var(--qc-accent-primary)", borderColor: "var(--qc-border-active)" }
+              className="relative flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium overflow-hidden transition-colors whitespace-nowrap"
+              style={
+                isFactorActive
+                  ? { background: "#0E0E0C", color: "#FFFFFF" }
+                  : {
+                      background: "linear-gradient(180deg,#F4FBDD 0%,#EAF5C3 100%)",
+                      border: "1px solid #D9E8A6",
+                      color: "#2E4A0A",
+                    }
               }
             >
               {!isFactorActive && (
@@ -168,42 +191,30 @@ function TopBarInner() {
                   aria-hidden
                   className="pointer-events-none absolute inset-0 rounded-full"
                   style={{
-                    background: "linear-gradient(105deg, transparent 40%, rgba(15,23,43,0.08) 50%, transparent 60%)",
-                    backgroundSize: "200% 100%",
+                    background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.65) 48%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.65) 52%, transparent 60%)",
+                    backgroundSize: "220% 100%",
                   }}
                   animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
-                  transition={{ duration: 2.8, repeat: Infinity, ease: "linear", repeatDelay: 1.2 }}
+                  transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
                 />
               )}
-              <Sparkles className="size-3 shrink-0" />
-              QuantCase
+              <Sparkles size={12} />
+              <span style={{ position: "relative", zIndex: 1 }}>QuantCase</span>
               <ChevronRight
-                className={cn(
-                  "size-3 shrink-0 transition-transform duration-200",
-                  showFactorItems ? "rotate-90" : "rotate-0"
-                )}
+                size={12}
+                className={cn("transition-transform duration-200", showFactorItems ? "rotate-90" : "rotate-0")}
+                style={{ position: "relative", zIndex: 1, color: "#6E7D4A" }}
               />
             </span>
           </button>
 
           {showFactorItems && (
             <>
-              <span className="flex h-full items-center px-1 select-none text-base" style={{ color: "var(--qc-topbar-separator)" }}>·</span>
+              <span className="px-1 select-none text-sm" style={{ color: "var(--qc-topbar-separator)" }}>·</span>
               {FACTOR_ITEMS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={withSymbol(item.href)}
-                  className={cn(
-                    "relative flex h-full items-center px-3 text-sm whitespace-nowrap transition-colors",
-                    pathname === item.href ? "font-medium" : ""
-                  )}
-                  style={{ color: pathname === item.href ? "var(--qc-topbar-tab-active-fg)" : "var(--qc-topbar-tab-idle-fg)" }}
-                >
+                <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
                   {item.label}
-                  {pathname === item.href && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: "var(--qc-topbar-tab-active-fg)" }} />
-                  )}
-                </Link>
+                </PillTab>
               ))}
             </>
           )}
@@ -212,52 +223,62 @@ function TopBarInner() {
     );
   } else if (isWealthOS) {
     const wealthTabs = [
-      { label: "Dashboard", href: "/wealthos/dashboard", icon: <LayoutDashboard className="size-3.5 shrink-0" /> },
-      { label: "Clients",   href: "/wealthos/clients",   icon: <Users className="size-3.5 shrink-0" /> },
-      { label: "RMs",       href: "/wealthos/rms",       icon: <Users className="size-3.5 shrink-0" /> },
-      { label: "Models",    href: "/wealthos/models",    icon: <PieChart className="size-3.5 shrink-0" /> },
-      { label: "Analytics", href: "/wealthos/analytics", icon: <LineChart className="size-3.5 shrink-0" /> },
+      { label: "Dashboard", href: "/wealthos/dashboard", icon: <LayoutDashboard size={13} strokeWidth={1.8} /> },
+      { label: "Clients",   href: "/wealthos/clients",   icon: <Users size={13} strokeWidth={1.8} /> },
+      { label: "RMs",       href: "/wealthos/rms",       icon: <Users size={13} strokeWidth={1.8} /> },
+      { label: "Models",    href: "/wealthos/models",    icon: <PieChart size={13} strokeWidth={1.8} /> },
+      { label: "Analytics", href: "/wealthos/analytics", icon: <LineChart size={13} strokeWidth={1.8} /> },
     ];
     leftZone = (
-      <div className="flex h-full items-end gap-1">
+      <div
+        className="flex items-center gap-0.5 rounded-full p-1"
+        style={{ background: "var(--qc-surface-card, #FFFFFF)", border: "1px solid var(--qc-border-default)" }}
+      >
         {wealthTabs.map((tab) => (
-          <TabLink
-            key={tab.href}
-            href={withRmId(tab.href)}
-            active={pathname.startsWith(tab.href)}
-            icon={tab.icon}
-          >
+          <PillTab key={tab.href} href={withRmId(tab.href)} active={pathname.startsWith(tab.href)} icon={tab.icon}>
             {tab.label}
-          </TabLink>
+          </PillTab>
         ))}
       </div>
     );
   } else if (isModels) {
     const modelTabs = [
-      { label: "Model Builder",   href: "/model-builder",   icon: <Wrench className="size-3.5 shrink-0" /> },
-      { label: "Model Analytics", href: "/model-analytics", icon: <LineChart className="size-3.5 shrink-0" /> },
+      { label: "Model Builder",   href: "/model-builder",   icon: <Wrench size={13} strokeWidth={1.8} /> },
+      { label: "Model Analytics", href: "/model-analytics", icon: <LineChart size={13} strokeWidth={1.8} /> },
     ];
     leftZone = (
-      <div className="flex h-full items-end gap-1">
+      <div
+        className="flex items-center gap-0.5 rounded-full p-1"
+        style={{ background: "var(--qc-surface-card, #FFFFFF)", border: "1px solid var(--qc-border-default)" }}
+      >
         {modelTabs.map((tab) => (
-          <TabLink key={tab.href} href={tab.href} active={pathname === tab.href || (tab.href === "/model-builder" && pathname.startsWith("/model-builder/"))} icon={tab.icon}>
+          <PillTab
+            key={tab.href}
+            href={tab.href}
+            active={pathname === tab.href || (tab.href === "/model-builder" && pathname.startsWith("/model-builder/"))}
+            icon={tab.icon}
+          >
             {tab.label}
-          </TabLink>
+          </PillTab>
         ))}
       </div>
     );
   }
 
   return (
-    <header className="fixed left-14 right-0 top-0 z-30 flex h-12 items-center justify-between border-b px-6" style={{ background: "var(--qc-topbar-bg)", borderColor: "var(--qc-topbar-border)" }}>
+    <header
+      className="fixed left-[72px] right-0 top-0 z-30 flex h-[56px] items-center justify-between px-6 pt-[22px]"
+      style={{ background: "var(--qc-topbar-bg)" }}
+    >
       <div className="flex h-full items-center">{leftZone}</div>
 
       {/* Right: user avatar */}
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex size-9 items-center justify-center rounded-full text-sm font-semibold text-white" style={{ background: "var(--qc-topbar-avatar-bg)" }}>
-            PJ
-          </div>
+        <div
+          className="flex size-9 items-center justify-center rounded-full text-sm font-semibold text-white"
+          style={{ background: "var(--qc-topbar-avatar-bg)" }}
+        >
+          PJ
         </div>
       </div>
     </header>
@@ -268,7 +289,10 @@ export function TopBar() {
   return (
     <Suspense
       fallback={
-        <header className="fixed left-14 right-0 top-0 z-30 h-14 border-b" style={{ background: "var(--qc-topbar-bg)", borderColor: "var(--qc-topbar-border)" }} />
+        <header
+          className="fixed left-[72px] right-0 top-0 z-30 h-14 border-b"
+          style={{ background: "var(--qc-topbar-bg)", borderColor: "var(--qc-topbar-border)" }}
+        />
       }
     >
       <TopBarInner />

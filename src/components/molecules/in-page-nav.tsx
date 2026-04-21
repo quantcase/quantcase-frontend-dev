@@ -102,13 +102,13 @@ export function InPageNav({ items, className }: InPageNavProps) {
 
   return (
     <div
-      className={cn("sticky z-20 border-b", className)}
-      style={{ top: 48, background: "var(--qc-surface-white)", borderColor: "var(--qc-border-default)" }}
+      className={cn("sticky z-20", className)}
+      style={{ top: 56, background: "var(--qc-surface-white)", borderBottom: "1px solid var(--qc-border-default)" }}
     >
       <nav
         ref={navRef}
-        className="relative flex items-center gap-0 px-4 overflow-x-auto scrollbar-none"
-        style={{ height: 44 }}
+        className="relative flex items-center overflow-x-auto scrollbar-none"
+        style={{ height: 50, gap: 22, paddingLeft: 24, paddingRight: 24, paddingTop: 8, paddingBottom: 8 }}
       >
         {items.map((item) => {
           const isActive = item.id === activeId;
@@ -117,22 +117,27 @@ export function InPageNav({ items, className }: InPageNavProps) {
               key={item.id}
               ref={(el) => { buttonRefs.current[item.id] = el; }}
               onClick={() => handleClick(item.id)}
-              className={cn(
-                "relative flex h-full items-center px-4 text-sm whitespace-nowrap transition-colors duration-150 focus:outline-none",
-                isActive ? "font-medium" : ""
-              )}
-              style={{ color: isActive ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}
+              className="relative flex h-full items-center text-[13px] whitespace-nowrap transition-colors duration-150 focus:outline-none"
+              style={{
+                color: isActive ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+                fontWeight: isActive ? 500 : 400,
+                borderBottom: `1.5px solid ${isActive ? "var(--qc-border-active)" : "transparent"}`,
+                marginBottom: -1,
+                padding: "10px 0",
+              }}
             >
               {item.label}
             </button>
           );
         })}
 
+        {/* Hidden motion indicator removed — border-bottom on button handles it */}
         <motion.span
           data-indicator
+          aria-hidden
           layout
           transition={{ type: "spring", stiffness: 380, damping: 34 }}
-          className="pointer-events-none absolute bottom-0 h-0.5"
+          className="pointer-events-none absolute bottom-0 h-[1.5px] opacity-0"
           style={{ left: indicatorStyle.current.left, width: indicatorStyle.current.width, background: "var(--qc-border-active)" }}
         />
       </nav>

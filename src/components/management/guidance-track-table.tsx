@@ -16,7 +16,7 @@ import { TooltipProvider, TooltipRoot, TooltipTrigger, TooltipContent } from "@/
 import { CheckCircle2, XCircle, Clock, Target, ChevronUp, ChevronDown, ChevronsUpDown, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import type { GuidanceRow, GuidanceSeverity } from "@/types/management";
 
-export interface GuidanceFilterState {
+interface GuidanceFilterState {
   globalFilter: string;
   setGlobalFilter: (v: string) => void;
   selectedSeverities: Set<GuidanceSeverity>;

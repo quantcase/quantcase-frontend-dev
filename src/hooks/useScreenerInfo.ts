@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/constants";
 import { rawFetch } from "@/lib/api";
 
-export interface ScreenerInfo {
+interface ScreenerInfo {
   symbol: string;
   ticker: string;
   company: {

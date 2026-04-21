@@ -119,7 +119,7 @@ export function SentimentPill({
 
 // ─── DotChip ─────────────────────────────────────────────────────────────────
 // Pill tag with a colored dot. Used in narrative sidebars.
-export function DotChip({ label, dotColor }: { label: string; dotColor: string }) {
+function DotChip({ label, dotColor }: { label: string; dotColor: string }) {
   return (
     <span
       style={{
@@ -151,7 +151,7 @@ export function DotChip({ label, dotColor }: { label: string; dotColor: string }
 
 // ─── NarrativeSidebar ────────────────────────────────────────────────────────
 // The lime-gradient narrative card on the right of hero sections.
-export interface NarrativeSidebarProps {
+interface NarrativeSidebarProps {
   eyebrow: string;
   headline: string;
   body: string;
@@ -221,7 +221,7 @@ export function NarrativeSidebar({ eyebrow, headline, body, tags }: NarrativeSid
 // ─── MetricBar ───────────────────────────────────────────────────────────────
 // Horizontal fill bar with label + value row and sub-label row.
 // Used for momentum, volatility, ROCE, ROE, D/E, etc.
-export interface MetricBarProps {
+interface MetricBarProps {
   label: string;
   value: string;
   fillPct: number;

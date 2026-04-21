@@ -3,7 +3,7 @@
 import { Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-export interface ScorecardLineItem {
+interface ScorecardLineItem {
   /** Display label (e.g. "Guidance Accuracy") */
   label: string;
   /** Descriptor text shown below label (e.g. "Inconsistent") */
@@ -18,7 +18,7 @@ export interface ScorecardLineItem {
   scrollToId?: string;
 }
 
-export interface ScreenerScorecardProps {
+interface ScreenerScorecardProps {
   /** Title shown in the header (e.g. "MANAGEMENT CREDIBILITY") */
   title: string;
   /** Overall level label shown colored next to title (e.g. "HIGH") */

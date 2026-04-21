@@ -9,7 +9,7 @@ export function fp(val: number | null | undefined): string {
   return `₹${val.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 }
 
-export function pctChange(current: number, ref: number | null | undefined): string {
+function pctChange(current: number, ref: number | null | undefined): string {
   if (ref == null || ref === 0) return "—";
   const diff = ((current - ref) / ref) * 100;
   return `${diff >= 0 ? "+" : ""}${diff.toFixed(1)}%`;

@@ -54,7 +54,7 @@ export interface RMNode {
 
 // ── Severity config ───────────────────────────────────────────────────────────
 
-export const SEV: Record<SignalSeverity, {
+const SEV: Record<SignalSeverity, {
   bg: string; border: string; text: string; edge: string; glow: string; label: string;
 }> = {
   critical: { bg: "#FEF2F2", border: "#ef4444", text: "#dc2626", edge: "#fca5a5", glow: "rgba(239,68,68,0.20)", label: "Critical" },

@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/constants";
 import { apiCall } from "@/lib/api";
 
-export interface OpportunityPromptMetric {
+interface OpportunityPromptMetric {
   name: string;
   type: string;
   trend?: string;
 }
 
-export interface OpportunityPromptData {
+interface OpportunityPromptData {
   section: string;
   bfsi: boolean;
   instructions: string;

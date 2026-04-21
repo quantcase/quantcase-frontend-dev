@@ -15,7 +15,7 @@ import type { ChartGroup } from "@/types/financials";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface MultiLineBarComboChartProps {
+interface MultiLineBarComboChartProps {
   chartGroups: ChartGroup[];
   /** Left y-axis label (for bar series) */
   leftAxisLabel?: string;

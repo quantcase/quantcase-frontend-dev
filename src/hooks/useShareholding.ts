@@ -21,7 +21,7 @@ export interface ShareholdingSection {
   children: ShareholdingChild[];
 }
 
-export interface ShareholdingResponse {
+interface ShareholdingResponse {
   company: string;
   symbol: string;
   quarters: string[];

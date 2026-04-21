@@ -31,7 +31,7 @@ interface RiskProfileDef {
 
 interface CapitalChipDef  { label: string; value: number }
 interface AssetClassDef   { key: AssetClassKey; label: string; description: string }
-export interface SubClassDef     { key: string; label: string; description: string }
+interface SubClassDef     { key: string; label: string; description: string }
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
@@ -485,7 +485,7 @@ function Step3({
 
 // ── PortfolioBuilderStepper ───────────────────────────────────────────────────
 
-export interface PortfolioBuilderStepperProps {
+interface PortfolioBuilderStepperProps {
   onSuccess: (modelId: string) => void;
   onCancel: () => void;
 }

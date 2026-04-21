@@ -70,7 +70,7 @@ export function formatDate(dateString: string): string {
 }
 
 // Label formatting
-export function formatLabel(camelCase: string): string {
+function formatLabel(camelCase: string): string {
   return camelCase
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (str) => str.toUpperCase())
@@ -78,7 +78,7 @@ export function formatLabel(camelCase: string): string {
 }
 
 // Variance color helper
-export function getVarianceColor(variance: string | undefined | null): string {
+function getVarianceColor(variance: string | undefined | null): string {
   if (!variance) return "text-muted-foreground";
   if (variance.startsWith("+")) {
     return "text-green-600 dark:text-green-400";
@@ -89,7 +89,7 @@ export function getVarianceColor(variance: string | undefined | null): string {
 }
 
 // Badge variant helpers
-export function getRatingVariant(rating: TrustLevel): "default" | "secondary" | "destructive" {
+function getRatingVariant(rating: TrustLevel): "default" | "secondary" | "destructive" {
   switch (rating) {
     case "HIGH":
       return "default";
@@ -100,7 +100,7 @@ export function getRatingVariant(rating: TrustLevel): "default" | "secondary" | 
   }
 }
 
-export function getStatusVariant(status: StatusType): "default" | "secondary" | "destructive" {
+function getStatusVariant(status: StatusType): "default" | "secondary" | "destructive" {
   switch (status) {
     case "ACHIEVED":
       return "default";
@@ -111,7 +111,7 @@ export function getStatusVariant(status: StatusType): "default" | "secondary" | 
   }
 }
 
-export function getConfidenceVariant(level: ConfidenceLevel): "default" | "secondary" | "destructive" {
+function getConfidenceVariant(level: ConfidenceLevel): "default" | "secondary" | "destructive" {
   switch (level) {
     case "HIGH":
       return "default";

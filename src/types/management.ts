@@ -71,9 +71,9 @@ export interface GuidanceVsActuals {
 export type TrustLevel = "HIGH" | "MODERATE" | "LOW";
 export type ConfidenceLevel = "HIGH" | "MEDIUM" | "LOW";
 export type StatusType = "ACHIEVED" | "MISSED" | "PENDING";
-export type TargetType = "financial" | "conceptual";
+type TargetType = "financial" | "conceptual";
 
-export interface CompanyInfo {
+interface CompanyInfo {
   name: string | null;
   company_name?: string | null;
   ticker: string | null;
@@ -90,26 +90,26 @@ export interface FactorScore {
   descriptor: string | null;
 }
 
-export interface TrustScore {
+interface TrustScore {
   overall: TrustLevel;
   subfactors: { guidanceAccuracy: number; disclosureHonesty: number; capitalAllocation: number };
 }
 
-export interface GovernanceSignal {
+interface GovernanceSignal {
   id: string;
   text: string;
   isPositive: boolean;
   targets?: Array<{ statement: string; severity?: string }>;
 }
 
-export interface ConsistencyMetrics {
+interface ConsistencyMetrics {
   score: number;
   maxScore: number;
   hitRate: number;
   disclosurePattern: string;
 }
 
-export interface GuidanceRecord {
+interface GuidanceRecord {
   id: string;
   source_call?: string;
   source_date?: string;
@@ -125,33 +125,33 @@ export interface GuidanceRecord {
   data_source?: string | null;
 }
 
-export interface NotablePattern {
+interface NotablePattern {
   id: string;
   title: string;
   description: string;
   category: "positive" | "neutral" | "negative";
 }
 
-export type CapexTimeframe = "last_quarter" | "12_months" | "3_years" | "5_years";
+type CapexTimeframe = "last_quarter" | "12_months" | "3_years" | "5_years";
 
-export interface CapexSlice { name: string; percentage: number; amount_label: string }
-export interface CapexBreakdownPeriod {
+interface CapexSlice { name: string; percentage: number; amount_label: string }
+interface CapexBreakdownPeriod {
   total_deployed: number; total_deployed_label: string; vs_5yr_avg_pct: number;
   largest_allocation: string; largest_allocation_pct: number; slices: CapexSlice[];
 }
-export interface CapexBreakdown {
+interface CapexBreakdown {
   last_quarter: CapexBreakdownPeriod | null; "12_months": CapexBreakdownPeriod | null;
   "3_years": CapexBreakdownPeriod | null; "5_years": CapexBreakdownPeriod | null;
 }
 
-export interface RoceTrendMetric { label: string; value: string; sub_label?: string | null; sentiment: "positive" | "negative" | "neutral" }
-export interface RoceTrendDataPoint { period: string; roce: number }
-export interface RoceTrendView {
+interface RoceTrendMetric { label: string; value: string; sub_label?: string | null; sentiment: "positive" | "negative" | "neutral" }
+interface RoceTrendDataPoint { period: string; roce: number }
+interface RoceTrendView {
   date_range: string; wacc_threshold: number | null; period_avg_roce: number | null;
   data_points: RoceTrendDataPoint[]; metrics: RoceTrendMetric[];
 }
-export interface RoceTrend { summary: string; quarterly: RoceTrendView | null; yearly: RoceTrendView | null }
-export interface CapitalAllocation { capex_breakdown: CapexBreakdown | null; roce_trend: RoceTrend | null }
+interface RoceTrend { summary: string; quarterly: RoceTrendView | null; yearly: RoceTrendView | null }
+interface CapitalAllocation { capex_breakdown: CapexBreakdown | null; roce_trend: RoceTrend | null }
 
 // ─── Investment Thesis ────────────────────────────────────────────────────────
 

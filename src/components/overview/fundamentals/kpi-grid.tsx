@@ -48,7 +48,7 @@ function Sparkline({ data, dataKey, positive, invert = false }: SparklineProps) 
 
 // ─── KpiCard ─────────────────────────────────────────────────────────────────
 
-export interface YoyResult {
+interface YoyResult {
   text: string;
   cls: "pos" | "neg" | "na";
 }
@@ -133,7 +133,7 @@ function KpiCard({ label, value, unit, yoy, muted, spark }: KpiCardProps) {
 
 // ─── KpiGrid ─────────────────────────────────────────────────────────────────
 
-export function yoyText(growth: number | null | undefined, invert = false): YoyResult {
+function yoyText(growth: number | null | undefined, invert = false): YoyResult {
   if (growth == null) return { text: "—", cls: "na" };
   const sign = growth >= 0 ? "+" : "";
   const pctStr = `${sign}${(growth * 100).toFixed(1)}% YoY`;

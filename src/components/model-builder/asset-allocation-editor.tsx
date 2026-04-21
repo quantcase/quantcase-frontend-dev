@@ -91,7 +91,7 @@ export interface AssetClassItem {
   pct: number;
 }
 
-export interface AssetClassFormProps {
+interface AssetClassFormProps {
   capital: number;
   items: AssetClassItem[];
   onChange: (items: AssetClassItem[]) => void;
@@ -190,7 +190,7 @@ export interface SubClassItem {
   pct: number;
 }
 
-export interface SubClassSectionProps {
+interface SubClassSectionProps {
   assetKey: AssetClassKey;
   assetLabel: string;
   assetPct: number;
@@ -307,7 +307,7 @@ function SubClassSection({
   );
 }
 
-export interface SubClassFormProps {
+interface SubClassFormProps {
   capital: number;
   activeAssetKeys: AssetClassKey[];
   assetPcts: Record<AssetClassKey, number>;
@@ -365,7 +365,7 @@ export function itemsToAssetAllocs(
   ) as Record<AssetClassKey, AssetClassAlloc>;
 }
 
-export function subAllocsToItems(
+function subAllocsToItems(
   assetKey: AssetClassKey,
   subAllocs: Record<string, SubClassAlloc>,
 ): SubClassItem[] {

@@ -17,7 +17,7 @@ export interface Skill {
 }
 
 // Shape returned by GET /admin/plugins/:id/skills
-export interface PluginSkill {
+interface PluginSkill {
   id: string;
   pluginId: string;
   skillId: string;

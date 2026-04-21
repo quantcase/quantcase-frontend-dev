@@ -9,12 +9,12 @@ import type { JobStatusResponse } from "@/types/management";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface SideWindowSection {
+interface SideWindowSection {
   id: string;
   label: string;
 }
 
-export const DEFAULT_SECTIONS: SideWindowSection[] = [
+const DEFAULT_SECTIONS: SideWindowSection[] = [
   { id: "industry_overview", label: "Industry Overview" },
   { id: "competition", label: "Competition" },
   { id: "financial_strength", label: "Financial Strength" },

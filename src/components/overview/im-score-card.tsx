@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { FactorScore } from "@/types/management";
+import type { FactorScore, ManagementIntelligence } from "@/types/management";
 import type { FinalTakeaways, OFactorResponse } from "@/types/opportunity";
 import type { OverviewSection } from "@/types/deal";
 import { SectionShell } from "./primitives";
@@ -25,6 +25,7 @@ interface IMScoreCardProps {
   dealScore?: number | null;
   dealMax?: number | null;
   managementFactors?: FactorScore[];
+  managementIntelligence?: ManagementIntelligence | null;
   opportunityTakeaways?: FinalTakeaways | null;
   opportunityData?: OFactorResponse | null;
   dealOverview?: OverviewSection | null;
@@ -58,7 +59,7 @@ export function IMScoreCard({
   managementScore, managementMax,
   opportunityScore, opportunityMax,
   dealScore, dealMax,
-  managementFactors, opportunityTakeaways, opportunityData, dealOverview,
+  managementFactors, managementIntelligence, opportunityTakeaways, opportunityData, dealOverview,
 }: IMScoreCardProps) {
   const mScore = managementScore ?? null;
   const oScore = opportunityScore ?? null;
@@ -128,9 +129,16 @@ export function IMScoreCard({
   const apWeight = ap === "M" ? cMW : ap === "O" ? cOW : cDW;
 
   // Build sub-items per pillar
-  const mItems: TitledBullet[] = managementFactors
-    ? managementFactors.slice(0, 4).map((f) => ({ title: f.factor, text: f.descriptor ?? "" }))
-    : [];
+  const mItems: TitledBullet[] = managementIntelligence?.signals_breakdown?.length
+    ? managementIntelligence.signals_breakdown.map((s) => ({
+        title: s.label,
+        text: s.details[0] ?? "",
+        score: s.score,
+        max: s.max_score,
+      }))
+    : managementFactors
+      ? managementFactors.slice(0, 4).map((f) => ({ title: f.factor, text: f.descriptor ?? "" }))
+      : [];
 
   const oSubScores = opportunityTakeaways?.section_scores;
   const oEntries = [
@@ -175,7 +183,7 @@ export function IMScoreCard({
             marginBottom: 12, whiteSpace: "nowrap",
           }}
         >
-          Weighting &amp; Framework
+          QC Insight
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 360px", gap: 14, marginBottom: 14 }}>

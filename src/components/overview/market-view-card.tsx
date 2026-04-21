@@ -1,6 +1,8 @@
 "use client";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { SectionShell, SectionLabel, NarrativeSidebar, MonoEyebrow } from "./primitives";
+
+// ─── Types ─────────────────────────────────────────────────────────────────
 
 type Sent = "bear" | "neu" | "bull";
 
@@ -122,26 +124,42 @@ function fwSubLabel(sent: Sent): string {
 
 function MvTile({ tile }: { tile: FrameworkTile }) {
   return (
-    <div className="mv-tile">
-      <div className="mv-tile-head">
+    <div
+      style={{
+        background: "var(--qc-surface-white)",
+        border: "1px solid var(--qc-border-default)",
+        borderRadius: 12,
+        padding: "12px 14px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
         <div>
-          <div className="mv-tile-name">{tile.name}</div>
-          <div className="mv-tile-tf">{tile.tf}</div>
+          <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-text-heading)", marginBottom: 2 }}>{tile.name}</div>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".08em", color: "var(--qc-text-muted)", textTransform: "uppercase" }}>{tile.tf}</div>
         </div>
-        <span className={`mv-tile-verdict ${tile.verdict}`}>{tile.verdict === "bear" ? "Bearish" : tile.verdict === "bull" ? "Bullish" : "Neutral"}</span>
+        <span
+          style={{
+            fontSize: 10.5, fontWeight: 600, letterSpacing: ".04em", textTransform: "uppercase",
+            color: sentColor(tile.verdict),
+            background: tile.verdict === "bear" ? "var(--qc-down-soft, #FDECEA)" : tile.verdict === "bull" ? "var(--qc-up-soft, #EAF4EE)" : "var(--qc-warn-soft, #FEF3E2)",
+            padding: "3px 8px", borderRadius: 999,
+          }}
+        >
+          {tile.verdict === "bear" ? "Bearish" : tile.verdict === "bull" ? "Bullish" : "Neutral"}
+        </span>
       </div>
-      <div className="mv-tile-readings">
+      <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 10 }}>
         {tile.signals.map((sig) => (
-          <div key={sig.label} className="mv-tile-reading">
-            <span className={`rd ${sig.sent}`} />
-            <span className="lbl">{sig.label}</span>
-            <span className={`rv ${sig.sent}`}>{sig.value}</span>
+          <div key={sig.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: sentColor(sig.sent), flexShrink: 0 }} />
+            <span style={{ flex: 1, fontSize: 11.5, color: "var(--qc-text-body)" }}>{sig.label}</span>
+            <span style={{ fontSize: 11.5, fontWeight: 500, color: sentColor(sig.sent) }}>{sig.value}</span>
           </div>
         ))}
       </div>
-      <div className="mv-tile-foot">
-        <span>{tile.signalCount} signals</span>
-        <b>{tile.footNote}</b>
+      <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--qc-border-inner)", paddingTop: 8 }}>
+        <span style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>{tile.signalCount} signals</span>
+        <b style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-text-body)" }}>{tile.footNote}</b>
       </div>
     </div>
   );
@@ -150,31 +168,51 @@ function MvTile({ tile }: { tile: FrameworkTile }) {
 // ─── Main export ───────────────────────────────────────────────────────────────
 
 export function MarketViewCard() {
-  const bearPct  = Math.round((TALLY.bear / TALLY_TOTAL) * 100);
-  const neuPct   = Math.round((TALLY.neu  / TALLY_TOTAL) * 100);
-  const bullPct  = 100 - bearPct - neuPct;
+
+  const narrativeTags = [
+    { label: "Trend down",       color: sentColor("bear") },
+    { label: "Weak breadth",     color: sentColor("bear") },
+    { label: "Rich valuations",  color: sentColor("neu") },
+    { label: "Macro supportive", color: sentColor("bull") },
+  ];
 
   return (
-    <div className="mv-section">
-      <div className="mv-section-title">Market View</div>
+    <SectionShell>
+      <SectionLabel>Market View</SectionLabel>
 
       {/* Hero row */}
-      <div className="mv-hero-row">
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 14, marginBottom: 14 }}>
 
         {/* Left: sentiment hero */}
-        <section className="mv-hero">
-          <div className="mv-hero-top">
-            <div className="mv-hero-eyebrow">6-framework consensus · Today</div>
-            <span className="mv-hero-verdict">
-              <span className="dot" />
+        <section
+          style={{
+            background: "var(--qc-surface-white)",
+            border: "1px solid var(--qc-border-default)",
+            borderRadius: 18,
+            padding: "16px 20px 18px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <MonoEyebrow>6-framework consensus · Today</MonoEyebrow>
+            <span
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "4px 10px", borderRadius: 999,
+                background: "var(--qc-down-soft, #FDECEA)",
+                border: "1px solid #F0C0BB",
+                color: "var(--qc-down, #B23A2F)",
+                fontSize: 11, fontWeight: 600, letterSpacing: ".04em", textTransform: "uppercase",
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--qc-down, #B23A2F)", display: "inline-block" }} />
               Cautious · Bearish bias
             </span>
           </div>
 
           {/* Gauge + context */}
-          <div className="mv-hero-body">
-            <div className="mv-gauge" aria-label="Market sentiment gauge">
-              <svg viewBox="0 0 160 100" width="170" height="100">
+          <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 16 }}>
+            <div style={{ position: "relative", flexShrink: 0 }} aria-label="Market sentiment gauge">
+              <svg viewBox="0 0 160 100" width="150" height="94">
                 <defs>
                   <linearGradient id="mvGaugeGrad" x1="0" y1="0" x2="1" y2="0">
                     <stop offset="0%"   stopColor="var(--qc-down, #B23A2F)" />
@@ -189,115 +227,140 @@ export function MarketViewCard() {
                   <circle cx="80" cy="85" r="5" fill="var(--qc-text-heading, #0E0E0C)" />
                 </g>
               </svg>
-              <div className="mv-gauge-label">
-                <div className="v">{SENTIMENT_SCORE}<span>/100</span></div>
-                <div className="k">Sentiment</div>
+              <div style={{ textAlign: "center", marginTop: -8 }}>
+                <div style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                  {SENTIMENT_SCORE}<span style={{ fontSize: 12, color: "var(--qc-text-muted)", fontWeight: 400 }}>/100</span>
+                </div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--qc-text-muted)", marginTop: 4 }}>
+                  Sentiment
+                </div>
               </div>
             </div>
 
-            <div className="mv-hero-ctx">
-              <h3>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h3 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 500, letterSpacing: "-0.01em", color: "var(--qc-text-heading)", lineHeight: 1.3 }}>
                 {FW.bear >= 4
                   ? `${FW.bear} of six frameworks read bearish.`
                   : FW.bull >= 4
                   ? `${FW.bull} of six frameworks read bullish.`
                   : "Market signals are mixed across frameworks."}
               </h3>
-              <p>
+              <p style={{ margin: 0, fontSize: 12.5, color: "var(--qc-text-body)", lineHeight: 1.55 }}>
                 {FW.bear >= 3
-                  ? "Price structure, momentum, breadth and valuation are all flashing caution. Only macro and policy offer a partial offset. Capital flows are mixed, with FII selling and DII buying. Position defensively until breadth recovers."
+                  ? "Price structure, momentum, breadth and valuation are all flashing caution. Only macro and policy offer a partial offset. Capital flows are mixed, with FII selling and DII buying."
                   : "Signals are mixed — check individual framework tiles below for detail."}
               </p>
             </div>
           </div>
 
           {/* Split: bull / neutral / bear */}
-          <div className="mv-split">
+          <div
+            style={{
+              display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
+              borderTop: "1px solid var(--qc-border-inner)", paddingTop: 14, gap: 8,
+            }}
+          >
             {(["bull", "neu", "bear"] as Sent[]).map((sent) => (
-              <div key={sent} className="mv-split-cell">
-                <div className="mv-split-head">
-                  <span className="mv-split-dot" style={{ background: sentColor(sent) }} />
-                  <span className="mv-split-k">{sent === "bull" ? "Bullish" : sent === "bear" ? "Bearish" : "Neutral"}</span>
+              <div key={sent}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: sentColor(sent), flexShrink: 0 }} />
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-text-muted)" }}>
+                    {sent === "bull" ? "Bullish" : sent === "bear" ? "Bearish" : "Neutral"}
+                  </span>
                 </div>
-                <div className="mv-split-v">{FW[sent]}<span>/6</span></div>
-                <div className="mv-split-sub">{fwSubLabel(sent)}</div>
+                <div style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                  {FW[sent]}<span style={{ fontSize: 13, color: "var(--qc-text-muted)", fontWeight: 400 }}>/6</span>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 3 }}>{fwSubLabel(sent)}</div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Right: narrative aside */}
-        <aside className="fx-narr">
-          <div className="fx-narr-lime" />
-          <div className="fx-narr-inner">
-            <div className="fx-narr-eyebrow">What the market says</div>
-            <div className="fx-narr-title">A classic late-cycle mix: rich valuations, weak breadth, decent macro.</div>
-            <p className="fx-narr-body">
-              With price below SMA 200, shrinking leadership, and earnings getting downgraded, the market is digesting gains. Strong macro prevents a deeper drawdown but doesn't justify fresh aggression.
-            </p>
-            <div className="fx-narr-tags">
-              {[
-                { sent: "bear" as Sent, text: "Trend down" },
-                { sent: "bear" as Sent, text: "Weak breadth" },
-                { sent: "neu"  as Sent, text: "Rich valuations" },
-                { sent: "bull" as Sent, text: "Macro supportive" },
-              ].map(({ sent, text }) => (
-                <span key={text} className="fx-tag">
-                  <span className="d" style={{ background: sentColor(sent) }} />
-                  {text}
-                </span>
-              ))}
-            </div>
-          </div>
-        </aside>
+        {/* Right: narrative sidebar */}
+        <NarrativeSidebar
+          eyebrow="What the market says"
+          headline="A classic late-cycle mix: rich valuations, weak breadth, decent macro."
+          body="With price below SMA 200, shrinking leadership, and earnings getting downgraded, the market is digesting gains. Strong macro prevents a deeper drawdown but doesn't justify fresh aggression."
+          tags={narrativeTags}
+        />
       </div>
 
       {/* Framework grid */}
-      <div className="mv-fw-eyebrow">Framework readings</div>
-      <div className="mv-grid">
+      <MonoEyebrow style={{ margin: "4px 0 10px" }}>Framework readings</MonoEyebrow>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 10,
+          marginBottom: 14,
+        }}
+      >
         {TILES.map((tile) => <MvTile key={tile.name} tile={tile} />)}
       </div>
 
       {/* Signal tally */}
-      <div className="mv-tally">
-        <div className="mv-tally-head">
-          <h4>Signal tally · across 6 frameworks</h4>
-          <span className="mv-tally-head-sub">{TALLY_TOTAL} readings · weight-neutral</span>
+      <div
+        style={{
+          background: "var(--qc-surface-white)",
+          border: "1px solid var(--qc-border-default)",
+          borderRadius: 14,
+          padding: "14px 16px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+          <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>
+            Signal tally · across 6 frameworks
+          </h4>
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: ".08em" }}>
+            {TALLY_TOTAL} readings · weight-neutral
+          </span>
         </div>
 
-        <div className="mv-tally-bar" role="img" aria-label={`${TALLY.bear} bearish, ${TALLY.neu} neutral, ${TALLY.bull} bullish signals`}>
+        <div
+          style={{ display: "flex", height: 36, borderRadius: 8, overflow: "hidden", gap: 2, marginBottom: 12 }}
+          role="img"
+          aria-label={`${TALLY.bear} bearish, ${TALLY.neu} neutral, ${TALLY.bull} bullish signals`}
+        >
           {TALLY.bear > 0 && (
-            <div className="mv-tally-seg" style={{ width: `${bearPct}%`, background: "var(--qc-down, #B23A2F)" }}>
+            <div style={{ flex: TALLY.bear, background: "var(--qc-down, #B23A2F)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontSize: 11, fontWeight: 500, minWidth: 0 }}>
               <span>Bearish</span><b>{TALLY.bear}</b>
             </div>
           )}
           {TALLY.neu > 0 && (
-            <div className="mv-tally-seg" style={{ width: `${neuPct}%`, background: "var(--qc-warn, #B4731A)" }}>
+            <div style={{ flex: TALLY.neu, background: "var(--qc-warn, #B4731A)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontSize: 11, fontWeight: 500, minWidth: 0 }}>
               <span>Neutral</span><b>{TALLY.neu}</b>
             </div>
           )}
           {TALLY.bull > 0 && (
-            <div className="mv-tally-seg" style={{ width: `${bullPct}%`, background: "var(--qc-up, #1F7A4A)" }}>
+            <div style={{ flex: TALLY.bull, background: "var(--qc-up, #1F7A4A)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontSize: 11, fontWeight: 500, minWidth: 0 }}>
               <span>Bullish</span><b>{TALLY.bull}</b>
             </div>
           )}
         </div>
 
-        <div className="mv-tally-legend">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
           {TILES.map((tile) => {
             const bear = tile.signals.filter(s => s.sent === "bear").length;
             const neu  = tile.signals.filter(s => s.sent === "neu").length;
             const bull = tile.signals.filter(s => s.sent === "bull").length;
-            const borderColor = sentColor(tile.verdict);
             return (
-              <div key={tile.name} className="mv-tally-leg" style={{ borderColor }}>
-                <div className="k">{tile.shortName}</div>
-                <div className="v">{bear}<span>·{neu}·{bull}</span></div>
+              <div
+                key={tile.name}
+                style={{
+                  borderLeft: `3px solid ${sentColor(tile.verdict)}`,
+                  paddingLeft: 8,
+                }}
+              >
+                <div style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-text-body)", marginBottom: 2 }}>{tile.shortName}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "var(--qc-text-heading)" }}>
+                  {bear}<span style={{ color: "var(--qc-text-muted)" }}>·{neu}·{bull}</span>
+                </div>
               </div>
             );
           })}
         </div>
       </div>
-    </div>
+    </SectionShell>
   );
 }

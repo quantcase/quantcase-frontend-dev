@@ -67,26 +67,25 @@ export function FinancialPerformanceCard({
   ];
 
   return (
-    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
+    <Card className="bg-[var(--qc-surface-white)] border border-[var(--qc-border-default)] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+            <CardTitle className="text-base font-semibold text-[var(--qc-text-heading)]">
               Financial Performance
             </CardTitle>
-            <p className="text-xs text-zinc-500 mt-0.5">Trailing twelve months</p>
+            <p className="text-xs text-[var(--qc-text-muted)] mt-0.5">Trailing twelve months</p>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-zinc-500" />
+          <ArrowUpRight className="h-4 w-4 text-[var(--qc-text-muted)]" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Metrics row */}
         <div className="grid grid-cols-3 gap-4">
           {metrics.map((m) => (
             <div key={m.label}>
-              <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-1">{m.label}</p>
+              <p className="text-xs text-[var(--qc-text-muted)] mb-1">{m.label}</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-[18px] font-normal leading-none text-[#0F172B]">{m.value}</span>
+                <span className="text-[18px] font-normal leading-none text-[var(--qc-text-heading)]">{m.value}</span>
                 {m.change && (
                   <span className={`flex items-center text-xs font-semibold ${m.positive ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
                     {m.positive ? <TrendingUp className="h-3 w-3 mr-0.5" /> : <TrendingDown className="h-3 w-3 mr-0.5" />}
@@ -98,45 +97,43 @@ export function FinancialPerformanceCard({
           ))}
         </div>
 
-        {/* Legend */}
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">
-            <span className="inline-block w-2 h-2 rounded-full bg-[#0F172B]" />
+          <span className="flex items-center gap-1.5 text-[11px] text-[var(--qc-text-muted)]">
+            <span className="inline-block w-2 h-2 rounded-full bg-[var(--qc-accent-primary)]" />
             Revenue
           </span>
-          <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+          <span className="flex items-center gap-1.5 text-[11px] text-[var(--qc-text-muted)]">
             <span className="inline-block w-2 h-2 rounded-full bg-[#71717a]" />
             EBITDA
           </span>
         </div>
 
-        {/* Bar chart */}
         <div className="h-48">
           <ResponsiveContainer width="100%" height={192}>
             <BarChart data={chartData} barGap={2} barCategoryGap="30%">
               <XAxis
                 dataKey="quarter"
-                tick={{ fontSize: 10, fill: "#a1a1aa" }}
+                tick={{ fontSize: 10, fill: "var(--qc-text-muted)" }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: "#a1a1aa" }}
+                tick={{ fontSize: 10, fill: "var(--qc-text-muted)" }}
                 axisLine={false}
                 tickLine={false}
               />
               <Tooltip
                 contentStyle={{
-                  background: "white",
-                  border: "1px solid #e4e4e7",
+                  background: "var(--qc-surface-white)",
+                  border: "1px solid var(--qc-border-default)",
                   borderRadius: 8,
                   fontSize: 12,
                   padding: "6px 10px",
                 }}
-                itemStyle={{ padding: '0px 10px' }}
+                itemStyle={{ padding: "0px 10px" }}
                 formatter={(value: number, name: string) => [`₹${value}Cr`, name]}
               />
-              <Bar dataKey="revenue" name="Revenue" fill="#0F172B" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="revenue" name="Revenue" fill="var(--qc-accent-primary)" radius={[2, 2, 0, 0]} />
               <Bar dataKey="ebitda" name="EBITDA" fill="#71717a" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

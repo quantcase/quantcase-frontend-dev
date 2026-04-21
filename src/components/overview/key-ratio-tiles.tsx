@@ -14,12 +14,12 @@ function MetricTile({ label, value, sublabel, sublabelColor = "muted" }: MetricT
   const sublabelClass =
     sublabelColor === "emerald" ? "text-emerald-600" :
     sublabelColor === "red" ? "text-red-600" :
-    "text-[#888888]";
+    "text-[var(--qc-text-muted)]";
 
   return (
-    <div className="rounded-lg border border-zinc-100 bg-white px-4 py-4 flex flex-col gap-1.5 min-w-0">
-      <p className="text-[11px] uppercase tracking-wider text-[#888888] font-medium">{label}</p>
-      <p className="text-[22px] font-medium text-[#0F172B] leading-none truncate">{value}</p>
+    <div className="rounded-lg border border-[var(--qc-border-default)] bg-[var(--qc-surface-white)] px-4 py-4 flex flex-col gap-1.5 min-w-0">
+      <p className="text-[11px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">{label}</p>
+      <p className="text-[22px] font-medium text-[var(--qc-text-heading)] leading-none truncate">{value}</p>
       {sublabel && (
         <p className={`text-[11px] font-semibold ${sublabelClass}`}>{sublabel}</p>
       )}

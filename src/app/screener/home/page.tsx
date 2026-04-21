@@ -101,22 +101,73 @@ export default function ScreenerHomePage() {
             ))}
           </div>
 
-          {/* Search input */}
-          <div className="w-full">
-            <AutocompleteInput
-              placeholder="Search by company name or ticker…"
-              value={searchQuery}
-              onChange={setSearchQuery}
-              onSubmit={handleSearch}
-              options={stockOptions}
-              maxSuggestions={8}
-            />
-          </div>
+          {/* Search input or Private Equity cards */}
+          {activeTab === "Private Equity" ? (
+            <div className="w-full grid grid-cols-3 gap-4">
+              {[
+                {
+                  key: "vc",
+                  label: "VC Deals",
+                  description: "Analyse venture capital deal memos, term sheets, and cap tables.",
+                  icon: "💼",
+                  comingSoon: true,
+                },
+                {
+                  key: "aif",
+                  label: "AIFs",
+                  description: "Evaluate Alternative Investment Fund documents and PPMs.",
+                  icon: "📊",
+                  comingSoon: true,
+                },
+                {
+                  key: "pre-ipo",
+                  label: "Pre-IPO",
+                  description: "Deep-dive DRHP analysis — business quality, red flags & verdict.",
+                  icon: "🏦",
+                  comingSoon: false,
+                },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  disabled={item.comingSoon}
+                  onClick={() => {
+                    if (!item.comingSoon) router.push("/private-equity/pre-ipo");
+                  }}
+                  className="group relative flex flex-col items-start gap-3 rounded-[10px] border border-[#E2E2E2] bg-white px-5 py-5 text-left transition-all hover:border-[#0F172B] hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {item.comingSoon && (
+                    <span className="absolute top-3 right-3 text-[9px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5" style={{ background: "#F5F5F5", color: "#90A1B9" }}>
+                      Soon
+                    </span>
+                  )}
+                  <span className="text-2xl">{item.icon}</span>
+                  <div>
+                    <p className="text-[14px] font-semibold" style={{ color: "#0F172B" }}>{item.label}</p>
+                    <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "#888888" }}>{item.description}</p>
+                  </div>
+                  {!item.comingSoon && (
+                    <ArrowRight className="size-4 mt-auto self-end opacity-0 group-hover:opacity-60 transition-opacity" style={{ color: "#0F172B" }} />
+                  )}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="w-full">
+              <AutocompleteInput
+                placeholder="Search by company name or ticker…"
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onSubmit={handleSearch}
+                options={stockOptions}
+                maxSuggestions={8}
+              />
+            </div>
+          )}
         </div>
       </div>
 
       {/* Research Baskets — white bg, section divider style matching home page */}
-      <div>
+      <div className={activeTab === "Private Equity" ? "hidden" : ""}>
         {/* Section divider — exact same pattern as SectionDivider on home page */}
         <div className="flex items-center gap-4 px-6 py-5">
           <div className="flex-1 h-px bg-[#E2E2E2]" />

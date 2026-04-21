@@ -1,8 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { TabularCard } from "@/components/molecules/tabular-card";
 import { formatINR } from "@/lib/utils";
-import type { ScreenerData } from "@/types/screener";
+import type { ScreenerData, QuarterlyTrend } from "@/types/screener";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 function pct(val: number | null | undefined, decimals = 1): string {
   if (val == null) return "—";
@@ -14,14 +23,19 @@ function pctRaw(val: number | null | undefined, decimals = 1): string {
   return `${val.toFixed(decimals)}%`;
 }
 
+type MetricKey = "revenue" | "ebitda" | "netProfit" | "cfo" | "fcf" | "reserves" | "debt";
+
 interface MetricTileCardProps {
   label: string;
   value: string;
   growth?: number | null;
   invertGrowth?: boolean;
+  metricKey: MetricKey;
+  selected: boolean;
+  onClick: (key: MetricKey) => void;
 }
 
-function MetricTileCard({ label, value, growth, invertGrowth }: MetricTileCardProps) {
+function MetricTileCard({ label, value, growth, invertGrowth, metricKey, selected, onClick }: MetricTileCardProps) {
   const hasGrowth = growth != null;
   const isPositiveRaw = hasGrowth && growth! >= 0;
   const isPositive = invertGrowth ? !isPositiveRaw : isPositiveRaw;
@@ -30,10 +44,18 @@ function MetricTileCard({ label, value, growth, invertGrowth }: MetricTileCardPr
     : null;
 
   return (
-    <div className="rounded-lg border border-zinc-100 bg-white px-4 py-4 flex flex-col gap-1.5 min-w-0">
-      <p className="text-[11px] uppercase tracking-wider text-[#888888] font-medium">{label}</p>
+    <button
+      type="button"
+      onClick={() => onClick(metricKey)}
+      className={`rounded-lg border px-4 py-4 flex flex-col gap-1.5 min-w-0 text-left transition-colors cursor-pointer w-full ${
+        selected
+          ? "border-[var(--qc-accent-primary)] bg-[var(--qc-accent-primary)]/5"
+          : "border-[var(--qc-border-default)] bg-[var(--qc-surface-white)] hover:border-[var(--qc-accent-primary)]/40"
+      }`}
+    >
+      <p className="text-[11px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">{label}</p>
       <div className="flex items-center gap-1.5">
-        <p className="text-[20px] font-medium text-[#0F172B] leading-none truncate">{value}</p>
+        <p className="text-[20px] font-medium text-[var(--qc-text-heading)] leading-none truncate">{value}</p>
         {hasGrowth && (
           <span className={`text-[12px] leading-none ${isPositive ? "text-emerald-600" : "text-red-600"}`}>
             {isPositive ? "▲" : "▼"}
@@ -45,7 +67,7 @@ function MetricTileCard({ label, value, growth, invertGrowth }: MetricTileCardPr
           {growthText}
         </p>
       )}
-    </div>
+    </button>
   );
 }
 
@@ -59,10 +81,10 @@ interface RatioTileCardProps {
 function RatioTileCard({ label, value, sublabel, trendIcon }: RatioTileCardProps) {
   const isPositive = trendIcon === "up";
   return (
-    <div className="rounded-lg border border-zinc-100 bg-white px-4 py-4 flex flex-col gap-1.5 min-w-0">
-      <p className="text-[11px] uppercase tracking-wider text-[#888888] font-medium">{label}</p>
+    <div className="rounded-lg border border-[var(--qc-border-default)] bg-[var(--qc-surface-white)] px-4 py-4 flex flex-col gap-1.5 min-w-0">
+      <p className="text-[11px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">{label}</p>
       <div className="flex items-center gap-1.5">
-        <p className="text-[20px] font-medium text-[#0F172B] leading-none">{value}</p>
+        <p className="text-[20px] font-medium text-[var(--qc-text-heading)] leading-none">{value}</p>
         {trendIcon && (
           <span className={`text-[12px] leading-none ${isPositive ? "text-emerald-600" : "text-red-600"}`}>
             {isPositive ? "▲" : "▼"}
@@ -70,7 +92,7 @@ function RatioTileCard({ label, value, sublabel, trendIcon }: RatioTileCardProps
         )}
       </div>
       {sublabel && (
-        <p className="text-[11px] text-[#888888]">{sublabel}</p>
+        <p className="text-[11px] text-[var(--qc-text-muted)]">{sublabel}</p>
       )}
     </div>
   );
@@ -93,18 +115,113 @@ function RatioRow({ label, value, sublabel, badge, badgeColor = "zinc" }: RatioR
   }[badgeColor];
 
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-[#E2E2E2] last:border-0">
-      <span className="text-sm text-[#121212]">{label}</span>
+    <div className="flex items-center justify-between py-2.5 border-b border-[var(--qc-border-default)] last:border-0">
+      <span className="text-sm text-[var(--qc-text-body)]">{label}</span>
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-[#0F172B]">{value}</span>
+        <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{value}</span>
         {badge && (
           <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-sm ${badgeClass}`}>
             {badge}
           </span>
         )}
         {sublabel && !badge && (
-          <span className="text-[11px] text-[#888888]">{sublabel}</span>
+          <span className="text-[11px] text-[var(--qc-text-muted)]">{sublabel}</span>
         )}
+      </div>
+    </div>
+  );
+}
+
+const METRIC_CONFIG: Record<MetricKey, { label: string; dataKey: keyof QuarterlyTrend }> = {
+  revenue:   { label: "Revenue Trend",   dataKey: "revenue" },
+  ebitda:    { label: "EBITDA Trend",    dataKey: "ebitda" },
+  netProfit: { label: "Net Profit Trend", dataKey: "netIncome" },
+  cfo:       { label: "CFO Trend",       dataKey: "revenue" },
+  fcf:       { label: "FCF Trend",       dataKey: "revenue" },
+  reserves:  { label: "Reserves Trend",  dataKey: "totalEquity" },
+  debt:      { label: "Debt Trend",      dataKey: "totalDebt" },
+};
+
+interface MetricChartProps {
+  metricKey: MetricKey;
+  quarterlyTrend: QuarterlyTrend[];
+}
+
+function MetricChart({ metricKey, quarterlyTrend }: MetricChartProps) {
+  const config = METRIC_CONFIG[metricKey];
+  const chartData = quarterlyTrend
+    .filter((q) => q[config.dataKey] != null)
+    .map((q) => ({
+      period: q.period,
+      value: parseFloat(((q[config.dataKey] as number) / 1e7).toFixed(1)),
+    }));
+
+  if (chartData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-[var(--qc-text-muted)] text-sm">
+        No data available
+      </div>
+    );
+  }
+
+  const values = chartData.map((d) => d.value).filter((v) => v != null) as number[];
+  const minVal = Math.min(...values);
+  const maxVal = Math.max(...values);
+  const padding = (maxVal - minVal) * 0.15 || maxVal * 0.1 || 1;
+  const yMin = Math.max(0, Math.floor(minVal - padding));
+  const yMax = Math.ceil(maxVal + padding);
+
+  return (
+    <div className="flex flex-col h-full gap-3">
+      <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">
+        {config.label}
+      </p>
+      <div className="flex-1 min-h-0">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+            <defs>
+              <linearGradient id="metricGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--qc-accent-primary)" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="var(--qc-accent-primary)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <XAxis
+              dataKey="period"
+              tick={{ fontSize: 10, fill: "var(--qc-text-muted)" }}
+              axisLine={false}
+              tickLine={false}
+              interval="preserveStartEnd"
+            />
+            <YAxis
+              domain={[yMin, yMax]}
+              tick={{ fontSize: 10, fill: "var(--qc-text-muted)" }}
+              axisLine={false}
+              tickLine={false}
+              width={40}
+              tickFormatter={(v) => `${v}`}
+            />
+            <Tooltip
+              contentStyle={{
+                background: "var(--qc-surface-white)",
+                border: "1px solid var(--qc-border-default)",
+                borderRadius: 8,
+                fontSize: 12,
+                padding: "6px 10px",
+              }}
+              formatter={(v: number) => [`₹${v} Cr`, config.label.replace(" Trend", "")]}
+              labelStyle={{ fontSize: 11, color: "var(--qc-text-muted)" }}
+            />
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="var(--qc-accent-primary)"
+              strokeWidth={1.5}
+              fill="url(#metricGradient)"
+              dot={{ r: 2, fill: "var(--qc-accent-primary)", strokeWidth: 0 }}
+              activeDot={{ r: 3, fill: "var(--qc-accent-primary)", strokeWidth: 0 }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
@@ -115,6 +232,8 @@ interface Props {
 }
 
 export function FundamentalOverviewCard({ data }: Props) {
+  const [selectedMetric, setSelectedMetric] = useState<MetricKey>("revenue");
+
   const fp = data.financialPerformance;
   const val = data.valuation;
   const eff = data.efficiency;
@@ -137,33 +256,50 @@ export function FundamentalOverviewCard({ data }: Props) {
     : own.publicLabel === "Low" ? "green"
     : "zinc";
 
+  const quarterlyTrend = fp.quarterlyTrend ?? [];
+
   return (
     <TabularCard title="Fundamentals">
       <div className="space-y-5">
 
-        {/* KEY METRICS */}
+        {/* KEY METRICS — two-column layout: 60% metrics, 40% chart */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Key Metrics</p>
-          <div className="flex flex-col gap-3">
-            {/* Row 1: always 4 cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <MetricTileCard label="Revenue" value={formatINR(fp.revenue)} growth={fp.revenueGrowth} />
-              <MetricTileCard label="EBITDA" value={formatINR(fp.ebitda)} growth={fp.ebitdaGrowth} />
-              <MetricTileCard label="Net Profit" value={formatINR(fp.netProfit)} growth={fp.netProfitGrowth} />
-              <MetricTileCard label="CFO" value={formatINR(fp.operatingCashflow)} growth={fp.cfoGrowth} />
+          <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Key Metrics</p>
+          <div className="flex gap-4">
+            {/* Left: metric tiles (60%) */}
+            <div className="flex flex-col gap-3" style={{ flex: "0 0 60%" }}>
+              <div className="grid grid-cols-2 gap-3">
+                <MetricTileCard label="Revenue" value={formatINR(fp.revenue)} growth={fp.revenueGrowth} metricKey="revenue" selected={selectedMetric === "revenue"} onClick={setSelectedMetric} />
+                <MetricTileCard label="EBITDA" value={formatINR(fp.ebitda)} growth={fp.ebitdaGrowth} metricKey="ebitda" selected={selectedMetric === "ebitda"} onClick={setSelectedMetric} />
+                <MetricTileCard label="Net Profit" value={formatINR(fp.netProfit)} growth={fp.netProfitGrowth} metricKey="netProfit" selected={selectedMetric === "netProfit"} onClick={setSelectedMetric} />
+                <MetricTileCard label="CFO" value={formatINR(fp.operatingCashflow)} growth={fp.cfoGrowth} metricKey="cfo" selected={selectedMetric === "cfo"} onClick={setSelectedMetric} />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <MetricTileCard label="FCF" value={formatINR(fp.freeCashflow)} growth={fp.fcfGrowth} metricKey="fcf" selected={selectedMetric === "fcf"} onClick={setSelectedMetric} />
+                <MetricTileCard label="Reserves" value={formatINR(fp.reserves)} growth={fp.reservesGrowth} metricKey="reserves" selected={selectedMetric === "reserves"} onClick={setSelectedMetric} />
+                <MetricTileCard label="Debt" value={formatINR(eff.totalDebt)} growth={eff.debtGrowth} invertGrowth metricKey="debt" selected={selectedMetric === "debt"} onClick={setSelectedMetric} />
+              </div>
             </div>
-            {/* Row 2: remaining 3 cards stretch to fill full width */}
-            <div className="grid grid-cols-3 gap-3">
-              <MetricTileCard label="FCF" value={formatINR(fp.freeCashflow)} growth={fp.fcfGrowth} />
-              <MetricTileCard label="Reserves" value={formatINR(fp.reserves)} growth={fp.reservesGrowth} />
-              <MetricTileCard label="Debt" value={formatINR(eff.totalDebt)} growth={eff.debtGrowth} invertGrowth />
+
+            {/* Right: trend chart (40%) */}
+            <div
+              className="rounded-lg border border-[var(--qc-border-default)] bg-[var(--qc-surface-white)] px-4 py-4"
+              style={{ flex: "0 0 40%" }}
+            >
+              {quarterlyTrend.length > 0 ? (
+                <MetricChart metricKey={selectedMetric} quarterlyTrend={quarterlyTrend} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-[var(--qc-text-muted)] text-sm">
+                  No trend data
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* KEY RATIOS */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Key Ratios</p>
+          <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Key Ratios</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <RatioTileCard
               label="ROCE"
@@ -190,8 +326,8 @@ export function FundamentalOverviewCard({ data }: Props) {
 
           {/* Valuation */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Valuation</p>
-            <div className="rounded-[10px] border border-[#E2E2E2] px-4">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Valuation</p>
+            <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4">
               <RatioRow
                 label="P/E"
                 value={val.peRatio != null ? `${val.peRatio.toFixed(1)}x` : "—"}
@@ -217,8 +353,8 @@ export function FundamentalOverviewCard({ data }: Props) {
 
           {/* Ownership */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Ownership</p>
-            <div className="rounded-[10px] border border-[#E2E2E2] px-4">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium mb-2">Ownership</p>
+            <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4">
               <RatioRow label="Promoter" value={pct(own.promoter)} />
               <RatioRow
                 label="FII"

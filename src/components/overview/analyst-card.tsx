@@ -25,8 +25,8 @@ const RECOMMENDATION_LABELS: Record<string, { label: string; color: string }> = 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
-      <p className="text-[28px] font-normal leading-none text-[#0F172B]">{value}</p>
+      <p className="text-xs text-[var(--qc-text-muted)] mb-0.5">{label}</p>
+      <p className="text-[28px] font-normal leading-none text-[var(--qc-text-heading)]">{value}</p>
     </div>
   );
 }
@@ -57,27 +57,26 @@ export function AnalystCard({
       : null;
 
   return (
-    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
+    <Card className="bg-[var(--qc-surface-white)] border border-[var(--qc-border-default)] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+            <CardTitle className="text-base font-semibold text-[var(--qc-text-heading)]">
               Analyst Coverage
             </CardTitle>
-            <p className="text-xs text-zinc-500 mt-0.5">
+            <p className="text-xs text-[var(--qc-text-muted)] mt-0.5">
               {numberOfAnalysts != null ? `${numberOfAnalysts} analysts` : "Price targets & ratings"}
             </p>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-zinc-500" />
+          <ArrowUpRight className="h-4 w-4 text-[var(--qc-text-muted)]" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Mean target + upside + recommendation badge */}
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-xs text-zinc-500 mb-0.5">Mean Target</p>
+            <p className="text-xs text-[var(--qc-text-muted)] mb-0.5">Mean Target</p>
             <div className="flex items-baseline gap-2">
-              <span className="text-[28px] font-normal leading-none text-[#0F172B]">
+              <span className="text-[28px] font-normal leading-none text-[var(--qc-text-heading)]">
                 {targetMeanPrice != null ? formatPrice(targetMeanPrice, 0) : "—"}
               </span>
               {upside != null && (
@@ -94,27 +93,25 @@ export function AnalystCard({
           )}
         </div>
 
-        {/* Target range bar */}
         <div>
-          <div className="flex justify-between text-xs text-zinc-500 mb-1">
+          <div className="flex justify-between text-xs text-[var(--qc-text-muted)] mb-1">
             <span>Low {targetLowPrice != null ? formatPrice(targetLowPrice, 0) : "—"}</span>
             <span>High {targetHighPrice != null ? formatPrice(targetHighPrice, 0) : "—"}</span>
           </div>
-          <div className="relative h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800">
+          <div className="relative h-1.5 rounded-full bg-[var(--qc-surface-panel)]">
             {rangePercent != null && (
               <div
-                className="absolute top-0 h-1.5 w-2 -translate-x-1/2 rounded-full bg-zinc-900 dark:bg-zinc-300"
+                className="absolute top-0 h-1.5 w-2 -translate-x-1/2 rounded-full bg-[var(--qc-accent-primary)]"
                 style={{ left: `${Math.min(100, Math.max(0, rangePercent))}%` }}
               />
             )}
           </div>
-          <p className="text-xs text-zinc-500 mt-1 text-center">
+          <p className="text-xs text-[var(--qc-text-muted)] mt-1 text-center">
             {currentPrice != null ? `Current ${formatPrice(currentPrice)}` : ""}
           </p>
         </div>
 
-        {/* Holdings */}
-        <div className="grid grid-cols-2 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-3">
+        <div className="grid grid-cols-2 gap-3 border-t border-[var(--qc-border-default)] pt-3">
           <Stat
             label="Insider Held"
             value={heldPercentInsiders != null ? `${(heldPercentInsiders * 100).toFixed(1)}%` : "—"}

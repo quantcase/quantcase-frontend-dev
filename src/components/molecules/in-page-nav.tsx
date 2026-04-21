@@ -21,7 +21,6 @@ export function InPageNav({ items, className }: InPageNavProps) {
   const indicatorStyle = useRef<{ left: number; width: number }>({ left: 0, width: 0 });
   const isScrollingRef = useRef(false);
 
-  // ── indicator positioning (direct DOM, no React re-render) ──────────────
   function moveIndicator(id: string) {
     const btn = buttonRefs.current[id];
     const nav = navRef.current;
@@ -32,7 +31,6 @@ export function InPageNav({ items, className }: InPageNavProps) {
       left: btnRect.left - navRect.left,
       width: btnRect.width,
     };
-    // Write directly so framer-motion picks it up via layout animation
     const indicator = nav.querySelector<HTMLElement>("[data-indicator]");
     if (indicator) {
       indicator.style.left = `${indicatorStyle.current.left}px`;
@@ -40,7 +38,6 @@ export function InPageNav({ items, className }: InPageNavProps) {
     }
   }
 
-  // ── scroll spy: activate the section whose centre is closest to viewport centre ──
   useEffect(() => {
     function onScroll() {
       if (isScrollingRef.current) return;
@@ -53,7 +50,6 @@ export function InPageNav({ items, className }: InPageNavProps) {
         const el = document.getElementById(item.id);
         if (!el) continue;
         const rect = el.getBoundingClientRect();
-        // midpoint of the section relative to viewport
         const sectionMid = rect.top + rect.height / 2;
         const dist = Math.abs(sectionMid - viewportMid);
         if (dist < closestDist) {
@@ -73,20 +69,17 @@ export function InPageNav({ items, className }: InPageNavProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, activeId]);
 
-  // reposition indicator when activeId changes (e.g. window resize / initial)
   useEffect(() => {
     moveIndicator(activeId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeId]);
 
-  // initial position after layout settles
   useEffect(() => {
     const t = setTimeout(() => moveIndicator(activeId), 80);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── click: scroll so section sits in the centre of the viewport ──────────
   function handleClick(id: string) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -102,7 +95,6 @@ export function InPageNav({ items, className }: InPageNavProps) {
 
     window.scrollTo({ top: Math.max(0, targetScrollY), behavior: "smooth" });
 
-    // re-enable spy after smooth scroll finishes (~800 ms)
     setTimeout(() => {
       isScrollingRef.current = false;
     }, 900);
@@ -110,8 +102,8 @@ export function InPageNav({ items, className }: InPageNavProps) {
 
   return (
     <div
-      className={cn("sticky z-20 bg-white border-b border-[#E2E2E2]", className)}
-      style={{ top: 48 }}
+      className={cn("sticky z-20 border-b", className)}
+      style={{ top: 48, background: "var(--qc-surface-white)", borderColor: "var(--qc-border-default)" }}
     >
       <nav
         ref={navRef}
@@ -127,21 +119,21 @@ export function InPageNav({ items, className }: InPageNavProps) {
               onClick={() => handleClick(item.id)}
               className={cn(
                 "relative flex h-full items-center px-4 text-sm whitespace-nowrap transition-colors duration-150 focus:outline-none",
-                isActive ? "text-[#0F172B] font-medium" : "text-[#888888] hover:text-[#0F172B]"
+                isActive ? "font-medium" : ""
               )}
+              style={{ color: isActive ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}
             >
               {item.label}
             </button>
           );
         })}
 
-        {/* Animated underline — framer-motion layout drives the spring */}
         <motion.span
           data-indicator
           layout
           transition={{ type: "spring", stiffness: 380, damping: 34 }}
-          className="pointer-events-none absolute bottom-0 h-0.5 bg-[#0F172B]"
-          style={{ left: indicatorStyle.current.left, width: indicatorStyle.current.width }}
+          className="pointer-events-none absolute bottom-0 h-0.5"
+          style={{ left: indicatorStyle.current.left, width: indicatorStyle.current.width, background: "var(--qc-border-active)" }}
         />
       </nav>
     </div>

@@ -9,12 +9,12 @@ function formatPrice(val: number | null | undefined): string {
 }
 
 function signalColor(signal: string | null | undefined): string {
-  if (!signal) return "text-[#888888]";
+  if (!signal) return "text-[var(--qc-text-muted)]";
   const s = signal.toUpperCase();
   if (s.includes("UPTREND") || s.includes("STRONG") || s.includes("OUTPERFORM") || s.includes("OVERSOLD") || s.includes("CONFIRMED")) return "text-emerald-600";
   if (s.includes("DOWNTREND") || s.includes("WEAK") || s.includes("UNDERPERFORM") || s.includes("OVERBOUGHT") || s.includes("DISTRIBUTION")) return "text-red-600";
   if (s.includes("SIDEWAYS") || s.includes("NEUTRAL") || s.includes("CONSOLIDAT") || s.includes("EARLY") || s.includes("ACCUMULATION") || s.includes("MID")) return "text-amber-600";
-  return "text-[#888888]";
+  return "text-[var(--qc-text-muted)]";
 }
 
 function humanizeSignal(val: string | null | undefined): string {
@@ -33,10 +33,10 @@ interface SummaryTileProps {
 
 function SummaryTile({ label, value, sublabel }: SummaryTileProps) {
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3 flex flex-col gap-1 flex-1 min-w-0">
-      <small className="text-[10px] uppercase tracking-wider text-[#888888] font-medium">{label}</small>
+    <div className="rounded-[10px] border border-[var(--qc-border-default)] bg-[var(--qc-surface-panel)] px-4 py-3 flex flex-col gap-1 flex-1 min-w-0">
+      <small className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">{label}</small>
       <p className={`text-sm font-semibold leading-tight ${signalColor(value)}`}>{humanizeSignal(value)}</p>
-      <small className="text-[11px] text-[#888888]">{sublabel}</small>
+      <small className="text-[11px] text-[var(--qc-text-muted)]">{sublabel}</small>
     </div>
   );
 }
@@ -117,17 +117,17 @@ export function TechnicalsCard({ data }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
           {/* Support & Resistance */}
-          <div className="rounded-[10px] border border-[#E2E2E2] px-4 py-3">
+          <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4 py-3">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
-              <p className="text-[11px] font-semibold text-[#0F172B]">Support &amp; resistance</p>
+              <p className="text-[11px] font-semibold text-[var(--qc-text-heading)]">Support &amp; resistance</p>
             </div>
             <div className="space-y-2">
               {resistances.slice().reverse().map((r, i) => (
                 <div key={`r${i}`} className="flex items-center justify-between">
-                  <span className="text-sm text-[#121212]">Resistance {resistances.length - i}</span>
+                  <span className="text-sm text-[var(--qc-text-body)]">Resistance {resistances.length - i}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[#0F172B]">{formatPrice(r)}</span>
+                    <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(r)}</span>
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-red-600 text-white">
                       R{resistances.length - i}
                     </span>
@@ -136,9 +136,9 @@ export function TechnicalsCard({ data }: Props) {
               ))}
               {supports.map((s, i) => (
                 <div key={`s${i}`} className="flex items-center justify-between">
-                  <span className="text-sm text-[#121212]">Support {i + 1}</span>
+                  <span className="text-sm text-[var(--qc-text-body)]">Support {i + 1}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[#0F172B]">{formatPrice(s)}</span>
+                    <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(s)}</span>
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-emerald-600 text-white">
                       S{i + 1}
                     </span>
@@ -149,17 +149,17 @@ export function TechnicalsCard({ data }: Props) {
           </div>
 
           {/* Moving Averages */}
-          <div className="rounded-[10px] border border-[#E2E2E2] px-4 py-3">
+          <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4 py-3">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-              <p className="text-[11px] font-semibold text-[#0F172B]">Moving averages</p>
+              <p className="text-[11px] font-semibold text-[var(--qc-text-heading)]">Moving averages</p>
             </div>
             <div className="space-y-2">
               {smas.map((sma) => (
                 <div key={sma.label} className="flex items-center justify-between">
-                  <span className="text-sm text-[#121212]">{sma.label}</span>
+                  <span className="text-sm text-[var(--qc-text-body)]">{sma.label}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[#0F172B]">{formatPrice(sma.val)}</span>
+                    <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(sma.val)}</span>
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm ${sma.above ? "bg-emerald-600 text-white" : "bg-red-600 text-white"}`}>
                       {sma.above ? "Above" : "Below"}
                     </span>
@@ -170,30 +170,30 @@ export function TechnicalsCard({ data }: Props) {
           </div>
 
           {/* Price Levels */}
-          <div className="rounded-[10px] border border-[#E2E2E2] px-4 py-3">
+          <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4 py-3">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-              <p className="text-[11px] font-semibold text-[#0F172B]">Price levels</p>
+              <p className="text-[11px] font-semibold text-[var(--qc-text-heading)]">Price levels</p>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#121212]">All time high</span>
+                <span className="text-sm text-[var(--qc-text-body)]">All time high</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-[#0F172B]">{formatPrice(price.high52w)}</span>
+                  <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(price.high52w)}</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-amber-500 text-white">ATH</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#121212]">52W high</span>
-                <span className="text-sm font-semibold text-[#0F172B]">{formatPrice(price.high52w)}</span>
+                <span className="text-sm text-[var(--qc-text-body)]">52W high</span>
+                <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(price.high52w)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#121212]">52W low</span>
-                <span className="text-sm font-semibold text-[#0F172B]">{formatPrice(price.low52w)}</span>
+                <span className="text-sm text-[var(--qc-text-body)]">52W low</span>
+                <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(price.low52w)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#121212]">CMP</span>
-                <span className="text-sm font-semibold text-[#0F172B]">{formatPrice(price.cmp)}</span>
+                <span className="text-sm text-[var(--qc-text-body)]">CMP</span>
+                <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(price.cmp)}</span>
               </div>
             </div>
           </div>

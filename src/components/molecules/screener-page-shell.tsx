@@ -25,11 +25,11 @@ function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps)
   const industry = screenerInfo?.company?.industry;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ background: "var(--qc-surface-white)" }}>
       {/* Company Header */}
       <div className="flex items-center justify-between gap-4 pt-4 pb-4 px-4">
         <div className="space-y-1">
-          <h2 style={{ fontSize: 22, fontWeight: 500, color: "#0F172B", lineHeight: 1.2 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.2 }}>
             {companyName}
           </h2>
           <div className="flex items-center gap-2 flex-wrap">
@@ -60,7 +60,7 @@ export function ScreenerPageShell({ navItems, headerRight, children }: ScreenerP
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen" style={{ background: "var(--qc-surface-white)" }}>
           <div className="h-20 px-4 pt-8">
             <div className="h-6 w-48 rounded bg-zinc-100 animate-pulse" />
           </div>

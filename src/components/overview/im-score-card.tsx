@@ -18,7 +18,6 @@ interface IMScoreCardProps {
   opportunityMax?: number | null;
   dealScore?: number | null;
   dealMax?: number | null;
-  // Structured insight items
   managementFactors?: FactorScore[];
   opportunityTakeaways?: FinalTakeaways | null;
   opportunityData?: OFactorResponse | null;
@@ -48,7 +47,6 @@ function getOverallInsight(
   if (highlights.length > 0) return highlights.slice(0, 2).join(" · ");
   if (dealVerdict) return dealVerdict;
 
-  // Fallback based on score band
   if (scorePct >= 0.80) return "Strong fundamentals · High confidence in management · Attractive entry point";
   if (scorePct >= 0.65) return "Solid business with positive outlook · Reasonable valuation";
   if (scorePct >= 0.50) return "Steady business · Watchful on valuation and growth catalysts";
@@ -56,7 +54,6 @@ function getOverallInsight(
   return rating + " · Limited upside or elevated risk";
 }
 
-// Clamp weights so they always sum to 100%
 function clampWeights(m: number, o: number, d: number): [number, number, number] {
   const total = m + o + d;
   if (total === 0) return [33, 34, 33];
@@ -67,11 +64,12 @@ function clampWeights(m: number, o: number, d: number): [number, number, number]
   ];
 }
 
-// Color themes for each factor card
+// Semantic accent colors for M/O/D factors — intentionally not theme variables
+// because these are fixed categorical identifiers, not surface/text tokens
 const CARD_THEMES = {
-  M: { border: "#2563EB", fill: "#2563EB", bg: "rgba(37,99,235,0.04)", dot: "#2563EB" },   // Blue
-  O: { border: "#059669", fill: "#059669", bg: "rgba(5,150,105,0.04)", dot: "#059669" },     // Emerald
-  D: { border: "#D97706", fill: "#D97706", bg: "rgba(217,119,6,0.04)", dot: "#D97706" },     // Amber
+  M: { border: "#2563EB", fill: "#2563EB", bg: "rgba(37,99,235,0.04)", dot: "#2563EB" },
+  O: { border: "#059669", fill: "#059669", bg: "rgba(5,150,105,0.04)", dot: "#059669" },
+  D: { border: "#D97706", fill: "#D97706", bg: "rgba(217,119,6,0.04)", dot: "#D97706" },
 } as const;
 
 interface BentoCardProps {
@@ -81,7 +79,7 @@ interface BentoCardProps {
   max: number;
   weightPct: number;
   items: TitledBullet[];
-  flex: number; // css flex grow value
+  flex: number;
 }
 
 function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoCardProps) {
@@ -91,26 +89,30 @@ function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoC
 
   return (
     <div
-      className="rounded-[10px] border bg-white p-5 flex flex-col gap-3 min-w-0 h-full overflow-y-auto"
-      style={{ flex, borderColor: theme.border, borderTopWidth: 3, backgroundColor: theme.bg }}
+      className="rounded-[10px] border p-5 flex flex-col gap-3 min-w-0 h-full overflow-y-auto"
+      style={{
+        flex,
+        borderColor: theme.border,
+        borderTopWidth: 3,
+        backgroundColor: theme.bg,
+        background: theme.bg,
+      }}
     >
-      {/* Header row */}
       <div className="flex items-start justify-between">
         <div>
           <p className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: theme.border }}>
             {label} ({letter})
           </p>
-          <p className="text-xs text-zinc-400 mt-0.5">{weightPct}% weight</p>
+          <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{weightPct}% weight</p>
         </div>
         <div className="text-right">
-          <span className="text-2xl font-bold text-[#0F172B] leading-none">
+          <span className="text-2xl font-bold leading-none" style={{ color: "var(--qc-text-heading)" }}>
             {score !== null ? score : "—"}
           </span>
-          <span className="text-sm font-normal text-zinc-400 ml-0.5">/{max}</span>
+          <span className="text-sm font-normal ml-0.5" style={{ color: "var(--qc-text-muted)" }}>/{max}</span>
         </div>
       </div>
 
-      {/* Tick bar */}
       <div className="flex gap-[2px] flex-wrap">
         {Array.from({ length: Math.min(ticks, 40) }).map((_, i) => {
           const filledCount = Math.round(pct * Math.min(ticks, 40));
@@ -121,7 +123,7 @@ function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoC
                 width: 4,
                 height: 12,
                 borderRadius: 1,
-                backgroundColor: i < filledCount ? theme.fill : "#e5e7eb",
+                backgroundColor: i < filledCount ? theme.fill : "var(--qc-border-default)",
                 flexShrink: 0,
               }}
             />
@@ -129,7 +131,6 @@ function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoC
         })}
       </div>
 
-      {/* Titled bullet items */}
       {items.length > 0 ? (
         <ul className="space-y-2.5 flex-1">
           {items.map((item, i) => (
@@ -139,14 +140,14 @@ function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoC
                 style={{ backgroundColor: theme.dot }}
               />
               <div>
-                <p className="text-xs font-semibold text-[#0F172B] leading-snug">{item.title}</p>
-                <p className="text-xs text-zinc-500 leading-relaxed mt-0.5">{item.text}</p>
+                <p className="text-xs font-semibold leading-snug" style={{ color: "var(--qc-text-heading)" }}>{item.title}</p>
+                <p className="text-xs leading-relaxed mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{item.text}</p>
               </div>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-xs text-zinc-400 flex-1">No analysis available.</p>
+        <p className="text-xs flex-1" style={{ color: "var(--qc-text-muted)" }}>No analysis available.</p>
       )}
     </div>
   );
@@ -213,7 +214,6 @@ export function IMScoreCard({
   const weightSum = cMW + cOW + cDW;
   const weightValid = weightSum === 100;
 
-  // Weighted score
   let partialNumer = 0;
   let partialDenom = 0;
   if (mScore !== null) { partialNumer += (mScore / mMax) * cMW; partialDenom += cMW; }
@@ -226,7 +226,6 @@ export function IMScoreCard({
   const rating = hasAnyScore ? getRating(weightedPct) : null;
   const overallInsight = hasAnyScore ? getOverallInsight(weightedPct, opportunityTakeaways, dealOverview) : null;
 
-  // Titled items per card
   const mItems: TitledBullet[] = managementFactors
     ? managementFactors.slice(0, 4).map((f) => ({
         title: f.factor,
@@ -235,7 +234,6 @@ export function IMScoreCard({
     : [];
 
   const oItems: TitledBullet[] = (() => {
-    // Try final_takeaways.section_scores first
     const scores = opportunityTakeaways?.section_scores;
     if (scores) {
       const entries: { key: string; label: string }[] = [
@@ -252,7 +250,6 @@ export function IMScoreCard({
         }));
       if (items.length > 0) return items;
     }
-    // Fallback: read takeaway from each section's .text.takeaway
     if (!opportunityData) return [];
     const sectionMap: { key: keyof OFactorResponse; label: string }[] = [
       { key: "industry_overview", label: "Industry" },
@@ -289,21 +286,19 @@ export function IMScoreCard({
     return items;
   })();
 
-
   return (
     <TabularCard title="QC Insight">
-      {/* Top: two-column layout — Col 1: radial chart, Col 2: rating + title + sliders */}
-      <div className="flex gap-6 mb-4 pb-4 border-b border-[#E2E2E2]">
+      <div className="flex gap-6 mb-4 pb-4" style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
 
-        {/* Col 1: Radial score chart */}
+        {/* Radial score chart */}
         <div className="flex-shrink-0 flex items-center justify-center">
           <div className="relative flex items-center justify-center">
             <svg width={96} height={96} viewBox="0 0 96 96">
-              <circle cx={48} cy={48} r={40} fill="none" stroke="#E5E7EB" strokeWidth={7} />
+              <circle cx={48} cy={48} r={40} fill="none" stroke="var(--qc-border-default)" strokeWidth={7} />
               <circle
                 cx={48} cy={48} r={40}
                 fill="none"
-                stroke="#0F172B"
+                stroke="var(--qc-accent-primary)"
                 strokeWidth={7}
                 strokeDasharray={`${2 * Math.PI * 40}`}
                 strokeDashoffset={`${2 * Math.PI * 40 * (1 - (displayScore ?? 0) / 100)}`}
@@ -312,17 +307,16 @@ export function IMScoreCard({
               />
             </svg>
             <div className="absolute flex flex-col items-center">
-              <span className="text-2xl font-bold text-[#0F172B] leading-none">
+              <span className="text-2xl font-bold leading-none" style={{ color: "var(--qc-text-heading)" }}>
                 {displayScore !== null ? displayScore : "—"}
               </span>
-              <span className="text-[9px] text-zinc-400 font-semibold uppercase tracking-wide">/100</span>
+              <span className="text-[9px] font-semibold uppercase tracking-wide" style={{ color: "var(--qc-text-muted)" }}>/100</span>
             </div>
           </div>
         </div>
 
-        {/* Col 2: Rating badge + headline + sliders stacked */}
+        {/* Rating badge + headline + sliders */}
         <div className="flex-1 min-w-0 flex flex-col gap-3 justify-center">
-          {/* Rating + headline */}
           <div className="flex flex-col gap-1">
             {rating && (
               <span
@@ -339,13 +333,12 @@ export function IMScoreCard({
               </span>
             )}
             {overallInsight && (
-              <p className="text-sm font-semibold text-[#0F172B] leading-snug">{overallInsight}</p>
+              <p className="text-sm font-semibold leading-snug" style={{ color: "var(--qc-text-heading)" }}>{overallInsight}</p>
             )}
           </div>
 
-          {/* Sliders */}
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold mb-2">
+            <p className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "var(--qc-text-muted)" }}>
               Adjust Weightings — must total 100%
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
@@ -379,44 +372,16 @@ export function IMScoreCard({
 
       </div>
 
-      {/* Bento grid: left col = Opportunity (full height), right col = Management + Deal stacked */}
       <div className="flex flex-col lg:flex-row gap-4" style={{ height: 480 }}>
-        {/* Left: Management — width proportional to mWeight */}
         <div className="min-w-0 flex overflow-hidden" style={{ flex: cMW }}>
-          <BentoCard
-            label="Management"
-            letter="M"
-            score={mScore}
-            max={mMax}
-            weightPct={cMW}
-            items={mItems}
-            flex={1}
-          />
+          <BentoCard label="Management" letter="M" score={mScore} max={mMax} weightPct={cMW} items={mItems} flex={1} />
         </div>
-
-        {/* Right: Opportunity + Deal — width proportional to oWeight + dWeight, heights split by each weight */}
         <div className="min-w-0 flex flex-col gap-4" style={{ flex: cOW + cDW }}>
           <div className="flex flex-col overflow-hidden" style={{ flex: cOW }}>
-            <BentoCard
-              label="Opportunity"
-              letter="O"
-              score={oScore}
-              max={oMax}
-              weightPct={cOW}
-              items={oItems}
-              flex={1}
-            />
+            <BentoCard label="Opportunity" letter="O" score={oScore} max={oMax} weightPct={cOW} items={oItems} flex={1} />
           </div>
           <div className="flex flex-col overflow-hidden" style={{ flex: cDW }}>
-            <BentoCard
-              label="Deal"
-              letter="D"
-              score={dScore}
-              max={dMax}
-              weightPct={cDW}
-              items={dItems}
-              flex={1}
-            />
+            <BentoCard label="Deal" letter="D" score={dScore} max={dMax} weightPct={cDW} items={dItems} flex={1} />
           </div>
         </div>
       </div>

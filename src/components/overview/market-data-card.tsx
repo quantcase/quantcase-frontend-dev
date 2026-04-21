@@ -17,8 +17,8 @@ interface MarketDataCardProps {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
-      <p className="text-[28px] font-normal leading-none text-[#0F172B]">{value}</p>
+      <p className="text-xs text-[var(--qc-text-muted)] mb-0.5">{label}</p>
+      <p className="text-[28px] font-normal leading-none text-[var(--qc-text-heading)]">{value}</p>
     </div>
   );
 }
@@ -47,45 +47,42 @@ export function MarketDataCard({
       : null;
 
   return (
-    <Card className="bg-white border border-[#E2E2E2] rounded-[10px] shadow-none">
+    <Card className="bg-[var(--qc-surface-white)] border border-[var(--qc-border-default)] rounded-[10px] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+            <CardTitle className="text-base font-semibold text-[var(--qc-text-heading)]">
               Market Data
             </CardTitle>
-            <p className="text-xs text-zinc-500 mt-0.5">Price &amp; Volume</p>
+            <p className="text-xs text-[var(--qc-text-muted)] mt-0.5">Price &amp; Volume</p>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-zinc-500" />
+          <ArrowUpRight className="h-4 w-4 text-[var(--qc-text-muted)]" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* 52W range bar */}
         <div>
-          <div className="flex justify-between text-xs text-zinc-500 mb-1">
+          <div className="flex justify-between text-xs text-[var(--qc-text-muted)] mb-1">
             <span>52W Low {week52Low != null ? `₹${week52Low.toFixed(2)}` : "—"}</span>
             <span>52W High {week52High != null ? `₹${week52High.toFixed(2)}` : "—"}</span>
           </div>
-          <div className="relative h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800">
+          <div className="relative h-1.5 rounded-full bg-[var(--qc-surface-panel)]">
             {rangePercent != null && (
               <div
-                className="absolute left-0 top-0 h-1.5 rounded-full bg-zinc-900"
+                className="absolute left-0 top-0 h-1.5 rounded-full bg-[var(--qc-accent-primary)]"
                 style={{ width: `${Math.min(100, Math.max(0, rangePercent))}%` }}
               />
             )}
           </div>
         </div>
 
-        {/* Moving averages + volume */}
-        <div className="grid grid-cols-2 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-3">
+        <div className="grid grid-cols-2 gap-3 border-t border-[var(--qc-border-default)] pt-3">
           <Stat label="50D Avg" value={fiftyDayAverage != null ? `₹${fiftyDayAverage.toFixed(2)}` : "—"} />
           <Stat label="200D Avg" value={twoHundredDayAverage != null ? `₹${twoHundredDayAverage.toFixed(2)}` : "—"} />
           <Stat label="Volume" value={volume != null ? formatVol(volume) : "—"} />
           <Stat label="Avg Volume" value={avgVolume != null ? formatVol(avgVolume) : "—"} />
         </div>
 
-        {/* Per share */}
-        <div className="grid grid-cols-3 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-3">
+        <div className="grid grid-cols-3 gap-3 border-t border-[var(--qc-border-default)] pt-3">
           <Stat label="EPS (TTM)" value={eps != null ? `₹${eps.toFixed(2)}` : "—"} />
           <Stat label="Fwd EPS" value={epsForward != null ? `₹${epsForward.toFixed(2)}` : "—"} />
           <Stat label="Div Yield" value={dividendYield != null ? `${dividendYield.toFixed(2)}%` : "—"} />

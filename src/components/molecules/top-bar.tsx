@@ -267,7 +267,7 @@ function TopBarInner() {
 
   return (
     <header
-      className="fixed left-[72px] right-0 top-0 z-30 flex h-[56px] items-center justify-between px-6 pt-[22px]"
+      className="fixed left-[72px] right-0 top-0 z-30 flex h-[60px] items-center justify-between px-6 pt-[22px]"
       style={{ background: "var(--qc-topbar-bg)" }}
     >
       <div className="flex h-full items-center">{leftZone}</div>

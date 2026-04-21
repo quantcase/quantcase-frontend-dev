@@ -201,7 +201,7 @@ function OpportunityContent() {
                 <div className="w-[400px] shrink-0">
                   <IndustryIntelligenceCard
                     data={data.industry_overview}
-                    investmentImplications={data.industry_analysis?.investment_implications}
+                    investmentImplications={data.industry_analysis}
                   />
                 </div>
               )}

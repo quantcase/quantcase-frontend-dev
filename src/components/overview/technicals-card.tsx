@@ -1,44 +1,31 @@
 "use client";
 
-import { TabularCard } from "@/components/molecules/tabular-card";
 import type { TechnicalsResponse } from "@/types/technicals";
+import { SectionShell, SectionLabel, NarrativeSidebar } from "./primitives";
+import { PriceLadderSection } from "./technicals/price-ladder-section";
+import { StateCardsRow, type StateCardsRowItem } from "./technicals/state-cards-row";
+import { MovingAveragesStrip } from "./technicals/moving-averages-strip";
+import { MomentumVolatilityPanel } from "./technicals/momentum-volatility-panel";
 
-function formatPrice(val: number | null | undefined): string {
-  if (val == null) return "—";
-  return `₹${val.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
-}
-
-function signalColor(signal: string | null | undefined): string {
-  if (!signal) return "text-[var(--qc-text-muted)]";
-  const s = signal.toUpperCase();
-  if (s.includes("UPTREND") || s.includes("STRONG") || s.includes("OUTPERFORM") || s.includes("OVERSOLD") || s.includes("CONFIRMED")) return "text-emerald-600";
-  if (s.includes("DOWNTREND") || s.includes("WEAK") || s.includes("UNDERPERFORM") || s.includes("OVERBOUGHT") || s.includes("DISTRIBUTION")) return "text-red-600";
-  if (s.includes("SIDEWAYS") || s.includes("NEUTRAL") || s.includes("CONSOLIDAT") || s.includes("EARLY") || s.includes("ACCUMULATION") || s.includes("MID")) return "text-amber-600";
-  return "text-[var(--qc-text-muted)]";
-}
-
-function humanizeSignal(val: string | null | undefined): string {
+function humanize(val: string | null | undefined): string {
   if (!val) return "—";
-  return val
-    .replace(/_/g, " ")
-    .toLowerCase()
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return val.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-interface SummaryTileProps {
-  label: string;
-  value: string;
-  sublabel: string;
-}
-
-function SummaryTile({ label, value, sublabel }: SummaryTileProps) {
-  return (
-    <div className="rounded-[10px] border border-[var(--qc-border-default)] bg-[var(--qc-surface-panel)] px-4 py-3 flex flex-col gap-1 flex-1 min-w-0">
-      <small className="text-[10px] uppercase tracking-wider text-[var(--qc-text-muted)] font-medium">{label}</small>
-      <p className={`text-sm font-semibold leading-tight ${signalColor(value)}`}>{humanizeSignal(value)}</p>
-      <small className="text-[11px] text-[var(--qc-text-muted)]">{sublabel}</small>
-    </div>
-  );
+function signalSentiment(signal: string | null | undefined): "up" | "down" | "neutral" {
+  if (!signal) return "neutral";
+  const s = signal.toUpperCase();
+  if (
+    s.includes("UPTREND") || s.includes("STRONG") || s.includes("OUTPERFORM") ||
+    s.includes("OVERSOLD") || s.includes("BULLISH") || s.includes("ABOVE") ||
+    s.includes("BUY") || s.includes("MARK-UP") || s.includes("ACCUMULATION")
+  ) return "up";
+  if (
+    s.includes("DOWNTREND") || s.includes("WEAK") || s.includes("UNDERPERFORM") ||
+    s.includes("OVERBOUGHT") || s.includes("BEARISH") || s.includes("BELOW") ||
+    s.includes("SELL") || s.includes("MARK-DOWN") || s.includes("DISTRIBUTION")
+  ) return "down";
+  return "neutral";
 }
 
 interface Props {
@@ -46,160 +33,189 @@ interface Props {
 }
 
 export function TechnicalsCard({ data }: Props) {
-  const sr = data.supportResistance;
-  const ma = data.movingAverages;
-  const price = data.price;
-  const trend = data.trend;
-  const re = data.ruleEngine;
+  const { supportResistance: sr, movingAverages: ma, price, trend, ruleEngine: re, momentum, volatility } = data;
 
-  // Support / Resistance values
-  const supports = sr.static.support.slice(0, 2);
-  const resistances = sr.static.resistance.slice(0, 2);
+  const cmp = price.cmp;
+  const high52w = price.high52w;
+  const low52w = price.low52w;
+  const ath = price.allTimeHigh ?? high52w;
 
-  // Structure label
-  const structureLabel = re?.structureEngine.priceStructure.zone
-    ?? (trend.phase ? humanizeSignal(trend.phase) : "—");
-  const structureSub = re?.structureEngine.marketStructure.wyckoffPhase
-    ? `${humanizeSignal(re.structureEngine.marketStructure.wyckoffPhase)} phase`
-    : "Base building near support";
+  const r1 = sr.static.resistance[0] ?? null;
+  const s1 = sr.static.support[0] ?? null;
 
-  // Trend label
-  const trendLabel = trend.direction ?? "—";
-  const trendSub = (() => {
-    const above: string[] = [];
-    const below: string[] = [];
-    const pos = ma.pricePosition;
-    if (pos.aboveSMA20) above.push("SMA20"); else below.push("SMA20");
-    if (pos.aboveSMA50) above.push("SMA50"); else below.push("SMA50");
-    if (pos.aboveSMA200) above.push("SMA200"); else below.push("SMA200");
-    if (below.length > 0) return `Below ${below.join(", ")}`;
-    if (above.length > 0) return `Above ${above.join(", ")}`;
-    return "—";
-  })();
+  const rangeWidth = high52w - low52w;
+  const rangePct = rangeWidth > 0 ? Math.round(((cmp - low52w) / rangeWidth) * 100) : 0;
+  const distFromATH = ath ? ((cmp - ath) / ath) * 100 : null;
+  const distFromS1 = s1 ? ((cmp - s1) / s1) * 100 : null;
+  const rrRatio =
+    r1 != null && s1 != null && r1 !== cmp && s1 !== cmp
+      ? Math.abs((r1 - cmp) / (cmp - s1))
+      : null;
 
-  // Timing label (momentum)
-  const rsi = data.momentum.rsi;
-  const timingLabel = re?.timingEngine.momentum.rsiZone ?? rsi.zone ?? "—";
-  const timingSub = re?.timingEngine.momentum.rsi != null
-    ? `RSI ${re.timingEngine.momentum.rsi.toFixed(0)} · ${humanizeSignal(rsi.trend)}`
-    : `RSI ${rsi.value.toFixed(0)} · ${humanizeSignal(rsi.trend)}`;
+  const verdictLabel =
+    re?.structureEngine.priceStructure.zone
+      ? humanize(re.structureEngine.priceStructure.zone)
+      : trend.phase
+      ? `${humanize(trend.direction)} · ${humanize(trend.phase)}`
+      : humanize(trend.direction);
+  const verdictSentiment = signalSentiment(trend.direction);
 
-  // Relative strength label
-  const rsVsNifty = re?.dominanceEngine.leadership.vsNifty.signal;
-  const rsVsSector = re?.dominanceEngine.leadership.vsSector.signal;
-  const relStrengthLabel = rsVsNifty ?? data.signals.overall;
-  const relStrengthSub = rsVsSector ? `vs Sector: ${humanizeSignal(rsVsSector)}` : "vs Nifty & sector";
+  const aboveSMAs = [
+    ma.pricePosition.aboveSMA20 ? "SMA 20" : null,
+    ma.pricePosition.aboveSMA50 ? "SMA 50" : null,
+    cmp >= ma.sma[100] ? "SMA 100" : null,
+    ma.pricePosition.aboveSMA200 ? "SMA 200" : null,
+  ].filter(Boolean);
+  const belowSMAs = [
+    !ma.pricePosition.aboveSMA20 ? "SMA 20" : null,
+    !ma.pricePosition.aboveSMA50 ? "SMA 50" : null,
+    cmp < ma.sma[100] ? "SMA 100" : null,
+    !ma.pricePosition.aboveSMA200 ? "SMA 200" : null,
+  ].filter(Boolean);
 
-  // Decision context summary
-  const summary = re?.decisionContext.summary ?? data.insights[0] ?? "";
-
-  // SMA rows
-  const smas: { label: string; val: number; above: boolean }[] = [
+  const smas = [
     { label: "SMA 20", val: ma.sma[20], above: ma.pricePosition.aboveSMA20 },
     { label: "SMA 50", val: ma.sma[50], above: ma.pricePosition.aboveSMA50 },
-    { label: "SMA 100", val: ma.sma[100], above: price.cmp >= ma.sma[100] },
+    { label: "SMA 100", val: ma.sma[100], above: cmp >= ma.sma[100] },
     { label: "SMA 200", val: ma.sma[200], above: ma.pricePosition.aboveSMA200 },
   ];
 
+  const rsiValue = re?.timingEngine?.momentum?.rsi ?? momentum.rsi.value;
+  const rsiZone = re?.timingEngine?.momentum?.rsiZone ?? momentum.rsi.zone ?? "—";
+  const rsiSub = `${humanize(momentum.rsi.trend)} · in ${rsiZone.replace(/_/g, "–")} zone`;
+
+  const rsVsNiftySignal = re?.dominanceEngine.leadership.vsNifty.signal ?? null;
+  const rsVsSectorSignal = re?.dominanceEngine.leadership.vsSector.signal ?? null;
+  const rsLabel = rsVsNiftySignal ? humanize(rsVsNiftySignal) : humanize(data.signals.overall);
+  const rsSub = rsVsSectorSignal
+    ? `vs Nifty · vs Sector: ${humanize(rsVsSectorSignal)}`
+    : "vs Nifty & sector peers";
+  const rsSentiment = signalSentiment(rsVsNiftySignal ?? data.signals.overall);
+
+  const bbSqueeze = volatility.bollingerBands.squeeze;
+  const momentumScore = data.signals.components?.momentum ?? Math.round(rsiValue * 0.7);
+  const momentumLabel = momentumScore > 60 ? "Positive" : momentumScore > 40 ? "Neutral" : "Negative";
+  const momentumColor =
+    momentumScore > 60 ? "var(--qc-up)" : momentumScore > 40 ? "var(--qc-warn)" : "var(--qc-down)";
+  const volLabel = bbSqueeze ? "Contracting" : "Expanding";
+  const volPct = bbSqueeze ? 28 : 65;
+  const volColor = bbSqueeze ? "var(--qc-warn)" : "var(--qc-up)";
+
+  const trendSentiment = signalSentiment(trend.direction);
+  const tags: { label: string; color: string }[] = [
+    {
+      label: humanize(trend.direction),
+      color:
+        trendSentiment === "up" ? "var(--qc-up)"
+        : trendSentiment === "down" ? "var(--qc-down)"
+        : "var(--qc-warn)",
+    },
+  ];
+  if (aboveSMAs.length === 4) tags.push({ label: "Above all SMAs", color: "var(--qc-up)" });
+  else if (belowSMAs.length === 4) tags.push({ label: "Below all SMAs", color: "var(--qc-down)" });
+  if (bbSqueeze) tags.push({ label: "Vol contracting", color: "var(--qc-warn)" });
+  tags.push({
+    label: rsSentiment === "up" ? "Outperforming" : "Underperforming",
+    color: rsSentiment === "up" ? "var(--qc-up)" : "var(--qc-down)",
+  });
+
+  const summary = re?.decisionContext.summary ?? data.insights[0] ?? "";
+
+  const stateCards: StateCardsRowItem[] = [
+    {
+      label: "Structure",
+      value: re?.structureEngine.priceStructure.zone
+        ? humanize(re.structureEngine.priceStructure.zone)
+        : "—",
+      sub: re?.structureEngine.marketStructure.wyckoffPhase
+        ? `${humanize(re.structureEngine.marketStructure.wyckoffPhase)} phase · money flow positive`
+        : "Market structure analysis",
+      sentiment: signalSentiment(re?.structureEngine.priceStructure.zone),
+      iconPath: "M3 18l6-8 4 5 8-11",
+    },
+    {
+      label: "Trend",
+      value: humanize(trend.direction),
+      sub:
+        belowSMAs.length === 0
+          ? `Above ${aboveSMAs.join(" · ")}`
+          : aboveSMAs.length === 0
+          ? `Below ${belowSMAs.join(" · ")}`
+          : `Above ${aboveSMAs.join(", ")} · Below ${belowSMAs.join(", ")}`,
+      sentiment: signalSentiment(trend.direction),
+      iconPath: "M7 17L17 7M17 7H9M17 7v8",
+    },
+    {
+      label: "Timing",
+      value: `RSI ${rsiValue.toFixed(0)}`,
+      sub: rsiSub,
+      sentiment: "neutral",
+      iconPath: "M12 7v5l3 2",
+      iconCircle: true,
+      iconColor: "var(--qc-blue)",
+    },
+    {
+      label: "Relative Strength",
+      value: rsLabel,
+      sub: rsSub,
+      sentiment: rsSentiment,
+      iconPath: rsSentiment === "up" ? "M7 17L17 7M17 7H9M17 7v8" : "M7 7l10 10M17 7L7 17",
+    },
+  ];
+
   return (
-    <TabularCard title="Technicals" subtitle={summary || undefined}>
+    <SectionShell>
+      <SectionLabel>Technicals</SectionLabel>
 
-      {/* 4-up summary tiles */}
-      <div className="space-y-4">
-        <div className="flex gap-3 flex-wrap sm:flex-nowrap">
-          <SummaryTile label="Structure" value={structureLabel} sublabel={structureSub} />
-          <SummaryTile label="Trend" value={trendLabel} sublabel={trendSub} />
-          <SummaryTile label="Timing" value={timingLabel} sublabel={timingSub} />
-          <SummaryTile label="Relative Strength" value={relStrengthLabel} sublabel={relStrengthSub} />
-        </div>
-
-        {/* 3-column data panels */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-
-          {/* Support & Resistance */}
-          <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4 py-3">
-            <div className="flex items-center gap-1.5 mb-3">
-              <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
-              <p className="text-[11px] font-semibold text-[var(--qc-text-heading)]">Support &amp; resistance</p>
-            </div>
-            <div className="space-y-2">
-              {resistances.slice().reverse().map((r, i) => (
-                <div key={`r${i}`} className="flex items-center justify-between">
-                  <span className="text-sm text-[var(--qc-text-body)]">Resistance {resistances.length - i}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(r)}</span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-red-600 text-white">
-                      R{resistances.length - i}
-                    </span>
-                  </div>
-                </div>
-              ))}
-              {supports.map((s, i) => (
-                <div key={`s${i}`} className="flex items-center justify-between">
-                  <span className="text-sm text-[var(--qc-text-body)]">Support {i + 1}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(s)}</span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-emerald-600 text-white">
-                      S{i + 1}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Moving Averages */}
-          <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4 py-3">
-            <div className="flex items-center gap-1.5 mb-3">
-              <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-              <p className="text-[11px] font-semibold text-[var(--qc-text-heading)]">Moving averages</p>
-            </div>
-            <div className="space-y-2">
-              {smas.map((sma) => (
-                <div key={sma.label} className="flex items-center justify-between">
-                  <span className="text-sm text-[var(--qc-text-body)]">{sma.label}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(sma.val)}</span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm ${sma.above ? "bg-emerald-600 text-white" : "bg-red-600 text-white"}`}>
-                      {sma.above ? "Above" : "Below"}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Price Levels */}
-          <div className="rounded-[10px] border border-[var(--qc-border-default)] px-4 py-3">
-            <div className="flex items-center gap-1.5 mb-3">
-              <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-              <p className="text-[11px] font-semibold text-[var(--qc-text-heading)]">Price levels</p>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[var(--qc-text-body)]">All time high</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(price.high52w)}</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-amber-500 text-white">ATH</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[var(--qc-text-body)]">52W high</span>
-                <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(price.high52w)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[var(--qc-text-body)]">52W low</span>
-                <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(price.low52w)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[var(--qc-text-body)]">CMP</span>
-                <span className="text-sm font-semibold text-[var(--qc-text-heading)]">{formatPrice(price.cmp)}</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
+      {/* Hero row */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 14, marginBottom: 14 }}>
+        <PriceLadderSection
+          cmp={cmp}
+          high52w={high52w}
+          low52w={low52w}
+          ath={ath}
+          r1={r1}
+          s1={s1}
+          rangePct={rangePct}
+          distFromATH={distFromATH}
+          distFromS1={distFromS1}
+          rrRatio={rrRatio}
+          atr14={volatility.atr14}
+          bbSqueeze={bbSqueeze}
+          verdictLabel={verdictLabel}
+          verdictSentiment={verdictSentiment}
+        />
+        <NarrativeSidebar
+          eyebrow="What the chart says"
+          headline={
+            trendSentiment === "up"
+              ? `${verdictLabel} near key levels — watch for continuation.`
+              : trendSentiment === "down"
+              ? "Downtrend in play — caution until structure recovers."
+              : "Consolidating — direction pending a catalyst."
+          }
+          body={
+            summary ||
+            (trendSentiment === "up"
+              ? `Price is ${aboveSMAs.length === 4 ? "above all moving averages" : `above ${aboveSMAs.join(", ")}`} with RSI at ${rsiValue.toFixed(0)}. Structure is intact.`
+              : `Price is ${belowSMAs.length > 0 ? `below ${belowSMAs.join(", ")}` : "near key levels"} with RSI at ${rsiValue.toFixed(0)}. Monitor for reversal signals.`)
+          }
+          tags={tags}
+        />
       </div>
-    </TabularCard>
+
+      <StateCardsRow items={stateCards} />
+      <MovingAveragesStrip cmp={cmp} smas={smas} aboveSMAs={aboveSMAs} belowSMAs={belowSMAs} />
+      <MomentumVolatilityPanel
+        rsiValue={rsiValue}
+        momentumScore={momentumScore}
+        momentumLabel={momentumLabel}
+        momentumColor={momentumColor}
+        volLabel={volLabel}
+        volPct={volPct}
+        volColor={volColor}
+        bbSqueeze={bbSqueeze}
+      />
+    </SectionShell>
   );
 }

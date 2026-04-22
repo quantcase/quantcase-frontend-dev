@@ -9,24 +9,31 @@ interface PromoterSectionProps {
   mqiScore: MqiScore;
 }
 
-function scoreColor(score: number, max: number): string {
+function scoreLevel(score: number, max: number): "up" | "warn" | "down" {
   const pct = max > 0 ? score / max : 0;
-  if (pct >= 0.7) return "#16a34a";
-  if (pct >= 0.4) return "#d97706";
-  return "#dc2626";
+  if (pct >= 0.7) return "up";
+  if (pct >= 0.4) return "warn";
+  return "down";
 }
 
-function verdictColor(verdict: string): { bg: string; text: string; border: string } {
+function scoreCssColor(score: number, max: number): string {
+  const level = scoreLevel(score, max);
+  if (level === "up") return "var(--qc-up)";
+  if (level === "warn") return "var(--qc-warn)";
+  return "var(--qc-down)";
+}
+
+function verdictStyle(verdict: string): { bg: string; text: string; border: string } {
   const v = verdict.toLowerCase();
-  if (v === "strong" || v === "high") return { bg: "#f0fdf4", text: "#16a34a", border: "#bbf7d0" };
-  if (v === "weak" || v === "low" || v === "poor") return { bg: "#fef2f2", text: "#dc2626", border: "#fecaca" };
-  return { bg: "#fffbeb", text: "#d97706", border: "#fde68a" };
+  if (v === "strong" || v === "high") return { bg: "var(--qc-up-soft)", text: "var(--qc-up)", border: "var(--qc-up)" };
+  if (v === "weak" || v === "low" || v === "poor") return { bg: "var(--qc-down-soft)", text: "var(--qc-down)", border: "var(--qc-down)" };
+  return { bg: "var(--qc-warn-soft)", text: "var(--qc-warn)", border: "var(--qc-warn)" };
 }
 
 function formatChange(change: number | null): { text: string; color: string } {
-  if (change === null || change === 0) return { text: "—", color: "#888888" };
-  if (change > 0) return { text: `+${change}%`, color: "#16a34a" };
-  return { text: `${change}%`, color: "#dc2626" };
+  if (change === null || change === 0) return { text: "—", color: "var(--qc-text-muted)" };
+  if (change > 0) return { text: `+${change}%`, color: "var(--qc-up)" };
+  return { text: `${change}%`, color: "var(--qc-down)" };
 }
 
 function MqiDonut({ score, label }: { score: number; label: string }) {
@@ -36,7 +43,7 @@ function MqiDonut({ score, label }: { score: number; label: string }) {
   const center = size / 2;
   const circumference = 2 * Math.PI * radius;
   const filled = (score / 100) * circumference;
-  const color = scoreColor(score, 100);
+  const color = scoreCssColor(score, 100);
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -44,7 +51,7 @@ function MqiDonut({ score, label }: { score: number; label: string }) {
         style={{
           fontSize: 10,
           fontWeight: 600,
-          color: "#888888",
+          color: "var(--qc-text-muted)",
           textTransform: "uppercase",
           letterSpacing: "0.1em",
         }}
@@ -53,9 +60,7 @@ function MqiDonut({ score, label }: { score: number; label: string }) {
       </span>
 
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {/* Track */}
-        <circle cx={center} cy={center} r={radius} fill="none" stroke="#E2E2E2" strokeWidth={strokeWidth} />
-        {/* Progress */}
+        <circle cx={center} cy={center} r={radius} fill="none" stroke="var(--qc-border-default)" strokeWidth={strokeWidth} />
         <circle
           cx={center}
           cy={center}
@@ -67,18 +72,16 @@ function MqiDonut({ score, label }: { score: number; label: string }) {
           strokeLinecap="round"
           transform={`rotate(-90 ${center} ${center})`}
         />
-        {/* Score */}
-        <text x={center} y={center - 5} textAnchor="middle" fontSize="26" fontWeight="700" fill="#0F172B">
+        <text x={center} y={center - 5} textAnchor="middle" fontSize="26" fontWeight="700" fill="var(--qc-text-heading)">
           {score}
         </text>
-        <text x={center} y={center + 14} textAnchor="middle" fontSize="11" fill="#888888">
+        <text x={center} y={center + 14} textAnchor="middle" fontSize="11" fill="var(--qc-text-muted)">
           /100
         </text>
       </svg>
 
-      {/* Label line */}
-      <p style={{ fontSize: 13, fontWeight: 700, color: "#0F172B", textTransform: "uppercase", textAlign: "center", lineHeight: 1.3 }}>
-        {label} <span style={{ color: "#888888", fontWeight: 400 }}>| {score} / 100</span>
+      <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-text-heading)", textTransform: "uppercase", textAlign: "center", lineHeight: 1.3 }}>
+        {label} <span style={{ color: "var(--qc-text-muted)", fontWeight: 400 }}>| {score} / 100</span>
       </p>
     </div>
   );
@@ -96,33 +99,16 @@ function DimensionBars({ dimensions }: { dimensions: MqiScore["dimensions"] }) {
     <div className="flex flex-col justify-center gap-4 h-full">
       {items.map((item) => {
         const pct = item.max > 0 ? item.score / item.max : 0;
-        const color = scoreColor(item.score, item.max);
+        const color = scoreCssColor(item.score, item.max);
         return (
           <div key={item.label} className="flex items-center gap-3">
-            <span
-              style={{ fontSize: 12, color: "#0F172B", width: 140, flexShrink: 0 }}
-            >
+            <span style={{ fontSize: 12, color: "var(--qc-text-body)", width: 140, flexShrink: 0 }}>
               {item.label}
             </span>
-            <div
-              style={{
-                flex: 1,
-                height: 8,
-                borderRadius: 4,
-                background: "#F5F5F5",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  width: `${pct * 100}%`,
-                  height: "100%",
-                  borderRadius: 4,
-                  background: color,
-                }}
-              />
+            <div style={{ flex: 1, height: 8, borderRadius: 4, background: "var(--qc-surface-panel)", overflow: "hidden" }}>
+              <div style={{ width: `${pct * 100}%`, height: "100%", borderRadius: 4, background: color }} />
             </div>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "#0F172B", width: 36, textAlign: "right", flexShrink: 0 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-heading)", width: 36, textAlign: "right", flexShrink: 0 }}>
               {item.score}/{item.max}
             </span>
           </div>
@@ -134,16 +120,16 @@ function DimensionBars({ dimensions }: { dimensions: MqiScore["dimensions"] }) {
 
 export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionProps) {
   const { verdict, shareholding, promoter_note, verdict_rationale, mqi_rationale } = promoterActivity;
-  const vColor = verdictColor(verdict);
+  const vStyle = verdictStyle(verdict);
 
   const headerAction = (
     <div
       style={{
         fontSize: 11,
         fontWeight: 600,
-        color: vColor.text,
-        background: vColor.bg,
-        border: `1px solid ${vColor.border}`,
+        color: vStyle.text,
+        background: vStyle.bg,
+        border: `1px solid ${vStyle.border}`,
         borderRadius: 4,
         padding: "3px 10px",
         textTransform: "uppercase",
@@ -156,9 +142,7 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
 
   return (
     <SectionPanel title="Promoter Activity" headerAction={headerAction}>
-      {/* Top: table + score card */}
       <div className="flex gap-6 items-start">
-        {/* Promoter shareholding table */}
         <div className="flex-1 min-w-0 overflow-x-auto">
           <Table className="table-fixed w-full">
             <colgroup>
@@ -169,11 +153,12 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
               <col style={{ width: "34%" }} />
             </colgroup>
             <TableHeader>
-              <TableRow className="border-zinc-200">
+              <TableRow style={{ borderColor: "var(--qc-border-default)" }}>
                 {["Quarter", "Promoter %", "Pledge %", "Change", "Signal"].map((h) => (
                   <TableHead
                     key={h}
-                    className="text-[10px] font-medium uppercase tracking-wider text-zinc-500"
+                    className="text-[10px] font-medium uppercase tracking-wider"
+                    style={{ color: "var(--qc-text-muted)" }}
                   >
                     {h}
                   </TableHead>
@@ -184,20 +169,20 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
               {shareholding.map((row, i) => {
                 const change = formatChange(row.change);
                 return (
-                  <TableRow key={i} className="border-zinc-100">
-                    <TableCell className="text-xs text-zinc-700 font-medium">
+                  <TableRow key={i} style={{ borderColor: "var(--qc-border-inner)" }}>
+                    <TableCell className="text-xs font-medium" style={{ color: "var(--qc-text-body)" }}>
                       {row.quarter}
                     </TableCell>
-                    <TableCell className="text-xs text-zinc-700">
+                    <TableCell className="text-xs" style={{ color: "var(--qc-text-body)" }}>
                       {row.promoter_pct != null ? `${row.promoter_pct.toFixed(1)}%` : "—"}
                     </TableCell>
-                    <TableCell className="text-xs text-zinc-700">
+                    <TableCell className="text-xs" style={{ color: "var(--qc-text-body)" }}>
                       {row.pledge_pct != null ? `${row.pledge_pct.toFixed(1)}%` : "—"}
                     </TableCell>
                     <TableCell className="text-xs font-medium" style={{ color: change.color }}>
                       {change.text}
                     </TableCell>
-                    <TableCell className="text-xs text-zinc-600 break-words whitespace-normal">
+                    <TableCell className="text-xs break-words whitespace-normal" style={{ color: "var(--qc-text-muted)" }}>
                       {row.signal}
                     </TableCell>
                   </TableRow>
@@ -207,14 +192,9 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
           </Table>
         </div>
 
-        {/* Right: donut + dimension bars */}
         <div
           className="flex gap-6 items-center shrink-0"
-          style={{
-            borderLeft: "1px solid #E2E2E2",
-            paddingLeft: 24,
-            minWidth: 380,
-          }}
+          style={{ borderLeft: "1px solid var(--qc-border-default)", paddingLeft: 24, minWidth: 380 }}
         >
           <MqiDonut score={mqiScore.total} label={mqiScore.label} />
           <div className="flex-1">
@@ -223,26 +203,22 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
         </div>
       </div>
 
-      {/* Bottom: notes */}
       {(promoter_note || verdict_rationale || mqi_rationale) && (
-        <div
-          className="flex flex-col gap-2 mt-4 pt-4"
-          style={{ borderTop: "1px solid #E2E2E2" }}
-        >
+        <div className="flex flex-col gap-2 mt-4 pt-4" style={{ borderTop: "1px solid var(--qc-border-default)" }}>
           {promoter_note && (
-            <p style={{ fontSize: 12, color: "#121212", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>
               <span style={{ fontWeight: 600 }}>Promoter note: </span>
               {promoter_note}
             </p>
           )}
           {verdict_rationale && (
-            <p style={{ fontSize: 12, color: "#121212", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>
               <span style={{ fontWeight: 600 }}>Verdict rationale: </span>
               {verdict_rationale}
             </p>
           )}
           {mqi_rationale && (
-            <p style={{ fontSize: 12, color: "#121212", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>
               <span style={{ fontWeight: 600 }}>MQI impact: </span>
               {mqi_rationale}
             </p>

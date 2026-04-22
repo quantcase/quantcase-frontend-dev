@@ -1,106 +1,82 @@
 "use client";
 
 import { useState } from "react";
-import { Brain, Info, ArrowRight, Clock } from "lucide-react";
-import type { ManagementIntelligence, MqiScore, IntelligenceSignalItem, IntelligenceRecommendedStrategy } from "@/types/management";
+import { Brain, Info, AlertTriangle, Target, Clock, Users, Lightbulb, GitBranch, type LucideIcon } from "lucide-react";
+import type {
+  ManagementIntelligence,
+  MqiScore,
+  IntelligenceSignalItem,
+  IntelligenceRecommendedStrategy,
+} from "@/types/management";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function sentimentColors(sentiment: IntelligenceSignalItem["sentiment"]) {
-  if (sentiment === "positive") return {
-    text: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200",
-    dot: "bg-emerald-500", tagBg: "bg-emerald-600",
-  };
-  if (sentiment === "negative") return {
-    text: "text-red-600", bg: "bg-red-50", border: "border-red-200",
-    dot: "bg-red-500", tagBg: "bg-red-600",
-  };
-  return {
-    text: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200",
-    dot: "bg-amber-400", tagBg: "bg-amber-600",
-  };
+function sentimentVars(sentiment: IntelligenceSignalItem["sentiment"]) {
+  if (sentiment === "positive") return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "#BBD9C6" };
+  if (sentiment === "negative") return { color: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "#F0C0BB" };
+  return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "#E8D4A0" };
 }
 
-function labelTheme(label: string) {
+function labelVars(label: string) {
   const l = label.toLowerCase();
-  if (l === "high" || l === "strong" || l === "good") return {
-    border: "#059669", bg: "rgba(5,150,105,0.04)", tagBg: "bg-emerald-600",
-    insightBorder: "border-emerald-200", insightBg: "bg-emerald-50/50",
-  };
-  if (l === "low" || l === "poor" || l === "weak") return {
-    border: "#dc2626", bg: "rgba(220,38,38,0.04)", tagBg: "bg-red-600",
-    insightBorder: "border-red-200", insightBg: "bg-red-50/50",
-  };
-  return {
-    border: "#D97706", bg: "rgba(217,119,6,0.04)", tagBg: "bg-amber-600",
-    insightBorder: "border-amber-200", insightBg: "bg-amber-50/50",
-  };
+  if (l === "high" || l === "strong" || l === "good")
+    return { tagBg: "rgba(0,0,0,0.14)", tagFg: "var(--qc-text-heading)", accent: "var(--qc-up)" };
+  if (l === "low" || l === "poor" || l === "weak")
+    return { tagBg: "rgba(0,0,0,0.14)", tagFg: "var(--qc-text-heading)", accent: "var(--qc-down)" };
+  return { tagBg: "rgba(0,0,0,0.14)", tagFg: "var(--qc-text-heading)", accent: "var(--qc-warn)" };
 }
 
-function tickColor(score: number, maxScore: number): string {
-  const pct = maxScore > 0 ? score / maxScore : 0;
-  if (pct >= 0.7) return "#059669";
-  if (pct >= 0.4) return "#D97706";
-  return "#dc2626";
-}
+// ─── Signal Row ───────────────────────────────────────────────────────────────
 
-// ─── Signal Bucket ─────────────────────────────────────────────────────────────
-
-function SignalBucket({ item }: { item: IntelligenceSignalItem }) {
+function SignalRow({ item }: { item: IntelligenceSignalItem }) {
   const [open, setOpen] = useState(false);
-  const sc = sentimentColors(item.sentiment);
-  const fill = tickColor(item.score, item.max_score);
-  const filledTicks = Math.round(item.score);
+  const sv = sentimentVars(item.sentiment);
+  const pct = item.max_score > 0 ? (item.score / item.max_score) * 100 : 0;
+  const dimLabel = item.label.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
     <div
-      className="relative"
+      style={{ position: "relative" }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <div className={`text-left rounded-lg border ${sc.border} ${sc.bg} px-3 py-2.5 cursor-default`}>
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider">
-            {item.label}
-          </p>
-          <Info className="h-3 w-3 text-[#AAAAAA]" />
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", cursor: "default" }}>
+        <span style={{ width: 6, height: 6, borderRadius: "50%", background: sv.color, flexShrink: 0 }} />
+        <span style={{ fontSize: 12, color: "var(--qc-text-body)", width: 120, flexShrink: 0, lineHeight: 1.2 }}>{dimLabel}</span>
+        <div style={{ flex: 1, height: 4, borderRadius: 999, background: "rgba(0,0,0,0.10)", overflow: "hidden" }}>
+          <div style={{ height: "100%", borderRadius: 999, width: `${pct}%`, background: sv.color, transition: "width .4s" }} />
         </div>
-
-        <div className="flex gap-0.5 mb-1.5">
-          {Array.from({ length: item.max_score }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: 6, height: 10, borderRadius: 1,
-                backgroundColor: i < filledTicks ? fill : "#E2E8F0",
-              }}
-            />
-          ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 4, width: 46, justifyContent: "flex-end", flexShrink: 0 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: sv.color, fontVariantNumeric: "tabular-nums" }}>
+            {item.score}
+            <span style={{ color: "rgba(58,58,46,0.45)", fontWeight: 400 }}>/{item.max_score}</span>
+          </span>
+          <Info style={{ width: 10, height: 10, color: "rgba(58,58,46,0.35)", flexShrink: 0 }} />
         </div>
-
-        <p className={`text-[12px] font-semibold ${sc.text}`}>
-          {item.score}/{item.max_score}
-        </p>
       </div>
 
+      {/* hover popover */}
       {open && item.details.length > 0 && (
-        <div className="absolute right-full top-0 mr-2 z-50 w-72 rounded-[10px] border border-[#E2E2E2] bg-white shadow-xl">
-          <div className={`flex items-center justify-between px-4 py-3 rounded-t-[10px] border-b border-[#E2E2E2] ${sc.bg}`}>
-            <div>
-              <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-0.5">
-                Signal Breakdown
-              </p>
-              <p className="text-[14px] font-semibold text-[#0F172B]">{item.label}</p>
-            </div>
-            <span className={`text-[13px] font-semibold ${sc.text}`}>
-              {item.score}/{item.max_score}
-            </span>
+        <div style={{
+          position: "absolute", right: 0, top: "100%", marginTop: 4,
+          zIndex: 50, width: 280, borderRadius: 14,
+          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-surface-card, #FFFFFF)",
+          boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
+        }}>
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "10px 14px", borderBottom: "1px solid var(--qc-border-default)",
+            background: sv.bg, borderRadius: "14px 14px 0 0",
+          }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>{dimLabel}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: sv.color }}>{item.score}/{item.max_score}</span>
           </div>
-          <div className="px-4 py-4 space-y-2.5">
+          <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
             {item.details.map((d, i) => (
-              <div key={i} className="flex gap-2.5">
-                <span className={`mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 ${sc.dot}`} />
-                <p style={{ fontSize: 13, color: "#121212", lineHeight: 1.6 }}>{d}</p>
+              <div key={i} style={{ display: "flex", gap: 8 }}>
+                <span style={{ width: 5, height: 5, borderRadius: "50%", background: sv.color, flexShrink: 0, marginTop: 5 }} />
+                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>{d}</p>
               </div>
             ))}
           </div>
@@ -110,49 +86,136 @@ function SignalBucket({ item }: { item: IntelligenceSignalItem }) {
   );
 }
 
-// ─── Recommended Strategy ─────────────────────────────────────────────────────
+// ─── Strategy Card ────────────────────────────────────────────────────────────
 
-function RecommendedStrategyCard({ strategy }: { strategy: IntelligenceRecommendedStrategy }) {
-  const rows: { label: string; value: string }[] = [
-    { label: "Thesis", value: strategy.thesis ?? "" },
-    { label: "Timing", value: strategy.timing ?? "" },
-    { label: "Segment", value: strategy.segment ?? "" },
-    { label: "Rationale", value: strategy.rationale ?? "" },
-  ].filter((r) => r.value);
+const STRATEGY_CONFIG: { key: keyof IntelligenceRecommendedStrategy; label: string; dot: string; Icon: LucideIcon }[] = [
+  { key: "timing",    label: "Timing",    dot: "var(--qc-blue, #3A6BEF)", Icon: Clock },
+  { key: "segment",   label: "Segment",   dot: "var(--qc-warn)",          Icon: Users },
+  { key: "thesis",    label: "Thesis",    dot: "var(--qc-up)",            Icon: Lightbulb },
+  { key: "rationale", label: "Rationale", dot: "var(--qc-down)",          Icon: GitBranch },
+];
+
+function StrategyRow({ label, body, dot, Icon }: { label: string; body: string; dot: string; Icon: LucideIcon }) {
+  const [open, setOpen] = useState(false);
 
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider">
-          Recommended Strategy
-        </p>
-        <div className="flex-1 h-px bg-[#E2E2E2]" />
-      </div>
-
-      <div
-        className="rounded-lg border border-blue-200 bg-blue-50/40 px-4 py-3 space-y-2"
-        style={{ borderTopWidth: 3, borderTopColor: "#2563eb" }}
-      >
-        <div className="flex items-start gap-2">
-          <ArrowRight className="h-3.5 w-3.5 text-blue-600 shrink-0 mt-0.5" />
-          <p style={{ fontSize: 13, fontWeight: 600, color: "#0F172B", lineHeight: 1.5 }}>
-            {strategy.action}
+    <div style={{ position: "relative" }} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "6px 0", cursor: "default" }}>
+        <div style={{
+          width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 2,
+          display: "grid", placeItems: "center",
+          background: "var(--qc-icon-box-bg)",
+          border: "1px solid var(--qc-icon-box-border)",
+        }}>
+          <Icon style={{ width: 10, height: 10, color: dot }} />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <span style={{
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+            color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+            letterSpacing: ".1em", display: "block", marginBottom: 2,
+          }}>
+            {label}
+          </span>
+          <p style={{
+            margin: 0, fontSize: 12, fontWeight: 500,
+            color: "var(--qc-text-heading)", lineHeight: 1.4,
+            display: "-webkit-box", WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical", overflow: "hidden",
+          }}>
+            {body}
           </p>
         </div>
-
-        {rows.length > 0 && (
-          <div className="space-y-1.5">
-            {rows.map((r) => (
-              <div key={r.label} className="flex gap-1.5 min-w-0">
-                <span className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider shrink-0 w-[58px] mt-0.5 mr-2">
-                  {r.label}
-                </span>
-                <p style={{ fontSize: 12, color: "#121212", lineHeight: 1.5 }}>{r.value}</p>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+
+      {open && (
+        <div style={{
+          position: "absolute", left: 0, top: "100%", marginTop: 2,
+          zIndex: 50, width: 300, borderRadius: 12,
+          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-surface-card, var(--qc-surface-white))",
+          boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
+        }}>
+          <div style={{
+            padding: "8px 12px", borderBottom: "1px solid var(--qc-border-default)",
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <Icon style={{ width: 10, height: 10, color: dot, flexShrink: 0 }} />
+            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-heading)" }}>{label}</span>
+          </div>
+          <div style={{ padding: "10px 12px" }}>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>{body}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RecommendedStrategyCard({ strategy }: { strategy: IntelligenceRecommendedStrategy }) {
+  const rows = STRATEGY_CONFIG
+    .map((c) => ({ ...c, body: strategy[c.key] as string | null | undefined }))
+    .filter((r) => r.body);
+
+  return (
+    <div style={{
+      background: "var(--qc-surface-white)",
+      border: "1px solid var(--qc-border-default)",
+      borderRadius: 14,
+      padding: "14px 16px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 10,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{
+          padding: 5, borderRadius: 6,
+          border: "1px solid var(--qc-icon-box-border)",
+          background: "var(--qc-icon-box-bg)",
+          display: "grid", placeItems: "center", flexShrink: 0,
+        }}>
+          <Target style={{ width: 10, height: 10, color: "var(--qc-text-body)" }} />
+        </div>
+        <div style={{
+          fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+          letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+        }}>
+          Recommended Strategy
+        </div>
+      </div>
+
+      <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.4, letterSpacing: "-0.01em" }}>
+        {strategy.action}
+      </p>
+
+      {rows.length > 0 && (
+        <div style={{ borderTop: "1px solid var(--qc-border-default)", display: "flex", flexDirection: "column" }}>
+          {rows.map((r, i) => (
+            <div key={r.key} style={{ borderBottom: i < rows.length - 1 ? "1px solid var(--qc-border-default)" : "none" }}>
+              <StrategyRow label={r.label} body={r.body!} dot={r.dot} Icon={r.Icon} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Watchouts ────────────────────────────────────────────────────────────────
+
+function WatchoutsList({ items }: { items: string[] }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {items.map((point, i) => (
+        <div key={i} style={{
+          display: "flex", alignItems: "flex-start", gap: 8,
+          padding: "6px 0",
+          borderBottom: i < items.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+        }}>
+          <span style={{ fontSize: 12, color: "var(--qc-text-muted)", flexShrink: 0, lineHeight: 1.5, userSelect: "none" }}>–</span>
+          <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.5 }}>{point}</p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -166,122 +229,159 @@ interface Props {
 
 export function ManagementIntelligenceCard({ intelligence, mqiScore }: Props) {
   const { key_takeaways, signals_breakdown, recommended_strategy, watchouts } = intelligence;
-  const theme = labelTheme(mqiScore.label);
-  const scoreBarPct = (mqiScore.total / 100) * 100;
-  const barColor = tickColor(mqiScore.total, 100);
+  const theme = labelVars(mqiScore.label);
 
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2 h-full">
+    /* ── Outer section card ── */
+    <div style={{
+      background: "var(--qc-surface-row-alt)",
+      border: "1px solid var(--qc-border-default)",
+      borderRadius: 18,
+      padding: 8,
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+    }}>
+
       {/* Card header */}
-      <div className="flex items-center gap-2.5 pb-3 px-1 pt-1">
-        <div className="p-1.5 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-white">
-          <Brain className="h-4 w-4 text-zinc-600" />
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 6px 2px" }}>
+        <div style={{
+          padding: 6, borderRadius: 8, display: "grid", placeItems: "center",
+          border: "1px solid var(--qc-icon-box-border)",
+          background: "var(--qc-icon-box-bg)",
+        }}>
+          <Brain style={{ width: 14, height: 14, color: "var(--qc-text-body)" }} />
         </div>
-        <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", letterSpacing: "0.01em" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>
           Decision Intelligence
         </span>
       </div>
 
-      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] px-5 py-5 flex flex-col gap-5">
+      {/* ── 1. Score + Signal Breakdown — white bg + lime gradient overlay ── */}
+      <div style={{
+        background: "var(--qc-surface-white)",
+        border: "1px solid var(--qc-border-default)",
+        borderRadius: 14,
+        overflow: "hidden",
+        position: "relative",
+      }}>
+        {/* lime gradient overlay at bottom */}
+        <div style={{
+          position: "absolute", inset: "auto 0 0 0", height: "50%",
+          background: "linear-gradient(180deg, transparent 0%, var(--qc-accent-lime-bg, #E9F4C4) 100%)",
+          zIndex: 0, pointerEvents: "none",
+        }} />
 
-        {/* Score + status block */}
-        <div
-          className="rounded-[10px] border px-4 py-4 flex flex-col gap-3"
-          style={{ borderColor: theme.border, borderTopWidth: 3, backgroundColor: theme.bg }}
-        >
-          <div className="flex items-start justify-between gap-3">
+        <div style={{ position: "relative", zIndex: 1, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
+
+          {/* Score row */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
             <div>
-              <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-1">
-                Management Credibility Score
-              </p>
-              <div className="flex items-baseline gap-1">
-                <span style={{ fontSize: 40, fontWeight: 500, color: "#0F172B", lineHeight: 1 }}>
+              <div style={{
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+                letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const, marginBottom: 6,
+              }}>
+                Credibility Score
+              </div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
+                <span style={{
+                  fontSize: 44, fontWeight: 500, letterSpacing: "-0.03em",
+                  color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
+                }}>
                   {mqiScore.total}
                 </span>
-                <span style={{ fontSize: 20, fontWeight: 400, color: "rgba(18,18,18,0.40)" }}>
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 15,
+                  color: "var(--qc-text-muted)", fontWeight: 400,
+                }}>
                   /100
                 </span>
               </div>
             </div>
-            <span className={`inline-block rounded-full px-3 py-1 text-[12px] font-semibold text-white mt-1 ${theme.tagBg}`}>
+            <span style={{
+              display: "inline-block", borderRadius: 999,
+              padding: "4px 11px", fontSize: 11, fontWeight: 600,
+              background: theme.tagBg, color: theme.tagFg,
+              marginTop: 2,
+            }}>
               {mqiScore.label}
             </span>
           </div>
 
-          <div className="space-y-1">
-            <div className="h-2 w-full rounded-full bg-[#E2E2E2] overflow-hidden">
-              <div className="h-full rounded-full transition-all" style={{ width: `${scoreBarPct}%`, backgroundColor: barColor }} />
+          {/* Separator */}
+          <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+
+          {/* Signal Breakdown rows */}
+          <div>
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+              letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const, marginBottom: 8,
+            }}>
+              Signal Breakdown · hover for details
             </div>
-            <div className="flex justify-between">
-              <span className="text-[10px] text-[#888888]">Low</span>
-              <span className="text-[10px] text-[#888888]">Medium</span>
-              <span className="text-[10px] text-[#888888]">High</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {signals_breakdown.map((item) => (
+                <SignalRow key={item.key} item={item} />
+              ))}
             </div>
           </div>
 
+          {/* Key Takeaway inside lime card */}
           {key_takeaways.length > 0 && (
-            <div className={`rounded-lg border ${theme.insightBorder} ${theme.insightBg} px-4 py-3`}>
-              <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mb-1">
-                Key Takeaway
-              </p>
-              <p style={{ fontSize: 13, color: "#121212", lineHeight: 1.6 }}>{key_takeaways[0]}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Signal Breakdown */}
-        {signals_breakdown.length > 0 && (
-          <>
-            <div className="border-t border-[#E2E2E2]" />
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider">
-                  Signal Breakdown
+            <>
+              <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+                  letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+                }}>
+                  Key Takeaway
+                </div>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
+                  {key_takeaways[0]}
                 </p>
-                <p className="text-[10px] text-[#AAAAAA]">Hover for details</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                {signals_breakdown.map((item) => (
-                  <SignalBucket key={item.key} item={item} />
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Recommended Strategy */}
-        {recommended_strategy && (
-          <>
-            <div className="border-t border-[#E2E2E2]" />
-            <RecommendedStrategyCard strategy={recommended_strategy} />
-          </>
-        )}
-
-        {/* Watchouts */}
-        {watchouts.length > 0 && (
-          <>
-            <div className="border-t border-[#E2E2E2]" />
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Clock className="h-3 w-3 text-[#888888]" />
-                <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider">
-                  Watch Outs
-                </p>
-                <div className="flex-1 h-px bg-[#E2E2E2]" />
-              </div>
-              <div className="rounded-lg border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3 space-y-2">
-                {watchouts.map((point, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <span className="text-[10px] text-[#AAAAAA] shrink-0 mt-0.5">→</span>
-                    <p style={{ fontSize: 12, color: "#121212", lineHeight: 1.5 }}>{point}</p>
+                {key_takeaways.slice(1).map((t, i) => (
+                  <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                    <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--qc-border-default)", flexShrink: 0, marginTop: 7 }} />
+                    <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>{t}</p>
                   </div>
                 ))}
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
 
+        </div>
       </div>
+
+      {/* ── 2. Recommended Strategy ── */}
+      {recommended_strategy && (
+        <RecommendedStrategyCard strategy={recommended_strategy} />
+      )}
+
+      {/* ── 3. Watch Outs ── */}
+      {watchouts.length > 0 && (
+        <div style={{
+          background: "var(--qc-surface-white)",
+          border: "1px solid var(--qc-border-default)",
+          borderRadius: 14,
+          padding: "14px 16px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <AlertTriangle style={{ width: 11, height: 11, color: "var(--qc-text-muted)" }} />
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+              letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+            }}>
+              Watch Outs
+            </div>
+          </div>
+          <WatchoutsList items={watchouts} />
+        </div>
+      )}
+
     </div>
   );
 }

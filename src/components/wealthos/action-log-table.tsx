@@ -16,7 +16,9 @@ interface ActionLogTableProps {
 export function ActionLogTable({ actions }: ActionLogTableProps) {
   if (!actions?.length) {
     return (
-      <p className="text-sm text-zinc-400 dark:text-zinc-500 py-6 text-center">No actions logged</p>
+      <p className="py-6 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
+        No actions logged
+      </p>
     );
   }
 
@@ -24,19 +26,27 @@ export function ActionLogTable({ actions }: ActionLogTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Type</TableHead>
-          <TableHead>Content</TableHead>
-          <TableHead>Outcome</TableHead>
-          <TableHead>Date</TableHead>
+          <TableHead style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Type</TableHead>
+          <TableHead style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Content</TableHead>
+          <TableHead style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Outcome</TableHead>
+          <TableHead style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Date</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {actions.map((action) => (
           <TableRow key={action.id}>
-            <TableCell className="font-medium capitalize">{action.action_type}</TableCell>
-            <TableCell className="max-w-xs truncate text-zinc-500 dark:text-zinc-400">{action.content || "—"}</TableCell>
-            <TableCell className="text-zinc-500 dark:text-zinc-400">{action.outcome || "—"}</TableCell>
-            <TableCell className="text-zinc-400 dark:text-zinc-500 whitespace-nowrap">{formatDate(action.created_at)}</TableCell>
+            <TableCell className="capitalize" style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>
+              {action.action_type}
+            </TableCell>
+            <TableCell className="max-w-xs truncate" style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>
+              {action.content || "—"}
+            </TableCell>
+            <TableCell style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>
+              {action.outcome || "—"}
+            </TableCell>
+            <TableCell className="whitespace-nowrap" style={{ fontSize: 11, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)" }}>
+              {formatDate(action.created_at)}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

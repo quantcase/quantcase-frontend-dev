@@ -21,7 +21,7 @@ export interface PeerRow {
   roce: number | null;
 }
 
-export interface ScreenerPeersResponse {
+interface ScreenerPeersResponse {
   symbol: string;
   basicIndustry: string;
   industryGroup: string;

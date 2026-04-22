@@ -6,21 +6,53 @@ export function GrowthStatCard({
   rows: { label: string; value: number | null | undefined }[];
 }) {
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-5">
-      <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", marginBottom: 16 }}>{title}</div>
-      <div className="space-y-0">
+    <div
+      style={{
+        borderRadius: 14,
+        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-surface-white)",
+        padding: "14px 16px",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 10,
+          fontWeight: 500,
+          color: "var(--qc-text-muted)",
+          textTransform: "uppercase",
+          letterSpacing: "0.12em",
+          marginBottom: 14,
+        }}
+      >
+        {title}
+      </div>
+      <div>
         {rows.map(({ label, value }, i) => (
           <div
             key={label}
-            className="flex items-center justify-between py-2"
-            style={{ borderTop: i > 0 ? "1px solid #F5F5F5" : undefined }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "8px 0",
+              borderTop: i > 0 ? "1px solid var(--qc-border-inner)" : undefined,
+            }}
           >
-            <span style={{ fontSize: 13, color: "#888888" }}>{label}</span>
+            <span style={{ fontSize: 12, color: "var(--qc-text-body)" }}>{label}</span>
             <span
-              style={{ fontSize: 13, fontWeight: 600 }}
-              className={value === null || value === undefined ? "text-zinc-400" : "text-[#0F172B]"}
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                fontFamily: "'IBM Plex Mono', monospace",
+                letterSpacing: "0.02em",
+                color:
+                  value === null || value === undefined
+                    ? "var(--qc-text-muted)"
+                    : "var(--qc-text-heading)",
+              }}
             >
-              {value === null || value === undefined ? "%" : `${parseFloat(value.toFixed(1))}%`}
+              {value === null || value === undefined ? "—" : `${parseFloat(value.toFixed(1))}%`}
             </span>
           </div>
         ))}

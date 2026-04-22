@@ -5,23 +5,24 @@ interface RedFlagsSectionProps {
   flags: RedFlag[];
 }
 
-function severityStyle(severity: RedFlagSeverity): { borderColor: string; titleColor: string; bulletColor: string; badgeBg: string; badgeText: string } {
+function severityStyle(severity: RedFlagSeverity): { borderColor: string; titleColor: string; bulletColor: string; badgeBg: string; badgeText: string; badgeBorder: string } {
   if (severity === "caution") {
     return {
-      borderColor: "#d97706",   // amber-600
-      titleColor: "#b45309",    // amber-700
-      bulletColor: "#d97706",
-      badgeBg: "#fffbeb",
-      badgeText: "#b45309",
+      borderColor: "var(--qc-warn)",
+      titleColor: "var(--qc-warn)",
+      bulletColor: "var(--qc-warn)",
+      badgeBg: "var(--qc-warn-soft)",
+      badgeText: "var(--qc-warn)",
+      badgeBorder: "var(--qc-warn)",
     };
   }
-  // watch
   return {
-    borderColor: "#71717a",     // zinc-500
-    titleColor: "#52525b",      // zinc-600
-    bulletColor: "#71717a",
-    badgeBg: "#f4f4f5",
-    badgeText: "#52525b",
+    borderColor: "var(--qc-text-muted)",
+    titleColor: "var(--qc-text-body)",
+    bulletColor: "var(--qc-text-muted)",
+    badgeBg: "var(--qc-surface-panel)",
+    badgeText: "var(--qc-text-body)",
+    badgeBorder: "var(--qc-border-default)",
   };
 }
 
@@ -36,9 +37,9 @@ export function RedFlagsSection({ flags }: RedFlagsSectionProps) {
           style={{
             fontSize: 11,
             fontWeight: 600,
-            color: "#b45309",
-            background: "#fffbeb",
-            border: "1px solid #fde68a",
+            color: "var(--qc-warn)",
+            background: "var(--qc-warn-soft)",
+            border: "1px solid var(--qc-warn)",
             borderRadius: 4,
             padding: "3px 10px",
             textTransform: "uppercase",
@@ -53,9 +54,9 @@ export function RedFlagsSection({ flags }: RedFlagsSectionProps) {
           style={{
             fontSize: 11,
             fontWeight: 600,
-            color: "#52525b",
-            background: "#f4f4f5",
-            border: "1px solid #e4e4e7",
+            color: "var(--qc-text-body)",
+            background: "var(--qc-surface-panel)",
+            border: "1px solid var(--qc-border-default)",
             borderRadius: 4,
             padding: "3px 10px",
             textTransform: "uppercase",
@@ -70,45 +71,35 @@ export function RedFlagsSection({ flags }: RedFlagsSectionProps) {
 
   return (
     <SectionPanel title="Red Flags" headerAction={headerAction} contentClassName="!p-0 overflow-hidden">
-      <div className="divide-y divide-zinc-100 overflow-y-auto" style={{ maxHeight: 400 }}>
+      <div className="overflow-y-auto" style={{ maxHeight: 400, borderTop: "1px solid var(--qc-border-inner)" }}>
         {flags.map((flag, i) => {
           const style = severityStyle(flag.severity);
           return (
             <div
               key={i}
               className="flex gap-0"
-              style={{ borderLeft: `3px solid ${style.borderColor}` }}
+              style={{
+                borderLeft: `3px solid ${style.borderColor}`,
+                borderBottom: i < flags.length - 1 ? "1px solid var(--qc-border-inner)" : "none",
+              }}
             >
-              {/* Left: title */}
-              <div
-                className="flex items-start gap-2 py-5 px-4 shrink-0"
-                style={{ width: "30%" }}
-              >
+              <div className="flex items-start gap-2 py-5 px-4 shrink-0" style={{ width: "30%" }}>
                 <span style={{ color: style.bulletColor, fontSize: 14, lineHeight: 1.4, flexShrink: 0 }}>■</span>
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: style.titleColor,
-                    lineHeight: 1.45,
-                  }}
-                >
+                <span style={{ fontSize: 13, fontWeight: 600, color: style.titleColor, lineHeight: 1.45 }}>
                   {flag.title}
                 </span>
               </div>
 
-              {/* Divider */}
-              <div style={{ width: 1, background: "#E2E2E2", margin: "12px 0", flexShrink: 0 }} />
+              <div style={{ width: 1, background: "var(--qc-border-default)", margin: "12px 0", flexShrink: 0 }} />
 
-              {/* Right: evidence + implication */}
               <div className="flex-1 py-5 px-5">
-                <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.65 }}>
-                  <span style={{ color: "#555555", fontWeight: 500 }}>Evidence: </span>
+                <p style={{ fontSize: 13, color: "var(--qc-text-muted)", lineHeight: 1.65 }}>
+                  <span style={{ color: "var(--qc-text-body)", fontWeight: 500 }}>Evidence: </span>
                   {flag.evidence}
                 </p>
                 {flag.implication && (
-                  <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.65, marginTop: 6 }}>
-                    <span style={{ color: "#555555", fontWeight: 500 }}>Implication: </span>
+                  <p style={{ fontSize: 13, color: "var(--qc-text-muted)", lineHeight: 1.65, marginTop: 6 }}>
+                    <span style={{ color: "var(--qc-text-body)", fontWeight: 500 }}>Implication: </span>
                     {flag.implication}
                   </p>
                 )}

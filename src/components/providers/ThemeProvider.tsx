@@ -9,7 +9,7 @@ interface ThemeContextValue {
   setTheme: (t: ThemeId) => void;
 }
 
-export const ThemeContext = createContext<ThemeContextValue>({
+const ThemeContext = createContext<ThemeContextValue>({
   theme: DEFAULT_THEME,
   setTheme: () => {},
 });

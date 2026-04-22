@@ -17,14 +17,14 @@ interface FinancialStrengthCardProps {
 export function FinancialStrengthCard({ data, showDetails = true, onToggle }: FinancialStrengthCardProps) {
   const m = data?.metrics;
   const financialMetrics = [
-    { ...safeMetric(m?.revenue), icon: TrendingUp, iconColor: "text-blue-500" },
-    { ...safeMetric(m?.gross_margin), icon: BarChart2, iconColor: "text-emerald-500" },
-    { ...safeMetric(m?.ebitda_margin), icon: PieChart, iconColor: "text-purple-500" },
-    { ...safeMetric(m?.pat), icon: DollarSign, iconColor: "text-indigo-500" },
-    { ...safeMetric(m?.free_cash_flow), icon: Wallet, iconColor: "text-teal-500" },
-    { ...safeMetric(m?.interest_coverage), icon: Shield, iconColor: "text-orange-500" },
-    { ...safeMetric(m?.roce), icon: Target, iconColor: "text-rose-500" },
-    { ...safeMetric(m?.roe), icon: Activity, iconColor: "text-zinc-500" },
+    { ...safeMetric(m?.revenue), icon: TrendingUp },
+    { ...safeMetric(m?.gross_margin), icon: BarChart2 },
+    { ...safeMetric(m?.ebitda_margin), icon: PieChart },
+    { ...safeMetric(m?.pat), icon: DollarSign },
+    { ...safeMetric(m?.free_cash_flow), icon: Wallet },
+    { ...safeMetric(m?.interest_coverage), icon: Shield },
+    { ...safeMetric(m?.roce), icon: Target },
+    { ...safeMetric(m?.roe), icon: Activity },
   ];
 
   return (

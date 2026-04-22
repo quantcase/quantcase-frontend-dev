@@ -15,33 +15,48 @@ interface SmartClientSegmentsProps {
 
 export function SmartClientSegments({ segments, className }: SmartClientSegmentsProps) {
   return (
-    <div className={cn("rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2 flex flex-col", className)}>
+    <div
+      className={cn("rounded-[10px] p-2 flex flex-col", className)}
+      style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+    >
       {/* Panel header */}
       <div className="px-2 pt-1 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Users2 className="size-3.5 text-[#888888]" />
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.01em" }}>
+          <Users2 className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
             Smart Client Segments
           </span>
         </div>
       </div>
 
       {/* Inner white box */}
-      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] flex flex-col divide-y divide-[#E2E2E2] overflow-hidden">
+      <div
+        className="rounded-[10px] flex flex-col divide-y overflow-hidden"
+        style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-inner)" }}
+      >
         {segments.map((seg) => {
           const countColor =
-            seg.urgency === "alert" ? "#dc2626" :
-            seg.urgency === "warning" ? "#d97706" :
-            "#0F172B";
+            seg.urgency === "alert" ? "var(--qc-down)" :
+            seg.urgency === "warning" ? "var(--qc-warn)" :
+            "var(--qc-text-heading)";
+          const countBg =
+            seg.urgency === "alert" ? "var(--qc-down-soft)" :
+            seg.urgency === "warning" ? "var(--qc-warn-soft)" :
+            "transparent";
           return (
             <div
               key={seg.id}
-              className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-[#F5F5F5] transition-colors"
+              className="flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors hover:bg-[var(--qc-surface-hover)]"
+              style={{ borderTopColor: "var(--qc-border-inner)" }}
             >
-              <p className="text-[13px]" style={{ color: "#0F172B" }}>{seg.label}</p>
+              <p className="text-[13px]" style={{ color: "var(--qc-text-heading)" }}>{seg.label}</p>
               <span
-                className="text-[13px] font-semibold tabular-nums"
-                style={{ color: countColor }}
+                className="text-[13px] font-semibold tabular-nums rounded-sm px-2 py-0.5"
+                style={{
+                  color: countColor,
+                  background: countBg,
+                  fontFamily: "var(--font-ibm-plex-mono, monospace)",
+                }}
               >
                 {seg.count}
               </span>

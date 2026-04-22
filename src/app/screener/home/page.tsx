@@ -18,24 +18,26 @@ function BasketRow({ basket }: { basket: Basket }) {
   return (
     <Link
       href={`/screener/basket?id=${encodeURIComponent(basket.id)}`}
-      className="group flex items-start justify-between gap-3 px-4 py-3 transition-colors hover:bg-[#F5F5F5]"
+      className="group flex items-start justify-between gap-3 px-4 py-3 transition-colors"
+      onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+      onMouseLeave={e => (e.currentTarget.style.background = "")}
     >
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-medium leading-snug truncate" style={{ color: "#0F172B" }}>
+        <p className="text-[13px] font-medium leading-snug truncate" style={{ color: "var(--qc-text-heading)" }}>
           {basket.title}
         </p>
-        <p className="text-[11px] mt-0.5 line-clamp-1 leading-relaxed" style={{ color: "#888888" }}>
+        <p className="text-[11px] mt-0.5 line-clamp-1 leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>
           {basket.description}
         </p>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
         <span
           className="text-[10px] font-medium rounded-sm px-1.5 py-0.5 tabular-nums"
-          style={{ background: "#F5F5F5", color: "#90A1B9" }}
+          style={{ background: "var(--qc-accent-lime-bg)", color: "var(--qc-text-heading)" }}
         >
           {basket.conditions.length}
         </span>
-        <ArrowRight className="size-3 opacity-0 group-hover:opacity-40 transition-opacity" style={{ color: "#0F172B" }} />
+        <ArrowRight className="size-3 opacity-0 group-hover:opacity-40 transition-opacity" style={{ color: "var(--qc-text-heading)" }} />
       </div>
     </Link>
   );
@@ -70,21 +72,32 @@ export default function ScreenerHomePage() {
   const { data: basketsData, loading: basketsLoading, error: basketsError } = useBaskets();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ background: "var(--qc-surface-base)" }}>
       {/* Hero search section */}
-      <div className="bg-white">
-        <div className="max-w-3xl mx-auto px-6 pt-16 pb-14 flex flex-col items-center gap-6">
+      <div className="relative" style={{ background: "var(--qc-surface-base)" }}>
+        {/* Lime radial bloom behind headline — clipped separately so dropdown can escape */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-64 overflow-hidden"
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-accent-lime-bg) 0%, transparent 70%)",
+            }}
+          />
+        </div>
+        <div className="relative max-w-3xl mx-auto px-6 pt-16 pb-14 flex flex-col items-center gap-6">
           <div className="text-center space-y-2">
-            <h2 className="text-[32px] font-medium leading-tight" style={{ color: "#0F172B" }}>
+            <h2 className="text-[32px] font-medium leading-tight" style={{ color: "var(--qc-text-heading)" }}>
               What would you like to research today?
             </h2>
-            <p className="text-sm" style={{ color: "#888888" }}>
+            <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>
               Search a company to open its screener, or pick a research basket below.
             </p>
           </div>
 
           {/* Asset class tab selector */}
-          <div className="flex items-center gap-1 rounded-full border border-[#E2E2E2] bg-[#F5F5F5] p-1">
+          <div className="flex items-center gap-1 rounded-full border p-1" style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
             {ASSET_TABS.map((tab) => (
               <button
                 key={tab}
@@ -92,8 +105,8 @@ export default function ScreenerHomePage() {
                 className="px-4 py-1.5 rounded-full text-xs font-medium transition-all"
                 style={
                   activeTab === tab
-                    ? { background: "#0F172B", color: "#FFFFFF" }
-                    : { color: "#888888" }
+                    ? { background: "var(--qc-accent-lime)", color: "var(--qc-text-heading)" }
+                    : { color: "var(--qc-text-muted)" }
                 }
               >
                 {tab}
@@ -133,20 +146,21 @@ export default function ScreenerHomePage() {
                   onClick={() => {
                     if (!item.comingSoon) router.push("/private-equity/pre-ipo");
                   }}
-                  className="group relative flex flex-col items-start gap-3 rounded-[10px] border border-[#E2E2E2] bg-white px-5 py-5 text-left transition-all hover:border-[#0F172B] hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group relative flex flex-col items-start gap-3 rounded-[10px] border px-5 py-5 text-left transition-all hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+                  style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
                 >
                   {item.comingSoon && (
-                    <span className="absolute top-3 right-3 text-[9px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5" style={{ background: "#F5F5F5", color: "#90A1B9" }}>
+                    <span className="absolute top-3 right-3 text-[9px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>
                       Soon
                     </span>
                   )}
                   <span className="text-2xl">{item.icon}</span>
                   <div>
-                    <p className="text-[14px] font-semibold" style={{ color: "#0F172B" }}>{item.label}</p>
-                    <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "#888888" }}>{item.description}</p>
+                    <p className="text-[14px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{item.label}</p>
+                    <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>{item.description}</p>
                   </div>
                   {!item.comingSoon && (
-                    <ArrowRight className="size-4 mt-auto self-end opacity-0 group-hover:opacity-60 transition-opacity" style={{ color: "#0F172B" }} />
+                    <ArrowRight className="size-4 mt-auto self-end opacity-0 group-hover:opacity-60 transition-opacity" style={{ color: "var(--qc-text-heading)" }} />
                   )}
                 </button>
               ))}
@@ -166,28 +180,28 @@ export default function ScreenerHomePage() {
         </div>
       </div>
 
-      {/* Research Baskets — white bg, section divider style matching home page */}
+      {/* Research Baskets */}
       <div className={activeTab === "Private Equity" ? "hidden" : ""}>
-        {/* Section divider — exact same pattern as SectionDivider on home page */}
+        {/* Section divider */}
         <div className="flex items-center gap-4 px-6 py-5">
-          <div className="flex-1 h-px bg-[#E2E2E2]" />
+          <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />
           <div className="flex flex-col items-center gap-0.5 px-1">
             <span
               style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: "#0F172B",
+                color: "var(--qc-text-heading)",
                 textTransform: "uppercase",
                 letterSpacing: "0.12em",
               }}
             >
               Research Baskets
             </span>
-            <span style={{ fontSize: 10, color: "#888888", letterSpacing: "0.02em" }}>
+            <span style={{ fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: "0.02em" }}>
               Pre-built screening strategies
             </span>
           </div>
-          <div className="flex-1 h-px bg-[#E2E2E2]" />
+          <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />
         </div>
 
         <div className="max-w-[1400px] mx-auto px-6 pb-12">
@@ -203,8 +217,8 @@ export default function ScreenerHomePage() {
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-[10px] border border-[#E2E2E2] h-[320px] animate-pulse"
-                  style={{ background: "#F5F5F5" }}
+                  className="rounded-[10px] border h-[320px] animate-pulse"
+                  style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
                 />
               ))}
             </div>
@@ -218,28 +232,36 @@ export default function ScreenerHomePage() {
               {Object.entries(basketsData.grouped).map(([category, baskets]) => (
                 <div
                   key={category}
-                  className="rounded-[10px] border border-[#E2E2E2] overflow-hidden"
-                  style={{ background: "#FFFFFF" }}
+                  className="relative rounded-[10px] border overflow-hidden"
+                  style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
                 >
                   {/* Column header */}
-                  <div className="px-4 py-4 border-b border-[#E2E2E2]" style={{ background: "#F5F5F5" }}>
+                  <div className="px-4 py-4 border-b" style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
                     <p
                       className="text-[10px] font-bold uppercase tracking-[0.10em] leading-tight"
-                      style={{ color: "#0F172B" }}
+                      style={{ color: "var(--qc-text-heading)" }}
                     >
                       {category}
                     </p>
-                    <p className="text-[11px] mt-1" style={{ color: "#888888" }}>
+                    <p className="text-[11px] mt-1" style={{ color: "var(--qc-text-muted)" }}>
                       {baskets.length} basket{baskets.length !== 1 ? "s" : ""}
                     </p>
                   </div>
 
                   {/* Basket rows with dividers */}
-                  <div className="divide-y divide-[#E2E2E2]">
+                  <div className="divide-y divide-[#EFEDE7]">
                     {baskets.map((basket) => (
                       <BasketRow key={basket.id} basket={basket} />
                     ))}
                   </div>
+
+                  {/* Lime gradient fade at bottom */}
+                  <div
+                    className="pointer-events-none absolute bottom-0 left-0 right-0 h-10"
+                    style={{
+                      background: "linear-gradient(180deg, transparent 0%, rgba(233,244,196,0.6) 100%)",
+                    }}
+                  />
                 </div>
               ))}
             </div>

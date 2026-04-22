@@ -39,7 +39,7 @@ export function SuggestionsPanel({ clientId, rmId }: SuggestionsPanelProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+        <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>
           {suggestions.length} suggestion{suggestions.length !== 1 ? "s" : ""}
         </span>
         <Button size="sm" variant="outline" onClick={handleGenerate} disabled={isPolling}>
@@ -50,15 +50,25 @@ export function SuggestionsPanel({ clientId, rmId }: SuggestionsPanelProps) {
       {isPolling && (
         <div className="space-y-1">
           <Progress value={progress} className="h-1.5" />
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">AI is generating suggestions... {progress}%</p>
+          <p style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
+            AI is generating suggestions... {progress}%
+          </p>
         </div>
       )}
 
-      {loading && <p className="text-sm text-zinc-400 dark:text-zinc-500 py-4 text-center">Loading suggestions...</p>}
-      {error && <p className="text-sm text-red-500 py-4 text-center">{error}</p>}
+      {loading && (
+        <p className="py-4 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
+          Loading suggestions...
+        </p>
+      )}
+      {error && (
+        <p className="py-4 text-center" style={{ fontSize: 13, color: "var(--qc-down)" }}>
+          {error}
+        </p>
+      )}
 
       {!loading && suggestions.length === 0 && !isPolling && (
-        <p className="text-sm text-zinc-400 dark:text-zinc-500 py-6 text-center">
+        <p className="py-6 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
           No suggestions yet. Click &ldquo;Generate Suggestions&rdquo; to create AI-powered recommendations.
         </p>
       )}

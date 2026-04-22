@@ -1,318 +1,166 @@
 "use client";
 
-import React, { useState } from "react";
+import { SectionShell, SectionLabel, NarrativeSidebar, MonoEyebrow } from "./primitives";
 
-// ─── Hardcoded data ────────────────────────────────────────────────────────────
+// ─── Types ─────────────────────────────────────────────────────────────────
 
-type Sentiment = "Bearish" | "Bullish" | "Neutral";
+type Sent = "bear" | "neu" | "bull";
 
 interface SignalRow {
+  sent: Sent;
   label: string;
   value: string;
-  sentiment: "bearish" | "bullish" | "neutral";
 }
 
-interface FrameworkBlock {
-  title: string;
-  timeframe: string;
-  signalCount: number;
-  verdict: Sentiment;
+interface FrameworkTile {
+  name: string;
+  shortName: string;
+  tf: string;
+  verdict: Sent;
   signals: SignalRow[];
+  signalCount: number;
+  footNote: string;
 }
 
-const FRAMEWORK_BLOCKS: FrameworkBlock[] = [
+// ─── Static data ──────────────────────────────────────────────────────────────
+
+const TILES: FrameworkTile[] = [
   {
-    title: "Price structure",
-    timeframe: "Weekly + Daily",
-    signalCount: 6,
-    verdict: "Bearish",
+    name: "Price structure", shortName: "Price structure", tf: "Weekly · Daily", verdict: "bear", signalCount: 6, footNote: "Base forming",
     signals: [
-      { label: "Trend direction",   value: "Downtrend",     sentiment: "bearish" },
-      { label: "Higher highs / lows", value: "No",          sentiment: "bearish" },
-      { label: "Key level breach",  value: "Yes",           sentiment: "bearish" },
-      { label: "Price vs SMA 200",  value: "Below",         sentiment: "bearish" },
-      { label: "Pattern",           value: "Base forming",  sentiment: "neutral" },
-      { label: "Volume trend",      value: "Declining",     sentiment: "bearish" },
+      { sent: "bear", label: "Trend direction",   value: "Downtrend" },
+      { sent: "bear", label: "Price vs SMA 200",  value: "Below" },
+      { sent: "bear", label: "Key level breach",  value: "Yes" },
+      { sent: "bear", label: "Volume trend",      value: "Declining" },
     ],
   },
   {
-    title: "Technical momentum",
-    timeframe: "Daily",
-    signalCount: 4,
-    verdict: "Bearish",
+    name: "Technical momentum", shortName: "Technical mom.", tf: "Daily", verdict: "bear", signalCount: 4, footNote: "Momentum weak",
     signals: [
-      { label: "RSI (14)",    value: "38 — Weak",      sentiment: "bearish" },
-      { label: "MACD",        value: "Negative",       sentiment: "bearish" },
-      { label: "Stochastic",  value: "42 — Neutral",   sentiment: "neutral" },
-      { label: "ADX",         value: "28 — Trending",  sentiment: "bullish" },
+      { sent: "bear", label: "RSI (14)",   value: "38 · Weak" },
+      { sent: "bear", label: "MACD",       value: "Negative" },
+      { sent: "neu",  label: "Stochastic", value: "42 · Neutral" },
+      { sent: "bear", label: "ADX",        value: "28 · Trending" },
     ],
   },
   {
-    title: "Market breadth",
-    timeframe: "Weekly",
-    signalCount: 5,
-    verdict: "Bearish",
+    name: "Market breadth", shortName: "Market breadth", tf: "Weekly", verdict: "bear", signalCount: 5, footNote: "Narrow leadership",
     signals: [
-      { label: "Advance / Decline",    value: "Declining",  sentiment: "bearish" },
-      { label: "% above SMA 200",      value: "38%",        sentiment: "bearish" },
-      { label: "New 52W highs",        value: "Low",        sentiment: "bearish" },
-      { label: "Sector rotation",      value: "Defensive",  sentiment: "neutral" },
-      { label: "Mid / Small cap ratio",value: "Weak",       sentiment: "bearish" },
+      { sent: "bear", label: "Advance / Decline", value: "Declining" },
+      { sent: "bear", label: "% above SMA 200",   value: "38%" },
+      { sent: "bear", label: "New 52W highs",      value: "Low" },
+      { sent: "bear", label: "Sector rotation",    value: "Defensive" },
     ],
   },
   {
-    title: "Capital flows",
-    timeframe: "Weekly",
-    signalCount: 2,
-    verdict: "Neutral",
+    name: "Capital flows", shortName: "Capital flows", tf: "Weekly", verdict: "neu", signalCount: 2, footNote: "Domestic absorbing",
     signals: [
-      { label: "FII flows (4W)", value: "−₹2,400 Cr", sentiment: "bearish" },
-      { label: "DII flows (4W)", value: "+₹5,100 Cr", sentiment: "bullish" },
+      { sent: "bear", label: "FII flows (4W)", value: "−₹2,400 Cr" },
+      { sent: "bull", label: "DII flows (4W)", value: "+₹5,100 Cr" },
     ],
   },
   {
-    title: "Macro & policy",
-    timeframe: "Monthly",
-    signalCount: 4,
-    verdict: "Neutral",
+    name: "Macro & policy", shortName: "Macro & policy", tf: "Monthly", verdict: "neu", signalCount: 4, footNote: "Supportive backdrop",
     signals: [
-      { label: "RBI stance",    value: "Neutral",           sentiment: "neutral" },
-      { label: "GDP growth",    value: "6.8% — Strong",     sentiment: "bullish" },
-      { label: "Inflation (CPI)", value: "4.6%",            sentiment: "neutral" },
-      { label: "Capex cycle",   value: "Expanding",         sentiment: "bullish" },
+      { sent: "neu",  label: "RBI stance",      value: "Neutral" },
+      { sent: "bull", label: "GDP growth",       value: "6.8% · Strong" },
+      { sent: "neu",  label: "Inflation (CPI)",  value: "4.6%" },
+      { sent: "bull", label: "Capex cycle",      value: "Expanding" },
     ],
   },
   {
-    title: "Valuation & earnings",
-    timeframe: "Monthly",
-    signalCount: 3,
-    verdict: "Bearish",
+    name: "Valuation & earnings", shortName: "Valuation", tf: "Monthly", verdict: "bear", signalCount: 3, footNote: "Premium unjustified",
     signals: [
-      { label: "Nifty P/E",          value: "21x — Premium",   sentiment: "bearish" },
-      { label: "Earnings revision",  value: "Downgrade",       sentiment: "bearish" },
-      { label: "Earnings growth",    value: "12% — Moderate",  sentiment: "neutral" },
+      { sent: "bear", label: "Nifty P/E",         value: "21x · Premium" },
+      { sent: "bear", label: "Earnings revision",  value: "Downgrade" },
+      { sent: "neu",  label: "Earnings growth",    value: "12% · Moderate" },
     ],
   },
 ];
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
+// ─── Derived tallies ──────────────────────────────────────────────────────────
 
-function verdictStyle(v: Sentiment): { bg: string; text: string; border: string } {
-  if (v === "Bearish") return { bg: "#FEF2F2", text: "#DC2626", border: "#FECACA" };
-  if (v === "Bullish") return { bg: "#F0FDF4", text: "#16A34A", border: "#BBF7D0" };
-  return { bg: "#FFFBEB", text: "#D97706", border: "#FDE68A" };
+const TALLY = TILES.reduce(
+  (acc, t) => {
+    t.signals.forEach((s) => {
+      if (s.sent === "bear") acc.bear++;
+      else if (s.sent === "bull") acc.bull++;
+      else acc.neu++;
+    });
+    return acc;
+  },
+  { bear: 0, neu: 0, bull: 0 }
+);
+const TALLY_TOTAL = TALLY.bear + TALLY.neu + TALLY.bull;
+
+const FW = TILES.reduce(
+  (acc, t) => {
+    if (t.verdict === "bear") acc.bear++;
+    else if (t.verdict === "bull") acc.bull++;
+    else acc.neu++;
+    return acc;
+  },
+  { bear: 0, neu: 0, bull: 0 }
+);
+
+const SENTIMENT_SCORE = Math.round((FW.bull / TILES.length) * 100);
+const needleAngle = -90 + (SENTIMENT_SCORE / 100) * 180;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function sentColor(s: Sent) {
+  if (s === "bear") return "var(--qc-down, #B23A2F)";
+  if (s === "bull") return "var(--qc-up, #1F7A4A)";
+  return "var(--qc-warn, #B4731A)";
 }
 
-function signalValueColor(s: SignalRow["sentiment"]): string {
-  if (s === "bearish") return "#DC2626";
-  if (s === "bullish") return "#16A34A";
-  return "#D97706";
+function fwSubLabel(sent: Sent): string {
+  const names = TILES.filter(t => t.verdict === sent).map(t => t.name.split(" ")[0]);
+  if (sent === "bull" && names.length === 0) return "No framework bullish";
+  return names.join(" · ") || "—";
 }
 
-function frameworkSummary(): { bear: number; neutral: number; bull: number; overall: string } {
-  const counts = FRAMEWORK_BLOCKS.reduce(
-    (acc, b) => {
-      if (b.verdict === "Bearish") acc.bear++;
-      else if (b.verdict === "Bullish") acc.bull++;
-      else acc.neutral++;
-      return acc;
-    },
-    { bear: 0, neutral: 0, bull: 0 }
-  );
-  const overall = counts.bear >= 4 ? "Risk-Off" : counts.bull >= 4 ? "Risk-On" : "Mixed";
-  return { ...counts, overall };
-}
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
-// ─── Sub-components ────────────────────────────────────────────────────────────
-
-function VerdictBadge({ verdict }: { verdict: Sentiment }) {
-  const s = verdictStyle(verdict);
+function MvTile({ tile }: { tile: FrameworkTile }) {
   return (
-    <span
+    <div
       style={{
-        fontSize: 11,
-        fontWeight: 600,
-        padding: "2px 8px",
-        borderRadius: 4,
-        border: `1px solid ${s.border}`,
-        background: s.bg,
-        color: s.text,
-        whiteSpace: "nowrap",
+        background: "var(--qc-surface-white)",
+        border: "1px solid var(--qc-border-default)",
+        borderRadius: 12,
+        padding: "12px 14px",
       }}
     >
-      {verdict}
-    </span>
-  );
-}
-
-function FrameworkBlockCard({ block, style }: { block: FrameworkBlock; style?: React.CSSProperties }) {
-  return (
-    <div style={{ padding: 16, ...style }}>
-      <div className="flex items-start justify-between gap-2 mb-3">
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
         <div>
-          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>{block.title}</p>
-          <p style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 2 }}>
-            {block.timeframe} · {block.signalCount} signals
-          </p>
+          <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-text-heading)", marginBottom: 2 }}>{tile.name}</div>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".08em", color: "var(--qc-text-muted)", textTransform: "uppercase" }}>{tile.tf}</div>
         </div>
-        <VerdictBadge verdict={block.verdict} />
+        <span
+          style={{
+            fontSize: 10.5, fontWeight: 600, letterSpacing: ".04em", textTransform: "uppercase",
+            color: sentColor(tile.verdict),
+            background: tile.verdict === "bear" ? "var(--qc-down-soft, #FDECEA)" : tile.verdict === "bull" ? "var(--qc-up-soft, #EAF4EE)" : "var(--qc-warn-soft, #FEF3E2)",
+            padding: "3px 8px", borderRadius: 999,
+          }}
+        >
+          {tile.verdict === "bear" ? "Bearish" : tile.verdict === "bull" ? "Bullish" : "Neutral"}
+        </span>
       </div>
-      <div className="space-y-1.5">
-        {block.signals.map((sig) => (
-          <div key={sig.label} className="flex items-center justify-between">
-            <span style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>{sig.label}</span>
-            <span style={{ fontSize: 13, fontWeight: 500, color: signalValueColor(sig.sentiment) }}>
-              {sig.value}
-            </span>
+      <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 10 }}>
+        {tile.signals.map((sig) => (
+          <div key={sig.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: sentColor(sig.sent), flexShrink: 0 }} />
+            <span style={{ flex: 1, fontSize: 11.5, color: "var(--qc-text-body)" }}>{sig.label}</span>
+            <span style={{ fontSize: 11.5, fontWeight: 500, color: sentColor(sig.sent) }}>{sig.value}</span>
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function SummaryView() {
-  return (
-    <div
-      style={{
-        borderRadius: 10,
-        border: "1px solid var(--qc-border-inner)",
-        background: "var(--qc-surface-white)",
-        padding: 16,
-      }}
-    >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          border: "1px solid var(--qc-border-default)",
-          borderRadius: 8,
-          overflow: "hidden",
-        }}
-      >
-        {FRAMEWORK_BLOCKS.map((block, idx) => {
-          const col = idx % 3;
-          const row = Math.floor(idx / 3);
-          const totalRows = Math.ceil(FRAMEWORK_BLOCKS.length / 3);
-          return (
-            <FrameworkBlockCard
-              key={block.title}
-              block={block}
-              style={{
-                borderRight: col < 2 ? "1px solid var(--qc-border-default)" : undefined,
-                borderBottom: row < totalRows - 1 ? "1px solid var(--qc-border-default)" : undefined,
-              }}
-            />
-          );
-        })}
+      <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--qc-border-inner)", paddingTop: 8 }}>
+        <span style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>{tile.signalCount} signals</span>
+        <b style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-text-body)" }}>{tile.footNote}</b>
       </div>
-    </div>
-  );
-}
-
-function DetailedView() {
-  return (
-    <div
-      style={{
-        borderRadius: 10,
-        border: "1px solid var(--qc-border-inner)",
-        background: "var(--qc-surface-white)",
-        padding: 16,
-      }}
-    >
-      <div className="overflow-x-auto">
-        <table className="w-full text-left" style={{ borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              {["Framework", "Timeframe", "Signals", "Key Readings", "Verdict"].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 500,
-                    color: "var(--qc-text-muted)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                    padding: "8px 12px 8px 0",
-                    whiteSpace: "nowrap",
-                    borderBottom: "1px solid var(--qc-border-default)",
-                  }}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {FRAMEWORK_BLOCKS.map((block, idx) => (
-              <tr
-                key={block.title}
-                style={{
-                  background: idx % 2 === 0 ? "var(--qc-surface-white)" : "var(--qc-surface-row-alt)",
-                  borderTop: "1px solid transparent",
-                }}
-              >
-                <td style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", padding: "10px 12px 10px 0", whiteSpace: "nowrap" }}>
-                  {block.title}
-                </td>
-                <td style={{ fontSize: 13, color: "var(--qc-text-muted)", padding: "10px 12px", whiteSpace: "nowrap" }}>
-                  {block.timeframe}
-                </td>
-                <td style={{ fontSize: 13, color: "var(--qc-text-muted)", padding: "10px 12px", whiteSpace: "nowrap" }}>
-                  {block.signalCount}
-                </td>
-                <td style={{ fontSize: 12, color: "var(--qc-text-muted)", padding: "10px 12px", maxWidth: 260 }}>
-                  {block.signals.map((sig) => (
-                    <span key={sig.label} className="inline-block mr-3 whitespace-nowrap">
-                      <span style={{ color: "var(--qc-text-muted)" }}>{sig.label}: </span>
-                      <span style={{ color: signalValueColor(sig.sentiment), fontWeight: 500 }}>{sig.value}</span>
-                    </span>
-                  ))}
-                </td>
-                <td style={{ padding: "10px 12px", whiteSpace: "nowrap" }}>
-                  <VerdictBadge verdict={block.verdict} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-// ─── OutlineToggle ────────────────────────────────────────────────────────────
-
-function OutlineToggle({
-  options,
-  value,
-  onChange,
-}: {
-  options: string[];
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="inline-flex items-center gap-1.5">
-      {options.map((option) => (
-        <button
-          key={option}
-          onClick={() => onChange(option)}
-          style={{
-            fontSize: 12,
-            fontWeight: 500,
-            padding: "4px 12px",
-            borderRadius: 6,
-            border: `1px solid ${value === option ? "var(--qc-accent-primary)" : "var(--qc-border-default)"}`,
-            background: value === option ? "var(--qc-accent-primary)" : "transparent",
-            color: value === option ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {option}
-        </button>
-      ))}
     </div>
   );
 }
@@ -320,105 +168,199 @@ function OutlineToggle({
 // ─── Main export ───────────────────────────────────────────────────────────────
 
 export function MarketViewCard() {
-  const [activeTab, setActiveTab] = useState<"Summary" | "Detailed">("Summary");
-  const { bear, neutral, bull, overall } = frameworkSummary();
-  const overallStyle = overall === "Risk-Off"
-    ? { bg: "#FEF2F2", text: "#DC2626", border: "#FECACA" }
-    : overall === "Risk-On"
-    ? { bg: "#F0FDF4", text: "#16A34A", border: "#BBF7D0" }
-    : { bg: "#FFFBEB", text: "#D97706", border: "#FDE68A" };
+
+  const narrativeTags = [
+    { label: "Trend down",       color: sentColor("bear") },
+    { label: "Weak breadth",     color: sentColor("bear") },
+    { label: "Rich valuations",  color: sentColor("neu") },
+    { label: "Macro supportive", color: sentColor("bull") },
+  ];
 
   return (
-    <div
-      style={{
-        borderRadius: 10,
-        border: "1px solid var(--qc-border-default)",
-        background: "var(--qc-surface-panel)",
-        padding: 8,
-      }}
-    >
-      {/* Header */}
-      <div
-        className="flex items-center justify-between flex-wrap gap-2"
-        style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}
-      >
-        <div className="flex items-center gap-3 flex-wrap">
-          <div
-            style={{
-              fontSize: 14,
-              fontWeight: 600,
-              color: "var(--qc-text-heading)",
-              textTransform: "uppercase",
-              letterSpacing: "0.01em",
-            }}
-          >
-            Market View
+    <SectionShell>
+      <SectionLabel>Market View</SectionLabel>
+
+      {/* Hero row */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 14, marginBottom: 14 }}>
+
+        {/* Left: sentiment hero */}
+        <section
+          style={{
+            background: "var(--qc-surface-white)",
+            border: "1px solid var(--qc-border-default)",
+            borderRadius: 18,
+            padding: "16px 20px 18px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <MonoEyebrow>6-framework consensus · Today</MonoEyebrow>
+            <span
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "4px 10px", borderRadius: 999,
+                background: "var(--qc-down-soft, #FDECEA)",
+                border: "1px solid #F0C0BB",
+                color: "var(--qc-down, #B23A2F)",
+                fontSize: 11, fontWeight: 600, letterSpacing: ".04em", textTransform: "uppercase",
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--qc-down, #B23A2F)", display: "inline-block" }} />
+              Cautious · Bearish bias
+            </span>
           </div>
 
-          {activeTab === "Detailed" && (
-            <>
-              <span style={{ width: 1, height: 14, background: "var(--qc-border-default)", display: "inline-block", flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>Framework score</span>
-              {bear > 0 && (
-                <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 9px", borderRadius: 20, background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA" }}>
-                  {bear} Bear
-                </span>
-              )}
-              {neutral > 0 && (
-                <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 9px", borderRadius: 20, background: "#FFFBEB", color: "#D97706", border: "1px solid #FDE68A" }}>
-                  {neutral} Neutral
-                </span>
-              )}
-              {bull > 0 && (
-                <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 9px", borderRadius: 20, background: "#F0FDF4", color: "#16A34A", border: "1px solid #BBF7D0" }}>
-                  {bull} Bull
-                </span>
-              )}
-              <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 9px", borderRadius: 20, background: overallStyle.bg, color: overallStyle.text, border: `1px solid ${overallStyle.border}` }}>
-                {overall}
-              </span>
-            </>
-          )}
+          {/* Gauge + context */}
+          <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 16 }}>
+            <div style={{ position: "relative", flexShrink: 0 }} aria-label="Market sentiment gauge">
+              <svg viewBox="0 0 160 100" width="150" height="94">
+                <defs>
+                  <linearGradient id="mvGaugeGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%"   stopColor="var(--qc-down, #B23A2F)" />
+                    <stop offset="50%"  stopColor="var(--qc-warn, #B4731A)" />
+                    <stop offset="100%" stopColor="var(--qc-up, #1F7A4A)" />
+                  </linearGradient>
+                </defs>
+                <path d="M 15 85 A 65 65 0 0 1 145 85" stroke="var(--qc-border-inner, #EFEDE7)" strokeWidth="10" fill="none" strokeLinecap="round" />
+                <path d="M 15 85 A 65 65 0 0 1 145 85" stroke="url(#mvGaugeGrad)" strokeWidth="10" fill="none" strokeLinecap="round" strokeDasharray="204" strokeDashoffset="0" opacity=".28" />
+                <g transform={`rotate(${needleAngle} 80 85)`}>
+                  <line x1="80" y1="85" x2="80" y2="28" stroke="var(--qc-text-heading, #0E0E0C)" strokeWidth="2.5" strokeLinecap="round" />
+                  <circle cx="80" cy="85" r="5" fill="var(--qc-text-heading, #0E0E0C)" />
+                </g>
+              </svg>
+              <div style={{ textAlign: "center", marginTop: -8 }}>
+                <div style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                  {SENTIMENT_SCORE}<span style={{ fontSize: 12, color: "var(--qc-text-muted)", fontWeight: 400 }}>/100</span>
+                </div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--qc-text-muted)", marginTop: 4 }}>
+                  Sentiment
+                </div>
+              </div>
+            </div>
 
-          {activeTab === "Summary" && (
-            <>
-              <span style={{ width: 1, height: 14, background: "var(--qc-border-default)", display: "inline-block", flexShrink: 0 }} />
-              <span style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
-                Combined signal: <span style={{ fontWeight: 600, color: "var(--qc-text-heading)" }}>Cautious</span>
-              </span>
-              <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 9px", borderRadius: 20, background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA" }}>
-                Bearish bias
-              </span>
-            </>
-          )}
-        </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h3 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 500, letterSpacing: "-0.01em", color: "var(--qc-text-heading)", lineHeight: 1.3 }}>
+                {FW.bear >= 4
+                  ? `${FW.bear} of six frameworks read bearish.`
+                  : FW.bull >= 4
+                  ? `${FW.bull} of six frameworks read bullish.`
+                  : "Market signals are mixed across frameworks."}
+              </h3>
+              <p style={{ margin: 0, fontSize: 12.5, color: "var(--qc-text-body)", lineHeight: 1.55 }}>
+                {FW.bear >= 3
+                  ? "Price structure, momentum, breadth and valuation are all flashing caution. Only macro and policy offer a partial offset. Capital flows are mixed, with FII selling and DII buying."
+                  : "Signals are mixed — check individual framework tiles below for detail."}
+              </p>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <span
+          {/* Split: bull / neutral / bear */}
+          <div
             style={{
-              fontSize: 10,
-              fontWeight: 700,
-              padding: "2px 7px",
-              borderRadius: 4,
-              background: "#FEF9C3",
-              color: "#92400E",
-              border: "1px solid #FDE68A",
-              textTransform: "uppercase",
-              letterSpacing: "0.04em",
+              display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
+              borderTop: "1px solid var(--qc-border-inner)", paddingTop: 14, gap: 8,
             }}
           >
-            Hardcoded for now
-          </span>
-          <OutlineToggle
-            options={["Summary", "Detailed"]}
-            value={activeTab}
-            onChange={(v) => setActiveTab(v as "Summary" | "Detailed")}
-          />
-        </div>
+            {(["bull", "neu", "bear"] as Sent[]).map((sent) => (
+              <div key={sent}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: sentColor(sent), flexShrink: 0 }} />
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-text-muted)" }}>
+                    {sent === "bull" ? "Bullish" : sent === "bear" ? "Bearish" : "Neutral"}
+                  </span>
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                  {FW[sent]}<span style={{ fontSize: 13, color: "var(--qc-text-muted)", fontWeight: 400 }}>/6</span>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 3 }}>{fwSubLabel(sent)}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Right: narrative sidebar */}
+        <NarrativeSidebar
+          eyebrow="What the market says"
+          headline="A classic late-cycle mix: rich valuations, weak breadth, decent macro."
+          body="With price below SMA 200, shrinking leadership, and earnings getting downgraded, the market is digesting gains. Strong macro prevents a deeper drawdown but doesn't justify fresh aggression."
+          tags={narrativeTags}
+        />
       </div>
 
-      {/* Content */}
-      {activeTab === "Summary" ? <DetailedView /> : <SummaryView />}
-    </div>
+      {/* Framework grid */}
+      <MonoEyebrow style={{ margin: "4px 0 10px" }}>Framework readings</MonoEyebrow>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 10,
+          marginBottom: 14,
+        }}
+      >
+        {TILES.map((tile) => <MvTile key={tile.name} tile={tile} />)}
+      </div>
+
+      {/* Signal tally */}
+      <div
+        style={{
+          background: "var(--qc-surface-white)",
+          border: "1px solid var(--qc-border-default)",
+          borderRadius: 14,
+          padding: "14px 16px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+          <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>
+            Signal tally · across 6 frameworks
+          </h4>
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: ".08em" }}>
+            {TALLY_TOTAL} readings · weight-neutral
+          </span>
+        </div>
+
+        <div
+          style={{ display: "flex", height: 36, borderRadius: 8, overflow: "hidden", gap: 2, marginBottom: 12 }}
+          role="img"
+          aria-label={`${TALLY.bear} bearish, ${TALLY.neu} neutral, ${TALLY.bull} bullish signals`}
+        >
+          {TALLY.bear > 0 && (
+            <div style={{ flex: TALLY.bear, background: "var(--qc-down, #B23A2F)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontSize: 11, fontWeight: 500, minWidth: 0 }}>
+              <span>Bearish</span><b>{TALLY.bear}</b>
+            </div>
+          )}
+          {TALLY.neu > 0 && (
+            <div style={{ flex: TALLY.neu, background: "var(--qc-warn, #B4731A)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontSize: 11, fontWeight: 500, minWidth: 0 }}>
+              <span>Neutral</span><b>{TALLY.neu}</b>
+            </div>
+          )}
+          {TALLY.bull > 0 && (
+            <div style={{ flex: TALLY.bull, background: "var(--qc-up, #1F7A4A)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontSize: 11, fontWeight: 500, minWidth: 0 }}>
+              <span>Bullish</span><b>{TALLY.bull}</b>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
+          {TILES.map((tile) => {
+            const bear = tile.signals.filter(s => s.sent === "bear").length;
+            const neu  = tile.signals.filter(s => s.sent === "neu").length;
+            const bull = tile.signals.filter(s => s.sent === "bull").length;
+            return (
+              <div
+                key={tile.name}
+                style={{
+                  borderLeft: `3px solid ${sentColor(tile.verdict)}`,
+                  paddingLeft: 8,
+                }}
+              >
+                <div style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-text-body)", marginBottom: 2 }}>{tile.shortName}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "var(--qc-text-heading)" }}>
+                  {bear}<span style={{ color: "var(--qc-text-muted)" }}>·{neu}·{bull}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </SectionShell>
   );
 }

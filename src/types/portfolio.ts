@@ -70,10 +70,10 @@ export interface EquityPosition {
 // ── Legacy types (used by model-analytics, ic-report, and older components) ──
 
 // Old 4-category asset class (model-analytics still uses this)
-export type AssetClass = "growth" | "quality_compounder" | "value" | "income";
+type AssetClass = "growth" | "quality_compounder" | "value" | "income";
 
 // Old position type (still referenced by allocated-positions-card)
-export interface Position {
+interface Position {
   id: string;
   company: string;
   ticker: string;
@@ -82,7 +82,7 @@ export interface Position {
   allocation: number;
 }
 
-export interface RebalanceTrigger {
+interface RebalanceTrigger {
   id: string;
   assetClass: string;
   currentAllocation: number;
@@ -90,7 +90,7 @@ export interface RebalanceTrigger {
   severity: "warning" | "critical";
 }
 
-export interface RiskProfileOption {
+interface RiskProfileOption {
   type: RiskProfileType;
   label: string;
   description: string;
@@ -98,13 +98,13 @@ export interface RiskProfileOption {
   threshold: string;
 }
 
-export interface AllocationSegment {
+interface AllocationSegment {
   name: string;
   value: number;
   color: string;
 }
 
-export interface DriftItem {
+interface DriftItem {
   id: string;
   assetClass: string;
   currentAllocation: number;
@@ -113,10 +113,10 @@ export interface DriftItem {
   direction: "up" | "down";
 }
 
-export type ConvictionLevel = "strong_buy" | "buy" | "hold" | "sell";
-export type ValuationZone   = "Attractive" | "Fair" | "High" | "Speculative";
+type ConvictionLevel = "strong_buy" | "buy" | "hold" | "sell";
+type ValuationZone   = "Attractive" | "Fair" | "High" | "Speculative";
 
-export interface ScoreDimension {
+interface ScoreDimension {
   label: string;
   value: number;
   maxValue: number;
@@ -124,7 +124,7 @@ export interface ScoreDimension {
   color: "green" | "amber" | "orange" | "red";
 }
 
-export interface AssetDeepDive {
+interface AssetDeepDive {
   company: string;
   ticker: string;
   sector: string;

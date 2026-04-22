@@ -81,13 +81,13 @@ function OpportunityContent() {
   const loading = transcriptLoading || opportunityLoading;
 
   if (!symbol) {
-    return <PageEmptyState><span className="text-red-600">Error: No symbol provided in query parameters</span></PageEmptyState>;
+    return <PageEmptyState><span style={{ color: "var(--qc-down)" }}>Error: No symbol provided in query parameters</span></PageEmptyState>;
   }
   if (loading) {
     return <PageEmptyState>Loading...</PageEmptyState>;
   }
   if (transcriptError) {
-    return <PageEmptyState><span className="text-red-600">Error: {transcriptError}</span></PageEmptyState>;
+    return <PageEmptyState><span style={{ color: "var(--qc-down)" }}>Error: {transcriptError}</span></PageEmptyState>;
   }
   if (transcriptCalls.length === 0) {
     return <PageEmptyState>No transcript calls found for {symbol}</PageEmptyState>;
@@ -201,7 +201,7 @@ function OpportunityContent() {
                 <div className="w-[400px] shrink-0">
                   <IndustryIntelligenceCard
                     data={data.industry_overview}
-                    investmentImplications={data.industry_analysis?.investment_implications}
+                    investmentImplications={data.industry_analysis}
                   />
                 </div>
               )}
@@ -221,8 +221,8 @@ function OpportunityContent() {
               <div className="flex-1 min-w-0 space-y-4">
                 <CompetitionCard data={data.competition} />
                 <div>
-                  <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-0.5">KPI Benchmarking</h4>
-                  <p className="text-xs text-zinc-400 mb-3">Latest KPI values across industry peers</p>
+                  <h4 className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: "var(--qc-text-body)" }}>KPI Benchmarking</h4>
+                  <p className="text-xs mb-3" style={{ color: "var(--qc-text-muted)" }}>Latest KPI values across industry peers</p>
                   <KpiBenchmarkingTable data={peerData?.peer_kpi_timeseries} loading={peerLoading} />
                 </div>
                 <CompetitiveBenchmarking data={data.competition} peers={peerData?.competition?.peers ?? []} loading={peerLoading} />

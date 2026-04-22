@@ -1,14 +1,20 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { TabularCard } from "@/components/molecules/tabular-card";
-import type { FactorScore } from "@/types/management";
+import type { FactorScore, ManagementIntelligence } from "@/types/management";
 import type { FinalTakeaways, OFactorResponse } from "@/types/opportunity";
 import type { OverviewSection } from "@/types/deal";
+import { SectionShell } from "./primitives";
+import { PillarPills, type PillarKey } from "./im-score/pillar-pills";
+import { ActivePillarHero } from "./im-score/active-pillar-hero";
+import { WeightingPanel } from "./im-score/weighting-panel";
+import { QcScoreStrip } from "./im-score/qc-score-strip";
 
 interface TitledBullet {
   title: string;
   text: string;
+  score?: number | null;
+  max?: number;
 }
 
 interface IMScoreCardProps {
@@ -19,10 +25,17 @@ interface IMScoreCardProps {
   dealScore?: number | null;
   dealMax?: number | null;
   managementFactors?: FactorScore[];
+  managementIntelligence?: ManagementIntelligence | null;
   opportunityTakeaways?: FinalTakeaways | null;
   opportunityData?: OFactorResponse | null;
   dealOverview?: OverviewSection | null;
 }
+
+const PILLAR_META = {
+  M: { label: "Management", letter: "M" as const, sub: "Quality · credibility · track record · guidance" },
+  O: { label: "Opportunity", letter: "O" as const, sub: "Industry · competition · strength · customer traction" },
+  D: { label: "Deal", letter: "D" as const, sub: "EPS engine · valuation · re-rating · margin of safety" },
+};
 
 function getRating(scorePct: number): string {
   if (scorePct >= 0.80) return "Strong Buy";
@@ -30,28 +43,6 @@ function getRating(scorePct: number): string {
   if (scorePct >= 0.50) return "Hold";
   if (scorePct >= 0.35) return "Underperform";
   return "Sell";
-}
-
-function getOverallInsight(
-  scorePct: number,
-  oppTakeaways?: FinalTakeaways | null,
-  dealOverview?: OverviewSection | null,
-): string {
-  const highlights = oppTakeaways?.key_highlights ?? [];
-  const dealVerdict = dealOverview?.deal_verdict?.title ?? null;
-  const rating = getRating(scorePct);
-
-  if (highlights.length > 0 && dealVerdict) {
-    return `${highlights[0]} · ${dealVerdict}`;
-  }
-  if (highlights.length > 0) return highlights.slice(0, 2).join(" · ");
-  if (dealVerdict) return dealVerdict;
-
-  if (scorePct >= 0.80) return "Strong fundamentals · High confidence in management · Attractive entry point";
-  if (scorePct >= 0.65) return "Solid business with positive outlook · Reasonable valuation";
-  if (scorePct >= 0.50) return "Steady business · Watchful on valuation and growth catalysts";
-  if (scorePct >= 0.35) return "Mixed signals · Below-average conviction on risk-reward";
-  return rating + " · Limited upside or elevated risk";
 }
 
 function clampWeights(m: number, o: number, d: number): [number, number, number] {
@@ -64,328 +55,225 @@ function clampWeights(m: number, o: number, d: number): [number, number, number]
   ];
 }
 
-// Semantic accent colors for M/O/D factors — intentionally not theme variables
-// because these are fixed categorical identifiers, not surface/text tokens
-const CARD_THEMES = {
-  M: { border: "#2563EB", fill: "#2563EB", bg: "rgba(37,99,235,0.04)", dot: "#2563EB" },
-  O: { border: "#059669", fill: "#059669", bg: "rgba(5,150,105,0.04)", dot: "#059669" },
-  D: { border: "#D97706", fill: "#D97706", bg: "rgba(217,119,6,0.04)", dot: "#D97706" },
-} as const;
-
-interface BentoCardProps {
-  label: string;
-  letter: "M" | "O" | "D";
-  score: number | null;
-  max: number;
-  weightPct: number;
-  items: TitledBullet[];
-  flex: number;
-}
-
-function BentoCard({ label, letter, score, max, weightPct, items, flex }: BentoCardProps) {
-  const pct = max > 0 && score !== null ? Math.min(score / max, 1) : 0;
-  const ticks = max;
-  const theme = CARD_THEMES[letter];
-
-  return (
-    <div
-      className="rounded-[10px] border p-5 flex flex-col gap-3 min-w-0 h-full overflow-y-auto"
-      style={{
-        flex,
-        borderColor: theme.border,
-        borderTopWidth: 3,
-        backgroundColor: theme.bg,
-        background: theme.bg,
-      }}
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: theme.border }}>
-            {label} ({letter})
-          </p>
-          <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{weightPct}% weight</p>
-        </div>
-        <div className="text-right">
-          <span className="text-2xl font-bold leading-none" style={{ color: "var(--qc-text-heading)" }}>
-            {score !== null ? score : "—"}
-          </span>
-          <span className="text-sm font-normal ml-0.5" style={{ color: "var(--qc-text-muted)" }}>/{max}</span>
-        </div>
-      </div>
-
-      <div className="flex gap-[2px] flex-wrap">
-        {Array.from({ length: Math.min(ticks, 40) }).map((_, i) => {
-          const filledCount = Math.round(pct * Math.min(ticks, 40));
-          return (
-            <div
-              key={i}
-              style={{
-                width: 4,
-                height: 12,
-                borderRadius: 1,
-                backgroundColor: i < filledCount ? theme.fill : "var(--qc-border-default)",
-                flexShrink: 0,
-              }}
-            />
-          );
-        })}
-      </div>
-
-      {items.length > 0 ? (
-        <ul className="space-y-2.5 flex-1">
-          {items.map((item, i) => (
-            <li key={i} className="flex items-start gap-2">
-              <span
-                className="mt-1.5 h-1.5 w-1.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: theme.dot }}
-              />
-              <div>
-                <p className="text-xs font-semibold leading-snug" style={{ color: "var(--qc-text-heading)" }}>{item.title}</p>
-                <p className="text-xs leading-relaxed mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{item.text}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-xs flex-1" style={{ color: "var(--qc-text-muted)" }}>No analysis available.</p>
-      )}
-    </div>
-  );
-}
-
 export function IMScoreCard({
-  managementScore,
-  managementMax,
-  opportunityScore,
-  opportunityMax,
-  dealScore,
-  dealMax,
-  managementFactors,
-  opportunityTakeaways,
-  opportunityData,
-  dealOverview,
+  managementScore, managementMax,
+  opportunityScore, opportunityMax,
+  dealScore, dealMax,
+  managementFactors, managementIntelligence, opportunityTakeaways, opportunityData, dealOverview,
 }: IMScoreCardProps) {
   const mScore = managementScore ?? null;
   const oScore = opportunityScore ?? null;
   const dScore = dealScore ?? null;
-
-  const mMax = managementMax ?? 20;
-  const oMax = opportunityMax ?? 40;
-  const dMax = dealMax ?? 40;
+  const mMax = managementMax ?? 50;
+  const oMax = opportunityMax ?? 30;
+  const dMax = dealMax ?? 20;
 
   const [mWeight, setMWeight] = useState(40);
   const [oWeight, setOWeight] = useState(40);
   const [dWeight, setDWeight] = useState(20);
+  const [activePillar, setActivePillar] = useState<PillarKey>("O");
 
   const handleMWeight = useCallback((val: number) => {
     const newM = Math.max(5, Math.min(90, val));
     const remaining = 100 - newM;
     const ratio = oWeight / (oWeight + dWeight || 1);
-    const newO = Math.max(5, Math.round(remaining * ratio));
-    const newD = Math.max(5, remaining - newO);
     setMWeight(newM);
-    setOWeight(newO);
-    setDWeight(newD);
+    setOWeight(Math.max(5, Math.round(remaining * ratio)));
+    setDWeight(Math.max(5, remaining - Math.max(5, Math.round(remaining * ratio))));
   }, [oWeight, dWeight]);
 
   const handleOWeight = useCallback((val: number) => {
     const newO = Math.max(5, Math.min(90, val));
     const remaining = 100 - newO;
     const ratio = mWeight / (mWeight + dWeight || 1);
-    const newM = Math.max(5, Math.round(remaining * ratio));
-    const newD = Math.max(5, remaining - newM);
     setOWeight(newO);
-    setMWeight(newM);
-    setDWeight(newD);
+    setMWeight(Math.max(5, Math.round(remaining * ratio)));
+    setDWeight(Math.max(5, remaining - Math.max(5, Math.round(remaining * ratio))));
   }, [mWeight, dWeight]);
 
   const handleDWeight = useCallback((val: number) => {
     const newD = Math.max(5, Math.min(90, val));
     const remaining = 100 - newD;
     const ratio = mWeight / (mWeight + oWeight || 1);
-    const newM = Math.max(5, Math.round(remaining * ratio));
-    const newO = Math.max(5, remaining - newM);
     setDWeight(newD);
-    setMWeight(newM);
-    setOWeight(newO);
+    setMWeight(Math.max(5, Math.round(remaining * ratio)));
+    setOWeight(Math.max(5, remaining - Math.max(5, Math.round(remaining * ratio))));
   }, [mWeight, oWeight]);
 
-  const [cMW, cOW, cDW] = clampWeights(mWeight, oWeight, dWeight);
-  const weightSum = cMW + cOW + cDW;
-  const weightValid = weightSum === 100;
+  const handleReset = useCallback(() => {
+    setMWeight(40);
+    setOWeight(40);
+    setDWeight(20);
+  }, []);
 
-  let partialNumer = 0;
-  let partialDenom = 0;
+  const [cMW, cOW, cDW] = clampWeights(mWeight, oWeight, dWeight);
+
+  let partialNumer = 0, partialDenom = 0;
   if (mScore !== null) { partialNumer += (mScore / mMax) * cMW; partialDenom += cMW; }
   if (oScore !== null) { partialNumer += (oScore / oMax) * cOW; partialDenom += cOW; }
   if (dScore !== null) { partialNumer += (dScore / dMax) * cDW; partialDenom += cDW; }
-
   const hasAnyScore = partialDenom > 0;
   const weightedPct = hasAnyScore ? partialNumer / partialDenom : 0;
   const displayScore = hasAnyScore ? Math.round(weightedPct * 100) : null;
   const rating = hasAnyScore ? getRating(weightedPct) : null;
-  const overallInsight = hasAnyScore ? getOverallInsight(weightedPct, opportunityTakeaways, dealOverview) : null;
 
-  const mItems: TitledBullet[] = managementFactors
-    ? managementFactors.slice(0, 4).map((f) => ({
-        title: f.factor,
-        text: f.descriptor ?? "",
+  const pillScores: Record<PillarKey, { score: number | null; max: number }> = {
+    M: { score: mScore, max: mMax },
+    O: { score: oScore, max: oMax },
+    D: { score: dScore, max: dMax },
+  };
+
+  const ap = activePillar;
+  const apScore = pillScores[ap].score;
+  const apMax = pillScores[ap].max;
+  const apWeight = ap === "M" ? cMW : ap === "O" ? cOW : cDW;
+
+  // Build sub-items per pillar
+  const mItems: TitledBullet[] = managementIntelligence?.signals_breakdown?.length
+    ? managementIntelligence.signals_breakdown.map((s) => ({
+        title: s.label,
+        text: s.details[0] ?? "",
+        score: s.score,
+        max: s.max_score,
       }))
-    : [];
+    : managementFactors
+      ? managementFactors.slice(0, 4).map((f) => ({ title: f.factor, text: f.descriptor ?? "" }))
+      : [];
 
-  const oItems: TitledBullet[] = (() => {
-    const scores = opportunityTakeaways?.section_scores;
-    if (scores) {
-      const entries: { key: string; label: string }[] = [
-        { key: "industry", label: "Industry" },
-        { key: "competition", label: "Competition" },
-        { key: "financial_strength", label: "Financial Strength" },
-        { key: "customer_traction", label: "Customer Traction" },
-      ];
-      const items = entries
-        .filter((e) => scores[e.key as keyof typeof scores]?.takeaway)
-        .map((e) => ({
-          title: e.label,
-          text: scores[e.key as keyof typeof scores].takeaway,
-        }));
-      if (items.length > 0) return items;
-    }
-    if (!opportunityData) return [];
-    const sectionMap: { key: keyof OFactorResponse; label: string }[] = [
-      { key: "industry_overview", label: "Industry" },
-      { key: "competition", label: "Competition" },
-      { key: "financial_strength", label: "Financial Strength" },
-      { key: "customer_traction", label: "Customer Traction" },
-    ];
-    return sectionMap
-      .filter((e) => {
-        const sec = opportunityData[e.key];
-        return sec && typeof sec === "object" && "text" in sec && sec.text?.takeaway;
-      })
-      .map((e) => ({
-        title: e.label,
-        text: (opportunityData[e.key] as { text?: { takeaway?: string } })!.text!.takeaway!,
-      }));
-  })();
+  const oSubScores = opportunityTakeaways?.section_scores;
+  const oEntries = [
+    { key: "industry", label: "Industry", max: 10 },
+    { key: "competition", label: "Competition", max: 10 },
+    { key: "financial_strength", label: "Financial Strength", max: 5 },
+    { key: "customer_traction", label: "Customer Traction", max: 5 },
+  ];
+  const oItems: TitledBullet[] = oEntries.map((e) => {
+    const sec = oSubScores?.[e.key as keyof typeof oSubScores];
+    const takeaway =
+      (sec as { takeaway?: string } | undefined)?.takeaway
+      ?? (opportunityData?.[e.key as keyof OFactorResponse] as { text?: { takeaway?: string } } | undefined)?.text?.takeaway
+      ?? "";
+    return { title: e.label, text: takeaway, score: (sec as { score?: number } | undefined)?.score ?? null, max: e.max };
+  });
 
   const dItems: TitledBullet[] = (() => {
     const items: TitledBullet[] = [];
     const eps = dealOverview?.eps_engine_card;
-    if (eps?.drivers?.length) {
-      items.push({ title: "EPS Engine", text: eps.drivers?.slice(0, 2)?.join("; ") });
-    }
+    if (eps?.drivers?.length) items.push({ title: "EPS Engine", text: eps.drivers.slice(0, 2).join("; ") });
     const val = dealOverview?.valuation_rerating_card;
-    if (val?.drivers?.length) {
-      items.push({ title: "Valuation Re-Rating", text: val.drivers?.slice(0, 2)?.join("; ") });
-    }
+    if (val?.drivers?.length) items.push({ title: "Valuation Re-Rating", text: val.drivers.slice(0, 2).join("; ") });
     if (items.length === 0 && dealOverview?.key_takeaway?.length) {
-      dealOverview.key_takeaway.slice(0, 4).forEach((t) => {
-        items.push({ title: "Key Takeaway", text: t });
-      });
+      dealOverview.key_takeaway.slice(0, 4).forEach((t) => items.push({ title: "Key Takeaway", text: t }));
     }
     return items;
   })();
 
-  return (
-    <TabularCard title="QC Insight">
-      <div className="flex gap-6 mb-4 pb-4" style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
+  const activeItems = ap === "M" ? mItems : ap === "O" ? oItems : dItems;
 
-        {/* Radial score chart */}
-        <div className="flex-shrink-0 flex items-center justify-center">
-          <div className="relative flex items-center justify-center">
-            <svg width={96} height={96} viewBox="0 0 96 96">
-              <circle cx={48} cy={48} r={40} fill="none" stroke="var(--qc-border-default)" strokeWidth={7} />
-              <circle
-                cx={48} cy={48} r={40}
-                fill="none"
-                stroke="var(--qc-accent-primary)"
-                strokeWidth={7}
-                strokeDasharray={`${2 * Math.PI * 40}`}
-                strokeDashoffset={`${2 * Math.PI * 40 * (1 - (displayScore ?? 0) / 100)}`}
-                strokeLinecap="round"
-                transform="rotate(-90 48 48)"
-              />
-            </svg>
-            <div className="absolute flex flex-col items-center">
-              <span className="text-2xl font-bold leading-none" style={{ color: "var(--qc-text-heading)" }}>
-                {displayScore !== null ? displayScore : "—"}
-              </span>
-              <span className="text-[9px] font-semibold uppercase tracking-wide" style={{ color: "var(--qc-text-muted)" }}>/100</span>
-            </div>
-          </div>
+  const pillarLabels: Record<PillarKey, string> = { M: "Management", O: "Opportunity", D: "Deal" };
+
+  return (
+    <div>
+      <SectionShell>
+        <div
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 11, letterSpacing: "0.14em",
+            color: "var(--qc-text-body)", textTransform: "uppercase",
+            marginBottom: 12, whiteSpace: "nowrap",
+          }}
+        >
+          QC Insight
         </div>
 
-        {/* Rating badge + headline + sliders */}
-        <div className="flex-1 min-w-0 flex flex-col gap-3 justify-center">
-          <div className="flex flex-col gap-1">
-            {rating && (
-              <span
-                className="self-start rounded-full px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wide"
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 360px", gap: 14, marginBottom: 14 }}>
+          {/* LEFT: Framework pillars */}
+          <section
+            style={{
+              background: "var(--qc-surface-white)",
+              border: "1px solid var(--qc-border-default)",
+              borderRadius: 18, padding: "16px 20px 18px",
+              position: "relative", overflow: "hidden",
+            }}
+          >
+            {/* Header with icon buttons */}
+            <header
+              style={{
+                display: "flex", alignItems: "center",
+                justifyContent: "space-between", marginBottom: 8,
+              }}
+            >
+              <div
                 style={{
-                  background: rating === "Strong Buy" || rating === "Buy"
-                    ? CARD_THEMES.O.border
-                    : rating === "Hold"
-                    ? CARD_THEMES.D.border
-                    : "#dc2626",
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+                  letterSpacing: "0.16em", color: "var(--qc-text-muted)", textTransform: "uppercase",
                 }}
               >
-                {rating}
-              </span>
-            )}
-            {overallInsight && (
-              <p className="text-sm font-semibold leading-snug" style={{ color: "var(--qc-text-heading)" }}>{overallInsight}</p>
-            )}
-          </div>
+                M · O · D Framework
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                {[
+                  "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
+                  "M4 14v6h6M20 10V4h-6M20 4l-7 7M4 20l7-7",
+                ].map((d, i) => (
+                  <button
+                    key={i}
+                    style={{
+                      width: 28, height: 28, borderRadius: 8,
+                      border: "1px solid var(--qc-border-default)",
+                      background: "var(--qc-surface-white)",
+                      color: "var(--qc-text-muted)",
+                      display: "grid", placeItems: "center", cursor: "pointer",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d={d} />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+            </header>
 
-          <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "var(--qc-text-muted)" }}>
-              Adjust Weightings — must total 100%
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
-              {[
-                { label: "Management", value: cMW, onChange: handleMWeight, color: CARD_THEMES.M.border },
-                { label: "Opportunity", value: cOW, onChange: handleOWeight, color: CARD_THEMES.O.border },
-                { label: "Deal", value: cDW, onChange: handleDWeight, color: CARD_THEMES.D.border },
-              ].map(({ label, value, onChange, color }) => (
-                <div key={label} className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="text-[11px] font-medium w-20 flex-shrink-0" style={{ color }}>{label}</span>
-                  <input
-                    type="range"
-                    min={5}
-                    max={90}
-                    value={value}
-                    onChange={(e) => onChange(Number(e.target.value))}
-                    className="flex-1 min-w-0 h-1"
-                    style={{ accentColor: color }}
-                  />
-                  <span className="text-[11px] font-semibold w-8 text-right flex-shrink-0" style={{ color }}>
-                    {value}%
-                  </span>
-                </div>
-              ))}
-            </div>
-            {!weightValid && (
-              <p className="text-[10px] text-red-500 mt-1">Weightings must add up to 100% — adjust sliders.</p>
-            )}
-          </div>
+            <PillarPills
+              activePillar={activePillar}
+              onSelect={setActivePillar}
+              scores={pillScores}
+              labels={pillarLabels}
+            />
+
+            <ActivePillarHero
+              activePillar={ap}
+              pillarLabel={PILLAR_META[ap].label}
+              pillarSub={PILLAR_META[ap].sub}
+              score={apScore}
+              max={apMax}
+              weight={apWeight}
+              items={activeItems}
+            />
+          </section>
+
+          {/* RIGHT: Weighting panel */}
+          <WeightingPanel
+            mWeight={cMW}
+            oWeight={cOW}
+            dWeight={cDW}
+            displayScore={displayScore}
+            onMChange={handleMWeight}
+            onOChange={handleOWeight}
+            onDChange={handleDWeight}
+            onReset={handleReset}
+          />
         </div>
 
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-4" style={{ height: 480 }}>
-        <div className="min-w-0 flex overflow-hidden" style={{ flex: cMW }}>
-          <BentoCard label="Management" letter="M" score={mScore} max={mMax} weightPct={cMW} items={mItems} flex={1} />
-        </div>
-        <div className="min-w-0 flex flex-col gap-4" style={{ flex: cOW + cDW }}>
-          <div className="flex flex-col overflow-hidden" style={{ flex: cOW }}>
-            <BentoCard label="Opportunity" letter="O" score={oScore} max={oMax} weightPct={cOW} items={oItems} flex={1} />
-          </div>
-          <div className="flex flex-col overflow-hidden" style={{ flex: cDW }}>
-            <BentoCard label="Deal" letter="D" score={dScore} max={dMax} weightPct={cDW} items={dItems} flex={1} />
-          </div>
-        </div>
-      </div>
-
-    </TabularCard>
+        {rating && displayScore != null && (
+          <QcScoreStrip
+            displayScore={displayScore}
+            rating={rating}
+            weightedPct={weightedPct}
+            weights={{ M: cMW, O: cOW, D: cDW }}
+          />
+        )}
+      </SectionShell>
+    </div>
   );
 }

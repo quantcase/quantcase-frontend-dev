@@ -148,7 +148,7 @@ export interface Paginated<T> {
 }
 
 // Job response types (async AI endpoints)
-export interface WealthJobResponse {
+interface WealthJobResponse {
   success: boolean;
   message: string;
   job: { id: string; status: string };

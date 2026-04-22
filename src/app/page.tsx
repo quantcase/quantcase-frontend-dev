@@ -426,13 +426,13 @@ export default function Home() {
   const today = getTodayLabel();
 
   return (
-    <div className="min-h-screen bg-white mb-12 px-6">
+    <div className="min-h-screen mb-12 px-6" style={{ background: "var(--qc-surface-white)" }}>
       <div className="space-y-4">
 
         {/* ── Page header ────────────────────────────────────────────── */}
         <div className="pt-6 pb-2">
-          <h3 style={{ color: "#0F172B", fontWeight: 500, fontSize: 28 }}>{greeting}, Palash</h3>
-          <p style={{ fontSize: 13, color: "#888888", marginTop: 2 }}>
+          <h3 style={{ color: "var(--qc-text-heading)", fontWeight: 500, fontSize: 28 }}>{greeting}, Palash</h3>
+          <p style={{ fontSize: 13, color: "var(--qc-text-muted)", marginTop: 2 }}>
             Here is your daily IC briefing for {today}.
           </p>
         </div>
@@ -489,7 +489,7 @@ export default function Home() {
           {/* Right column */}
           <div className="flex flex-col gap-4">
             {/* 4 stat cards grouped into a single panel */}
-            <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+            <div className="rounded-[10px] p-2" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
               <div className="grid grid-cols-2 gap-2">
                 <StatCard
                   flat

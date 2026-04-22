@@ -11,7 +11,7 @@ export const THEME_CLASS_MAP: Record<ThemeId, string | null> = {
   'luxury': 'theme-luxury',
 };
 
-export const THEME_LABELS: Record<ThemeId, string> = {
+const THEME_LABELS: Record<ThemeId, string> = {
   'light-modern': 'Light Modern',
   'dark-modern': 'Dark Modern',
   'light-enterprise': 'Light Enterprise',

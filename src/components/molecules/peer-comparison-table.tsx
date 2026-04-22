@@ -38,6 +38,12 @@ function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
 
 const PAGE_SIZES = [10, 25, 50];
 
+const MONO: React.CSSProperties = {
+  fontFamily: "'IBM Plex Mono', monospace",
+  fontVariantNumeric: "tabular-nums",
+  letterSpacing: "0.02em",
+};
+
 export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -49,7 +55,7 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
         id: "sno",
         header: "S.No.",
         cell: ({ row }) => (
-          <span style={{ color: "#888888", fontSize: 13 }}>{row.index + 1}.</span>
+          <span style={{ ...MONO, color: "var(--qc-text-muted)", fontSize: 12 }}>{row.index + 1}.</span>
         ),
         enableSorting: false,
         size: 48,
@@ -62,7 +68,7 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
             style={{
               fontSize: 13,
               fontWeight: row.original.isSubject ? 600 : 400,
-              color: "#0F172B",
+              color: "var(--qc-text-heading)",
             }}
           >
             {row.original.name}
@@ -74,35 +80,35 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
         accessorKey: "cmp",
         header: "CMP Rs.",
         cell: ({ getValue }) => (
-          <span style={{ fontSize: 13, color: "#121212" }}>{fmtNum(getValue() as number | null)}</span>
+          <span style={{ ...MONO, fontSize: 12, color: "var(--qc-text-heading)" }}>{fmtNum(getValue() as number | null)}</span>
         ),
       },
       {
         accessorKey: "pe",
         header: "P/E",
         cell: ({ getValue }) => (
-          <span style={{ fontSize: 13, color: "#121212" }}>{fmtNum(getValue() as number | null)}</span>
+          <span style={{ ...MONO, fontSize: 12, color: "var(--qc-text-heading)" }}>{fmtNum(getValue() as number | null)}</span>
         ),
       },
       {
         accessorKey: "marketCapCr",
         header: "Mar Cap Rs.Cr.",
         cell: ({ getValue }) => (
-          <span style={{ fontSize: 13, color: "#121212" }}>{fmtNum(getValue() as number | null)}</span>
+          <span style={{ ...MONO, fontSize: 12, color: "var(--qc-text-heading)" }}>{fmtNum(getValue() as number | null)}</span>
         ),
       },
       {
         accessorKey: "divYld",
         header: "Div Yld %",
         cell: ({ getValue }) => (
-          <span style={{ fontSize: 13, color: "#121212" }}>{fmtNum(getValue() as number | null)}</span>
+          <span style={{ ...MONO, fontSize: 12, color: "var(--qc-text-heading)" }}>{fmtNum(getValue() as number | null)}</span>
         ),
       },
       {
         accessorKey: "npQtrCr",
         header: "NP Qtr Rs.Cr.",
         cell: ({ getValue }) => (
-          <span style={{ fontSize: 13, color: "#121212" }}>{fmtNum(getValue() as number | null)}</span>
+          <span style={{ ...MONO, fontSize: 12, color: "var(--qc-text-heading)" }}>{fmtNum(getValue() as number | null)}</span>
         ),
       },
       {
@@ -110,15 +116,21 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
         header: "Qtr Profit Var %",
         cell: ({ getValue }) => {
           const val = getValue() as number | null;
-          const color = val === null ? "#888888" : val > 0 ? "#16a34a" : val < 0 ? "#dc2626" : "#121212";
-          return <span style={{ fontSize: 13, color }}>{fmtNum(val)}</span>;
+          const color = val === null
+            ? "var(--qc-text-muted)"
+            : val > 0
+            ? "var(--qc-up)"
+            : val < 0
+            ? "var(--qc-down)"
+            : "var(--qc-text-heading)";
+          return <span style={{ ...MONO, fontSize: 12, color }}>{fmtNum(val)}</span>;
         },
       },
       {
         accessorKey: "salesQtrCr",
         header: "Sales Qtr Rs.Cr.",
         cell: ({ getValue }) => (
-          <span style={{ fontSize: 13, color: "#121212" }}>{fmtNum(getValue() as number | null)}</span>
+          <span style={{ ...MONO, fontSize: 12, color: "var(--qc-text-heading)" }}>{fmtNum(getValue() as number | null)}</span>
         ),
       },
       {
@@ -126,15 +138,21 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
         header: "Qtr Sales Var %",
         cell: ({ getValue }) => {
           const val = getValue() as number | null;
-          const color = val === null ? "#888888" : val > 0 ? "#16a34a" : val < 0 ? "#dc2626" : "#121212";
-          return <span style={{ fontSize: 13, color }}>{fmtNum(val)}</span>;
+          const color = val === null
+            ? "var(--qc-text-muted)"
+            : val > 0
+            ? "var(--qc-up)"
+            : val < 0
+            ? "var(--qc-down)"
+            : "var(--qc-text-heading)";
+          return <span style={{ ...MONO, fontSize: 12, color }}>{fmtNum(val)}</span>;
         },
       },
       {
         accessorKey: "roce",
         header: "ROCE %",
         cell: ({ getValue }) => (
-          <span style={{ fontSize: 13, color: "#121212" }}>{fmtNum(getValue() as number | null)}</span>
+          <span style={{ ...MONO, fontSize: 12, color: "var(--qc-text-heading)" }}>{fmtNum(getValue() as number | null)}</span>
         ),
       },
     ],
@@ -171,26 +189,30 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
             placeholder="Search companies..."
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            style={{ fontSize: 13, paddingLeft: 32, width: 240, height: 34 }}
+            style={{ fontSize: 12, paddingLeft: 32, width: 240, height: 34, fontFamily: "'IBM Plex Mono', monospace" }}
           />
           <svg
             className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5"
-            style={{ color: "#888888" }}
+            style={{ color: "var(--qc-text-muted)" }}
             fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
         </div>
         <div className="flex items-center gap-2">
-          <span style={{ fontSize: 12, color: "#888888" }}>Rows per page</span>
+          <span style={{ fontSize: 11, color: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>Rows per page</span>
           <select
             value={pageSize}
-            onChange={(e) => {
-              setPagination({ pageIndex: 0, pageSize: Number(e.target.value) });
-            }}
+            onChange={(e) => setPagination({ pageIndex: 0, pageSize: Number(e.target.value) })}
             style={{
-              fontSize: 12, color: "#0F172B", border: "1px solid #E2E2E2",
-              borderRadius: 6, padding: "4px 8px", background: "white", cursor: "pointer",
+              fontSize: 11,
+              color: "var(--qc-text-heading)",
+              border: "1px solid var(--qc-border-default)",
+              borderRadius: 6,
+              padding: "4px 8px",
+              background: "var(--qc-surface-white)",
+              cursor: "pointer",
+              fontFamily: "'IBM Plex Mono', monospace",
             }}
           >
             {PAGE_SIZES.map((s) => (
@@ -201,23 +223,41 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-[#E2E2E2]">
+      <div
+        className="overflow-x-auto"
+        style={{
+          borderRadius: 10,
+          border: "1px solid var(--qc-border-default)",
+          overflow: "hidden",
+        }}
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id} style={{ background: "#FAFAFA", borderBottom: "1px solid #E2E2E2" }}>
+              <TableRow
+                key={hg.id}
+                style={{
+                  background: "var(--qc-surface-panel)",
+                  borderBottom: "1px solid var(--qc-border-default)",
+                }}
+              >
                 {hg.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
                     style={{
-                      fontSize: 10, fontWeight: 500, color: "#888888",
-                      textTransform: "uppercase", letterSpacing: "0.08em",
-                      whiteSpace: "nowrap", padding: "8px 12px",
+                      fontSize: 10,
+                      fontWeight: 500,
+                      color: "var(--qc-text-muted)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.12em",
+                      whiteSpace: "nowrap",
+                      padding: "8px 12px",
                       textAlign: header.column.id === "sno" || header.column.id === "name" ? "left" : "right",
                       cursor: header.column.getCanSort() ? "pointer" : "default",
                       userSelect: "none",
                       width: header.column.columnDef.size,
+                      fontFamily: "'IBM Plex Mono', monospace",
                     }}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
@@ -234,7 +274,13 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  style={{ textAlign: "center", fontSize: 13, color: "#888888", padding: "24px 12px" }}
+                  style={{
+                    textAlign: "center",
+                    fontSize: 12,
+                    color: "var(--qc-text-muted)",
+                    padding: "24px 12px",
+                    fontFamily: "'IBM Plex Mono', monospace",
+                  }}
                 >
                   No companies found.
                 </TableCell>
@@ -245,9 +291,13 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
                   key={row.id}
                   style={{
                     background: row.original.isSubject
-                      ? "#F5F5F5"
-                      : idx % 2 === 0 ? "#ffffff" : "#fafafa",
-                    borderTop: row.original.isSubject ? "1px solid #E2E2E2" : undefined,
+                      ? "var(--qc-surface-panel)"
+                      : idx % 2 === 0
+                      ? "var(--qc-surface-white)"
+                      : "var(--qc-surface-row-alt)",
+                    borderTop: row.original.isSubject
+                      ? "1px solid var(--qc-border-default)"
+                      : undefined,
                   }}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -271,7 +321,7 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
 
       {/* Pagination */}
       <div className="flex items-center justify-between">
-        <span style={{ fontSize: 12, color: "#888888" }}>
+        <span style={{ fontSize: 11, color: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>
           {totalFiltered === peers.length
             ? `${peers.length} companies`
             : `${totalFiltered} of ${peers.length} companies`}
@@ -287,7 +337,6 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
             <ChevronLeft className="h-4 w-4" />
           </Button>
           {Array.from({ length: Math.min(pageCount, 7) }, (_, i) => {
-            // Show pages around current page
             const half = 3;
             let start = Math.max(0, pageIndex - half);
             const end = Math.min(pageCount - 1, start + 6);
@@ -302,10 +351,14 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
                 size="sm"
                 onClick={() => table.setPageIndex(p)}
                 style={{
-                  height: 30, minWidth: 30, padding: "0 8px", fontSize: 12,
-                  background: p === pageIndex ? "#0F172B" : undefined,
-                  color: p === pageIndex ? "#ffffff" : undefined,
-                  borderColor: p === pageIndex ? "#0F172B" : undefined,
+                  height: 30,
+                  minWidth: 30,
+                  padding: "0 8px",
+                  fontSize: 11,
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  background: p === pageIndex ? "var(--qc-accent-primary)" : undefined,
+                  color: p === pageIndex ? "var(--qc-accent-primary-fg)" : undefined,
+                  borderColor: p === pageIndex ? "var(--qc-accent-primary)" : undefined,
                 }}
               >
                 {p + 1}

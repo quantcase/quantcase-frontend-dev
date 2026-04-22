@@ -37,7 +37,6 @@ export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps
   const formRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Close popup on outside click
   useEffect(() => {
     if (!showForm) return;
     function handleClick(e: MouseEvent) {
@@ -49,7 +48,6 @@ export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showForm]);
 
-  // Focus input when popup opens
   useEffect(() => {
     if (showForm) {
       setTimeout(() => inputRef.current?.focus(), 50);
@@ -61,7 +59,6 @@ export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps
       prev.map((t) => {
         if (t.id !== id) return t;
         if (t.status === "done") {
-          // Restore to original pending/overdue state based on meta
           const isOverdue = t.meta === "Overdue";
           return { ...t, status: isOverdue ? "overdue" : "pending" };
         }
@@ -88,21 +85,25 @@ export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps
   }
 
   return (
-    <div className={cn("rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2 flex flex-col relative", className)}>
+    <div
+      className={cn("rounded-[10px] p-2 flex flex-col relative", className)}
+      style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+    >
       {/* Panel header */}
       <div className="px-2 pt-1 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ListTodo className="size-3.5 text-[#888888]" />
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.01em" }}>
+          <ListTodo className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
             Today&apos;s Tasks
           </span>
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="flex items-center justify-center size-6 rounded-md border border-[#E2E2E2] bg-white hover:bg-[#F5F5F5] transition-colors"
+          className="flex items-center justify-center size-6 rounded-md transition-colors"
+          style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}
           aria-label="Add task"
         >
-          <Plus className="size-3.5 text-[#0F172B]" />
+          <Plus className="size-3.5" style={{ color: "var(--qc-text-heading)" }} />
         </button>
       </div>
 
@@ -110,15 +111,17 @@ export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps
       {showForm && (
         <div
           ref={formRef}
-          className="absolute right-2 top-10 z-50 w-64 rounded-[10px] border border-[#E2E2E2] bg-white shadow-lg p-3 flex flex-col gap-2"
+          className="absolute right-2 top-10 z-50 w-64 rounded-[10px] shadow-lg p-3 flex flex-col gap-2"
+          style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}
         >
           <div className="flex items-center justify-between mb-0.5">
-            <span style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
               New Task
             </span>
             <button
               onClick={() => setShowForm(false)}
-              className="text-[#888888] hover:text-[#0F172B] transition-colors"
+              className="transition-colors"
+              style={{ color: "var(--qc-text-muted)" }}
               aria-label="Close"
             >
               <X className="size-3.5" />
@@ -131,17 +134,20 @@ export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps
               placeholder="Task description"
               value={taskLabel}
               onChange={(e) => setTaskLabel(e.target.value)}
-              className="w-full rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-3 py-1.5 text-[13px] text-[#0F172B] placeholder:text-[#888888] outline-none focus:border-[#0F172B] transition-colors"
+              className="w-full rounded-md px-3 py-1.5 text-[13px] outline-none transition-colors"
+              style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)", color: "var(--qc-text-heading)" }}
             />
             <input
               type="date"
               value={taskDate}
               onChange={(e) => setTaskDate(e.target.value)}
-              className="w-full rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-3 py-1.5 text-[13px] text-[#0F172B] outline-none focus:border-[#0F172B] transition-colors"
+              className="w-full rounded-md px-3 py-1.5 text-[13px] outline-none transition-colors"
+              style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)", color: "var(--qc-text-heading)" }}
             />
             <button
               type="submit"
-              className="w-full rounded-md bg-[#0F172B] text-white text-[12px] font-semibold py-1.5 hover:bg-[#1e293b] transition-colors"
+              className="w-full rounded-md text-[12px] font-semibold py-1.5 transition-colors"
+              style={{ background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}
             >
               Add Task
             </button>
@@ -150,9 +156,12 @@ export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps
       )}
 
       {/* Inner white box */}
-      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] flex flex-col divide-y divide-[#E2E2E2] overflow-hidden">
+      <div
+        className="rounded-[10px] flex flex-col divide-y overflow-hidden"
+        style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-inner)" }}
+      >
         {tasks.length === 0 && (
-          <p className="px-4 py-4 text-[13px] text-[#888888] text-center">No tasks for today.</p>
+          <p className="px-4 py-4 text-[13px] text-center" style={{ color: "var(--qc-text-muted)" }}>No tasks for today.</p>
         )}
         {tasks.map((task) => {
           const isDone = task.status === "done";
@@ -160,17 +169,19 @@ export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps
           return (
             <div
               key={task.id}
-              className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-[#F5F5F5] transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors"
+              style={{ borderTopColor: "var(--qc-border-inner)" }}
               onClick={() => toggleTask(task.id)}
             >
               {/* Checkbox */}
               <div
                 className={cn(
-                  "flex-shrink-0 size-4 rounded border flex items-center justify-center transition-colors",
-                  isDone
-                    ? "border-emerald-500 bg-emerald-500"
-                    : "border-[#E2E2E2] bg-white"
+                  "flex-shrink-0 size-4 rounded flex items-center justify-center transition-colors",
                 )}
+                style={{
+                  border: isDone ? "1px solid var(--qc-up)" : "1px solid var(--qc-border-default)",
+                  background: isDone ? "var(--qc-up)" : "var(--qc-surface-card)",
+                }}
               >
                 {isDone && (
                   <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
@@ -182,7 +193,7 @@ export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps
               {/* Label */}
               <p
                 className={cn("flex-1 text-[13px]", isDone && "line-through")}
-                style={{ color: isDone ? "#888888" : "#0F172B" }}
+                style={{ color: isDone ? "var(--qc-text-muted)" : "var(--qc-text-heading)" }}
               >
                 {task.label}
               </p>
@@ -192,9 +203,9 @@ export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps
                 <span
                   className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5"
                   style={{
-                    background: isOverdue ? "#FEF3F2" : isDone ? "#F0FDF4" : "#F5F5F5",
-                    color: isOverdue ? "#dc2626" : isDone ? "#059669" : "#888888",
-                    border: isOverdue ? "1px solid #fecaca" : isDone ? "1px solid #bbf7d0" : "1px solid #E2E2E2",
+                    background: isOverdue ? "var(--qc-down-soft)" : isDone ? "var(--qc-up-soft)" : "var(--qc-chip-bg)",
+                    color: isOverdue ? "var(--qc-down)" : isDone ? "var(--qc-up)" : "var(--qc-text-muted)",
+                    border: isOverdue ? "1px solid var(--qc-down)" : isDone ? "1px solid var(--qc-up)" : "1px solid var(--qc-chip-border)",
                   }}
                 >
                   {task.meta}

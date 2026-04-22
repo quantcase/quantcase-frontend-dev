@@ -89,26 +89,30 @@ function TechnicalsContent() {
         .map((ind) => (
           <div
             key={ind!.name}
-            className="rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-center"
+            className="rounded-[8px] border px-3 py-1.5 text-center"
+            style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
           >
-            <p className="text-[9px] font-semibold text-[#888888] uppercase tracking-wider mb-px">
+            <p className="font-mono text-[9px] uppercase tracking-[0.14em] mb-px" style={{ color: "var(--qc-text-muted)" }}>
               {ind!.name}
             </p>
-            <p className="text-[12px] font-semibold text-[#0F172B]">{ind!.tag}</p>
+            <p className="text-[12px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{ind!.tag}</p>
           </div>
         ))}
-      <div className="rounded-md border border-[#0F172B] bg-white px-3 py-1.5 text-center">
-        <p className="text-[9px] font-semibold text-[#888888] uppercase tracking-wider mb-px">
+      <div
+        className="rounded-[8px] border px-3 py-1.5 text-center"
+        style={{ borderColor: "var(--qc-text-heading)", background: "var(--qc-surface-white)" }}
+      >
+        <p className="font-mono text-[9px] uppercase tracking-[0.14em] mb-px" style={{ color: "var(--qc-text-muted)" }}>
           Tag
         </p>
-        <p className="text-[12px] font-semibold text-[#0F172B]">{di.tag}</p>
+        <p className="text-[12px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{di.tag}</p>
       </div>
     </>
   ) : null;
 
   return (
     <ScreenerPageShell navItems={TECHNICALS_NAV} headerRight={insightCards}>
-      <div className="mb-8 px-4 space-y-6 pt-6">
+      <div className="mb-8 px-4 space-y-[14px] pt-4">
         <div id="section-price-levels">
           <LevelsStrip
             price={data.price}
@@ -121,8 +125,8 @@ function TechnicalsContent() {
         </div>
 
         {/* Row 1: Price Chart + Rule Engine (2/3) + Decision Intelligence (1/3) */}
-        <div className="grid grid-cols-3 gap-4 items-start">
-          <div className="col-span-2 flex flex-col gap-4">
+        <div className="grid grid-cols-3 gap-[14px] items-start">
+          <div className="col-span-2 flex flex-col gap-[14px]">
             <div id="section-price-chart">
               <SectionPanel
                 title="Price Chart"
@@ -130,7 +134,8 @@ function TechnicalsContent() {
                   chartMode !== "DEFAULT" ? (
                     <button
                       onClick={() => setChartMode("DEFAULT")}
-                      className="px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wide border border-[#E2E2E2] bg-white text-[#0F172B] hover:bg-[#F5F5F5] transition-colors"
+                      className="px-2.5 py-1 rounded-[8px] font-mono text-[10px] uppercase tracking-[0.14em] border transition-colors"
+                      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)", color: "var(--qc-text-heading)" }}
                     >
                       Default View
                     </button>

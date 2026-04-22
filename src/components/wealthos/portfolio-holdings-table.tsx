@@ -21,22 +21,42 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
+const thStyle: React.CSSProperties = {
+  fontSize: 10,
+  fontFamily: "var(--font-ibm-plex-mono, monospace)",
+  color: "var(--qc-text-muted)",
+  textTransform: "uppercase",
+  letterSpacing: "0.08em",
+};
+
 export function PortfolioHoldingsTable({ portfolio }: PortfolioHoldingsTableProps) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-4 text-sm">
+      <div className="flex flex-wrap gap-6">
         <div>
-          <span className="text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-wide">Total Value</span>
-          <p className="font-semibold text-zinc-900 dark:text-zinc-50">{formatCurrency(portfolio.total_value)}</p>
+          <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Total Value
+          </p>
+          <p style={{ fontSize: 16, fontWeight: 500, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+            {formatCurrency(portfolio.total_value)}
+          </p>
         </div>
         <div>
-          <span className="text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-wide">Risk Score</span>
-          <p className="font-semibold text-zinc-900 dark:text-zinc-50">{portfolio.risk_score.toFixed(1)}</p>
+          <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Risk Score
+          </p>
+          <p style={{ fontSize: 16, fontWeight: 500, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+            {portfolio.risk_score.toFixed(1)}
+          </p>
         </div>
         {portfolio.last_rebalance_date && (
           <div>
-            <span className="text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-wide">Last Rebalanced</span>
-            <p className="font-semibold text-zinc-900 dark:text-zinc-50">{formatDate(portfolio.last_rebalance_date)}</p>
+            <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              Last Rebalanced
+            </p>
+            <p style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>
+              {formatDate(portfolio.last_rebalance_date)}
+            </p>
           </div>
         )}
       </div>
@@ -45,23 +65,31 @@ export function PortfolioHoldingsTable({ portfolio }: PortfolioHoldingsTableProp
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Symbol</TableHead>
-              <TableHead className="text-right">Weight</TableHead>
-              <TableHead className="text-right">Qty</TableHead>
+              <TableHead style={thStyle}>Symbol</TableHead>
+              <TableHead className="text-right" style={thStyle}>Weight</TableHead>
+              <TableHead className="text-right" style={thStyle}>Qty</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {(portfolio.holdings ?? []).map((holding, idx) => (
               <TableRow key={`${holding.symbol}-${idx}`}>
-                <TableCell className="font-medium">{holding.symbol}</TableCell>
-                <TableCell className="text-right">{(holding.weight * 100).toFixed(2)}%</TableCell>
-                <TableCell className="text-right">{holding.qty}</TableCell>
+                <TableCell style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+                  {holding.symbol}
+                </TableCell>
+                <TableCell className="text-right" style={{ fontSize: 12, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+                  {(holding.weight * 100).toFixed(2)}%
+                </TableCell>
+                <TableCell className="text-right" style={{ fontSize: 12, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+                  {holding.qty}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       ) : (
-        <p className="text-sm text-zinc-400 dark:text-zinc-500 py-4 text-center">No holdings recorded</p>
+        <p className="py-4 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
+          No holdings recorded
+        </p>
       )}
     </div>
   );

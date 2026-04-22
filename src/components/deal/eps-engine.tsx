@@ -11,15 +11,14 @@ interface EpsEngineProps {
 
 type ScenarioKey = "bear" | "base" | "bull";
 
-const scenarioColors: Record<ScenarioKey, { text: string; header: string; label: string }> = {
-  bull: { text: "text-emerald-600", header: "text-emerald-600", label: "Bull case — optimistic" },
-  base: { text: "text-blue-600", header: "text-blue-600", label: "Base case — as per mgmt guidance" },
-  bear: { text: "text-red-600", header: "text-red-600", label: "Bear case — risk-heavy" },
+const scenarioColors: Record<ScenarioKey, { cssVar: string; label: string }> = {
+  bull: { cssVar: "var(--qc-up)", label: "Bull case — optimistic" },
+  base: { cssVar: "var(--qc-blue)", label: "Base case — as per mgmt guidance" },
+  bear: { cssVar: "var(--qc-down)", label: "Bear case — risk-heavy" },
 };
 
 const scenarioOrder: ScenarioKey[] = ["bull", "base", "bear"];
 
-// Normalize static camelCase data → API snake_case shape
 function normalizeStatic(s: typeof epsEngineData.scenarios.bear): EpsScenario {
   return {
     industry_cagr:     { value: s.industryCagr.value,       note: s.industryCagr.note },
@@ -41,32 +40,29 @@ function MetricRow({ label, scenarios, field, isLast }: MetricRowProps) {
   return (
     <>
       <div className="grid grid-cols-[180px_1fr_1fr_1fr] items-start gap-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 pt-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wider pt-3" style={{ color: "var(--qc-text-muted)" }}>
           {label}
         </p>
         {scenarioOrder.map((key) => {
           const s = scenarios[key];
           const metric = s[field];
-          const colors = scenarioColors[key];
+          const cssVar = scenarioColors[key].cssVar;
           const isEps = field === "expected_eps_cagr";
 
           return (
             <div
               key={key}
-              className={`rounded-lg border px-4 py-3 ${
-                isEps
-                  ? key === "bull"
-                    ? "bg-emerald-50/50 border-emerald-200/60"
-                    : key === "base"
-                    ? "bg-blue-50/50 border-blue-200/60"
-                    : "bg-red-50/50 border-red-200/60"
-                  : "bg-[#F5F5F5] border-[#E2E2E2]"
-              }`}
+              className="rounded-lg px-4 py-3"
+              style={{
+                background: isEps ? `${cssVar}12` : "var(--qc-surface-panel)",
+                border: `1px solid ${isEps ? cssVar : "var(--qc-border-default)"}`,
+                borderColor: isEps ? `${cssVar}40` : "var(--qc-border-default)",
+              }}
             >
-              <p className={`text-lg font-semibold ${isEps ? colors.text : colors.text}`}>
+              <p className="text-lg font-semibold" style={{ color: cssVar }}>
                 {fmtDealNum(metric?.value)}
               </p>
-              <p className={`text-xs mt-0.5 text-[#888888]`}>
+              <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
                 {"note" in (metric || {}) ? (metric as { note?: string })?.note : ""}
                 {"subtitle" in (metric || {}) ? (metric as { subtitle?: string })?.subtitle : ""}
               </p>
@@ -79,7 +75,7 @@ function MetricRow({ label, scenarios, field, isLast }: MetricRowProps) {
           <div />
           {scenarioOrder.map((key) => (
             <div key={key} className="flex justify-center py-1">
-              <ArrowDown className="h-4 w-4 text-zinc-500" />
+              <ArrowDown className="h-4 w-4" style={{ color: "var(--qc-text-muted)" }} />
             </div>
           ))}
         </div>
@@ -104,19 +100,14 @@ export function EpsEngine({ data }: EpsEngineProps) {
       {/* Legend pills */}
       <div className="flex items-center gap-3 flex-wrap">
         {scenarioOrder.map((key) => {
-          const cfg = scenarioColors[key];
-          const borderColor =
-            key === "bull"
-              ? "border-emerald-600/40"
-              : key === "base"
-              ? "border-blue-600/40"
-              : "border-red-600/40";
+          const { cssVar, label } = scenarioColors[key];
           return (
             <span
               key={key}
-              className={`text-xs font-medium px-3 py-1.5 rounded-full border ${borderColor} text-[#121212]`}
+              className="text-xs font-medium px-3 py-1.5 rounded-full"
+              style={{ border: `1px solid ${cssVar}60`, color: "var(--qc-text-body)" }}
             >
-              {cfg.label}
+              {label}
             </span>
           );
         })}
@@ -126,10 +117,7 @@ export function EpsEngine({ data }: EpsEngineProps) {
       <div className="grid grid-cols-[180px_1fr_1fr_1fr] gap-4">
         <div />
         {scenarioOrder.map((key) => (
-          <p
-            key={key}
-            className={`text-xs font-bold uppercase tracking-wider ${scenarioColors[key].header}`}
-          >
+          <p key={key} className="text-xs font-bold uppercase tracking-wider" style={{ color: scenarioColors[key].cssVar }}>
             {key === "bull" ? "BULL CASE" : key === "base" ? "BASE CASE" : "BEAR CASE"}
           </p>
         ))}
@@ -141,23 +129,23 @@ export function EpsEngine({ data }: EpsEngineProps) {
       <MetricRow label="Margin Trajectory" scenarios={scenarios} field="margin_trajectory" />
       <MetricRow label="EPS CAGR Forecast" scenarios={scenarios} field="expected_eps_cagr" isLast />
 
-      {/* Bottom cards: upside lever + risk factor */}
+      {/* Bottom cards */}
       {(topUpsideLever || primaryRiskFactor) && (
         <div className="grid grid-cols-2 gap-4 pt-2">
           {topUpsideLever && (
-            <div className="rounded-lg bg-emerald-50/90 border border-emerald-200/60 px-5 py-4">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-1">
+            <div className="rounded-lg px-5 py-4" style={{ background: "var(--qc-up-soft)", border: "1px solid var(--qc-up)" }}>
+              <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--qc-up)" }}>
                 Top Upside Lever
               </p>
-              <p className="text-base font-medium text-zinc-900">{topUpsideLever}</p>
+              <p className="text-base font-medium" style={{ color: "var(--qc-text-heading)" }}>{topUpsideLever}</p>
             </div>
           )}
           {primaryRiskFactor && (
-            <div className="rounded-lg bg-red-50/90 border border-red-200/60 px-5 py-4">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-red-700 mb-1">
+            <div className="rounded-lg px-5 py-4" style={{ background: "var(--qc-down-soft)", border: "1px solid var(--qc-down)" }}>
+              <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--qc-down)" }}>
                 Primary Risk Factor
               </p>
-              <p className="text-base font-medium text-zinc-900">{primaryRiskFactor}</p>
+              <p className="text-base font-medium" style={{ color: "var(--qc-text-heading)" }}>{primaryRiskFactor}</p>
             </div>
           )}
         </div>

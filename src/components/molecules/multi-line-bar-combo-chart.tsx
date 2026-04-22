@@ -15,7 +15,7 @@ import type { ChartGroup } from "@/types/financials";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface MultiLineBarComboChartProps {
+interface MultiLineBarComboChartProps {
   chartGroups: ChartGroup[];
   /** Left y-axis label (for bar series) */
   leftAxisLabel?: string;
@@ -32,8 +32,9 @@ export interface MultiLineBarComboChartProps {
 
 // ─── Default colors ───────────────────────────────────────────────────────────
 
-const BAR_COLORS = ["#a5b4fc", "#93c5fd", "#6ee7b7", "#fcd34d"];
-const LINE_COLORS = ["#0F172B", "#d97706", "#6b7280", "#7c3aed"];
+// Warm-neutral palette aligned to the design system
+const BAR_COLORS = ["#A5B4FC", "#93C5FD", "#6EE7B7", "#FCD34D"];
+const LINE_COLORS = ["#0E0E0C", "#B4731A", "#5A5A54", "#3A6BEF"];
 
 // ─── Merge series data into flat recharts rows keyed by x ────────────────────
 
@@ -108,7 +109,7 @@ function LegendItem({
         </svg>
       )}
 
-      <span style={{ fontSize: 12, color: "#888888", whiteSpace: "nowrap" }}>{name}</span>
+      <span style={{ fontSize: 11, color: "var(--qc-text-body)", fontFamily: "'IBM Plex Mono', monospace", whiteSpace: "nowrap" }}>{name}</span>
     </button>
   );
 }
@@ -120,13 +121,15 @@ function GroupButton({ label, active, onClick }: { label: string; active: boolea
     <button
       onClick={onClick}
       style={{
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: 500,
         padding: "4px 12px",
         borderRadius: 6,
-        border: `1px solid ${active ? "#0F172B" : "#E2E2E2"}`,
-        background: active ? "#0F172B" : "transparent",
-        color: active ? "#ffffff" : "#888888",
+        fontFamily: "'IBM Plex Mono', monospace",
+        letterSpacing: "0.06em",
+        border: `1px solid ${active ? "var(--qc-accent-primary)" : "var(--qc-border-default)"}`,
+        background: active ? "var(--qc-accent-primary)" : "transparent",
+        color: active ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
         cursor: "pointer",
         whiteSpace: "nowrap",
       }}
@@ -203,11 +206,11 @@ export function MultiLineBarComboChart({
       {/* Chart */}
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={chartData} margin={{ top: 4, right: 20, bottom: 20, left: 20 }}>
-          <CartesianGrid vertical={false} stroke="#F0F0F0" />
+          <CartesianGrid vertical={false} stroke="var(--qc-border-inner)" />
 
           <XAxis
             dataKey="x"
-            tick={{ fontSize: 11, fill: "#888888" }}
+            tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}
             axisLine={false}
             tickLine={false}
           />
@@ -216,7 +219,7 @@ export function MultiLineBarComboChart({
           <YAxis
             yAxisId="left"
             orientation="left"
-            tick={{ fontSize: 11, fill: "#888888" }}
+            tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}
             axisLine={false}
             tickLine={false}
             tickFormatter={fmtTick}
@@ -227,7 +230,7 @@ export function MultiLineBarComboChart({
             }}
             label={
               resolvedLeftLabel
-                ? { value: resolvedLeftLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 11, fill: "#888888", textAnchor: "middle" } }
+                ? { value: resolvedLeftLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 10, fill: "var(--qc-text-muted)", textAnchor: "middle", fontFamily: "'IBM Plex Mono', monospace" } }
                 : undefined
             }
           />
@@ -237,7 +240,7 @@ export function MultiLineBarComboChart({
             <YAxis
               yAxisId="right"
               orientation="right"
-              tick={{ fontSize: 11, fill: "#888888" }}
+              tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={fmtTick}
@@ -248,7 +251,7 @@ export function MultiLineBarComboChart({
               }}
               label={
                 resolvedRightLabel
-                  ? { value: resolvedRightLabel, angle: 90, position: "insideRight", offset: -10, style: { fontSize: 11, fill: "#888888", textAnchor: "middle" } }
+                  ? { value: resolvedRightLabel, angle: 90, position: "insideRight", offset: -10, style: { fontSize: 10, fill: "var(--qc-text-muted)", textAnchor: "middle", fontFamily: "'IBM Plex Mono', monospace" } }
                   : undefined
               }
             />
@@ -256,14 +259,15 @@ export function MultiLineBarComboChart({
 
           <Tooltip
             contentStyle={{
-              fontSize: 12,
-              border: "1px solid #E2E2E2",
-              borderRadius: 8,
-              background: "#fff",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              fontSize: 11,
+              border: "1px solid var(--qc-border-default)",
+              borderRadius: 10,
+              background: "var(--qc-surface-white)",
+              boxShadow: "0 4px 16px rgba(14,14,12,0.08)",
+              fontFamily: "'IBM Plex Mono', monospace",
             }}
-            labelStyle={{ fontWeight: 600, color: "#0F172B", marginBottom: 4 }}
-            itemStyle={{ color: "#888888" }}
+            labelStyle={{ fontWeight: 600, color: "var(--qc-text-heading)", marginBottom: 4 }}
+            itemStyle={{ color: "var(--qc-text-body)" }}
           />
 
           {activeGroup.barSeries.map((s, i) => (
@@ -324,17 +328,50 @@ export function MultiLineBarComboChart({
 
   if (title) {
     return (
-      <div className={className} style={{ borderRadius: 10, border: "1px solid #E2E2E2", background: "#F5F5F5", padding: 8 }}>
+      <div
+        className={className}
+        style={{
+          borderRadius: 10,
+          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-surface-panel)",
+          padding: 8,
+        }}
+      >
         {/* Card header */}
-        <div className="flex items-center justify-between" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
+        <div
+          className="flex items-center justify-between"
+          style={{ paddingTop: 4, paddingBottom: 10, paddingLeft: 8, paddingRight: 8 }}
+        >
           <div>
-            <h5>{title}</h5>
-            {subtitle && <p>{subtitle}</p>}
+            <div
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 11,
+                fontWeight: 500,
+                color: "var(--qc-text-body)",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+              }}
+            >
+              {title}
+            </div>
+            {subtitle && (
+              <div style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 2, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.04em" }}>
+                {subtitle}
+              </div>
+            )}
           </div>
           {groupToggles}
         </div>
         {/* Content box */}
-        <div style={{ borderRadius: 10, border: "1px solid rgba(226,226,226,0.10)", background: "#FFF", padding: 16 }}>
+        <div
+          style={{
+            borderRadius: 10,
+            border: "1px solid var(--qc-border-inner)",
+            background: "var(--qc-surface-white)",
+            padding: 16,
+          }}
+        >
           {inner}
         </div>
       </div>

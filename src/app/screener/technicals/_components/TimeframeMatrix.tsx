@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { TechnicalsTimeframesRaw } from "@/types/technicals";
 import { signalColor, directionColor } from "./helpers";
@@ -15,33 +14,49 @@ const TIMEFRAME_ROWS = [
   { label: "MONTHLY", key: "monthly" as const },
 ] as const;
 
+function SignalBadge({ label, color }: { label: string; color: string }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-[4px] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.10em]"
+      style={{ color, background: color + "1A", border: `1px solid ${color}33` }}
+    >
+      {label}
+    </span>
+  );
+}
+
 export function TimeframeMatrix({ timeframes }: TimeframeMatrixProps) {
   return (
     <SectionPanel
       title="Timeframe Matrix"
       subtitle="Signal alignment across daily, weekly, monthly"
     >
-      <div className="divide-y divide-zinc-100 pb-4">
-        {TIMEFRAME_ROWS.map(({ label, key }) => {
+      <div className="pb-4">
+        {TIMEFRAME_ROWS.map(({ label, key }, i) => {
           const tf = timeframes[key];
           return (
-            <div key={key} className="flex items-center justify-between py-3 px-2">
+            <div
+              key={key}
+              className="flex items-center justify-between py-2.5 px-2"
+              style={i > 0 ? { borderTop: "1px solid var(--qc-border-inner)" } : undefined}
+            >
               <div>
-                <h6 className="uppercase tracking-wider">{label}</h6>
-                <p className={directionColor(tf.trend)}>{tf.trend}</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-heading)" }}>{label}</p>
+                <p className="text-[12px] font-medium" style={{ color: directionColor(tf.trend) }}>{tf.trend}</p>
               </div>
-              <Badge className={signalColor(tf.signal)}>{tf.signal.replace(/_/g, " ")}</Badge>
+              <SignalBadge label={tf.signal.replace(/_/g, " ")} color={signalColor(tf.signal)} />
             </div>
           );
         })}
-        <div className="flex items-center justify-between py-3 px-2">
+        <div
+          className="flex items-center justify-between py-2.5 px-2"
+          style={{ borderTop: "1px solid var(--qc-border-inner)" }}
+        >
           <div>
-            <h6 className="uppercase tracking-wider">Multi-TF Score</h6>
-            <p>{timeframes.multiTimeframeScore.toFixed(1)}/100</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-heading)" }}>Multi-TF Score</p>
+            <p className="text-[12px]" style={{ color: "var(--qc-text-body)" }}>{timeframes.multiTimeframeScore.toFixed(1)}/100</p>
           </div>
-          <Badge className={signalColor(timeframes.multiTimeframeSignal)}>
-            {timeframes.multiTimeframeSignal}
-          </Badge>
+          <SignalBadge label={timeframes.multiTimeframeSignal} color={signalColor(timeframes.multiTimeframeSignal)} />
         </div>
       </div>
     </SectionPanel>

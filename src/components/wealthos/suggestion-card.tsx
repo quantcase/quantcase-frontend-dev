@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { apiPut, apiPost } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { PriorityBadge } from "./priority-badge";
 import { useJobPoller } from "@/hooks/useJobPoller";
-import { Progress } from "@/components/ui/progress";
 import type { WealthSuggestion, MessageChannel } from "@/types/wealthos";
 
 interface SuggestionCardProps {
@@ -16,6 +16,16 @@ interface SuggestionCardProps {
 }
 
 const CHANNELS: MessageChannel[] = ["call", "email", "whatsapp"];
+
+const inputStyle: React.CSSProperties = {
+  borderRadius: 6,
+  border: "1px solid var(--qc-border-default)",
+  background: "var(--qc-surface-card)",
+  color: "var(--qc-text-heading)",
+  fontSize: 12,
+  padding: "4px 8px",
+  outline: "none",
+};
 
 export function SuggestionCard({ suggestion, clientId, onStatusChange }: SuggestionCardProps) {
   const [showMessageForm, setShowMessageForm] = useState(false);
@@ -61,22 +71,42 @@ export function SuggestionCard({ suggestion, clientId, onStatusChange }: Suggest
   const isPending = suggestion.status === "pending";
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
+    <div
+      className="rounded-[14px]"
+      style={{
+        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-surface-card)",
+        padding: "14px 16px",
+      }}
+    >
       <div className="flex items-start justify-between gap-2 mb-2">
         <PriorityBadge priority={suggestion.priority} />
-        <span className="text-xs text-zinc-400 dark:text-zinc-500">
+        <span
+          style={{
+            fontSize: 10,
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
+            color: "var(--qc-text-muted)",
+          }}
+        >
           Score {(suggestion.score * 100).toFixed(0)}
         </span>
       </div>
 
-      <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200 mb-1">{suggestion.suggested_action}</p>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3">{suggestion.reason}</p>
+      <p className="mb-1" style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>
+        {suggestion.suggested_action}
+      </p>
+      <p className="mb-3" style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>
+        {suggestion.reason}
+      </p>
 
       {suggestion.talking_points.length > 0 && (
         <ul className="space-y-1 mb-3">
           {suggestion.talking_points.map((point, i) => (
-            <li key={i} className="flex items-start gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
-              <span className="mt-0.5 size-1.5 shrink-0 rounded-full bg-blue-400" />
+            <li key={i} className="flex items-start gap-1.5" style={{ fontSize: 12, color: "var(--qc-text-body)" }}>
+              <span
+                className="mt-0.5 size-1.5 shrink-0 rounded-full"
+                style={{ background: "var(--qc-text-muted)" }}
+              />
               {point}
             </li>
           ))}
@@ -84,13 +114,21 @@ export function SuggestionCard({ suggestion, clientId, onStatusChange }: Suggest
       )}
 
       {suggestion.message && (
-        <div className="rounded-md border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-3 py-2 mb-3">
-          <p className="text-xs text-zinc-600 dark:text-zinc-400 italic">&ldquo;{suggestion.message}&rdquo;</p>
+        <div
+          className="rounded-md px-3 py-2 mb-3"
+          style={{
+            border: "1px solid var(--qc-border-inner)",
+            background: "var(--qc-surface-panel)",
+          }}
+        >
+          <p className="italic" style={{ fontSize: 12, color: "var(--qc-text-body)" }}>
+            &ldquo;{suggestion.message}&rdquo;
+          </p>
         </div>
       )}
 
       {suggestion.status !== "pending" && (
-        <span className="inline-flex items-center text-xs text-zinc-400 dark:text-zinc-500 capitalize">
+        <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }} className="inline-flex items-center capitalize">
           {suggestion.status === "used" ? "✓ Acted on" : "✗ Ignored"}
         </span>
       )}
@@ -106,12 +144,15 @@ export function SuggestionCard({ suggestion, clientId, onStatusChange }: Suggest
       )}
 
       {showMessageForm && isPending && (
-        <div className="mt-3 space-y-2 border-t border-zinc-100 dark:border-zinc-800 pt-3">
+        <div
+          className="mt-3 space-y-2 pt-3"
+          style={{ borderTop: "1px dashed var(--qc-border-inner)" }}
+        >
           <div className="flex gap-2">
             <select
               value={channel}
               onChange={e => setChannel(e.target.value as MessageChannel)}
-              className="rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              style={inputStyle}
             >
               {CHANNELS.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
@@ -120,7 +161,8 @@ export function SuggestionCard({ suggestion, clientId, onStatusChange }: Suggest
               value={context}
               onChange={e => setContext(e.target.value)}
               placeholder="Optional context..."
-              className="flex-1 rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1"
+              style={{ ...inputStyle, minWidth: 0 }}
             />
             <Button size="sm" onClick={handleGenerateMessage} disabled={isPolling || msgJobQueued}>
               {isPolling ? "Generating..." : "Send"}
@@ -129,10 +171,14 @@ export function SuggestionCard({ suggestion, clientId, onStatusChange }: Suggest
           {(isPolling || msgJobQueued) && (
             <div className="space-y-1">
               <Progress value={progress} className="h-1" />
-              <p className="text-[10px] text-zinc-400">Generating message... {progress}%</p>
+              <p style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>
+                Generating message... {progress}%
+              </p>
             </div>
           )}
-          {msgError && <p className="text-xs text-red-600 dark:text-red-400">{msgError}</p>}
+          {msgError && (
+            <p style={{ fontSize: 12, color: "var(--qc-down)" }}>{msgError}</p>
+          )}
         </div>
       )}
     </div>

@@ -9,9 +9,9 @@ interface SectionScoring {
 
 function scoreColor(score: number, maxScore: number): string {
   const pct = maxScore > 0 ? score / maxScore : 0;
-  if (pct <= 0.4) return "#F8383C";
-  if (pct <= 0.7) return "#FBBF24";
-  return "#888888";
+  if (pct <= 0.4) return "var(--qc-down)";
+  if (pct <= 0.7) return "var(--qc-warn)";
+  return "var(--qc-up)";
 }
 
 function SectionScoreBar({ scoring }: { scoring: SectionScoring }) {
@@ -19,12 +19,12 @@ function SectionScoreBar({ scoring }: { scoring: SectionScoring }) {
   const numericScore = !isNaN(parsedScore);
   const filled = numericScore ? Math.round(Math.min(parsedScore, scoring.max_score)) : 0;
   const total = scoring.max_score;
-  const fillColor = numericScore ? scoreColor(parsedScore, scoring.max_score) : "#E2E8F0";
+  const fillColor = numericScore ? scoreColor(parsedScore, scoring.max_score) : "var(--qc-border-default)";
   const textColor = fillColor;
 
   return (
     <div className="shrink-0 flex items-center gap-2">
-      <span style={{ fontSize: 13, fontWeight: 600, color: numericScore ? textColor : "#94a3b8", letterSpacing: "0.01em" }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: numericScore ? textColor : "var(--qc-text-muted)", letterSpacing: "0.01em" }}>
         {numericScore ? `${parsedScore}/${scoring.max_score}` : "N/A"}
       </span>
       {numericScore && (
@@ -37,7 +37,7 @@ function SectionScoreBar({ scoring }: { scoring: SectionScoring }) {
                 height: 12,
                 flexShrink: 0,
                 borderRadius: 1,
-                backgroundColor: i < filled ? fillColor : "#E2E8F0",
+                backgroundColor: i < filled ? fillColor : "var(--qc-border-default)",
               }}
             />
           ))}

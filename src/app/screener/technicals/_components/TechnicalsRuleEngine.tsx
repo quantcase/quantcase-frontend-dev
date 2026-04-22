@@ -20,18 +20,15 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
 
   const titleNode = (
     <div className="flex items-center gap-3">
-      <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", letterSpacing: "0.01em" }}>Rule Engine</span>
+      <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>Rule Engine</span>
       <div className="flex items-center gap-0.5">
         {(["GROWTH", "VALUE"] as const).map((p, i) => (
           <span key={p} className="contents">
-            {i > 0 && <span className="text-[#E2E2E2] text-[10px] select-none">·</span>}
+            {i > 0 && <span className="text-[10px] select-none" style={{ color: "var(--qc-border-default)" }}>·</span>}
             <button
               onClick={() => setActivePerspective(p)}
-              className={`px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
-                activePerspective === p
-                  ? "text-[#0F172B]"
-                  : "text-[#C0C0C0] hover:text-[#888888]"
-              }`}
+              className="px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors"
+              style={{ color: activePerspective === p ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}
             >
               {p}
             </button>
@@ -42,16 +39,19 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
   );
 
   const engineTabs = (
-    <div className="inline-flex rounded-lg border border-[#E2E2E2] bg-[#F5F5F5] p-0.5 gap-0.5">
+    <div
+      className="inline-flex rounded-[8px] border p-0.5 gap-0.5"
+      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+    >
       {ENGINE_TABS.map((tab) => (
         <button
           key={tab}
           onClick={() => onEngineChange(tab)}
-          className={`px-3 py-1.5 rounded-md text-[10px] font-semibold uppercase tracking-wide transition-all ${
-            activeEngine === tab
-              ? "bg-[#0F172B] text-white"
-              : "text-[#888888] hover:text-[#0F172B]"
-          }`}
+          className="px-3 py-1.5 rounded-[6px] font-mono text-[10px] uppercase tracking-[0.14em] transition-all"
+          style={activeEngine === tab
+            ? { background: "var(--qc-text-heading)", color: "var(--qc-surface-white)" }
+            : { color: "var(--qc-text-muted)" }
+          }
         >
           {tab}
         </button>

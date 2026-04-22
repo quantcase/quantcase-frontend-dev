@@ -143,29 +143,41 @@ export function AutocompleteInput({
 
       {/* Suggestions dropdown */}
       {showSuggestions && filteredSuggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden">
+        <div
+          className="absolute z-[100] w-full mt-1 rounded-xl shadow-lg overflow-hidden"
+          style={{
+            background: "var(--qc-surface-white)",
+            border: "1px solid var(--qc-border-default)",
+          }}
+        >
           {filteredSuggestions.map((option, index) => (
             <button
               key={option.value}
               type="button"
               onClick={() => handleSuggestionClick(option)}
               className={cn(
-                "w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-800 last:border-b-0",
-                selectedIndex === index && "bg-gray-50 dark:bg-gray-800"
+                "w-full px-4 py-3 text-left transition-colors border-b last:border-b-0",
+                selectedIndex === index ? "opacity-100" : ""
               )}
+              style={{
+                borderColor: "var(--qc-border-inner)",
+                background: selectedIndex === index ? "var(--qc-surface-hover)" : undefined,
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+              onMouseLeave={e => (e.currentTarget.style.background = selectedIndex === index ? "var(--qc-surface-hover)" : "")}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  <div className="text-sm font-medium truncate" style={{ color: "var(--qc-text-heading)" }}>
                     {option.label}
                   </div>
                   {option.subtitle && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                    <div className="text-xs truncate mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
                       {option.subtitle}
                     </div>
                   )}
                 </div>
-                <div className="ml-3 text-xs font-medium text-gray-600 dark:text-gray-400">
+                <div className="ml-3 text-xs font-medium mono" style={{ color: "var(--qc-text-muted)" }}>
                   {option.value}
                 </div>
               </div>

@@ -16,7 +16,7 @@ import { TooltipProvider, TooltipRoot, TooltipTrigger, TooltipContent } from "@/
 import { CheckCircle2, XCircle, Clock, Target, ChevronUp, ChevronDown, ChevronsUpDown, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import type { GuidanceRow, GuidanceSeverity } from "@/types/management";
 
-export interface GuidanceFilterState {
+interface GuidanceFilterState {
   globalFilter: string;
   setGlobalFilter: (v: string) => void;
   selectedSeverities: Set<GuidanceSeverity>;
@@ -35,7 +35,7 @@ export function GuidanceFilterControls({ state }: { state: GuidanceFilterState }
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <SeverityDropdown selected={selectedSeverities} onChange={setSelectedSeverities} />
       <div style={{ position: "relative" }}>
-        <Search style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", width: 13, height: 13, color: "#aaa", pointerEvents: "none" }} />
+        <Search style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", width: 13, height: 13, color: "var(--qc-text-muted)", pointerEvents: "none" }} />
         <input
           type="text"
           placeholder="Search…"
@@ -43,8 +43,8 @@ export function GuidanceFilterControls({ state }: { state: GuidanceFilterState }
           onChange={(e) => setGlobalFilter(e.target.value)}
           style={{
             fontSize: 12, paddingLeft: 26, paddingRight: 10, paddingTop: 5, paddingBottom: 5,
-            border: "1px solid #E2E2E2", borderRadius: 6, width: 180,
-            outline: "none", color: "#121212", background: "#fff",
+            border: "1px solid var(--qc-border-default)", borderRadius: 6, width: 180,
+            outline: "none", color: "var(--qc-text-body)", background: "var(--qc-surface-white)",
           }}
         />
       </div>
@@ -60,21 +60,51 @@ interface GuidanceTrackTableProps {
 function getStatusConfig(severity: GuidanceSeverity) {
   switch (severity) {
     case "beat":
-      return { icon: <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />, textColor: "text-emerald-700", borderColor: "border-l-4 border-l-emerald-600", label: "Beat" };
+      return {
+        icon: <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "var(--qc-up)" }} />,
+        textColor: "var(--qc-up)",
+        borderLeft: "4px solid var(--qc-up)",
+        label: "Beat",
+      };
     case "major":
-      return { icon: <XCircle className="h-3.5 w-3.5 text-red-600" />, textColor: "text-red-700", borderColor: "border-l-4 border-l-red-600", label: "Major Miss" };
+      return {
+        icon: <XCircle className="h-3.5 w-3.5" style={{ color: "var(--qc-down)" }} />,
+        textColor: "var(--qc-down)",
+        borderLeft: "4px solid var(--qc-down)",
+        label: "Major Miss",
+      };
     case "mediocre":
-      return { icon: <XCircle className="h-3.5 w-3.5 text-red-600" />, textColor: "text-red-700", borderColor: "border-l-4 border-l-red-600", label: "Miss" };
+      return {
+        icon: <XCircle className="h-3.5 w-3.5" style={{ color: "var(--qc-down)" }} />,
+        textColor: "var(--qc-down)",
+        borderLeft: "4px solid var(--qc-down)",
+        label: "Miss",
+      };
     case "minor":
-      return { icon: <XCircle className="h-3.5 w-3.5 text-amber-600" />, textColor: "text-amber-700", borderColor: "border-l-4 border-l-amber-600", label: "Minor Miss" };
+      return {
+        icon: <XCircle className="h-3.5 w-3.5" style={{ color: "var(--qc-warn)" }} />,
+        textColor: "var(--qc-warn)",
+        borderLeft: "4px solid var(--qc-warn)",
+        label: "Minor Miss",
+      };
     case "rolled_forward":
-      return { icon: <Clock className="h-3.5 w-3.5 text-blue-600" />, textColor: "text-blue-700", borderColor: "border-l-4 border-l-blue-600", label: "Rolled Fwd" };
+      return {
+        icon: <Clock className="h-3.5 w-3.5" style={{ color: "var(--qc-blue)" }} />,
+        textColor: "var(--qc-blue)",
+        borderLeft: "4px solid var(--qc-blue)",
+        label: "Rolled Fwd",
+      };
     case "ongoing":
-      return { icon: <Clock className="h-3.5 w-3.5 text-blue-600" />, textColor: "text-blue-700", borderColor: "border-l-4 border-l-blue-600", label: "Ongoing" };
+      return {
+        icon: <Clock className="h-3.5 w-3.5" style={{ color: "var(--qc-blue)" }} />,
+        textColor: "var(--qc-blue)",
+        borderLeft: "4px solid var(--qc-blue)",
+        label: "Ongoing",
+      };
     case "not_trackable":
-      return { icon: null, textColor: "text-zinc-500", borderColor: "", label: "N/A" };
+      return { icon: null, textColor: "var(--qc-text-muted)", borderLeft: "none", label: "N/A" };
     default:
-      return { icon: null, textColor: "text-zinc-500", borderColor: "", label: String(severity) };
+      return { icon: null, textColor: "var(--qc-text-muted)", borderLeft: "none", label: String(severity) };
   }
 }
 
@@ -89,9 +119,9 @@ const SEVERITY_OPTIONS: { value: GuidanceSeverity; label: string }[] = [
 ];
 
 function SortIcon({ sorted }: { sorted: false | "asc" | "desc" }) {
-  if (sorted === "asc") return <ChevronUp className="h-3 w-3 text-zinc-600" />;
-  if (sorted === "desc") return <ChevronDown className="h-3 w-3 text-zinc-600" />;
-  return <ChevronsUpDown className="h-3 w-3 text-zinc-400" />;
+  if (sorted === "asc") return <ChevronUp className="h-3 w-3" style={{ color: "var(--qc-text-body)" }} />;
+  if (sorted === "desc") return <ChevronDown className="h-3 w-3" style={{ color: "var(--qc-text-body)" }} />;
+  return <ChevronsUpDown className="h-3 w-3" style={{ color: "var(--qc-text-muted)" }} />;
 }
 
 function SeverityDropdown({
@@ -128,30 +158,30 @@ function SeverityDropdown({
         onClick={() => setOpen(v => !v)}
         style={{
           display: "inline-flex", alignItems: "center", gap: 6,
-          fontSize: 12, fontWeight: 500, color: selected.size > 0 ? "#0F172B" : "#888888",
-          border: `1px solid ${selected.size > 0 ? "#0F172B" : "#E2E2E2"}`,
+          fontSize: 12, fontWeight: 500,
+          color: selected.size > 0 ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+          border: `1px solid ${selected.size > 0 ? "var(--qc-border-active)" : "var(--qc-border-default)"}`,
           borderRadius: 6, padding: "5px 10px",
-          background: "#fff", cursor: "pointer", whiteSpace: "nowrap",
+          background: "var(--qc-surface-white)", cursor: "pointer", whiteSpace: "nowrap",
         }}
       >
         {label}
-        <ChevronDown className="h-3 w-3" style={{ color: "#888888", flexShrink: 0 }} />
+        <ChevronDown className="h-3 w-3" style={{ color: "var(--qc-text-muted)", flexShrink: 0 }} />
       </button>
       {open && (
         <div style={{
           position: "absolute", top: "calc(100% + 4px)", right: 0, zIndex: 50,
-          background: "#fff", border: "1px solid #E2E2E2", borderRadius: 8,
+          background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", borderRadius: 8,
           boxShadow: "0 4px 16px rgba(0,0,0,0.08)", minWidth: 160, padding: "4px 0",
         }}>
-          {/* Clear all */}
           <button
             onClick={() => onChange(new Set())}
             style={{
               width: "100%", textAlign: "left", padding: "6px 12px",
-              fontSize: 11, color: selected.size === 0 ? "#0F172B" : "#888888",
+              fontSize: 11, color: selected.size === 0 ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
               fontWeight: selected.size === 0 ? 600 : 400,
               background: "none", border: "none", cursor: "pointer",
-              borderBottom: "1px solid #F5F5F5",
+              borderBottom: "1px solid var(--qc-surface-panel)",
             }}
           >
             All
@@ -162,14 +192,14 @@ function SeverityDropdown({
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "6px 12px", cursor: "pointer",
-                fontSize: 12, color: "#121212",
+                fontSize: 12, color: "var(--qc-text-body)",
               }}
             >
               <input
                 type="checkbox"
                 checked={selected.has(opt.value)}
                 onChange={() => toggle(opt.value)}
-                style={{ accentColor: "#0F172B", width: 13, height: 13, cursor: "pointer", flexShrink: 0 }}
+                style={{ accentColor: "var(--qc-accent-primary)", width: 13, height: 13, cursor: "pointer", flexShrink: 0 }}
               />
               {opt.label}
             </label>
@@ -204,10 +234,10 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
       size: 130,
       cell: ({ getValue }) => (
         <div className="flex items-center gap-1.5">
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0 bg-zinc-100">
-            <Target className="h-3 w-3 text-zinc-500" />
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0" style={{ background: "var(--qc-icon-box-bg)", border: "1px solid var(--qc-icon-box-border)" }}>
+            <Target className="h-3 w-3" style={{ color: "var(--qc-text-muted)" }} />
           </span>
-          <span className="text-[10px] uppercase tracking-wide text-zinc-500">
+          <span className="text-[10px] uppercase tracking-wide" style={{ color: "var(--qc-text-muted)" }}>
             {String(getValue()).replace(/_/g, " ")}
           </span>
         </div>
@@ -222,9 +252,9 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
       accessorFn: (row) => row.actual,
       cell: ({ row }) => (
         <div className="space-y-0.5">
-          <div className="text-xs text-zinc-700">{row.original.actual}</div>
+          <div className="text-xs" style={{ color: "var(--qc-text-body)" }}>{row.original.actual}</div>
           {row.original.delta && (
-            <div className="text-[10px] text-zinc-400">{row.original.delta}</div>
+            <div className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>{row.original.delta}</div>
           )}
         </div>
       ),
@@ -240,9 +270,9 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
       cell: ({ getValue }) => {
         const config = getStatusConfig(getValue() as GuidanceSeverity);
         return (
-          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-50">
+          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md" style={{ background: "var(--qc-surface-panel)" }}>
             <span className="flex-shrink-0">{config.icon}</span>
-            <span className={`text-[10px] font-medium uppercase tracking-wide whitespace-nowrap ${config.textColor}`}>
+            <span className="text-[10px] font-medium uppercase tracking-wide whitespace-nowrap" style={{ color: config.textColor }}>
               {config.label}
             </span>
           </div>
@@ -276,12 +306,11 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
   });
 
   if (rows.length === 0) {
-    return <p className="text-xs text-zinc-500 py-4">No guidance records available</p>;
+    return <p className="text-xs py-4" style={{ color: "var(--qc-text-muted)" }}>No guidance records available</p>;
   }
 
   return (
     <div className="space-y-3">
-      {/* Table */}
       <div className="overflow-x-auto">
         <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
           <colgroup>
@@ -294,14 +323,14 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
           </colgroup>
           <thead>
             {table.getHeaderGroups().map(hg => (
-              <tr key={hg.id} style={{ borderBottom: "1px solid #E2E2E2" }}>
+              <tr key={hg.id} style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
                 {hg.headers.map(header => (
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
                     style={{
                       padding: "6px 8px", textAlign: "left",
-                      fontSize: 10, fontWeight: 500, color: "#888888",
+                      fontSize: 10, fontWeight: 500, color: "var(--qc-text-muted)",
                       textTransform: "uppercase", letterSpacing: "0.08em",
                       cursor: header.column.getCanSort() ? "pointer" : "default",
                       userSelect: "none", whiteSpace: "nowrap",
@@ -325,13 +354,12 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
                 const tr = (
                   <tr
                     key={row.id}
-                    className={config.borderColor}
-                    style={{ borderBottom: "1px solid #E2E2E2" }}
+                    style={{ borderBottom: "1px solid var(--qc-border-inner)", borderLeft: config.borderLeft }}
                   >
-                    <td style={{ padding: "8px 8px", fontSize: 12, color: "#3F3F46", wordBreak: "break-word" }}>{row.original.period}</td>
+                    <td style={{ padding: "8px 8px", fontSize: 12, color: "var(--qc-text-body)", wordBreak: "break-word" }}>{row.original.period}</td>
                     <td style={{ padding: "8px 8px" }}>{flexRender(columns[1].cell, row.getVisibleCells()[1].getContext())}</td>
-                    <td style={{ padding: "8px 8px", fontSize: 12, color: "#3F3F46", wordBreak: "break-word" }}>{row.original.metric}</td>
-                    <td style={{ padding: "8px 8px", fontSize: 12, color: "#3F3F46", wordBreak: "break-word" }}>{row.original.guidance}</td>
+                    <td style={{ padding: "8px 8px", fontSize: 12, color: "var(--qc-text-body)", wordBreak: "break-word" }}>{row.original.metric}</td>
+                    <td style={{ padding: "8px 8px", fontSize: 12, color: "var(--qc-text-body)", wordBreak: "break-word" }}>{row.original.guidance}</td>
                     <td style={{ padding: "8px 8px" }}>{flexRender(columns[4].cell, row.getVisibleCells()[4].getContext())}</td>
                     <td style={{ padding: "8px 8px" }}>{flexRender(columns[5].cell, row.getVisibleCells()[5].getContext())}</td>
                   </tr>
@@ -350,7 +378,7 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
             </TooltipProvider>
             {table.getRowModel().rows.length === 0 && (
               <tr>
-                <td colSpan={6} style={{ padding: "24px 8px", textAlign: "center", fontSize: 12, color: "#888888" }}>
+                <td colSpan={6} style={{ padding: "24px 8px", textAlign: "center", fontSize: 12, color: "var(--qc-text-muted)" }}>
                   No results match your filter.
                 </td>
               </tr>
@@ -361,7 +389,7 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
 
       {/* Pagination */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, paddingTop: 4 }}>
-        <span style={{ fontSize: 11, color: "#888888" }}>
+        <span style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
           {table.getFilteredRowModel().rows.length} rows
           {table.getPageCount() > 1 && ` · page ${table.getState().pagination.pageIndex + 1} of ${table.getPageCount()}`}
         </span>
@@ -369,23 +397,23 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
           <select
             value={table.getState().pagination.pageSize}
             onChange={e => table.setPageSize(Number(e.target.value))}
-            style={{ fontSize: 11, border: "1px solid #E2E2E2", borderRadius: 6, padding: "3px 6px", color: "#121212", background: "#fff", cursor: "pointer" }}
+            style={{ fontSize: 11, border: "1px solid var(--qc-border-default)", borderRadius: 6, padding: "3px 6px", color: "var(--qc-text-body)", background: "var(--qc-surface-white)", cursor: "pointer" }}
           >
             {[5, 10, 20, 50].map(sz => <option key={sz} value={sz}>{sz} / page</option>)}
           </select>
           <button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "1px solid #E2E2E2", background: "#fff", cursor: table.getCanPreviousPage() ? "pointer" : "not-allowed", opacity: table.getCanPreviousPage() ? 1 : 0.4 }}
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)", cursor: table.getCanPreviousPage() ? "pointer" : "not-allowed", opacity: table.getCanPreviousPage() ? 1 : 0.4 }}
           >
-            <ChevronLeft className="h-3.5 w-3.5 text-zinc-600" />
+            <ChevronLeft className="h-3.5 w-3.5" style={{ color: "var(--qc-text-body)" }} />
           </button>
           <button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "1px solid #E2E2E2", background: "#fff", cursor: table.getCanNextPage() ? "pointer" : "not-allowed", opacity: table.getCanNextPage() ? 1 : 0.4 }}
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)", cursor: table.getCanNextPage() ? "pointer" : "not-allowed", opacity: table.getCanNextPage() ? 1 : 0.4 }}
           >
-            <ChevronRight className="h-3.5 w-3.5 text-zinc-600" />
+            <ChevronRight className="h-3.5 w-3.5" style={{ color: "var(--qc-text-body)" }} />
           </button>
         </div>
       </div>

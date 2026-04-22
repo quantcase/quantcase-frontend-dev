@@ -23,29 +23,36 @@ const pctFmt = (n: number) => {
   return `${sign}${n.toFixed(1)}%`;
 };
 
+type SubColorToken = "up" | "down" | "muted";
+
 interface MetricItem {
   label: string;
   value: string;
   sub?: string;
-  subColor?: string;
+  subColor?: SubColorToken;
   highlight?: boolean;
 }
+
+const SUB_COLOR: Record<SubColorToken, string> = {
+  up: "var(--qc-up)",
+  down: "var(--qc-down)",
+  muted: "var(--qc-text-muted)",
+};
 
 function MetricCell({ label, value, sub, subColor, highlight }: MetricItem) {
   return (
     <div className="flex flex-col gap-0.5 px-5 py-2">
-      <span className="text-[10px] font-medium uppercase tracking-wider text-[#888888]">
+      <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
         {label}
       </span>
       <span
-        className={`text-base font-bold whitespace-nowrap ${
-          highlight ? "text-[#E67E22]" : "text-[#0F172B]"
-        }`}
+        className="text-base whitespace-nowrap"
+        style={{ color: "var(--qc-text-heading)", fontWeight: highlight ? 700 : 600 }}
       >
         {value}
       </span>
       {sub != null && (
-        <span className={`text-[11px] font-semibold ${subColor ?? "text-zinc-500"}`}>
+        <span className="text-[11px] font-semibold" style={{ color: subColor ? SUB_COLOR[subColor] : "var(--qc-text-muted)" }}>
           {sub}
         </span>
       )}
@@ -67,8 +74,8 @@ function MetricGroup({
       className={`flex flex-col `}
     >
       {/* Group header */}
-      <div className="px-5 pt-2 pb-1.5 border-b border-[#F0F0F0]">
-        <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#888888]">
+      <div className="px-5 pt-2 pb-1.5" style={{ borderBottom: "1px solid var(--qc-border-inner)" }}>
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
           {title}
         </span>
       </div>
@@ -76,7 +83,7 @@ function MetricGroup({
       <div className="flex">
         {items.map((item, i) => (
           <div key={item.label} className="flex">
-            {i > 0 && <div className="w-px bg-[#F0F0F0] self-stretch" />}
+            {i > 0 && <div className="w-px self-stretch" style={{ background: "var(--qc-border-inner)" }} />}
             <MetricCell {...item} />
           </div>
         ))}
@@ -115,11 +122,11 @@ export function LevelsStrip({
       sub: entry.isCmp ? changeDisplay : pctFmt(-distPct),
       subColor: entry.isCmp
         ? changeIsPositive
-          ? "text-emerald-600"
-          : "text-red-600"
+          ? "up"
+          : "down"
         : distPct > 0
-          ? "text-red-600"
-          : "text-emerald-600",
+          ? "down"
+          : "up",
       highlight: entry.isCmp,
     };
   });
@@ -137,8 +144,7 @@ export function LevelsStrip({
             label: "Support",
             value: fmt(support),
             sub: pctFmt(((price.cmp - support) / support) * 100),
-            subColor:
-              price.cmp >= support ? "text-emerald-600" : "text-red-600",
+            subColor: (price.cmp >= support ? "up" : "down") as SubColorToken,
           },
         ]
       : []),
@@ -148,8 +154,7 @@ export function LevelsStrip({
             label: "Resistance",
             value: fmt(resistance),
             sub: pctFmt(((price.cmp - resistance) / resistance) * 100),
-            subColor:
-              price.cmp >= resistance ? "text-emerald-600" : "text-red-600",
+            subColor: (price.cmp >= resistance ? "up" : "down") as SubColorToken,
           },
         ]
       : []),
@@ -175,13 +180,13 @@ export function LevelsStrip({
       label: "52W High",
       value: fmt(price.high52w),
       sub: pctFmt(price.distanceFrom52wHigh),
-      subColor: "text-red-600",
+      subColor: "down" as SubColorToken,
     },
     {
       label: "52W Low",
       value: fmt(price.low52w),
       sub: pctFmt(price.distanceFrom52wLow),
-      subColor: "text-emerald-600",
+      subColor: "up" as SubColorToken,
     },
     {
       label: "% Range",
@@ -207,7 +212,7 @@ export function LevelsStrip({
             label: "ATH",
             value: fmt(price.allTimeHigh!),
             sub: pctFmt(price.distanceFromATH ?? 0),
-            subColor: "text-red-600",
+            subColor: "down" as SubColorToken,
           },
         ]
       : []),
@@ -217,7 +222,7 @@ export function LevelsStrip({
             label: "ATL",
             value: fmt(price.allTimeLow!),
             sub: pctFmt(price.distanceFromATL ?? 0),
-            subColor: "text-emerald-600",
+            subColor: "up" as SubColorToken,
           },
         ]
       : []),

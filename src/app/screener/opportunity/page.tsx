@@ -32,7 +32,6 @@ import { CompanyMetricsTable } from "@/components/opportunity/company-metrics-ta
 import { InvestmentImplicationsCard } from "@/components/opportunity/investment-implications-card";
 import { PageEmptyState } from "@/components/opportunity/page-empty-state";
 import { AnalyzePromptCard } from "@/components/opportunity/analyze-prompt-card";
-import { FinancialSubsection } from "@/components/opportunity/financial-subsection";
 import { FinancialIntelligenceCard } from "@/components/opportunity/financial-intelligence-card";
 
 const NAV_ITEMS = [
@@ -71,7 +70,7 @@ function OpportunityContent() {
   const [selectedSection, setSelectedSection] = useState("industry_overview");
   const [showSideWindow, setShowSideWindow] = useState(false);
   const [patchedSections, setPatchedSections] = useState<Partial<OFactorResponse>>({});
-  const [showFinancialDetails, setShowFinancialDetails] = useState(false);
+  const [activeFinancialTab, setActiveFinancialTab] = useState(0);
 
   const { data: transcriptCalls, loading: transcriptLoading, error: transcriptError } = useTranscriptCalls(symbol);
   const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
@@ -248,29 +247,46 @@ function OpportunityContent() {
                 <div className="pb-0 space-y-4">
                   <FinancialStrengthCard
                     data={data.financial_strength}
-                    showDetails={showFinancialDetails}
-                    onToggle={() => setShowFinancialDetails(v => !v)}
                   />
                 </div>
-                {showFinancialDetails && (
-                  <>
-                    <FinancialSubsection title="Operating Leverage Analysis" subtitle="Fixed cost absorption, DOL trend & leverage verdict">
-                      <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />
-                    </FinancialSubsection>
-                    <FinancialSubsection title="Free Cash Flow Analysis" subtitle="FCF conversion, growth trajectory, capex drag & yield">
-                      <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />
-                    </FinancialSubsection>
-                    <FinancialSubsection title="Working Capital" subtitle="DSO, DIO, DPO, CCC trends & WC as % of revenue">
-                      <WorkingCapitalCard data={data.financial_strength?.working_capital} />
-                    </FinancialSubsection>
-                    <FinancialSubsection title="Capital Structure & Capex" subtitle="Balance sheet position, debt trajectory, equity allocation & capex intensity">
-                      <CapitalStructureCard data={data.financial_strength?.capital_structure} />
-                    </FinancialSubsection>
-                    <FinancialSubsection title="KPI Timeseries" subtitle="Industry-specific KPI trends over time" paddingBottom={false}>
-                      <IndustryKpiTable data={peerData?.industry_kpis} loading={peerLoading} />
-                    </FinancialSubsection>
-                  </>
-                )}
+                {(() => {
+                  const FINANCIAL_TABS = [
+                    { label: "Operating Leverage", subtitle: "Fixed cost absorption, DOL trend & leverage verdict" },
+                    { label: "Free Cash Flow", subtitle: "FCF conversion, growth trajectory, capex drag & yield" },
+                    { label: "Working Capital", subtitle: "DSO, DIO, DPO, CCC trends & WC as % of revenue" },
+                    { label: "Capital Structure & Capex", subtitle: "Balance sheet position, debt trajectory, equity allocation & capex intensity" },
+                    { label: "KPI Timeseries", subtitle: "Industry-specific KPI trends over time" },
+                  ];
+                  return (
+                    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+                      <div className="flex gap-1 overflow-x-auto pb-2 px-1 pt-1">
+                        {FINANCIAL_TABS.map((tab, i) => (
+                          <button
+                            key={tab.label}
+                            onClick={() => setActiveFinancialTab(i)}
+                            className={`shrink-0 rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors whitespace-nowrap ${
+                              activeFinancialTab === i
+                                ? "bg-[#0F172B] text-white"
+                                : "bg-white border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B]"
+                            }`}
+                          >
+                            {tab.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-1 text-[11px] text-[#888888] px-2 pb-2">
+                        {FINANCIAL_TABS[activeFinancialTab].subtitle}
+                      </div>
+                      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4">
+                        {activeFinancialTab === 0 && <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />}
+                        {activeFinancialTab === 1 && <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />}
+                        {activeFinancialTab === 2 && <WorkingCapitalCard data={data.financial_strength?.working_capital} />}
+                        {activeFinancialTab === 3 && <CapitalStructureCard data={data.financial_strength?.capital_structure} />}
+                        {activeFinancialTab === 4 && <IndustryKpiTable data={peerData?.industry_kpis} loading={peerLoading} />}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
               {data.financial_strength?.final_scoring && (
                 <div className="w-[400px] shrink-0">

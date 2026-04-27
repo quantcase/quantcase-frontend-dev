@@ -33,7 +33,7 @@ export function DealOverview({ data }: DealOverviewProps) {
             title="DEAL FACTOR"
             overallLevel={deal_factor_score.level}
             score={deal_factor_score.overall ?? 0}
-            maxScore={20}
+            maxScore={100}
             scoreLabel="Overall Deal Factor"
             items={[
               {

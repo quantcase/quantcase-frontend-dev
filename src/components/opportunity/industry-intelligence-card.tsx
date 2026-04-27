@@ -141,7 +141,7 @@ export function IndustryIntelligenceCard({ data, investmentImplications }: Props
   if (!fs) return null;
 
   const score = fs.score ?? 0;
-  const maxScore = fs.checks?.length ?? 10;
+  const maxScore = fs.max_score ?? fs.checks?.length ?? 25;
   const status = fs.status ?? "NEUTRAL";
   const statusColor = fs.color ?? fs.status_color;
   const signals = fs.signal_breakdown ?? [];

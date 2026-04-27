@@ -111,7 +111,7 @@ function OpportunityContent() {
     return { ...s, max_score: s.max_score ?? defaultMax };
   }
 
-  const industryScoring = normScoring(data.industry_overview?.final_scoring ?? ftScoring("industry", 10), 10);
+  const industryScoring = normScoring(data.industry_overview?.final_scoring ?? ftScoring("industry", 25), 25);
   const competitionScoring = normScoring(data.competition?.final_scoring ?? ftScoring("competition", 10), 10);
   const financialScoring = normScoring(data.financial_strength?.final_scoring ?? ftScoring("financial_strength", 10), 10);
   const customerScoring = normScoring(data.customer_traction?.analysis?.final_scoring ?? ftScoring("customer_traction", 10), 10);
@@ -121,7 +121,7 @@ function OpportunityContent() {
   };
 
   const overallScore = totalScore?.total_score ?? data.final_takeaways?.overall_score ?? 0;
-  const overallMax = totalScore?.max_score ?? data.final_takeaways?.max_score ?? 40;
+  const overallMax = 100;
 
   const scorecardItems = (
     [

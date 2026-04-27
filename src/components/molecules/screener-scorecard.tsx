@@ -255,26 +255,28 @@ export function ScreenerScorecard({
 
             {/* Big score */}
             <div style={{ lineHeight: 1 }}>
-              <span style={{ fontSize: 52, fontWeight: 500, color: "var(--qc-text-heading)" }}>{score}</span>
+              <span style={{ fontSize: 52, fontWeight: 500, color: "var(--qc-text-heading)" }}>{Math.round(score)}</span>
               <span style={{ fontSize: 24, fontWeight: 400, color: "var(--qc-text-dimmed)" }}>
                 /{maxScore}
               </span>
             </div>
 
-            {/* Segmented bar */}
+            {/* Progress bar */}
             <div className="space-y-1 w-full" style={{ marginTop: 4 }}>
-              <div style={{ display: "flex", gap: 3 }}>
-                {Array.from({ length: maxScore }).map((_, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      flex: 1,
-                      height: 14,
-                      borderRadius: 2,
-                      backgroundColor: i < score ? barColor : "var(--qc-border-default)",
-                    }}
-                  />
-                ))}
+              <div
+                style={{
+                  height: 14, borderRadius: 4,
+                  background: "var(--qc-border-default)", overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${maxScore > 0 ? Math.min(100, (score / maxScore) * 100) : 0}%`,
+                    background: barColor, borderRadius: 4,
+                    transition: "width 0.3s ease",
+                  }}
+                />
               </div>
               <div className="flex justify-between">
                 <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Low</span>

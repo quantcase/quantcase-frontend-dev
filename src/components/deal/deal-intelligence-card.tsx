@@ -285,13 +285,13 @@ export function DealIntelligenceCard({ intelligence }: { intelligence: DealIntel
                   fontSize: 44, fontWeight: 500, letterSpacing: "-0.03em",
                   color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
                 }}>
-                  {deal_score.total}
+                  {Math.round(deal_score.total)}
                 </span>
                 <span style={{
                   fontFamily: "'IBM Plex Mono', monospace", fontSize: 15,
                   color: "var(--qc-text-muted)", fontWeight: 400,
                 }}>
-                  /{deal_score.max_score}
+                  /100
                 </span>
               </div>
             </div>

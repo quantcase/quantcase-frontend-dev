@@ -57,7 +57,7 @@ export function PillarPills({ activePillar, onSelect, scores, labels }: PillarPi
                 letterSpacing: "-0.01em",
               }}
             >
-              {score != null ? score : "—"}
+              {score != null ? Math.round(score) : "—"}
               <span
                 style={{
                   fontSize: 10.5,

@@ -63,30 +63,26 @@ function OverviewContent() {
 
   const derivedDealScore = dealTotalScore?.total_score
     ?? (dFactorData?.overview?.deal_factor_score?.overall ?? null);
-  const derivedDealMax = dealTotalScore?.max_score
-    ?? (dFactorData?.overview?.deal_factor_score?.overall != null ? 20 : null);
 
   const mScore = mgmtDashboard?.mqi_score?.total ?? null;
-  const mMax = 100;
   const oScore = oppTotalScore?.total_score ?? null;
-  const oMax = oppTotalScore?.max_score ?? 40;
   const dScore = derivedDealScore;
-  const dMax = derivedDealMax ?? 40;
 
-  let partialScore = 0;
-  let partialMax = 0;
-  if (mScore !== null) { partialScore += mScore; partialMax += mMax; }
-  if (oScore !== null) { partialScore += oScore; partialMax += oMax; }
-  if (dScore !== null) { partialScore += dScore; partialMax += dMax; }
+  // All pillar scores are now out of 100; use equal-weighted average
+  let partialSum = 0;
+  let partialCount = 0;
+  if (mScore !== null) { partialSum += mScore; partialCount++; }
+  if (oScore !== null) { partialSum += oScore; partialCount++; }
+  if (dScore !== null) { partialSum += dScore; partialCount++; }
 
-  const totalMax = mMax + oMax + dMax;
-  const hasAnyScore = partialMax > 0;
-  const rating = hasAnyScore ? getRating(partialScore / totalMax) : null;
+  const hasAnyScore = partialCount > 0;
+  const avgScore = hasAnyScore ? partialSum / partialCount : 0;
+  const rating = hasAnyScore ? getRating(avgScore / 100) : null;
 
   return (
     <ScreenerPageShell navItems={OVERVIEW_NAV}>
       <QcScoreHeroCard
-        score={hasAnyScore ? Math.round((partialScore / totalMax) * 100) : null}
+        score={hasAnyScore ? Math.round(avgScore) : null}
         ratingLabel={rating}
         mqiLabel={mgmtDashboard?.mqi_score?.label ?? null}
         thesisHeadline={mgmtDashboard?.management_intelligence?.key_takeaways?.[0] ?? null}
@@ -106,9 +102,9 @@ function OverviewContent() {
             managementScore={mgmtDashboard?.mqi_score?.total ?? null}
             managementMax={100}
             opportunityScore={oppTotalScore?.total_score ?? null}
-            opportunityMax={oppTotalScore?.max_score ?? null}
+            opportunityMax={100}
             dealScore={derivedDealScore}
-            dealMax={derivedDealMax}
+            dealMax={100}
             managementIntelligence={mgmtDashboard?.management_intelligence ?? null}
             opportunityTakeaways={oppData?.final_takeaways ?? null}
             opportunityData={oppData}

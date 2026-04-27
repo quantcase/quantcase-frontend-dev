@@ -41,7 +41,7 @@ function FwxSub({ item, color, muted }: FwxSubProps) {
             letterSpacing: "-0.01em",
           }}
         >
-          {item.score != null ? item.score : "—"}
+          {item.score != null ? Math.round(item.score) : "—"}
           <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>/{item.max ?? 5}</span>
         </span>
       </div>
@@ -135,7 +135,7 @@ export function ActivePillarHero({
               lineHeight: 1, fontVariantNumeric: "tabular-nums",
             }}
           >
-            {score != null ? score : "—"}
+            {score != null ? Math.round(score) : "—"}
             <span
               style={{
                 fontFamily: "'IBM Plex Mono', monospace", fontSize: 14,

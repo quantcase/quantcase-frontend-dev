@@ -45,8 +45,7 @@ export function AutocompleteInput({
             option.subtitle?.toLowerCase().includes(searchTerm)
           );
         })
-        .slice(0, maxSuggestions)
-    : [];
+    : options.slice(0, maxSuggestions);
 
   // Handle click outside to close suggestions
   useEffect(() => {
@@ -127,7 +126,7 @@ export function AutocompleteInput({
             value={value}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => value.trim() && setShowSuggestions(true)}
+            onFocus={() => setShowSuggestions(true)}
             placeholder={placeholder}
             autoComplete="off"
             className="w-full pl-12 pr-14 py-4 text-base rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent"
@@ -144,10 +143,11 @@ export function AutocompleteInput({
       {/* Suggestions dropdown */}
       {showSuggestions && filteredSuggestions.length > 0 && (
         <div
-          className="absolute z-[100] w-full mt-1 rounded-xl shadow-lg overflow-hidden"
+          className="absolute z-[100] w-full mt-1 rounded-xl shadow-lg overflow-y-auto"
           style={{
             background: "var(--qc-surface-white)",
             border: "1px solid var(--qc-border-default)",
+            maxHeight: "360px",
           }}
         >
           {filteredSuggestions.map((option, index) => (

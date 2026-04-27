@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { AutocompleteInput, AutocompleteOption } from "@/components/molecules/autocomplete-input";
 import { useBaskets } from "@/hooks/useBaskets";
+import { useMutualFunds } from "@/hooks/useMutualFunds";
 import { apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import type { StocksApiResponse } from "@/types/screener";
@@ -47,8 +48,17 @@ export default function ScreenerHomePage() {
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [mfQuery, setMfQuery] = useState("");
   const [stockOptions, setStockOptions] = useState<AutocompleteOption[]>([]);
   const [activeTab, setActiveTab] = useState<AssetTab>("Indian Stocks");
+
+  const { schemes: mfSchemes } = useMutualFunds();
+
+  const mfOptions: AutocompleteOption[] = mfSchemes.map((s) => ({
+    value: s.amfi_code,
+    label: s.name,
+    subtitle: [s.amc_name, s.category].filter(Boolean).join(" · "),
+  }));
 
   useEffect(() => {
     apiCall<StocksApiResponse>(`${BACKEND_URL}/api/transcript/stocks`, {
@@ -67,6 +77,10 @@ export default function ScreenerHomePage() {
 
   const handleSearch = (symbol: string) => {
     if (symbol) router.push(`/screener/overview?symbol=${encodeURIComponent(symbol)}`);
+  };
+
+  const handleMfSelect = (amfiCode: string) => {
+    if (amfiCode) router.push(`/screener/mutual-fund/${encodeURIComponent(amfiCode)}`);
   };
 
   const { data: basketsData, loading: basketsLoading, error: basketsError } = useBaskets();
@@ -115,7 +129,18 @@ export default function ScreenerHomePage() {
           </div>
 
           {/* Search input or Private Equity cards */}
-          {activeTab === "Private Equity" ? (
+          {activeTab === "Mutual Funds" ? (
+            <div className="w-full">
+              <AutocompleteInput
+                placeholder="Search by fund name or AMC…"
+                value={mfQuery}
+                onChange={setMfQuery}
+                onSubmit={handleMfSelect}
+                options={mfOptions}
+                maxSuggestions={8}
+              />
+            </div>
+          ) : activeTab === "Private Equity" ? (
             <div className="w-full grid grid-cols-3 gap-4">
               {[
                 {
@@ -181,7 +206,7 @@ export default function ScreenerHomePage() {
       </div>
 
       {/* Research Baskets */}
-      <div className={activeTab === "Private Equity" ? "hidden" : ""}>
+      <div className={activeTab === "Private Equity" || activeTab === "Mutual Funds" ? "hidden" : ""}>
         {/* Section divider */}
         <div className="flex items-center gap-4 px-6 py-5">
           <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />

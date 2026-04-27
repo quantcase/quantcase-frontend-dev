@@ -106,7 +106,8 @@ function TopBarInner() {
   const isScreenerHomePage = pathname === "/screener/home";
   const isBasketPage = pathname === "/screener/basket";
 
-  const isTerminal = pathname.startsWith("/screener");
+  const isMutualFundPage = pathname.startsWith("/screener/mutual-fund/");
+  const isTerminal = pathname.startsWith("/screener") && !isMutualFundPage;
   const isWealthOS = pathname.startsWith("/wealthos");
   const isModels =
     pathname === "/model-builder" ||
@@ -141,7 +142,7 @@ function TopBarInner() {
     if (!isFactorActive) setFactorOpen(false);
   }, [isFactorActive]);
 
-  if (isHome || isScreenerHomePage || isBasketPage) return null;
+  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage) return null;
 
   let leftZone: React.ReactNode = null;
 

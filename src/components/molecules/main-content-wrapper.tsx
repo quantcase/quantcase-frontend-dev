@@ -7,7 +7,8 @@ const HIDE_TOPBAR_PATHS = ["/", "/screener/home", "/screener/basket"];
 
 export function MainContentWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const hideTopBar = HIDE_TOPBAR_PATHS.includes(pathname);
+  const hideTopBar =
+    HIDE_TOPBAR_PATHS.includes(pathname) || pathname.startsWith("/screener/mutual-fund/");
 
   return (
     <div

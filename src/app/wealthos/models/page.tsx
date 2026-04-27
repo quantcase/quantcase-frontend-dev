@@ -61,7 +61,7 @@ function PortfolioBuilderModal({
         >
           <div>
             <h2 className="text-xl font-semibold" style={{ color: "#0F172B" }}>
-              Portfolio Builder
+              Wealth Builder
             </h2>
             <p className="text-xs mt-0.5" style={{ color: "#888888" }}>
               Model Portfolio Library — configure and save for relationship managers

@@ -15,6 +15,54 @@ export interface MfBasket {
   searchIntent: string;
   conditions: MfBasketCondition[];
   columns: string[];
+  filter_params?: string;
+}
+
+export interface MfFilterOptions {
+  categories: string[];
+  risks: string[];
+  amcs: { slug: string; name: string }[];
+  plan_types: string[];
+}
+
+export interface MfScreenerParams {
+  q?: string;
+  category?: string;
+  risk?: string;
+  rating?: number;
+  amc_slug?: string;
+  plan_type?: string;
+  sort?: string;
+  order?: "asc" | "desc";
+  page?: number;
+  size?: number;
+}
+
+export interface MfScreenerScheme {
+  amfi_code: string;
+  name: string;
+  amc_name: string | null;
+  category: string | null;
+  plan_type: string;
+  risk_label: string | null;
+  expense_ratio: number | null;
+  aum: number | null;
+  morningstar: number | null;
+  nav: number | null;
+  nav_date: string | null;
+  returns_1y: number | null;
+  returns_3y: number | null;
+  returns_5y: number | null;
+  [key: string]: string | number | null | undefined;
+}
+
+export interface MfScreenerResponse {
+  success: boolean;
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+  schemes: MfScreenerScheme[];
 }
 
 export interface MfBasketsApiResponse {

@@ -35,7 +35,7 @@ function PortfolioBuilderModal({
         >
           <div>
             <h2 className="text-xl font-semibold" style={{ color: "#0F172B" }}>
-              Portfolio Builder
+              Wealth Builder
             </h2>
             <p className="text-xs mt-0.5" style={{ color: "#888888" }}>
               Model Portfolio Library — configure and save for relationship managers
@@ -81,7 +81,7 @@ export default function ModelBuilderPage() {
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-2xl font-semibold" style={{ color: "#0F172B" }}>
-                Portfolio Builder
+                Wealth Builder
               </h1>
               <p className="mt-0.5 text-sm" style={{ color: "#888888" }}>
                 Model Portfolio Library — configure and save for relationship managers

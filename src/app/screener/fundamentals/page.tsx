@@ -25,6 +25,7 @@ import { ShareholdingCharts } from "@/components/fundamentals/shareholding-chart
 import { ViewToggle } from "@/components/fundamentals/view-toggle";
 import { PnLChart } from "@/components/fundamentals/pnl-chart";
 import { SectionPanel } from "@/components/molecules/section-panel";
+import { FundamentalsIntelligenceBanner } from "@/components/fundamentals/fundamentals-intelligence-banner";
 
 
 
@@ -39,61 +40,16 @@ const FUNDAMENTALS_NAV = [
   { id: "section-growth-returns",   label: "Growth & Returns" },
 ];
 
-const SWOT_ITEMS = [
-  {
-    key: "strengths",
-    icon: ShieldCheck,
-    label: "Strengths",
-    sentiment: "up" as const,
-    points: [
-      "#1 thermal producer, ~17 GW capacity",
-      "EBITDA margins >35%",
-      "Long-term PPAs, 5–25 yr revenue lock-in",
-    ],
-  },
-  {
-    key: "weaknesses",
-    icon: AlertTriangle,
-    label: "Weaknesses",
-    sentiment: "down" as const,
-    points: [
-      "Net D/E >2x, high interest burden",
-      "DISCOM receivables delay cash flows",
-      "Fuel cost pass-through lag hurts margins",
-    ],
-  },
-  {
-    key: "opportunities",
-    icon: Lightbulb,
-    label: "Opportunities",
-    sentiment: "warn" as const,
-    points: [
-      "India peak-power deficit drives baseload demand",
-      "6+ GW pipeline to monetise post-reform",
-      "Green-bond access as renewables expand",
-    ],
-  },
-  {
-    key: "threats",
-    icon: Zap,
-    label: "Threats",
-    sentiment: "neutral" as const,
-    points: [
-      "Renewables may structurally reprice thermal",
-      "Hindenburg report dampens institutional appetite",
-      "CERC tariff revisions risk merchant margins",
-    ],
-  },
+import type { FundamentalsSwot } from "@/types/financials";
+
+const SWOT_CONFIG = [
+  { key: "strengths"    as const, icon: ShieldCheck,   label: "Strengths",     color: "var(--qc-up)" },
+  { key: "weaknesses"   as const, icon: AlertTriangle,  label: "Weaknesses",    color: "var(--qc-down)" },
+  { key: "opportunities"as const, icon: Lightbulb,      label: "Opportunities", color: "var(--qc-warn)" },
+  { key: "threats"      as const, icon: Zap,            label: "Threats",       color: "var(--qc-text-muted)" },
 ];
 
-const SENTIMENT_COLOR: Record<string, string> = {
-  up: "var(--qc-up)",
-  down: "var(--qc-down)",
-  warn: "var(--qc-warn)",
-  neutral: "var(--qc-text-muted)",
-};
-
-function SwotSection() {
+function SwotSection({ swot }: { swot: FundamentalsSwot }) {
   return (
     <div id="section-swot">
       <SectionPanel title="SWOT Analysis" subtitle="Strategic assessment across four dimensions">
@@ -108,74 +64,65 @@ function SwotSection() {
             margin: "-16px",
           }}
         >
-          {SWOT_ITEMS.map(({ key, icon: Icon, label, sentiment, points }) => {
-            const color = SENTIMENT_COLOR[sentiment];
-            return (
-              <div
-                key={key}
-                style={{
-                  background: "var(--qc-surface-white)",
-                  padding: "16px 18px",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                  <div
-                    style={{
-                      padding: 5,
-                      borderRadius: 6,
-                      border: "1px solid var(--qc-icon-box-border)",
-                      background: "var(--qc-icon-box-bg)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Icon size={14} style={{ color: "var(--qc-text-muted)" }} />
-                  </div>
-                  <span
-                    style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.12em",
-                      color,
-                    }}
-                  >
-                    {label}
-                  </span>
+          {SWOT_CONFIG.map(({ key, icon: Icon, label, color }) => (
+            <div key={key} style={{ background: "var(--qc-surface-white)", padding: "16px 18px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                <div
+                  style={{
+                    padding: 5,
+                    borderRadius: 6,
+                    border: "1px solid var(--qc-icon-box-border)",
+                    background: "var(--qc-icon-box-bg)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon size={14} style={{ color: "var(--qc-text-muted)" }} />
                 </div>
-                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-                  {points.map((point) => (
-                    <li
-                      key={point}
-                      style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: 8,
-                        fontSize: 12.5,
-                        color: "var(--qc-text-body)",
-                        lineHeight: 1.45,
-                      }}
-                    >
-                      <span
-                        style={{
-                          marginTop: 6,
-                          width: 5,
-                          height: 5,
-                          borderRadius: "50%",
-                          background: "var(--qc-text-muted)",
-                          flexShrink: 0,
-                          display: "inline-block",
-                        }}
-                      />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
+                <span
+                  style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.12em",
+                    color,
+                  }}
+                >
+                  {label}
+                </span>
               </div>
-            );
-          })}
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+                {swot[key].map((point) => (
+                  <li
+                    key={point}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 8,
+                      fontSize: 12.5,
+                      color: "var(--qc-text-body)",
+                      lineHeight: 1.45,
+                    }}
+                  >
+                    <span
+                      style={{
+                        marginTop: 6,
+                        width: 5,
+                        height: 5,
+                        borderRadius: "50%",
+                        background: "var(--qc-text-muted)",
+                        flexShrink: 0,
+                        display: "inline-block",
+                      }}
+                    />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </SectionPanel>
     </div>
@@ -234,125 +181,100 @@ function FinancialsContent() {
   const { standardized } = data;
   const { metrics, quarterly, annual, balanceSheet, cashFlow, cashFlowQuarterly } = standardized;
 
+  const fi = data.fundamentalsIntelligence;
+
   return (
     <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-      <div className="mx-auto space-y-6 px-4 pt-6 pb-8">
+      <div className="grid grid-cols-3 gap-[14px] items-start px-4 pt-6 pb-8">
 
-        {/* Price / PE / Sales chart */}
-        {chartsData && (
-          <div id="section-charts">
-            <MultiLineBarComboChart
-              chartGroups={chartsData.chartGroups}
-              height={300}
-              title="Charts"
-              subtitle="Price, valuation, and sales trends"
-            />
-          </div>
-        )}
+        {/* Left: all content sections */}
+        <div className="col-span-2 space-y-6">
 
-        {/* SWOT Analysis */}
-        <SwotSection />
+          {/* Price / PE / Sales chart */}
+          {chartsData && (
+            <div id="section-charts">
+              <MultiLineBarComboChart
+                chartGroups={chartsData.chartGroups}
+                height={300}
+                title="Charts"
+                subtitle="Price, valuation, and sales trends"
+              />
+            </div>
+          )}
 
-        {/* P&L Table */}
-        <div id="section-pnl">
-          <TabularCard
-            title="Profit & Loss"
-            subtitle="All values in INR Crores"
-            tabs={pnlView === "table" ? ["Quarterly", "Annual"] : undefined}
-            defaultTab="Quarterly"
-            headerAction={<ViewToggle view={pnlView} onChange={setPnlView} />}
-          >
-            {(activeTab) =>
-              pnlView === "chart" ? (
-                <PnLChart table={quarterly} />
-              ) : (
-                <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
-              )
-            }
-          </TabularCard>
-        </div>
+          {/* SWOT Analysis */}
+          {fi?.swot && <SwotSection swot={fi.swot} />}
 
-        {/* Balance Sheet */}
-        <div id="section-balance-sheet">
-          <TabularCard
-            title="Balance Sheet"
-            subtitle="All values in INR Crores"
-            tabs={balanceSheetView === "table" && balanceSheet.quarterly ? ["Quarterly", "Annual"] : undefined}
-            defaultTab="Annual"
-            headerAction={<ViewToggle view={balanceSheetView} onChange={setBalanceSheetView} />}
-          >
-            {(activeTab) =>
-              balanceSheetView === "chart" ? (
-                <BalanceSheetTreemap table={balanceSheet.annual} />
-              ) : (
-                <FinancialDataTable
-                  table={activeTab === "Quarterly" && balanceSheet.quarterly ? balanceSheet.quarterly : balanceSheet.annual}
-                />
-              )
-            }
-          </TabularCard>
-        </div>
-
-        {/* Cash Flow */}
-        <div id="section-cash-flow">
-          <TabularCard
-            title="Cash Flow"
-            subtitle="All values in INR Crores"
-            tabs={cashFlowView === "table" && cashFlowQuarterly ? ["Quarterly", "Annual"] : undefined}
-            defaultTab="Annual"
-            headerAction={<ViewToggle view={cashFlowView} onChange={setCashFlowView} />}
-          >
-            {(activeTab) =>
-              cashFlowView === "chart" ? (
-                <CashFlowWaterfall table={cashFlow} />
-              ) : (
-                <FinancialDataTable
-                  table={activeTab === "Quarterly" && cashFlowQuarterly ? cashFlowQuarterly : cashFlow}
-                  cashFlowMode
-                />
-              )
-            }
-          </TabularCard>
-        </div>
-
-        {/* Peer Comparison */}
-        {(peersLoading || (peersData && peersData.peers.length > 0)) && (
-          <div id="section-peer-comparison">
+          {/* P&L Table */}
+          <div id="section-pnl">
             <TabularCard
-              title="Peer Comparison"
-              subtitle={peersData ? `${peersData.basicIndustry} · ${peersData.latestQuarter} · ${peersData.count} companies` : undefined}
-            >
-              {peersLoading ? (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 0" }}>
-                  <div
-                    style={{
-                      width: 20,
-                      height: 20,
-                      borderRadius: "50%",
-                      border: "2px solid var(--qc-border-default)",
-                      borderTopColor: "var(--qc-text-body)",
-                      animation: "spin 0.7s linear infinite",
-                    }}
-                  />
-                </div>
-              ) : (
-                <PeerComparisonDataTable peers={peersData!.peers} />
-              )}
-            </TabularCard>
-          </div>
-        )}
-
-        {/* Shareholding Pattern */}
-        {(shareholdingLoading || shareholdingData) && (
-          <div id="section-shareholding">
-            <TabularCard
-              title="Shareholding Pattern"
-              subtitle="Numbers in percentages"
-              tabs={shareholdingView === "table" ? ["Quarterly", "Annual"] : undefined}
-              headerAction={<ViewToggle view={shareholdingView} onChange={setShareholdingView} />}
+              title="Profit & Loss"
+              subtitle="All values in INR Crores"
+              tabs={pnlView === "table" ? ["Quarterly", "Annual"] : undefined}
+              defaultTab="Quarterly"
+              headerAction={<ViewToggle view={pnlView} onChange={setPnlView} />}
             >
               {(activeTab) =>
-                shareholdingLoading ? (
+                pnlView === "chart" ? (
+                  <PnLChart table={quarterly} />
+                ) : (
+                  <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
+                )
+              }
+            </TabularCard>
+          </div>
+
+          {/* Balance Sheet */}
+          <div id="section-balance-sheet">
+            <TabularCard
+              title="Balance Sheet"
+              subtitle="All values in INR Crores"
+              tabs={balanceSheetView === "table" && balanceSheet.quarterly ? ["Quarterly", "Annual"] : undefined}
+              defaultTab="Annual"
+              headerAction={<ViewToggle view={balanceSheetView} onChange={setBalanceSheetView} />}
+            >
+              {(activeTab) =>
+                balanceSheetView === "chart" ? (
+                  <BalanceSheetTreemap table={balanceSheet.annual} />
+                ) : (
+                  <FinancialDataTable
+                    table={activeTab === "Quarterly" && balanceSheet.quarterly ? balanceSheet.quarterly : balanceSheet.annual}
+                  />
+                )
+              }
+            </TabularCard>
+          </div>
+
+          {/* Cash Flow */}
+          <div id="section-cash-flow">
+            <TabularCard
+              title="Cash Flow"
+              subtitle="All values in INR Crores"
+              tabs={cashFlowView === "table" && cashFlowQuarterly ? ["Quarterly", "Annual"] : undefined}
+              defaultTab="Annual"
+              headerAction={<ViewToggle view={cashFlowView} onChange={setCashFlowView} />}
+            >
+              {(activeTab) =>
+                cashFlowView === "chart" ? (
+                  <CashFlowWaterfall table={cashFlow} />
+                ) : (
+                  <FinancialDataTable
+                    table={activeTab === "Quarterly" && cashFlowQuarterly ? cashFlowQuarterly : cashFlow}
+                    cashFlowMode
+                  />
+                )
+              }
+            </TabularCard>
+          </div>
+
+          {/* Peer Comparison */}
+          {(peersLoading || (peersData && peersData.peers.length > 0)) && (
+            <div id="section-peer-comparison">
+              <TabularCard
+                title="Peer Comparison"
+                subtitle={peersData ? `${peersData.basicIndustry} · ${peersData.latestQuarter} · ${peersData.count} companies` : undefined}
+              >
+                {peersLoading ? (
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 0" }}>
                     <div
                       style={{
@@ -365,58 +287,95 @@ function FinancialsContent() {
                       }}
                     />
                   </div>
-                ) : shareholdingView === "chart" ? (
-                  <ShareholdingCharts sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} />
                 ) : (
-                  <ShareholdingTable sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} mode={activeTab} />
-                )
-              }
-            </TabularCard>
-          </div>
-        )}
-
-        {/* Growth & Returns */}
-        <div id="section-growth-returns">
-          <SectionPanel title="Growth & Returns" subtitle="Compounded growth rates and return metrics">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-              <GrowthStatCard
-                title="Compounded Sales Growth"
-                rows={[
-                  { label: "10 Years:", value: metrics.salesGrowth["10y"] },
-                  { label: "5 Years:", value: metrics.salesGrowth["5y"] },
-                  { label: "3 Years:", value: metrics.salesGrowth["3y"] },
-                  { label: "TTM:", value: metrics.salesGrowth.ttm },
-                ]}
-              />
-              <GrowthStatCard
-                title="Compounded Profit Growth"
-                rows={[
-                  { label: "10 Years:", value: metrics.profitGrowth["10y"] },
-                  { label: "5 Years:", value: metrics.profitGrowth["5y"] },
-                  { label: "3 Years:", value: metrics.profitGrowth["3y"] },
-                  { label: "TTM:", value: metrics.profitGrowth.ttm },
-                ]}
-              />
-              <GrowthStatCard
-                title="Stock Price CAGR"
-                rows={[
-                  { label: "10 Years:", value: metrics.stockPriceCagr["10y"] },
-                  { label: "5 Years:", value: metrics.stockPriceCagr["5y"] },
-                  { label: "3 Years:", value: metrics.stockPriceCagr["3y"] },
-                  { label: "1 Year:", value: metrics.stockPriceCagr["1y"] },
-                ]}
-              />
-              <GrowthStatCard
-                title="Return on Equity"
-                rows={[
-                  { label: "10 Years:", value: metrics.roe["10y"] },
-                  { label: "5 Years:", value: metrics.roe["5y"] },
-                  { label: "3 Years:", value: metrics.roe["3y"] },
-                  { label: "Last Year:", value: metrics.roe.last },
-                ]}
-              />
+                  <PeerComparisonDataTable peers={peersData!.peers} />
+                )}
+              </TabularCard>
             </div>
-          </SectionPanel>
+          )}
+
+          {/* Shareholding Pattern */}
+          {(shareholdingLoading || shareholdingData) && (
+            <div id="section-shareholding">
+              <TabularCard
+                title="Shareholding Pattern"
+                subtitle="Numbers in percentages"
+                tabs={shareholdingView === "table" ? ["Quarterly", "Annual"] : undefined}
+                headerAction={<ViewToggle view={shareholdingView} onChange={setShareholdingView} />}
+              >
+                {(activeTab) =>
+                  shareholdingLoading ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 0" }}>
+                      <div
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: "50%",
+                          border: "2px solid var(--qc-border-default)",
+                          borderTopColor: "var(--qc-text-body)",
+                          animation: "spin 0.7s linear infinite",
+                        }}
+                      />
+                    </div>
+                  ) : shareholdingView === "chart" ? (
+                    <ShareholdingCharts sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} />
+                  ) : (
+                    <ShareholdingTable sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} mode={activeTab} />
+                  )
+                }
+              </TabularCard>
+            </div>
+          )}
+
+          {/* Growth & Returns */}
+          <div id="section-growth-returns">
+            <SectionPanel title="Growth & Returns" subtitle="Compounded growth rates and return metrics">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+                <GrowthStatCard
+                  title="Compounded Sales Growth"
+                  rows={[
+                    { label: "10 Years:", value: metrics.salesGrowth["10y"] },
+                    { label: "5 Years:", value: metrics.salesGrowth["5y"] },
+                    { label: "3 Years:", value: metrics.salesGrowth["3y"] },
+                    { label: "TTM:", value: metrics.salesGrowth.ttm },
+                  ]}
+                />
+                <GrowthStatCard
+                  title="Compounded Profit Growth"
+                  rows={[
+                    { label: "10 Years:", value: metrics.profitGrowth["10y"] },
+                    { label: "5 Years:", value: metrics.profitGrowth["5y"] },
+                    { label: "3 Years:", value: metrics.profitGrowth["3y"] },
+                    { label: "TTM:", value: metrics.profitGrowth.ttm },
+                  ]}
+                />
+                <GrowthStatCard
+                  title="Stock Price CAGR"
+                  rows={[
+                    { label: "10 Years:", value: metrics.stockPriceCagr["10y"] },
+                    { label: "5 Years:", value: metrics.stockPriceCagr["5y"] },
+                    { label: "3 Years:", value: metrics.stockPriceCagr["3y"] },
+                    { label: "1 Year:", value: metrics.stockPriceCagr["1y"] },
+                  ]}
+                />
+                <GrowthStatCard
+                  title="Return on Equity"
+                  rows={[
+                    { label: "10 Years:", value: metrics.roe["10y"] },
+                    { label: "5 Years:", value: metrics.roe["5y"] },
+                    { label: "3 Years:", value: metrics.roe["3y"] },
+                    { label: "Last Year:", value: metrics.roe.last },
+                  ]}
+                />
+              </div>
+            </SectionPanel>
+          </div>
+
+        </div>
+
+        {/* Right: Decision Intelligence sticky panel */}
+        <div className="col-span-1 sticky top-28">
+          {fi && <FundamentalsIntelligenceBanner fi={fi} />}
         </div>
 
       </div>

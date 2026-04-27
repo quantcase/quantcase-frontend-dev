@@ -68,6 +68,48 @@ export interface FinancialsStandardized {
   valuation: FinancialsValuation;
 }
 
+export interface FundamentalsSignals {
+  growth: string;
+  valuation: string;
+  balanceSheet: string;
+  profitability: string;
+  cashConversion: string;
+}
+
+export interface FundamentalsActionableInsight {
+  action: string;
+  rationale: string;
+  reEvaluateCondition?: string;
+  existingHolderAction?: string;
+}
+
+export interface FundamentalsKeyMetric {
+  name: string;
+  value: string;
+  comment: string;
+  assessment: "Positive" | "Negative" | "Neutral";
+}
+
+export interface FundamentalsSwot {
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  threats: string[];
+}
+
+export interface FundamentalsIntelligence {
+  tag: string;
+  fundamentalGrade: string;
+  convictionLevel: string;
+  actionBias: string;
+  signals: FundamentalsSignals;
+  actionableInsight: FundamentalsActionableInsight;
+  swot: FundamentalsSwot;
+  riskAlerts: string[];
+  whatCanChange: string[];
+  keyMetricsSummary: FundamentalsKeyMetric[];
+}
+
 export interface FinancialsResponse {
   symbol: string;
   exchange: string;
@@ -75,6 +117,7 @@ export interface FinancialsResponse {
   unit: string;
   timestamp: string;
   standardized: FinancialsStandardized;
+  fundamentalsIntelligence?: FundamentalsIntelligence;
 }
 
 // ─── Chart types ───────────────────────────────────────────────────────────────

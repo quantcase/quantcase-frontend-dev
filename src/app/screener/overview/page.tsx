@@ -114,7 +114,7 @@ function OverviewContent() {
 
         {/* Section: Fundamentals */}
         <div id="section-fundamentals">
-          {data && <FundamentalOverviewCard data={data} />}
+          {data && <FundamentalOverviewCard data={data} symbol={symbol} />}
         </div>
 
         {/* Section: Technicals */}

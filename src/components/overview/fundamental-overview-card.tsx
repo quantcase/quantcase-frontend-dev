@@ -6,12 +6,14 @@ import { ValuationHeroSection } from "./fundamentals/valuation-hero-section";
 import { KpiGrid } from "./fundamentals/kpi-grid";
 import { ReturnsLeveragePanel } from "./fundamentals/returns-leverage-panel";
 import { ShareholdingPanel } from "./fundamentals/shareholding-panel";
+import { useShareholding } from "@/hooks/useShareholding";
 
 interface Props {
   data: ScreenerData;
+  symbol: string;
 }
 
-export function FundamentalOverviewCard({ data }: Props) {
+export function FundamentalOverviewCard({ data, symbol }: Props) {
   const fp = data.financialPerformance;
   const val = data.valuation;
   const eff = data.efficiency;
@@ -19,6 +21,8 @@ export function FundamentalOverviewCard({ data }: Props) {
   const ratios = data.ratios;
   const perShare = data.perShare;
   const qt = fp.quarterlyTrend ?? [];
+
+  const { data: shareholdingData } = useShareholding(symbol);
 
   const pe = val.peRatio;
   const industryPE = val.industryPE;
@@ -62,11 +66,26 @@ export function FundamentalOverviewCard({ data }: Props) {
   if (!deIsGood && deVal != null) tags.push({ label: "Elevated D/E", color: "var(--qc-warn)" });
   if (deIsGood && deVal != null) tags.push({ label: "Low leverage", color: "var(--qc-text-muted)" });
 
+  const getLatestById = (id: string): number | null => {
+    if (!shareholdingData) return null;
+    for (const s of shareholdingData.sections) {
+      if (s.id === id) return s.data.reduce<number | null>((acc, d) => (d.value != null ? d.value : acc), null);
+      const child = s.children.find((c) => c.id === id);
+      if (child) return child.data.reduce<number | null>((acc, d) => (d.value != null ? d.value : acc), null);
+    }
+    return null;
+  };
+
+  const promoterPct = getLatestById("promoters") ?? (own.promoter != null ? own.promoter * 100 : null);
+  const fiiPct = getLatestById("npFiis") ?? (own.fii != null ? own.fii * 100 : own.institutions != null ? own.institutions * 100 : null);
+  const diiPct = getLatestById("npMutualFunds") ?? (own.dii != null ? own.dii * 100 : null);
+  const publicPct = getLatestById("npNonInst") ?? (own.public != null ? own.public * 100 : null);
+
   const shareholdingSegments = [
-    { label: "Promoter", pct: own.promoter != null ? own.promoter * 100 : null, color: "var(--qc-text-heading)" },
-    { label: "FII", pct: own.fii != null ? own.fii * 100 : own.institutions != null ? own.institutions * 100 : null, color: "var(--qc-blue)" },
-    { label: "DII", pct: own.dii != null ? own.dii * 100 : null, color: "var(--qc-up)" },
-    { label: "Public", pct: own.public != null ? own.public * 100 : null, color: "var(--qc-text-muted)" },
+    { label: "Promoter", pct: promoterPct, color: "var(--qc-text-heading)" },
+    { label: "FII", pct: fiiPct, color: "var(--qc-blue)" },
+    { label: "DII", pct: diiPct, color: "var(--qc-up)" },
+    { label: "Public", pct: publicPct, color: "var(--qc-text-muted)" },
   ];
 
   return (

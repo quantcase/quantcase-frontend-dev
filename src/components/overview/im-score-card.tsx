@@ -6,7 +6,7 @@ import type { FinalTakeaways, OFactorResponse } from "@/types/opportunity";
 import type { OverviewSection } from "@/types/deal";
 import { SectionShell } from "./primitives";
 import { PillarPills, type PillarKey } from "./im-score/pillar-pills";
-import { ActivePillarHero } from "./im-score/active-pillar-hero";
+import { PillarPieChart } from "./im-score/pillar-pie-chart";
 import { WeightingPanel } from "./im-score/weighting-panel";
 import { QcScoreStrip } from "./im-score/qc-score-strip";
 
@@ -32,9 +32,15 @@ interface IMScoreCardProps {
 }
 
 const PILLAR_META = {
-  M: { label: "Management", letter: "M" as const, sub: "Quality · credibility · track record · guidance" },
-  O: { label: "Opportunity", letter: "O" as const, sub: "Industry · competition · strength · customer traction" },
-  D: { label: "Deal", letter: "D" as const, sub: "EPS engine · valuation · re-rating · margin of safety" },
+  M: { label: "Management", sub: "Quality · credibility · track record · guidance" },
+  O: { label: "Opportunity", sub: "Industry · competition · strength · customer traction" },
+  D: { label: "Deal", sub: "EPS engine · valuation · re-rating · margin of safety" },
+};
+
+const PILLAR_DOT: Record<PillarKey, string> = {
+  M: "var(--qc-blue, #2563EB)",
+  O: "var(--qc-up, #1F7A4A)",
+  D: "var(--qc-warn, #B4731A)",
 };
 
 function getRating(scorePct: number): string {
@@ -55,6 +61,54 @@ function clampWeights(m: number, o: number, d: number): [number, number, number]
   ];
 }
 
+function BulletItem({ item, color }: { item: TitledBullet; color: string }) {
+  const pct = item.score != null && item.max ? Math.round((item.score / item.max) * 100) : null;
+  return (
+    <div style={{ minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+        <span
+          style={{
+            width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
+            background: item.score != null ? color : "var(--qc-border-default)",
+          }}
+        />
+        <span style={{ fontSize: 13, fontWeight: 500, flex: 1, color: "var(--qc-text-heading)" }}>
+          {item.title}
+        </span>
+        {item.score != null && item.max != null && (
+          <span
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 12,
+              color: "var(--qc-text-heading)", letterSpacing: "-0.01em",
+            }}
+          >
+            {Math.round(item.score)}
+            <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>/{item.max}</span>
+          </span>
+        )}
+      </div>
+      {pct != null && (
+        <div
+          style={{
+            height: 3, background: "var(--qc-chip-bg, #F2F1EC)",
+            borderRadius: 999, overflow: "hidden", marginBottom: 5,
+          }}
+        >
+          <span
+            style={{
+              display: "block", height: "100%", width: `${pct}%`,
+              borderRadius: 999, background: color,
+            }}
+          />
+        </div>
+      )}
+      <div style={{ fontSize: 12, color: "var(--qc-text-muted)", lineHeight: 1.45 }}>
+        {item.text || <span style={{ opacity: 0.45 }}>No data available.</span>}
+      </div>
+    </div>
+  );
+}
+
 export function IMScoreCard({
   managementScore, managementMax,
   opportunityScore, opportunityMax,
@@ -64,9 +118,9 @@ export function IMScoreCard({
   const mScore = managementScore ?? null;
   const oScore = opportunityScore ?? null;
   const dScore = dealScore ?? null;
-  const mMax = managementMax ?? 50;
-  const oMax = opportunityMax ?? 30;
-  const dMax = dealMax ?? 20;
+  const mMax = managementMax ?? 100;
+  const oMax = opportunityMax ?? 100;
+  const dMax = dealMax ?? 100;
 
   const [mWeight, setMWeight] = useState(40);
   const [oWeight, setOWeight] = useState(40);
@@ -101,9 +155,7 @@ export function IMScoreCard({
   }, [mWeight, oWeight]);
 
   const handleReset = useCallback(() => {
-    setMWeight(40);
-    setOWeight(40);
-    setDWeight(20);
+    setMWeight(40); setOWeight(40); setDWeight(20);
   }, []);
 
   const [cMW, cOW, cDW] = clampWeights(mWeight, oWeight, dWeight);
@@ -123,12 +175,9 @@ export function IMScoreCard({
     D: { score: dScore, max: dMax },
   };
 
-  const ap = activePillar;
-  const apScore = pillScores[ap].score;
-  const apMax = pillScores[ap].max;
-  const apWeight = ap === "M" ? cMW : ap === "O" ? cOW : cDW;
+  const pillarLabels: Record<PillarKey, string> = { M: "Management", O: "Opportunity", D: "Deal" };
 
-  // Build sub-items per pillar
+  // Build bullet items per pillar
   const mItems: TitledBullet[] = managementIntelligence?.signals_breakdown?.length
     ? managementIntelligence.signals_breakdown.map((s) => ({
         title: s.label,
@@ -168,9 +217,8 @@ export function IMScoreCard({
     return items;
   })();
 
-  const activeItems = ap === "M" ? mItems : ap === "O" ? oItems : dItems;
-
-  const pillarLabels: Record<PillarKey, string> = { M: "Management", O: "Opportunity", D: "Deal" };
+  const activeItems = activePillar === "M" ? mItems : activePillar === "O" ? oItems : dItems;
+  const activeColor = PILLAR_DOT[activePillar];
 
   return (
     <div>
@@ -187,16 +235,14 @@ export function IMScoreCard({
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 360px", gap: 14, marginBottom: 14 }}>
-          {/* LEFT: Framework pillars */}
+          {/* LEFT: Pillar tabs + 2-col split (bullets | pie) */}
           <section
             style={{
               background: "var(--qc-surface-white)",
               border: "1px solid var(--qc-border-default)",
               borderRadius: 18, padding: "16px 20px 18px",
-              position: "relative", overflow: "hidden",
             }}
           >
-            {/* Header with icon buttons */}
             <header
               style={{
                 display: "flex", alignItems: "center",
@@ -241,18 +287,45 @@ export function IMScoreCard({
               labels={pillarLabels}
             />
 
-            <ActivePillarHero
-              activePillar={ap}
-              pillarLabel={PILLAR_META[ap].label}
-              pillarSub={PILLAR_META[ap].sub}
-              score={apScore}
-              max={apMax}
-              weight={apWeight}
-              items={activeItems}
-            />
+            {/* Pillar subtitle */}
+            <div
+              style={{
+                fontSize: 12, color: "var(--qc-text-muted)", marginBottom: 14,
+                paddingTop: 2, lineHeight: 1.4,
+              }}
+            >
+              {PILLAR_META[activePillar].sub}
+            </div>
+
+            {/* 2-col split: bullet grid (left 2 spans) | pie chart (right 1 span) */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "14px 24px", alignItems: "start" }}>
+              {/* Bullets — always exactly 4 items spanning 2 cols in a nested grid */}
+              <div style={{ gridColumn: "1 / 3", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px 24px" }}>
+                {activeItems.length > 0 ? (
+                  activeItems.map((item, i) => (
+                    <BulletItem key={i} item={item} color={activeColor} />
+                  ))
+                ) : (
+                  <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "var(--qc-text-muted)" }}>
+                    No analysis available.
+                  </div>
+                )}
+              </div>
+
+              {/* Pie chart — right column */}
+              <div style={{ borderLeft: "1px solid var(--qc-border-inner)", paddingLeft: 20 }}>
+                <PillarPieChart
+                  activePillar={activePillar}
+                  onSelect={setActivePillar}
+                  weights={{ M: cMW, O: cOW, D: cDW }}
+                  displayScore={displayScore}
+                  rating={rating}
+                />
+              </div>
+            </div>
           </section>
 
-          {/* RIGHT: Weighting panel */}
+          {/* RIGHT: Weighting sliders panel */}
           <WeightingPanel
             mWeight={cMW}
             oWeight={cOW}

@@ -1,3 +1,57 @@
+// ── MF Basket types ───────────────────────────────────────────────────────────
+
+export interface MfBasketCondition {
+  metric: string;
+  operator: string;
+  value: number | string;
+  label: string;
+}
+
+export interface MfBasket {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  searchIntent: string;
+  conditions: MfBasketCondition[];
+  columns: string[];
+}
+
+export interface MfBasketsApiResponse {
+  baskets: MfBasket[];
+  grouped: Record<string, MfBasket[]>;
+}
+
+export interface MfBasketScheme {
+  amfi_code: string;
+  name: string;
+  amc_name: string | null;
+  category: string | null;
+  plan_type: string;
+  risk_label: string | null;
+  expense_ratio: number | null;
+  aum: number | null;
+  morningstar: number | null;
+  nav: number | null;
+  nav_date: string | null;
+  [key: string]: string | number | null | undefined;
+}
+
+export interface MfBasketPagination {
+  page: number;
+  size: number;
+  total: number;
+  pages: number;
+}
+
+export interface MfBasketSchemesApiResponse {
+  basket: Pick<MfBasket, "id" | "category" | "title" | "description" | "conditions" | "columns">;
+  pagination: MfBasketPagination;
+  schemes: MfBasketScheme[];
+}
+
+// ── Scheme types ──────────────────────────────────────────────────────────────
+
 export interface MutualFundScheme {
   amfi_code: string;
   name: string;

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { AutocompleteInput, AutocompleteOption } from "@/components/molecules/autocomplete-input";
 import { useBaskets } from "@/hooks/useBaskets";
+import { useMfBaskets } from "@/hooks/useMfBaskets";
 import { useMutualFunds } from "@/hooks/useMutualFunds";
 import { apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
@@ -84,6 +85,7 @@ export default function ScreenerHomePage() {
   };
 
   const { data: basketsData, loading: basketsLoading, error: basketsError } = useBaskets();
+  const { data: mfBasketsData, loading: mfBasketsLoading, error: mfBasketsError } = useMfBaskets();
 
   return (
     <div className="min-h-screen" style={{ background: "var(--qc-surface-base)" }}>
@@ -200,6 +202,100 @@ export default function ScreenerHomePage() {
                 options={stockOptions}
                 maxSuggestions={8}
               />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* MF Research Baskets */}
+      <div className={activeTab !== "Mutual Funds" ? "hidden" : ""}>
+        <div className="flex items-center gap-4 px-6 py-5">
+          <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />
+          <div className="flex flex-col items-center gap-0.5 px-1">
+            <span style={{ fontSize: 10, fontWeight: 700, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.12em" }}>
+              Fund Baskets
+            </span>
+            <span style={{ fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: "0.02em" }}>
+              Pre-built fund screening strategies
+            </span>
+          </div>
+          <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />
+        </div>
+
+        <div className="max-w-[1400px] mx-auto px-6 pb-12">
+          {mfBasketsError && (
+            <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 mb-6">
+              <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+              <p className="text-sm text-red-600">{mfBasketsError}</p>
+            </div>
+          )}
+
+          {mfBasketsLoading && (
+            <div className="grid grid-cols-5 gap-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-[10px] border h-[320px] animate-pulse"
+                  style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+                />
+              ))}
+            </div>
+          )}
+
+          {!mfBasketsLoading && !mfBasketsError && mfBasketsData && (
+            <div
+              className="grid gap-4"
+              style={{ gridTemplateColumns: `repeat(${Object.keys(mfBasketsData.grouped).length}, 1fr)` }}
+            >
+              {Object.entries(mfBasketsData.grouped).map(([category, baskets]) => (
+                <div
+                  key={category}
+                  className="relative rounded-[10px] border overflow-hidden"
+                  style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+                >
+                  <div className="px-4 py-4 border-b" style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.10em] leading-tight" style={{ color: "var(--qc-text-heading)" }}>
+                      {category}
+                    </p>
+                    <p className="text-[11px] mt-1" style={{ color: "var(--qc-text-muted)" }}>
+                      {baskets.length} basket{baskets.length !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <div className="divide-y divide-[#EFEDE7]">
+                    {baskets.map((basket) => (
+                      <Link
+                        key={basket.id}
+                        href={`/screener/mutual-fund-basket?id=${encodeURIComponent(basket.id)}`}
+                        className="group flex items-start justify-between gap-3 px-4 py-3 transition-colors"
+                        onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "")}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-medium leading-snug truncate" style={{ color: "var(--qc-text-heading)" }}>
+                            {basket.title}
+                          </p>
+                          <p className="text-[11px] mt-0.5 line-clamp-1 leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>
+                            {basket.description}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
+                          <span
+                            className="text-[10px] font-medium rounded-sm px-1.5 py-0.5 tabular-nums"
+                            style={{ background: "var(--qc-accent-lime-bg)", color: "var(--qc-text-heading)" }}
+                          >
+                            {basket.conditions.length}
+                          </span>
+                          <ArrowRight className="size-3 opacity-0 group-hover:opacity-40 transition-opacity" style={{ color: "var(--qc-text-heading)" }} />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <div
+                    className="pointer-events-none absolute bottom-0 left-0 right-0 h-10"
+                    style={{ background: "linear-gradient(180deg, transparent 0%, rgba(233,244,196,0.6) 100%)" }}
+                  />
+                </div>
+              ))}
             </div>
           )}
         </div>

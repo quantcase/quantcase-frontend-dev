@@ -559,7 +559,7 @@ function InnerGraph({ rms, expandedIds, handleToggle, isFullyExpanded, setExpand
         <div className="flex items-center gap-2">
           <Network className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
           <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
-            RM Portfolio Signal Map
+            RM Heartbeat
           </span>
           {critCount > 0 && (
             <span className="text-[9px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5"

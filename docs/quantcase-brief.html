@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantcase · Brief — Priya Venkat · NPS Conversation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FCFCFA;
+  --surface: #FFFFFF;
+  --ink: #1A1A1A;
+  --ink-2: #4A4A4A;
+  --ink-3: #8A8A8A;
+  --ink-4: #C8C8C4;
+  --rule: #EDEAE3;
+  --rule-2: #E0DCD2;
+  --critical: #C2410C;
+  --warning: #B45309;
+  --good: #15803D;
+  --info: #1E40AF;
+  --opp: #6B21A8;
+  --tint-critical: #FEF2EC;
+  --tint-warning: #FEF7E6;
+  --tint-good: #ECFDF5;
+  --tint-info: #EFF6FF;
+  --tint-opp: #F5F0FA;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  min-height: 100vh;
+}
+.sidebar {
+  border-right: 1px solid var(--rule);
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+}
+.sidebar .logo {
+  width: 28px; height: 28px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Instrument Serif', serif;
+  font-size: 18px;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+.sidebar .icon {
+  width: 36px; height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  cursor: pointer;
+  border-radius: 6px;
+}
+.sidebar .icon:hover { background: var(--rule); color: var(--ink); }
+.sidebar .icon.active { background: var(--ink); color: var(--bg); }
+.sidebar .icon svg { width: 18px; height: 18px; }
+.sidebar .spacer { flex: 1; }
+
+/* MAIN */
+.main { padding: 0; }
+
+/* BREADCRUMB */
+.breadcrumb-bar {
+  padding: 14px 36px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  background: var(--surface);
+}
+.breadcrumb {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--ink-3);
+}
+.breadcrumb a {
+  color: var(--ink-3);
+  text-decoration: none;
+  cursor: pointer;
+}
+.breadcrumb a:hover { color: var(--ink); }
+.breadcrumb .sep { color: var(--ink-4); }
+.breadcrumb .current { color: var(--ink); font-weight: 500; }
+.brief-actions-top {
+  display: flex;
+  gap: 8px;
+}
+.btn-primary {
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-secondary {
+  background: var(--surface);
+  color: var(--ink-2);
+  border: 1px solid var(--rule-2);
+  padding: 7px 13px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-secondary:hover { background: var(--rule); }
+.btn-tiny {
+  background: transparent;
+  border: 1px solid var(--rule-2);
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 10px;
+  color: var(--ink-2);
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-tiny:hover { background: var(--rule); }
+
+/* CONTAINER */
+.container {
+  max-width: 1280px;
+  padding: 28px 36px 60px;
+}
+
+/* HEADER */
+.brief-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 28px;
+}
+.client-avatar-large {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 20px;
+}
+.brief-title-block .brief-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--opp);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.brief-title-block h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.brief-title-block h1 em {
+  font-style: italic;
+  color: var(--opp);
+}
+.brief-title-block .meta {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.brief-title-block .meta strong { color: var(--ink-2); font-weight: 500; }
+
+.brief-fit {
+  text-align: right;
+}
+.brief-fit-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.brief-fit-value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 38px;
+  font-weight: 400;
+  color: var(--opp);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.brief-fit-bar {
+  width: 100px;
+  height: 4px;
+  background: var(--rule);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+  margin-left: auto;
+}
+.brief-fit-bar-fill {
+  height: 100%;
+  background: var(--opp);
+  width: 92%;
+}
+
+/* TWO-COL BODY */
+.brief-body {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 28px;
+}
+
+/* SECTION */
+.section {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+.section-head {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.section-head h2 {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-head h2 .num {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0;
+}
+.section-body {
+  padding: 22px;
+}
+
+/* SITUATION */
+.situation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.sit-cell {
+  background: var(--surface);
+  padding: 14px 16px;
+}
+.sit-cell .lbl {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.sit-cell .val {
+  font-family: 'Instrument Serif', serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.sit-cell .sub {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 2px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.her-words {
+  background: linear-gradient(135deg, #FEFAFF 0%, #F9F5FE 100%);
+  border: 1px solid #E9DEF5;
+  border-radius: 8px;
+  padding: 18px 22px;
+  position: relative;
+}
+.her-words::before {
+  content: '"';
+  font-family: 'Instrument Serif', serif;
+  font-size: 64px;
+  position: absolute;
+  top: 4px; left: 12px;
+  color: var(--opp);
+  line-height: 1;
+  opacity: 0.4;
+}
+.her-words .when {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--opp);
+  font-weight: 600;
+  margin-bottom: 8px;
+  margin-left: 32px;
+}
+.her-words .quote {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-left: 32px;
+}
+
+/* RECOMMENDATION */
+.rec-block {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 22px;
+  align-items: center;
+  padding: 20px 22px;
+  background: linear-gradient(135deg, #FAFFF8 0%, #F5FCEF 100%);
+  border: 1px solid #DDEBC9;
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+.rec-icon {
+  width: 44px; height: 44px;
+  background: var(--surface);
+  border: 1px solid #DDEBC9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--good);
+}
+.rec-text .rec-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--good);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.rec-text .rec-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+.rec-text .rec-detail {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.rec-amount {
+  text-align: right;
+}
+.rec-amount .amt {
+  font-family: 'Instrument Serif', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.rec-amount .amt-lbl {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+.rec-amount .amt-sub {
+  font-size: 11px;
+  color: var(--good);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 4px;
+}
+
+.why-now {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+.why-cell {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.why-cell .why-lbl {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.why-cell .why-lbl::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--good);
+  border-radius: 50%;
+}
+.why-cell .why-text {
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.why-cell .why-text strong { font-weight: 600; }
+
+/* TALKING POINTS */
+.opener-card {
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 8px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.opener-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; width: 200px; height: 100%;
+  background: radial-gradient(circle at top right, rgba(107, 33, 168, 0.25), transparent 70%);
+}
+.opener-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 10px;
+  position: relative;
+}
+.opener-text {
+  font-family: 'Instrument Serif', serif;
+  font-size: 18px;
+  line-height: 1.55;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  font-style: italic;
+  position: relative;
+}
+.opener-text::before {
+  content: '"';
+  font-size: 24px;
+  margin-right: 4px;
+  opacity: 0.7;
+}
+.opener-text::after {
+  content: '"';
+  font-size: 24px;
+  margin-left: 2px;
+  opacity: 0.7;
+}
+.opener-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  position: relative;
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+}
+.opener-foot button {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--bg);
+  padding: 5px 12px;
+  border-radius: 5px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.points-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.point-row {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.point-row:last-child { border-bottom: none; }
+.point-num {
+  width: 22px; height: 22px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+.point-content .point-headline {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.point-content .point-body {
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.point-content .point-body strong { color: var(--ink); font-weight: 500; }
+
+/* OBJECTIONS */
+.obj-row {
+  border-bottom: 1px solid var(--rule);
+  padding: 14px 0;
+}
+.obj-row:last-child { border: none; padding-bottom: 0; }
+.obj-q {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 6px;
+  display: flex;
+  gap: 8px;
+}
+.obj-q::before {
+  content: 'Q';
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  background: var(--tint-warning);
+  color: var(--warning);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+  align-self: flex-start;
+  height: fit-content;
+}
+.obj-a {
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.55;
+  margin-left: 26px;
+  padding-left: 12px;
+  border-left: 2px solid var(--rule-2);
+}
+.obj-a strong { color: var(--ink); font-weight: 600; }
+
+/* RIGHT COL */
+.client-snapshot .section-body { padding: 0; }
+.snap-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--rule);
+}
+.snap-cell {
+  padding: 12px 18px;
+  border-right: 1px solid var(--rule);
+}
+.snap-cell:last-child { border-right: none; }
+.snap-row:last-child { border-bottom: none; }
+.snap-lbl {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.snap-val {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.snap-val.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+.snap-sub {
+  font-size: 10px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+/* TIMELINE OF CONVERSATIONS */
+.convo-row {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 12px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--rule);
+}
+.convo-row:last-child { border-bottom: none; }
+.convo-when {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink-3);
+}
+.convo-when .ago {
+  font-size: 9px;
+  color: var(--ink-3);
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+.convo-text {
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.convo-text strong { color: var(--ink); font-weight: 500; }
+.convo-text .topic {
+  display: inline-block;
+  font-size: 9px;
+  background: var(--bg);
+  color: var(--ink-3);
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-right: 6px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border: 1px solid var(--rule);
+}
+
+/* ACTIONS BLOCK */
+.actions-card {
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 10px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.actions-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(107, 33, 168, 0.18), transparent 60%);
+}
+.actions-card h3 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 18px;
+  font-weight: 400;
+  margin-bottom: 14px;
+  position: relative;
+}
+.action-button {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--bg);
+  padding: 11px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  position: relative;
+  text-align: left;
+  transition: background 0.15s;
+}
+.action-button:hover { background: rgba(255,255,255,0.12); }
+.action-button.primary {
+  background: var(--bg);
+  color: var(--ink);
+  border-color: var(--bg);
+  font-weight: 600;
+}
+.action-button.primary:hover { background: #F5F0FA; }
+.action-button .icon {
+  width: 24px; height: 24px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.action-button.primary .icon {
+  background: rgba(107, 33, 168, 0.15);
+  color: var(--opp);
+}
+.action-button .text {
+  flex: 1;
+}
+.action-button .label {
+  font-weight: 600;
+  font-size: 12px;
+  display: block;
+}
+.action-button .desc {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 2px;
+}
+.action-button.primary .desc { color: var(--ink-3); }
+.action-button .arr { color: rgba(255,255,255,0.4); }
+.action-button.primary .arr { color: var(--ink-3); }
+
+/* PORTFOLIO MINI */
+.port-mini {
+  padding: 14px 22px;
+}
+.port-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.port-row:last-child { border-bottom: none; }
+.port-row .lbl { color: var(--ink-2); }
+.port-row .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+}
+.port-row .pct {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink-3);
+  font-size: 11px;
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">Q</div>
+    <div class="icon" title="Today">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9"/><path d="M5 10v10h14V10"/></svg>
+    </div>
+    <div class="icon active" title="Clients">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5"/></svg>
+    </div>
+    <div class="icon" title="Opportunities">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    </div>
+    <div class="icon" title="Research">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l5-5 4 4 9-9"/><path d="M14 7h7v7"/></svg>
+    </div>
+    <div class="icon" title="Reports">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l4 4v12H5z"/><path d="M16 4v4h4"/></svg>
+    </div>
+    <div class="spacer"></div>
+    <div class="icon" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19 12c0 .5 0 1-.1 1.5l2 1.5-2 3.5-2.4-.8c-.7.6-1.6 1-2.5 1.3l-.4 2.5h-4l-.4-2.5c-.9-.3-1.8-.7-2.5-1.3L4.3 18.5l-2-3.5 2-1.5C4 13 4 12.5 4 12s0-1 .1-1.5l-2-1.5 2-3.5 2.4.8c.7-.6 1.6-1 2.5-1.3L9.5 2.5h4l.4 2.5c.9.3 1.8.7 2.5 1.3l2.4-.8 2 3.5-2 1.5c.1.5.1 1 .1 1.5z"/></svg>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb-bar">
+      <div class="breadcrumb">
+        <a>Today</a>
+        <span class="sep">/</span>
+        <a>Opportunities</a>
+        <span class="sep">/</span>
+        <span class="current">Brief — Priya Venkat · NPS Conversation</span>
+      </div>
+      <div class="brief-actions-top">
+        <button class="btn-secondary">Listen (90 sec)</button>
+        <button class="btn-secondary">Print</button>
+        <button class="btn-secondary">Dismiss</button>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <!-- HEADER -->
+      <div class="brief-head">
+        <div class="client-avatar-large">PV</div>
+        <div class="brief-title-block">
+          <div class="brief-eyebrow">Conversation Brief · Generated 09:41 IST · 90-sec read</div>
+          <h1>Priya Venkat · <em>the NPS conversation</em> she asked for</h1>
+          <div class="meta">
+            <span><strong>₹4.6 Cr book</strong></span>
+            <span>·</span>
+            <span>Client since Mar 2022</span>
+            <span>·</span>
+            <span>Last met <strong>11 Apr 2026</strong></span>
+            <span>·</span>
+            <span>Next meeting <strong>today, 11:30</strong></span>
+          </div>
+        </div>
+        <div class="brief-fit">
+          <div class="brief-fit-label">Conversation fit</div>
+          <div class="brief-fit-value">92%</div>
+          <div class="brief-fit-bar"><div class="brief-fit-bar-fill"></div></div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="brief-body">
+
+        <!-- LEFT COL -->
+        <div>
+
+          <!-- 1. SITUATION -->
+          <section class="section">
+            <div class="section-head">
+              <h2><span class="num">1</span> The situation</h2>
+            </div>
+            <div class="section-body">
+
+              <div class="situation-grid">
+                <div class="sit-cell">
+                  <div class="lbl">Stage of life</div>
+                  <div class="val">Dual-income · 41</div>
+                  <div class="sub">Husband 43 · 2 kids (8, 11)</div>
+                </div>
+                <div class="sit-cell">
+                  <div class="lbl">Tax slab</div>
+                  <div class="val">30% bracket</div>
+                  <div class="sub">FY26 estimated TI ₹38L+</div>
+                </div>
+                <div class="sit-cell">
+                  <div class="lbl">Current retirement provision</div>
+                  <div class="val">EPF only</div>
+                  <div class="sub">No NPS, no PPF maxed</div>
+                </div>
+                <div class="sit-cell">
+                  <div class="lbl">Risk profile</div>
+                  <div class="val">Moderate</div>
+                  <div class="sub">Onboarding RPQ · Sept 2023</div>
+                </div>
+              </div>
+
+              <div class="her-words">
+                <div class="when">Her words · last call · 11 Apr 2026</div>
+                <div class="quote">My husband mentioned NPS at his office — should we be doing that? What's the actual tax benefit at our slab?</div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- 2. RECOMMENDATION -->
+          <section class="section">
+            <div class="section-head">
+              <h2><span class="num">2</span> What to recommend</h2>
+            </div>
+            <div class="section-body">
+
+              <div class="rec-block">
+                <div class="rec-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+                </div>
+                <div class="rec-text">
+                  <div class="rec-eyebrow">Primary recommendation</div>
+                  <div class="rec-title">Tier-1 NPS · ₹50,000/yr under Sec 80CCD(1B)</div>
+                  <div class="rec-detail">Active choice · 75% Equity (E) · 15% Corporate Bond (C) · 10% G-Sec (G) · matching her moderate profile</div>
+                </div>
+                <div class="rec-amount">
+                  <div class="amt-lbl">Annual contribution</div>
+                  <div class="amt">₹50,000</div>
+                  <div class="amt-sub">Tax saved: ₹15,600</div>
+                </div>
+              </div>
+
+              <div class="why-now">
+                <div class="why-cell">
+                  <div class="why-lbl">Why now</div>
+                  <div class="why-text">She <strong>raised it herself</strong> on the last call. The longer the gap, the more it feels like the conversation didn't matter to you.</div>
+                </div>
+                <div class="why-cell">
+                  <div class="why-lbl">Why this product</div>
+                  <div class="why-text">Of all options, <strong>only NPS gives the additional ₹50K deduction</strong> under 80CCD(1B). PPF and ELSS share the 80C ₹1.5L bucket she's already using.</div>
+                </div>
+                <div class="why-cell">
+                  <div class="why-lbl">Why this amount</div>
+                  <div class="why-text">₹50K is the <strong>full 80CCD(1B) limit</strong>. Anything less leaves tax benefit on the table; anything more crowds her existing SIPs.</div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- 3. WHAT TO SAY -->
+          <section class="section">
+            <div class="section-head">
+              <h2><span class="num">3</span> What to say</h2>
+              <span style="font-size: 11px; color: var(--ink-3);">Suggested · adapt freely</span>
+            </div>
+            <div class="section-body">
+
+              <div class="opener-card">
+                <div class="opener-eyebrow">Opener · use verbatim or adapt</div>
+                <div class="opener-text">Priya, you'd asked me last month about NPS. I went and looked at your specific situation — at your tax slab, this is actually one of the few moves that adds real value, and I want to walk you through what makes sense.</div>
+                <div class="opener-foot">
+                  <span>Frames as a follow-up to her question · positions you as having done the work</span>
+                  <button>Copy text</button>
+                </div>
+              </div>
+
+              <div class="points-list">
+
+                <div class="point-row">
+                  <div class="point-num">1</div>
+                  <div class="point-content">
+                    <div class="point-headline">Lead with the tax math, not the product</div>
+                    <div class="point-body">"At your 30% slab, ₹50,000 in NPS saves you <strong>₹15,600 in tax this year</strong> — that's an immediate, guaranteed 31% return before the market does anything. The investment compounds on top."</div>
+                  </div>
+                </div>
+
+                <div class="point-row">
+                  <div class="point-num">2</div>
+                  <div class="point-content">
+                    <div class="point-headline">Position it as "in addition to," not "instead of"</div>
+                    <div class="point-body">She's already maxing 80C through ELSS and PPF. Critical to clarify: <strong>NPS uses a separate 80CCD(1B) limit</strong>. This is genuinely additional headroom, not a reshuffle.</div>
+                  </div>
+                </div>
+
+                <div class="point-row">
+                  <div class="point-num">3</div>
+                  <div class="point-content">
+                    <div class="point-headline">Acknowledge the lock-in honestly</div>
+                    <div class="point-body">Don't hide it. "Yes, it's locked till 60. But Priya, you're 41 — anything you put in for retirement <strong>should be locked till 60.</strong> The lock-in is the feature, not the bug."</div>
+                  </div>
+                </div>
+
+                <div class="point-row">
+                  <div class="point-num">4</div>
+                  <div class="point-content">
+                    <div class="point-headline">Suggest active choice, 75/15/10</div>
+                    <div class="point-body">Auto choice glide-path is too conservative for her age. <strong>Active choice with 75% equity</strong> matches her moderate risk profile and her 19-year horizon to age 60.</div>
+                  </div>
+                </div>
+
+                <div class="point-row">
+                  <div class="point-num">5</div>
+                  <div class="point-content">
+                    <div class="point-headline">Close with the "do you want me to set this up" ask</div>
+                    <div class="point-body">"If this lands well, I can have the eNPS account opened today and your first contribution sent before March 31. Should we do that?" <strong>Don't leave her to come back to you.</strong></div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+          <!-- 4. OBJECTIONS -->
+          <section class="section">
+            <div class="section-head">
+              <h2><span class="num">4</span> Likely objections</h2>
+            </div>
+            <div class="section-body">
+
+              <div class="obj-row">
+                <div class="obj-q">Why now? I haven't needed NPS for the last 19 years.</div>
+                <div class="obj-a">"You're right — but two things changed. Your tax slab has moved up, so the ₹15,600 deduction is meaningfully larger now. And every year you don't contribute is <strong>one less year of compounding</strong>. ₹50K/yr at 11% over 19 years is ~₹32 lakh. Over 18 years it's ₹28L. The cost of waiting is real."</div>
+              </div>
+
+              <div class="obj-row">
+                <div class="obj-q">Locked till 60 sounds scary. What if I need the money?</div>
+                <div class="obj-a">"That's a fair concern. But here's the framing — <strong>you already have ₹4.6 Cr of liquid assets with me.</strong> NPS is for the part of your portfolio that <em>should</em> be locked. Even at ₹50K/yr, by 60 it's ~₹32L — meaningful but not so big that lock-in becomes a problem."</div>
+              </div>
+
+              <div class="obj-row">
+                <div class="obj-q">My husband says he doesn't trust government schemes.</div>
+                <div class="obj-a">"NPS isn't really a government 'scheme' in that sense — it's a <strong>regulated retirement account managed by private fund managers</strong> like HDFC, ICICI, SBI. Government just sets the structure. The returns track the underlying equity and bond markets, not government promises."</div>
+              </div>
+
+              <div class="obj-row">
+                <div class="obj-q">Can I do this directly online without you?</div>
+                <div class="obj-a">"You absolutely can — eNPS is open to anyone. What I'm offering is the <strong>fund-manager selection, asset-allocation choice, and annual rebalancing.</strong> Most people who do it themselves end up in Auto Choice and over time leave 1-2% return on the table. Up to you — happy either way."</div>
+              </div>
+
+            </div>
+          </section>
+
+        </div>
+
+        <!-- RIGHT COL -->
+        <div>
+
+          <!-- ACTIONS -->
+          <div class="actions-card">
+            <h3>Take it from here</h3>
+
+            <button class="action-button primary">
+              <div class="icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4l3 3-3 3M19 8H8M19 16l-3-3 3-3M5 13h11"/></svg>
+              </div>
+              <div class="text">
+                <span class="label">Bring up in 11:30 meeting</span>
+                <span class="desc">Pinned to today's call agenda</span>
+              </div>
+              <span class="arr">→</span>
+            </button>
+
+            <button class="action-button">
+              <div class="icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l4 4v12H5z"/></svg>
+              </div>
+              <div class="text">
+                <span class="label">Generate one-pager</span>
+                <span class="desc">PDF with tax math, fund options · branded</span>
+              </div>
+              <span class="arr">→</span>
+            </button>
+
+            <button class="action-button">
+              <div class="icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l9 7 9-7M3 6h18v12H3z"/></svg>
+              </div>
+              <div class="text">
+                <span class="label">Draft WhatsApp follow-up</span>
+                <span class="desc">If call doesn't happen today</span>
+              </div>
+              <span class="arr">→</span>
+            </button>
+
+            <button class="action-button">
+              <div class="icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              </div>
+              <div class="text">
+                <span class="label">Schedule a dedicated NPS call</span>
+                <span class="desc">If she wants the deep dive separately</span>
+              </div>
+              <span class="arr">→</span>
+            </button>
+          </div>
+
+          <!-- CLIENT SNAPSHOT -->
+          <section class="section client-snapshot">
+            <div class="section-head">
+              <h2>Snapshot</h2>
+              <a class="btn-tiny" href="#">Full file →</a>
+            </div>
+            <div class="section-body">
+              <div class="snap-row">
+                <div class="snap-cell">
+                  <div class="snap-lbl">AUM</div>
+                  <div class="snap-val mono">₹4.6 Cr</div>
+                  <div class="snap-sub">+₹38L · 12mo</div>
+                </div>
+                <div class="snap-cell">
+                  <div class="snap-lbl">Pulse</div>
+                  <div class="snap-val mono">76<span style="font-size:11px;color:var(--ink-3)">/100</span></div>
+                  <div class="snap-sub">+2 vs last week</div>
+                </div>
+              </div>
+              <div class="snap-row">
+                <div class="snap-cell">
+                  <div class="snap-lbl">Last review</div>
+                  <div class="snap-val">Q4 FY25</div>
+                  <div class="snap-sub">14 Jan 2026</div>
+                </div>
+                <div class="snap-cell">
+                  <div class="snap-lbl">Touchpoints · 90d</div>
+                  <div class="snap-val">7</div>
+                  <div class="snap-sub">3 calls, 4 messages</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PORTFOLIO MIX -->
+          <section class="section">
+            <div class="section-head">
+              <h2>Portfolio mix</h2>
+              <span style="font-size:11px;color:var(--ink-3);">on track</span>
+            </div>
+            <div class="port-mini">
+              <div class="port-row">
+                <span class="lbl">Equity (direct + MF)</span>
+                <span class="val">₹2.8 Cr</span>
+                <span class="pct">61%</span>
+              </div>
+              <div class="port-row">
+                <span class="lbl">Debt / Liquid</span>
+                <span class="val">₹1.1 Cr</span>
+                <span class="pct">24%</span>
+              </div>
+              <div class="port-row">
+                <span class="lbl">Real estate (REITs)</span>
+                <span class="val">₹40 L</span>
+                <span class="pct">9%</span>
+              </div>
+              <div class="port-row">
+                <span class="lbl">Cash / Savings</span>
+                <span class="val">₹30 L</span>
+                <span class="pct">6%</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- RECENT CONVERSATIONS -->
+          <section class="section">
+            <div class="section-head">
+              <h2>Recent conversations</h2>
+              <a class="btn-tiny" href="#">Timeline →</a>
+            </div>
+            <div style="padding: 4px 0;">
+              <div class="convo-row">
+                <div class="convo-when">
+                  11 Apr
+                  <span class="ago">16d ago</span>
+                </div>
+                <div class="convo-text">
+                  <span class="topic">Call · 32min</span>
+                  Quarterly review. Discussed infra holding. <strong>Asked about NPS</strong>; husband mentioned at office. Mentioned EV interest for son.
+                </div>
+              </div>
+              <div class="convo-row">
+                <div class="convo-when">
+                  28 Mar
+                  <span class="ago">30d ago</span>
+                </div>
+                <div class="convo-text">
+                  <span class="topic">WhatsApp</span>
+                  Shared Q4 portfolio statement. She acknowledged · "looks good, talk in April."
+                </div>
+              </div>
+              <div class="convo-row">
+                <div class="convo-when">
+                  14 Jan
+                  <span class="ago">3mo ago</span>
+                </div>
+                <div class="convo-text">
+                  <span class="topic">Meeting · in person</span>
+                  Q3 review. Rebalanced into infra (5% allocation). Discussed daughter's school fees structure.
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

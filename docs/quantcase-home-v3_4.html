@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantcase · Good Morning, Palash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FCFCFA;
+  --surface: #FFFFFF;
+  --ink: #1A1A1A;
+  --ink-2: #4A4A4A;
+  --ink-3: #8A8A8A;
+  --ink-4: #C8C8C4;
+  --rule: #EDEAE3;
+  --rule-2: #E0DCD2;
+  --critical: #C2410C;
+  --warning: #B45309;
+  --good: #15803D;
+  --info: #1E40AF;
+  --opp: #6B21A8;
+  --tint-critical: #FEF2EC;
+  --tint-warning: #FEF7E6;
+  --tint-good: #ECFDF5;
+  --tint-info: #EFF6FF;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.serif { font-family: 'Instrument Serif', serif; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ============ SIDEBAR ============ */
+.layout {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  min-height: 100vh;
+}
+.sidebar {
+  border-right: 1px solid var(--rule);
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+}
+.sidebar .logo {
+  width: 28px; height: 28px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Instrument Serif', serif;
+  font-size: 18px;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+.sidebar .icon {
+  width: 36px; height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  cursor: pointer;
+  border-radius: 6px;
+}
+.sidebar .icon:hover { background: var(--rule); color: var(--ink); }
+.sidebar .icon.active { background: var(--ink); color: var(--bg); }
+.sidebar .icon svg { width: 18px; height: 18px; }
+.sidebar .spacer { flex: 1; }
+
+/* ============ MAIN ============ */
+.main {
+  padding: 24px 36px 60px;
+  max-width: 1400px;
+}
+
+/* ============ HEADER ============ */
+.greeting {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 24px;
+}
+.greeting h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+.greeting h1 .comma {
+  color: var(--ink-3);
+  font-style: italic;
+}
+.greeting .sub {
+  color: var(--ink-3);
+  font-size: 13px;
+  margin-top: 6px;
+}
+.greeting-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.search-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--rule-2);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-3);
+  font-size: 12px;
+  width: 240px;
+}
+.search-pill .key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: var(--rule);
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--ink-2);
+}
+
+/* ============ HERO ROW (briefing + signal map) ============ */
+.hero-row {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ============ HERO BRIEFING ============ */
+.briefing {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 24px 28px;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.briefing::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; width: 220px; height: 100%;
+  background: radial-gradient(circle at top right, rgba(194, 65, 12, 0.18), transparent 70%);
+}
+.briefing-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 12px;
+  position: relative;
+}
+.briefing-headline {
+  font-family: 'Instrument Serif', serif;
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: auto;
+  padding-bottom: 18px;
+  position: relative;
+}
+.briefing-headline em {
+  font-style: italic;
+  color: #F59E0B;
+}
+.briefing-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.action-chip {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 7px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--bg);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.action-chip:hover {
+  background: rgba(255,255,255,0.14);
+}
+.action-chip .who {
+  font-weight: 500;
+}
+.action-chip .what {
+  color: rgba(255,255,255,0.6);
+  font-size: 11px;
+}
+.action-chip .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+.action-chip .dot.critical { background: #EF4444; }
+.action-chip .dot.warning { background: #F59E0B; }
+
+/* ============ SIGNAL MAP HERO (compact, in hero row) ============ */
+.signal-map-hero {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 18px 20px 14px;
+  display: flex;
+  flex-direction: column;
+}
+.signal-map-hero-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.signal-map-hero-head h3 {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 4px;
+}
+.signal-map-hero-sub {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.legend-compact {
+  display: flex;
+  gap: 4px;
+}
+.legend-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+}
+.legend-pill.critical { background: var(--tint-critical); color: var(--critical); }
+.legend-pill.warning { background: var(--tint-warning); color: var(--warning); }
+.legend-pill.good { background: var(--tint-good); color: var(--good); }
+.legend-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+.legend-dot.critical { background: var(--critical); }
+.legend-dot.warning { background: var(--warning); }
+.legend-dot.good { background: var(--good); }
+
+.map-canvas-hero {
+  flex: 1;
+  background:
+    radial-gradient(circle, var(--rule) 1px, transparent 1px);
+  background-size: 20px 20px;
+  border-radius: 8px;
+  min-height: 240px;
+  position: relative;
+}
+.map-canvas-hero svg {
+  width: 100%; height: 100%; display: block;
+}
+
+/* ============ NEXT MEETING PREP ============ */
+.meeting-prep {
+  display: grid;
+  grid-template-columns: auto 1fr 2fr auto;
+  gap: 28px;
+  align-items: center;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #FFFBF0 0%, #FEF7E6 100%);
+  border: 1px solid #F0E2BB;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.meeting-prep::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--warning);
+}
+
+.prep-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 24px;
+  border-right: 1px solid rgba(180, 83, 9, 0.18);
+  min-width: 110px;
+}
+.prep-eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--warning);
+  font-weight: 600;
+}
+.prep-time {
+  font-family: 'Instrument Serif', serif;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink);
+}
+.prep-mode {
+  font-size: 10px;
+  color: var(--ink-3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.prep-client {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.prep-avatar {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+}
+.prep-name {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+.prep-aum {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-2);
+  font-weight: 400;
+  margin-left: 6px;
+}
+.prep-since {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.prep-context {
+  border-left: 1px solid rgba(180, 83, 9, 0.18);
+  padding-left: 24px;
+}
+.prep-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.prep-points {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.prep-bullet {
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.45;
+  position: relative;
+  padding-left: 14px;
+}
+.prep-bullet::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.prep-actions {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+}
+
+/* ============ THE ROW ============ */
+.row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* CALL LIST */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.card-head {
+  padding: 16px 20px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
+}
+.card-head h3 {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-head .count {
+  background: var(--rule);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--ink-2);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.card-head .seeall {
+  font-size: 11px;
+  color: var(--ink-3);
+  text-decoration: none;
+}
+
+/* PRIORITY CLIENT ROWS */
+.priority-row {
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.priority-row:last-child { border-bottom: none; }
+.priority-row:hover { background: #FAFAF7; }
+.priority-row .avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--surface);
+}
+.priority-row .avatar.critical { background: var(--critical); }
+.priority-row .avatar.warning { background: var(--warning); }
+.priority-row .avatar.info { background: var(--info); }
+
+.priority-row .body .name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.priority-row .body .name .badge {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.badge.critical { background: var(--tint-critical); color: var(--critical); }
+.badge.warning { background: var(--tint-warning); color: var(--warning); }
+.badge.info { background: var(--tint-info); color: var(--info); }
+
+.priority-row .body .why {
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.priority-row .body .why em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--ink);
+}
+.priority-row .meta {
+  text-align: right;
+}
+.priority-row .meta .aum {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 13px;
+}
+.priority-row .meta .ret {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  margin-top: 2px;
+}
+.priority-row .meta .ret.neg { color: var(--critical); }
+.priority-row .meta .ret.pos { color: var(--good); }
+.priority-row .cta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+.btn-primary {
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-primary:hover { background: #2D2D2D; }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--ink-2);
+  border: 1px solid var(--rule-2);
+  padding: 7px 13px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-secondary:hover { background: var(--rule); }
+.last-touch {
+  font-size: 10px;
+  color: var(--ink-3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ============ TODAY PANEL (RIGHT) ============ */
+.today-stack > .card { margin-bottom: 16px; }
+.today-stack > .card:last-child { margin-bottom: 0; }
+
+.tasks {
+  padding: 8px 0;
+}
+.task {
+  padding: 12px 20px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+}
+.task:last-child { border-bottom: none; }
+.task .checkbox {
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--ink-4);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.task.done .checkbox {
+  background: var(--ink);
+  border-color: var(--ink);
+  position: relative;
+}
+.task.done .checkbox::after {
+  content: '';
+  position: absolute;
+  left: 4px; top: 1px;
+  width: 4px; height: 8px;
+  border: solid var(--bg);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+.task .text {
+  flex: 1;
+  font-size: 12px;
+}
+.task.done .text { color: var(--ink-3); text-decoration: line-through; }
+.task .time {
+  font-size: 10px;
+  color: var(--ink-3);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 2px;
+}
+
+/* PORTFOLIO STATS */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--rule);
+}
+.stat {
+  background: var(--surface);
+  padding: 14px 16px;
+}
+.stat .label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+}
+.stat .value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.stat .delta {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--good);
+  margin-top: 4px;
+}
+
+/* ============ SIGNAL MAP (REDUCED) ============ */
+.signal-map-card {
+  margin-bottom: 24px;
+}
+.signal-map-head {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
+}
+.signal-map-head h3 {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.legend {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--ink-3);
+  align-items: center;
+}
+.legend-item { display: flex; gap: 6px; align-items: center; }
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+.legend-dot.critical { background: var(--critical); }
+.legend-dot.warning { background: var(--warning); }
+.legend-dot.good { background: var(--good); }
+
+.map-canvas {
+  height: 320px;
+  position: relative;
+  background:
+    linear-gradient(var(--surface), var(--surface)),
+    radial-gradient(circle, var(--rule) 1px, transparent 1px);
+  background-size: 100% 100%, 24px 24px;
+  background-blend-mode: normal, multiply;
+}
+.map-canvas svg { width: 100%; height: 100%; display: block; }
+
+/* ============ WHAT CHANGED (vertical stack) ============ */
+.changes-card {
+  margin-bottom: 24px;
+}
+.changes-list {
+  display: flex;
+  flex-direction: column;
+}
+.change-row {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+}
+.change-row:last-child { border-bottom: none; }
+.change-row:hover { background: #FAFAF7; }
+
+.change-row::before {
+  content: '';
+  position: absolute;
+  left: 110px; top: 50%;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ink-4);
+  transform: translateY(-50%);
+}
+.change-row[data-type] {} /* hook for variants */
+
+.change-time {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.change-time .time-stamp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.change-time .tag {
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.change-time .tag.alert { background: var(--tint-critical); color: var(--critical); }
+.change-time .tag.research { background: var(--tint-info); color: var(--info); }
+.change-time .tag.action { background: var(--tint-warning); color: var(--warning); }
+.change-time .tag.completed { background: var(--tint-good); color: var(--good); }
+
+.change-body .title {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+.change-body .desc {
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.change-body .desc strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.change-cta { display: flex; }
+
+/* ============ SEGMENTS BAR ============ */
+.segments {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+}
+.segment {
+  padding: 6px 12px;
+  background: var(--bg);
+  border: 1px solid var(--rule-2);
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.segment:hover { background: var(--rule); }
+.segment .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-3);
+  background: var(--surface);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.segment.alert { border-color: var(--critical); color: var(--critical); }
+.segment.alert .n { background: var(--tint-critical); }
+
+/* RESEARCH NUDGE */
+.research-nudge {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px dashed var(--rule-2);
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg);
+}
+.research-nudge .left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ============ OPPORTUNITIES (HOME, COMPACT) ============ */
+.opps-card {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+.opps-card .card-head {
+  align-items: flex-start;
+}
+.subhead {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 4px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.opps-mini {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--rule);
+}
+
+.opp-mini {
+  background: var(--surface);
+  display: grid;
+  grid-template-columns: 4px 1fr;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.opp-mini:hover { background: #FAFAF7; }
+
+.opp-mini-rail.asked { background: var(--critical); }
+.opp-mini-rail.life { background: var(--good); }
+.opp-mini-rail.idle { background: var(--info); }
+.opp-mini-rail.gap { background: var(--warning); }
+
+.opp-mini-body {
+  padding: 16px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opp-mini-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.opp-mini-client {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.opp-mini-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 11px;
+}
+.opp-mini-name {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+.opp-mini-tag {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-weight: 600;
+  display: inline-block;
+}
+.opp-mini-tag.asked { background: var(--tint-critical); color: var(--critical); }
+.opp-mini-tag.life { background: var(--tint-good); color: var(--good); }
+.opp-mini-tag.idle { background: var(--tint-info); color: var(--info); }
+.opp-mini-tag.gap { background: var(--tint-warning); color: var(--warning); }
+
+.opp-mini-fit {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-3);
+  background: var(--bg);
+  padding: 3px 7px;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+}
+
+.opp-mini-headline {
+  font-family: 'Instrument Serif', serif;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.opp-mini-headline em {
+  font-style: italic;
+  color: var(--opp, #6B21A8);
+}
+
+.opp-mini-evidence {
+  font-size: 11px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  font-style: italic;
+  border-left: 2px solid var(--rule-2);
+  padding-left: 10px;
+}
+
+.opp-mini-foot {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px dashed var(--rule);
+}
+
+.opp-mini-value {
+  font-size: 11px;
+  color: var(--ink-2);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+}
+
+.opps-footer {
+  padding: 14px 20px;
+  background: #FAFAF7;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.opps-summary {
+  color: var(--ink-2);
+  font-size: 12px;
+}
+.opps-summary strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.research-nudge .icon-box {
+  width: 40px; height: 40px;
+  background: var(--surface);
+  border: 1px solid var(--rule-2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-2);
+}
+.research-nudge h4 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 17px;
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+.research-nudge p {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.research-nudge p strong { color: var(--ink); font-weight: 500; }
+
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">Q</div>
+    <div class="icon active" title="Today">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9"/><path d="M5 10v10h14V10"/></svg>
+    </div>
+    <div class="icon" title="Clients">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5"/></svg>
+    </div>
+    <div class="icon" title="Research">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l5-5 4 4 9-9"/><path d="M14 7h7v7"/></svg>
+    </div>
+    <div class="icon" title="Reports">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l4 4v12H5z"/><path d="M16 4v4h4"/></svg>
+    </div>
+    <div class="icon" title="Library">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4v16M9 4v16M13 4v16M17 6l3 14"/></svg>
+    </div>
+    <div class="spacer"></div>
+    <div class="icon" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19 12c0 .5 0 1-.1 1.5l2 1.5-2 3.5-2.4-.8c-.7.6-1.6 1-2.5 1.3l-.4 2.5h-4l-.4-2.5c-.9-.3-1.8-.7-2.5-1.3L4.3 18.5l-2-3.5 2-1.5C4 13 4 12.5 4 12s0-1 .1-1.5l-2-1.5 2-3.5 2.4.8c.7-.6 1.6-1 2.5-1.3L9.5 2.5h4l.4 2.5c.9.3 1.8.7 2.5 1.3l2.4-.8 2 3.5-2 1.5c.1.5.1 1 .1 1.5z"/></svg>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- GREETING -->
+    <header class="greeting">
+      <div>
+        <h1>Good morning<span class="comma">,</span> Palash</h1>
+        <div class="sub">Wednesday, 22 April · 18 clients · ₹796 Cr book</div>
+      </div>
+      <div class="greeting-right">
+        <div class="search-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="6"/><path d="M14 14l5 5"/></svg>
+          <span>Search clients, stocks, reports...</span>
+          <span class="key">⌘K</span>
+        </div>
+        <button class="btn-primary">+ New Review</button>
+      </div>
+    </header>
+
+    <!-- HERO ROW: Briefing + Signal Map side by side -->
+    <section class="hero-row">
+
+      <!-- Briefing (left, narrower) -->
+      <div class="briefing">
+        <div class="briefing-eyebrow">Today's Brief · 09:42 IST</div>
+        <h2 class="briefing-headline">
+          Three clients need a conversation before market open. <em>Rahul</em> first — small-cap drift +6%.
+        </h2>
+        <div class="briefing-actions">
+          <div class="action-chip">
+            <span class="dot critical"></span>
+            <span class="who">Call Rahul</span>
+          </div>
+          <div class="action-chip">
+            <span class="dot warning"></span>
+            <span class="who">EV report → Anita</span>
+          </div>
+          <div class="action-chip">
+            <span class="dot critical"></span>
+            <span class="who">Rebalance Varun</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signal Map (right, compact) -->
+      <div class="signal-map-hero">
+        <div class="signal-map-hero-head">
+          <div>
+            <h3>Portfolio Signal Map</h3>
+            <div class="signal-map-hero-sub">18 clients · click to expand any node</div>
+          </div>
+          <div class="legend-compact">
+            <span class="legend-pill critical"><span class="legend-dot critical"></span>3</span>
+            <span class="legend-pill warning"><span class="legend-dot warning"></span>2</span>
+            <span class="legend-pill good"><span class="legend-dot good"></span>13</span>
+          </div>
+        </div>
+        <div class="map-canvas-hero">
+          <svg viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet">
+            <!-- Connection lines -->
+            <g stroke="#E0DCD2" stroke-width="1" fill="none">
+              <path d="M 300 38 Q 300 60 90 100"/>
+              <path d="M 300 38 Q 300 60 230 100"/>
+              <path d="M 300 38 Q 300 60 370 100"/>
+              <path d="M 300 38 Q 300 60 510 100"/>
+              <!-- Rahul -->
+              <path d="M 90 116 L 50 175" stroke="#C2410C" stroke-dasharray="3,3"/>
+              <path d="M 90 116 L 130 175"/>
+              <!-- Varun -->
+              <path d="M 230 116 L 190 175" stroke="#C2410C" stroke-dasharray="3,3"/>
+              <path d="M 230 116 L 270 175" stroke="#B45309" stroke-dasharray="3,3"/>
+              <!-- Anita -->
+              <path d="M 370 116 L 330 175" stroke="#B45309" stroke-dasharray="3,3"/>
+              <path d="M 370 116 L 410 175"/>
+              <!-- Suresh -->
+              <path d="M 510 116 L 470 175"/>
+              <path d="M 510 116 L 550 175"/>
+            </g>
+
+            <!-- ROOT: Palash -->
+            <g>
+              <rect x="265" y="14" width="70" height="28" rx="5" fill="#1A1A1A"/>
+              <text x="300" y="28" text-anchor="middle" fill="#FCFCFA" font-size="10" font-weight="600" font-family="Inter">Palash</text>
+              <text x="300" y="38" text-anchor="middle" fill="#8A8A8A" font-size="8" font-family="JetBrains Mono">₹796 Cr</text>
+            </g>
+
+            <!-- LEVEL 2: Clients -->
+            <g>
+              <rect x="55" y="92" width="70" height="28" rx="5" fill="#FEF2EC" stroke="#C2410C" stroke-width="1.5"/>
+              <text x="90" y="105" text-anchor="middle" fill="#1A1A1A" font-size="10" font-weight="600" font-family="Inter">Rahul</text>
+              <text x="90" y="115" text-anchor="middle" fill="#C2410C" font-size="8" font-family="JetBrains Mono">CRIT</text>
+            </g>
+
+            <g>
+              <rect x="195" y="92" width="70" height="28" rx="5" fill="#FEF2EC" stroke="#C2410C" stroke-width="1.5"/>
+              <text x="230" y="105" text-anchor="middle" fill="#1A1A1A" font-size="10" font-weight="600" font-family="Inter">Varun</text>
+              <text x="230" y="115" text-anchor="middle" fill="#C2410C" font-size="8" font-family="JetBrains Mono">CRIT</text>
+            </g>
+
+            <g>
+              <rect x="335" y="92" width="70" height="28" rx="5" fill="#FEF7E6" stroke="#B45309" stroke-width="1.5"/>
+              <text x="370" y="105" text-anchor="middle" fill="#1A1A1A" font-size="10" font-weight="600" font-family="Inter">Anita</text>
+              <text x="370" y="115" text-anchor="middle" fill="#B45309" font-size="8" font-family="JetBrains Mono">WARN</text>
+            </g>
+
+            <g>
+              <rect x="475" y="92" width="70" height="28" rx="5" fill="#ECFDF5" stroke="#15803D" stroke-width="1.5"/>
+              <text x="510" y="105" text-anchor="middle" fill="#1A1A1A" font-size="10" font-weight="600" font-family="Inter">Suresh</text>
+              <text x="510" y="115" text-anchor="middle" fill="#15803D" font-size="8" font-family="JetBrains Mono">OK</text>
+            </g>
+
+            <!-- LEVEL 3 -->
+            <g>
+              <rect x="22" y="170" width="56" height="22" rx="4" fill="#FFFFFF" stroke="#C2410C" stroke-dasharray="2,2"/>
+              <text x="50" y="184" text-anchor="middle" fill="#C2410C" font-size="8" font-family="JetBrains Mono">+6%</text>
+            </g>
+            <g>
+              <rect x="102" y="170" width="56" height="22" rx="4" fill="#FFFFFF" stroke="#15803D"/>
+              <text x="130" y="184" text-anchor="middle" fill="#15803D" font-size="8" font-family="JetBrains Mono">OK</text>
+            </g>
+            <g>
+              <rect x="162" y="170" width="56" height="22" rx="4" fill="#FFFFFF" stroke="#C2410C" stroke-dasharray="2,2"/>
+              <text x="190" y="184" text-anchor="middle" fill="#C2410C" font-size="8" font-family="JetBrains Mono">+9%</text>
+            </g>
+            <g>
+              <rect x="242" y="170" width="56" height="22" rx="4" fill="#FFFFFF" stroke="#B45309" stroke-dasharray="2,2"/>
+              <text x="270" y="184" text-anchor="middle" fill="#B45309" font-size="8" font-family="JetBrains Mono">near</text>
+            </g>
+            <g>
+              <rect x="302" y="170" width="56" height="22" rx="4" fill="#FFFFFF" stroke="#B45309" stroke-dasharray="2,2"/>
+              <text x="330" y="184" text-anchor="middle" fill="#B45309" font-size="8" font-family="JetBrains Mono">EV</text>
+            </g>
+            <g>
+              <rect x="382" y="170" width="56" height="22" rx="4" fill="#FFFFFF" stroke="#15803D"/>
+              <text x="410" y="184" text-anchor="middle" fill="#15803D" font-size="8" font-family="JetBrains Mono">REIT</text>
+            </g>
+            <g>
+              <rect x="442" y="170" width="56" height="22" rx="4" fill="#FFFFFF" stroke="#15803D"/>
+              <text x="470" y="184" text-anchor="middle" fill="#15803D" font-size="8" font-family="JetBrains Mono">Debt</text>
+            </g>
+            <g>
+              <rect x="522" y="170" width="56" height="22" rx="4" fill="#FFFFFF" stroke="#15803D"/>
+              <text x="550" y="184" text-anchor="middle" fill="#15803D" font-size="8" font-family="JetBrains Mono">Eq</text>
+            </g>
+
+            <!-- +14 more -->
+            <text x="300" y="222" text-anchor="middle" fill="#8A8A8A" font-size="10" font-family="Inter" font-style="italic">+14 more clients · expand to view</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    </section>
+
+    <!-- NEXT MEETING PREP STRIP -->
+    <section class="meeting-prep">
+      <div class="prep-rail">
+        <div class="prep-eyebrow">Next meeting · in 47 min</div>
+        <div class="prep-time">11:30</div>
+        <div class="prep-mode">Zoom · 30 min</div>
+      </div>
+      <div class="prep-client">
+        <div class="prep-avatar">PV</div>
+        <div>
+          <div class="prep-name">Priya Venkat <span class="prep-aum">₹4.6 Cr</span></div>
+          <div class="prep-since">Client since Mar 2022 · last met 11 Apr</div>
+        </div>
+      </div>
+      <div class="prep-context">
+        <div class="prep-label">What to bring up</div>
+        <div class="prep-points">
+          <span class="prep-bullet">Infra holding pending review (flagged 2w ago)</span>
+          <span class="prep-bullet">She asked about NPS allocation last call — never followed up</span>
+          <span class="prep-bullet">Birthday next week · personal note worth sending</span>
+        </div>
+      </div>
+      <div class="prep-actions">
+        <button class="btn-secondary">Brief me →</button>
+        <button class="btn-primary">Open file</button>
+      </div>
+    </section>
+
+    <!-- THE ROW: Who to call (left) + Today (right) -->
+    <section class="row">
+
+      <!-- WHO TO CALL TODAY -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Who to call today <span class="count">3</span></h3>
+          <a class="seeall" href="#">All clients →</a>
+        </div>
+
+        <div class="priority-row">
+          <div class="avatar critical">RM</div>
+          <div class="body">
+            <div class="name">Rahul Mehta <span class="badge critical">Critical</span></div>
+            <div class="why">Anxious about small-cap volatility on last call. Portfolio drifted <em>+6% mid-cap</em>. No updated allocation brief sent.</div>
+          </div>
+          <div class="meta">
+            <div class="aum">₹3.2 Cr</div>
+            <div class="ret neg">−6.0% · 30d</div>
+          </div>
+          <div class="cta">
+            <button class="btn-primary">Call Now</button>
+            <span class="last-touch">2d ago</span>
+          </div>
+        </div>
+
+        <div class="priority-row">
+          <div class="avatar critical">VK</div>
+          <div class="body">
+            <div class="name">Varun Kapoor <span class="badge critical">High Risk</span></div>
+            <div class="why">Mid-cap overweight <em>+9%</em>. Small-cap near threshold. <em>14 days no interaction</em> — relationship cold.</div>
+          </div>
+          <div class="meta">
+            <div class="aum">₹7.1 Cr</div>
+            <div class="ret neg">−9.2% · 30d</div>
+          </div>
+          <div class="cta">
+            <button class="btn-primary">Rebalance</button>
+            <span class="last-touch">16d ago</span>
+          </div>
+        </div>
+
+        <div class="priority-row">
+          <div class="avatar warning">AS</div>
+          <div class="body">
+            <div class="name">Anita Shah <span class="badge warning">Pending Promise</span></div>
+            <div class="why">Asked for <em>EV &amp; Green Energy</em> sector update for 2025 allocation. Report drafted but not sent.</div>
+          </div>
+          <div class="meta">
+            <div class="aum">₹5.8 Cr</div>
+            <div class="ret pos">+1.4% · 30d</div>
+          </div>
+          <div class="cta">
+            <button class="btn-primary">Send Report</button>
+            <span class="last-touch">7d ago</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TODAY STACK -->
+      <div class="today-stack">
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Book at a glance</h3>
+          </div>
+          <div class="stat-grid">
+            <div class="stat">
+              <div class="label">Total AUM</div>
+              <div class="value">₹796 Cr</div>
+              <div class="delta">+₹14 Cr · 7d</div>
+            </div>
+            <div class="stat">
+              <div class="label">Clients</div>
+              <div class="value">18</div>
+              <div class="delta">+1 this month</div>
+            </div>
+            <div class="stat">
+              <div class="label">Active alerts</div>
+              <div class="value" style="color:var(--critical)">3</div>
+              <div class="delta" style="color:var(--ink-3)">2 from yesterday</div>
+            </div>
+            <div class="stat">
+              <div class="label">Avg pulse</div>
+              <div class="value">71<span style="font-size:13px;color:var(--ink-3)">/100</span></div>
+              <div class="delta">+2 vs last wk</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Today's tasks <span class="count">4</span></h3>
+          </div>
+          <div class="tasks">
+            <div class="task">
+              <div class="checkbox"></div>
+              <div class="text">Send Rahul updated portfolio PDF
+                <div class="time">By 10:00 · before call</div>
+              </div>
+            </div>
+            <div class="task">
+              <div class="checkbox"></div>
+              <div class="text">Share EV report with Anita
+                <div class="time">Overdue · 5 days</div>
+              </div>
+            </div>
+            <div class="task done">
+              <div class="checkbox"></div>
+              <div class="text">KYC renewal — Suresh Nair
+                <div class="time">Done · 09:12</div>
+              </div>
+            </div>
+            <div class="task">
+              <div class="checkbox"></div>
+              <div class="text">Q4 review prep — Kapoor &amp; Sons
+                <div class="time">Tomorrow · 14:00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- WHAT CHANGED (vertical stack) -->
+    <section class="card changes-card">
+      <div class="card-head">
+        <h3>What changed today <span class="count">5</span></h3>
+        <a class="seeall" href="#">All activity →</a>
+      </div>
+      <div class="changes-list">
+
+        <div class="change-row">
+          <div class="change-time">
+            <div class="time-stamp">09:42</div>
+            <span class="tag alert">Alert</span>
+          </div>
+          <div class="change-body">
+            <div class="title">Meridian Holdings — portfolio value below threshold</div>
+            <div class="desc">Triggered drift alert. Held by <strong>Rahul Mehta</strong> (₹3.2 Cr). Position size 4.2% of book.</div>
+          </div>
+          <div class="change-cta">
+            <button class="btn-secondary">Review →</button>
+          </div>
+        </div>
+
+        <div class="change-row">
+          <div class="change-time">
+            <div class="time-stamp">08:15</div>
+            <span class="tag research">Research</span>
+          </div>
+          <div class="change-body">
+            <div class="title">Emerging Markets Outlook — new note published</div>
+            <div class="desc">Relevant to <strong>4 clients</strong>: Anita Shah, Priya Venkat, Suresh Nair, Kapoor &amp; Sons. Auto-tagged to portfolios.</div>
+          </div>
+          <div class="change-cta">
+            <button class="btn-secondary">Read →</button>
+          </div>
+        </div>
+
+        <div class="change-row">
+          <div class="change-time">
+            <div class="time-stamp">07:50</div>
+            <span class="tag completed">Done</span>
+          </div>
+          <div class="change-body">
+            <div class="title">Northwind Capital — rebalance executed</div>
+            <div class="desc">6 holdings rebalanced successfully. Confirmation sent to client. No further action needed.</div>
+          </div>
+          <div class="change-cta">
+            <button class="btn-secondary">View →</button>
+          </div>
+        </div>
+
+        <div class="change-row">
+          <div class="change-time">
+            <div class="time-stamp">Yest</div>
+            <span class="tag action">Action</span>
+          </div>
+          <div class="change-body">
+            <div class="title">Apex Ventures — redemption request ₹8.2 Cr</div>
+            <div class="desc">Submitted by client. Pending your approval. Settlement timeline: T+2.</div>
+          </div>
+          <div class="change-cta">
+            <button class="btn-secondary">Approve →</button>
+          </div>
+        </div>
+
+        <div class="change-row">
+          <div class="change-time">
+            <div class="time-stamp">Yest</div>
+            <span class="tag research">Research</span>
+          </div>
+          <div class="change-body">
+            <div class="title">Bluechip Growth Fund — Q4 transcript flagged</div>
+            <div class="desc">Management tone analysis flagged for review. Held by <strong>3 clients</strong>. Worth reading before next call.</div>
+          </div>
+          <div class="change-cta">
+            <button class="btn-secondary">Open →</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SMART SEGMENTS -->
+    <section class="card" style="margin-bottom: 24px;">
+      <div class="card-head">
+        <h3>Smart segments</h3>
+        <a class="seeall" href="#">Create segment →</a>
+      </div>
+      <div class="segments">
+        <span class="segment alert">Needs immediate action <span class="n">3</span></span>
+        <span class="segment">Portfolio drift alerts <span class="n">5</span></span>
+        <span class="segment">High AUM (₹5Cr+) <span class="n">7</span></span>
+        <span class="segment">EV / Green Energy interest <span class="n">4</span></span>
+        <span class="segment">Conservative <span class="n">6</span></span>
+        <span class="segment">Inactive &gt; 30 days <span class="n">2</span></span>
+        <span class="segment">KYC expiring <span class="n">1</span></span>
+      </div>
+    </section>
+
+    <!-- RESEARCH NUDGE (the demoted section) -->
+    <div class="research-nudge">
+      <div class="left">
+        <div class="icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M16 16l4 4"/></svg>
+        </div>
+        <div>
+          <h4>Research Terminal</h4>
+          <p><strong>3 thesis updates</strong> · <strong>5 catalysts in next 30 days</strong> · IC drafts, watchlists &amp; signal changes</p>
+        </div>
+      </div>
+      <button class="btn-secondary">Open Research →</button>
+    </div>
+
+    <!-- OPPORTUNITIES (compact, 3 cards) -->
+    <section class="card opps-card">
+      <div class="card-head">
+        <div>
+          <h3>Opportunities worth a conversation <span class="count">12</span></h3>
+          <div class="subhead">Observations from client data · ranked by receptivity, not commission</div>
+        </div>
+        <a class="seeall" href="#">All 12 →</a>
+      </div>
+
+      <div class="opps-mini">
+
+        <!-- Priya - Client asked -->
+        <div class="opp-mini">
+          <div class="opp-mini-rail asked"></div>
+          <div class="opp-mini-body">
+            <div class="opp-mini-top">
+              <div class="opp-mini-client">
+                <div class="opp-mini-avatar">PV</div>
+                <div>
+                  <div class="opp-mini-name">Priya Venkat</div>
+                  <span class="opp-mini-tag asked">Client asked</span>
+                </div>
+              </div>
+              <div class="opp-mini-fit">Fit 92%</div>
+            </div>
+            <div class="opp-mini-headline">Asked about <em>NPS allocation</em> on last call. Never followed up.</div>
+            <div class="opp-mini-evidence">"Should we be doing NPS? What's the actual tax benefit at our slab?" · 11 Apr</div>
+            <div class="opp-mini-foot">
+              <span class="opp-mini-value">~₹50K /yr value</span>
+              <button class="btn-tiny">Brief →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rahul - Life event -->
+        <div class="opp-mini">
+          <div class="opp-mini-rail life"></div>
+          <div class="opp-mini-body">
+            <div class="opp-mini-top">
+              <div class="opp-mini-client">
+                <div class="opp-mini-avatar">RM</div>
+                <div>
+                  <div class="opp-mini-name">Rahul Mehta</div>
+                  <span class="opp-mini-tag life">Life event</span>
+                </div>
+              </div>
+              <div class="opp-mini-fit">Fit 88%</div>
+            </div>
+            <div class="opp-mini-headline">Daughter <em>turns 14 this month</em>. No education corpus.</div>
+            <div class="opp-mini-evidence">4 years to undergrad · current SIPs are general-purpose, no goal-linked plan</div>
+            <div class="opp-mini-foot">
+              <span class="opp-mini-value">₹35K/mo SIP</span>
+              <button class="btn-tiny">Brief →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suresh - Idle cash -->
+        <div class="opp-mini">
+          <div class="opp-mini-rail idle"></div>
+          <div class="opp-mini-body">
+            <div class="opp-mini-top">
+              <div class="opp-mini-client">
+                <div class="opp-mini-avatar">SN</div>
+                <div>
+                  <div class="opp-mini-name">Suresh Nair</div>
+                  <span class="opp-mini-tag idle">Idle cash</span>
+                </div>
+              </div>
+              <div class="opp-mini-fit">Fit 78%</div>
+            </div>
+            <div class="opp-mini-headline"><em>₹62 L</em> in savings for 4 months · ~₹2L/yr lost vs liquid funds</div>
+            <div class="opp-mini-evidence">HDFC SB balance &gt;₹50L since Dec · conservative profile fits liquid + ultra-short split</div>
+            <div class="opp-mini-foot">
+              <span class="opp-mini-value">₹2.1 L/yr uplift</span>
+              <button class="btn-tiny">Brief →</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="opps-footer">
+        <div class="opps-summary">
+          <span><strong>9 more</strong> opportunities · ₹38.4 Cr total opportunity AUM · 7 coverage gaps · ₹14.2 Cr idle cash across book</span>
+        </div>
+        <button class="btn-secondary">Open Opportunities →</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>

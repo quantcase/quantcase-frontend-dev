@@ -24,7 +24,7 @@ const navItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const isDark = theme === "dark-modern" || theme === "dark-enterprise" || theme === "luxury";
+  const isDark = theme === "dark-purple";
 
   return (
     <aside
@@ -37,9 +37,9 @@ export function AppSidebar() {
       {/* Logo mark — lime circle */}
       <div
         className="mb-2 flex items-center justify-center rounded-full"
-        style={{ width: 40, height: 40, background: "var(--qc-accent-lime, #D4F26A)" }}
+        style={{ width: 40, height: 40, background: "var(--qc-accent-primary)" }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0E0E0C" strokeWidth="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--qc-accent-primary-fg)" strokeWidth="2">
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-3.5-3.5" />
         </svg>
@@ -90,18 +90,18 @@ export function AppSidebar() {
       {/* Footer — theme toggle (light/dark inline pills) */}
       <div
         className="flex flex-col items-center rounded-full gap-0.5 p-[3px]"
-        style={{ background: "var(--qc-chip-bg, #F2F1EC)", border: "1px solid var(--qc-chip-border, #E9E7E1)", width: 36 }}
+        style={{ background: "var(--qc-chip-bg)", border: "1px solid var(--qc-chip-border)", width: 36 }}
       >
         <TooltipProvider delayDuration={300}>
           <TooltipRoot>
             <TooltipTrigger asChild>
               <button
-                onClick={() => setTheme("light-modern")}
+                onClick={() => setTheme("purple")}
                 className="flex items-center justify-center rounded-full transition-all"
                 style={{
                   width: "100%",
                   padding: "7px 0",
-                  background: !isDark ? "var(--qc-surface-card, #FFFFFF)" : "transparent",
+                  background: !isDark ? "var(--qc-surface-white)" : "transparent",
                   color: !isDark ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
                   boxShadow: !isDark ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
                 }}
@@ -114,12 +114,12 @@ export function AppSidebar() {
           <TooltipRoot>
             <TooltipTrigger asChild>
               <button
-                onClick={() => setTheme("dark-modern")}
+                onClick={() => setTheme("dark-purple")}
                 className="flex items-center justify-center rounded-full transition-all"
                 style={{
                   width: "100%",
                   padding: "7px 0",
-                  background: isDark ? "var(--qc-surface-card, #FFFFFF)" : "transparent",
+                  background: isDark ? "var(--qc-surface-white)" : "transparent",
                   color: isDark ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
                   boxShadow: isDark ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
                 }}

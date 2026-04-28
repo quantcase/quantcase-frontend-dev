@@ -1,7 +1,7 @@
 "use client";
 
 export const PILLAR_COLORS = {
-  M: { dot: "var(--qc-blue, #2563EB)", seg: "#0E0E0C" },
+  M: { dot: "var(--qc-blue, #2563EB)", seg: "var(--qc-text-heading)" },
   O: { dot: "var(--qc-up, #1F7A4A)", seg: "#1E3A2B" },
   D: { dot: "var(--qc-warn, #B4731A)", seg: "#7A5A12" },
 } as const;

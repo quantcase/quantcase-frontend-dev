@@ -23,7 +23,7 @@ const CHART_COLORS = {
   axis: "#a1a1aa",
   refLine: "#a1a1aa",
   revenueBar: "#64748b",
-  ebitBar: "#0E0E0C",   // --qc-text-heading approx
+  ebitBar: "var(--qc-text-heading)",   // --qc-text-heading approx
   dolLine: "#B4731A",   // --qc-warn approx
   dolUp: "#1F7A4A",     // --qc-up
   dolMid: "#B4731A",    // --qc-warn

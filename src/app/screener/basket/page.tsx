@@ -197,9 +197,9 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
         <div className="px-5 py-4 space-y-4">
           {/* Success state */}
           {done && (
-            <div className="flex items-center gap-2 rounded-[8px] bg-emerald-50 border border-emerald-200 px-3 py-2.5">
-              <BookmarkCheck className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-              <span className="text-[12px] text-emerald-700 font-medium">Added successfully!</span>
+            <div className="flex items-center gap-2 rounded-[8px] px-3 py-2.5" style={{ background: "var(--qc-up-soft)", border: "1px solid var(--qc-up-soft)" }}>
+              <BookmarkCheck className="h-4 w-4 flex-shrink-0" style={{ color: "var(--qc-up)" }} />
+              <span className="text-[12px] font-medium" style={{ color: "var(--qc-up)" }}>Added successfully!</span>
             </div>
           )}
 
@@ -302,7 +302,7 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
               </div>
 
               {err && (
-                <div className="flex items-center gap-1.5 text-red-600">
+                <div className="flex items-center gap-1.5" style={{ color: "var(--qc-down)" }}>
                   <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
                   <span className="text-[11px]">{err}</span>
                 </div>
@@ -399,7 +399,7 @@ function BasketContent() {
               if (el) el.indeterminate = table.getIsSomePageRowsSelected();
             }}
             onChange={table.getToggleAllPageRowsSelectedHandler()}
-            className="accent-[#0F172B] h-3.5 w-3.5 rounded cursor-pointer"
+            className="accent-[var(--qc-accent-primary)] h-3.5 w-3.5 rounded cursor-pointer"
           />
         ),
         cell: ({ row }) => (
@@ -408,7 +408,7 @@ function BasketContent() {
             checked={row.getIsSelected()}
             onChange={row.getToggleSelectedHandler()}
             onClick={(e) => e.stopPropagation()}
-            className="accent-[#0F172B] h-3.5 w-3.5 rounded cursor-pointer"
+            className="accent-[var(--qc-accent-primary)] h-3.5 w-3.5 rounded cursor-pointer"
           />
         ),
         size: 40,
@@ -419,7 +419,7 @@ function BasketContent() {
         id: "index",
         header: "#",
         cell: ({ row }) => (
-          <span className="text-[11px] tabular-nums" style={{ color: "#888888" }}>
+          <span className="text-[11px] tabular-nums" style={{ color: "var(--qc-text-muted)" }}>
             {row.index + 1}
           </span>
         ),
@@ -465,7 +465,7 @@ function BasketContent() {
       cell: () => (
         <ArrowRight
           className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ color: "#0F172B" }}
+          style={{ color: "var(--qc-text-heading)" }}
         />
       ),
       size: 40,
@@ -551,8 +551,8 @@ function BasketContent() {
             {/* Top-level error */}
             {topError && (
               <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-                <p className="text-sm text-red-600">{topError}</p>
+                <AlertCircle className="h-4 w-4 flex-shrink-0" style={{ color: "var(--qc-down)" }} />
+                <p className="text-sm" style={{ color: "var(--qc-down)" }}>{topError}</p>
               </div>
             )}
 
@@ -735,7 +735,7 @@ function BasketContent() {
                 )}
 
                 {!stocksLoading && stocksError && (
-                  <div className="flex items-center justify-center py-16 gap-2 text-red-600">
+                  <div className="flex items-center justify-center py-16 gap-2" style={{ color: "var(--qc-down)" }}>
                     <AlertCircle className="h-4 w-4" />
                     <span className="text-sm">{stocksError}</span>
                   </div>

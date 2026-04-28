@@ -9,7 +9,7 @@ const RISK_PROFILE_LABELS: Record<string, string> = {
   aggressive:   "Aggressive",
 };
 
-const SEGMENT_COLORS = ["#0F172B", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
+const SEGMENT_COLORS = ["var(--qc-text-heading)", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
 
 interface ModelBuilderCardProps {
   model: StoredModel;
@@ -36,13 +36,13 @@ export function ModelBuilderCard({ model }: ModelBuilderCardProps) {
             >
               Portfolio Model
             </p>
-            <span className="text-sm font-semibold leading-tight" style={{ color: "#0F172B" }}>
+            <span className="text-sm font-semibold leading-tight" style={{ color: "var(--qc-text-heading)" }}>
               {model.name}
             </span>
           </div>
           <span
             className="shrink-0 text-[10px] font-semibold rounded-sm px-2 py-0.5 uppercase tracking-wide"
-            style={{ background: "#F5F5F5", color: "#0F172B" }}
+            style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-heading)" }}
           >
             {RISK_PROFILE_LABELS[model.riskProfile] ?? model.riskProfile}
           </span>
@@ -50,13 +50,13 @@ export function ModelBuilderCard({ model }: ModelBuilderCardProps) {
 
         {/* Capital */}
         <div className="mt-2 flex items-center gap-2">
-          <span className="text-xs font-semibold" style={{ color: "#0F172B" }}>
+          <span className="text-xs font-semibold" style={{ color: "var(--qc-text-heading)" }}>
             {formatCapital(model.capital)}
           </span>
           {model.client?.clientName && model.client.clientName !== "—" && (
             <>
-              <span style={{ color: "#E2E2E2" }}>·</span>
-              <span className="text-xs" style={{ color: "#888888" }}>
+              <span style={{ color: "var(--qc-border-default)" }}>·</span>
+              <span className="text-xs" style={{ color: "var(--qc-text-muted)" }}>
                 {model.client.clientName}
               </span>
             </>
@@ -71,12 +71,12 @@ export function ModelBuilderCard({ model }: ModelBuilderCardProps) {
         {assetClasses.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: "#888888" }}>
+              <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: "var(--qc-text-muted)" }}>
                 Allocation
               </span>
               <span
                 className="text-[10px] font-semibold"
-                style={{ color: isOver ? "#dc2626" : isBalanced ? "#059669" : "#888888" }}
+                style={{ color: isOver ? "#dc2626" : isBalanced ? "#059669" : "var(--qc-text-muted)" }}
               >
                 {Math.round(totalPct)}%
               </span>
@@ -103,7 +103,7 @@ export function ModelBuilderCard({ model }: ModelBuilderCardProps) {
               <span
                 key={entry.key}
                 className="text-[10px] font-medium rounded-sm px-2 py-0.5"
-                style={{ background: "#F5F5F5", color: "#0F172B" }}
+                style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-heading)" }}
               >
                 {entry.label} {entry.pct}%
               </span>
@@ -113,7 +113,7 @@ export function ModelBuilderCard({ model }: ModelBuilderCardProps) {
 
         {/* Why-this-portfolio */}
         {model.whyThisPortfolio?.length > 0 && (
-          <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "#888888" }}>
+          <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "var(--qc-text-muted)" }}>
             {model.whyThisPortfolio[0]}
           </p>
         )}
@@ -124,12 +124,12 @@ export function ModelBuilderCard({ model }: ModelBuilderCardProps) {
         className="px-4 py-2.5 flex items-center justify-between border-t"
         style={{ borderColor: "#F0F0F0" }}
       >
-        <span className="text-[10px]" style={{ color: "#888888" }}>
+        <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>
           {assetClasses.length} class{assetClasses.length !== 1 ? "es" : ""}
           {" · "}
           {formatDate(model.createdAt)}
         </span>
-        <span className="text-[10px] font-medium" style={{ color: "#0F172B" }}>
+        <span className="text-[10px] font-medium" style={{ color: "var(--qc-text-heading)" }}>
           Open →
         </span>
       </div>

@@ -25,7 +25,7 @@ function WxSlider({
         <span
           style={{
             position: "absolute", left: 0, top: 0, bottom: 0,
-            width: `${value}%`, background: "#0E0E0C", borderRadius: 999,
+            width: `${value}%`, background: "var(--qc-text-heading)", borderRadius: 999,
           }}
         />
         <input
@@ -66,7 +66,7 @@ interface WeightingPanelProps {
 }
 
 const SEGMENTS: { key: PillarKey; label: string; bg: string }[] = [
-  { key: "M", label: "Mgmt", bg: "#0E0E0C" },
+  { key: "M", label: "Mgmt", bg: "var(--qc-text-heading)" },
   { key: "O", label: "Opp", bg: "#1E3A2B" },
   { key: "D", label: "Deal", bg: "#7A5A12" },
 ];
@@ -114,7 +114,7 @@ export function WeightingPanel({
                 width: 24, height: 24, borderRadius: "50%",
                 border: "1px solid rgba(14,14,12,0.12)",
                 background: "rgba(255,255,255,0.35)",
-                color: "#0E0E0C",
+                color: "var(--qc-text-heading)",
                 display: "grid", placeItems: "center", cursor: "pointer",
               }}
             >
@@ -129,7 +129,7 @@ export function WeightingPanel({
       <h3
         style={{
           margin: "2px 0 8px", fontSize: 18, fontWeight: 500, lineHeight: 1.35,
-          letterSpacing: "-0.01em", color: "#0E0E0C", paddingRight: 20,
+          letterSpacing: "-0.01em", color: "var(--qc-text-heading)", paddingRight: 20,
         }}
       >
         Weights must total <b style={{ fontWeight: 600 }}>100%</b> — drag to rebalance.
@@ -180,7 +180,7 @@ export function WeightingPanel({
           <div
             style={{
               fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em",
-              color: "#0E0E0C", lineHeight: 1, fontVariantNumeric: "tabular-nums",
+              color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
             }}
           >
             100<span style={{ fontSize: 16, marginLeft: 1 }}>%</span>
@@ -200,7 +200,7 @@ export function WeightingPanel({
             width: 38, height: 38, borderRadius: "50%",
             border: "1px solid rgba(14,14,12,0.12)",
             background: "rgba(255,255,255,0.5)",
-            color: "#0E0E0C",
+            color: "var(--qc-text-heading)",
             display: "grid", placeItems: "center", cursor: "pointer",
           }}
         >
@@ -213,7 +213,7 @@ export function WeightingPanel({
           <div
             style={{
               fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em",
-              color: "#0E0E0C", lineHeight: 1, fontVariantNumeric: "tabular-nums",
+              color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
             }}
           >
             {displayScore != null ? displayScore : "—"}

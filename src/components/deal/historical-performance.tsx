@@ -13,7 +13,7 @@ import { historicalPerformanceData } from "@/components/deal/detailed-analysis-d
 const CHART = {
   grid: "#f4f4f5",
   axis: "#a1a1aa",
-  companyBar: "#0E0E0C",   // --qc-text-heading approx
+  companyBar: "var(--qc-text-heading)",   // --qc-text-heading approx
   industryLine: "#9A9A92", // --qc-text-muted approx
 };
 

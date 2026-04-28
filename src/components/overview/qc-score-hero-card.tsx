@@ -28,10 +28,10 @@ export function QcScoreHeroCard({
   const startY = Math.min(215, scoreY + 30);
 
   const legendItems = [
-    { label: "Moat", color: "var(--qc-up, #1F7A4A)", muted: false },
-    { label: "Govt. pricing", color: "var(--qc-blue, #2563EB)", muted: false },
-    { label: "Crude sensitive", color: "var(--qc-warn, #B4731A)", muted: true },
-    { label: "Earnings compression", color: "var(--qc-down, #B23A2F)", muted: true },
+    { label: "Moat", color: "var(--qc-up)", muted: false },
+    { label: "Govt. pricing", color: "var(--qc-blue)", muted: false },
+    { label: "Crude sensitive", color: "var(--qc-warn)", muted: true },
+    { label: "Earnings compression", color: "var(--qc-down)", muted: true },
   ];
 
   const headline = thesisHeadline ?? "AI-powered research across management, opportunity and deal factors.";
@@ -48,7 +48,7 @@ export function QcScoreHeroCard({
       {/* LEFT: hero-chart */}
       <section
         style={{
-          background: "var(--qc-surface-card, #FFFFFF)",
+          background: "var(--qc-surface-white)",
           border: "1px solid var(--qc-border-default)",
           borderRadius: 18,
           padding: "16px 20px 18px",
@@ -71,7 +71,7 @@ export function QcScoreHeroCard({
                 style={{
                   width: 28, height: 28, borderRadius: 8,
                   border: "1px solid var(--qc-border-default)",
-                  background: "var(--qc-surface-card, #FFFFFF)",
+                  background: "var(--qc-surface-white)",
                   color: "var(--qc-text-muted)",
                   display: "grid", placeItems: "center", cursor: "pointer",
                 }}
@@ -135,9 +135,9 @@ export function QcScoreHeroCard({
         <div style={{ position: "relative", margin: "0 -4px" }}>
           <svg viewBox="0 0 920 240" width="100%" height="240" preserveAspectRatio="none">
             {/* threshold bands */}
-            <rect x="0" y="0" width="920" height="50" fill="#F0F7DC" opacity=".5" />
-            <rect x="0" y="50" width="920" height="60" fill="#FAF5E0" opacity=".4" />
-            <rect x="0" y="170" width="920" height="70" fill="#FBE9E6" opacity=".35" />
+            <rect x="0" y="0" width="920" height="50" fill="var(--qc-up-soft)" opacity=".5" />
+            <rect x="0" y="50" width="920" height="60" fill="var(--qc-surface-panel)" opacity=".4" />
+            <rect x="0" y="170" width="920" height="70" fill="var(--qc-down-soft)" opacity=".35" />
             {/* dashed threshold lines */}
             <g stroke="var(--qc-border-default)" strokeWidth="1">
               <line x1="0" x2="920" y1="50" y2="50" strokeDasharray="3 4" />
@@ -146,18 +146,18 @@ export function QcScoreHeroCard({
             </g>
             {/* sector median dashed */}
             <path d="M0,112 C80,108 160,104 240,100 C320,95 400,90 480,88 C560,86 640,85 720,84 C800,83 880,82 920,82"
-              fill="none" stroke="#B8B5AB" strokeWidth="1.6" strokeDasharray="5 4" />
+              fill="none" stroke="var(--qc-border-default)" strokeWidth="1.6" strokeDasharray="5 4" />
             {/* stock score trajectory */}
             <path
               d={`M0,${startY} C70,${startY - 8} 130,${startY + 2} 200,${Math.min(215, startY + 20)} C270,${Math.min(215, startY + 38)} 330,${Math.min(215, startY + 40)} 400,${Math.min(215, startY + 32)} C470,${scoreY + 24} 530,${scoreY + 15} 600,${scoreY + 12} C670,${scoreY + 9} 730,${scoreY + 22} 800,${scoreY + 30} C860,${scoreY + 36} 900,${scoreY + 32} 920,${scoreY + 28}`}
-              fill="none" stroke="#0E0E0C" strokeWidth="2.2" strokeLinejoin="round"
+              fill="none" stroke="var(--qc-text-heading)" strokeWidth="2.2" strokeLinejoin="round"
             />
             {/* endpoint dot */}
-            <circle cx="920" cy={scoreY + 28} r="5" fill="#0E0E0C" />
-            <circle cx="920" cy={scoreY + 28} r="9" fill="none" stroke="#0E0E0C" strokeOpacity=".18" strokeWidth="2" />
+            <circle cx="920" cy={scoreY + 28} r="5" fill="var(--qc-text-heading)" />
+            <circle cx="920" cy={scoreY + 28} r="9" fill="none" stroke="var(--qc-text-heading)" strokeOpacity=".18" strokeWidth="2" />
             {/* band labels */}
-            <text x="906" y="22" textAnchor="end" fontSize="10" fontFamily="'IBM Plex Mono',monospace" fill="#6B8A2E" letterSpacing=".1em">OUTPERFORM · 70+</text>
-            <text x="906" y="208" textAnchor="end" fontSize="10" fontFamily="'IBM Plex Mono',monospace" fill="#B23A2F" letterSpacing=".1em">UNDERPERFORM · &lt;45</text>
+            <text x="906" y="22" textAnchor="end" fontSize="10" fontFamily="'IBM Plex Mono',monospace" fill="var(--qc-up)" letterSpacing=".1em">OUTPERFORM · 70+</text>
+            <text x="906" y="208" textAnchor="end" fontSize="10" fontFamily="'IBM Plex Mono',monospace" fill="var(--qc-down)" letterSpacing=".1em">UNDERPERFORM · &lt;45</text>
           </svg>
 
           {/* floating annotation */}
@@ -166,7 +166,7 @@ export function QcScoreHeroCard({
               style={{
                 position: "absolute", left: "36%", top: "44%",
                 transform: "translateX(-50%)",
-                background: "var(--qc-surface-card, #FFFFFF)",
+                background: "var(--qc-surface-white)",
                 border: "1px solid var(--qc-border-default)",
                 borderRadius: 10,
                 padding: "10px 12px 8px",
@@ -177,7 +177,7 @@ export function QcScoreHeroCard({
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-0.015em", fontVariantNumeric: "tabular-nums" }}>{displayScore}</span>
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, fontWeight: 600, padding: "3px 7px", borderRadius: 5, background: "#DFF0A6", color: "#40580F", letterSpacing: "0.04em" }}>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, fontWeight: 600, padding: "3px 7px", borderRadius: 5, background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)", letterSpacing: "0.04em" }}>
                   {displayRating}
                 </span>
                 <button
@@ -188,8 +188,8 @@ export function QcScoreHeroCard({
               <div style={{ fontSize: 11.5, color: "var(--qc-text-muted)", marginTop: 4, lineHeight: 1.35 }}>
                 {mqiLabel ? `${mqiLabel} management quality` : "Combined M · O · D score"}
               </div>
-              <div style={{ marginTop: 8, height: 3, background: "#0E0E0C", borderRadius: 999, position: "relative" }}>
-                <span style={{ position: "absolute", left: "20%", right: "40%", top: 0, bottom: 0, background: "var(--qc-accent-lime, #D4F26A)", borderRadius: 999 }} />
+              <div style={{ marginTop: 8, height: 3, background: "var(--qc-border-default)", borderRadius: 999, position: "relative" }}>
+                <span style={{ position: "absolute", left: "20%", right: "40%", top: 0, bottom: 0, background: "var(--qc-accent-primary)", borderRadius: 999 }} />
               </div>
             </div>
           )}
@@ -204,8 +204,8 @@ export function QcScoreHeroCard({
       {/* RIGHT: insight-card — lime gradient */}
       <aside
         style={{
-          background: "linear-gradient(175deg, #E8F3BD 0%, #D6E996 100%)",
-          border: "1px solid #C6DC8A",
+          background: "linear-gradient(175deg, var(--qc-surface-panel) 0%, var(--qc-surface-hover) 100%)",
+          border: "1px solid var(--qc-border-default)",
           borderRadius: 18,
           padding: "18px 20px",
           display: "flex",
@@ -216,7 +216,7 @@ export function QcScoreHeroCard({
       >
         {/* head */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.16em", color: "#4A5F20", textTransform: "uppercase" }}>
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.16em", color: "var(--qc-text-muted)", textTransform: "uppercase" }}>
             Investment Thesis
           </span>
           <div style={{ display: "flex", gap: 4 }}>
@@ -224,7 +224,7 @@ export function QcScoreHeroCard({
               <svg key="prev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 6l-6 6 6 6" /></svg>,
               <svg key="next" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 6l6 6-6 6" /></svg>,
             ].map((icon, i) => (
-              <button key={i} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid rgba(14,14,12,0.12)", background: "rgba(255,255,255,0.35)", color: "#0E0E0C", display: "grid", placeItems: "center", cursor: "pointer" }}>
+              <button key={i} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid var(--qc-border-subtle)", background: "var(--qc-surface-white)", color: "var(--qc-text-heading)", display: "grid", placeItems: "center", cursor: "pointer" }}>
                 {icon}
               </button>
             ))}
@@ -232,7 +232,7 @@ export function QcScoreHeroCard({
         </div>
 
         {/* title */}
-        <h3 style={{ margin: "2px 0 8px", fontSize: 18, fontWeight: 500, lineHeight: 1.35, letterSpacing: "-0.01em", color: "#0E0E0C", paddingRight: 20 }}>
+        <h3 style={{ margin: "2px 0 8px", fontSize: 18, fontWeight: 500, lineHeight: 1.35, letterSpacing: "-0.01em", color: "var(--qc-text-heading)", paddingRight: 20 }}>
           {headline}
         </h3>
 
@@ -241,16 +241,16 @@ export function QcScoreHeroCard({
           <svg viewBox="0 0 360 140" width="100%" height="140" preserveAspectRatio="none">
             <defs>
               <linearGradient id="qc-insight-fill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#B7D853" stopOpacity=".55" />
-                <stop offset="100%" stopColor="#B7D853" stopOpacity="0" />
+                <stop offset="0%" stopColor="var(--qc-accent-primary)" stopOpacity=".35" />
+                <stop offset="100%" stopColor="var(--qc-accent-primary)" stopOpacity="0" />
               </linearGradient>
             </defs>
-            <g stroke="#9CB844" strokeWidth="1.4" opacity=".38">
+            <g stroke="var(--qc-border-default)" strokeWidth="1.4" opacity=".6">
               {[18,36,54,72,90,108,126,144,162,180,198,216,234,252,270,288,306,324,342].map((x, i) => (
                 <line key={x} x1={x} y1="130" x2={x} y2={Math.max(20, 72 - i * 1.8)} />
               ))}
             </g>
-            <path d="M0,85 C50,80 100,75 150,70 C200,65 260,55 320,40 L360,30" fill="none" stroke="#0E0E0C" strokeWidth="2" />
+            <path d="M0,85 C50,80 100,75 150,70 C200,65 260,55 320,40 L360,30" fill="none" stroke="var(--qc-accent-primary)" strokeWidth="2" />
             <path d="M0,85 C50,80 100,75 150,70 C200,65 260,55 320,40 L360,30 L360,140 L0,140 Z" fill="url(#qc-insight-fill)" />
           </svg>
         </div>
@@ -258,21 +258,21 @@ export function QcScoreHeroCard({
         {/* footer */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 12, marginTop: 6 }}>
           <div>
-            <div style={{ fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em", color: "#0E0E0C", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+            <div style={{ fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
               {score !== null ? displayScore : "—"}<span style={{ fontSize: 16, marginLeft: 1 }}>/100</span>
             </div>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#4A5F20", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 6 }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 6 }}>
               QC · Score
             </div>
           </div>
-          <button style={{ width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(14,14,12,0.12)", background: "rgba(255,255,255,0.5)", color: "#0E0E0C", display: "grid", placeItems: "center", cursor: "pointer" }}>
+          <button style={{ width: 38, height: 38, borderRadius: "50%", border: "1px solid var(--qc-border-subtle)", background: "var(--qc-surface-white)", color: "var(--qc-text-heading)", display: "grid", placeItems: "center", cursor: "pointer" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 8v4M12 16h.01" /></svg>
           </button>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em", color: "#0E0E0C", lineHeight: 1 }}>
+            <div style={{ fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-text-heading)", lineHeight: 1 }}>
               {mqiLabel ?? displayRating}
             </div>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#4A5F20", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 6, textAlign: "right" }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 6, textAlign: "right" }}>
               Rating
             </div>
           </div>

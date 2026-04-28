@@ -87,7 +87,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         fontSize: "10px",
         fontWeight: "500",
         fontFamily: "'IBM Plex Mono', monospace",
-        colors: ["#0E0E0C"], // --qc-text-heading
+        colors: ["var(--qc-text-heading)"], // --qc-text-heading
       },
       offsetY: -4,
     },

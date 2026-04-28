@@ -203,11 +203,11 @@ export default function PipelinesPage() {
         onSelect={setSelectedPluginId}
       />
 
-      <main className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#F5F5F5]">
+      <main className="flex-1 overflow-y-auto p-6 space-y-4 bg-[var(--qc-surface-panel)]">
         {/* Page header */}
         <div>
-          <h1 className="text-[22px] font-[400] text-[#0F172B]">AI Pipelines</h1>
-          <p className="text-[14px] text-[#888888] mt-0.5">Manage skills and plugin configurations</p>
+          <h1 className="text-[22px] font-[400] text-[var(--qc-text-heading)]">AI Pipelines</h1>
+          <p className="text-[14px] text-[var(--qc-text-muted)] mt-0.5">Manage skills and plugin configurations</p>
         </div>
 
         {/* Error banner */}
@@ -222,15 +222,15 @@ export default function PipelinesPage() {
         )}
 
         {/* Tab switcher */}
-        <div className="flex border-b border-[#E2E2E2] bg-white rounded-t-[10px] px-4">
+        <div className="flex border-b border-[var(--qc-border-default)] bg-white rounded-t-[10px] px-4">
           {(["plugin", "skills"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
                 activeTab === tab
-                  ? "border-[#0F172B] text-[#0F172B]"
-                  : "border-transparent text-[#888888] hover:text-[#0F172B]"
+                  ? "border-[var(--qc-border-active)] text-[var(--qc-text-heading)]"
+                  : "border-transparent text-[var(--qc-text-muted)] hover:text-[var(--qc-text-heading)]"
               }`}
             >
               {tab === "plugin" ? "Plugin Chain" : "Skills Library"}

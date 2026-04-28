@@ -258,26 +258,27 @@ function OpportunityContent() {
                     { label: "KPI Timeseries", subtitle: "Industry-specific KPI trends over time" },
                   ];
                   return (
-                    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+                    <div className="rounded-[10px] p-2" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
                       <div className="flex gap-1 overflow-x-auto pb-2 px-1 pt-1">
                         {FINANCIAL_TABS.map((tab, i) => (
                           <button
                             key={tab.label}
                             onClick={() => setActiveFinancialTab(i)}
-                            className={`shrink-0 rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors whitespace-nowrap ${
+                            className="shrink-0 rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors whitespace-nowrap"
+                            style={
                               activeFinancialTab === i
-                                ? "bg-[#0F172B] text-white"
-                                : "bg-white border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B]"
-                            }`}
+                                ? { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
+                                : { background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", color: "var(--qc-text-muted)" }
+                            }
                           >
                             {tab.label}
                           </button>
                         ))}
                       </div>
-                      <div className="mt-1 text-[11px] text-[#888888] px-2 pb-2">
+                      <div className="mt-1 text-[11px] px-2 pb-2" style={{ color: "var(--qc-text-muted)" }}>
                         {FINANCIAL_TABS[activeFinancialTab].subtitle}
                       </div>
-                      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4">
+                      <div className="rounded-[10px] p-4" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-inner)" }}>
                         {activeFinancialTab === 0 && <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />}
                         {activeFinancialTab === 1 && <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />}
                         {activeFinancialTab === 2 && <WorkingCapitalCard data={data.financial_strength?.working_capital} />}

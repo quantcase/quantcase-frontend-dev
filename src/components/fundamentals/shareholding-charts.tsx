@@ -2,8 +2,8 @@ import ApexChart from "@/components/molecules/apex-chart";
 import type { ShareholdingSection } from "@/hooks/useShareholding";
 import { MonoEyebrow } from "@/components/overview/primitives";
 
-// Ink-family steps from --qc-text-heading down to lighter tones for donut segments
-const SHAREHOLDING_COLORS = ["#0E0E0C", "#3A3A38", "#5A5A54", "#7A7A72", "#9A9A92", "#B8B6B0", "#C8C6C0"];
+// Purple-family steps for donut segments (works across both light and dark purple themes)
+const SHAREHOLDING_COLORS = ["#1A0A2E", "#3D2460", "#6B21A8", "#9333EA", "#C084FC", "#D8B4FE", "#EDE8F5"];
 
 export function ShareholdingCharts({
   sections,
@@ -51,7 +51,7 @@ export function ShareholdingCharts({
               label: "Total",
               fontSize: "11px",
               fontFamily: "'IBM Plex Mono', monospace",
-              color: "#9A9A92", // --qc-text-muted resolved (ApexCharts requires hex)
+              color: "#7C6998", // --qc-text-muted resolved for purple theme (ApexCharts requires hex)
               formatter: () => "100%",
             },
           },
@@ -62,7 +62,7 @@ export function ShareholdingCharts({
       theme: "light",
       y: { formatter: (val: number) => `${val.toFixed(1)}%` },
     },
-    stroke: { width: 2, colors: ["#FBFAF7"] },
+    stroke: { width: 2, colors: ["#FFFFFF"] },
   };
 
   return (

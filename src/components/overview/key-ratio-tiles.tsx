@@ -15,9 +15,9 @@ interface StatCellProps {
 function StatCell({ label, value, sublabel, sublabelColor = "muted", isRange, rangePosition }: StatCellProps) {
   const sublabelStyle: React.CSSProperties =
     sublabelColor === "up"
-      ? { background: "var(--qc-up-soft, #E3F1E8)", color: "var(--qc-up, #1F7A4A)" }
+      ? { background: "var(--qc-up-soft)", color: "var(--qc-up)" }
       : sublabelColor === "down"
-      ? { background: "var(--qc-down-soft, #F7E6E3)", color: "var(--qc-down, #B23A2F)" }
+      ? { background: "var(--qc-down-soft)", color: "var(--qc-down)" }
       : { color: "var(--qc-text-muted)" };
 
   const isDeltaChip = sublabelColor === "up" || sublabelColor === "down";
@@ -42,14 +42,14 @@ function StatCell({ label, value, sublabel, sublabelColor = "muted", isRange, ra
             <div className="relative h-[3px] rounded-full" style={{ background: "var(--qc-border-default)" }}>
               <div
                 className="absolute top-0 bottom-0 left-0 rounded-full"
-                style={{ width: `${rangePosition}%`, background: "var(--qc-accent-lime, #D4F26A)" }}
+                style={{ width: `${rangePosition}%`, background: "var(--qc-accent-primary)" }}
               />
               <div
                 className="absolute top-1/2 -translate-y-1/2 w-[10px] h-[10px] rounded-full border-2"
                 style={{
                   left: `calc(${rangePosition}% - 5px)`,
-                  background: "var(--qc-accent-lime, #D4F26A)",
-                  borderColor: "var(--qc-surface-card, #FFFFFF)",
+                  background: "var(--qc-accent-primary)",
+                  borderColor: "var(--qc-surface-white)",
                   boxShadow: "0 0 0 1px var(--qc-border-default)",
                 }}
               />
@@ -154,10 +154,10 @@ export function KeyRatioTiles({ data }: Props) {
       <div
         className="grid grid-cols-5 overflow-hidden"
         style={{
-          background: "var(--qc-surface-card, #FFFFFF)",
+          background: "var(--qc-surface-white)",
           border: "1px solid var(--qc-border-default)",
           borderRadius: 16,
-          boxShadow: "0 1px 0 rgba(14,14,12,0.02)",
+          boxShadow: "0 1px 0 var(--qc-border-subtle)",
         }}
       >
         {/* Each cell gets a left border except the first, simulating the dividers */}
@@ -199,7 +199,7 @@ export function KeyRatioTiles({ data }: Props) {
         ].map((cell, i) => (
           <div
             key={i}
-            style={i > 0 ? { borderLeft: "1px solid var(--qc-border-inner, #EFEDE7)" } : undefined}
+            style={i > 0 ? { borderLeft: "1px solid var(--qc-border-inner)" } : undefined}
           >
             {cell}
           </div>

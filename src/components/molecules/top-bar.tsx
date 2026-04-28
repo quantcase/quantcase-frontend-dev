@@ -36,7 +36,7 @@ function PillTab({
   onClick?: () => void;
 }) {
   const base: React.CSSProperties = active
-    ? { background: "#0E0E0C", color: "#FFFFFF" }
+    ? { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
     : { background: "transparent", color: "var(--qc-text-muted)" };
 
   const content = (
@@ -69,7 +69,7 @@ function SearchZone() {
     <div className="flex items-center gap-3">
       <div
         className="flex items-center gap-2 rounded-full px-3 py-1.5"
-        style={{ background: "var(--qc-surface-card, #FFFFFF)", border: "1px solid var(--qc-border-default)" }}
+        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ color: "var(--qc-text-muted)" }}>
           <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
@@ -86,7 +86,7 @@ function SearchZone() {
           <span
             key={sym}
             className="rounded-full px-3 py-1 text-xs font-medium"
-            style={{ background: "var(--qc-chip-bg, #F2F1EC)", border: "1px solid var(--qc-chip-border, #E9E7E1)", color: "var(--qc-text-muted)" }}
+            style={{ background: "var(--qc-chip-bg)", border: "1px solid var(--qc-chip-border)", color: "var(--qc-text-muted)" }}
           >
             {sym}
           </span>
@@ -161,7 +161,7 @@ function TopBarInner() {
       /* pill-tabs container — card bg, border, rounded-full pill, small gap */
       <div
         className="flex items-center gap-0.5 rounded-full p-1"
-        style={{ background: "var(--qc-surface-card, #FFFFFF)", border: "1px solid var(--qc-border-default)" }}
+        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
       >
         {terminalTabs.map((tab) => (
           <PillTab key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href} icon={tab.icon}>
@@ -179,11 +179,11 @@ function TopBarInner() {
               className="relative flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium overflow-hidden transition-colors whitespace-nowrap"
               style={
                 isFactorActive
-                  ? { background: "#0E0E0C", color: "#FFFFFF" }
+                  ? { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
                   : {
-                      background: "linear-gradient(180deg,#F4FBDD 0%,#EAF5C3 100%)",
-                      border: "1px solid #D9E8A6",
-                      color: "#2E4A0A",
+                      background: "var(--qc-surface-panel)",
+                      border: "1px solid var(--qc-border-default)",
+                      color: "var(--qc-text-heading)",
                     }
               }
             >
@@ -204,7 +204,7 @@ function TopBarInner() {
               <ChevronRight
                 size={12}
                 className={cn("transition-transform duration-200", showFactorItems ? "rotate-90" : "rotate-0")}
-                style={{ position: "relative", zIndex: 1, color: "#6E7D4A" }}
+                style={{ position: "relative", zIndex: 1, color: "var(--qc-text-muted)" }}
               />
             </span>
           </button>
@@ -233,7 +233,7 @@ function TopBarInner() {
     leftZone = (
       <div
         className="flex items-center gap-0.5 rounded-full p-1"
-        style={{ background: "var(--qc-surface-card, #FFFFFF)", border: "1px solid var(--qc-border-default)" }}
+        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
       >
         {wealthTabs.map((tab) => (
           <PillTab key={tab.href} href={withRmId(tab.href)} active={pathname.startsWith(tab.href)} icon={tab.icon}>
@@ -250,7 +250,7 @@ function TopBarInner() {
     leftZone = (
       <div
         className="flex items-center gap-0.5 rounded-full p-1"
-        style={{ background: "var(--qc-surface-card, #FFFFFF)", border: "1px solid var(--qc-border-default)" }}
+        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
       >
         {modelTabs.map((tab) => (
           <PillTab

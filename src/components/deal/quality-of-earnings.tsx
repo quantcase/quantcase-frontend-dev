@@ -72,7 +72,7 @@ export function QualityOfEarnings({ data }: QualityOfEarningsProps) {
               <YAxis tick={{ fontSize: 10, fill: "#a1a1aa" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e4e4e7", backgroundColor: "white" }} itemStyle={{ padding: '0px 10px' }} />
               <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
-              <Line type="monotone" dataKey="roe"          name="ROE (%)"          stroke="#0F172B" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="roe"          name="ROE (%)"          stroke="var(--qc-text-heading)" strokeWidth={2} dot={{ r: 3 }} />
               <Line type="monotone" dataKey="roic"         name="ROIC (%)"         stroke="#71717a" strokeWidth={2} dot={{ r: 3 }} />
               <Line type="monotone" dataKey="market_share" name="Market Share (%)" stroke="#a1a1aa" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>

@@ -94,7 +94,7 @@ function TranscriptDriversSection({
     <div className="space-y-3">
       {/* Section label */}
       <div className="flex items-center gap-2">
-        <p style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
           {title}
         </p>
         <div className="flex-1 h-px bg-[#E2E2E2]" />

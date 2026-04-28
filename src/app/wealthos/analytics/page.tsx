@@ -32,6 +32,7 @@ const RISK_COLOR: Record<RiskProfileType, string> = {
   conservative: "var(--qc-up)",
   balanced: "var(--qc-warn)",
   aggressive: "var(--qc-down)",
+  "goal-based": "var(--qc-warn)",
 };
 
 // ── Stat pill ──────────────────────────────────────────────────────────────
@@ -688,8 +689,9 @@ function AnalyticsContent() {
   // Risk breakdown from models
   const riskBreakdown = models.reduce(
     (acc, m) => {
-      const rp = m.riskProfile as RiskProfileType;
-      if (rp in acc) acc[rp] += 1;
+      const rp = m.riskProfile;
+      const key = rp === "goal-based" ? "balanced" : rp;
+      if (key in acc) acc[key] += 1;
       return acc;
     },
     { conservative: 0, balanced: 0, aggressive: 0 }

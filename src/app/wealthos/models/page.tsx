@@ -24,12 +24,14 @@ const RISK_LABELS: Record<RiskProfileType, string> = {
   conservative: "Conservative",
   balanced: "Balanced",
   aggressive: "Aggressive",
+  "goal-based": "Goal-based",
 };
 
 const RISK_COLOR: Record<RiskProfileType, string> = {
   conservative: "var(--qc-up)",
   balanced: "var(--qc-warn)",
   aggressive: "var(--qc-down)",
+  "goal-based": "var(--qc-warn)",
 };
 
 const ASSET_COLORS = ["#0F172B", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
@@ -292,9 +294,10 @@ function RightPanel({
 }) {
   const totalCapital = models.reduce((s, m) => s + (m.capital ?? 0), 0);
 
-  const riskCounts = { conservative: 0, balanced: 0, aggressive: 0 };
+  const riskCounts: Record<string, number> = { conservative: 0, balanced: 0, aggressive: 0 };
   models.forEach((m) => {
-    if (m.riskProfile in riskCounts) riskCounts[m.riskProfile]++;
+    const key = m.riskProfile === "goal-based" ? "balanced" : m.riskProfile;
+    if (key in riskCounts) riskCounts[key]++;
   });
 
   const avgAssetClasses =

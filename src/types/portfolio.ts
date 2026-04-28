@@ -1,4 +1,4 @@
-export type RiskProfileType = "conservative" | "balanced" | "aggressive";
+export type RiskProfileType = "conservative" | "balanced" | "aggressive" | "goal-based";
 
 // ── New asset-class schema (matches backend) ────────────────────────────────
 
@@ -38,6 +38,70 @@ export interface ModelHolding {
 
 // ── Core model ──────────────────────────────────────────────────────────────
 
+// ── SWP types ────────────────────────────────────────────────────────────────
+
+export type GoalType =
+  | "child_education"
+  | "passive_income"
+  | "child_marriage"
+  | "retirement_corpus"
+  | "wealth_creation"
+  | "emergency_fund"
+  | "home_purchase"
+  | "retirement_income";
+
+export type SwpGoalType = "child_education" | "passive_income" | "retirement_income";
+
+export interface SwpPassiveIncome {
+  goal_type: "passive_income";
+  corpus: number;
+  start_date: string;
+  end_date: string | null;
+  withdrawal_method: "fixed" | "percentage";
+  fixed_amount: number | null;
+  withdrawal_rate_pa: number | null;
+  frequency: "monthly" | "quarterly" | "half-yearly" | "annual";
+  payout_date: 1 | 15;
+  step_up_rate: number | null;
+  portfolio_cagr_assumed: number;
+  status: "active" | "paused" | "closed";
+}
+
+export interface SwpRetirementIncome {
+  goal_type: "retirement_income";
+  client_dob: string;
+  retirement_age: number;
+  target_longevity_age: number;
+  corpus: number;
+  withdrawal_method: "fixed" | "percentage";
+  fixed_amount: number | null;
+  withdrawal_rate_pa: number | null;
+  frequency: "monthly" | "quarterly" | "half-yearly" | "annual";
+  step_up_rate: number | null;
+  inflation_rate: number;
+  portfolio_cagr_assumed: number;
+  nominee: { name: string; relation: string; contact: string };
+  status: "active" | "paused" | "pending_approval" | "closed";
+}
+
+export interface SwpMilestone {
+  id: "school" | "ug" | "pg" | "pro";
+  active: boolean;
+  trigger_age: number;
+}
+
+export interface SwpChildEducation {
+  goal_type: "child_education";
+  child_dob: string;
+  corpus: number;
+  inflation_rate: number;
+  portfolio_cagr_assumed: number;
+  milestones: SwpMilestone[];
+  status: "active" | "paused" | "closed";
+}
+
+export type SwpConfig = SwpPassiveIncome | SwpRetirementIncome | SwpChildEducation;
+
 export interface PortfolioData {
   id: string;
   name: string;
@@ -49,6 +113,8 @@ export interface PortfolioData {
   whyThisPortfolio: string[];
   linkedClientIds?: string[];
   holdings?: ModelHolding[];
+  goalType?: GoalType;
+  swpConfig?: SwpConfig;
 }
 
 export interface StoredModel extends PortfolioData {

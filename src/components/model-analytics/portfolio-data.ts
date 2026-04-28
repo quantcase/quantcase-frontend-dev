@@ -180,11 +180,11 @@ export function formatCrore(n: number) {
 }
 
 export function riskLabel(r: PortfolioData["riskProfile"]) {
-  return { conservative: "Conservative", balanced: "Balanced", aggressive: "Aggressive" }[r];
+  return ({ conservative: "Conservative", balanced: "Balanced", aggressive: "Aggressive", "goal-based": "Goal-based" } as Record<string, string>)[r] ?? r;
 }
 
 export function riskColor(r: PortfolioData["riskProfile"]) {
-  return { conservative: "#16a34a", balanced: "#d97706", aggressive: "#dc2626" }[r];
+  return ({ conservative: "#16a34a", balanced: "#d97706", aggressive: "#dc2626", "goal-based": "#d97706" } as Record<string, string>)[r] ?? "#888888";
 }
 
 export function driftSeverity(d: number): "clean" | "warning" | "critical" {

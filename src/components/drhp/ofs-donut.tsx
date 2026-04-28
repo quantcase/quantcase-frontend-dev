@@ -11,7 +11,7 @@ interface OfsDonutProps {
 export function OfsDonut({ ofsCr, freshIssueCr, ofsPct }: OfsDonutProps) {
   const data = [
     { name: "OFS", value: ofsCr, color: "#dc2626" },
-    { name: "Fresh", value: freshIssueCr, color: "#0F172B" },
+    { name: "Fresh", value: freshIssueCr, color: "var(--qc-text-heading)" },
   ];
 
   return (
@@ -28,7 +28,7 @@ export function OfsDonut({ ofsCr, freshIssueCr, ofsPct }: OfsDonutProps) {
         </PieChart>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           <span className="text-[14px] font-bold" style={{ color: "#dc2626" }}>{Number(ofsPct).toFixed(0)}%</span>
-          <span className="text-[9px] uppercase tracking-wider" style={{ color: "#888888" }}>OFS</span>
+          <span className="text-[9px] uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>OFS</span>
         </div>
       </div>
       <div className="flex flex-col gap-2">
@@ -36,14 +36,14 @@ export function OfsDonut({ ofsCr, freshIssueCr, ofsPct }: OfsDonutProps) {
           <div key={d.name} className="flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.color }} />
             <div>
-              <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#888888" }}>{d.name}</span>
-              <span className="text-[13px] font-semibold ml-2" style={{ color: "#0F172B" }}>
+              <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>{d.name}</span>
+              <span className="text-[13px] font-semibold ml-2" style={{ color: "var(--qc-text-heading)" }}>
                 ₹{d.value.toLocaleString("en-IN")} Cr
               </span>
             </div>
           </div>
         ))}
-        <p className="text-[11px] leading-relaxed mt-1" style={{ color: "#888888" }}>
+        <p className="text-[11px] leading-relaxed mt-1" style={{ color: "var(--qc-text-muted)" }}>
           Typical healthy IPO has &lt;40% OFS.
         </p>
       </div>

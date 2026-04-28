@@ -2,7 +2,7 @@ import { Minus } from "lucide-react";
 import type { PortfolioData } from "@/types/portfolio";
 import { formatCrore } from "./portfolio-data";
 
-const PALETTE = ["#0F172B", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
+const PALETTE = ["var(--qc-text-heading)", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
 
 function AllocationDonut({ assetClasses }: { assetClasses: PortfolioData["assetClasses"] }) {
   const size = 120;
@@ -44,10 +44,10 @@ function AllocationDonut({ assetClasses }: { assetClasses: PortfolioData["assetC
           strokeLinecap="butt"
         />
       ))}
-      <text x={cx} y={cy - 5} textAnchor="middle" style={{ fontSize: 13, fontWeight: 600, fill: "#0F172B" }}>
+      <text x={cx} y={cy - 5} textAnchor="middle" style={{ fontSize: 13, fontWeight: 600, fill: "var(--qc-text-heading)" }}>
         {assetClasses.length}
       </text>
-      <text x={cx} y={cy + 10} textAnchor="middle" style={{ fontSize: 9, fill: "#888888" }}>
+      <text x={cx} y={cy + 10} textAnchor="middle" style={{ fontSize: 9, fill: "var(--qc-text-muted)" }}>
         CLASSES
       </text>
     </svg>
@@ -59,8 +59,8 @@ export function AllocationBreakdownCard({ portfolio }: { portfolio: PortfolioDat
     <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
       <div className="rounded-[10px] bg-white p-4 space-y-4">
         <div className="flex items-center justify-between">
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172B" }}>Asset Allocation</span>
-          <span style={{ fontSize: 11, color: "#888888" }}>{portfolio.assetClasses.length} classes</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)" }}>Asset Allocation</span>
+          <span style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>{portfolio.assetClasses.length} classes</span>
         </div>
 
         {/* Donut + legend */}
@@ -73,7 +73,7 @@ export function AllocationBreakdownCard({ portfolio }: { portfolio: PortfolioDat
                   <div className="w-2.5 h-2.5 rounded-[2px] flex-shrink-0" style={{ background: PALETTE[i % PALETTE.length] }} />
                   <span style={{ fontSize: 13, color: "#121212" }}>{ac.label}</span>
                 </div>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#0F172B", fontVariantNumeric: "tabular-nums" }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", fontVariantNumeric: "tabular-nums" }}>
                   {ac.pct}%
                 </span>
               </div>
@@ -83,16 +83,16 @@ export function AllocationBreakdownCard({ portfolio }: { portfolio: PortfolioDat
 
         {/* Sub-class detail */}
         <div className="pt-2 border-t border-[#E2E2E2] space-y-3">
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Sub-class Detail
           </div>
           {portfolio.assetClasses.map((ac) => (
             <div key={ac.key}>
               <div className="flex items-center justify-between py-1">
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#0F172B", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                   {ac.label}
                 </span>
-                <span style={{ fontSize: 12, color: "#888888", fontVariantNumeric: "tabular-nums" }}>
+                <span style={{ fontSize: 12, color: "var(--qc-text-muted)", fontVariantNumeric: "tabular-nums" }}>
                   {formatCrore(ac.amount)}
                 </span>
               </div>
@@ -103,10 +103,10 @@ export function AllocationBreakdownCard({ portfolio }: { portfolio: PortfolioDat
                     <span style={{ fontSize: 13, color: "#121212" }}>{sc.label}</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span style={{ fontSize: 12, color: "#888888", fontVariantNumeric: "tabular-nums" }}>
+                    <span style={{ fontSize: 12, color: "var(--qc-text-muted)", fontVariantNumeric: "tabular-nums" }}>
                       {formatCrore(sc.amount)}
                     </span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#0F172B", fontVariantNumeric: "tabular-nums", minWidth: 36, textAlign: "right" }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", fontVariantNumeric: "tabular-nums", minWidth: 36, textAlign: "right" }}>
                       {sc.pct}%
                     </span>
                   </div>

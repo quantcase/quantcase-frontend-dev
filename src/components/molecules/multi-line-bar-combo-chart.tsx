@@ -34,7 +34,7 @@ interface MultiLineBarComboChartProps {
 
 // Warm-neutral palette aligned to the design system
 const BAR_COLORS = ["#A5B4FC", "#93C5FD", "#6EE7B7", "#FCD34D"];
-const LINE_COLORS = ["#0E0E0C", "#B4731A", "#5A5A54", "#3A6BEF"];
+const LINE_COLORS = ["var(--qc-text-heading)", "#B4731A", "#5A5A54", "#3A6BEF"];
 
 // ─── Merge series data into flat recharts rows keyed by x ────────────────────
 

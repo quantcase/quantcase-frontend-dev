@@ -53,7 +53,7 @@ function StatPill({ label, value }: { label: string; value: string }) {
       <span style={{ fontSize: 10, color: "rgba(15,23,43,0.55)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
         {label}
       </span>
-      <span style={{ fontSize: 16, fontWeight: 700, color: "#0F172B", fontFamily: "var(--font-ibm-plex-mono, monospace)", letterSpacing: "-0.02em" }}>
+      <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)", letterSpacing: "-0.02em" }}>
         {value}
       </span>
     </div>
@@ -104,7 +104,7 @@ function RMSelectorRow({
                 justifyContent: "center",
                 fontSize: 10,
                 fontWeight: 700,
-                color: isSelected ? "#0F172B" : "var(--qc-text-muted)",
+                color: isSelected ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
                 flexShrink: 0,
               }}
             >
@@ -216,7 +216,7 @@ function RMAnalyticsPanel({ rmId, rmName }: { rmId: string; rmName: string }) {
             justifyContent: "center",
             fontSize: 11,
             fontWeight: 700,
-            color: "#0F172B",
+            color: "var(--qc-text-heading)",
             flexShrink: 0,
           }}
         >
@@ -293,7 +293,7 @@ function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
         </div>
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>
-            <span style={{ width: 8, height: 8, borderRadius: 2, background: "#0F172B", display: "inline-block" }} />
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: "var(--qc-text-heading)", display: "inline-block" }} />
             Engagement
           </span>
           <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>
@@ -327,7 +327,7 @@ function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
               }}
               cursor={{ fill: "rgba(0,0,0,0.03)" }}
             />
-            <Bar dataKey="engagement" fill="#0F172B" radius={[3, 3, 0, 0]} maxBarSize={28} />
+            <Bar dataKey="engagement" fill="var(--qc-text-heading)" radius={[3, 3, 0, 0]} maxBarSize={28} />
             <Bar dataKey="churn" fill="#a1a1aa" radius={[3, 3, 0, 0]} maxBarSize={28} />
           </BarChart>
         </ResponsiveContainer>
@@ -546,7 +546,7 @@ function RightPanel({
           style={{
             fontSize: 32,
             fontWeight: 800,
-            color: "#0F172B",
+            color: "var(--qc-text-heading)",
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
             letterSpacing: "-0.04em",
             lineHeight: 1,
@@ -712,7 +712,7 @@ function AnalyticsContent() {
   return (
     <div
       style={{
-        background: "#FBFAF7",
+        background: "var(--qc-surface-base)",
         minHeight: "100vh",
         padding: "28px 28px 40px",
       }}

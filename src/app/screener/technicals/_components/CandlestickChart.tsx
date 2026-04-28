@@ -57,13 +57,13 @@ interface OscillatorConfig {
   height: number;
 }
 
-// Design token hex values (mirrored from CSS variables for use in chart API)
-const QC_HEADING = "#0E0E0C";
-const QC_MUTED   = "#9A9A92";
-const QC_UP      = "#1F7A4A";
-const QC_DOWN    = "#B23A2F";
-const QC_BORDER  = "#E9E7E1";
-const QC_GRID    = "#EFEDE7";
+// Design token hex values — resolved for purple theme (mirrored from --qc-* CSS vars for chart API use)
+const QC_HEADING = "#1A0A2E";
+const QC_MUTED   = "#7C6998";
+const QC_UP      = "#15803D";
+const QC_DOWN    = "#B91C1C";
+const QC_BORDER  = "#E4DCF0";
+const QC_GRID    = "#EDE8F5";
 
 const OVERLAY_CONFIGS: Record<ChartMode, LineConfig[]> = {
   DEFAULT: [
@@ -71,22 +71,22 @@ const OVERLAY_CONFIGS: Record<ChartMode, LineConfig[]> = {
     { key: "sma200", color: QC_HEADING, lineWidth: 2, title: "SMA 200" },
   ],
   STRUCTURE: [
-    { key: "bbUpper",  color: "#9A9A92", lineWidth: 1, title: "BB Upper" },
-    { key: "bbMiddle", color: "#5A5A54", lineWidth: 1, title: "BB Mid" },
-    { key: "bbLower",  color: "#9A9A92", lineWidth: 1, title: "BB Lower" },
+    { key: "bbUpper",  color: QC_MUTED,   lineWidth: 1, title: "BB Upper" },
+    { key: "bbMiddle", color: QC_HEADING, lineWidth: 1, title: "BB Mid" },
+    { key: "bbLower",  color: QC_MUTED,   lineWidth: 1, title: "BB Lower" },
   ],
   TREND: [
     { key: "sma20",  color: QC_MUTED,   lineWidth: 1, title: "SMA 20" },
-    { key: "sma50",  color: "#7A7A72",  lineWidth: 1, title: "SMA 50" },  // mid-muted step
-    { key: "sma100", color: "#5A5A54",  lineWidth: 1, title: "SMA 100" }, // --qc-text-body
-    { key: "sma200", color: QC_HEADING, lineWidth: 2, title: "SMA 200" }, // dominant, thicker
-    { key: "ema20",  color: QC_UP,      lineWidth: 1, title: "EMA 20" },  // --qc-up for EMA pair
-    { key: "ema50",  color: QC_DOWN,    lineWidth: 1, title: "EMA 50" },  // --qc-down for EMA pair
+    { key: "sma50",  color: "#9333EA",  lineWidth: 1, title: "SMA 50" },
+    { key: "sma100", color: "#6B21A8",  lineWidth: 1, title: "SMA 100" },
+    { key: "sma200", color: QC_HEADING, lineWidth: 2, title: "SMA 200" },
+    { key: "ema20",  color: QC_UP,      lineWidth: 1, title: "EMA 20" },
+    { key: "ema50",  color: QC_DOWN,    lineWidth: 1, title: "EMA 50" },
   ],
   TIMING: [
-    { key: "bbUpper",  color: "#9A9A92", lineWidth: 1, title: "BB Upper" },
-    { key: "bbMiddle", color: "#5A5A54", lineWidth: 1, title: "BB Mid" },
-    { key: "bbLower",  color: "#9A9A92", lineWidth: 1, title: "BB Lower" },
+    { key: "bbUpper",  color: QC_MUTED,   lineWidth: 1, title: "BB Upper" },
+    { key: "bbMiddle", color: QC_HEADING, lineWidth: 1, title: "BB Mid" },
+    { key: "bbLower",  color: QC_MUTED,   lineWidth: 1, title: "BB Lower" },
   ],
   "RELATIVE STRENGTH": [],
 };
@@ -200,7 +200,7 @@ export function CandlestickChart({
 
     const chart = createChart(containerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: "#FBFAF7" }, // --qc-surface-white
+        background: { type: ColorType.Solid, color: "#FFFFFF" }, // --qc-surface-white
         textColor: QC_MUTED,
         fontFamily: "IBM Plex Mono, monospace",
         fontSize: 11,
@@ -336,7 +336,7 @@ export function CandlestickChart({
     volumeSeriesRef.current.setData(sorted.map((p) => ({
       time: p.date as Time,
       value: p.volume,
-      color: p.close >= p.open ? "rgba(31,122,74,0.22)" : "rgba(178,58,47,0.22)",
+      color: p.close >= p.open ? "rgba(21,128,61,0.22)" : "rgba(185,28,28,0.22)",
     })));
 
     chartRef.current?.timeScale().fitContent();

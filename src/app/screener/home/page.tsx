@@ -61,10 +61,10 @@ const MF_COLUMNS: ColDef[] = [
     sortKey: "name",
     render: (s) => (
       <div className="flex flex-col gap-0.5 min-w-0">
-        <span className="truncate max-w-[300px] block" style={{ fontSize: 13, fontWeight: 500, color: "#111827" }}>
+        <span className="truncate max-w-[300px] block" style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>
           {s.name}
         </span>
-        <span className="truncate max-w-[300px] block" style={{ fontSize: 11, color: "#9CA3AF" }}>
+        <span className="truncate max-w-[300px] block" style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
           {[s.amc_name, s.category].filter(Boolean).join(" · ")}
         </span>
       </div>
@@ -77,7 +77,7 @@ const MF_COLUMNS: ColDef[] = [
     render: (s) => (
       <span
         className="inline-block rounded-sm px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
-        style={{ background: "#F3F4F6", color: "#6B7280" }}
+        style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}
       >
         {s.plan_type ?? "—"}
       </span>
@@ -87,7 +87,7 @@ const MF_COLUMNS: ColDef[] = [
     key: "risk_label",
     label: "Risk",
     align: "left",
-    render: (s) => <span style={{ fontSize: 12, color: "#6B7280" }}>{s.risk_label ?? "—"}</span>,
+    render: (s) => <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>{s.risk_label ?? "—"}</span>,
   },
   {
     key: "morningstar",
@@ -96,10 +96,10 @@ const MF_COLUMNS: ColDef[] = [
     sortKey: "morningstar",
     render: (s) => (
       s.morningstar == null
-        ? <span style={{ fontSize: 12, color: "#D1D5DB" }}>—</span>
+        ? <span style={{ fontSize: 12, color: "var(--qc-text-dimmed)" }}>—</span>
         : (
           <span className="flex items-center justify-end gap-0.5">
-            <span style={{ color: "#F59E0B", fontSize: 11, letterSpacing: 1 }}>{"★".repeat(s.morningstar)}</span>
+            <span style={{ color: "var(--qc-warn)", fontSize: 11, letterSpacing: 1 }}>{"★".repeat(s.morningstar)}</span>
           </span>
         )
     ),
@@ -109,14 +109,14 @@ const MF_COLUMNS: ColDef[] = [
     label: "AUM",
     align: "right",
     sortKey: "aum",
-    render: (s) => <span style={{ fontSize: 12, fontWeight: 500, color: "#111827" }}>{cr(s.aum)}</span>,
+    render: (s) => <span style={{ fontSize: 12, fontWeight: 500, color: "var(--qc-text-heading)" }}>{cr(s.aum)}</span>,
   },
   {
     key: "expense_ratio",
     label: "Exp. Ratio",
     align: "right",
     sortKey: "expense_ratio",
-    render: (s) => <span style={{ fontSize: 12, color: "#6B7280" }}>{pct(s.expense_ratio)}</span>,
+    render: (s) => <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>{pct(s.expense_ratio)}</span>,
   },
   {
     key: "nav",
@@ -124,8 +124,8 @@ const MF_COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "nav",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>
-        {s.nav == null ? <span style={{ color: "#D1D5DB" }}>—</span> : `₹${s.nav.toFixed(2)}`}
+      <span style={{ fontSize: 12, color: "var(--qc-text-body)", fontWeight: 500 }}>
+        {s.nav == null ? <span style={{ color: "var(--qc-text-dimmed)" }}>—</span> : `₹${s.nav.toFixed(2)}`}
       </span>
     ),
   },
@@ -162,8 +162,8 @@ function FilterSelect({
         className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[12px] font-medium transition-all"
         style={
           active
-            ? { border: "1px solid #0F172B", background: "#0F172B", color: "#FFFFFF" }
-            : { border: "1px solid #E5E7EB", background: "#F9FAFB", color: "#6B7280" }
+            ? { border: "1px solid var(--qc-border-active)", background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
+            : { border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)", color: "var(--qc-text-muted)" }
         }
       >
         {label}
@@ -178,7 +178,7 @@ function FilterSelect({
             onClick={(e) => { e.stopPropagation(); onChange([]); setOpen(false); }}
           />
         ) : (
-          <ChevronRight className="h-2.5 w-2.5 rotate-90 text-zinc-400" />
+          <ChevronRight className="h-2.5 w-2.5 rotate-90" style={{ color: "var(--qc-text-muted)" }} />
         )}
       </button>
       {open && (
@@ -186,7 +186,7 @@ function FilterSelect({
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
             className="absolute left-0 top-full mt-1.5 z-20 rounded-[10px] shadow-lg py-1"
-            style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", minWidth: 200, maxHeight: 280, overflowY: "auto", boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}
+            style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", minWidth: 200, maxHeight: 280, overflowY: "auto", boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}
           >
             {options.map((opt) => {
               const checked = value.includes(opt);
@@ -195,15 +195,15 @@ function FilterSelect({
                   key={opt}
                   onClick={() => onChange(checked ? value.filter((v) => v !== opt) : [...value, opt])}
                   className="w-full flex items-center gap-2.5 px-3.5 py-2 text-left text-[12px] transition-colors"
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#F3F4F6")}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-surface-panel)")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "")}
-                  style={{ color: checked ? "#0F172B" : "#374151", fontWeight: checked ? 500 : 400 }}
+                  style={{ color: checked ? "var(--qc-accent-primary)" : "var(--qc-text-body)", fontWeight: checked ? 500 : 400 }}
                 >
                   <span
                     className="w-3.5 h-3.5 rounded-[3px] flex items-center justify-center shrink-0 transition-colors"
                     style={{
-                      border: `1.5px solid ${checked ? "#0F172B" : "#D1D5DB"}`,
-                      background: checked ? "#0F172B" : "transparent",
+                      border: `1.5px solid ${checked ? "var(--qc-accent-primary)" : "var(--qc-text-dimmed)"}`,
+                      background: checked ? "var(--qc-accent-primary)" : "transparent",
                     }}
                   >
                     {checked && (
@@ -235,8 +235,8 @@ function RatingFilter({ value, onChange }: { value: number | undefined; onChange
         className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[12px] font-medium transition-all"
         style={
           active
-            ? { border: "1px solid #0F172B", background: "#0F172B", color: "#FFFFFF" }
-            : { border: "1px solid #E5E7EB", background: "#F9FAFB", color: "#6B7280" }
+            ? { border: "1px solid var(--qc-border-active)", background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
+            : { border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)", color: "var(--qc-text-muted)" }
         }
       >
         {active ? `★ ${value}+` : "★ Rating"}
@@ -246,7 +246,7 @@ function RatingFilter({ value, onChange }: { value: number | undefined; onChange
             onClick={(e) => { e.stopPropagation(); onChange(undefined); setOpen(false); }}
           />
         ) : (
-          <ChevronRight className="h-2.5 w-2.5 rotate-90 text-zinc-400" />
+          <ChevronRight className="h-2.5 w-2.5 rotate-90" style={{ color: "var(--qc-text-muted)" }} />
         )}
       </button>
       {open && (
@@ -254,19 +254,19 @@ function RatingFilter({ value, onChange }: { value: number | undefined; onChange
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
             className="absolute left-0 top-full mt-1.5 z-20 rounded-[10px] overflow-hidden py-1"
-            style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", minWidth: 140, boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}
+            style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", minWidth: 140, boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}
           >
             {[5, 4, 3, 2, 1].map((n) => (
               <button
                 key={n}
                 onClick={() => { onChange(value === n ? undefined : n); setOpen(false); }}
                 className="w-full flex items-center gap-2 px-3.5 py-2 text-left text-[12px] transition-colors"
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#F3F4F6")}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-surface-panel)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "")}
-                style={{ color: value === n ? "#0F172B" : "#374151", fontWeight: value === n ? 600 : 400 }}
+                style={{ color: value === n ? "var(--qc-accent-primary)" : "var(--qc-text-body)", fontWeight: value === n ? 600 : 400 }}
               >
-                <span style={{ color: "#F59E0B", letterSpacing: 1 }}>{"★".repeat(n)}</span>
-                <span style={{ color: "#9CA3AF", fontSize: 11 }}>{n}+</span>
+                <span style={{ color: "var(--qc-warn)", letterSpacing: 1 }}>{"★".repeat(n)}</span>
+                <span style={{ color: "var(--qc-text-muted)", fontSize: 11 }}>{n}+</span>
               </button>
             ))}
           </div>
@@ -358,16 +358,16 @@ function MfScreenerSection() {
                 key={b.id}
                 onClick={() => applyBasket(b.filter_params)}
                 className="rounded-full px-3.5 py-1.5 text-[12px] font-medium transition-all border"
-                style={{ borderColor: "#D1D5DB", background: "#FFFFFF", color: "#374151" }}
+                style={{ borderColor: "var(--qc-text-dimmed)", background: "var(--qc-surface-white)", color: "var(--qc-text-body)" }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#0F172B";
-                  e.currentTarget.style.color = "#FFFFFF";
-                  e.currentTarget.style.borderColor = "#0F172B";
+                  e.currentTarget.style.background = "var(--qc-accent-primary)";
+                  e.currentTarget.style.color = "var(--qc-surface-white)";
+                  e.currentTarget.style.borderColor = "var(--qc-accent-primary)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#FFFFFF";
-                  e.currentTarget.style.color = "#374151";
-                  e.currentTarget.style.borderColor = "#D1D5DB";
+                  e.currentTarget.style.background = "var(--qc-surface-white)";
+                  e.currentTarget.style.color = "var(--qc-text-body)";
+                  e.currentTarget.style.borderColor = "var(--qc-text-dimmed)";
                 }}
               >
                 {b.title}
@@ -380,27 +380,27 @@ function MfScreenerSection() {
       {/* Filters bar */}
       <div
         className="flex items-center gap-2 flex-wrap mb-3 px-3 py-2.5 rounded-[10px]"
-        style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
       >
-        <SlidersHorizontal className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+        <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
 
         {/* Search */}
         <div
           className="flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5"
-          style={{ background: "#F9FAFB", border: "1px solid #E5E7EB" }}
+          style={{ background: "var(--qc-surface-base)", border: "1px solid var(--qc-border-default)" }}
         >
-          <Search className="h-3 w-3 shrink-0 text-zinc-400" />
+          <Search className="h-3 w-3 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
           <input
             type="text"
             value={q}
             onChange={(e) => { setQ(e.target.value); setPage(1); }}
             placeholder="Search funds…"
-            className="w-36 text-[12px] outline-none bg-transparent placeholder:text-zinc-400"
-            style={{ color: "#111827" }}
+            className="w-36 text-[12px] outline-none bg-transparent placeholder:text-[var(--qc-text-muted)]"
+            style={{ color: "var(--qc-text-heading)" }}
           />
           {q && (
             <button onClick={() => { setQ(""); setPage(1); }}>
-              <X className="h-3 w-3 text-zinc-400 hover:text-zinc-600" />
+              <X className="h-3 w-3 hover:opacity-70" style={{ color: "var(--qc-text-muted)" }} />
             </button>
           )}
         </div>
@@ -419,8 +419,8 @@ function MfScreenerSection() {
                 className="appearance-none rounded-[8px] px-3 pr-7 py-1.5 text-[12px] outline-none cursor-pointer font-medium"
                 style={
                   amcSlug
-                    ? { border: "1px solid #0F172B", background: "#0F172B", color: "#FFFFFF" }
-                    : { border: "1px solid #E5E7EB", background: "#F9FAFB", color: "#6B7280" }
+                    ? { border: "1px solid var(--qc-border-active)", background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
+                    : { border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)", color: "var(--qc-text-muted)" }
                 }
               >
                 <option value="">AMC</option>
@@ -430,7 +430,7 @@ function MfScreenerSection() {
               </select>
               <ChevronRight
                 className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 rotate-90"
-                style={{ color: amcSlug ? "#FFFFFF" : "#9CA3AF" }}
+                style={{ color: amcSlug ? "var(--qc-surface-white)" : "var(--qc-text-muted)" }}
               />
             </div>
           </>
@@ -441,15 +441,15 @@ function MfScreenerSection() {
             <button
               onClick={resetFilters}
               className="flex items-center gap-1 text-[11px] font-medium rounded-[6px] px-2 py-1 transition-colors"
-              style={{ color: "#6B7280", background: "#F3F4F6" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#E5E7EB")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#F3F4F6")}
+              style={{ color: "var(--qc-text-muted)", background: "var(--qc-surface-panel)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-border-default)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--qc-surface-panel)")}
             >
               <X className="h-2.5 w-2.5" /> Clear all
             </button>
           )}
           {data && (
-            <span className="text-[12px] font-medium tabular-nums" style={{ color: "#374151" }}>
+            <span className="text-[12px] font-medium tabular-nums" style={{ color: "var(--qc-text-body)" }}>
               {data.total.toLocaleString()} funds
             </span>
           )}
@@ -467,22 +467,22 @@ function MfScreenerSection() {
       {/* Table */}
       <div
         className="rounded-[10px] overflow-hidden"
-        style={{ border: "1px solid #E2E2E2", background: "#FFFFFF", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
+        style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
       >
         {/* Table header — always visible */}
         <div style={{ overflowX: "auto" }}>
           <table className="w-full" style={{ borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "#F8F9FA", borderBottom: "2px solid #E2E2E2" }}>
-                <th className="px-4 py-3 text-left" style={{ width: 48, color: "#9CA3AF", fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em" }}>#</th>
+              <tr style={{ background: "var(--qc-surface-base)", borderBottom: "2px solid var(--qc-border-default)" }}>
+                <th className="px-4 py-3 text-left" style={{ width: 48, color: "var(--qc-text-muted)", fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em" }}>#</th>
                 {MF_COLUMNS.map((col) => (
                   <th
                     key={col.key}
                     onClick={() => handleSort(col)}
                     className={`px-4 py-3 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap select-none ${col.sortKey ? "cursor-pointer" : ""} ${col.align === "right" ? "text-right" : "text-left"}`}
-                    style={{ color: sort === col.sortKey ? "#0F172B" : "#6B7280" }}
-                    onMouseEnter={(e) => { if (col.sortKey) e.currentTarget.style.color = "#0F172B"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = sort === col.sortKey ? "#0F172B" : "#6B7280"; }}
+                    style={{ color: sort === col.sortKey ? "var(--qc-accent-primary)" : "var(--qc-text-muted)" }}
+                    onMouseEnter={(e) => { if (col.sortKey) e.currentTarget.style.color = "var(--qc-accent-primary)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = sort === col.sortKey ? "var(--qc-accent-primary)" : "var(--qc-text-muted)"; }}
                   >
                     {col.label}
                     {col.sortKey && <SortIcon active={sort === col.sortKey} dir={order} />}
@@ -496,7 +496,7 @@ function MfScreenerSection() {
             {loading && (
               <tbody>
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #F3F4F6" }}>
+                  <tr key={i} style={{ borderBottom: "1px solid var(--qc-border-inner)" }}>
                     <td className="px-4 py-3.5" style={{ width: 48 }}>
                       <div className="h-3 w-5 rounded bg-zinc-100 animate-pulse" />
                     </td>
@@ -517,7 +517,7 @@ function MfScreenerSection() {
               <tbody>
                 <tr>
                   <td colSpan={MF_COLUMNS.length + 2} className="px-4 py-16 text-center">
-                    <p className="text-sm" style={{ color: "#9CA3AF" }}>No funds matched your criteria.</p>
+                    <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>No funds matched your criteria.</p>
                   </td>
                 </tr>
               </tbody>
@@ -531,12 +531,12 @@ function MfScreenerSection() {
                     key={scheme.amfi_code}
                     onClick={() => router.push(`/screener/mutual-fund/${encodeURIComponent(scheme.amfi_code)}`)}
                     className="cursor-pointer group"
-                    style={{ borderBottom: i < data.schemes.length - 1 ? "1px solid #F3F4F6" : undefined }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#F8F9FA")}
+                    style={{ borderBottom: i < data.schemes.length - 1 ? "1px solid var(--qc-border-inner)" : undefined }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-surface-base)")}
                     onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                   >
                     <td className="px-4 py-3.5" style={{ width: 48 }}>
-                      <span className="tabular-nums" style={{ fontSize: 11, color: "#9CA3AF" }}>
+                      <span className="tabular-nums" style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
                         {(page - 1) * PAGE_SIZE + i + 1}
                       </span>
                     </td>
@@ -546,7 +546,7 @@ function MfScreenerSection() {
                       </td>
                     ))}
                     <td className="px-4 py-3.5" style={{ width: 40 }}>
-                      <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-50 transition-opacity" style={{ color: "#0F172B" }} />
+                      <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-50 transition-opacity" style={{ color: "var(--qc-accent-primary)" }} />
                     </td>
                   </tr>
                 ))}
@@ -559,13 +559,13 @@ function MfScreenerSection() {
         {!loading && data && data.total > 0 && (
           <div
             className="flex items-center justify-between px-5 py-3"
-            style={{ borderTop: "1px solid #E2E2E2", background: "#F8F9FA" }}
+            style={{ borderTop: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)" }}
           >
-            <p className="text-[12px]" style={{ color: "#6B7280" }}>
+            <p className="text-[12px]" style={{ color: "var(--qc-text-muted)" }}>
               {data.total.toLocaleString()} total
-              <span className="mx-1.5 text-zinc-300">·</span>
+              <span className="mx-1.5" style={{ color: "var(--qc-text-dimmed)" }}>·</span>
               showing {((page - 1) * PAGE_SIZE + 1).toLocaleString()}–{Math.min(page * PAGE_SIZE, data.total).toLocaleString()}
-              <span className="mx-1.5 text-zinc-300">·</span>
+              <span className="mx-1.5" style={{ color: "var(--qc-text-dimmed)" }}>·</span>
               page {page} of {totalPages}
             </p>
             <div className="flex items-center gap-1">
@@ -573,9 +573,9 @@ function MfScreenerSection() {
                 onClick={() => setPage(1)}
                 disabled={page === 1}
                 className="rounded-[6px] px-2 py-1 text-[11px] font-medium disabled:opacity-30 transition-colors"
-                style={{ color: "#374151", background: page === 1 ? "transparent" : "#FFFFFF", border: "1px solid #E5E7EB" }}
-                onMouseEnter={(e) => { if (page !== 1) e.currentTarget.style.background = "#F3F4F6"; }}
-                onMouseLeave={(e) => { if (page !== 1) e.currentTarget.style.background = "#FFFFFF"; }}
+                style={{ color: "var(--qc-text-body)", background: page === 1 ? "transparent" : "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
+                onMouseEnter={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-surface-panel)"; }}
+                onMouseLeave={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-surface-white)"; }}
               >
                 «
               </button>
@@ -583,9 +583,9 @@ function MfScreenerSection() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
                 className="rounded-[6px] p-1.5 disabled:opacity-30 transition-colors"
-                style={{ color: "#374151", background: "#FFFFFF", border: "1px solid #E5E7EB" }}
-                onMouseEnter={(e) => { if (page !== 1) e.currentTarget.style.background = "#F3F4F6"; }}
-                onMouseLeave={(e) => { if (page !== 1) e.currentTarget.style.background = "#FFFFFF"; }}
+                style={{ color: "var(--qc-text-body)", background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
+                onMouseEnter={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-surface-panel)"; }}
+                onMouseLeave={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-surface-white)"; }}
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
               </button>
@@ -603,7 +603,7 @@ function MfScreenerSection() {
                 }
                 return pages.map((p, idx) =>
                   p === "..." ? (
-                    <span key={`ellipsis-${idx}`} className="px-1 text-[11px]" style={{ color: "#9CA3AF" }}>…</span>
+                    <span key={`ellipsis-${idx}`} className="px-1 text-[11px]" style={{ color: "var(--qc-text-muted)" }}>…</span>
                   ) : (
                     <button
                       key={p}
@@ -611,11 +611,11 @@ function MfScreenerSection() {
                       className="rounded-[6px] min-w-[28px] h-7 text-[11px] font-medium transition-colors"
                       style={
                         page === p
-                          ? { background: "#0F172B", color: "#FFFFFF", border: "1px solid #0F172B" }
-                          : { background: "#FFFFFF", color: "#374151", border: "1px solid #E5E7EB" }
+                          ? { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)", border: "1px solid var(--qc-border-active)" }
+                          : { background: "var(--qc-surface-white)", color: "var(--qc-text-body)", border: "1px solid var(--qc-border-default)" }
                       }
-                      onMouseEnter={(e) => { if (page !== p) e.currentTarget.style.background = "#F3F4F6"; }}
-                      onMouseLeave={(e) => { if (page !== p) e.currentTarget.style.background = "#FFFFFF"; }}
+                      onMouseEnter={(e) => { if (page !== p) e.currentTarget.style.background = "var(--qc-surface-panel)"; }}
+                      onMouseLeave={(e) => { if (page !== p) e.currentTarget.style.background = "var(--qc-surface-white)"; }}
                     >
                       {p}
                     </button>
@@ -627,9 +627,9 @@ function MfScreenerSection() {
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
                 className="rounded-[6px] p-1.5 disabled:opacity-30 transition-colors"
-                style={{ color: "#374151", background: "#FFFFFF", border: "1px solid #E5E7EB" }}
-                onMouseEnter={(e) => { if (page < totalPages) e.currentTarget.style.background = "#F3F4F6"; }}
-                onMouseLeave={(e) => { if (page < totalPages) e.currentTarget.style.background = "#FFFFFF"; }}
+                style={{ color: "var(--qc-text-body)", background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
+                onMouseEnter={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-surface-panel)"; }}
+                onMouseLeave={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-surface-white)"; }}
               >
                 <ChevronRight className="h-3.5 w-3.5" />
               </button>
@@ -637,9 +637,9 @@ function MfScreenerSection() {
                 onClick={() => setPage(totalPages)}
                 disabled={page >= totalPages}
                 className="rounded-[6px] px-2 py-1 text-[11px] font-medium disabled:opacity-30 transition-colors"
-                style={{ color: "#374151", background: page >= totalPages ? "transparent" : "#FFFFFF", border: "1px solid #E5E7EB" }}
-                onMouseEnter={(e) => { if (page < totalPages) e.currentTarget.style.background = "#F3F4F6"; }}
-                onMouseLeave={(e) => { if (page < totalPages) e.currentTarget.style.background = "#FFFFFF"; }}
+                style={{ color: "var(--qc-text-body)", background: page >= totalPages ? "transparent" : "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
+                onMouseEnter={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-surface-panel)"; }}
+                onMouseLeave={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-surface-white)"; }}
               >
                 »
               </button>
@@ -871,10 +871,10 @@ export default function ScreenerHomePage() {
                       <p className="text-[10px] font-bold uppercase tracking-[0.10em] leading-tight" style={{ color: "var(--qc-text-heading)" }}>{category}</p>
                       <p className="text-[11px] mt-1" style={{ color: "var(--qc-text-muted)" }}>{baskets.length} basket{baskets.length !== 1 ? "s" : ""}</p>
                     </div>
-                    <div className="divide-y divide-[#EFEDE7]">
+                    <div className="divide-y divide-[var(--qc-border-inner)]">
                       {baskets.map((basket) => <BasketRow key={basket.id} basket={basket} />)}
                     </div>
-                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(233,244,196,0.6) 100%)" }} />
+                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10" style={{ background: "linear-gradient(180deg, transparent 0%, var(--qc-surface-panel) 100%)" }} />
                   </div>
                 ))}
               </div>

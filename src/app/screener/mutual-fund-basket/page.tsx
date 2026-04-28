@@ -139,7 +139,7 @@ function MfBasketContent() {
         id: "index",
         header: "#",
         cell: ({ row }) => (
-          <span className="text-[11px] tabular-nums" style={{ color: "#888888" }}>
+          <span className="text-[11px] tabular-nums" style={{ color: "var(--qc-text-muted)" }}>
             {row.index + 1}
           </span>
         ),
@@ -175,7 +175,7 @@ function MfBasketContent() {
       id: "arrow",
       header: "",
       cell: () => (
-        <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "#0F172B" }} />
+        <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--qc-text-heading)" }} />
       ),
       size: 40,
       enableSorting: false,

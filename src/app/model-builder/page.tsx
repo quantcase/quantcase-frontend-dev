@@ -31,13 +31,13 @@ function PortfolioBuilderModal({
         {/* Fixed header */}
         <div
           className="shrink-0 flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor: "#E2E2E2", background: "#fff" }}
+          style={{ borderColor: "var(--qc-border-default)", background: "#fff" }}
         >
           <div>
-            <h2 className="text-xl font-semibold" style={{ color: "#0F172B" }}>
+            <h2 className="text-xl font-semibold" style={{ color: "var(--qc-text-heading)" }}>
               Wealth Builder
             </h2>
-            <p className="text-xs mt-0.5" style={{ color: "#888888" }}>
+            <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
               Model Portfolio Library — configure and save for relationship managers
             </p>
           </div>
@@ -45,7 +45,7 @@ function PortfolioBuilderModal({
             type="button"
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-200 transition-colors shrink-0"
-            style={{ color: "#888888" }}
+            style={{ color: "var(--qc-text-muted)" }}
           >
             <X className="w-4 h-4" />
           </button>
@@ -80,10 +80,10 @@ export default function ModelBuilderPage() {
           {/* Header */}
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-semibold" style={{ color: "#0F172B" }}>
+              <h1 className="text-2xl font-semibold" style={{ color: "var(--qc-text-heading)" }}>
                 Wealth Builder
               </h1>
-              <p className="mt-0.5 text-sm" style={{ color: "#888888" }}>
+              <p className="mt-0.5 text-sm" style={{ color: "var(--qc-text-muted)" }}>
                 Model Portfolio Library — configure and save for relationship managers
               </p>
             </div>
@@ -91,7 +91,7 @@ export default function ModelBuilderPage() {
               type="button"
               onClick={() => setModalOpen(true)}
               className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
-              style={{ background: "#0F172B" }}
+              style={{ background: "var(--qc-text-heading)" }}
             >
               <Plus className="h-4 w-4" />
               New Portfolio
@@ -101,7 +101,7 @@ export default function ModelBuilderPage() {
           {/* Models list */}
           {loading ? (
             <div className="flex items-center justify-center py-24">
-              <p className="text-sm" style={{ color: "#888888" }}>Loading models...</p>
+              <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading models...</p>
             </div>
           ) : error ? (
             <div className="flex items-center justify-center py-24">
@@ -113,19 +113,19 @@ export default function ModelBuilderPage() {
                 className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
                 style={{ background: "#EBEBEB", border: "1px solid #E2E2E2" }}
               >
-                <Plus className="w-5 h-5" style={{ color: "#888888" }} />
+                <Plus className="w-5 h-5" style={{ color: "var(--qc-text-muted)" }} />
               </div>
-              <p className="text-sm font-medium mb-1" style={{ color: "#0F172B" }}>
+              <p className="text-sm font-medium mb-1" style={{ color: "var(--qc-text-heading)" }}>
                 No portfolios yet
               </p>
-              <p className="text-xs mb-6" style={{ color: "#888888" }}>
+              <p className="text-xs mb-6" style={{ color: "var(--qc-text-muted)" }}>
                 Build your first model portfolio to get started.
               </p>
               <button
                 type="button"
                 onClick={() => setModalOpen(true)}
                 className="rounded-md px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
-                style={{ background: "#0F172B" }}
+                style={{ background: "var(--qc-text-heading)" }}
               >
                 Build your first portfolio
               </button>

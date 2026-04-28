@@ -71,9 +71,9 @@ function MetricsStrip() {
         <div key={label} className="flex items-center gap-3 px-4 py-3" style={{ borderRight: "1px solid var(--qc-border-default)" }}>
           <div
             className="flex items-center justify-center size-7 rounded-[7px] shrink-0"
-            style={{ background: "#c8f569" }}
+            style={{ background: "var(--qc-accent-primary)" }}
           >
-            <Icon className="size-3.5" style={{ color: "#1a5c00" }} />
+            <Icon className="size-3.5" style={{ color: "var(--qc-accent-primary-fg)" }} />
           </div>
           <div className="min-w-0">
             <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--qc-text-muted)", marginBottom: 1 }}>
@@ -84,7 +84,7 @@ function MetricsStrip() {
                 {value}
               </span>
               {delta && (
-                <span style={{ fontSize: 10, fontWeight: 600, color: deltaPositive ? "#5a9e1a" : "var(--qc-down)" }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color: deltaPositive ? "var(--qc-up)" : "var(--qc-down)" }}>
                   {delta}
                 </span>
               )}
@@ -191,7 +191,7 @@ function RightPanel({
         className="relative overflow-hidden"
         style={{
           borderRadius: 14,
-          background: "linear-gradient(135deg, #c8f569 0%, #a8e63d 40%, #7ecb1a 100%)",
+          background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
           padding: "22px 22px 18px",
           minHeight: 210,
         }}
@@ -214,7 +214,7 @@ function RightPanel({
 
           <div className="mb-4">
             <div className="flex items-end gap-1.5 mb-0.5">
-              <span style={{ fontSize: 48, fontWeight: 500, lineHeight: 1, color: "#1a2e00", letterSpacing: "-0.03em" }}>{total}</span>
+              <span style={{ fontSize: 48, fontWeight: 500, lineHeight: 1, color: "var(--qc-accent-primary-fg)", letterSpacing: "-0.03em" }}>{total}</span>
               <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(0,0,0,0.45)", marginBottom: 6 }}>clients</span>
             </div>
             <p style={{ fontSize: 11, color: "rgba(0,0,0,0.5)" }}>require your attention today</p>
@@ -223,20 +223,20 @@ function RightPanel({
           <div className="flex items-center gap-1.5 flex-wrap">
             {counts.HIGH > 0 && (
               <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(0,0,0,0.12)" }}>
-                <div className="size-1.5 rounded-full" style={{ background: "#c0392b" }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: "#1a2e00" }}>{counts.HIGH} high</span>
+                <div className="size-1.5 rounded-full" style={{ background: "var(--qc-down)" }} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-accent-primary-fg)" }}>{counts.HIGH} high</span>
               </div>
             )}
             {counts.MEDIUM > 0 && (
               <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(0,0,0,0.12)" }}>
-                <div className="size-1.5 rounded-full" style={{ background: "#b4730e" }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: "#1a2e00" }}>{counts.MEDIUM} med</span>
+                <div className="size-1.5 rounded-full" style={{ background: "var(--qc-warn)" }} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-accent-primary-fg)" }}>{counts.MEDIUM} med</span>
               </div>
             )}
             {counts.LOW > 0 && (
               <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(0,0,0,0.12)" }}>
-                <div className="size-1.5 rounded-full" style={{ background: "#1a6e42" }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: "#1a2e00" }}>{counts.LOW} low</span>
+                <div className="size-1.5 rounded-full" style={{ background: "var(--qc-up)" }} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-accent-primary-fg)" }}>{counts.LOW} low</span>
               </div>
             )}
           </div>
@@ -264,7 +264,7 @@ function RightPanel({
             className="h-full rounded-full"
             style={{
               width: `${Math.min(urgencyScore * 10, 100)}%`,
-              background: urgencyScore > 6 ? "var(--qc-down)" : urgencyScore > 3 ? "var(--qc-warn)" : "#7ecb1a",
+              background: urgencyScore > 6 ? "var(--qc-down)" : urgencyScore > 3 ? "var(--qc-warn)" : "var(--qc-accent-primary)",
             }}
           />
         </div>
@@ -282,7 +282,7 @@ function RightPanel({
           <div className="flex items-center gap-2.5 mb-3">
             <div
               className="size-9 rounded-full flex items-center justify-center shrink-0"
-              style={{ background: "linear-gradient(135deg, #c8f569 0%, #7ecb1a 100%)", fontSize: 12, fontWeight: 700, color: "#1a2e00" }}
+              style={{ background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)", fontSize: 12, fontWeight: 700, color: "var(--qc-accent-primary-fg)" }}
             >
               {topItem.client.name.split(" ").map(w => w[0]).slice(0, 2).join("")}
             </div>
@@ -312,8 +312,8 @@ function RightPanel({
               className="flex flex-col gap-1.5 rounded-[9px] p-3 text-left hover:bg-[rgba(0,0,0,0.03)] transition-colors cursor-pointer"
               style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
             >
-              <div className="flex items-center justify-center size-6 rounded-[6px]" style={{ background: "#c8f569" }}>
-                <Icon className="size-3.5" style={{ color: "#1a5c00" }} />
+              <div className="flex items-center justify-center size-6 rounded-[6px]" style={{ background: "var(--qc-accent-primary)" }}>
+                <Icon className="size-3.5" style={{ color: "var(--qc-accent-primary-fg)" }} />
               </div>
               <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}>{label}</span>
               <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>{desc}</span>
@@ -398,10 +398,10 @@ function DashboardContent() {
   const topItem = priorityList[0];
 
   return (
-    <div className="min-h-screen pb-16" style={{ background: "#FBFAF7" }}>
+    <div className="min-h-screen pb-16" style={{ background: "var(--qc-surface-base)" }}>
 
       {/* Header */}
-      <div style={{ borderBottom: "1px solid var(--qc-border-default)", background: "#FBFAF7", padding: "18px 24px 16px" }}>
+      <div style={{ borderBottom: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)", padding: "18px 24px 16px" }}>
         <div className="flex items-center justify-between gap-4">
           <div>
             <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--qc-text-muted)", marginBottom: 3, fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
@@ -486,7 +486,7 @@ function DashboardContent() {
                   {dashboard && (
                     <span
                       className="rounded-full px-2 py-0.5"
-                      style={{ fontSize: 10, fontWeight: 700, background: "#c8f569", color: "#1a2e00" }}
+                      style={{ fontSize: 10, fontWeight: 700, background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}
                     >
                       {priorityList.length}
                     </span>
@@ -532,7 +532,7 @@ function DashboardContent() {
               )}
               {selectedRmId && !loading && !error && priorityList.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 gap-2">
-                  <CheckCircle2 className="size-7 mb-1" style={{ color: "#7ecb1a", opacity: 0.7 }} />
+                  <CheckCircle2 className="size-7 mb-1" style={{ color: "var(--qc-accent-primary)", opacity: 0.7 }} />
                   <p style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>All clear today.</p>
                   <p style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>Generate suggestions to refresh the list.</p>
                 </div>
@@ -588,7 +588,7 @@ function DashboardContent() {
               <RightPanel counts={counts} date={dashboard.date} total={priorityList.length} topItem={topItem} />
             ) : (
               <>
-                <div style={{ borderRadius: 14, background: "linear-gradient(135deg, #c8f569 0%, #7ecb1a 100%)", minHeight: 210, opacity: 0.3 }} />
+                <div style={{ borderRadius: 14, background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)", minHeight: 210, opacity: 0.3 }} />
                 <div style={{ borderRadius: 12, border: "1px solid var(--qc-border-default)", height: 72, background: "var(--qc-surface-card)", opacity: 0.5 }} />
               </>
             )}

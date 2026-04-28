@@ -34,7 +34,7 @@ const RISK_COLOR: Record<RiskProfileType, string> = {
   "goal-based": "var(--qc-warn)",
 };
 
-const ASSET_COLORS = ["#0F172B", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
+const ASSET_COLORS = ["#1A0A2E", "#3D2460", "#6B21A8", "#9333EA", "#C084FC"];
 
 // ─── Modal ─────────────────────────────────────────────────────────────────────
 
@@ -55,17 +55,17 @@ function PortfolioBuilderModal({
     >
       <div
         className="relative flex flex-col w-full max-w-4xl mx-auto my-0 sm:my-10 sm:rounded-lg overflow-hidden"
-        style={{ background: "#fff", maxHeight: "calc(100dvh - 80px)" }}
+        style={{ background: "var(--qc-surface-white)", maxHeight: "calc(100dvh - 80px)" }}
       >
         <div
           className="shrink-0 flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor: "#E2E2E2", background: "#fff" }}
+          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
         >
           <div>
-            <h2 className="text-xl font-semibold" style={{ color: "#0F172B" }}>
+            <h2 className="text-xl font-semibold" style={{ color: "var(--qc-text-heading)" }}>
               Wealth Builder
             </h2>
-            <p className="text-xs mt-0.5" style={{ color: "#888888" }}>
+            <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
               Model Portfolio Library — configure and save for relationship managers
             </p>
           </div>
@@ -73,7 +73,7 @@ function PortfolioBuilderModal({
             type="button"
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-200 transition-colors shrink-0"
-            style={{ color: "#888888" }}
+            style={{ color: "var(--qc-text-muted)" }}
           >
             <X className="w-4 h-4" />
           </button>
@@ -175,7 +175,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
                 />
               ))}
               {totalPct < 100 && (
-                <div style={{ width: `${100 - totalPct}%`, background: "#E2E2E2" }} />
+                <div style={{ width: `${100 - totalPct}%`, background: "var(--qc-border-default)" }} />
               )}
             </div>
             <span
@@ -320,7 +320,7 @@ function RightPanel({
       <div
         className="rounded-[14px] overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #c8f569 0%, #a8e63d 40%, #7ecb1a 100%)",
+          background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
           padding: "20px 18px 16px",
         }}
       >
@@ -330,7 +330,7 @@ function RightPanel({
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
             fontWeight: 700,
             letterSpacing: "0.12em",
-            color: "#2d5a00",
+            color: "var(--qc-accent-primary-fg)",
             textTransform: "uppercase",
             marginBottom: 8,
           }}
@@ -344,14 +344,14 @@ function RightPanel({
                 fontSize: 40,
                 fontWeight: 800,
                 fontFamily: "var(--font-ibm-plex-mono, monospace)",
-                color: "#1a3a00",
+                color: "var(--qc-accent-primary-fg)",
                 letterSpacing: "-0.04em",
                 lineHeight: 1,
               }}
             >
               {models.length}
             </p>
-            <p style={{ fontSize: 11, color: "#3a6e00", marginTop: 2 }}>
+            <p style={{ fontSize: 11, color: "var(--qc-accent-primary-fg)", marginTop: 2 }}>
               Portfolio Models
             </p>
           </div>
@@ -361,18 +361,18 @@ function RightPanel({
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
             style={{ background: "rgba(26,58,0,0.15)" }}
           >
-            <TrendingUp className="size-2.5" style={{ color: "#2d5a00" }} />
+            <TrendingUp className="size-2.5" style={{ color: "var(--qc-accent-primary-fg)" }} />
             <span
               style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: "#1a3a00",
+                color: "var(--qc-accent-primary-fg)",
                 fontFamily: "var(--font-ibm-plex-mono, monospace)",
               }}
             >
               {formatCapital(totalCapital)}
             </span>
-            <span style={{ fontSize: 10, color: "#3a6e00" }}>total AUM</span>
+            <span style={{ fontSize: 10, color: "var(--qc-accent-primary-fg)" }}>total AUM</span>
           </div>
         </div>
       </div>
@@ -541,7 +541,7 @@ function ModelsContent() {
 
   return (
     <>
-      <div style={{ background: "#FBFAF7", minHeight: "100vh", padding: "20px 24px" }}>
+      <div style={{ background: "var(--qc-surface-base)", minHeight: "100vh", padding: "20px 24px" }}>
         {/* Header */}
         <div className="flex items-start justify-between mb-5">
           <div>

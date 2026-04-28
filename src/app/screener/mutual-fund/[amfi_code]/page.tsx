@@ -128,7 +128,7 @@ function RiskBadge({ label }: { label: string }) {
     Low:               { bg: "var(--qc-up-soft)",   color: "var(--qc-up)" },
     "Low to Moderate": { bg: "var(--qc-warn-soft)",  color: "var(--qc-warn)" },
     Moderate:          { bg: "var(--qc-warn-soft)",  color: "var(--qc-warn)" },
-    "Moderately High": { bg: "#ffedd5",              color: "#9a3412" },
+    "Moderately High": { bg: "var(--qc-warn-soft)",              color: "var(--qc-down)" },
     High:              { bg: "var(--qc-down-soft)",  color: "var(--qc-down)" },
     "Very High":       { bg: "var(--qc-down-soft)",  color: "var(--qc-down)" },
   };
@@ -147,7 +147,7 @@ function StarRating({ stars }: { stars: number }) {
   return (
     <span className="flex items-center gap-0.5">
       {Array.from({ length: 5 }).map((_, i) => (
-        <Star key={i} size={12} fill={i < stars ? "#f59e0b" : "none"} stroke={i < stars ? "#f59e0b" : "#d1d5db"} />
+        <Star key={i} size={12} fill={i < stars ? "var(--qc-warn)" : "none"} stroke={i < stars ? "var(--qc-warn)" : "var(--qc-border-default)"} />
       ))}
     </span>
   );
@@ -180,7 +180,7 @@ function HeroTile({
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "linear-gradient(135deg, rgba(212,242,106,0.35) 0%, transparent 60%)",
+            background: "linear-gradient(135deg, rgba(107, 33, 168, 0.10) 0%, transparent 60%)",
           }}
         />
       )}
@@ -265,8 +265,8 @@ function ReturnsStrip({ returns, rankTotal }: { returns: MFReturns; rankTotal: n
 function AllocationBar({ equity, debt, other }: { equity: number; debt: number; other: number }) {
   const segments = [
     { label: "Equity", pct: equity, color: "var(--qc-text-heading)" },
-    { label: "Debt",   pct: debt,   color: "#71717a" },
-    { label: "Other",  pct: other,  color: "#d1d5db" },
+    { label: "Debt",   pct: debt,   color: "var(--qc-text-muted)" },
+    { label: "Other",  pct: other,  color: "var(--qc-border-default)" },
   ].filter(s => s.pct > 0);
 
   return (
@@ -495,12 +495,12 @@ function NavChart({ navHistory }: { navHistory: MFNavHistory }) {
       <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full" style={{ height: 140 }}>
         <defs>
           <linearGradient id="navAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={isPositive ? "#D4F26A" : "#ef4444"} stopOpacity="0.35" />
-            <stop offset="100%" stopColor={isPositive ? "#D4F26A" : "#ef4444"} stopOpacity="0" />
+            <stop offset="0%" stopColor={isPositive ? "var(--qc-accent-primary)" : "var(--qc-down)"} stopOpacity="0.35" />
+            <stop offset="100%" stopColor={isPositive ? "var(--qc-accent-primary)" : "var(--qc-down)"} stopOpacity="0" />
           </linearGradient>
           <linearGradient id="navLineGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={isPositive ? "#6b7c30" : "#dc2626"} />
-            <stop offset="100%" stopColor={isPositive ? "#D4F26A" : "#ef4444"} />
+            <stop offset="0%" stopColor={isPositive ? "var(--qc-accent-primary)" : "var(--qc-down)"} />
+            <stop offset="100%" stopColor={isPositive ? "var(--qc-accent-primary)" : "var(--qc-down)"} />
           </linearGradient>
         </defs>
         <path d={areaD} fill="url(#navAreaGrad)" />
@@ -547,11 +547,11 @@ function AumTrend({ history }: { history: { month: string; total_aum: number; st
                 className="w-full rounded-t-sm transition-opacity group-hover:opacity-80"
                 style={{
                   height: `${heightPct}%`,
-                  background: `linear-gradient(180deg, var(--qc-accent-lime) 0%, #a3bc2f 100%)`,
+                  background: "linear-gradient(180deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
                   minHeight: 3,
                 }}
               />
-              <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 hidden group-hover:block bg-zinc-900 text-white text-[10px] rounded px-2 py-1 whitespace-nowrap z-10 shadow-lg">
+              <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 hidden group-hover:block text-[10px] rounded px-2 py-1 whitespace-nowrap z-10 shadow-lg" style={{ background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}>
                 <p className="font-semibold">{fmtCr(total_aum)}</p>
                 <p className="opacity-60">{month}</p>
               </div>
@@ -877,7 +877,7 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
                   style={{
                     border: "1px solid var(--qc-border-default)",
                     background: p === safePage ? "var(--qc-text-heading)" : "var(--qc-surface-white)",
-                    color: p === safePage ? "#fff" : "var(--qc-text-muted)",
+                    color: p === safePage ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
                   }}
                 >
                   {p}
@@ -978,7 +978,7 @@ export default function MutualFundDetailPage() {
         {/* Hero gradient strip */}
         <div
           className="h-1"
-          style={{ background: "linear-gradient(90deg, var(--qc-accent-lime) 0%, #a3bc2f 50%, var(--qc-text-heading) 100%)" }}
+          style={{ background: "linear-gradient(90deg, var(--qc-accent-primary) 0%, var(--qc-text-heading) 100%)" }}
         />
         <div className="px-6 py-3 flex items-center gap-4">
           <button

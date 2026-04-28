@@ -197,7 +197,7 @@ function RightPanel({
         className="relative overflow-hidden"
         style={{
           borderRadius: 14,
-          background: "linear-gradient(135deg, #c8f569 0%, #a8e63d 40%, #7ecb1a 100%)",
+          background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
           padding: "22px 22px 18px",
           minHeight: 200,
         }}
@@ -217,21 +217,21 @@ function RightPanel({
           </div>
           <div className="mb-4">
             <div className="flex items-end gap-1.5 mb-0.5">
-              <span style={{ fontSize: 48, fontWeight: 500, lineHeight: 1, color: "#1a2e00", letterSpacing: "-0.03em" }}>{total}</span>
+              <span style={{ fontSize: 48, fontWeight: 500, lineHeight: 1, color: "var(--qc-accent-primary-fg)", letterSpacing: "-0.03em" }}>{total}</span>
               <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(0,0,0,0.45)", marginBottom: 6 }}>clients</span>
             </div>
             <p style={{ fontSize: 11, color: "rgba(0,0,0,0.5)" }}>across all segments</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(0,0,0,0.12)" }}>
-              <TrendingDown className="size-3" style={{ color: "#1a2e00" }} />
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#1a2e00" }}>
+              <TrendingDown className="size-3" style={{ color: "var(--qc-accent-primary-fg)" }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-accent-primary-fg)" }}>
                 {highRisk.length} at-risk
               </span>
             </div>
             <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(0,0,0,0.12)" }}>
-              <Activity className="size-3" style={{ color: "#1a2e00" }} />
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#1a2e00" }}>
+              <Activity className="size-3" style={{ color: "var(--qc-accent-primary-fg)" }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-accent-primary-fg)" }}>
                 {(avgChurn * 100).toFixed(0)}% avg churn
               </span>
             </div>
@@ -278,7 +278,7 @@ function RightPanel({
                     <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--qc-surface-panel)" }}>
                       <div
                         className="h-full rounded-full"
-                        style={{ width: `${pct}%`, background: "#7ecb1a" }}
+                        style={{ width: `${pct}%`, background: "var(--qc-accent-primary)" }}
                       />
                     </div>
                   </div>
@@ -308,10 +308,10 @@ function RightPanel({
             <div
               className="size-9 rounded-full flex items-center justify-center shrink-0"
               style={{
-                background: "linear-gradient(135deg, #c8f569 0%, #7ecb1a 100%)",
+                background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
                 fontSize: 12,
                 fontWeight: 700,
-                color: "#1a2e00",
+                color: "var(--qc-accent-primary-fg)",
               }}
             >
               {topRisk.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
@@ -371,8 +371,8 @@ function RightPanel({
               className="flex flex-col gap-1.5 rounded-[9px] p-3 text-left hover:bg-[rgba(0,0,0,0.03)] transition-colors cursor-pointer"
               style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
             >
-              <div className="flex items-center justify-center size-6 rounded-[6px]" style={{ background: "#c8f569" }}>
-                <Icon className="size-3.5" style={{ color: "#1a5c00" }} />
+              <div className="flex items-center justify-center size-6 rounded-[6px]" style={{ background: "var(--qc-accent-primary)" }}>
+                <Icon className="size-3.5" style={{ color: "var(--qc-accent-primary-fg)" }} />
               </div>
               <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}>{label}</span>
               <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>{desc}</span>
@@ -420,10 +420,10 @@ function ClientsContent() {
   const offset = (page - 1) * 20;
 
   return (
-    <div className="min-h-screen pb-16" style={{ background: "#FBFAF7" }}>
+    <div className="min-h-screen pb-16" style={{ background: "var(--qc-surface-base)" }}>
 
       {/* Header */}
-      <div style={{ borderBottom: "1px solid var(--qc-border-default)", background: "#FBFAF7", padding: "18px 24px 16px" }}>
+      <div style={{ borderBottom: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)", padding: "18px 24px 16px" }}>
         <div className="flex items-center justify-between gap-4">
           <div>
             <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--qc-text-muted)", marginBottom: 3, fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>

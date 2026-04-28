@@ -86,38 +86,38 @@ function TranscriptContent() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black">
+    <div className="min-h-screen" style={{ background: "var(--qc-surface-base)" }}>
       {/* Combined Header Bar */}
-      <div className="sticky top-0 z-20 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-sm">
+      <div className="sticky top-0 z-20 shadow-sm" style={{ background: "var(--qc-surface-white)", borderBottom: "1px solid var(--qc-border-default)" }}>
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-6">
             {/* Left: Title and Metadata */}
             {!loading && !error && data ? (
               <div className="flex items-center gap-6">
                 <div>
-                  <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                  <h1 className="text-lg font-bold" style={{ color: "var(--qc-text-heading)" }}>
                     Earnings Call Transcript
                   </h1>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
                     {data.data.id}
                   </p>
                 </div>
-                <div className="flex items-center gap-4 text-xs border-l border-zinc-200 dark:border-zinc-800 pl-6">
+                <div className="flex items-center gap-4 text-xs pl-6" style={{ borderLeft: "1px solid var(--qc-border-default)" }}>
                   <div>
-                    <span className="text-zinc-500 dark:text-zinc-500">Company: </span>
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                    <span className="" style={{ color: "var(--qc-text-muted)" }}>Company: </span>
+                    <span className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>
                       {data.data.company}
                     </span>
                   </div>
                   <div>
-                    <span className="text-zinc-500 dark:text-zinc-500">Quarter: </span>
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                    <span className="" style={{ color: "var(--qc-text-muted)" }}>Quarter: </span>
+                    <span className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>
                       {data.data.fiscal_year} {data.data.quarter}
                     </span>
                   </div>
                   <div>
-                    <span className="text-zinc-500 dark:text-zinc-500">Date: </span>
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                    <span className="" style={{ color: "var(--qc-text-muted)" }}>Date: </span>
+                    <span className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>
                       {data.data.call_date}
                     </span>
                   </div>
@@ -125,22 +125,22 @@ function TranscriptContent() {
               </div>
             ) : (
               <div>
-                <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                <h1 className="text-lg font-bold" style={{ color: "var(--qc-text-heading)" }}>
                   Earnings Call Transcript
                 </h1>
               </div>
             )}
 
             {/* Center: Toggle Navigation */}
-            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-md p-1">
+            <div className="flex items-center gap-1 rounded-md p-1" style={{ background: "var(--qc-surface-panel)" }}>
               <Link
                 href={`/summary?callId=${selectedCallId}`}
-                className="px-4 py-1.5 text-sm font-medium rounded text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                className="px-4 py-1.5 text-sm font-medium rounded transition-colors" style={{ color: "var(--qc-text-muted)" }}
               >
                 Summary
               </Link>
               <button
-                className="px-4 py-1.5 text-sm font-medium rounded bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-50 shadow-sm"
+                className="px-4 py-1.5 text-sm font-medium rounded shadow-sm" style={{ background: "var(--qc-surface-white)", color: "var(--qc-text-heading)" }}
               >
                 Transcript
               </button>
@@ -156,11 +156,11 @@ function TranscriptContent() {
                   onKeyDown={handleKeyDown}
                   onFocus={() => setIsOpen(true)}
                   placeholder="Search or enter call ID..."
-                  className="w-full px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-zinc-900 dark:text-zinc-50"
+                  className="w-full px-3 py-1.5 text-sm rounded-md focus:outline-none" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", color: "var(--qc-text-heading)" }}
                 />
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
+                  className="absolute right-2 top-1/2 -translate-y-1/2" style={{ color: "var(--qc-text-muted)" }}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -168,19 +168,19 @@ function TranscriptContent() {
                 </button>
 
                 {isOpen && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md shadow-lg max-h-60 overflow-auto">
+                  <div className="absolute z-10 w-full mt-1 rounded-md shadow-lg max-h-60 overflow-auto" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}>
                     {filteredCalls.length > 0 ? (
                       filteredCalls.map((call) => (
                         <button
                           key={call}
                           onClick={() => handleSelectCall(call)}
-                          className="w-full px-3 py-2 text-sm text-left hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-50 transition-colors"
+                          className="w-full px-3 py-2 text-sm text-left transition-colors" style={{ color: "var(--qc-text-heading)" }}
                         >
                           {call}
                         </button>
                       ))
                     ) : (
-                      <div className="px-3 py-2 text-sm text-zinc-500 dark:text-zinc-400">
+                      <div className="px-3 py-2 text-sm" style={{ color: "var(--qc-text-muted)" }}>
                         No matching calls. Press Enter to search for &ldquo;{inputValue}&rdquo;
                       </div>
                     )}
@@ -189,7 +189,7 @@ function TranscriptContent() {
               </div>
               <Link
                 href="/"
-                className="px-4 py-1.5 text-sm font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors text-zinc-900 dark:text-zinc-50 whitespace-nowrap"
+                className="px-4 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", color: "var(--qc-text-heading)" }}
               >
                 Back to Home
               </Link>
@@ -202,26 +202,26 @@ function TranscriptContent() {
 
         {loading && (
           <div className="flex items-center justify-center py-12">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400">Loading...</div>
+            <div className="text-sm" style={{ color: "var(--qc-text-body)" }}>Loading...</div>
           </div>
         )}
 
         {error && (
-          <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-red-200 dark:border-red-800">
+          <div className="rounded-lg p-4" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-down-soft)" }}>
             <div className="flex items-start gap-3">
-              <div className="text-red-600 dark:text-red-400 shrink-0">
+              <div className="shrink-0" style={{ color: "var(--qc-down)" }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                <h3 className="text-sm font-semibold" style={{ color: "var(--qc-text-heading)" }}>
                   Failed to Load Data
                 </h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+                <p className="text-sm mt-1" style={{ color: "var(--qc-text-body)" }}>
                   {error}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
+                <p className="text-xs mt-1" style={{ color: "var(--qc-text-muted)" }}>
                   Please check the call ID and try again.
                 </p>
               </div>
@@ -232,42 +232,42 @@ function TranscriptContent() {
         {!loading && !error && data && (
           <>
             {/* Call Information */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-3">Call Information</h2>
+            <div className="rounded-lg p-4" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}>
+              <h2 className="text-lg font-bold mb-3" style={{ color: "var(--qc-text-heading)" }}>Call Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500">Company</p>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mt-0.5">
+                  <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>Company</p>
+                  <p className="text-sm font-semibold mt-0.5" style={{ color: "var(--qc-text-heading)" }}>
                     {data.data.company_name || data.data.company}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500">Industry</p>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mt-0.5">
+                  <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>Industry</p>
+                  <p className="text-sm font-semibold mt-0.5" style={{ color: "var(--qc-text-heading)" }}>
                     {data.data.basic_industry || 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500">Fiscal Year</p>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mt-0.5">
+                  <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>Fiscal Year</p>
+                  <p className="text-sm font-semibold mt-0.5" style={{ color: "var(--qc-text-heading)" }}>
                     {data.data.fiscal_year}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500">Quarter</p>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mt-0.5">
+                  <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>Quarter</p>
+                  <p className="text-sm font-semibold mt-0.5" style={{ color: "var(--qc-text-heading)" }}>
                     {data.data.quarter}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500">Call Date</p>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mt-0.5">
+                  <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>Call Date</p>
+                  <p className="text-sm font-semibold mt-0.5" style={{ color: "var(--qc-text-heading)" }}>
                     {data.data.call_date}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500">Last Updated</p>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mt-0.5">
+                  <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>Last Updated</p>
+                  <p className="text-sm font-semibold mt-0.5" style={{ color: "var(--qc-text-heading)" }}>
                     {new Date(data.data.updated_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -275,84 +275,84 @@ function TranscriptContent() {
             </div>
 
             {/* Transcript Section */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800">
+            <div className="rounded-lg p-4" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Transcript</h2>
+                <h2 className="text-lg font-bold" style={{ color: "var(--qc-text-heading)" }}>Transcript</h2>
                 {data.data.transcript_url && (
                   <a
                     href={data.data.transcript_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-xs font-medium hover:underline" style={{ color: "var(--qc-blue)" }}
                   >
                     View Original
                   </a>
                 )}
               </div>
               {data.data.transcript_text ? (
-                <div className="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-md">
-                  <p className="text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre-wrap">
+                <div className="p-4 rounded-md" style={{ background: "var(--qc-surface-panel)" }}>
+                  <p className="text-sm whitespace-pre-wrap" style={{ color: "var(--qc-text-heading)" }}>
                     {data.data.transcript_text}
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-zinc-500 dark:text-zinc-500">
+                <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>
                   No transcript available
                 </p>
               )}
             </div>
 
             {/* Presentation Section */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800">
+            <div className="rounded-lg p-4" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Presentation</h2>
+                <h2 className="text-lg font-bold" style={{ color: "var(--qc-text-heading)" }}>Presentation</h2>
                 {data.data.ppt_url && (
                   <a
                     href={data.data.ppt_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-xs font-medium hover:underline" style={{ color: "var(--qc-blue)" }}
                   >
                     View PDF
                   </a>
                 )}
               </div>
               {data.data.ppt_text ? (
-                <div className="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-md max-h-96 overflow-y-auto">
-                  <p className="text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre-wrap">
+                <div className="p-4 rounded-md max-h-96 overflow-y-auto" style={{ background: "var(--qc-surface-panel)" }}>
+                  <p className="text-sm whitespace-pre-wrap" style={{ color: "var(--qc-text-heading)" }}>
                     {data.data.ppt_text}
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-zinc-500 dark:text-zinc-500">
+                <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>
                   No presentation text available
                 </p>
               )}
             </div>
 
             {/* Quarterly Results Section */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800">
+            <div className="rounded-lg p-4" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Quarterly Results</h2>
+                <h2 className="text-lg font-bold" style={{ color: "var(--qc-text-heading)" }}>Quarterly Results</h2>
                 {data.data.quarterly_result_url && (
                   <a
                     href={data.data.quarterly_result_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-xs font-medium hover:underline" style={{ color: "var(--qc-blue)" }}
                   >
                     View Original
                   </a>
                 )}
               </div>
               {data.data.quarterly_result_text ? (
-                <div className="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-md max-h-96 overflow-y-auto">
-                  <p className="text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre-wrap">
+                <div className="p-4 rounded-md max-h-96 overflow-y-auto" style={{ background: "var(--qc-surface-panel)" }}>
+                  <p className="text-sm whitespace-pre-wrap" style={{ color: "var(--qc-text-heading)" }}>
                     {data.data.quarterly_result_text}
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-zinc-500 dark:text-zinc-500">
+                <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>
                   No quarterly results available
                 </p>
               )}
@@ -367,8 +367,8 @@ function TranscriptContent() {
 export default function TranscriptPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center">
-        <div className="text-sm text-zinc-600 dark:text-zinc-400">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-surface-base)" }}>
+        <div className="text-sm" style={{ color: "var(--qc-text-body)" }}>Loading...</div>
       </div>
     }>
       <TranscriptContent />

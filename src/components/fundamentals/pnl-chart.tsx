@@ -37,7 +37,7 @@ const COLORS = {
   revenue:  "#C8C6C0",  // --qc-text-muted lighter: neutral bar for revenue
   expenses: "#E9E7E1",  // --qc-border-default: muted expenses bar
   interest: "#B23A2F",  // --qc-down: interest is a cost drag
-  opProfit: "#0E0E0C",  // --qc-text-heading: primary line
+  opProfit: "var(--qc-text-heading)",  // --qc-text-heading: primary line
   netProfit:"#9A9A92",  // --qc-text-muted: secondary dashed line
 };
 

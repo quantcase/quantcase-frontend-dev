@@ -44,7 +44,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
         fontSize: "12px",
         fontWeight: "500",
         fontFamily: "'IBM Plex Mono', monospace",
-        colors: ["#FBFAF7"], // --qc-surface-white resolved (text on dark treemap fills)
+        colors: ["var(--qc-surface-base)"], // --qc-surface-white resolved (text on dark treemap fills)
       },
       formatter: (text: string, op?: ApexCharts.ApexFormatterOpts) =>
         op?.value !== undefined ? [`${text}`, fmtCr(op.value as number)] : text,

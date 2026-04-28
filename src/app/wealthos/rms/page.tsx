@@ -586,7 +586,7 @@ function RMPageContent() {
   return (
     <div
       style={{
-        background: "#FBFAF7",
+        background: "var(--qc-surface-base)",
         minHeight: "100vh",
         padding: "20px 24px",
       }}

@@ -21,7 +21,7 @@ export function IconBox({ icon: Icon }: IconBoxProps) {
         flexShrink: 0,
       }}
     >
-      <Icon style={{ height: 16, width: 16, flexShrink: 0, alignSelf: "stretch", color: "#888888" }} />
+      <Icon style={{ height: 16, width: 16, flexShrink: 0, alignSelf: "stretch", color: "var(--qc-text-muted)" }} />
     </div>
   );
 }

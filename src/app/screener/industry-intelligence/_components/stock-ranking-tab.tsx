@@ -8,45 +8,12 @@ import { Card } from "@/components/ui/card";
 import {
   Table, TableBody, TableHead, TableHeader, TableRow, TableCell,
 } from "@/components/ui/table";
+import type {
+  IIStockRanking, IIClusterSignal, IIClusterNews,
+  RevisionDirection, ValuationLabel, ClusterSignalVariant,
+} from "@/types/industry-intelligence";
 
-// ── Types & data ──────────────────────────────────────────────────────────────
-
-type RevDir = "up" | "flat" | "down";
-type ValLabel = "Fair" | "Expensive" | "Cheap";
-
-interface Stock {
-  rank: number;
-  symbol: string;
-  name: string;
-  rs: string;
-  revision: string;
-  revDir: RevDir;
-  quality: number;
-  val: ValLabel;
-}
-
-const CLUSTERS = [
-  "Bank - Private",
-  "Bank - Public",
-  "NBFC - Large",
-  "Insurance",
-  "Asset Management",
-];
-
-const STOCKS: Stock[] = [
-  { rank: 1,  symbol: "ICICIBANK",  name: "ICICI Bank",            rs: "+9%", revision: "Strong",    revDir: "up",   quality: 91, val: "Fair" },
-  { rank: 2,  symbol: "HDFCBANK",   name: "HDFC Bank",             rs: "+7%", revision: "Strong",    revDir: "up",   quality: 93, val: "Fair" },
-  { rank: 3,  symbol: "AXISBANK",   name: "Axis Bank",             rs: "+5%", revision: "Improving", revDir: "up",   quality: 79, val: "Fair" },
-  { rank: 4,  symbol: "KOTAKBANK",  name: "Kotak Mahindra Bank",   rs: "+3%", revision: "Stable",    revDir: "flat", quality: 86, val: "Expensive" },
-  { rank: 5,  symbol: "FEDERALBNK", name: "Federal Bank",          rs: "+2%", revision: "Improving", revDir: "up",   quality: 74, val: "Fair" },
-  { rank: 6,  symbol: "AUBANK",     name: "AU Small Finance Bank", rs: "+1%", revision: "Stable",    revDir: "flat", quality: 71, val: "Fair" },
-  { rank: 7,  symbol: "IDFCFIRSTB", name: "IDFC FIRST Bank",       rs: "0%",  revision: "Stable",    revDir: "flat", quality: 66, val: "Fair" },
-  { rank: 8,  symbol: "CUB",        name: "City Union Bank",       rs: "-1%", revision: "Stable",    revDir: "flat", quality: 63, val: "Fair" },
-  { rank: 9,  symbol: "KTKBANK",    name: "Karnataka Bank",        rs: "-2%", revision: "Declining", revDir: "down", quality: 58, val: "Fair" },
-  { rank: 10, symbol: "DCBBANK",    name: "DCB Bank",              rs: "-3%", revision: "Declining", revDir: "down", quality: 52, val: "Fair" },
-];
-
-// ── Table helpers ─────────────────────────────────────────────────────────────
+// ── Cell helpers ──────────────────────────────────────────────────────────────
 
 const TH = "text-[10px] font-semibold uppercase tracking-wider px-3 py-2.5 whitespace-nowrap";
 
@@ -55,11 +22,11 @@ function RSCell({ rs }: { rs: string }) {
   return <span className="text-[13px] font-semibold tabular-nums" style={{ color }}>{rs}</span>;
 }
 
-function RevisionCell({ label, dir }: { label: string; dir: RevDir }) {
+function RevisionCell({ label, dir }: { label: string; dir: RevisionDirection }) {
   const color =
-    label === "Strong"    ? "var(--qc-up)"  :
-    label === "Improving" ? "var(--qc-blue)" :
-    label === "Declining" ? "var(--qc-down)" :
+    label === "Strong"    ? "var(--qc-up)"   :
+    label === "Improving" ? "var(--qc-blue)"  :
+    label === "Declining" ? "var(--qc-down)"  :
     "var(--qc-text-muted)";
   const Icon = dir === "up" ? TrendingUp : dir === "down" ? TrendingDown : ArrowRight;
   return (
@@ -69,38 +36,26 @@ function RevisionCell({ label, dir }: { label: string; dir: RevDir }) {
   );
 }
 
-function ValCell({ val }: { val: ValLabel }) {
+function ValCell({ val }: { val: ValuationLabel }) {
   const color = val === "Expensive" ? "var(--qc-warn)" : val === "Cheap" ? "var(--qc-up)" : "var(--qc-text-muted)";
   return <span className="text-[12px]" style={{ color }}>{val}</span>;
 }
 
 // ── Cluster signal card ───────────────────────────────────────────────────────
 
-type SignalVariant = "hold" | "watch";
-
-const SIGNAL_STYLES: Record<SignalVariant, { bg: string; color: string; border: string }> = {
-  hold:  { bg: "var(--qc-blue-soft)", color: "var(--qc-blue)", border: "var(--qc-blue)" },
-  watch: { bg: "var(--qc-warn-soft)", color: "var(--qc-warn)", border: "var(--qc-warn)" },
+const SIGNAL_STYLES: Record<ClusterSignalVariant, { bg: string; color: string; border: string }> = {
+  hold:     { bg: "var(--qc-blue-soft)", color: "var(--qc-blue)", border: "var(--qc-blue)" },
+  watch:    { bg: "var(--qc-warn-soft)", color: "var(--qc-warn)", border: "var(--qc-warn)" },
+  exit:     { bg: "var(--qc-down-soft)", color: "var(--qc-down)", border: "var(--qc-down)" },
+  emerging: { bg: "var(--qc-up-soft)",   color: "var(--qc-up)",   border: "var(--qc-up)" },
 };
 
-function ClusterSignalCard({ variant, title, subtitle, detail }: {
-  variant: SignalVariant;
-  title: string;
-  subtitle?: string;
-  detail: string;
-}) {
+function ClusterSignalCard({ variant, title, subtitle, detail }: IIClusterSignal) {
   const s = SIGNAL_STYLES[variant];
   return (
-    <Card
-      className="rounded-[10px] shadow-none px-4 py-3 gap-1.5"
-      style={{ background: s.bg, borderColor: s.border }}
-    >
-      <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: s.color }}>
-        {title}
-      </span>
-      {subtitle && (
-        <p className="text-[12px] font-medium" style={{ color: s.color, opacity: 0.55 }}>{subtitle}</p>
-      )}
+    <Card className="rounded-[10px] shadow-none px-4 py-3 gap-1.5" style={{ background: s.bg, borderColor: s.border }}>
+      <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: s.color }}>{title}</span>
+      {subtitle && <p className="text-[12px] font-medium" style={{ color: s.color, opacity: 0.55 }}>{subtitle}</p>}
       <p className="text-[12px] leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>{detail}</p>
     </Card>
   );
@@ -108,28 +63,29 @@ function ClusterSignalCard({ variant, title, subtitle, detail }: {
 
 // ── Cluster news card ─────────────────────────────────────────────────────────
 
-function ClusterNewsCard() {
+function ClusterNewsCard({ item }: { item: IIClusterNews }) {
+  const sentColor =
+    item.sentiment_direction === "positive" ? "var(--qc-up)"   :
+    item.sentiment_direction === "negative" ? "var(--qc-down)" :
+    "var(--qc-warn)";
+  const sentSymbol = item.sentiment_direction === "mixed" ? "◆" : "";
+
   return (
-    <Card
-      className="rounded-[10px] shadow-none px-4 py-3 gap-2"
-      style={{ background: "var(--qc-accent-lime-bg)", borderColor: "transparent" }}
-    >
-      <Badge
-        className="self-start text-[9px] font-bold tracking-widest px-2 py-0.5"
+    <Card className="rounded-[10px] shadow-none px-4 py-3 gap-2" style={{ background: "var(--qc-accent-lime-bg)", borderColor: "transparent" }}>
+      <Badge className="self-start text-[9px] font-bold tracking-widest px-2 py-0.5"
         style={{ background: "var(--qc-accent-primary)", color: "#fff", borderColor: "transparent" }}
       >
-        MACRO
+        {item.category}
       </Badge>
-      <p className="text-[13px] font-semibold leading-snug" style={{ color: "var(--qc-text-heading)" }}>
-        RBI holds rates — NIM outlook stable
-      </p>
+      <p className="text-[13px] font-semibold leading-snug" style={{ color: "var(--qc-text-heading)" }}>{item.headline}</p>
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[11px] font-semibold" style={{ color: "var(--qc-warn)" }}>◆ Mixed</span>
-        <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>RBI · Wed</span>
+        <span className="text-[11px] font-semibold" style={{ color: sentColor }}>
+          {sentSymbol} {item.sentiment}
+        </span>
+        <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{item.source} · {item.published_day}</span>
       </div>
       <div className="flex items-center gap-1.5 flex-wrap">
-        <Badge className="text-[10px] px-2 py-0.5">NIM &amp; Spread</Badge>
-        <Badge className="text-[10px] px-2 py-0.5">Valuation</Badge>
+        {item.factor_tags.map((t) => <Badge key={t} className="text-[10px] px-2 py-0.5">{t}</Badge>)}
       </div>
     </Card>
   );
@@ -158,16 +114,15 @@ function Breadcrumb({ items }: { items: string[] }) {
 
 // ── Main tab ──────────────────────────────────────────────────────────────────
 
-export function StockRankingTab() {
-  const [cluster, setCluster] = useState("Bank - Private");
+export function StockRankingTab({ data }: { data: IIStockRanking }) {
+  const [cluster, setCluster] = useState(data.selected_cluster.name);
+  const sel = data.selected_cluster;
 
   return (
     <div className="px-6 py-5 flex flex-col gap-5">
 
-      {/* Breadcrumb */}
-      <Breadcrumb items={["Industry ranking", "Financial Services", "Banking", cluster]} />
+      <Breadcrumb items={sel.breadcrumb} />
 
-      {/* 60 / 40 two-column layout */}
       <div className="grid grid-cols-5 gap-4 items-start">
 
         {/* Left: stock table */}
@@ -187,12 +142,9 @@ export function StockRankingTab() {
                     minWidth: 168,
                   }}
                 >
-                  {CLUSTERS.map((c) => <option key={c}>{c}</option>)}
+                  {data.available_clusters.map((c) => <option key={c}>{c}</option>)}
                 </select>
-                <ChevronDown
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none"
-                  style={{ color: "var(--qc-text-muted)" }}
-                />
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: "var(--qc-text-muted)" }} />
               </div>
             }
           >
@@ -208,37 +160,23 @@ export function StockRankingTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {STOCKS.map((stock) => (
+                {sel.stocks.map((stock) => (
                   <TableRow key={stock.symbol} style={{ borderColor: "var(--qc-border-inner)" }}>
                     <TableCell className="px-3 py-2.5">
-                      <span className="text-[11px] tabular-nums" style={{ color: "var(--qc-text-muted)" }}>
-                        {stock.rank}
-                      </span>
+                      <span className="text-[11px] tabular-nums" style={{ color: "var(--qc-text-muted)" }}>{stock.rank}</span>
                     </TableCell>
                     <TableCell className="px-3 py-2.5">
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[13px] font-bold" style={{ color: "var(--qc-accent-primary)" }}>
-                          {stock.symbol}
-                        </span>
-                        <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
-                          {stock.name}
-                        </span>
+                        <span className="text-[13px] font-bold" style={{ color: "var(--qc-accent-primary)" }}>{stock.symbol}</span>
+                        <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{stock.company_name}</span>
                       </div>
                     </TableCell>
+                    <TableCell className="px-3 py-2.5"><RSCell rs={stock.rs_vs_cluster_pct} /></TableCell>
+                    <TableCell className="px-3 py-2.5"><RevisionCell label={stock.revision_label} dir={stock.revision_direction} /></TableCell>
                     <TableCell className="px-3 py-2.5">
-                      <RSCell rs={stock.rs} />
+                      <span className="text-[13px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{stock.quality_score}</span>
                     </TableCell>
-                    <TableCell className="px-3 py-2.5">
-                      <RevisionCell label={stock.revision} dir={stock.revDir} />
-                    </TableCell>
-                    <TableCell className="px-3 py-2.5">
-                      <span className="text-[13px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>
-                        {stock.quality}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-3 py-2.5">
-                      <ValCell val={stock.val} />
-                    </TableCell>
+                    <TableCell className="px-3 py-2.5"><ValCell val={stock.valuation_label} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -251,23 +189,17 @@ export function StockRankingTab() {
 
           <TabularCard title="Cluster Signal">
             <div className="flex flex-col gap-3 p-1">
-              <ClusterSignalCard
-                variant="hold"
-                title="Core Hold"
-                subtitle="Bank - Private #3"
-                detail="Rank stable at #3 for 7 of last 8 weeks. NIM resilience and credit growth confirm structural strength."
-              />
-              <ClusterSignalCard
-                variant="watch"
-                title="Watch — MFI Risk"
-                detail="IndusInd and RBL showing MFI slippage. Monitor GNPA in Q4 results."
-              />
+              {sel.cluster_signals.map((sig) => (
+                <ClusterSignalCard key={sig.title} {...sig} />
+              ))}
             </div>
           </TabularCard>
 
           <TabularCard title="Cluster News This Week">
-            <div className="p-1">
-              <ClusterNewsCard />
+            <div className="flex flex-col gap-2 p-1">
+              {sel.cluster_news.map((item) => (
+                <ClusterNewsCard key={item.headline} item={item} />
+              ))}
             </div>
           </TabularCard>
 

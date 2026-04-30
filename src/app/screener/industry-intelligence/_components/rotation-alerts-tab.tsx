@@ -6,18 +6,15 @@ import { Card } from "@/components/ui/card";
 import { TabularCard } from "@/components/molecules/tabular-card";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { TrendingUp, TrendingDown, ArrowUpRight } from "lucide-react";
+import type { IIRotationAlerts, IIMeta, IIHighConvictionPick, IIRegimeWeight } from "@/types/industry-intelligence";
 
 // ── Signal stat tiles ─────────────────────────────────────────────────────────
-// MetricTile doesn't support semantic-colored large values, so a local variant.
 
 function SignalTile({ label, value, valueColor, sublabel }: {
   label: string; value: string; valueColor: string; sublabel: string;
 }) {
   return (
-    <Card
-      className="rounded-[10px] shadow-none px-4 py-3 gap-1.5"
-      style={{ borderColor: "var(--qc-border-default)" }}
-    >
+    <Card className="rounded-[10px] shadow-none px-4 py-3 gap-1.5" style={{ borderColor: "var(--qc-border-default)" }}>
       <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>{label}</p>
       <p className="text-[28px] font-bold leading-none" style={{ color: valueColor }}>{value}</p>
       <p className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{sublabel}</p>
@@ -36,8 +33,7 @@ const SIGNAL_STYLES: Record<SignalType, { label: string; bg: string; color: stri
   emerging: { label: "EMERGING",       bg: "var(--qc-blue-soft)", color: "var(--qc-blue)", border: "var(--qc-blue)" },
 };
 
-// ── Unified signal + news column card (cols 1 & 2) ───────────────────────────
-// Merges the signal card and its confirming news into one visual unit.
+// ── Unified signal + news column card ────────────────────────────────────────
 
 function SignalColumnCard({ type, industry, detail, newsTag, newsHeadline, newsDir, newsTags }: {
   type: SignalType;
@@ -50,21 +46,13 @@ function SignalColumnCard({ type, industry, detail, newsTag, newsHeadline, newsD
 }) {
   const s = SIGNAL_STYLES[type];
   return (
-    <Card
-      className="rounded-[10px] shadow-none p-0 gap-0 overflow-hidden"
-      style={{ borderColor: s.border }}
-    >
-      {/* Signal section — tinted header */}
+    <Card className="rounded-[10px] shadow-none p-0 gap-0 overflow-hidden" style={{ borderColor: s.border }}>
       <div className="px-4 py-3 flex flex-col gap-1.5" style={{ background: s.bg }}>
         <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: s.color }}>{s.label}</span>
         <p className="text-[17px] font-semibold leading-snug" style={{ color: s.color }}>{industry}</p>
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>{detail}</p>
       </div>
-
-      {/* Divider */}
       <div className="h-px" style={{ background: "var(--qc-border-inner)" }} />
-
-      {/* News section — card background */}
       <div className="px-4 py-3 flex flex-col gap-2">
         <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--qc-text-muted)" }}>
           News Confirming Signal
@@ -72,8 +60,7 @@ function SignalColumnCard({ type, industry, detail, newsTag, newsHeadline, newsD
         <Badge className="self-start text-[9px] font-bold tracking-widest px-2 py-0.5">{newsTag}</Badge>
         <p className="text-[12px] leading-snug" style={{ color: "var(--qc-text-heading)" }}>{newsHeadline}</p>
         <div className="flex items-center gap-2 flex-wrap">
-          <span
-            className="flex items-center gap-1 text-[11px] font-semibold"
+          <span className="flex items-center gap-1 text-[11px] font-semibold"
             style={{ color: newsDir === "positive" ? "var(--qc-up)" : "var(--qc-down)" }}
           >
             {newsDir === "positive" ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
@@ -86,15 +73,12 @@ function SignalColumnCard({ type, industry, detail, newsTag, newsHeadline, newsD
   );
 }
 
-// ── Standalone signal card (Trap / Emerging — col 3, no news section) ─────────
+// ── Standalone signal card ────────────────────────────────────────────────────
 
 function SignalCard({ type, industry, detail }: { type: SignalType; industry: string; detail: string }) {
   const s = SIGNAL_STYLES[type];
   return (
-    <Card
-      className="rounded-[10px] shadow-none px-4 py-3 gap-1.5"
-      style={{ background: s.bg, borderColor: s.border }}
-    >
+    <Card className="rounded-[10px] shadow-none px-4 py-3 gap-1.5" style={{ background: s.bg, borderColor: s.border }}>
       <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: s.color }}>{s.label}</span>
       <p className="text-[17px] font-semibold leading-snug" style={{ color: s.color }}>{industry}</p>
       <p className="text-[12px] leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>{detail}</p>
@@ -102,27 +86,23 @@ function SignalCard({ type, industry, detail }: { type: SignalType; industry: st
   );
 }
 
-// ── High conviction pick ──────────────────────────────────────────────────────
+// ── High conviction card ──────────────────────────────────────────────────────
 
-function HighConvictionCard() {
+function HighConvictionCard({ pick }: { pick: IIHighConvictionPick }) {
   return (
-    <Card
-      className="rounded-[10px] shadow-none px-4 py-4 gap-3"
-      style={{ background: "var(--qc-text-heading)", borderColor: "transparent" }}
-    >
+    <Card className="rounded-[10px] shadow-none px-4 py-4 gap-3" style={{ background: "var(--qc-text-heading)", borderColor: "transparent" }}>
       <div className="flex flex-col gap-0.5">
         <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.45)" }}>
           High Conviction Pick
         </span>
-        <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Top stock · Top cluster</span>
+        <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{pick.context}</span>
       </div>
       <div className="flex flex-col gap-1">
         <p className="text-[15px] font-semibold" style={{ color: "#ffffff" }}>
-          {/* #C084FC — light purple, visible on dark background */}
-          <span style={{ color: "#C084FC" }}>TCS</span>{" · IT Services #1"}
+          <span style={{ color: "#C084FC" }}>{pick.ticker}</span>{` · ${pick.cluster_label}`}
         </p>
         <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-          RS vs market +14% · Revisions +9 · Quality 91
+          RS vs market {pick.rs_vs_market_pct} · Revisions {pick.revisions} · Quality {pick.quality_score}
         </p>
       </div>
       <Button
@@ -137,31 +117,29 @@ function HighConvictionCard() {
   );
 }
 
-// ── Regime weight adjustments ─────────────────────────────────────────────────
+// ── Regime weights panel ──────────────────────────────────────────────────────
 
-const REGIME_WEIGHTS = [
-  { label: "Momentum weight",  value: "30%", delta: "+5pp", deltaColor: "var(--qc-up)",   note: "Growth & momentum rewarded" },
-  { label: "Fundamentals",     value: "28%", delta: null,   deltaColor: null,              note: "Slightly reduced from 30% base" },
-  { label: "Valuation weight", value: "7%",  delta: "−3pp", deltaColor: "var(--qc-down)", note: "Discipline relaxed in risk-on" },
-];
-
-function RegimeWeightsPanel() {
+function RegimeWeightsPanel({ weights, regime }: { weights: IIRegimeWeight[]; regime: string }) {
   return (
     <SectionPanel
       title={
         <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--qc-warn)" }}>
-          Regime Weight Adjustments — Risk-On Active
+          Regime Weight Adjustments — {regime} Active
         </span>
       }
     >
       <div className="grid grid-cols-3 gap-8">
-        {REGIME_WEIGHTS.map((w) => (
+        {weights.map((w) => (
           <div key={w.label} className="flex flex-col gap-1">
             <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{w.label}</span>
             <div className="flex items-baseline gap-2">
-              <span className="text-[28px] font-bold" style={{ color: "var(--qc-text-heading)" }}>{w.value}</span>
+              <span className="text-[28px] font-bold" style={{ color: "var(--qc-text-heading)" }}>{w.value_pct}</span>
               {w.delta && (
-                <span className="text-[12px] font-semibold" style={{ color: w.deltaColor ?? undefined }}>{w.delta}</span>
+                <span className="text-[12px] font-semibold" style={{
+                  color: w.delta_direction === "positive" ? "var(--qc-up)" : "var(--qc-down)",
+                }}>
+                  {w.delta}
+                </span>
               )}
             </div>
             <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{w.note}</span>
@@ -174,64 +152,54 @@ function RegimeWeightsPanel() {
 
 // ── Main tab ──────────────────────────────────────────────────────────────────
 
-export function RotationAlertsTab() {
+export function RotationAlertsTab({ data, meta }: { data: IIRotationAlerts; meta: IIMeta }) {
+  const { signal_counts: sc, active_signals: as_, high_conviction_pick, regime_weights } = data;
+
   return (
     <div className="px-6 py-5 flex flex-col gap-5">
 
       {/* Signal stat tiles */}
       <div className="grid grid-cols-4 gap-3">
-        <SignalTile label="Entry signals"  value="2" valueColor="var(--qc-up)"   sublabel="Industrials · Energy" />
-        <SignalTile label="Exit signals"   value="1" valueColor="var(--qc-down)" sublabel="Real Estate" />
-        <SignalTile label="Trap alerts"    value="1" valueColor="var(--qc-warn)" sublabel="Utilities" />
-        <SignalTile label="News confirmed" value="2" valueColor="var(--qc-blue)" sublabel="News supports 2 of 3" />
+        <SignalTile label="Entry signals"  value={String(sc.entry_count)}           valueColor="var(--qc-up)"   sublabel={sc.entry_industries.join(" · ")} />
+        <SignalTile label="Exit signals"   value={String(sc.exit_count)}            valueColor="var(--qc-down)" sublabel={sc.exit_industries.join(" · ")} />
+        <SignalTile label="Trap alerts"    value={String(sc.trap_count)}            valueColor="var(--qc-warn)" sublabel={sc.trap_industries.join(" · ")} />
+        <SignalTile label="News confirmed" value={String(sc.news_confirmed_count)}  valueColor="var(--qc-blue)" sublabel={sc.news_confirmed_detail} />
       </div>
 
-      {/* Active signals — 3-column grid inside a unified panel */}
+      {/* Active signals */}
       <TabularCard title="Active Signals">
         <div className="grid grid-cols-3 gap-4 p-1">
 
-          {/* Col 1: Entry signal + confirming news (unified card) */}
           <SignalColumnCard
             type="entry"
-            industry="Industrials"
-            detail="Rank +7 in 3 weeks · Breadth 68% · Revisions +12 · Momentum top decile"
-            newsTag="POLICY"
-            newsHeadline="Rs 1.2L cr defence capex — Confirms entry"
-            newsDir="positive"
-            newsTags="Growth · Sentiment"
+            industry={as_.entry.industry}
+            detail={as_.entry.detail}
+            newsTag={as_.entry.confirming_news.category}
+            newsHeadline={as_.entry.confirming_news.headline}
+            newsDir={as_.entry.confirming_news.sentiment_direction}
+            newsTags={as_.entry.confirming_news.factor_tags.join(" · ")}
           />
 
-          {/* Col 2: Exit signal + confirming news (unified card) */}
           <SignalColumnCard
             type="exit"
-            industry="Real Estate"
-            detail="Rank −4 in 3 weeks · Breadth 21% · Revisions −8"
-            newsTag="MACRO"
-            newsHeadline="RBI rate hold — Real Estate bonds cleared"
-            newsDir="negative"
-            newsTags="Valuation · Sentiment"
+            industry={as_.exit.industry}
+            detail={as_.exit.detail}
+            newsTag={as_.exit.confirming_news.category}
+            newsHeadline={as_.exit.confirming_news.headline}
+            newsDir={as_.exit.confirming_news.sentiment_direction}
+            newsTags={as_.exit.confirming_news.factor_tags.join(" · ")}
           />
 
-          {/* Col 3: Trap + Emerging + High Conviction (stacked) */}
           <div className="flex flex-col gap-3">
-            <SignalCard
-              type="trap"
-              industry="Utilities"
-              detail="Price +6% in 4w but breadth only 28% and revisions −5"
-            />
-            <SignalCard
-              type="emerging"
-              industry="Materials"
-              detail="Score +18 in 2w · Watch for breadth confirmation"
-            />
-            <HighConvictionCard />
+            <SignalCard type="trap"     industry={as_.trap.industry}     detail={as_.trap.detail} />
+            <SignalCard type="emerging" industry={as_.emerging.industry} detail={as_.emerging.detail} />
+            <HighConvictionCard pick={high_conviction_pick} />
           </div>
 
         </div>
       </TabularCard>
 
-      {/* Regime weights */}
-      <RegimeWeightsPanel />
+      <RegimeWeightsPanel weights={regime_weights} regime={meta.regime} />
 
     </div>
   );

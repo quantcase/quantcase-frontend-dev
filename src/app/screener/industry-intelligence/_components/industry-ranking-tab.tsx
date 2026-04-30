@@ -12,15 +12,14 @@ import {
   Table, TableBody, TableHead, TableHeader, TableRow, TableCell,
 } from "@/components/ui/table";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import type { IIIndustryRanking, IIIndustry, QLevel, Direction } from "@/types/industry-intelligence";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type QLevel = "Q1" | "Q2" | "Q3" | "Q4";
-type Direction = "up" | "down" | "neutral";
 type SortKey = "Composite rank" | "Momentum" | "Breadth" | "Revisions";
 type FilterKey = "All" | "Top quartile" | "Upper mid" | "Lower mid" | "Bottom";
 
-// ── Chart line colors — data-viz palette, 12 distinct hues ───────────────────
+// ── Chart colors — data-viz palette, 12 distinct hues ────────────────────────
 
 const CHART_COLORS = [
   "#6366F1", "#10B981", "#F59E0B", "#EF4444",
@@ -28,75 +27,7 @@ const CHART_COLORS = [
   "#14B8A6", "#84CC16", "#3B82F6", "#A855F7",
 ];
 
-// ── Deterministic rank-history generator (seeded per industry) ────────────────
-
-function genHistory(currentRank: number, seed: number): number[] {
-  let s = seed * 9301 + 49297;
-  const rand = () => {
-    s = (s * 1103515245 + 12345) & 0x7fffffff;
-    return (s / 0x7fffffff) * 2 - 1; // [-1, 1]
-  };
-
-  const weeks = 11;
-  const history: number[] = [];
-
-  // work backwards from now, build reversed, then flip
-  let r = currentRank;
-  history.push(r); // "Now"
-
-  for (let i = 0; i < weeks; i++) {
-    r = Math.round(r + rand() * 2.5);
-    r = Math.max(1, Math.min(24, r));
-    history.push(r);
-  }
-
-  return history.reverse(); // oldest first
-}
-
-const WEEK_LABELS = ["W-11","W-10","W-9","W-8","W-7","W-6","W-5","W-4","W-3","W-2","W-1","Now"];
-
-// ── 24 Industry static data ───────────────────────────────────────────────────
-
-const ALL_INDUSTRIES = [
-  { rank: 1,  name: "Info Technology",   score: 88, wow: "+2",  mom: 91, breadth: 84, revisions: 78, val: 62, q: "Q1" as QLevel, newsTag: "Demand",  newsDir: "up"      as Direction },
-  { rank: 2,  name: "Energy",            score: 83, wow: "+5",  mom: 79, breadth: 72, revisions: 81, val: 71, q: "Q1" as QLevel, newsTag: "Macro",   newsDir: "up"      as Direction },
-  { rank: 3,  name: "Financials",        score: 79, wow: "—",   mom: 74, breadth: 71, revisions: 69, val: 77, q: "Q1" as QLevel, newsTag: "Macro",   newsDir: "neutral" as Direction },
-  { rank: 4,  name: "Industrials",       score: 76, wow: "+7",  mom: 82, breadth: 68, revisions: 74, val: 58, q: "Q1" as QLevel, newsTag: "Policy",  newsDir: "up"      as Direction },
-  { rank: 5,  name: "Materials",         score: 72, wow: "+3",  mom: 68, breadth: 65, revisions: 62, val: 64, q: "Q2" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 6,  name: "Healthcare",        score: 68, wow: "+1",  mom: 61, breadth: 63, revisions: 71, val: 59, q: "Q2" as QLevel, newsTag: "Macro",   newsDir: "up"      as Direction },
-  { rank: 7,  name: "Consumer Disc.",    score: 64, wow: "-1",  mom: 58, breadth: 59, revisions: 55, val: 61, q: "Q2" as QLevel, newsTag: "Raw",     newsDir: "down"    as Direction },
-  { rank: 8,  name: "Capital Goods",     score: 61, wow: "+2",  mom: 63, breadth: 56, revisions: 58, val: 55, q: "Q2" as QLevel, newsTag: "Policy",  newsDir: "up"      as Direction },
-  { rank: 9,  name: "Chemicals",         score: 57, wow: "-2",  mom: 52, breadth: 54, revisions: 49, val: 62, q: "Q2" as QLevel, newsTag: "Geo",     newsDir: "down"    as Direction },
-  { rank: 10, name: "Pharma",            score: 54, wow: "+1",  mom: 48, breadth: 51, revisions: 61, val: 50, q: "Q2" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 11, name: "Auto",              score: 51, wow: "-3",  mom: 49, breadth: 48, revisions: 44, val: 58, q: "Q3" as QLevel, newsTag: "Demand",  newsDir: "up"      as Direction },
-  { rank: 12, name: "FMCG",             score: 47, wow: "—",   mom: 41, breadth: 46, revisions: 42, val: 55, q: "Q3" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 13, name: "Telecom",           score: 44, wow: "-2",  mom: 38, breadth: 44, revisions: 39, val: 49, q: "Q3" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 14, name: "Power",             score: 41, wow: "+1",  mom: 44, breadth: 38, revisions: 36, val: 47, q: "Q3" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 15, name: "Cement",            score: 38, wow: "-1",  mom: 36, breadth: 37, revisions: 33, val: 44, q: "Q3" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 16, name: "Metals",            score: 35, wow: "-4",  mom: 31, breadth: 34, revisions: 28, val: 42, q: "Q3" as QLevel, newsTag: "Raw",     newsDir: "down"    as Direction },
-  { rank: 17, name: "Infrastructure",    score: 32, wow: "+2",  mom: 34, breadth: 30, revisions: 29, val: 38, q: "Q4" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 18, name: "Logistics",         score: 29, wow: "-1",  mom: 27, breadth: 28, revisions: 24, val: 35, q: "Q4" as QLevel, newsTag: "Geo",     newsDir: "down"    as Direction },
-  { rank: 19, name: "Media",             score: 26, wow: "-2",  mom: 22, breadth: 25, revisions: 21, val: 31, q: "Q4" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 20, name: "Insurance",         score: 23, wow: "+1",  mom: 24, breadth: 22, revisions: 20, val: 28, q: "Q4" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 21, name: "Utilities",         score: 21, wow: "—",   mom: 18, breadth: 28, revisions: 16, val: 26, q: "Q4" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 22, name: "Real Estate",       score: 24, wow: "-4",  mom: 19, breadth: 21, revisions: 14, val: 23, q: "Q4" as QLevel, newsTag: "Macro",   newsDir: "down"    as Direction },
-  { rank: 23, name: "Comm. Services",    score: 19, wow: "-2",  mom: 16, breadth: 18, revisions: 12, val: 22, q: "Q4" as QLevel, newsTag: null,      newsDir: null },
-  { rank: 24, name: "Consumer Staples",  score: 14, wow: "—",   mom: 12, breadth: 16, revisions: 9,  val: 18, q: "Q4" as QLevel, newsTag: null,      newsDir: null },
-];
-
-// Pre-compute rank histories (deterministic)
-const RANK_HISTORIES = ALL_INDUSTRIES.map((ind) => genHistory(ind.rank, ind.rank * 31));
-
-// Build Recharts data array: [{ week, "Info Technology": rank, "Energy": rank, ... }]
-const CHART_DATA = WEEK_LABELS.map((week, wi) => {
-  const row: Record<string, string | number> = { week };
-  ALL_INDUSTRIES.forEach((ind, ii) => {
-    row[ind.name] = RANK_HISTORIES[ii][wi];
-  });
-  return row;
-});
-
-// ── Helper functions ──────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function qStyle(q: QLevel) {
   switch (q) {
@@ -113,26 +44,26 @@ function wowColor(v: string) {
   return "var(--qc-text-muted)";
 }
 
-function sortIndustries(industries: typeof ALL_INDUSTRIES, key: SortKey) {
+function sortIndustries(industries: IIIndustry[], key: SortKey) {
   return [...industries].sort((a, b) => {
     switch (key) {
       case "Composite rank": return a.rank - b.rank;
-      case "Momentum":       return b.mom - a.mom;
-      case "Breadth":        return b.breadth - a.breadth;
+      case "Momentum":       return b.momentum - a.momentum;
+      case "Breadth":        return b.breadth_pct - a.breadth_pct;
       case "Revisions":      return b.revisions - a.revisions;
     }
   });
 }
 
 function filterRanks(filter: FilterKey): Set<number> {
-  if (filter === "All")          return new Set(ALL_INDUSTRIES.map((i) => i.rank));
-  if (filter === "Top quartile") return new Set([1,2,3,4,5,6]);
-  if (filter === "Upper mid")    return new Set([7,8,9,10,11,12]);
-  if (filter === "Lower mid")    return new Set([13,14,15,16,17,18]);
-  return new Set([19,20,21,22,23,24]); // Bottom
+  if (filter === "All")          return new Set(Array.from({ length: 24 }, (_, i) => i + 1));
+  if (filter === "Top quartile") return new Set([1, 2, 3, 4, 5, 6]);
+  if (filter === "Upper mid")    return new Set([7, 8, 9, 10, 11, 12]);
+  if (filter === "Lower mid")    return new Set([13, 14, 15, 16, 17, 18]);
+  return new Set([19, 20, 21, 22, 23, 24]);
 }
 
-// ── QBadge ────────────────────────────────────────────────────────────────────
+// ── Small atoms ───────────────────────────────────────────────────────────────
 
 function QBadge({ q }: { q: QLevel }) {
   return <Badge variant="outline" style={qStyle(q)}>{q}</Badge>;
@@ -151,17 +82,17 @@ function ScoreBar({ score, q }: { score: number; q: QLevel }) {
 }
 
 function SentIcon({ dir }: { dir: Direction }) {
-  if (dir === "up")   return <TrendingUp   className="h-3 w-3 shrink-0" style={{ color: "var(--qc-up)" }} />;
-  if (dir === "down") return <TrendingDown className="h-3 w-3 shrink-0" style={{ color: "var(--qc-down)" }} />;
+  if (dir === "up"   || dir === "positive") return <TrendingUp   className="h-3 w-3 shrink-0" style={{ color: "var(--qc-up)" }} />;
+  if (dir === "down" || dir === "negative") return <TrendingDown className="h-3 w-3 shrink-0" style={{ color: "var(--qc-down)" }} />;
   return <Minus className="h-3 w-3 shrink-0" style={{ color: "var(--qc-warn)" }} />;
 }
 
-// ── Table view ────────────────────────────────────────────────────────────────
-
 const TH = "text-[10px] font-semibold uppercase tracking-wider px-3 py-2.5 whitespace-nowrap";
 
-function TableView({ sort }: { sort: SortKey }) {
-  const rows = useMemo(() => sortIndustries(ALL_INDUSTRIES, sort), [sort]);
+// ── Table view ────────────────────────────────────────────────────────────────
+
+function TableView({ sort, industries }: { sort: SortKey; industries: IIIndustry[] }) {
+  const rows = useMemo(() => sortIndustries(industries, sort), [sort, industries]);
 
   return (
     <Table>
@@ -189,33 +120,31 @@ function TableView({ sort }: { sort: SortKey }) {
               <span className="text-[13px] font-medium" style={{ color: "var(--qc-text-heading)" }}>{row.name}</span>
             </TableCell>
             <TableCell className="px-3 py-2.5">
-              <ScoreBar score={row.score} q={row.q} />
+              <ScoreBar score={row.composite_score} q={row.quartile} />
             </TableCell>
             <TableCell className="px-3 py-2.5">
               <span className="text-[12px] font-medium tabular-nums" style={{ color: wowColor(row.wow) }}>{row.wow}</span>
             </TableCell>
             <TableCell className="px-3 py-2.5">
-              <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.mom}</span>
+              <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.momentum}</span>
             </TableCell>
             <TableCell className="px-3 py-2.5">
-              <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.breadth}%</span>
+              <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.breadth_pct}%</span>
             </TableCell>
             <TableCell className="px-3 py-2.5">
               <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.revisions}</span>
             </TableCell>
             <TableCell className="px-3 py-2.5">
-              <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.val}</span>
+              <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.valuation}</span>
             </TableCell>
+            <TableCell className="px-3 py-2.5"><QBadge q={row.quartile} /></TableCell>
             <TableCell className="px-3 py-2.5">
-              <QBadge q={row.q} />
-            </TableCell>
-            <TableCell className="px-3 py-2.5">
-              {row.newsTag && row.newsDir ? (
+              {row.news_tag && row.news_direction ? (
                 <span className="flex items-center gap-1 text-[12px] font-medium" style={{
-                  color: row.newsDir === "up" ? "var(--qc-up)" : row.newsDir === "neutral" ? "var(--qc-warn)" : "var(--qc-down)",
+                  color: row.news_direction === "up" ? "var(--qc-up)" : row.news_direction === "neutral" ? "var(--qc-warn)" : "var(--qc-down)",
                 }}>
-                  <SentIcon dir={row.newsDir} />
-                  {row.newsTag}
+                  <SentIcon dir={row.news_direction} />
+                  {row.news_tag}
                 </span>
               ) : (
                 <span style={{ color: "var(--qc-text-muted)" }}>—</span>
@@ -231,8 +160,8 @@ function TableView({ sort }: { sort: SortKey }) {
 // ── Chart view ────────────────────────────────────────────────────────────────
 
 const QUARTILE_FILTERS: FilterKey[] = ["All", "Top quartile", "Upper mid", "Lower mid", "Bottom"];
-
 const Y_TICKS = [1, 6, 12, 18, 24];
+
 function yTickLabel(v: number) {
   if (v === 1)  return "#1";
   if (v === 6)  return "#6";
@@ -242,7 +171,6 @@ function yTickLabel(v: number) {
   return String(v);
 }
 
-// Custom Y-axis tick — right-aligned text
 function YAxisTick({ x, y, payload }: { x?: number; y?: number; payload?: { value: number } }) {
   if (!payload) return null;
   return (
@@ -252,28 +180,29 @@ function YAxisTick({ x, y, payload }: { x?: number; y?: number; payload?: { valu
   );
 }
 
-function ChartView() {
+function ChartView({
+  industries,
+  chartData,
+  asOfDate,
+}: {
+  industries: IIIndustry[];
+  chartData: Record<string, string | number>[];
+  asOfDate: string;
+}) {
   const [filter, setFilter] = useState<FilterKey>("All");
   const activeRanks = filterRanks(filter);
 
   return (
     <div>
-      {/* Chart header */}
       <div className="px-4 pt-1 pb-3">
         <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>
-          All 24 Industries · 11 Apr 2025
+          All {industries.length} Industries · {asOfDate}
         </span>
       </div>
 
-      {/* Chart */}
       <ResponsiveContainer width="100%" height={520}>
-        <LineChart data={CHART_DATA} margin={{ top: 4, right: 32, bottom: 8, left: 52 }}>
-          <CartesianGrid
-            strokeDasharray="3 4"
-            stroke="var(--qc-border-default)"
-            strokeOpacity={0.7}
-            vertical={false}
-          />
+        <LineChart data={chartData} margin={{ top: 4, right: 32, bottom: 8, left: 52 }}>
+          <CartesianGrid strokeDasharray="3 4" stroke="var(--qc-border-default)" strokeOpacity={0.7} vertical={false} />
           <XAxis
             dataKey="week"
             tick={{ fontSize: 11, fill: "var(--qc-text-muted)" }}
@@ -311,12 +240,11 @@ function ChartView() {
             labelStyle={{ color: "var(--qc-text-muted)", fontWeight: 600, marginBottom: 4 }}
             itemStyle={{ padding: "1px 0" }}
           />
-          {/* Quartile boundary reference lines */}
           <ReferenceLine y={6.5}  stroke="var(--qc-border-default)" strokeDasharray="5 4" strokeOpacity={0.9} />
           <ReferenceLine y={12.5} stroke="var(--qc-border-default)" strokeDasharray="5 4" strokeOpacity={0.9} />
           <ReferenceLine y={18.5} stroke="var(--qc-border-default)" strokeDasharray="5 4" strokeOpacity={0.9} />
 
-          {ALL_INDUSTRIES.map((ind, i) => {
+          {industries.map((ind, i) => {
             const active = activeRanks.has(ind.rank);
             return (
               <Line
@@ -335,7 +263,6 @@ function ChartView() {
         </LineChart>
       </ResponsiveContainer>
 
-      {/* Quartile filter pills */}
       <div className="flex items-center gap-2 px-4 pb-5 pt-3">
         {QUARTILE_FILTERS.map((f) => (
           <button
@@ -358,9 +285,21 @@ function ChartView() {
 
 // ── Industry Ranking Tab ──────────────────────────────────────────────────────
 
-export function IndustryRankingTab() {
-  const [sort, setSort]   = useState<SortKey>("Composite rank");
-  const [view, setView]   = useState<"Table" | "Chart">("Table");
+export function IndustryRankingTab({ data }: { data: IIIndustryRanking }) {
+  const [sort, setSort] = useState<SortKey>("Composite rank");
+  const [view, setView] = useState<"Table" | "Chart">("Table");
+
+  // Build Recharts data from rank_history arrays in each industry
+  const chartData = useMemo(() => {
+    const weekLabels = data.industries[0]?.rank_history.map((h) => h.week) ?? [];
+    return weekLabels.map((week, wi) => {
+      const row: Record<string, string | number> = { week };
+      data.industries.forEach((ind) => {
+        row[ind.name] = ind.rank_history[wi]?.rank ?? ind.rank;
+      });
+      return row;
+    });
+  }, [data.industries]);
 
   return (
     <div className="px-6 py-5">
@@ -369,7 +308,6 @@ export function IndustryRankingTab() {
         titleCase
         headerAction={
           <div className="flex items-center gap-3">
-            {/* Sort */}
             <div className="flex items-center gap-2">
               <span className="text-[12px]" style={{ color: "var(--qc-text-muted)" }}>Sort:</span>
               <select
@@ -388,8 +326,6 @@ export function IndustryRankingTab() {
                 <option>Revisions</option>
               </select>
             </div>
-
-            {/* View toggle */}
             <div className="flex items-center gap-1.5">
               <span className="text-[12px]" style={{ color: "var(--qc-text-muted)" }}>View:</span>
               <TabToggle
@@ -402,14 +338,16 @@ export function IndustryRankingTab() {
           </div>
         }
       >
-        {/* Date label */}
         <div className="px-1 pb-3">
           <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>
-            All 24 Industries · 11 Apr 2025
+            All {data.total_industries} Industries · {data.as_of_date}
           </span>
         </div>
 
-        {view === "Table" ? <TableView sort={sort} /> : <ChartView />}
+        {view === "Table"
+          ? <TableView sort={sort} industries={data.industries} />
+          : <ChartView industries={data.industries} chartData={chartData} asOfDate={data.as_of_date} />
+        }
       </TabularCard>
     </div>
   );

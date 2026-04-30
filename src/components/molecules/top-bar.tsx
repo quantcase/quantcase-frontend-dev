@@ -142,7 +142,9 @@ function TopBarInner() {
     if (!isFactorActive) setFactorOpen(false);
   }, [isFactorActive]);
 
-  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage) return null;
+  const isIndustryTerminal = pathname === "/screener/industry-intelligence";
+
+  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isIndustryTerminal) return null;
 
   let leftZone: React.ReactNode = null;
 
@@ -150,9 +152,10 @@ function TopBarInner() {
     leftZone = <SearchZone />;
   } else if (hasAssetSelected) {
     const terminalTabs = [
-      { label: "Overview",     href: "/screener/overview",     icon: <Eye size={13} strokeWidth={1.8} /> },
-      { label: "Technicals",   href: "/screener/technicals",   icon: <CandlestickChart size={13} strokeWidth={1.8} /> },
-      { label: "Fundamentals", href: "/screener/fundamentals", icon: <BookOpen size={13} strokeWidth={1.8} /> },
+      { label: "Overview",     href: "/screener/overview",                icon: <Eye size={13} strokeWidth={1.8} /> },
+      { label: "Technicals",   href: "/screener/technicals",              icon: <CandlestickChart size={13} strokeWidth={1.8} /> },
+      { label: "Fundamentals", href: "/screener/fundamentals",            icon: <BookOpen size={13} strokeWidth={1.8} /> },
+      { label: "Industry",     href: "/screener/industry-intelligence",   icon: <LineChart size={13} strokeWidth={1.8} /> },
     ];
 
     const showFactorItems = isFactorActive || factorOpen;

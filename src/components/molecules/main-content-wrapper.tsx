@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const HIDE_TOPBAR_PATHS = ["/", "/screener/home", "/screener/basket"];
+const HIDE_TOPBAR_PATHS = ["/", "/screener/home", "/screener/basket", "/screener/industry-intelligence"];
 
 export function MainContentWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

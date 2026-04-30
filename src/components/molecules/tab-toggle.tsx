@@ -7,10 +7,36 @@ interface TabToggleProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
-  variant?: "pill" | "outline";
+  variant?: "pill" | "outline" | "underline";
 }
 
 export function TabToggle({ options, value, onChange, className, variant = "pill" }: TabToggleProps) {
+  if (variant === "underline") {
+    return (
+      <div
+        className={cn("flex items-center overflow-x-auto scrollbar-none", className)}
+        style={{ borderBottom: "1px solid var(--qc-border-default)" }}
+      >
+        {options.map((option) => (
+          <button
+            key={option}
+            onClick={() => onChange(option)}
+            className="relative px-4 py-3 text-[12px] font-medium whitespace-nowrap shrink-0 transition-colors"
+            style={{ color: value === option ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}
+          >
+            {option}
+            {value === option && (
+              <span
+                className="absolute bottom-0 left-0 right-0 h-0.5"
+                style={{ background: "var(--qc-accent-primary)" }}
+              />
+            )}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
   if (variant === "outline") {
     return (
       <div className={cn("inline-flex items-center gap-1.5", className)}>

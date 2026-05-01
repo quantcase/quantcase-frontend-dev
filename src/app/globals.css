@@ -99,31 +99,31 @@ html, body {
   --card-foreground: #1A0A2E;
   --popover: #FFFFFF;
   --popover-foreground: #1A0A2E;
-  --primary: #6B21A8;
+  --primary: #3b1f6e;
   --primary-foreground: #FFFFFF;
   --secondary: #F5F0FA;
   --secondary-foreground: #1A0A2E;
   --muted: #EDE8F5;
   --muted-foreground: #7C6998;
-  --accent: #9333EA;
+  --accent: #2d1b5e;
   --accent-foreground: #FFFFFF;
   --destructive: #C2410C;
   --border: #E4DCF0;
   --input: #E4DCF0;
-  --ring: #6B21A8;
-  --chart-1: #6B21A8;
-  --chart-2: #9333EA;
-  --chart-3: #C084FC;
-  --chart-4: #A855F7;
-  --chart-5: #7C3AED;
+  --ring: #3b1f6e;
+  --chart-1: #3b1f6e;
+  --chart-2: #2d1b5e;
+  --chart-3: #7c3aed;
+  --chart-4: #6d28d9;
+  --chart-5: #4c1d95;
   --sidebar: #FFFFFF;
   --sidebar-foreground: #1A0A2E;
-  --sidebar-primary: #6B21A8;
+  --sidebar-primary: #3b1f6e;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #F5F0FA;
   --sidebar-accent-foreground: #1A0A2E;
   --sidebar-border: #E4DCF0;
-  --sidebar-ring: #6B21A8;
+  --sidebar-ring: #3b1f6e;
 
   /* QuantCase design tokens — purple light */
   --qc-text-heading:          #1A0A2E;
@@ -141,13 +141,13 @@ html, body {
 
   --qc-border-default:        #E4DCF0;
   --qc-border-inner:          #EDE8F5;
-  --qc-border-subtle:         rgba(107, 33, 168, 0.12);
-  --qc-border-active:         #6B21A8;
+  --qc-border-subtle:         rgba(59, 31, 110, 0.12);
+  --qc-border-active:         #3b1f6e;
 
-  --qc-accent-primary:        #6B21A8;
+  --qc-accent-primary:        #3b1f6e;
   --qc-accent-primary-fg:     #FFFFFF;
-  --qc-accent-logo:           #6B21A8;
-  --qc-accent-lime:           #9333EA;
+  --qc-accent-logo:           #3b1f6e;
+  --qc-accent-lime:           #2d1b5e;
   --qc-accent-lime-bg:        #F5F0FA;
 
   /* Semantic */
@@ -162,25 +162,25 @@ html, body {
 
   --qc-sidebar-bg:            #FFFFFF;
   --qc-sidebar-border:        #E4DCF0;
-  --qc-sidebar-icon-active-bg:#6B21A8;
+  --qc-sidebar-icon-active-bg:#3b1f6e;
   --qc-sidebar-icon-active-fg:#FFFFFF;
   --qc-sidebar-icon-idle-fg:  #7C6998;
   --qc-sidebar-icon-hover-bg: #F5F0FA;
 
   --qc-topbar-bg:             #FFFFFF;
   --qc-topbar-border:         #E4DCF0;
-  --qc-topbar-tab-active-fg:  #6B21A8;
+  --qc-topbar-tab-active-fg:  #3b1f6e;
   --qc-topbar-tab-idle-fg:    #7C6998;
   --qc-topbar-separator:      #D6CEE8;
-  --qc-topbar-avatar-bg:      #6B21A8;
+  --qc-topbar-avatar-bg:      #3b1f6e;
   --qc-topbar-search-bg:      #FAF8FF;
   --qc-topbar-search-border:  #E4DCF0;
 
   --qc-range-track:           #E4DCF0;
-  --qc-range-thumb:           #6B21A8;
+  --qc-range-thumb:           #3b1f6e;
 
-  --qc-icon-box-bg:           rgba(107, 33, 168, 0.08);
-  --qc-icon-box-border:       rgba(107, 33, 168, 0.18);
+  --qc-icon-box-bg:           rgba(59, 31, 110, 0.08);
+  --qc-icon-box-border:       rgba(59, 31, 110, 0.18);
   --qc-chip-bg:               #F5F0FA;
   --qc-chip-border:           #E4DCF0;
   --qc-chip-fg:               #7C6998;

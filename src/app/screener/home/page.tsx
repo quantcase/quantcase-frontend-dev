@@ -26,7 +26,7 @@ import type { Basket } from "@/types/screener";
 import type { MfScreenerScheme, MfScreenerParams } from "@/types/mutual-fund";
 import Link from "next/link";
 
-const ASSET_TABS = ["Indian Stocks", "Mutual Funds", "US Stocks", "Private Equity"] as const;
+const ASSET_TABS = ["Indian Stocks", "Mutual Funds", "US Stocks", "PE / Pre-IPO"] as const;
 type AssetTab = typeof ASSET_TABS[number];
 
 // ── Formatters ────────────────────────────────────────────────────────────────
@@ -746,7 +746,7 @@ export default function ScreenerHomePage() {
                 className="px-4 py-1.5 rounded-full text-xs font-medium transition-all"
                 style={
                   activeTab === tab
-                    ? { background: "var(--qc-accent-lime)", color: "var(--qc-text-heading)" }
+                    ? { background: "var(--qc-accent-lime)", color: "#ffffff" }
                     : { color: "var(--qc-text-muted)" }
                 }
               >
@@ -767,7 +767,7 @@ export default function ScreenerHomePage() {
                 maxSuggestions={8}
               />
             </div>
-          ) : activeTab === "Private Equity" ? (
+          ) : activeTab === "PE / Pre-IPO" ? (
             <div className="w-full grid grid-cols-3 gap-4">
               {[
                 { key: "vc", label: "VC Deals", description: "Analyse venture capital deal memos, term sheets, and cap tables.", icon: "💼", comingSoon: true },
@@ -796,6 +796,16 @@ export default function ScreenerHomePage() {
                   )}
                 </button>
               ))}
+            </div>
+          ) : activeTab === "US Stocks" ? (
+            <div className="w-full flex flex-col items-center gap-3 py-6">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
+                <span className="text-2xl">🇺🇸</span>
+              </div>
+              <p className="text-[15px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>US Stocks — Coming Soon</p>
+              <p className="text-[13px] text-center max-w-sm" style={{ color: "var(--qc-text-muted)" }}>
+                Earnings call analysis and management quality scoring for US-listed companies is on the way.
+              </p>
             </div>
           ) : (
             <div className="w-full">
@@ -832,7 +842,7 @@ export default function ScreenerHomePage() {
       )}
 
       {/* Research Baskets — Indian Stocks / US Stocks */}
-      {activeTab !== "Private Equity" && activeTab !== "Mutual Funds" && (
+      {activeTab !== "PE / Pre-IPO" && activeTab !== "Mutual Funds" && activeTab !== "US Stocks" && (
         <>
           <div className="flex items-center gap-4 px-6 py-5">
             <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />

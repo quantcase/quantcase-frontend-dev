@@ -196,8 +196,7 @@ function FinancialsContent() {
               <MultiLineBarComboChart
                 chartGroups={chartsData.chartGroups}
                 height={300}
-                title="Charts"
-                subtitle="Price, valuation, and sales trends"
+                title="Charts & Trends"
               />
             </div>
           )}

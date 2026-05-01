@@ -15,17 +15,18 @@ import { useOpportunityAnalysis } from "@/hooks/useOpportunityAnalysis";
 import { useDealAnalysis } from "@/hooks/useDealAnalysis";
 import { useTechnicals } from "@/hooks/useTechnicals";
 import { KeyRatioTiles } from "@/components/overview/key-ratio-tiles";
-import { QcScoreHeroCard } from "@/components/overview/qc-score-hero-card";
+import { CompanyProfileCard } from "@/components/overview/company-profile-card";
 import type { ManagementDashboardData } from "@/types/management";
 import type { OFactorResponse } from "@/types/opportunity";
 import type { DFactorResponse } from "@/types/deal";
 
 const OVERVIEW_NAV = [
-  { id: "section-qc-insight",            label: "QC Insight" },
-  { id: "section-fundamentals",          label: "Fundamentals" },
-  { id: "section-technicals",            label: "Technicals" },
-  { id: "section-market-view",           label: "Market View" },
-  { id: "section-investment-conclusion", label: "Investment Conclusion" },
+  { id: "section-about",                  label: "About" },
+  { id: "section-qc-insight",             label: "QC Insight" },
+  { id: "section-fundamentals",           label: "Fundamentals" },
+  { id: "section-technicals",             label: "Technicals" },
+  { id: "section-market-view",            label: "Market View" },
+  { id: "section-investment-conclusion",  label: "Investment Conclusion" },
 ];
 
 function getRating(scorePct: number): string {
@@ -35,7 +36,6 @@ function getRating(scorePct: number): string {
   if (scorePct >= 0.35) return "Underperform";
   return "Sell";
 }
-
 
 function OverviewContent() {
   const searchParams = useSearchParams();
@@ -68,7 +68,6 @@ function OverviewContent() {
   const oScore = oppTotalScore?.total_score ?? null;
   const dScore = derivedDealScore;
 
-  // All pillar scores are now out of 100; use equal-weighted average
   let partialSum = 0;
   let partialCount = 0;
   if (mScore !== null) { partialSum += mScore; partialCount++; }
@@ -81,23 +80,24 @@ function OverviewContent() {
 
   return (
     <ScreenerPageShell navItems={OVERVIEW_NAV}>
-      <QcScoreHeroCard
-        score={hasAnyScore ? Math.round(avgScore) : null}
-        ratingLabel={rating}
-        mqiLabel={mgmtDashboard?.mqi_score?.label ?? null}
-        thesisHeadline={mgmtDashboard?.management_intelligence?.key_takeaways?.[0] ?? null}
-      />
-      {data && <KeyRatioTiles data={data} />}
-      <div className="px-4 space-y-6 pt-6 mb-8">
+      <div className="space-y-6 pb-8 pt-6">
 
         {error && (
-          <div className="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+          <div className="mx-4 mt-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
             Failed to load data: {error}
           </div>
         )}
 
-        {/* Section: QC Insight */}
-        <div id="section-qc-insight">
+        {/* Row 1: About + Company Facts */}
+        <div id="section-about">
+          {data && <CompanyProfileCard data={data} />}
+        </div>
+
+        {/* Row 2: Key metric tiles */}
+        {data && <KeyRatioTiles data={data} />}
+
+        {/* Row 3: QC Insight */}
+        <div id="section-qc-insight" className="px-4">
           <IMScoreCard
             managementScore={mgmtDashboard?.mqi_score?.total ?? null}
             managementMax={100}
@@ -113,22 +113,22 @@ function OverviewContent() {
         </div>
 
         {/* Section: Fundamentals */}
-        <div id="section-fundamentals">
+        <div id="section-fundamentals" className="px-4">
           {data && <FundamentalOverviewCard data={data} symbol={symbol} />}
         </div>
 
         {/* Section: Technicals */}
-        <div id="section-technicals">
+        <div id="section-technicals" className="px-4">
           {technicalsData && <TechnicalsCard data={technicalsData} />}
         </div>
 
         {/* Section: Market View */}
-        <div id="section-market-view">
+        <div id="section-market-view" className="px-4">
           <MarketViewCard />
         </div>
 
         {/* Section: Investment Conclusion */}
-        <div id="section-investment-conclusion">
+        <div id="section-investment-conclusion" className="px-4">
           <InvestmentConclusionCard
             dealData={dFactorData}
             oppTakeaways={oppData?.final_takeaways ?? null}

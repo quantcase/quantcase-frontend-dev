@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/molecules/app-sidebar";
 import { TopBar } from "@/components/molecules/top-bar";
 import { MainContentWrapper } from "@/components/molecules/main-content-wrapper";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { AuthGuard } from "@/components/providers/AuthGuard";
 
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex-sans",
@@ -45,9 +46,11 @@ export default function RootLayout({
       </head>
       <body className={`${ibmPlexSans.variable} ${inter.variable}`} style={{ fontFamily: "var(--font-inter), system-ui, sans-serif", WebkitFontSmoothing: "antialiased" }}>
         <ThemeProvider>
-          <AppSidebar />
-          <TopBar />
-          <MainContentWrapper>{children}</MainContentWrapper>
+          <AuthGuard>
+            <AppSidebar />
+            <TopBar />
+            <MainContentWrapper>{children}</MainContentWrapper>
+          </AuthGuard>
         </ThemeProvider>
       </body>
     </html>

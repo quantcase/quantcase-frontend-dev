@@ -286,7 +286,9 @@ function TopBarInner() {
   );
 }
 
-export function TopBar() {
+function TopBarGuard() {
+  const pathname = usePathname();
+  if (pathname === "/signin") return null;
   return (
     <Suspense
       fallback={
@@ -297,6 +299,14 @@ export function TopBar() {
       }
     >
       <TopBarInner />
+    </Suspense>
+  );
+}
+
+export function TopBar() {
+  return (
+    <Suspense fallback={null}>
+      <TopBarGuard />
     </Suspense>
   );
 }

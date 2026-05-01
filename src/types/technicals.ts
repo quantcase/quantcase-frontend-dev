@@ -26,6 +26,10 @@ export interface TechnicalsPriceRaw {
   distanceFromATH?: number;
   allTimeLow?: number;
   distanceFromATL?: number;
+  high52wDate?: string;
+  low52wDate?: string;
+  allTimeHighDate?: string;
+  allTimeLowDate?: string;
 }
 
 export interface TechnicalsTrendRaw {

@@ -127,12 +127,6 @@ export function DecisionIntelligenceBanner({ di }: Props) {
           {/* Tag row */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
             <div>
-              <div style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const, marginBottom: 6,
-              }}>
-                Tag
-              </div>
               <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "var(--qc-text-heading)", lineHeight: 1.3 }}>
                 {di.tag}
               </p>

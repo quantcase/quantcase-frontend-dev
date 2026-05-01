@@ -161,7 +161,14 @@ function EngineCard({
   );
 }
 
-function StructureEnginePanel({ engine, perspective, indicators }: { engine: StructureEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined }) {
+function formatVolume(v: number): string {
+  if (v >= 1e7) return `${(v / 1e7).toFixed(2)}Cr`;
+  if (v >= 1e5) return `${(v / 1e5).toFixed(2)}L`;
+  if (v >= 1e3) return `${(v / 1e3).toFixed(1)}K`;
+  return v.toFixed(0);
+}
+
+function StructureEnginePanel({ engine, perspective, indicators, avgVolume20d }: { engine: StructureEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined; avgVolume20d?: number }) {
   const mp = engine.marketStructure;
   const cp = engine.participation;
   const pa = engine.priceStructure;
@@ -183,6 +190,7 @@ function StructureEnginePanel({ engine, perspective, indicators }: { engine: Str
         metrics={<>
           <MetricPill label="CMF" value={cp.cmf.toFixed(4)} valueColor={cp.cmf >= 0 ? "var(--qc-up)" : "var(--qc-down)"} />
           <MetricPill label="CMF Signal" value={cp.cmfSignal} valueColor={engineSignalColor(cp.cmfSignal)} />
+          {avgVolume20d != null && <MetricPill label="Avg Vol (20D)" value={formatVolume(avgVolume20d)} valueColor="var(--qc-text-heading)" />}
         </>}
         output={isGrowth ? cp.growthOutput : cp.valueOutput}
         watchout={resolveWatchout(indicators, "Capital Participation", perspective)}
@@ -198,10 +206,31 @@ function StructureEnginePanel({ engine, perspective, indicators }: { engine: Str
   );
 }
 
+function deriveTrendSummaryLine(db: DirectionalBiasIndicator): string {
+  function ud(pos: string) { return pos === "ABOVE" ? "Up" : "Down"; }
+  const regime = db.priceVsSMA200 === "ABOVE" ? "Bullish Regime" : "Bearish Regime";
+  const st = ud(db.priceVsSMA20);
+  const it = ud(db.priceVsSMA50);
+  const lt = ud(db.priceVsSMA100);
+
+  if (st === it && it === lt) {
+    return `${regime} with Short Term, Intermediate & Long Term trend all ${st}.`;
+  }
+  if (st === it) {
+    return `${regime} with Short Term & Intermediate trend ${st}, but Long Term trend is ${lt}.`;
+  }
+  if (it === lt) {
+    return `${regime} with Short Term trend ${st}, but Intermediate & Long Term trend is ${it}.`;
+  }
+  return `${regime} with Short Term trend ${st}. Intermediate trend is ${it} and Long Term trend is ${lt}.`;
+}
+
 function TrendEnginePanel({ engine, perspective, indicators }: { engine: TrendEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined }) {
   const db = engine.trendDirection;
   const tm = engine.trendQuality;
   const isGrowth = perspective === "GROWTH";
+  const summaryLine = deriveTrendSummaryLine(db);
+  const trendOutput = summaryLine;
 
   return (
     <div className="space-y-4">
@@ -210,12 +239,12 @@ function TrendEnginePanel({ engine, perspective, indicators }: { engine: TrendEn
         subtitle="SMA 20 / 50 / 100 / 200"
         badge={deriveTrendDirectionBadge(db)}
         metrics={<>
-          <MetricPill label="SMA 20" value={db.priceVsSMA20} valueColor={smaPositionColor(db.priceVsSMA20)} />
-          <MetricPill label="SMA 50" value={db.priceVsSMA50} valueColor={smaPositionColor(db.priceVsSMA50)} />
-          <MetricPill label="SMA 100" value={db.priceVsSMA100} valueColor={smaPositionColor(db.priceVsSMA100)} />
-          <MetricPill label="SMA 200" value={db.priceVsSMA200} valueColor={smaPositionColor(db.priceVsSMA200)} />
+          <MetricPill label="SMA 20" value={db.priceVsSMA20 === "ABOVE" ? "UP" : "DOWN"} valueColor={smaPositionColor(db.priceVsSMA20)} />
+          <MetricPill label="SMA 50" value={db.priceVsSMA50 === "ABOVE" ? "UP" : "DOWN"} valueColor={smaPositionColor(db.priceVsSMA50)} />
+          <MetricPill label="SMA 100" value={db.priceVsSMA100 === "ABOVE" ? "UP" : "DOWN"} valueColor={smaPositionColor(db.priceVsSMA100)} />
+          <MetricPill label="SMA 200" value={db.priceVsSMA200 === "ABOVE" ? "UP" : "DOWN"} valueColor={smaPositionColor(db.priceVsSMA200)} />
         </>}
-        output={isGrowth ? db.growthOutput : db.valueOutput}
+        output={trendOutput}
         watchout={resolveWatchout(indicators, "Trend Direction", perspective)}
       />
       <EngineCard
@@ -302,18 +331,20 @@ export function RuleEngineSection({
   decisionIntelligence,
   activeEngine,
   activePerspective,
+  avgVolume20d,
 }: {
   ruleEngine: RuleEngine;
   decisionIntelligence?: DecisionIntelligence;
   activeEngine: EngineTab;
   activePerspective: "GROWTH" | "VALUE";
+  avgVolume20d?: number;
 }) {
   const diIndicators = decisionIntelligence?.indicators;
 
   return (
     <>
       {activeEngine === "STRUCTURE" && (
-        <StructureEnginePanel engine={ruleEngine.structureEngine} perspective={activePerspective} indicators={diIndicators} />
+        <StructureEnginePanel engine={ruleEngine.structureEngine} perspective={activePerspective} indicators={diIndicators} avgVolume20d={avgVolume20d} />
       )}
       {activeEngine === "TREND" && (
         <TrendEnginePanel engine={ruleEngine.trendEngine} perspective={activePerspective} indicators={diIndicators} />

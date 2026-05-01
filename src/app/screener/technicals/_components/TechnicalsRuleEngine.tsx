@@ -13,9 +13,10 @@ interface Props {
   decisionIntelligence?: DecisionIntelligence;
   activeEngine: EngineTab;
   onEngineChange: (tab: EngineTab) => void;
+  avgVolume20d?: number;
 }
 
-export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeEngine, onEngineChange }: Props) {
+export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeEngine, onEngineChange, avgVolume20d }: Props) {
   const [activePerspective, setActivePerspective] = useState<"GROWTH" | "VALUE">("GROWTH");
 
   const titleNode = (
@@ -69,7 +70,11 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
         decisionIntelligence={decisionIntelligence}
         activeEngine={activeEngine}
         activePerspective={activePerspective}
+        avgVolume20d={avgVolume20d}
       />
+      <p className="mt-3 px-1 text-[11px] text-right" style={{ color: "var(--qc-text-muted)" }}>
+        * All analysis and indicators are calculated using daily timeframe data.
+      </p>
     </SectionPanel>
   );
 }

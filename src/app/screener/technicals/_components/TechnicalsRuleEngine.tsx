@@ -72,6 +72,9 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
         activePerspective={activePerspective}
         avgVolume20d={avgVolume20d}
       />
+      <p className="mt-3 px-1 text-[11px] text-right" style={{ color: "var(--qc-text-muted)" }}>
+        * All analysis and indicators are calculated using daily timeframe data.
+      </p>
     </SectionPanel>
   );
 }

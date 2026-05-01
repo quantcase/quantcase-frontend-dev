@@ -78,26 +78,26 @@ function TechnicalsContent() {
   const changeDisplay = `${changeIsPositive ? "+" : ""}${data.price.changePercent.toFixed(1)}%`;
 
   const di = data.decisionIntelligence;
-  const trendIndicator = di?.indicators.find((i) => i.name.toLowerCase() === "trend");
-  const momentumIndicator = di?.indicators.find((i) => i.name.toLowerCase() === "momentum");
-  const volatilityIndicator = di?.indicators.find((i) => i.name.toLowerCase() === "volatility");
+  const findIndicator = (name: string) => di?.indicators.find((i) => i.name.toLowerCase().includes(name));
 
   const insightCards = di ? (
     <>
-      {[trendIndicator, momentumIndicator, volatilityIndicator]
-        .filter(Boolean)
-        .map((ind) => (
+      {(["momentum", "volatility", "trend"] as const).map((name) => {
+        const ind = findIndicator(name);
+        if (!ind) return null;
+        return (
           <div
-            key={ind!.name}
+            key={name}
             className="rounded-[8px] border px-3 py-1.5 text-center"
             style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
           >
             <p className="font-mono text-[9px] uppercase tracking-[0.14em] mb-px" style={{ color: "var(--qc-text-muted)" }}>
-              {ind!.name}
+              {ind.name}
             </p>
-            <p className="text-[12px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{ind!.tag}</p>
+            <p className="text-[12px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{ind.tag}</p>
           </div>
-        ))}
+        );
+      })}
       <div
         className="rounded-[8px] border px-3 py-1.5 text-center"
         style={{ borderColor: "var(--qc-text-heading)", background: "var(--qc-surface-white)" }}

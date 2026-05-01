@@ -160,6 +160,7 @@ function TechnicalsContent() {
                   decisionIntelligence={data.decisionIntelligence}
                   activeEngine={activeEngine}
                   onEngineChange={handleEngineChange}
+                  avgVolume20d={data.price.avgVolume20d}
                 />
               </div>
             )}

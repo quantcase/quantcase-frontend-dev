@@ -70,18 +70,12 @@ const OVERLAY_CONFIGS: Record<ChartMode, LineConfig[]> = {
     { key: "sma50",  color: QC_DOWN,    lineWidth: 1, title: "SMA 50" },
     { key: "sma200", color: QC_HEADING, lineWidth: 2, title: "SMA 200" },
   ],
-  STRUCTURE: [
-    { key: "bbUpper",  color: QC_MUTED,   lineWidth: 1, title: "BB Upper" },
-    { key: "bbMiddle", color: QC_HEADING, lineWidth: 1, title: "BB Mid" },
-    { key: "bbLower",  color: QC_MUTED,   lineWidth: 1, title: "BB Lower" },
-  ],
+  STRUCTURE: [],
   TREND: [
     { key: "sma20",  color: QC_MUTED,   lineWidth: 1, title: "SMA 20" },
     { key: "sma50",  color: "#9333EA",  lineWidth: 1, title: "SMA 50" },
     { key: "sma100", color: "#6B21A8",  lineWidth: 1, title: "SMA 100" },
     { key: "sma200", color: QC_HEADING, lineWidth: 2, title: "SMA 200" },
-    { key: "ema20",  color: QC_UP,      lineWidth: 1, title: "EMA 20" },
-    { key: "ema50",  color: QC_DOWN,    lineWidth: 1, title: "EMA 50" },
   ],
   TIMING: [
     { key: "bbUpper",  color: QC_MUTED,   lineWidth: 1, title: "BB Upper" },
@@ -95,7 +89,7 @@ const OSCILLATOR_CONFIGS: Record<ChartMode, OscillatorConfig | null> = {
   DEFAULT:   { key: "rsi14", color: QC_HEADING, title: "RSI (14)", height: 80 },
   STRUCTURE: { key: "cmf14", color: QC_HEADING, title: "CMF (14)", height: 80 },
   TREND:     { key: "adx14", color: QC_HEADING, title: "ADX (14)", height: 80 },
-  TIMING:    { key: "rsi14", color: QC_HEADING, title: "RSI (14)", height: 80 },
+  TIMING:    { key: "bbWidth" as keyof PriceIndicators, color: QC_HEADING, title: "BB Width", height: 80 },
   "RELATIVE STRENGTH": null,
 };
 
@@ -177,6 +171,8 @@ interface LegendItem {
   visible: boolean;
 }
 
+
+
 export function CandlestickChart({
   prices, indicators, chartMode, loading, error,
   supportResistance, structureEngine,
@@ -186,13 +182,15 @@ export function CandlestickChart({
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const subPaneRef = useRef<IPaneApi<Time> | null>(null);
+  const subPanesRef = useRef<IPaneApi<Time>[]>([]);
   const srLinesRef = useRef<ISeriesApi<"Line">[]>([]);
 
   const overlayMapRef = useRef<Map<string, { series: ISeriesApi<"Line">; isOsc: boolean }>>(new Map());
   const rsiMarkersRef = useRef<ISeriesMarkersPluginApi<Time> | null>(null);
 
   const [legendItems, setLegendItems] = useState<LegendItem[]>([]);
+
+  const ohlcBarRef = useRef<HTMLDivElement>(null);
 
   // Initialize chart once
   useEffect(() => {
@@ -312,7 +310,7 @@ export function CandlestickChart({
       volumeSeriesRef.current = null;
       overlayMapRef.current.clear();
       srLinesRef.current = [];
-      subPaneRef.current = null;
+      subPanesRef.current = [];
       if (rsiMarkersRef.current) { rsiMarkersRef.current.detach(); rsiMarkersRef.current = null; }
     };
   }, []);
@@ -331,6 +329,30 @@ export function CandlestickChart({
       low: p.low,
       close: p.close,
     })));
+
+    // Write latest candle OHLC directly to DOM — never changes on hover
+    const last = sorted[sorted.length - 1];
+    if (last && ohlcBarRef.current) {
+      const chg = last.close - last.open;
+      const chgPct = last.open !== 0 ? (chg / last.open) * 100 : 0;
+      const sign = chg >= 0 ? "+" : "";
+      const chgColor = chg >= 0 ? QC_UP : QC_DOWN;
+      const tiles = [
+        { label: "O", value: last.open.toFixed(2), color: QC_HEADING },
+        { label: "H", value: last.high.toFixed(2), color: QC_UP },
+        { label: "L", value: last.low.toFixed(2), color: QC_DOWN },
+        { label: "C", value: last.close.toFixed(2), color: QC_HEADING },
+        { label: "CHG", value: `${sign}${chg.toFixed(2)}`, color: chgColor },
+        { label: "CHG%", value: `${sign}${chgPct.toFixed(2)}%`, color: chgColor },
+      ];
+      ohlcBarRef.current.innerHTML = tiles.map((t, i) =>
+        `<div style="display:flex;flex-direction:column;align-items:flex-start;${i < tiles.length - 1 ? `padding-right:10px;border-right:1px solid ${QC_BORDER};margin-right:2px` : ""}">
+          <span style="font-size:9px;color:${QC_MUTED};font-weight:500;text-transform:uppercase;letter-spacing:0.08em;line-height:1.2">${t.label}</span>
+          <span style="font-size:11px;color:${t.color};font-weight:600;line-height:1.4">${t.value}</span>
+        </div>`
+      ).join("");
+      ohlcBarRef.current.style.display = "flex";
+    }
 
     // Volume bars colored by candle direction
     volumeSeriesRef.current.setData(sorted.map((p) => ({
@@ -421,11 +443,11 @@ export function CandlestickChart({
     // Remove RSI divergence markers
     if (rsiMarkersRef.current) { rsiMarkersRef.current.detach(); rsiMarkersRef.current = null; }
 
-    // Remove oscillator sub-pane
-    if (subPaneRef.current) {
-      chart.removePane(1);
-      subPaneRef.current = null;
+    // Remove oscillator sub-panes (remove from highest index down)
+    for (let i = subPanesRef.current.length; i >= 1; i--) {
+      try { chart.removePane(i); } catch { /* ok */ }
     }
+    subPanesRef.current = [];
 
     if (!indicators) {
       setLegendItems([]);
@@ -451,73 +473,123 @@ export function CandlestickChart({
       nextLegend.push({ key: cfg.title, title: cfg.title, color: cfg.color, isOsc: false, visible: true });
     }
 
-    // Oscillator sub-pane
-    const oscCfg = OSCILLATOR_CONFIGS[chartMode];
-    if (oscCfg) {
-      const data = toLineData(indicators[oscCfg.key]);
-      if (data.length > 0) {
-        subPaneRef.current = chart.addPane();
-        const s = chart.addSeries(LineSeries, {
-          color: oscCfg.color,
-          lineWidth: 1 as const,
-          title: oscCfg.title,
-          priceLineVisible: false,
-          lastValueVisible: true,
-          crosshairMarkerVisible: false,
-        }, 1);
-        s.setData(data);
-        overlayMapRef.current.set(oscCfg.title, { series: s, isOsc: true });
-        nextLegend.push({ key: oscCfg.title, title: oscCfg.title, color: oscCfg.color, isOsc: true, visible: true });
+    const sorted = [...prices].sort((a, b) => a.date.localeCompare(b.date));
+    const firstDate = sorted[0]?.date as Time | undefined;
+    const lastDate = sorted[sorted.length - 1]?.date as Time | undefined;
 
-        // Add reference lines for oscillator pane
-        const sorted = [...prices].sort((a, b) => a.date.localeCompare(b.date));
-        if (sorted.length >= 2) {
-          const firstDate = sorted[0].date as Time;
-          const lastDate = sorted[sorted.length - 1].date as Time;
+    // Helper: add one oscillator pane with a line series, returning the series and pane index
+    const addOscPane = (
+      paneIndex: number,
+      data: LineData[],
+      color: string,
+      title: string,
+      legendKey: string,
+    ): ISeriesApi<"Line"> | null => {
+      if (data.length === 0) return null;
+      subPanesRef.current.push(chart.addPane());
+      const s = chart.addSeries(LineSeries, {
+        color, lineWidth: 1 as const, title,
+        priceLineVisible: false, lastValueVisible: true, crosshairMarkerVisible: false,
+      }, paneIndex);
+      s.setData(data);
+      overlayMapRef.current.set(legendKey, { series: s, isOsc: true });
+      nextLegend.push({ key: legendKey, title, color, isOsc: true, visible: true });
+      return s;
+    };
 
+    // TIMING: two panes — BBWidth (pane 1) + RSI (pane 2)
+    if (chartMode === "TIMING") {
+      const bbwData = (() => {
+        const upperMap = new Map(indicators.bbUpper.filter(p => p.value !== null).map(p => [p.date, p.value as number]));
+        const middleMap = new Map(indicators.bbMiddle.filter(p => p.value !== null).map(p => [p.date, p.value as number]));
+        const lowerMap = new Map(indicators.bbLower.filter(p => p.value !== null).map(p => [p.date, p.value as number]));
+        const result: LineData[] = [];
+        upperMap.forEach((upper, date) => {
+          const middle = middleMap.get(date);
+          const lower = lowerMap.get(date);
+          if (middle && lower && middle !== 0) {
+            result.push({ time: date as Time, value: (upper - lower) / middle * 100 });
+          }
+        });
+        return result.sort((a, b) => String(a.time).localeCompare(String(b.time)));
+      })();
+      addOscPane(1, bbwData, QC_HEADING, "BB Width", "BB Width");
+
+      const rsiData = toLineData(indicators.rsi14);
+      const rsiSeries = addOscPane(2, rsiData, QC_HEADING, "RSI (14)", "RSI (14)");
+      if (rsiSeries && firstDate && lastDate) {
+        for (const [refVal, label] of [[30, "__rsi_30"], [70, "__rsi_70"]] as const) {
+          const refLine = chart.addSeries(LineSeries, {
+            color: QC_MUTED, lineWidth: 1, lineStyle: 2,
+            priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
+          }, 2);
+          refLine.setData([{ time: firstDate, value: refVal }, { time: lastDate, value: refVal }]);
+          overlayMapRef.current.set(label, { series: refLine, isOsc: true });
+        }
+        const divergences = detectRsiDivergences(prices, indicators.rsi14);
+        if (divergences.length > 0) {
+          const markers: SeriesMarker<Time>[] = divergences.map((d) => ({
+            time: d.time,
+            position: d.type === "bear" ? "aboveBar" as const : "belowBar" as const,
+            shape: "square" as const,
+            color: d.type === "bear" ? QC_DOWN : QC_UP,
+            text: d.type === "bear" ? "Bear" : "Bull",
+            size: 0.5,
+          }));
+          rsiMarkersRef.current = createSeriesMarkers(rsiSeries, markers);
+        }
+      }
+    } else {
+      // Single oscillator pane for all other modes
+      const oscCfg = OSCILLATOR_CONFIGS[chartMode];
+      if (oscCfg) {
+        const data = toLineData(indicators[oscCfg.key]);
+        const s = addOscPane(1, data, oscCfg.color, oscCfg.title, oscCfg.title);
+        if (s && firstDate && lastDate) {
           if (oscCfg.key === "cmf14") {
-            // CMF zero-line
             const zeroLine = chart.addSeries(LineSeries, {
-              color: QC_BORDER, lineWidth: 1, lineStyle: 2,
+              color: QC_MUTED, lineWidth: 1, lineStyle: 0,
               priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
             }, 1);
             zeroLine.setData([{ time: firstDate, value: 0 }, { time: lastDate, value: 0 }]);
             overlayMapRef.current.set("__cmf_zero", { series: zeroLine, isOsc: true });
           }
-
+          if (oscCfg.key === "adx14") {
+            const adx15Line = chart.addSeries(LineSeries, {
+              color: QC_MUTED, lineWidth: 1, lineStyle: 0,
+              priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
+            }, 1);
+            adx15Line.setData([{ time: firstDate, value: 15 }, { time: lastDate, value: 15 }]);
+            overlayMapRef.current.set("__adx_15", { series: adx15Line, isOsc: true });
+          }
           if (oscCfg.key === "rsi14") {
-            // RSI 30/70 reference lines
             for (const [refVal, label] of [[30, "__rsi_30"], [70, "__rsi_70"]] as const) {
               const refLine = chart.addSeries(LineSeries, {
-                color: QC_BORDER, lineWidth: 1, lineStyle: 2,
+                color: QC_MUTED, lineWidth: 1, lineStyle: 2,
                 priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
               }, 1);
               refLine.setData([{ time: firstDate, value: refVal }, { time: lastDate, value: refVal }]);
               overlayMapRef.current.set(label, { series: refLine, isOsc: true });
             }
-
-            // RSI divergence markers (Bull/Bear)
-            if (indicators) {
-              const divergences = detectRsiDivergences(prices, indicators.rsi14);
-              if (divergences.length > 0) {
-                const markers: SeriesMarker<Time>[] = divergences.map((d) => ({
-                  time: d.time,
-                  position: d.type === "bear" ? "aboveBar" as const : "belowBar" as const,
-                  shape: "square" as const,
-                  color: d.type === "bear" ? QC_DOWN : QC_UP,
-                  text: d.type === "bear" ? "Bear" : "Bull",
-                  size: 0.5,
-                }));
-                rsiMarkersRef.current = createSeriesMarkers(s, markers);
-              }
+            const divergences = detectRsiDivergences(prices, indicators.rsi14);
+            if (divergences.length > 0) {
+              const markers: SeriesMarker<Time>[] = divergences.map((d) => ({
+                time: d.time,
+                position: d.type === "bear" ? "aboveBar" as const : "belowBar" as const,
+                shape: "square" as const,
+                color: d.type === "bear" ? QC_DOWN : QC_UP,
+                text: d.type === "bear" ? "Bear" : "Bull",
+                size: 0.5,
+              }));
+              rsiMarkersRef.current = createSeriesMarkers(s, markers);
             }
           }
         }
       }
     }
 
-    // Average volume line (DEFAULT mode only)
-    if (chartMode === "DEFAULT" && prices.length > 0) {
+    // Average volume line (DEFAULT + STRUCTURE modes)
+    if ((chartMode === "DEFAULT" || chartMode === "STRUCTURE") && prices.length > 0) {
       const sortedPrices = [...prices].sort((a, b) => a.date.localeCompare(b.date));
       const period = 20;
       const avgVolData: LineData[] = [];
@@ -571,6 +643,13 @@ export function CandlestickChart({
           <span className="font-mono text-[11px]" style={{ color: "var(--qc-down)" }}>{error}</span>
         </div>
       )}
+
+      {/* OHLC info bar — written once via DOM ref when prices load, never touched by React re-renders */}
+      <div
+        ref={ohlcBarRef}
+        className="absolute top-2 left-2 z-10 items-center gap-1 font-mono select-none backdrop-blur-sm rounded-[6px] px-2 py-1.5"
+        style={{ display: "none", background: "rgba(255,255,255,0.88)", border: `1px solid ${QC_BORDER}` }}
+      />
 
       {/* Phase + Volume Signal badges */}
       {(wyckoffPhase || volumeSignal) && (

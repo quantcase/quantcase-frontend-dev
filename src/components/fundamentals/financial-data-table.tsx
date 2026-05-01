@@ -1,8 +1,11 @@
 import type { FinancialRow, FinancialTable } from "@/types/financials";
 
-function fmt(value: number | null | undefined, format?: string): string {
+function fmt(value: number | null | undefined, format?: string, key?: string): string {
   if (value === null || value === undefined) return "—";
   if (format === "percent") return `${parseFloat(value.toFixed(1))}%`;
+  if (key === "eps" || key === "otherIncome") {
+    return value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
   return value.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
@@ -106,7 +109,7 @@ export function FinancialDataTable({
                         letterSpacing: "0.02em",
                       }}
                     >
-                      {fmt(val, row.format)}
+                      {fmt(val, row.format, row.key)}
                     </td>
                   );
                 })}

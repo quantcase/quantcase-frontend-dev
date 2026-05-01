@@ -1,15 +1,13 @@
 "use client";
 
-import { ArrowUpRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { MetricTile } from "@/components/molecules/metric-tile";
 import { TabularCard } from "@/components/molecules/tabular-card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table, TableBody, TableHead, TableHeader, TableRow, TableCell,
 } from "@/components/ui/table";
-import type { IIDashboard, QLevel, Direction, CategoryStyle } from "@/types/industry-intelligence";
+import type { IIDashboard, QLevel } from "@/types/industry-intelligence";
 
 // ── Null safety helpers ───────────────────────────────────────────────────────
 
@@ -34,22 +32,6 @@ function wowColor(v: string) {
   if (v?.startsWith("+")) return "var(--qc-up)";
   if (v?.startsWith("−") || v?.startsWith("-")) return "var(--qc-down)";
   return "var(--qc-text-muted)";
-}
-
-function signalStyle(dir: "up" | "down" | "warn") {
-  switch (dir) {
-    case "up":   return { bg: "var(--qc-up-soft)",   border: "var(--qc-up)",   title: "var(--qc-up)" };
-    case "down": return { bg: "var(--qc-down-soft)", border: "var(--qc-down)", title: "var(--qc-down)" };
-    case "warn": return { bg: "var(--qc-warn-soft)", border: "var(--qc-warn)", title: "var(--qc-warn)" };
-  }
-}
-
-function catBadgeStyle(dir: CategoryStyle) {
-  switch (dir) {
-    case "blue":   return { background: "var(--qc-blue-soft)",      color: "var(--qc-blue)",              borderColor: "var(--qc-blue)" };
-    case "warn":   return { background: "var(--qc-warn-soft)",      color: "var(--qc-warn)",              borderColor: "var(--qc-warn)" };
-    case "accent": return { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)", borderColor: "var(--qc-accent-primary)" };
-  }
 }
 
 // ── Small atoms ───────────────────────────────────────────────────────────────
@@ -78,14 +60,6 @@ function WoW({ v }: { v: string }) {
   const val = safeStr(v);
   return <span className="text-[12px] font-medium tabular-nums" style={{ color: wowColor(val) }}>{val}</span>;
 }
-
-function SentIcon({ dir }: { dir: Direction }) {
-  if (dir === "up" || dir === "positive") return <TrendingUp className="h-3 w-3" style={{ color: "var(--qc-up)" }} />;
-  if (dir === "down" || dir === "negative") return <TrendingDown className="h-3 w-3" style={{ color: "var(--qc-down)" }} />;
-  return <Minus className="h-3 w-3" style={{ color: "var(--qc-warn)" }} />;
-}
-
-const TH_CLS = "text-[10px] font-semibold uppercase tracking-wider px-3 py-2.5 whitespace-nowrap";
 
 // ── Dashboard Tab ─────────────────────────────────────────────────────────────
 
@@ -172,7 +146,7 @@ export function DashboardTab({ data }: { data: IIDashboard }) {
                   <TableRow key={h?.ticker}>
                     <TableCell>{safeStr(h?.ticker)}</TableCell>
                     <TableCell>{safeStr(h?.cluster)}</TableCell>
-                    <TableCell>{safeNum(h?.cluster_rank)}</TableCell>
+                    <TableCell>{safeStr(h?.cluster_rank)}</TableCell>
                     <TableCell><QBadge q={h?.quartile ?? "Q2"} /></TableCell>
                     <TableCell><WoW v={h?.wow} /></TableCell>
                   </TableRow>
@@ -206,7 +180,6 @@ export function DashboardTab({ data }: { data: IIDashboard }) {
 
           <TabularCard title="Rotation Signals & Alerts" titleCase>
             {rotation_signals?.map((sig, i) => {
-              const s = signalStyle(sig?.direction ?? "warn");
               return (
                 <Card key={i}>
                   <CardContent>

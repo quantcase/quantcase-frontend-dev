@@ -39,8 +39,8 @@ function qStyle(q: QLevel) {
 }
 
 function wowColor(v: string) {
-  if (v.startsWith("+")) return "var(--qc-up)";
-  if (v.startsWith("−") || v.startsWith("-")) return "var(--qc-down)";
+  if (v?.startsWith("+")) return "var(--qc-up)";
+  if (v?.startsWith("−") || v?.startsWith("-")) return "var(--qc-down)";
   return "var(--qc-text-muted)";
 }
 
@@ -48,19 +48,25 @@ function sortIndustries(industries: IIIndustry[], key: SortKey) {
   return [...industries].sort((a, b) => {
     switch (key) {
       case "Composite rank": return a.rank - b.rank;
-      case "Momentum":       return b.momentum - a.momentum;
+      case "Momentum":       return (b.momentum ?? 0) - (a.momentum ?? 0);
       case "Breadth":        return b.breadth_pct - a.breadth_pct;
-      case "Revisions":      return b.revisions - a.revisions;
+      case "Revisions":      return (b.revisions ?? 0) - (a.revisions ?? 0);
     }
   });
 }
 
-function filterRanks(filter: FilterKey): Set<number> {
-  if (filter === "All")          return new Set(Array.from({ length: 24 }, (_, i) => i + 1));
-  if (filter === "Top quartile") return new Set([1, 2, 3, 4, 5, 6]);
-  if (filter === "Upper mid")    return new Set([7, 8, 9, 10, 11, 12]);
-  if (filter === "Lower mid")    return new Set([13, 14, 15, 16, 17, 18]);
-  return new Set([19, 20, 21, 22, 23, 24]);
+const QUARTILE_Q: Record<FilterKey, QLevel | null> = {
+  "All":          null,
+  "Top quartile": "Q1",
+  "Upper mid":    "Q2",
+  "Lower mid":    "Q3",
+  "Bottom":       "Q4",
+};
+
+function filterByQuartile(filter: FilterKey, industries: IIIndustry[]): Set<number> {
+  const q = QUARTILE_Q[filter];
+  if (!q) return new Set(industries.map((ind) => ind.rank));
+  return new Set(industries.filter((ind) => ind.quartile === q).map((ind) => ind.rank));
 }
 
 // ── Small atoms ───────────────────────────────────────────────────────────────
@@ -126,13 +132,13 @@ function TableView({ sort, industries }: { sort: SortKey; industries: IIIndustry
               <span className="text-[12px] font-medium tabular-nums" style={{ color: wowColor(row.wow) }}>{row.wow}</span>
             </TableCell>
             <TableCell className="px-3 py-2.5">
-              <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.momentum}</span>
+              <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.momentum ?? "—"}</span>
             </TableCell>
             <TableCell className="px-3 py-2.5">
               <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.breadth_pct}%</span>
             </TableCell>
             <TableCell className="px-3 py-2.5">
-              <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.revisions}</span>
+              <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.revisions ?? "—"}</span>
             </TableCell>
             <TableCell className="px-3 py-2.5">
               <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-body)" }}>{row.valuation}</span>
@@ -160,22 +166,17 @@ function TableView({ sort, industries }: { sort: SortKey; industries: IIIndustry
 // ── Chart view ────────────────────────────────────────────────────────────────
 
 const QUARTILE_FILTERS: FilterKey[] = ["All", "Top quartile", "Upper mid", "Lower mid", "Bottom"];
-const Y_TICKS = [1, 6, 12, 18, 24];
 
-function yTickLabel(v: number) {
-  if (v === 1)  return "#1";
-  if (v === 6)  return "#6";
-  if (v === 12) return "Mid";
-  if (v === 18) return "#18";
-  if (v === 24) return "#24";
-  return String(v);
+function getYTicks(total: number): number[] {
+  const step = Math.ceil(total / 4);
+  return [1, step, step * 2, step * 3, total];
 }
 
 function YAxisTick({ x, y, payload }: { x?: number; y?: number; payload?: { value: number } }) {
   if (!payload) return null;
   return (
     <text x={(x ?? 0) - 8} y={(y ?? 0) + 4} textAnchor="end" fontSize={11} fill="var(--qc-text-muted)">
-      {yTickLabel(payload.value)}
+      #{payload.value}
     </text>
   );
 }
@@ -184,13 +185,17 @@ function ChartView({
   industries,
   chartData,
   asOfDate,
+  totalIndustries,
 }: {
   industries: IIIndustry[];
   chartData: Record<string, string | number>[];
   asOfDate: string;
+  totalIndustries: number;
 }) {
   const [filter, setFilter] = useState<FilterKey>("All");
-  const activeRanks = filterRanks(filter);
+  const activeRanks = filterByQuartile(filter, industries);
+  const yTicks = getYTicks(totalIndustries);
+  const step = Math.ceil(totalIndustries / 4);
 
   return (
     <div>
@@ -212,8 +217,8 @@ function ChartView({
           />
           <YAxis
             reversed
-            domain={[1, 24]}
-            ticks={Y_TICKS}
+            domain={[1, totalIndustries]}
+            ticks={yTicks}
             tick={<YAxisTick />}
             tickLine={false}
             axisLine={false}
@@ -240,9 +245,9 @@ function ChartView({
             labelStyle={{ color: "var(--qc-text-muted)", fontWeight: 600, marginBottom: 4 }}
             itemStyle={{ padding: "1px 0" }}
           />
-          <ReferenceLine y={6.5}  stroke="var(--qc-border-default)" strokeDasharray="5 4" strokeOpacity={0.9} />
-          <ReferenceLine y={12.5} stroke="var(--qc-border-default)" strokeDasharray="5 4" strokeOpacity={0.9} />
-          <ReferenceLine y={18.5} stroke="var(--qc-border-default)" strokeDasharray="5 4" strokeOpacity={0.9} />
+          <ReferenceLine y={step + 0.5}      stroke="var(--qc-border-default)" strokeDasharray="5 4" strokeOpacity={0.9} />
+          <ReferenceLine y={step * 2 + 0.5}  stroke="var(--qc-border-default)" strokeDasharray="5 4" strokeOpacity={0.9} />
+          <ReferenceLine y={step * 3 + 0.5}  stroke="var(--qc-border-default)" strokeDasharray="5 4" strokeOpacity={0.9} />
 
           {industries.map((ind, i) => {
             const active = activeRanks.has(ind.rank);
@@ -289,8 +294,13 @@ export function IndustryRankingTab({ data }: { data: IIIndustryRanking }) {
   const [sort, setSort] = useState<SortKey>("Composite rank");
   const [view, setView] = useState<"Table" | "Chart">("Table");
 
-  // Build Recharts data from rank_history arrays in each industry
+  const hasHistory = useMemo(
+    () => data.industries.some((ind) => ind.rank_history.length > 1),
+    [data.industries],
+  );
+
   const chartData = useMemo(() => {
+    if (!hasHistory) return [];
     const weekLabels = data.industries[0]?.rank_history.map((h) => h.week) ?? [];
     return weekLabels.map((week, wi) => {
       const row: Record<string, string | number> = { week };
@@ -299,7 +309,7 @@ export function IndustryRankingTab({ data }: { data: IIIndustryRanking }) {
       });
       return row;
     });
-  }, [data.industries]);
+  }, [data.industries, hasHistory]);
 
   return (
     <div className="px-6 py-5">
@@ -344,10 +354,22 @@ export function IndustryRankingTab({ data }: { data: IIIndustryRanking }) {
           </span>
         </div>
 
-        {view === "Table"
-          ? <TableView sort={sort} industries={data.industries} />
-          : <ChartView industries={data.industries} chartData={chartData} asOfDate={data.as_of_date} />
-        }
+        {view === "Table" ? (
+          <TableView sort={sort} industries={data.industries} />
+        ) : hasHistory ? (
+          <ChartView
+            industries={data.industries}
+            chartData={chartData}
+            asOfDate={data.as_of_date}
+            totalIndustries={data.total_industries}
+          />
+        ) : (
+          <div className="flex items-center justify-center py-16">
+            <span className="text-[13px]" style={{ color: "var(--qc-text-muted)" }}>
+              Rank history not yet available — only current rankings are shown.
+            </span>
+          </div>
+        )}
       </TabularCard>
     </div>
   );

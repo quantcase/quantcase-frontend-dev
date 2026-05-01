@@ -10,8 +10,8 @@ export type CategoryType = "demand" | "macro" | "corporate" | "policy" | "geo" |
 
 export interface IIMeta {
   regime: string;
-  regime_previous: string;
-  regime_changed_weeks_ago: number;
+  regime_previous: string | null;
+  regime_changed_weeks_ago: number | null;
   as_of_date: string;
   week_ending_label: string;
   version: string;
@@ -20,10 +20,10 @@ export interface IIMeta {
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
 export interface IISummaryTiles {
-  market_regime: { value: string; change: string; since_label: string };
-  top_cluster: { name: string; score: number; quartile: QLevel; rank: number };
-  biggest_mover: { name: string; rank_change: string; label: string };
-  news_this_week: { count: number; clusters_affected: number };
+  market_regime: { value: string; change: string | null; since_label: string | null };
+  top_cluster: { name: string; score: number; quartile: QLevel; rank: number } | null;
+  biggest_mover: { name: string; rank_change: string; label: string } | null;
+  news_this_week: { count: number; clusters_affected: number } | null;
 }
 
 export interface IITop5Industry {
@@ -76,9 +76,9 @@ export interface IIDashboard {
   summary_tiles: IISummaryTiles;
   top_5_industries: IITop5Industry[];
   bottom_3_industries: IIBottom3Industry[];
-  portfolio_holdings: IIPortfolioHolding[];
+  portfolio_holdings: IIPortfolioHolding[] | null;
   rotation_signals: IIDashboardRotationSignal[];
-  top_news: IITopNewsItem[];
+  top_news: IITopNewsItem[] | null;
 }
 
 // ── Industry Ranking ──────────────────────────────────────────────────────────
@@ -93,9 +93,9 @@ export interface IIIndustry {
   name: string;
   composite_score: number;
   wow: string;
-  momentum: number;
+  momentum: number | null;
   breadth_pct: number;
-  revisions: number;
+  revisions: number | null;
   valuation: number;
   quartile: QLevel;
   news_tag: string | null;
@@ -172,7 +172,7 @@ export interface IISelectedIndustry {
 
 export interface IIDeepDive {
   available_industries: string[];
-  selected_industry: IISelectedIndustry;
+  selected_industry: IISelectedIndustry | null;
 }
 
 // ── Stock Ranking ─────────────────────────────────────────────────────────────
@@ -216,7 +216,7 @@ export interface IISelectedCluster {
 
 export interface IIStockRanking {
   available_clusters: string[];
-  selected_cluster: IISelectedCluster;
+  selected_cluster: IISelectedCluster | null;
 }
 
 // ── Rotation Alerts ───────────────────────────────────────────────────────────
@@ -228,8 +228,8 @@ export interface IISignalCounts {
   exit_industries: string[];
   trap_count: number;
   trap_industries: string[];
-  news_confirmed_count: number;
-  news_confirmed_detail: string;
+  news_confirmed_count: number | null;
+  news_confirmed_detail: string | null;
 }
 
 export interface IISignalWithNews {
@@ -249,18 +249,18 @@ export interface IISimpleSignal {
 }
 
 export interface IIActiveSignals {
-  entry: IISignalWithNews;
-  exit: IISignalWithNews;
-  trap: IISimpleSignal;
-  emerging: IISimpleSignal;
+  entry: IISignalWithNews | null;
+  exit: IISignalWithNews | null;
+  trap: IISimpleSignal | null;
+  emerging: IISimpleSignal | null;
 }
 
 export interface IIHighConvictionPick {
   ticker: string;
   cluster_label: string;
   context: string;
-  rs_vs_market_pct: string;
-  revisions: string;
+  rs_vs_market_pct: string | null;
+  revisions: string | null;
   quality_score: number;
 }
 
@@ -269,13 +269,13 @@ export interface IIRegimeWeight {
   value_pct: string;
   delta: string | null;
   delta_direction: "positive" | "negative" | null;
-  note: string;
+  note: string | null;
 }
 
 export interface IIRotationAlerts {
   signal_counts: IISignalCounts;
   active_signals: IIActiveSignals;
-  high_conviction_pick: IIHighConvictionPick;
+  high_conviction_pick: IIHighConvictionPick | null;
   regime_weights: IIRegimeWeight[];
 }
 

@@ -44,15 +44,25 @@ export default function IndustryIntelligencePage() {
 
         <div className="flex items-center gap-4">
           {/* Regime badge */}
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-            style={{ background: "var(--qc-up-soft)", border: "1px solid var(--qc-up)" }}
-          >
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--qc-up)" }} />
-            <span className="text-[11px] font-semibold" style={{ color: "var(--qc-up)" }}>
-              {data?.meta.regime ?? "—"} regime
-            </span>
-          </div>
+          {(() => {
+            const regime = data?.meta.regime ?? "";
+            const isRiskOn  = regime.toLowerCase().includes("risk-on")  || regime.toLowerCase().includes("bull");
+            const isRiskOff = regime.toLowerCase().includes("risk-off") || regime.toLowerCase().includes("bear");
+            const bg  = isRiskOn ? "var(--qc-up-soft)"   : isRiskOff ? "var(--qc-down-soft)"   : "var(--qc-surface-panel)";
+            const clr = isRiskOn ? "var(--qc-up)"        : isRiskOff ? "var(--qc-down)"        : "var(--qc-text-muted)";
+            const bdr = isRiskOn ? "var(--qc-up)"        : isRiskOff ? "var(--qc-down)"        : "var(--qc-border-default)";
+            return (
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+                style={{ background: bg, border: `1px solid ${bdr}` }}
+              >
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: clr }} />
+                <span className="text-[11px] font-semibold" style={{ color: clr }}>
+                  {regime || "—"} regime
+                </span>
+              </div>
+            );
+          })()}
 
           <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
             {data?.meta.week_ending_label ?? "Loading…"}

@@ -207,8 +207,34 @@ function RisksContent({ risks, catalysts }: { risks: string; catalysts: string }
 
 export function DeepDiveTab({ data }: { data: IIDeepDive }) {
   const [subTab, setSubTab] = useState<SubTab>("Overview");
-  const [industry, setIndustry] = useState(data.selected_industry.name);
-  const sel: IISelectedIndustry = data.selected_industry;
+  const [industry, setIndustry] = useState(data.selected_industry?.name ?? data.available_industries[0] ?? "");
+  const sel: IISelectedIndustry | null = data.selected_industry;
+
+  if (!sel) {
+    return (
+      <div className="px-6 py-5 flex flex-col gap-4">
+        <div className="relative">
+          <select
+            value={industry}
+            onChange={(e) => setIndustry(e.target.value)}
+            className="w-full appearance-none rounded-[10px] px-4 py-3 text-[16px] font-semibold outline-none cursor-pointer pr-10"
+            style={{
+              border: "1px solid var(--qc-border-default)",
+              background: "var(--qc-surface-card)",
+              color: "var(--qc-text-heading)",
+            }}
+          >
+            {data.available_industries.map((ind) => <option key={ind}>{ind}</option>)}
+          </select>
+        </div>
+        <div className="flex items-center justify-center py-16">
+          <span className="text-[13px]" style={{ color: "var(--qc-text-muted)" }}>
+            Select an industry above to view its deep-dive analysis.
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   const breadcrumb = sel.breadcrumb;
 

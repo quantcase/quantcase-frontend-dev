@@ -115,8 +115,35 @@ function Breadcrumb({ items }: { items: string[] }) {
 // ── Main tab ──────────────────────────────────────────────────────────────────
 
 export function StockRankingTab({ data }: { data: IIStockRanking }) {
-  const [cluster, setCluster] = useState(data.selected_cluster.name);
+  const [cluster, setCluster] = useState(data.selected_cluster?.name ?? data.available_clusters[0] ?? "");
   const sel = data.selected_cluster;
+
+  if (!sel) {
+    return (
+      <div className="px-6 py-5 flex flex-col gap-4">
+        <div className="relative">
+          <select
+            value={cluster}
+            onChange={(e) => setCluster(e.target.value)}
+            className="appearance-none rounded-[10px] px-4 py-3 text-[16px] font-semibold outline-none cursor-pointer pr-10 w-full max-w-sm"
+            style={{
+              border: "1px solid var(--qc-border-default)",
+              background: "var(--qc-surface-card)",
+              color: "var(--qc-text-heading)",
+            }}
+          >
+            {data.available_clusters.map((c) => <option key={c}>{c}</option>)}
+          </select>
+          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 pointer-events-none" style={{ color: "var(--qc-text-muted)" }} />
+        </div>
+        <div className="flex items-center justify-center py-16">
+          <span className="text-[13px]" style={{ color: "var(--qc-text-muted)" }}>
+            Select a cluster above to view its stock rankings.
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-6 py-5 flex flex-col gap-5">

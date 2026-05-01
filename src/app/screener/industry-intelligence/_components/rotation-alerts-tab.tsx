@@ -102,7 +102,7 @@ function HighConvictionCard({ pick }: { pick: IIHighConvictionPick }) {
           <span style={{ color: "#C084FC" }}>{pick.ticker}</span>{` · ${pick.cluster_label}`}
         </p>
         <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-          RS vs market {pick.rs_vs_market_pct} · Revisions {pick.revisions} · Quality {pick.quality_score}
+          RS vs market {pick.rs_vs_market_pct ?? "—"} · Revisions {pick.revisions ?? "—"} · Quality {pick.quality_score}
         </p>
       </div>
       <Button
@@ -142,7 +142,7 @@ function RegimeWeightsPanel({ weights, regime }: { weights: IIRegimeWeight[]; re
                 </span>
               )}
             </div>
-            <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{w.note}</span>
+            {w.note && <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{w.note}</span>}
           </div>
         ))}
       </div>
@@ -155,48 +155,60 @@ function RegimeWeightsPanel({ weights, regime }: { weights: IIRegimeWeight[]; re
 export function RotationAlertsTab({ data, meta }: { data: IIRotationAlerts; meta: IIMeta }) {
   const { signal_counts: sc, active_signals: as_, high_conviction_pick, regime_weights } = data;
 
+  const hasAnySignal = as_.entry || as_.exit || as_.trap || as_.emerging || high_conviction_pick;
+
   return (
     <div className="px-6 py-5 flex flex-col gap-5">
 
       {/* Signal stat tiles */}
       <div className="grid grid-cols-4 gap-3">
-        <SignalTile label="Entry signals"  value={String(sc.entry_count)}           valueColor="var(--qc-up)"   sublabel={sc.entry_industries.join(" · ")} />
-        <SignalTile label="Exit signals"   value={String(sc.exit_count)}            valueColor="var(--qc-down)" sublabel={sc.exit_industries.join(" · ")} />
-        <SignalTile label="Trap alerts"    value={String(sc.trap_count)}            valueColor="var(--qc-warn)" sublabel={sc.trap_industries.join(" · ")} />
-        <SignalTile label="News confirmed" value={String(sc.news_confirmed_count)}  valueColor="var(--qc-blue)" sublabel={sc.news_confirmed_detail} />
+        <SignalTile label="Entry signals"  value={String(sc.entry_count)}  valueColor="var(--qc-up)"   sublabel={sc.entry_industries.join(" · ") || "—"} />
+        <SignalTile label="Exit signals"   value={String(sc.exit_count)}   valueColor="var(--qc-down)" sublabel={sc.exit_industries.join(" · ") || "—"} />
+        <SignalTile label="Trap alerts"    value={String(sc.trap_count)}   valueColor="var(--qc-warn)" sublabel={sc.trap_industries.join(" · ") || "—"} />
+        <SignalTile label="News confirmed" value={String(sc.news_confirmed_count ?? "—")} valueColor="var(--qc-blue)" sublabel={sc.news_confirmed_detail ?? "—"} />
       </div>
 
       {/* Active signals */}
       <TabularCard title="Active Signals">
-        <div className="grid grid-cols-3 gap-4 p-1">
-
-          <SignalColumnCard
-            type="entry"
-            industry={as_.entry.industry}
-            detail={as_.entry.detail}
-            newsTag={as_.entry.confirming_news.category}
-            newsHeadline={as_.entry.confirming_news.headline}
-            newsDir={as_.entry.confirming_news.sentiment_direction}
-            newsTags={as_.entry.confirming_news.factor_tags.join(" · ")}
-          />
-
-          <SignalColumnCard
-            type="exit"
-            industry={as_.exit.industry}
-            detail={as_.exit.detail}
-            newsTag={as_.exit.confirming_news.category}
-            newsHeadline={as_.exit.confirming_news.headline}
-            newsDir={as_.exit.confirming_news.sentiment_direction}
-            newsTags={as_.exit.confirming_news.factor_tags.join(" · ")}
-          />
-
-          <div className="flex flex-col gap-3">
-            <SignalCard type="trap"     industry={as_.trap.industry}     detail={as_.trap.detail} />
-            <SignalCard type="emerging" industry={as_.emerging.industry} detail={as_.emerging.detail} />
-            <HighConvictionCard pick={high_conviction_pick} />
+        {!hasAnySignal ? (
+          <div className="flex items-center justify-center py-10">
+            <span className="text-[13px]" style={{ color: "var(--qc-text-muted)" }}>No active signals this week.</span>
           </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-4 p-1">
+            {as_.entry && (
+              <SignalColumnCard
+                type="entry"
+                industry={as_.entry.industry}
+                detail={as_.entry.detail}
+                newsTag={as_.entry.confirming_news.category}
+                newsHeadline={as_.entry.confirming_news.headline}
+                newsDir={as_.entry.confirming_news.sentiment_direction}
+                newsTags={as_.entry.confirming_news.factor_tags.join(" · ")}
+              />
+            )}
 
-        </div>
+            {as_.exit && (
+              <SignalColumnCard
+                type="exit"
+                industry={as_.exit.industry}
+                detail={as_.exit.detail}
+                newsTag={as_.exit.confirming_news.category}
+                newsHeadline={as_.exit.confirming_news.headline}
+                newsDir={as_.exit.confirming_news.sentiment_direction}
+                newsTags={as_.exit.confirming_news.factor_tags.join(" · ")}
+              />
+            )}
+
+            {(as_.trap || as_.emerging || high_conviction_pick) && (
+              <div className="flex flex-col gap-3">
+                {as_.trap && <SignalCard type="trap" industry={as_.trap.industry} detail={as_.trap.detail} />}
+                {as_.emerging && <SignalCard type="emerging" industry={as_.emerging.industry} detail={as_.emerging.detail} />}
+                {high_conviction_pick && <HighConvictionCard pick={high_conviction_pick} />}
+              </div>
+            )}
+          </div>
+        )}
       </TabularCard>
 
       <RegimeWeightsPanel weights={regime_weights} regime={meta.regime} />

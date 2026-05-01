@@ -12,9 +12,13 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     if (pathname === "/signin") return;
 
     const token = localStorage.getItem("qc_at");
+    if (!token) {
+      router.push("/signin");
+      return;
+    }
 
     fetch(`${BACKEND_URL}/api/auth/me`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: { Authorization: `Bearer ${token}` },
     }).then((res) => {
       if (res.status === 401) {
         localStorage.removeItem("qc_at");

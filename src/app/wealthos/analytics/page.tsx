@@ -26,7 +26,7 @@ import {
 import type { RiskProfileType } from "@/types/portfolio";
 import type { SegmentAnalytic } from "@/types/wealthos";
 
-const LIME_GRADIENT = "linear-gradient(135deg, #c8f569 0%, #a8e63d 40%, #7ecb1a 100%)";
+const LIME_GRADIENT = "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)";
 
 const RISK_COLOR: Record<RiskProfileType, string> = {
   conservative: "var(--qc-up)",
@@ -50,10 +50,10 @@ function StatPill({ label, value }: { label: string; value: string }) {
         gap: 1,
       }}
     >
-      <span style={{ fontSize: 10, color: "rgba(15,23,43,0.55)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+      <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
         {label}
       </span>
-      <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)", letterSpacing: "-0.02em" }}>
+      <span style={{ fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.95)", fontFamily: "var(--font-ibm-plex-mono, monospace)", letterSpacing: "-0.02em" }}>
         {value}
       </span>
     </div>
@@ -104,7 +104,7 @@ function RMSelectorRow({
                 justifyContent: "center",
                 fontSize: 10,
                 fontWeight: 700,
-                color: isSelected ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+                color: isSelected ? "rgba(255,255,255,0.95)" : "var(--qc-text-muted)",
                 flexShrink: 0,
               }}
             >
@@ -216,7 +216,7 @@ function RMAnalyticsPanel({ rmId, rmName }: { rmId: string; rmName: string }) {
             justifyContent: "center",
             fontSize: 11,
             fontWeight: 700,
-            color: "var(--qc-text-heading)",
+            color: "rgba(255,255,255,0.95)",
             flexShrink: 0,
           }}
         >
@@ -527,14 +527,14 @@ function RightPanel({
           borderRadius: 16,
           background: LIME_GRADIENT,
           padding: "20px 20px 18px",
-          border: "1px solid rgba(168,230,61,0.3)",
+          border: "1px solid rgba(255,255,255,0.1)",
         }}
       >
         <p
           style={{
             fontSize: 9,
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
-            color: "rgba(15,23,43,0.5)",
+            color: "rgba(255,255,255,0.6)",
             textTransform: "uppercase",
             letterSpacing: "0.1em",
             marginBottom: 6,
@@ -546,7 +546,7 @@ function RightPanel({
           style={{
             fontSize: 32,
             fontWeight: 800,
-            color: "var(--qc-text-heading)",
+            color: "rgba(255,255,255,0.95)",
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
             letterSpacing: "-0.04em",
             lineHeight: 1,

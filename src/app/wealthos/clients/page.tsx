@@ -207,31 +207,31 @@ function RightPanel({
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(0,0,0,0.45)", marginBottom: 2 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.6)", marginBottom: 2 }}>
                 Client Portfolio
               </p>
             </div>
-            <div className="flex items-center justify-center size-7 rounded-[8px]" style={{ background: "rgba(0,0,0,0.12)" }}>
-              <Users className="size-3.5" style={{ color: "rgba(0,0,0,0.55)" }} />
+            <div className="flex items-center justify-center size-7 rounded-[8px]" style={{ background: "rgba(255,255,255,0.15)" }}>
+              <Users className="size-3.5" style={{ color: "rgba(255,255,255,0.8)" }} />
             </div>
           </div>
           <div className="mb-4">
             <div className="flex items-end gap-1.5 mb-0.5">
-              <span style={{ fontSize: 48, fontWeight: 500, lineHeight: 1, color: "var(--qc-accent-primary-fg)", letterSpacing: "-0.03em" }}>{total}</span>
-              <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(0,0,0,0.45)", marginBottom: 6 }}>clients</span>
+              <span style={{ fontSize: 48, fontWeight: 500, lineHeight: 1, color: "rgba(255,255,255,0.95)", letterSpacing: "-0.03em" }}>{total}</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.6)", marginBottom: 6 }}>clients</span>
             </div>
-            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.5)" }}>across all segments</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>across all segments</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(0,0,0,0.12)" }}>
-              <TrendingDown className="size-3" style={{ color: "var(--qc-accent-primary-fg)" }} />
-              <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-accent-primary-fg)" }}>
+            <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(255,255,255,0.15)" }}>
+              <TrendingDown className="size-3" style={{ color: "rgba(255,255,255,0.9)" }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>
                 {highRisk.length} at-risk
               </span>
             </div>
-            <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(0,0,0,0.12)" }}>
-              <Activity className="size-3" style={{ color: "var(--qc-accent-primary-fg)" }} />
-              <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-accent-primary-fg)" }}>
+            <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(255,255,255,0.15)" }}>
+              <Activity className="size-3" style={{ color: "rgba(255,255,255,0.9)" }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>
                 {(avgChurn * 100).toFixed(0)}% avg churn
               </span>
             </div>

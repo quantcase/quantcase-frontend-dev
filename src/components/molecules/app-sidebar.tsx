@@ -24,6 +24,8 @@ const navItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+
+  if (pathname === "/signin") return null;
   const isDark = theme === "dark-purple";
 
   return (

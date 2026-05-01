@@ -195,7 +195,7 @@ export default function PipelinesPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-[calc(100vh-48px)] overflow-hidden">
+    <div className="flex h-screen overflow-hidden">
       <PluginSidebar
         plugins={plugins}
         selectedPluginId={selectedPluginId}
@@ -221,47 +221,53 @@ export default function PipelinesPage() {
           </div>
         )}
 
-        {/* Tab switcher */}
-        <div className="flex border-b border-[var(--qc-border-default)] bg-white rounded-t-[10px] px-4">
-          {(["plugin", "skills"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                activeTab === tab
-                  ? "border-[var(--qc-border-active)] text-[var(--qc-text-heading)]"
-                  : "border-transparent text-[var(--qc-text-muted)] hover:text-[var(--qc-text-heading)]"
-              }`}
-            >
-              {tab === "plugin" ? "Plugin Chain" : "Skills Library"}
-            </button>
-          ))}
+        {/* Tab card: tabs + content unified */}
+        <div className="rounded-[10px] border border-[var(--qc-border-default)] bg-[var(--qc-surface-panel)] overflow-hidden">
+          {/* Tab strip */}
+          <div className="flex border-b border-[var(--qc-border-default)] bg-white px-4">
+            {(["plugin", "skills"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                  activeTab === tab
+                    ? "border-[var(--qc-border-active)] text-[var(--qc-text-heading)]"
+                    : "border-transparent text-[var(--qc-text-muted)] hover:text-[var(--qc-text-heading)]"
+                }`}
+              >
+                {tab === "plugin" ? "Plugin Chain" : "Skills Library"}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab content */}
+          <div className="p-4">
+            {activeTab === "plugin" && (
+              <PluginChainTab
+                selectedPlugin={selectedPlugin}
+                chain={pluginSkillChain}
+                availableToAdd={availableToAdd}
+                loading={loading.chain}
+                addSkillId={addSkillId}
+                onAddSkillIdChange={setAddSkillId}
+                onAddSkill={addSkillToChain}
+                onMoveSkill={moveSkill}
+                onRemoveSkill={removeSkillFromChain}
+              />
+            )}
+
+            {activeTab === "skills" && (
+              <SkillsLibraryTab
+                skills={allSkills}
+                loading={loading.skills}
+                onRowClick={setDrawerSkill}
+                onToggleActive={toggleSkillActive}
+                onDelete={deleteSkill}
+                onNewSkillFormOpen={() => { setShowNewSkillForm(true); setMutationError(null); }}
+              />
+            )}
+          </div>
         </div>
-
-        {activeTab === "plugin" && (
-          <PluginChainTab
-            selectedPlugin={selectedPlugin}
-            chain={pluginSkillChain}
-            availableToAdd={availableToAdd}
-            loading={loading.chain}
-            addSkillId={addSkillId}
-            onAddSkillIdChange={setAddSkillId}
-            onAddSkill={addSkillToChain}
-            onMoveSkill={moveSkill}
-            onRemoveSkill={removeSkillFromChain}
-          />
-        )}
-
-        {activeTab === "skills" && (
-          <SkillsLibraryTab
-            skills={allSkills}
-            loading={loading.skills}
-            onRowClick={setDrawerSkill}
-            onToggleActive={toggleSkillActive}
-            onDelete={deleteSkill}
-            onNewSkillFormOpen={() => { setShowNewSkillForm(true); setMutationError(null); }}
-          />
-        )}
       </main>
 
       {/* Skill detail drawer */}

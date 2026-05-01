@@ -68,12 +68,12 @@ function RMRow({
           height: 32,
           borderRadius: "50%",
           background: isSelected
-            ? "linear-gradient(135deg, #c8f569 0%, #a8e63d 100%)"
+            ? "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)"
             : "var(--qc-surface-panel)",
           border: "1px solid var(--qc-border-default)",
           fontSize: 11,
           fontWeight: 700,
-          color: isSelected ? "#1a3a00" : "var(--qc-text-heading)",
+          color: isSelected ? "rgba(255,255,255,0.95)" : "var(--qc-text-heading)",
           letterSpacing: "0.02em",
         }}
       >
@@ -322,7 +322,7 @@ function RightPanel({
       <div
         className="rounded-[14px] overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #c8f569 0%, #a8e63d 40%, #7ecb1a 100%)",
+          background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
           padding: "20px 18px 16px",
         }}
       >
@@ -332,7 +332,7 @@ function RightPanel({
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
             fontWeight: 700,
             letterSpacing: "0.12em",
-            color: "#2d5a00",
+            color: "rgba(255,255,255,0.6)",
             textTransform: "uppercase",
             marginBottom: 8,
           }}
@@ -346,14 +346,14 @@ function RightPanel({
                 fontSize: 40,
                 fontWeight: 800,
                 fontFamily: "var(--font-ibm-plex-mono, monospace)",
-                color: "#1a3a00",
+                color: "rgba(255,255,255,0.95)",
                 letterSpacing: "-0.04em",
                 lineHeight: 1,
               }}
             >
               {rms.length}
             </p>
-            <p style={{ fontSize: 11, color: "#3a6e00", marginTop: 2 }}>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 2 }}>
               Relationship Managers
             </p>
           </div>
@@ -361,23 +361,23 @@ function RightPanel({
         <div className="flex gap-2">
           <div
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
-            style={{ background: "rgba(26,58,0,0.15)" }}
+            style={{ background: "rgba(255,255,255,0.15)" }}
           >
-            <Users className="size-2.5" style={{ color: "#2d5a00" }} />
-            <span style={{ fontSize: 10, fontWeight: 700, color: "#1a3a00", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+            <Users className="size-2.5" style={{ color: "rgba(255,255,255,0.8)" }} />
+            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.95)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
               {totalClients}
             </span>
-            <span style={{ fontSize: 10, color: "#3a6e00" }}>total clients</span>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>total clients</span>
           </div>
           <div
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
-            style={{ background: "rgba(26,58,0,0.15)" }}
+            style={{ background: "rgba(255,255,255,0.15)" }}
           >
-            <Star className="size-2.5" style={{ color: "#2d5a00" }} />
-            <span style={{ fontSize: 10, fontWeight: 700, color: "#1a3a00", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+            <Star className="size-2.5" style={{ color: "rgba(255,255,255,0.8)" }} />
+            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.95)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
               {avgScore.toFixed(1)}
             </span>
-            <span style={{ fontSize: 10, color: "#3a6e00" }}>avg score</span>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>avg score</span>
           </div>
         </div>
       </div>
@@ -410,10 +410,10 @@ function RightPanel({
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #c8f569 0%, #a8e63d 100%)",
+                background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
                 fontSize: 12,
                 fontWeight: 700,
-                color: "#1a3a00",
+                color: "rgba(255,255,255,0.95)",
               }}
             >
               {topRM.name

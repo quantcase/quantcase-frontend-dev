@@ -142,7 +142,9 @@ function TopBarInner() {
     if (!isFactorActive) setFactorOpen(false);
   }, [isFactorActive]);
 
-  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage) return null;
+  const isAdmin = pathname.startsWith("/admin");
+
+  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin) return null;
 
   let leftZone: React.ReactNode = null;
 

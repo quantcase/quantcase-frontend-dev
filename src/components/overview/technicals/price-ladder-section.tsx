@@ -201,40 +201,46 @@ export function PriceLadderSection({
               borderRadius: 2,
             }}
           />
-          {r1 != null && (
-            <LadderRow
-              labelK="Resistance 1" chipLabel="R1"
-              chipBg="var(--qc-down-soft)" chipColor="var(--qc-down)"
-              nodeType="res" value={fp(r1)} pct={pctChange(r1, cmp)}
-              pctType="neutral" isCurrent={false}
-            />
-          )}
-          <LadderRow
-            labelK="All-time / 52W high" chipLabel="ATH"
-            chipBg="var(--qc-warn-soft)" chipColor="var(--qc-warn)"
-            nodeType="ath" value={fp(ath)} pct={pctChange(ath, cmp)}
-            pctType="neutral" isCurrent={false}
-          />
-          <LadderRow
-            labelK="Current price" chipLabel="CMP"
-            chipBg="var(--qc-text-heading)" chipColor="#fff"
-            nodeType="cur" value={fp(cmp)} pct="—"
-            pctType="neutral" isCurrent
-          />
-          {s1 != null && (
-            <LadderRow
-              labelK="Support 1" chipLabel="S1"
-              chipBg="var(--qc-up-soft)" chipColor="var(--qc-up)"
-              nodeType="sup" value={fp(s1)} pct={pctChange(s1, cmp)}
-              pctType="pos" isCurrent={false}
-            />
-          )}
-          <LadderRow
-            labelK="52-week low" chipLabel="52W"
-            chipBg="var(--qc-chip-bg, #F2F1EC)" chipColor="var(--qc-text-body)"
-            nodeType="plain" value={fp(low52w)} pct={pctChange(low52w, cmp)}
-            pctType="pos" isCurrent={false}
-          />
+          {((): React.ReactNode => {
+            type LadderEntry = LadderRowProps & { price: number };
+            const entries: LadderEntry[] = [
+              {
+                price: cmp, labelK: "Current price", chipLabel: "CMP",
+                chipBg: "var(--qc-text-heading)", chipColor: "#fff",
+                nodeType: "cur", value: fp(cmp), pct: "—",
+                pctType: "neutral", isCurrent: true,
+              },
+              {
+                price: ath, labelK: "All-time / 52W high", chipLabel: "ATH",
+                chipBg: "var(--qc-warn-soft)", chipColor: "var(--qc-warn)",
+                nodeType: "ath", value: fp(ath), pct: pctChange(ath, cmp),
+                pctType: "neutral", isCurrent: false,
+              },
+              {
+                price: low52w, labelK: "52-week low", chipLabel: "52W",
+                chipBg: "var(--qc-chip-bg, #F2F1EC)", chipColor: "var(--qc-text-body)",
+                nodeType: "plain", value: fp(low52w), pct: pctChange(low52w, cmp),
+                pctType: "pos", isCurrent: false,
+              },
+              ...(r1 != null ? [{
+                price: r1, labelK: "Resistance 1", chipLabel: "R1",
+                chipBg: "var(--qc-down-soft)", chipColor: "var(--qc-down)",
+                nodeType: "res" as const, value: fp(r1), pct: pctChange(r1, cmp),
+                pctType: "neutral" as const, isCurrent: false,
+              }] : []),
+              ...(s1 != null ? [{
+                price: s1, labelK: "Support 1", chipLabel: "S1",
+                chipBg: "var(--qc-up-soft)", chipColor: "var(--qc-up)",
+                nodeType: "sup" as const, value: fp(s1), pct: pctChange(s1, cmp),
+                pctType: "pos" as const, isCurrent: false,
+              }] : []),
+            ];
+            return entries
+              .sort((a, b) => b.price - a.price)
+              .map(({ price: _price, ...rowProps }) => (
+                <LadderRow key={rowProps.chipLabel} {...rowProps} />
+              ));
+          })()}
         </div>
 
         {/* Range + stats */}

@@ -202,41 +202,41 @@ function RightPanel({
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(0,0,0,0.45)", marginBottom: 2 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.6)", marginBottom: 2 }}>
                 Today&apos;s Briefing
               </p>
-              <p style={{ fontSize: 11, color: "rgba(0,0,0,0.5)" }}>{date}</p>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>{date}</p>
             </div>
-            <div className="flex items-center justify-center size-7 rounded-[8px]" style={{ background: "rgba(0,0,0,0.12)" }}>
-              <Target className="size-3.5" style={{ color: "rgba(0,0,0,0.55)" }} />
+            <div className="flex items-center justify-center size-7 rounded-[8px]" style={{ background: "rgba(255,255,255,0.15)" }}>
+              <Target className="size-3.5" style={{ color: "rgba(255,255,255,0.8)" }} />
             </div>
           </div>
 
           <div className="mb-4">
             <div className="flex items-end gap-1.5 mb-0.5">
-              <span style={{ fontSize: 48, fontWeight: 500, lineHeight: 1, color: "var(--qc-accent-primary-fg)", letterSpacing: "-0.03em" }}>{total}</span>
-              <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(0,0,0,0.45)", marginBottom: 6 }}>clients</span>
+              <span style={{ fontSize: 48, fontWeight: 500, lineHeight: 1, color: "rgba(255,255,255,0.95)", letterSpacing: "-0.03em" }}>{total}</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.6)", marginBottom: 6 }}>clients</span>
             </div>
-            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.5)" }}>require your attention today</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>require your attention today</p>
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap">
             {counts.HIGH > 0 && (
-              <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(0,0,0,0.12)" }}>
+              <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(255,255,255,0.15)" }}>
                 <div className="size-1.5 rounded-full" style={{ background: "var(--qc-down)" }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-accent-primary-fg)" }}>{counts.HIGH} high</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>{counts.HIGH} high</span>
               </div>
             )}
             {counts.MEDIUM > 0 && (
-              <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(0,0,0,0.12)" }}>
+              <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(255,255,255,0.15)" }}>
                 <div className="size-1.5 rounded-full" style={{ background: "var(--qc-warn)" }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-accent-primary-fg)" }}>{counts.MEDIUM} med</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>{counts.MEDIUM} med</span>
               </div>
             )}
             {counts.LOW > 0 && (
-              <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(0,0,0,0.12)" }}>
+              <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(255,255,255,0.15)" }}>
                 <div className="size-1.5 rounded-full" style={{ background: "var(--qc-up)" }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-accent-primary-fg)" }}>{counts.LOW} low</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>{counts.LOW} low</span>
               </div>
             )}
           </div>

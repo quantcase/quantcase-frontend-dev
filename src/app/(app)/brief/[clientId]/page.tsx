@@ -355,7 +355,7 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
         style={{ borderBottom: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}
       >
         <div className="flex items-center gap-2 text-[12px]">
-          <Link href="/" style={{ color: "var(--qc-text-muted)", textDecoration: "none" }}>Today</Link>
+          <Link href="/dashboard" style={{ color: "var(--qc-text-muted)", textDecoration: "none" }}>Today</Link>
           <span style={{ color: "var(--qc-border-default)" }}>/</span>
           <span style={{ color: "var(--qc-text-muted)" }}>Opportunities</span>
           <span style={{ color: "var(--qc-border-default)" }}>/</span>

@@ -102,7 +102,7 @@ function TopBarInner() {
   const symbol = searchParams.get("symbol");
   const rmId = searchParams.get("rm_id");
 
-  const isHome = pathname === "/";
+  const isHome = pathname === "/dashboard";
   const isScreenerHomePage = pathname === "/screener/home";
   const isBasketPage = pathname === "/screener/basket";
 

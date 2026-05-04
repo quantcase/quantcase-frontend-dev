@@ -155,7 +155,7 @@ function SummaryContent() {
                 )}
               </div>
               <Link
-                href="/"
+                href="/dashboard"
                 className="px-4 py-1.5 text-sm font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors text-zinc-900 dark:text-zinc-50 whitespace-nowrap"
               >
                 Back to Home

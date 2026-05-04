@@ -3,11 +3,12 @@
 import { MetricTile } from "@/components/molecules/metric-tile";
 import { TabularCard } from "@/components/molecules/tabular-card";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import {
   Table, TableBody, TableHead, TableHeader, TableRow, TableCell,
 } from "@/components/ui/table";
-import type { IIDashboard, QLevel } from "@/types/industry-intelligence";
+import type { IIDashboard, QLevel, IITopNewsItem, IIDashboardRotationSignal } from "@/types/industry-intelligence";
 
 // ── Null safety helpers ───────────────────────────────────────────────────────
 
@@ -59,6 +60,67 @@ function ScoreBar({ score, color }: { score: number; color: string }) {
 function WoW({ v }: { v: string }) {
   const val = safeStr(v);
   return <span className="text-[12px] font-medium tabular-nums" style={{ color: wowColor(val) }}>{val}</span>;
+}
+
+// ── Rotation signal card ──────────────────────────────────────────────────────
+
+function RotationSignalCard({ sig }: { sig: IIDashboardRotationSignal }) {
+  const dir = sig.direction;
+  const bg    = dir === "up"   ? "var(--qc-up-soft)"   : dir === "down" ? "var(--qc-down-soft)"   : "var(--qc-warn-soft)";
+  const color = dir === "up"   ? "var(--qc-up)"         : dir === "down" ? "var(--qc-down)"         : "var(--qc-warn)";
+  const border = color;
+  const Icon  = dir === "up"   ? TrendingUp             : dir === "down" ? TrendingDown             : Minus;
+  return (
+    <Card className="rounded-[10px] shadow-none px-4 py-3 flex flex-col gap-1.5 mb-2" style={{ background: bg, borderColor: border }}>
+      <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest" style={{ color }}>
+        <Icon className="h-3 w-3" />{sig.type}
+      </span>
+      <p className="text-[14px] font-semibold" style={{ color }}>{sig.industry_name}</p>
+      <p className="text-[12px] leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>{sig.detail}</p>
+    </Card>
+  );
+}
+
+// ── News item card ────────────────────────────────────────────────────────────
+
+function NewsItemCard({ item }: { item: IITopNewsItem }) {
+  const catBg =
+    item.category_style === "blue"   ? "var(--qc-blue)"           :
+    item.category_style === "warn"   ? "var(--qc-warn)"           :
+    "var(--qc-accent-primary)";
+  const sentDir = item.sentiment_direction;
+  const sentColor =
+    sentDir === "up" || sentDir === "positive" ? "var(--qc-up)"   :
+    sentDir === "down" || sentDir === "negative" ? "var(--qc-down)" :
+    "var(--qc-warn)";
+  const SentIcon = sentDir === "up" || sentDir === "positive" ? TrendingUp : sentDir === "down" || sentDir === "negative" ? TrendingDown : Minus;
+
+  return (
+    <Card className="rounded-[10px] shadow-none px-4 py-3 flex flex-col gap-2 mb-2" style={{ borderColor: "var(--qc-border-default)" }}>
+      <div className="flex items-center gap-2 flex-wrap">
+        <Badge className="text-[9px] font-bold tracking-widest px-2 py-0.5" style={{ background: catBg, color: "#fff", borderColor: "transparent" }}>
+          {item.category}
+        </Badge>
+        {item.extra_badge && (
+          <Badge variant="outline" className="text-[9px] px-2 py-0.5">{item.extra_badge}</Badge>
+        )}
+      </div>
+      <p className="text-[13px] font-medium leading-snug" style={{ color: "var(--qc-text-heading)" }}>{item.headline}</p>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: sentColor }}>
+          <SentIcon className="h-3 w-3" />{item.sentiment}
+        </span>
+        <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{item.source}</span>
+      </div>
+      {item.industry_tags?.length > 0 && (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {item.industry_tags.map((t) => (
+            <Badge key={t} variant="outline" className="text-[10px] px-1.5 py-0.5">{t}</Badge>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
 }
 
 // ── Dashboard Tab ─────────────────────────────────────────────────────────────
@@ -179,29 +241,19 @@ export function DashboardTab({ data }: { data: IIDashboard }) {
         <div style={{ width: 340 }}>
 
           <TabularCard title="Rotation Signals & Alerts" titleCase>
-            {rotation_signals?.map((sig, i) => {
-              return (
-                <Card key={i}>
-                  <CardContent>
-                    <p>{safeStr(sig?.type)}</p>
-                    <p>{safeStr(sig?.industry_name)}</p>
-                    <p>{safeStr(sig?.detail)}</p>
-                  </CardContent>
-                </Card>
-              );
-            }) ?? null}
+            <div className="p-1">
+              {rotation_signals?.length
+                ? rotation_signals.map((sig, i) => <RotationSignalCard key={i} sig={sig} />)
+                : <p className="text-[12px] py-2" style={{ color: "var(--qc-text-muted)" }}>No signals this week.</p>}
+            </div>
           </TabularCard>
 
           <TabularCard title="Top News This Week" titleCase>
-            {top_news?.map((item, i) => (
-              <Card key={i}>
-                <CardContent>
-                  <p>{safeStr(item?.category)}</p>
-                  <p>{safeStr(item?.sentiment)}</p>
-                  <p>{safeStr(item?.headline)}</p>
-                </CardContent>
-              </Card>
-            )) ?? null}
+            <div className="p-1">
+              {top_news?.length
+                ? top_news.map((item, i) => <NewsItemCard key={i} item={item} />)
+                : null}
+            </div>
           </TabularCard>
 
         </div>

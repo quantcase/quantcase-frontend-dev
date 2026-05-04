@@ -259,7 +259,7 @@ function ChartView({
                 stroke={CHART_COLORS[i % CHART_COLORS.length]}
                 strokeWidth={active ? 2 : 0.75}
                 opacity={active ? 1 : 0.1}
-                dot={false}
+                dot={chartData.length <= 1 ? { r: 3, strokeWidth: 0 } : false}
                 activeDot={active ? { r: 4, strokeWidth: 0 } : false}
                 isAnimationActive={false}
               />
@@ -294,14 +294,9 @@ export function IndustryRankingTab({ data }: { data: IIIndustryRanking }) {
   const [sort, setSort] = useState<SortKey>("Composite rank");
   const [view, setView] = useState<"Table" | "Chart">("Table");
 
-  const hasHistory = useMemo(
-    () => data.industries.some((ind) => ind.rank_history.length > 1),
-    [data.industries],
-  );
-
   const chartData = useMemo(() => {
-    if (!hasHistory) return [];
     const weekLabels = data.industries[0]?.rank_history.map((h) => h.week) ?? [];
+    if (weekLabels.length === 0) return [];
     return weekLabels.map((week, wi) => {
       const row: Record<string, string | number> = { week };
       data.industries.forEach((ind) => {
@@ -309,7 +304,7 @@ export function IndustryRankingTab({ data }: { data: IIIndustryRanking }) {
       });
       return row;
     });
-  }, [data.industries, hasHistory]);
+  }, [data.industries]);
 
   return (
     <div className="px-6 py-5">
@@ -356,19 +351,13 @@ export function IndustryRankingTab({ data }: { data: IIIndustryRanking }) {
 
         {view === "Table" ? (
           <TableView sort={sort} industries={data.industries} />
-        ) : hasHistory ? (
+        ) : (
           <ChartView
             industries={data.industries}
             chartData={chartData}
             asOfDate={data.as_of_date}
             totalIndustries={data.total_industries}
           />
-        ) : (
-          <div className="flex items-center justify-center py-16">
-            <span className="text-[13px]" style={{ color: "var(--qc-text-muted)" }}>
-              Rank history not yet available — only current rankings are shown.
-            </span>
-          </div>
         )}
       </TabularCard>
     </div>

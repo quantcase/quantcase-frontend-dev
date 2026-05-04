@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { SignInPreviewCard } from "./SignInPreviewCard";
 
 const SLIDE_LABELS = [
@@ -100,7 +101,7 @@ export function SignInHeroPanel() {
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         {/* Logo + Wordmark + Headline stacked */}
-        <div className="flex items-center gap-4">
+        <Link href="/" className="flex items-center gap-4">
           <div
             className="flex items-center justify-center rounded-full flex-shrink-0"
             style={{ width: 52, height: 52, background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.18)" }}
@@ -137,7 +138,7 @@ export function SignInHeroPanel() {
               </AnimatePresence>
             </h1>
           </div>
-        </div>
+        </Link>
       </motion.div>
 
       {/* Preview card */}

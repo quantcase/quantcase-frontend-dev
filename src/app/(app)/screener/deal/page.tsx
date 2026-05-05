@@ -12,8 +12,6 @@ import type { DFactorResponse } from "@/types/deal";
 
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { TargetPriceMatrix } from "@/components/deal/target-price-matrix";
-import { RiskRewardSummary } from "@/components/deal/risk-reward-summary";
-import { DetailedAnalysis } from "@/components/deal/detailed-analysis";
 import { DealOverview } from "@/components/deal/deal-overview";
 import { EpsEngine } from "@/components/deal/eps-engine";
 import { HistoricalPerformance } from "@/components/deal/historical-performance";
@@ -285,7 +283,7 @@ function DealContent() {
         <div className="flex-1 min-w-0 space-y-6">
           {data.overview && (
             <div id="score">
-              <DealOverview data={data.overview} />
+              <DealOverview data={data.overview} riskReward={data.risk_reward_summary} />
             </div>
           )}
           <div id="target-price">

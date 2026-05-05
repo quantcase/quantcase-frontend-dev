@@ -120,6 +120,14 @@ export interface ScreenerData {
     website: string;
     employees: number;
     country: string;
+    email?: string | null;
+    isin?: string | null;
+    cin?: string | null;
+    bseCode?: number | null;
+    incorporationYear?: number | null;
+    listingDate?: string | null;
+    ownershipGroup?: string | null;
+    mainProduct?: string | null;
   };
   quote: {
     price: number;

@@ -1,50 +1,7 @@
 "use client";
 
 import { formatINR } from "@/lib/utils";
-import type { QuarterlyTrend } from "@/types/screener";
-
-// ─── Sparkline ────────────────────────────────────────────────────────────────
-
-function sparkPoints(data: QuarterlyTrend[], key: keyof QuarterlyTrend, invert = false): string {
-  const vals = data
-    .map((q) => q[key] as number | null)
-    .filter((v) => v != null) as number[];
-  if (vals.length === 0) return "";
-  const min = Math.min(...vals);
-  const max = Math.max(...vals);
-  const range = max - min || 1;
-  const step = 100 / Math.max(vals.length - 1, 1);
-  return vals
-    .map((v, i) => {
-      const x = i * step;
-      const normalized = (v - min) / range;
-      const y = invert ? normalized * 18 + 2 : (1 - normalized) * 18 + 2;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-}
-
-interface SparklineProps {
-  data: QuarterlyTrend[];
-  dataKey: keyof QuarterlyTrend;
-  positive: boolean;
-  invert?: boolean;
-}
-
-function Sparkline({ data, dataKey, positive, invert = false }: SparklineProps) {
-  const points = sparkPoints(data, dataKey, invert);
-  if (!points) return null;
-  const color = positive ? "var(--qc-up)" : "var(--qc-down)";
-  return (
-    <svg
-      viewBox="0 0 100 22"
-      preserveAspectRatio="none"
-      style={{ height: 22, marginTop: 2, display: "block", width: "100%" }}
-    >
-      <polyline fill="none" stroke={color} strokeWidth="1.5" points={points} />
-    </svg>
-  );
-}
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 // ─── KpiCard ─────────────────────────────────────────────────────────────────
 
@@ -59,10 +16,9 @@ interface KpiCardProps {
   unit?: string;
   yoy: YoyResult;
   muted?: boolean;
-  spark?: React.ReactNode;
 }
 
-function KpiCard({ label, value, unit, yoy, muted, spark }: KpiCardProps) {
+function KpiCard({ label, value, unit, yoy, muted }: KpiCardProps) {
   const yoyBg =
     yoy.cls === "pos" ? "var(--qc-up-soft)"
     : yoy.cls === "neg" ? "var(--qc-down-soft)"
@@ -72,15 +28,20 @@ function KpiCard({ label, value, unit, yoy, muted, spark }: KpiCardProps) {
     : yoy.cls === "neg" ? "var(--qc-down)"
     : "var(--qc-text-muted)";
 
+  const Icon =
+    yoy.cls === "pos" ? TrendingUp
+    : yoy.cls === "neg" ? TrendingDown
+    : Minus;
+
   return (
     <div
       style={{
         background: muted ? "var(--qc-surface-panel, #F2F1EC)" : "var(--qc-surface-white)",
-        padding: "14px 16px",
+        padding: "10px 14px",
         display: "flex",
         flexDirection: "column",
-        gap: 6,
-        minHeight: 112,
+        gap: 4,
+        minHeight: 80,
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -93,8 +54,10 @@ function KpiCard({ label, value, unit, yoy, muted, spark }: KpiCardProps) {
             fontSize: 10.5, padding: "2px 6px", borderRadius: 4,
             letterSpacing: ".02em", fontWeight: 500, lineHeight: 1.3,
             background: yoyBg, color: yoyColor,
+            display: "inline-flex", alignItems: "center", gap: 3,
           }}
         >
+          <Icon size={10} strokeWidth={2.5} />
           {yoy.text}
         </span>
       </div>
@@ -111,7 +74,7 @@ function KpiCard({ label, value, unit, yoy, muted, spark }: KpiCardProps) {
       ) : (
         <div
           style={{
-            fontSize: 22, fontWeight: 500, letterSpacing: "-0.015em",
+            fontSize: 18, fontWeight: 500, letterSpacing: "-0.015em",
             color: "var(--qc-text-heading)", fontVariantNumeric: "tabular-nums",
             lineHeight: 1.1, marginTop: "auto",
           }}
@@ -126,7 +89,6 @@ function KpiCard({ label, value, unit, yoy, muted, spark }: KpiCardProps) {
           )}
         </div>
       )}
-      {spark}
     </div>
   );
 }
@@ -142,7 +104,6 @@ function yoyText(growth: number | null | undefined, invert = false): YoyResult {
 }
 
 interface KpiGridProps {
-  quarterlyTrend: QuarterlyTrend[];
   revenue: number | null;
   revenueGrowth: number | null | undefined;
   ebitda: number | null;
@@ -160,7 +121,6 @@ interface KpiGridProps {
 }
 
 export function KpiGrid({
-  quarterlyTrend: qt,
   revenue, revenueGrowth,
   ebitda, ebitdaGrowth,
   netProfit, netProfitGrowth,
@@ -190,54 +150,13 @@ export function KpiGrid({
         marginBottom: 14,
       }}
     >
-      <KpiCard
-        label="Revenue"
-        value={formatINR(revenue)}
-        yoy={revenueYoy}
-        spark={<Sparkline data={qt} dataKey="revenue" positive={revenueYoy.cls === "pos"} />}
-      />
-      <KpiCard
-        label="EBITDA"
-        value={ebitda != null ? formatINR(ebitda) : "—"}
-        yoy={ebitdaYoy}
-        muted={ebitda == null}
-        spark={ebitda != null ? <Sparkline data={qt} dataKey="ebitda" positive={ebitdaYoy.cls === "pos"} /> : undefined}
-      />
-      <KpiCard
-        label="Net Profit"
-        value={netProfit != null ? formatINR(netProfit) : "—"}
-        yoy={netProfitYoy}
-        muted={netProfit == null}
-        spark={netProfit != null ? <Sparkline data={qt} dataKey="netIncome" positive={netProfitYoy.cls === "pos"} /> : undefined}
-      />
-      <KpiCard
-        label="CFO"
-        value={operatingCashflow != null ? formatINR(operatingCashflow) : "—"}
-        yoy={cfoYoy}
-        muted={operatingCashflow == null}
-        spark={operatingCashflow != null ? <Sparkline data={qt} dataKey="revenue" positive={cfoYoy.cls === "pos"} /> : undefined}
-      />
-      <KpiCard
-        label="FCF"
-        value={freeCashflow != null ? formatINR(freeCashflow) : "—"}
-        yoy={fcfYoy}
-        muted={freeCashflow == null}
-        spark={freeCashflow != null ? <Sparkline data={qt} dataKey="revenue" positive={fcfYoy.cls === "pos"} /> : undefined}
-      />
-      <KpiCard
-        label="Reserves"
-        value={reserves != null ? formatINR(reserves) : "—"}
-        yoy={reservesYoy}
-        muted={reserves == null}
-        spark={reserves != null ? <Sparkline data={qt} dataKey="totalEquity" positive={reservesYoy.cls === "pos"} /> : undefined}
-      />
-      <KpiCard
-        label="Debt"
-        value={totalDebt != null ? formatINR(totalDebt) : "—"}
-        yoy={debtYoy}
-        muted={totalDebt == null}
-        spark={totalDebt != null ? <Sparkline data={qt} dataKey="totalDebt" positive={debtYoy.cls === "pos"} invert /> : undefined}
-      />
+      <KpiCard label="Revenue" value={formatINR(revenue)} yoy={revenueYoy} />
+      <KpiCard label="EBITDA" value={ebitda != null ? formatINR(ebitda) : "—"} yoy={ebitdaYoy} muted={ebitda == null} />
+      <KpiCard label="Net Profit" value={netProfit != null ? formatINR(netProfit) : "—"} yoy={netProfitYoy} muted={netProfit == null} />
+      <KpiCard label="CFO" value={operatingCashflow != null ? formatINR(operatingCashflow) : "—"} yoy={cfoYoy} muted={operatingCashflow == null} />
+      <KpiCard label="FCF" value={freeCashflow != null ? formatINR(freeCashflow) : "—"} yoy={fcfYoy} muted={freeCashflow == null} />
+      <KpiCard label="Reserves" value={reserves != null ? formatINR(reserves) : "—"} yoy={reservesYoy} muted={reserves == null} />
+      <KpiCard label="Debt" value={totalDebt != null ? formatINR(totalDebt) : "—"} yoy={debtYoy} muted={totalDebt == null} />
       <KpiCard label="Interest Coverage" value="—" yoy={{ text: "—", cls: "na" }} muted />
     </div>
   );

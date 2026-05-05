@@ -20,7 +20,6 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
   const own = data.ownership;
   const ratios = data.ratios;
   const perShare = data.perShare;
-  const qt = fp.quarterlyTrend ?? [];
 
   const { data: shareholdingData } = useShareholding(symbol);
 
@@ -127,7 +126,6 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
       <MonoEyebrow style={{ margin: "4px 0 10px" }}>Key Metrics · Latest fiscal</MonoEyebrow>
 
       <KpiGrid
-        quarterlyTrend={qt}
         revenue={fp.revenue}
         revenueGrowth={fp.revenueGrowth}
         ebitda={fp.ebitda}

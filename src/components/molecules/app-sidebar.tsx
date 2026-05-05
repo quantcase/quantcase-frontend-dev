@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, Sun, Moon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TooltipProvider,
@@ -13,7 +13,7 @@ import {
 import { useTheme } from "@/components/providers/ThemeProvider";
 
 const navItems = [
-  { label: "Home",     href: "/",                  icon: Home,       isActive: (p: string) => p === "/" },
+  { label: "Home",     href: "/dashboard",          icon: Home,       isActive: (p: string) => p === "/dashboard" },
   { label: "Terminal", href: "/screener/home",      icon: Monitor,    isActive: (p: string) => p.startsWith("/screener") },
   { label: "WealthOS", href: "/wealthos/dashboard", icon: Briefcase,  isActive: (p: string) => p.startsWith("/wealthos") },
   { label: "Models",   href: "/model-builder",      icon: TrendingUp, isActive: (p: string) => p === "/model-builder" || p.startsWith("/model-builder/") || p === "/model-analytics" },
@@ -23,7 +23,15 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
+
+  function handleLogout() {
+    localStorage.clear();
+    router.push("/signin");
+  }
+
+  if (pathname === "/signin") return null;
   const isDark = theme === "dark-purple";
 
   return (
@@ -87,50 +95,34 @@ export function AppSidebar() {
         </nav>
       </TooltipProvider>
 
-      {/* Footer — theme toggle (light/dark inline pills) */}
-      <div
-        className="flex flex-col items-center rounded-full gap-0.5 p-[3px]"
-        style={{ background: "var(--qc-chip-bg)", border: "1px solid var(--qc-chip-border)", width: 36 }}
-      >
-        <TooltipProvider delayDuration={300}>
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setTheme("purple")}
-                className="flex items-center justify-center rounded-full transition-all"
-                style={{
-                  width: "100%",
-                  padding: "7px 0",
-                  background: !isDark ? "var(--qc-surface-white)" : "transparent",
-                  color: !isDark ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
-                  boxShadow: !isDark ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
-                }}
-              >
-                <Sun size={14} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Light</TooltipContent>
-          </TooltipRoot>
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setTheme("dark-purple")}
-                className="flex items-center justify-center rounded-full transition-all"
-                style={{
-                  width: "100%",
-                  padding: "7px 0",
-                  background: isDark ? "var(--qc-surface-white)" : "transparent",
-                  color: isDark ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
-                  boxShadow: isDark ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
-                }}
-              >
-                <Moon size={14} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Dark</TooltipContent>
-          </TooltipRoot>
-        </TooltipProvider>
-      </div>
+      {/* Logout */}
+      <TooltipProvider delayDuration={300}>
+        <TooltipRoot>
+          <TooltipTrigger asChild>
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center rounded-[10px] transition-colors mb-1"
+              style={{
+                width: 40,
+                height: 40,
+                color: "var(--qc-sidebar-icon-idle-fg)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "var(--qc-sidebar-icon-hover-bg)";
+                (e.currentTarget as HTMLElement).style.color = "var(--qc-text-heading)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "transparent";
+                (e.currentTarget as HTMLElement).style.color = "var(--qc-sidebar-icon-idle-fg)";
+              }}
+            >
+              <LogOut size={18} strokeWidth={1.8} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Logout</TooltipContent>
+        </TooltipRoot>
+      </TooltipProvider>
+
     </aside>
   );
 }

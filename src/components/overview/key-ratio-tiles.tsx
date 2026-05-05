@@ -145,11 +145,11 @@ export function KeyRatioTiles({ data }: Props) {
   const epsCagrIsPositive = epsCagrDisplay !== "—" && !epsCagrDisplay.startsWith("-");
   const epsCagrLabel = fin.eps_cagr_3y_label ?? null;
 
-  // Dividend Yield
-  const divYield = ps.dividendYield != null ? `${(ps.dividendYield * 100).toFixed(1)}%` : "—";
+  // Dividend Yield — backend sends value already in % (e.g. 0.98 means 0.98%)
+  const divYield = ps.dividendYield != null ? `${ps.dividendYield.toFixed(2)}%` : "—";
 
   return (
-    <div className="px-4 pt-4 pb-2">
+    <div className="px-4">
       {/* stats-plank: single bordered card, dividers between cells */}
       <div
         className="grid grid-cols-5 overflow-hidden"

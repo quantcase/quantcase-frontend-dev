@@ -1,6 +1,6 @@
 "use client";
 
-import { PILLAR_COLORS, type PillarKey } from "./pillar-pills";
+import { type PillarKey } from "./pillar-pills";
 
 function WxSlider({
   label, value, onChange,
@@ -9,23 +9,23 @@ function WxSlider({
 }) {
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 5 }}>
-        <span style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-text-heading)" }}>{label}</span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+        <span style={{ fontSize: 12.5, fontWeight: 500, color: "rgba(255,255,255,0.85)" }}>{label}</span>
         <span
           style={{
             fontFamily: "'IBM Plex Mono', monospace", fontSize: 13,
-            color: "var(--qc-text-heading)", letterSpacing: 0,
+            color: "rgba(255,255,255,0.9)", letterSpacing: 0,
           }}
         >
           {value}
-          <span style={{ color: "#4A5F20", fontSize: 10.5, marginLeft: 1 }}>%</span>
+          <span style={{ color: "rgba(200,180,255,0.6)", fontSize: 10.5, marginLeft: 1 }}>%</span>
         </span>
       </div>
-      <div style={{ position: "relative", height: 4, background: "rgba(14,14,12,0.14)", borderRadius: 999 }}>
+      <div style={{ position: "relative", height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 999 }}>
         <span
           style={{
             position: "absolute", left: 0, top: 0, bottom: 0,
-            width: `${value}%`, background: "var(--qc-text-heading)", borderRadius: 999,
+            width: `${value}%`, background: "rgba(200,180,255,0.7)", borderRadius: 999,
           }}
         />
         <input
@@ -43,9 +43,9 @@ function WxSlider({
             position: "absolute", top: "50%", transform: `translate(-50%, -50%)`,
             left: `${value}%`,
             width: 14, height: 14, borderRadius: "50%",
-            background: "var(--qc-surface-white)",
-            border: "2px solid #0E0E0C",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+            background: "rgba(255,255,255,0.95)",
+            border: "2px solid rgba(139,92,246,0.7)",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
             pointerEvents: "none",
           }}
         />
@@ -66,9 +66,9 @@ interface WeightingPanelProps {
 }
 
 const SEGMENTS: { key: PillarKey; label: string; bg: string }[] = [
-  { key: "M", label: "Mgmt", bg: "var(--qc-text-heading)" },
-  { key: "O", label: "Opp", bg: "#1E3A2B" },
-  { key: "D", label: "Deal", bg: "#7A5A12" },
+  { key: "M", label: "Mgmt",  bg: "rgba(99,102,241,0.75)" },
+  { key: "O", label: "Opp",   bg: "rgba(139,92,246,0.85)" },
+  { key: "D", label: "Deal",  bg: "rgba(168,85,247,0.65)" },
 ];
 
 export function WeightingPanel({
@@ -82,8 +82,8 @@ export function WeightingPanel({
   return (
     <aside
       style={{
-        background: "linear-gradient(175deg, #E8F3BD 0%, #D6E996 100%)",
-        border: "1px solid #C6DC8A",
+        background: "linear-gradient(160deg, #2d1b5e 0%, #18103a 55%, #0e0920 100%)",
+        border: "1px solid rgba(139,92,246,0.2)",
         borderRadius: 18,
         padding: "18px 20px",
         display: "flex",
@@ -92,12 +92,30 @@ export function WeightingPanel({
         overflow: "hidden",
       }}
     >
+      {/* glow orbs */}
+      <div
+        style={{
+          position: "absolute", top: -50, right: -30,
+          width: 180, height: 180, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 65%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute", bottom: -40, left: -20,
+          width: 120, height: 120, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(99,60,200,0.15) 0%, transparent 65%)",
+          pointerEvents: "none",
+        }}
+      />
+
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <span
           style={{
             fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-            letterSpacing: "0.16em", color: "#4A5F20", textTransform: "uppercase",
+            letterSpacing: "0.16em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase",
           }}
         >
           Adjust Weightings
@@ -112,9 +130,9 @@ export function WeightingPanel({
               onClick={onClick}
               style={{
                 width: 24, height: 24, borderRadius: "50%",
-                border: "1px solid rgba(14,14,12,0.12)",
-                background: "rgba(255,255,255,0.35)",
-                color: "var(--qc-text-heading)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.07)",
+                color: "rgba(200,180,255,0.8)",
                 display: "grid", placeItems: "center", cursor: "pointer",
               }}
             >
@@ -128,11 +146,11 @@ export function WeightingPanel({
 
       <h3
         style={{
-          margin: "2px 0 8px", fontSize: 18, fontWeight: 500, lineHeight: 1.35,
-          letterSpacing: "-0.01em", color: "var(--qc-text-heading)", paddingRight: 20,
+          margin: "2px 0 14px", fontSize: 17, fontWeight: 500, lineHeight: 1.4,
+          letterSpacing: "-0.01em", color: "rgba(255,255,255,0.9)", paddingRight: 20,
         }}
       >
-        Weights must total <b style={{ fontWeight: 600 }}>100%</b> — drag to rebalance.
+        Weights must total <span style={{ color: "rgba(200,180,255,1)", fontWeight: 600 }}>100%</span> — drag to rebalance.
       </h3>
 
       {/* Stacked weight bar */}
@@ -144,13 +162,13 @@ export function WeightingPanel({
               flex: weights[key], background: bg,
               display: "flex", flexDirection: "column",
               alignItems: "flex-start", justifyContent: "center",
-              padding: "0 12px", color: "#fff", minWidth: 0,
+              padding: "0 12px", minWidth: 0,
             }}
           >
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 500, lineHeight: 1 }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 500, lineHeight: 1, color: "#fff" }}>
               {weights[key]}%
             </span>
-            <span style={{ fontSize: 10.5, opacity: 0.75, marginTop: 3, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+            <span style={{ fontSize: 10.5, color: "rgba(255,255,255,0.65)", marginTop: 3, letterSpacing: "0.04em", textTransform: "uppercase" }}>
               {label}
             </span>
           </div>
@@ -158,7 +176,7 @@ export function WeightingPanel({
       </div>
 
       {/* Sliders */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 14, flex: 1 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 16, flex: 1 }}>
         {(["M", "O", "D"] as PillarKey[]).map((key) => (
           <WxSlider
             key={key}
@@ -173,22 +191,24 @@ export function WeightingPanel({
       <div
         style={{
           display: "grid", gridTemplateColumns: "1fr auto 1fr",
-          alignItems: "center", gap: 12, marginTop: 6,
+          alignItems: "center", gap: 12,
+          paddingTop: 14,
+          borderTop: "1px solid rgba(255,255,255,0.08)",
         }}
       >
         <div>
           <div
             style={{
               fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em",
-              color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
+              color: "rgba(255,255,255,0.9)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
             }}
           >
-            100<span style={{ fontSize: 16, marginLeft: 1 }}>%</span>
+            100<span style={{ fontSize: 16, marginLeft: 1, color: "rgba(200,180,255,0.7)" }}>%</span>
           </div>
           <div
             style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              color: "#4A5F20", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 6,
+              color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 6,
             }}
           >
             Allocated
@@ -198,9 +218,9 @@ export function WeightingPanel({
           onClick={onReset}
           style={{
             width: 38, height: 38, borderRadius: "50%",
-            border: "1px solid rgba(14,14,12,0.12)",
-            background: "rgba(255,255,255,0.5)",
-            color: "var(--qc-text-heading)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            background: "rgba(255,255,255,0.07)",
+            color: "rgba(200,180,255,0.8)",
             display: "grid", placeItems: "center", cursor: "pointer",
           }}
         >
@@ -213,16 +233,16 @@ export function WeightingPanel({
           <div
             style={{
               fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em",
-              color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
+              color: "rgba(255,255,255,0.9)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
             }}
           >
             {displayScore != null ? displayScore : "—"}
-            <span style={{ fontSize: 16, marginLeft: 1 }}>/100</span>
+            <span style={{ fontSize: 16, marginLeft: 1, color: "rgba(200,180,255,0.7)" }}>/100</span>
           </div>
           <div
             style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              color: "#4A5F20", letterSpacing: "0.08em", textTransform: "uppercase",
+              color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase",
               marginTop: 6, textAlign: "right",
             }}
           >

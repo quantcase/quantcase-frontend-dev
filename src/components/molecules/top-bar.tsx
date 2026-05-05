@@ -102,7 +102,7 @@ function TopBarInner() {
   const symbol = searchParams.get("symbol");
   const rmId = searchParams.get("rm_id");
 
-  const isHome = pathname === "/";
+  const isHome = pathname === "/dashboard";
   const isScreenerHomePage = pathname === "/screener/home";
   const isBasketPage = pathname === "/screener/basket";
 
@@ -143,8 +143,9 @@ function TopBarInner() {
   }, [isFactorActive]);
 
   const isIndustryTerminal = pathname === "/screener/industry-intelligence";
+  const isAdmin = pathname.startsWith("/admin");
 
-  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isIndustryTerminal) return null;
+  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isIndustryTerminal || isAdmin) return null;
 
   let leftZone: React.ReactNode = null;
 
@@ -289,7 +290,9 @@ function TopBarInner() {
   );
 }
 
-export function TopBar() {
+function TopBarGuard() {
+  const pathname = usePathname();
+  if (pathname === "/signin") return null;
   return (
     <Suspense
       fallback={
@@ -300,6 +303,14 @@ export function TopBar() {
       }
     >
       <TopBarInner />
+    </Suspense>
+  );
+}
+
+export function TopBar() {
+  return (
+    <Suspense fallback={null}>
+      <TopBarGuard />
     </Suspense>
   );
 }

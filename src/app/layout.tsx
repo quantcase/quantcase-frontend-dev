@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, Inter } from "next/font/google";
 import "./globals.css";
-import { AppSidebar } from "@/components/molecules/app-sidebar";
-import { TopBar } from "@/components/molecules/top-bar";
-import { MainContentWrapper } from "@/components/molecules/main-content-wrapper";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -45,9 +42,7 @@ export default function RootLayout({
       </head>
       <body className={`${ibmPlexSans.variable} ${inter.variable}`} style={{ fontFamily: "var(--font-inter), system-ui, sans-serif", WebkitFontSmoothing: "antialiased" }}>
         <ThemeProvider>
-          <AppSidebar />
-          <TopBar />
-          <MainContentWrapper>{children}</MainContentWrapper>
+          {children}
         </ThemeProvider>
       </body>
     </html>

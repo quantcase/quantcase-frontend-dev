@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { MonoLabel } from "@/components/ds";
 
-export type TaskStatus = "pending" | "done" | "overdue";
+type TaskStatus = "pending" | "done" | "overdue";
 
 export interface TaskItem {
   id: string;

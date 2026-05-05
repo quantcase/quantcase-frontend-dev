@@ -9,7 +9,7 @@ interface SectionHeaderProps {
   style?: React.CSSProperties;
 }
 
-export function SectionHeader({ label, count, linkLabel, onLinkClick, style }: SectionHeaderProps) {
+function SectionHeader({ label, count, linkLabel, onLinkClick, style }: SectionHeaderProps) {
   return (
     <div
       style={{

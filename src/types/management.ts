@@ -4,7 +4,7 @@ export type TimeframeOption = "current_quarter" | "rolling_3_year" | "full_histo
 
 // ─── MQI Score ────────────────────────────────────────────────────────────────
 
-export interface MqiDimension {
+interface MqiDimension {
   max: number;
   score: number;
   rationale: string;
@@ -33,7 +33,7 @@ export type GuidanceSeverity =
   | "ongoing"
   | "not_trackable";
 
-export type GuidanceTag =
+type GuidanceTag =
   | "order_book"
   | "revenue_growth"
   | "revenue"
@@ -58,7 +58,7 @@ export interface GuidanceRow {
   management_explanation: string;
 }
 
-export interface GuidanceVsActuals {
+interface GuidanceVsActuals {
   rows: GuidanceRow[];
   misses: { major: number; minor: number; mediocre: number };
   pattern: string;
@@ -155,7 +155,7 @@ interface CapitalAllocation { capex_breakdown: CapexBreakdown | null; roce_trend
 
 // ─── Investment Thesis ────────────────────────────────────────────────────────
 
-export interface WatchlistItem {
+interface WatchlistItem {
   number: number;
   what_to_listen_for: string;
   why_it_matters: string;
@@ -182,7 +182,7 @@ export interface RedFlag {
 
 // ─── Promoter Activity ────────────────────────────────────────────────────────
 
-export interface ShareholdingEntry {
+interface ShareholdingEntry {
   quarter: string;
   promoter_pct: number | null;
   pledge_pct: number | null;
@@ -264,7 +264,7 @@ export interface TranscriptCallsResponse {
 
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 
-export interface BullMQObject {
+interface BullMQObject {
   id: string;
   name: string;
   state: string;
@@ -273,7 +273,7 @@ export interface BullMQObject {
   returnvalue: unknown;
 }
 
-export interface Job {
+interface Job {
   id: string;
   callId: string;
   type: string;
@@ -292,7 +292,7 @@ export interface JobCreateResponse {
   job: Job;
 }
 
-export type PipelineStepStatus = "waiting" | "processing" | "completed" | "failed";
+type PipelineStepStatus = "waiting" | "processing" | "completed" | "failed";
 
 export interface PipelineStep {
   analysis_type: string;
@@ -300,7 +300,7 @@ export interface PipelineStep {
   status: PipelineStepStatus;
 }
 
-export interface PipelineJob {
+interface PipelineJob {
   id: string;
   callId: string;
   type: string;

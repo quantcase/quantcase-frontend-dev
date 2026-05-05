@@ -15,7 +15,7 @@ function FormLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function FormField({ label, children }: { label: string; children: React.ReactNode }) {
+function FormField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
       <FormLabel>{label}</FormLabel>
@@ -24,7 +24,7 @@ export function FormField({ label, children }: { label: string; children: React.
   );
 }
 
-export function TextInput({
+function TextInput({
   value,
   onChange,
   placeholder,
@@ -55,7 +55,7 @@ export function TextInput({
   );
 }
 
-export function SelectInput({
+function SelectInput({
   value,
   onChange,
   options,
@@ -84,7 +84,7 @@ export function SelectInput({
   );
 }
 
-export function TogglePill({
+function TogglePill({
   options,
   value,
   onChange,
@@ -113,7 +113,7 @@ export function TogglePill({
   );
 }
 
-export function SectionBox({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionBox({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
       <p className="text-[11px] font-semibold uppercase tracking-wider px-2 pt-1 pb-3" style={{ color: "var(--qc-ink-2)" }}>{title}</p>
@@ -174,7 +174,7 @@ const FREQ_OPTIONS = [
   { value: "annual",      label: "Annual"      },
 ];
 
-export function SwpPassiveIncomeForm({
+function SwpPassiveIncomeForm({
   value,
   onChange,
 }: {
@@ -256,7 +256,7 @@ export function SwpPassiveIncomeForm({
 
 // ── Retirement Income SWP ─────────────────────────────────────────────────────
 
-export function SwpRetirementIncomeForm({
+function SwpRetirementIncomeForm({
   value,
   onChange,
 }: {
@@ -350,7 +350,7 @@ export function SwpRetirementIncomeForm({
 
 // ── Child Education SWP ───────────────────────────────────────────────────────
 
-export function SwpChildEducationForm({
+function SwpChildEducationForm({
   value,
   onChange,
 }: {

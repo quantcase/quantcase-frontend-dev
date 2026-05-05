@@ -7,7 +7,7 @@ export interface MfBasketCondition {
   label: string;
 }
 
-export interface MfBasket {
+interface MfBasket {
   id: string;
   category: string;
   title: string;
@@ -85,7 +85,7 @@ export interface MfBasketScheme {
   [key: string]: string | number | null | undefined;
 }
 
-export interface MfBasketPagination {
+interface MfBasketPagination {
   page: number;
   size: number;
   total: number;
@@ -100,7 +100,7 @@ export interface MfBasketSchemesApiResponse {
 
 // ── Scheme types ──────────────────────────────────────────────────────────────
 
-export interface MutualFundScheme {
+interface MutualFundScheme {
   amfi_code: string;
   name: string;
   isin: string | null;
@@ -123,7 +123,7 @@ export interface MutualFundScheme {
   updated_at: string;
 }
 
-export interface MutualFundsListResponse {
+interface MutualFundsListResponse {
   success: boolean;
   total: number;
   schemes: MutualFundScheme[];
@@ -153,7 +153,7 @@ export interface DebtHolding {
   month_change_pct: number | null;
 }
 
-export interface OtherHolding {
+interface OtherHolding {
   name: string;
   holding_type: string;
   market_value: number;
@@ -163,7 +163,7 @@ export interface OtherHolding {
   month_change_pct: number | null;
 }
 
-export interface HoldingsData {
+interface HoldingsData {
   month: string;
   total_aum: number;
   equity_pct: number;
@@ -193,33 +193,33 @@ export interface MFReturns {
   rank_total: number | null;
 }
 
-export interface MFRatioValuation {
+interface MFRatioValuation {
   pe_ratio: number | null;
   pb_ratio: number | null;
   ps_ratio: number | null;
   dividend_yield: number | null;
 }
 
-export interface MFRatioEfficiency {
+interface MFRatioEfficiency {
   roe: number | null;
   roa: number | null;
 }
 
-export interface MFRatioReturns {
+interface MFRatioReturns {
   sharpe_ratio: number | null;
   jensens_alpha: number | null;
   treynor_ratio: number | null;
   information_ratio: number | null;
 }
 
-export interface MFRatioRisk {
+interface MFRatioRisk {
   std_deviation: number | null;
   beta: number | null;
   sortino_ratio: number | null;
   r_squared: number | null;
 }
 
-export interface MFRatioCategoryAverages {
+interface MFRatioCategoryAverages {
   pe: number | null;
   sharpe: number | null;
   beta: number | null;
@@ -252,7 +252,7 @@ export interface MFSector {
   total_market_value: number;
 }
 
-export interface MFHoldingsHistoryPoint {
+interface MFHoldingsHistoryPoint {
   month: string;
   total_aum: number;
   equity_pct: number;
@@ -261,21 +261,21 @@ export interface MFHoldingsHistoryPoint {
   stock_count: number;
 }
 
-export interface MFPeople {
+interface MFPeople {
   managers: { name: string; since: string | null }[];
   manager_count: number;
   avg_tenure: number | null;
   longest_tenure: number | null;
 }
 
-export interface MFPerformance {
+interface MFPerformance {
   annual_returns: null;
   percentile_rank: null;
   num_in_category: null;
   growth_10k_current: null;
 }
 
-export interface MFRiskDetail {
+interface MFRiskDetail {
   risk_rating: null;
   capture_ratios: null;
   drawdown: null;
@@ -283,7 +283,7 @@ export interface MFRiskDetail {
   analyst: null;
 }
 
-export interface MFNavHistoryPoint {
+interface MFNavHistoryPoint {
   period: string;
   open: number | null;
   high: number | null;

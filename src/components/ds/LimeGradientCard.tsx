@@ -7,7 +7,7 @@ interface LimeGradientCardProps {
   className?: string;
 }
 
-export function LimeGradientCard({ children, style, radius = 18, className }: LimeGradientCardProps) {
+function LimeGradientCard({ children, style, radius = 18, className }: LimeGradientCardProps) {
   return (
     <div
       className={className}

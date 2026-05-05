@@ -40,7 +40,7 @@ export interface BasketStock {
   [key: string]: string | number | null | undefined;
 }
 
-export interface BasketStocksPagination {
+interface BasketStocksPagination {
   page: number;
   size: number;
   total: number;
@@ -56,7 +56,7 @@ export interface BasketStocksApiResponse {
 
 // ── Watchlist types ───────────────────────────────────────────────────────────
 
-export interface WatchlistAsset {
+interface WatchlistAsset {
   id: string;
   watchlist_id: string;
   symbol: string;
@@ -84,7 +84,7 @@ export interface WatchlistApiResponse {
 
 // ── Stock types ───────────────────────────────────────────────────────────────
 
-export interface StockData {
+interface StockData {
   company: string;
   company_name: string;
   basic_industry: string;
@@ -95,7 +95,7 @@ export interface StocksApiResponse {
   data: StockData[];
 }
 
-export interface QuarterlyTrend {
+interface QuarterlyTrend {
   period: string;
   revenue: number | null;
   ebitda: number | null;

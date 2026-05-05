@@ -38,7 +38,7 @@ import {
 import type { SwpConfig } from "@/types/portfolio";
 
 // ── Re-export constants consumed by other files (backwards compat) ─────────────
-export { GOALS, ASSET_CLASSES, SUB_CLASSES, formatCapital };
+export {  ASSET_CLASSES, SUB_CLASSES, formatCapital };
 export type { AssetClassKey, AssetClassAlloc, SubClassAlloc };
 
 // ── Props ──────────────────────────────────────────────────────────────────────

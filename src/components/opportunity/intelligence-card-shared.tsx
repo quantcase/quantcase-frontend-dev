@@ -6,7 +6,7 @@ import type { IndustrySignalBreakdownItem } from "@/types/opportunity";
 
 // ─── CSS-var–based sentiment helpers ─────────────────────────────────────────
 
-export function sentimentVars(sentiment: IndustrySignalBreakdownItem["sentiment"]) {
+function sentimentVars(sentiment: IndustrySignalBreakdownItem["sentiment"]) {
   if (sentiment === "positive")
     return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "#BBD9C6" };
   if (sentiment === "negative")
@@ -14,14 +14,14 @@ export function sentimentVars(sentiment: IndustrySignalBreakdownItem["sentiment"
   return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "#E8D4A0" };
 }
 
-export function scoreColor(score: number, maxScore: number): string {
+function scoreColor(score: number, maxScore: number): string {
   const pct = maxScore > 0 ? score / maxScore : 0;
   if (pct >= 0.7) return "var(--qc-up)";
   if (pct >= 0.4) return "var(--qc-warn)";
   return "var(--qc-down)";
 }
 
-export function statusVars(status: string, color?: string) {
+function statusVars(status: string, color?: string) {
   const c = (color ?? status ?? "").toLowerCase();
   if (c === "green" || c === "high" || c === "favorable" || c === "strong")
     return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", tagBg: "var(--qc-up)" };
@@ -32,7 +32,7 @@ export function statusVars(status: string, color?: string) {
 
 // ─── Shared SignalRow (horizontal bar, same as management card) ───────────────
 
-export function SignalRow({ item }: { item: IndustrySignalBreakdownItem }) {
+function SignalRow({ item }: { item: IndustrySignalBreakdownItem }) {
   const [open, setOpen] = useState(false);
   const sv = sentimentVars(item.sentiment);
   const pct = item.max_score > 0 ? (item.score / item.max_score) * 100 : 0;
@@ -350,7 +350,7 @@ function ClampedText({ text, clamp = 2 }: { text: string; clamp?: number }) {
 
 // ─── Shared strategy rows (vertically stacked label+value, clamped) ──────────
 
-export function StrategyRows({ rows }: { rows: { label: string; value: string }[] }) {
+function StrategyRows({ rows }: { rows: { label: string; value: string }[] }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {rows.map((r) => (
@@ -371,7 +371,7 @@ export function StrategyRows({ rows }: { rows: { label: string; value: string }[
 
 // ─── Shared watch-out / bullet list (clamped) ────────────────────────────────
 
-export function BulletList({ items }: { items: string[] }) {
+function BulletList({ items }: { items: string[] }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       {items.map((point, i) => (

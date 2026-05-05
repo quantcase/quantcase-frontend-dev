@@ -21,23 +21,23 @@ import { MonoLabel } from "@/components/ds";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type SignalSeverity = "critical" | "warning" | "moderate" | "clean";
+type SignalSeverity = "critical" | "warning" | "moderate" | "clean";
 
-export interface AssetSubclass {
+interface AssetSubclass {
   id: string;
   label: string;
   severity: SignalSeverity;
   signal?: string;
 }
 
-export interface AssetClass {
+interface AssetClass {
   id: string;
   label: string;
   severity: SignalSeverity;
   subclasses: AssetSubclass[];
 }
 
-export interface RMClient {
+interface RMClient {
   id: string;
   name: string;
   aum: string;

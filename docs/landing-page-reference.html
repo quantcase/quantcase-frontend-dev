@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Quantcase — Enterprise-grade research across Private Markets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A0E1A;
+    --bg-2: #0E1422;
+    --bg-elev: #131A2C;
+    --line: rgba(255,255,255,0.07);
+    --line-2: rgba(255,255,255,0.12);
+    --ink: #E9ECF3;
+    --ink-2: #B7BECF;
+    --ink-3: #7C8499;
+    --ink-4: #565D72;
+    --gold: oklch(0.84 0.12 85);
+    --gold-2: oklch(0.72 0.13 75);
+    --indigo: oklch(0.68 0.18 270);
+    --indigo-2: oklch(0.58 0.20 270);
+    --mint: oklch(0.80 0.13 165);
+    --mint-2: oklch(0.65 0.13 165);
+    --rose: oklch(0.72 0.16 25);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: "ss01","cv11";
+    -webkit-font-smoothing:antialiased;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  ::selection{ background: var(--gold); color: #0a0e1a; }
+
+  .wrap{ max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+  .serif{ font-family:'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--gold); }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  /* ============ NAV ============ */
+  nav.top{
+    position: sticky; top:0; z-index:50;
+    backdrop-filter: blur(14px);
+    background: rgba(10,14,26,0.72);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.top .row{
+    display:flex; align-items:center; justify-content: space-between;
+    height: 68px;
+  }
+  .logo{ display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:-0.01em;}
+  .logo-mark{
+    width: 26px; height:26px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--indigo) 0%, #2a2f55 100%);
+    display:grid; place-items:center;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+  }
+  .logo-mark::after{
+    content:""; width:10px; height:10px; border-radius:2px;
+    background: var(--gold);
+    transform: rotate(45deg);
+  }
+  .nav-links{ display:flex; gap: 32px; font-size: 14px; color: var(--ink-2); }
+  .nav-links a{ color:inherit; text-decoration:none; }
+  .nav-links a:hover{ color: var(--ink); }
+  .nav-cta{
+    font-size:13px; padding: 9px 16px; border-radius: 999px;
+    border: 1px solid var(--line-2); color: var(--ink); background: transparent;
+    cursor:pointer;
+  }
+  .nav-cta.primary{ background: var(--ink); color:#0A0E1A; border-color: var(--ink); font-weight:600; }
+
+  /* ============ HERO ============ */
+  .hero{
+    position: relative;
+    padding: 96px 0 48px;
+    text-align:center;
+    isolation:isolate;
+  }
+  .hero::before{
+    content:""; position:absolute; inset:0;
+    background:
+      radial-gradient(60% 60% at 50% 0%, rgba(108,116,255,0.16), transparent 70%),
+      radial-gradient(40% 40% at 80% 30%, rgba(255,205,120,0.06), transparent 70%);
+    z-index:-1;
+  }
+  .hero::after{
+    content:""; position:absolute; inset:0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(70% 60% at 50% 30%, black, transparent 80%);
+    z-index:-1;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 6px 12px; border-radius: 999px;
+    border:1px solid var(--line-2);
+    background: rgba(255,255,255,0.02);
+    font-size:12px; color: var(--ink-2); letter-spacing: 0.04em;
+    margin-bottom: 28px;
+  }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background: var(--mint); box-shadow: 0 0 0 3px rgba(120,220,180,0.15);}
+  h1.hero-title{
+    font-size: clamp(40px, 6.6vw, 84px);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+    margin: 0 auto 22px;
+    max-width: 14ch;
+  }
+  h1.hero-title .serif{ display:block; }
+  .hero-sub{
+    color: var(--ink-2); font-size: 18px; max-width: 56ch; margin: 0 auto 36px;
+  }
+  .cta-row{ display:flex; gap: 12px; justify-content:center; align-items:center; }
+  .btn{
+    cursor:pointer; border:none;
+    font-family: inherit; font-size: 15px; font-weight: 500;
+    padding: 14px 22px; border-radius: 999px;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary{ background: var(--ink); color:#0A0E1A; }
+  .btn-primary:hover{ background:#fff; }
+  .btn-ghost{ background: transparent; color: var(--ink); border:1px solid var(--line-2); }
+  .btn-ghost:hover{ border-color: var(--ink-3); }
+
+  .hero-phone{
+    margin: 64px auto 0;
+    width: 320px;
+    position:relative;
+  }
+
+  /* ============ PHONE MOCK ============ */
+  .phone{
+    width: 320px; height: 660px;
+    border-radius: 44px;
+    background: #05080F;
+    border: 1.5px solid #1a2235;
+    padding: 10px;
+    box-shadow:
+      0 40px 80px -20px rgba(0,0,0,0.6),
+      0 0 0 1px rgba(255,255,255,0.04) inset,
+      0 -2px 0 rgba(255,255,255,0.04) inset;
+    position:relative;
+  }
+  .phone::before{
+    content:""; position:absolute; top: 14px; left:50%; transform:translateX(-50%);
+    width: 96px; height: 28px; background: #000; border-radius: 999px;
+    z-index:5;
+  }
+  .phone-screen{
+    width:100%; height:100%; border-radius: 34px;
+    background: #0A0E1A;
+    overflow:hidden; position:relative;
+    color: var(--ink);
+    font-size: 12.5px;
+  }
+  .status-bar{
+    height: 44px; display:flex; align-items:center; justify-content:space-between;
+    padding: 0 24px 0 28px; font-size: 13px; font-weight:600;
+    color:#fff;
+  }
+  .status-bar .icons{ display:flex; gap:5px; align-items:center; }
+  .status-bar svg{ width:14px; height:14px; }
+
+  /* ============ SECTIONS ============ */
+  section{ padding: 120px 0; position:relative; }
+  .section-eyebrow{
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  h2.section-title{
+    font-size: clamp(34px, 4.2vw, 56px);
+    line-height: 1.05; letter-spacing: -0.03em;
+    font-weight: 600; margin: 0 0 20px; max-width: 14ch;
+  }
+  .section-body{ color: var(--ink-2); font-size: 17px; max-width: 44ch; margin-bottom: 28px; }
+  .feature{
+    display:grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items:center;
+  }
+  .feature.reverse{ direction: rtl; }
+  .feature.reverse > *{ direction: ltr; }
+  .feature-text .serif{ font-style: italic; }
+  .pill-link{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size: 14px; color: var(--ink); padding: 10px 18px;
+    border-radius: 999px; border:1px solid var(--line-2); background: rgba(255,255,255,0.02);
+    text-decoration:none;
+  }
+  .pill-link:hover{ background: rgba(255,255,255,0.05); }
+  .pill-link svg{ width:14px; height:14px; transition: transform .2s; }
+  .pill-link:hover svg{ transform: translateX(3px); }
+
+  .feature-visual{ display:flex; justify-content:center; }
+
+  /* divider line */
+  .div-line{ height:1px; background: var(--line); margin: 0 auto; max-width: 1200px; }
+
+  /* ===== Phone screen 1: Deal Pipeline (hero) ===== */
+  .pipeline-card{ padding: 18px; }
+  .tag-row{ display:flex; gap:6px; margin-bottom:8px; }
+  .tag{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; letter-spacing: 0.06em;
+    padding: 4px 7px; border-radius: 5px;
+    background: rgba(255,255,255,0.06); color: var(--ink-2);
+    text-transform: uppercase;
+  }
+  .tag.gold{ background: rgba(220,180,90,0.14); color: var(--gold); }
+  .tag.indigo{ background: rgba(120,130,255,0.14); color: oklch(0.78 0.13 270); }
+  .tag.mint{ background: rgba(140,220,180,0.14); color: var(--mint); }
+  .deal-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding: 14px 0 6px;
+  }
+  .deal-head h3{ margin:0; font-size: 16px; font-weight:600; letter-spacing:-0.01em; }
+  .deal-head p{ margin:2px 0 0; font-size: 11.5px; color: var(--ink-3); }
+  .moic-num{ font-size: 22px; font-weight:700; color: var(--gold); letter-spacing:-0.02em; }
+  .moic-label{ font-size: 9px; color: var(--ink-3); text-align:right; letter-spacing:0.1em; text-transform:uppercase;}
+
+  .deal-row{ padding: 14px 0; border-top: 1px solid var(--line); }
+  .deal-row:first-of-type{ border-top: 1px solid var(--line); margin-top: 12px;}
+  .deal-row .top{ display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; }
+  .deal-row .name{ display:flex; align-items:center; gap:8px; font-weight:600; font-size: 13px;}
+  .bullet{ width:7px; height:7px; border-radius:50%; }
+  .progress{ height: 5px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow:hidden; }
+  .progress > span{ display:block; height:100%; border-radius:999px; }
+  .target{ font-size: 12px; font-weight:700; }
+  .target-lbl{ font-size: 10px; color: var(--ink-3); margin-left: 4px; font-weight:400;}
+  .meta{ font-size: 10px; color: var(--ink-3); margin-top: 6px; text-align:right; }
+  .footer-meta{
+    display:flex; align-items:center; gap:8px;
+    padding: 12px 0 0; margin-top: 8px;
+    font-size: 10.5px; color: var(--ink-3);
+    border-top: 1px solid var(--line);
+  }
+
+  /* ===== Stat block ===== */
+  .stat-section{ text-align:center; padding: 80px 0 120px; }
+  .stat-card{
+    margin: 32px auto 0;
+    width: 320px; padding: 28px 24px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #131A2C 0%, #0d1322 100%);
+    border:1px solid var(--line-2);
+    text-align:left;
+  }
+  .stat-card .lbl{ font-size:11px; color: var(--ink-3); letter-spacing:0.12em; text-transform:uppercase; }
+  .stat-card .num{
+    font-size: 64px; line-height:1; font-weight:700;
+    letter-spacing:-0.04em; margin: 12px 0 6px;
+    background: linear-gradient(180deg, #fff 0%, #b7becf 100%);
+    -webkit-background-clip: text; background-clip:text; color: transparent;
+  }
+  .stat-card .num .small{ font-size: 36px; color: var(--ink-2); -webkit-text-fill-color: var(--ink-2); }
+  .stat-card .desc{ font-size: 13px; color: var(--ink-2); }
+  .stat-card .desc .serif{ display:inline; }
+
+  /* ===== Team ===== */
+  .team-card{
+    display:grid; grid-template-columns: 200px 1fr; gap: 32px; align-items:center;
+    padding: 36px; border-radius: 24px;
+    background: linear-gradient(180deg, #11172A 0%, #0c1120 100%);
+    border:1px solid var(--line);
+    max-width: 760px; margin: 40px auto 0;
+  }
+  .team-photo{
+    width: 200px; height: 200px; border-radius: 16px;
+    background:
+      repeating-linear-gradient(45deg, #1a2238 0 8px, #141a2e 8px 16px);
+    border:1px solid var(--line-2);
+    display:grid; place-items:center;
+    color: var(--ink-3); font-family:'JetBrains Mono',monospace; font-size:11px;
+    text-align:center; padding: 12px;
+  }
+  .team-stat{
+    display:flex; gap: 32px; margin-top: 18px;
+  }
+  .team-stat .v{ font-size: 28px; font-weight:700; letter-spacing:-0.02em; color: var(--gold); }
+  .team-stat .v + .l{ font-size:11px; color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; margin-top:2px; }
+
+  /* ===== FAQ ===== */
+  .faq-section{ text-align:center; }
+  .faq-list{ max-width: 760px; margin: 40px auto 0; text-align:left; }
+  .faq{
+    border-bottom: 1px solid var(--line);
+    padding: 22px 4px;
+    cursor:pointer;
+    display:flex; align-items:flex-start; justify-content:space-between; gap: 24px;
+  }
+  .faq h4{ margin:0; font-size: 16px; font-weight:500; color: var(--ink);}
+  .faq .answer{
+    font-size: 14px; color: var(--ink-2); margin-top: 12px; display:none;
+    line-height: 1.6;
+  }
+  .faq.open .answer{ display:block; }
+  .faq-toggle{
+    flex:0 0 28px; width:28px; height:28px; border-radius:50%;
+    border:1px solid var(--line-2);
+    display:grid; place-items:center; transition: transform .2s;
+    color: var(--ink-2);
+  }
+  .faq.open .faq-toggle{ transform: rotate(45deg); border-color: var(--gold); color: var(--gold);}
+  .faq-q-wrap{ flex:1; }
+
+  /* ===== Footer ===== */
+  footer{
+    border-top: 1px solid var(--line);
+    padding: 64px 0 56px;
+    margin-top: 40px;
+    background: #07090F;
+  }
+  .foot-grid{ display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
+  .foot-col h5{ font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color: var(--ink-3); margin: 0 0 16px;}
+  .foot-col a{ display:block; color: var(--ink-2); font-size: 14px; text-decoration:none; padding: 6px 0; }
+  .foot-col a:hover{ color: var(--ink); }
+  .foot-tagline{ color: var(--ink-3); font-size: 13px; margin-top: 16px; max-width: 36ch;}
+  .foot-bottom{
+    margin-top: 56px; padding-top: 24px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+    color: var(--ink-3); font-size:12px;
+  }
+
+  /* phone screens */
+  .phone-content{ padding: 0 16px; }
+  .screen-title{ font-size: 11px; color: var(--ink-3); letter-spacing:0.14em; text-transform:uppercase; padding: 4px 0 12px;}
+
+  /* phone 2: Earnings Call */
+  .call-card{ background: #0F1525; border:1px solid var(--line); border-radius:14px; padding: 14px; margin-bottom: 10px;}
+  .call-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;}
+  .ticker{ font-weight:700; font-size: 14px; }
+  .ticker small{ color: var(--ink-3); font-weight: 400; margin-left: 6px;}
+  .signal-badge{ font-size:9px; padding: 3px 7px; border-radius: 4px; background: rgba(140,220,180,0.14); color: var(--mint); font-family:'JetBrains Mono',monospace; letter-spacing:0.06em;}
+  .signal-badge.warn{ background: rgba(220,180,90,0.14); color: var(--gold);}
+  .signal-badge.neg{ background: rgba(230,140,140,0.14); color: var(--rose);}
+  .meter{ display:flex; gap:3px; margin: 8px 0; }
+  .meter span{ flex:1; height: 4px; border-radius:2px; background: rgba(255,255,255,0.06);}
+  .meter span.on{ background: var(--mint);}
+  .meter span.warn-on{ background: var(--gold);}
+  .quote-line{ font-size: 11px; color: var(--ink-2); line-height:1.45; margin: 6px 0 0; font-style:italic;}
+  .signal-row{
+    display:flex; justify-content:space-between; font-size:10px; color: var(--ink-3);
+    margin-top: 8px; padding-top:8px; border-top: 1px solid var(--line);
+  }
+  .signal-row b{ color: var(--ink); font-weight:600;}
+
+  /* phone 3: Screening table */
+  .screen-toolbar{ display:flex; gap:6px; margin-bottom: 12px; flex-wrap:wrap; }
+  .chip{
+    font-size: 10px; padding: 5px 9px; border-radius: 999px;
+    background: rgba(255,255,255,0.05); color: var(--ink-2);
+    border:1px solid var(--line);
+  }
+  .chip.active{ background: var(--ink); color: #0A0E1A; border-color: var(--ink);}
+  .table-row{
+    display:grid; grid-template-columns: 1fr auto auto auto;
+    gap: 8px; padding: 10px 4px;
+    border-bottom: 1px solid var(--line);
+    align-items:center;
+    font-size: 11.5px;
+  }
+  .table-row.head{ font-size:9px; color: var(--ink-3); letter-spacing:0.1em; text-transform:uppercase; padding-bottom: 6px;}
+  .tname{ font-weight:600;}
+  .tname small{ display:block; color: var(--ink-3); font-size:9px; font-weight:400; margin-top:1px;}
+  .qcs{ font-family:'JetBrains Mono',monospace; font-weight:600; }
+  .qcs.high{ color: var(--mint);}
+  .qcs.mid{ color: var(--gold);}
+  .delta{ font-family:'JetBrains Mono',monospace; font-size: 10.5px;}
+  .delta.up{ color: var(--mint);}
+  .delta.dn{ color: var(--rose);}
+  .price{ font-family:'JetBrains Mono',monospace; font-weight:600; font-size: 11px;}
+  .results-meta{
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line);
+    font-size: 10px; color: var(--ink-3); display:flex; justify-content:space-between;
+  }
+
+  /* phone 4: Management score */
+  .leader-card{
+    background: #0F1525; border-radius: 14px; padding: 16px; margin-bottom: 12px;
+    border:1px solid var(--line);
+  }
+  .leader-head{ display:flex; align-items:center; gap:10px;}
+  .avatar{
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--indigo), #2a2f55);
+    display:grid; place-items:center; font-size: 11px; font-weight:600;
+    color: #fff;
+  }
+  .leader-head h4{ margin:0; font-size: 13px; font-weight:600;}
+  .leader-head p{ margin:0; font-size: 10px; color: var(--ink-3);}
+  .score-big{
+    font-size: 30px; font-weight:700; letter-spacing:-0.02em; color: var(--gold);
+    margin-left:auto;
+  }
+  .score-bars{ margin-top: 12px; display:flex; flex-direction:column; gap: 8px;}
+  .score-row{ display:grid; grid-template-columns: 1fr 60px auto; gap: 8px; align-items:center; font-size: 10.5px;}
+  .score-row .lab{ color: var(--ink-2);}
+  .score-row .bar{ height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow:hidden;}
+  .score-row .bar span{ display:block; height: 100%; border-radius:2px; background: var(--gold);}
+  .score-row .v{ font-family:'JetBrains Mono',monospace; font-size: 10px; color: var(--ink-2);}
+
+  /* responsive */
+  @media (max-width: 880px){
+    .feature{ grid-template-columns: 1fr; gap: 48px; }
+    .feature.reverse{ direction: ltr;}
+    .foot-grid{ grid-template-columns: 1fr 1fr; gap: 32px;}
+    .team-card{ grid-template-columns: 1fr; text-align:center;}
+    .team-photo{ margin: 0 auto;}
+    section{ padding: 80px 0;}
+    .nav-links{ display:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== NAV ============== -->
+<nav class="top">
+  <div class="wrap row">
+    <div class="logo">
+      <div class="logo-mark"></div>
+      <span>Quantcase</span>
+    </div>
+    <div class="nav-links">
+      <a href="#product">Product</a>
+      <a href="#research">Research</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#about">About</a>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="nav-cta">Sign in</button>
+      <button class="nav-cta primary">Request access</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ============== HERO ============== -->
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span> Now onboarding institutional allocators · Q2 2026</div>
+    <h1 class="hero-title">
+      Enterprise-grade research<br>
+      across <span class="serif">Private Markets.</span>
+    </h1>
+    <p class="hero-sub">
+      Quantcase brings the rigor of a quant desk to pre-IPO and growth-stage investing — earnings intelligence, real-time screening, and deep management diligence in one workspace.
+    </p>
+    <div class="cta-row">
+      <button class="btn btn-primary">Request access →</button>
+      <button class="btn btn-ghost">See a live deal</button>
+    </div>
+
+    <!-- Hero phone -->
+    <div class="hero-phone">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span class="icons">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 16h2v4H2v-4zm5-3h2v7H7v-7zm5-4h2v11h-2V9zm5-5h2v16h-2V4z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C7 4 2.7 6.5 1 10c1.7 3.5 6 6 11 6s9.3-2.5 11-6c-1.7-3.5-6-6-11-6zm0 10a4 4 0 110-8 4 4 0 010 8z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="10" rx="2"/><rect x="21" y="10" width="2" height="4" rx="1"/></svg>
+            </span>
+          </div>
+          <div class="phone-content pipeline-card">
+            <div class="tag-row">
+              <span class="tag gold">Pre-IPO · PE</span>
+              <span class="tag">Live Deals</span>
+            </div>
+            <div class="deal-head">
+              <div>
+                <h3>Deal Pipeline</h3>
+                <p>Curated private market opportunities</p>
+              </div>
+              <div style="text-align:right;">
+                <div class="moic-label">Avg MOIC</div>
+                <div class="moic-num">3.9<span style="font-size:14px;">x</span></div>
+              </div>
+            </div>
+
+            <div class="deal-row">
+              <div class="top">
+                <div class="name"><span class="bullet" style="background:oklch(0.72 0.16 270);"></span> Fleetbridge</div>
+                <div><span class="target" style="color:oklch(0.78 0.13 270);">3.2x</span> <span class="target-lbl">target</span></div>
+              </div>
+              <div class="progress"><span style="width:78%; background: linear-gradient(90deg, oklch(0.55 0.18 270), oklch(0.72 0.16 270));"></span></div>
+              <div class="meta">78% filled · ₹2,800 Cr</div>
+            </div>
+
+            <div class="deal-row">
+              <div class="top">
+                <div class="name"><span class="bullet" style="background: var(--mint);"></span> Northwind Bio</div>
+                <div><span class="target" style="color: var(--mint);">4.8x</span> <span class="target-lbl">target</span></div>
+              </div>
+              <div class="progress"><span style="width:55%; background: linear-gradient(90deg, oklch(0.55 0.13 165), var(--mint));"></span></div>
+              <div class="meta">55% filled · ₹1,500 Cr</div>
+            </div>
+
+            <div class="deal-row">
+              <div class="top">
+                <div class="name"><span class="bullet" style="background: var(--gold);"></span> Aerolane</div>
+                <div><span class="target" style="color: var(--gold);">2.7x</span> <span class="target-lbl">target</span></div>
+              </div>
+              <div class="progress"><span style="width:90%; background: linear-gradient(90deg, var(--gold-2), var(--gold));"></span></div>
+              <div class="meta">90% filled · ₹900 Cr</div>
+            </div>
+
+            <div class="footer-meta">
+              <span class="bullet" style="background: var(--mint);"></span>
+              Minimum ticket · ₹10L · Verified distributor
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="div-line"></div>
+
+<!-- ============== FEATURE 1: AI Earnings Analysis ============== -->
+<section id="product">
+  <div class="wrap">
+    <div class="feature">
+      <div class="feature-text">
+        <div class="section-eyebrow">01 · AI Earnings Analysis</div>
+        <h2 class="section-title">Decode every earnings call. <span class="serif">Word by word.</span></h2>
+        <p class="section-body">Our models read management tone, score guidance credibility, and surface forward signals from every call — so you catch hedges, deflections, and conviction shifts before they hit the tape.</p>
+        <a class="pill-link" href="#">See sample report
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+      <div class="feature-visual">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <span class="icons">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 16h2v4H2v-4zm5-3h2v7H7v-7zm5-4h2v11h-2V9zm5-5h2v16h-2V4z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="10" rx="2"/></svg>
+              </span>
+            </div>
+            <div class="phone-content">
+              <div class="screen-title">Q2 · Earnings Pulse</div>
+
+              <div class="call-card">
+                <div class="call-head">
+                  <div class="ticker">RELI <small>Q2 FY26</small></div>
+                  <span class="signal-badge">High Conviction</span>
+                </div>
+                <div style="font-size:10px; color: var(--ink-3); margin-bottom:4px;">Tone · Credibility · Forward signal</div>
+                <div class="meter">
+                  <span class="on"></span><span class="on"></span><span class="on"></span>
+                  <span class="on"></span><span class="on"></span>
+                  <span></span><span></span>
+                </div>
+                <p class="quote-line">"...margin expansion is structural, not cyclical — we're committing to the 22% target."</p>
+                <div class="signal-row">
+                  <span>CEO commitment</span><b>+18% vs Q1</b>
+                </div>
+              </div>
+
+              <div class="call-card">
+                <div class="call-head">
+                  <div class="ticker">MARV <small>Q2 FY26</small></div>
+                  <span class="signal-badge warn">Hedged</span>
+                </div>
+                <div style="font-size:10px; color: var(--ink-3); margin-bottom:4px;">Tone · Credibility · Forward signal</div>
+                <div class="meter">
+                  <span class="warn-on"></span><span class="warn-on"></span><span class="warn-on"></span>
+                  <span></span><span></span><span></span><span></span>
+                </div>
+                <p class="quote-line">"...we should see normalization in the back half — assuming demand cooperates."</p>
+                <div class="signal-row">
+                  <span>Hedge phrases</span><b style="color: var(--gold);">↑ 7 detected</b>
+                </div>
+              </div>
+
+              <div class="call-card" style="margin-bottom:0;">
+                <div class="call-head">
+                  <div class="ticker">CYNO <small>Q2 FY26</small></div>
+                  <span class="signal-badge neg">Deflective</span>
+                </div>
+                <div class="meter">
+                  <span style="background: var(--rose);"></span><span style="background: var(--rose);"></span>
+                  <span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <p class="quote-line">"...we don't want to comment on near-term unit economics at this time."</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- ============== FEATURE 2: Real-time Screening ============== -->
+<section>
+  <div class="wrap">
+    <div class="feature reverse">
+      <div class="feature-text">
+        <div class="section-eyebrow">02 · Real-time Screening</div>
+        <h2 class="section-title">Filter thousands of stocks. <span class="serif">Instantly.</span></h2>
+        <p class="section-body">Combine fundamentals, technicals, and our proprietary Quantcase scores into screens that update in real time. Save them, share them, or trigger alerts when something crosses your line.</p>
+        <a class="pill-link" href="#">Browse the screener
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+      <div class="feature-visual">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <span class="icons">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 16h2v4H2v-4zm5-3h2v7H7v-7zm5-4h2v11h-2V9zm5-5h2v16h-2V4z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="10" rx="2"/></svg>
+              </span>
+            </div>
+            <div class="phone-content">
+              <div class="screen-title">Live Screener</div>
+              <div class="screen-toolbar">
+                <span class="chip active">QCS &gt; 80</span>
+                <span class="chip">P/E &lt; 22</span>
+                <span class="chip">RSI 40–60</span>
+                <span class="chip">+ Add</span>
+              </div>
+
+              <div class="table-row head">
+                <span>Ticker</span><span>QCS</span><span>1D</span><span>Price</span>
+              </div>
+              <div class="table-row">
+                <div class="tname">ALPHALOOM<small>Software</small></div>
+                <span class="qcs high">92</span>
+                <span class="delta up">+2.4%</span>
+                <span class="price">₹4,128</span>
+              </div>
+              <div class="table-row">
+                <div class="tname">VEDARA<small>Industrials</small></div>
+                <span class="qcs high">88</span>
+                <span class="delta up">+1.1%</span>
+                <span class="price">₹992</span>
+              </div>
+              <div class="table-row">
+                <div class="tname">NORTHWIND<small>Energy</small></div>
+                <span class="qcs high">85</span>
+                <span class="delta dn">−0.6%</span>
+                <span class="price">₹2,344</span>
+              </div>
+              <div class="table-row">
+                <div class="tname">FLEETBRIDGE<small>Logistics</small></div>
+                <span class="qcs mid">81</span>
+                <span class="delta up">+0.9%</span>
+                <span class="price">₹612</span>
+              </div>
+              <div class="table-row">
+                <div class="tname">HELIOS LABS<small>Healthcare</small></div>
+                <span class="qcs mid">80</span>
+                <span class="delta up">+3.2%</span>
+                <span class="price">₹1,540</span>
+              </div>
+
+              <div class="results-meta">
+                <span>Updated 0.4s ago</span>
+                <span>1,247 → 26 matches</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- ============== FEATURE 3: Management Intelligence ============== -->
+<section>
+  <div class="wrap">
+    <div class="feature">
+      <div class="feature-text">
+        <div class="section-eyebrow">03 · Management Intelligence</div>
+        <h2 class="section-title">Score the people running the company. <span class="serif">Not just the numbers.</span></h2>
+        <p class="section-body">We score leadership quality across capital allocation, execution history, and communication — turning years of filings, calls, and board moves into a single, comparable view.</p>
+        <a class="pill-link" href="#">See methodology
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+      <div class="feature-visual">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <span class="icons">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 16h2v4H2v-4zm5-3h2v7H7v-7zm5-4h2v11h-2V9zm5-5h2v16h-2V4z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="10" rx="2"/></svg>
+              </span>
+            </div>
+            <div class="phone-content">
+              <div class="screen-title">Management Score</div>
+
+              <div class="leader-card">
+                <div class="leader-head">
+                  <div class="avatar">AR</div>
+                  <div>
+                    <h4>A. Ramnath</h4>
+                    <p>CEO · Vedara Industrials · 11 yrs</p>
+                  </div>
+                  <div class="score-big">87</div>
+                </div>
+                <div class="score-bars">
+                  <div class="score-row">
+                    <span class="lab">Capital allocation</span>
+                    <div class="bar"><span style="width:92%;"></span></div>
+                    <span class="v">A+</span>
+                  </div>
+                  <div class="score-row">
+                    <span class="lab">Execution history</span>
+                    <div class="bar"><span style="width:84%; background: var(--mint);"></span></div>
+                    <span class="v">A−</span>
+                  </div>
+                  <div class="score-row">
+                    <span class="lab">Communication</span>
+                    <div class="bar"><span style="width:78%; background: var(--gold);"></span></div>
+                    <span class="v">B+</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="leader-card" style="margin-bottom:0;">
+                <div class="leader-head">
+                  <div class="avatar" style="background: linear-gradient(135deg, var(--gold-2), #6b5a2a);">PD</div>
+                  <div>
+                    <h4>P. Dasgupta</h4>
+                    <p>CFO · Vedara Industrials · 4 yrs</p>
+                  </div>
+                  <div class="score-big" style="color: var(--mint);">73</div>
+                </div>
+                <div class="score-bars">
+                  <div class="score-row">
+                    <span class="lab">Capital allocation</span>
+                    <div class="bar"><span style="width:70%;"></span></div>
+                    <span class="v">B</span>
+                  </div>
+                  <div class="score-row">
+                    <span class="lab">Execution history</span>
+                    <div class="bar"><span style="width:80%; background: var(--mint);"></span></div>
+                    <span class="v">B+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- ============== STAT BLOCK ============== -->
+<section class="stat-section">
+  <div class="wrap">
+    <div class="section-eyebrow" style="margin-bottom:16px;">By the numbers</div>
+    <h2 class="section-title" style="margin: 0 auto;">Looking for a smarter way to <span class="serif">research?</span></h2>
+    <div class="stat-card">
+      <div class="lbl">Quantcase Index · 5y CAGR</div>
+      <div class="num">32<span class="small">.4%</span></div>
+      <div class="desc">Backtested across 1,200+ Indian listed equities · vs <span class="serif">Nifty 500</span> 14.1%.</div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- ============== TEAM ============== -->
+<section>
+  <div class="wrap" style="text-align:center;">
+    <div class="section-eyebrow">Built by operators</div>
+    <h2 class="section-title" style="margin: 0 auto;">From a team that has <span class="serif">done it before.</span></h2>
+    <div class="team-card">
+      <div class="team-photo">[ Founding team<br>placeholder ]</div>
+      <div>
+        <p style="margin:0; color: var(--ink-2); font-size: 15px;">
+          Founders from <span style="color:var(--ink); font-weight:500;">Two Sigma</span>, <span style="color:var(--ink); font-weight:500;">Sequoia</span>, and <span style="color:var(--ink); font-weight:500;">Bridgewater</span> — building the research stack we wished we had on the buy side.
+        </p>
+        <div class="team-stat">
+          <div>
+            <div class="v">$4.2B</div>
+            <div class="l">Lifetime AUM managed</div>
+          </div>
+          <div>
+            <div class="v">14<span style="font-size:18px; color:var(--ink-2);">yrs</span></div>
+            <div class="l">Avg. buy-side experience</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- ============== FAQ ============== -->
+<section class="faq-section">
+  <div class="wrap">
+    <div class="section-eyebrow">FAQ</div>
+    <h2 class="section-title" style="margin: 0 auto;">Still got questions? <br><span class="serif">We're here to help.</span></h2>
+
+    <div class="faq-list">
+      <div class="faq open">
+        <div class="faq-q-wrap">
+          <h4>Who is Quantcase built for?</h4>
+          <div class="answer">Family offices, RIAs, and serious individual investors who want institutional-grade research without standing up a quant desk. We're not a brokerage — we're the research layer that sits beside one.</div>
+        </div>
+        <div class="faq-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+      </div>
+      <div class="faq">
+        <div class="faq-q-wrap">
+          <h4>How is the Quantcase Score calculated?</h4>
+          <div class="answer">Each company is scored across four pillars — fundamentals, momentum, governance, and management quality — and blended into a single 0–100 score. We publish the methodology in full and re-score nightly.</div>
+        </div>
+        <div class="faq-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+      </div>
+      <div class="faq">
+        <div class="faq-q-wrap">
+          <h4>Do you offer access to private market deals?</h4>
+          <div class="answer">Yes — vetted pre-IPO and growth-stage opportunities are surfaced in the Deal Pipeline, with minimum tickets starting at ₹10L. All deals are accompanied by full Quantcase research.</div>
+        </div>
+        <div class="faq-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+      </div>
+      <div class="faq">
+        <div class="faq-q-wrap">
+          <h4>Is my portfolio data secure?</h4>
+          <div class="answer">Read-only integrations, SOC 2 Type II certified infrastructure, end-to-end encryption, and no resale of any user data — ever. Your holdings are yours alone.</div>
+        </div>
+        <div class="faq-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+      </div>
+      <div class="faq">
+        <div class="faq-q-wrap">
+          <h4>How much does Quantcase cost?</h4>
+          <div class="answer">Quantcase Pro is ₹24,000/year for individuals. Family office and RIA tiers are quoted based on seats and data needs — request access and we'll get you a number within a day.</div>
+        </div>
+        <div class="faq-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FOOTER ============== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <div class="logo" style="margin-bottom: 10px;">
+          <div class="logo-mark"></div>
+          <span>Quantcase</span>
+        </div>
+        <p class="foot-tagline">Enterprise-grade research across public and private markets — for the next generation of allocators.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Product</h5>
+        <a href="#">Earnings Pulse</a>
+        <a href="#">Live Screener</a>
+        <a href="#">Management Score</a>
+        <a href="#">Deal Pipeline</a>
+      </div>
+      <div class="foot-col">
+        <h5>Company</h5>
+        <a href="#">About</a>
+        <a href="#">Research</a>
+        <a href="#">Careers</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="foot-col">
+        <h5>Legal</h5>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Disclosures</a>
+        <a href="#">Compliance</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>We're building India's research stack. We're hiring.</span>
+      <span>© 2026 Quantcase Research Pvt. Ltd.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // FAQ toggles
+  document.querySelectorAll('.faq').forEach(el => {
+    el.addEventListener('click', () => el.classList.toggle('open'));
+  });
+</script>
+</body>
+</html>

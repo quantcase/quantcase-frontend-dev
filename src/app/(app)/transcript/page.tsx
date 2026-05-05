@@ -188,7 +188,7 @@ function TranscriptContent() {
                 )}
               </div>
               <Link
-                href="/"
+                href="/dashboard"
                 className="px-4 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", color: "var(--qc-text-heading)" }}
               >
                 Back to Home

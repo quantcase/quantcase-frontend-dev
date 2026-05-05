@@ -80,7 +80,7 @@ export function SignInForm() {
 
       localStorage.setItem("qc_at", data.access_token);
       localStorage.setItem("qc_rt", data.refresh_token);
-      router.push("/");
+      router.push("/dashboard");
     } catch {
       setError("Unable to reach server. Please try again.");
     } finally {

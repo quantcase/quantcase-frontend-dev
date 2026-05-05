@@ -6,7 +6,7 @@ import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useManagementAnalysis } from "@/hooks/useManagementAnalysis";
 import { apiPost, apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
-import { Target, Shield, Briefcase } from "lucide-react";
+import { Target, Shield } from "lucide-react";
 import type { TimeframeOption, JobCreateResponse, JobStatusResponse, JobStatus } from "@/types/management";
 
 import { SectionPanel } from "@/components/molecules/section-panel";
@@ -16,7 +16,9 @@ import { GuidanceTrackTable, GuidanceFilterControls, useGuidanceFilterState } fr
 import { PromoterSection } from "@/components/management/promoter-section";
 import { RedFlagsSection } from "@/components/management/red-flags-section";
 import { InvestmentThesisSection } from "@/components/management/investment-thesis-section";
-import { ManagementIntelligenceCard } from "@/components/management/management-intelligence-card";
+import { ScoreBreakdownCard } from "@/components/management/score-breakdown-card";
+import { ReanalyzeButton } from "@/components/management/reanalyze-button";
+import { AnalyzePrompt } from "@/components/management/analyze-prompt";
 
 const NAV_ITEMS = [
   { id: "section-score", label: "Score" },
@@ -26,15 +28,13 @@ const NAV_ITEMS = [
   { id: "section-promoter", label: "Promoter Activity" },
 ];
 
-/** Map mqi_score.label to a colour-driving level string. */
 function mqiLabelToLevel(label: string): string {
   const l = label.toLowerCase();
   if (l === "high" || l === "strong" || l === "good") return "HIGH";
   if (l === "low" || l === "poor" || l === "weak") return "LOW";
-  return label; // "Average", "Moderate", etc. → amber by default in scorecard
+  return label;
 }
 
-/** Derive HIGH / MODERATE / LOW from a dimension score percentage. */
 function pctToRating(score: number, max: number): string {
   const pct = max > 0 ? score / max : 0;
   if (pct >= 0.7) return "HIGH";
@@ -56,10 +56,7 @@ function ManagementDashboardContent() {
 
   const { data: transcriptCalls, loading: transcriptLoading, error: transcriptError } = useTranscriptCalls(symbol);
   const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
-  const { data: managementData, loading: managementLoading } = useManagementAnalysis(
-    firstCallId,
-    selectedTimeframe
-  );
+  const { data: managementData, loading: managementLoading } = useManagementAnalysis(firstCallId, selectedTimeframe);
 
   const loading = transcriptLoading || managementLoading;
   const guidanceFilterState = useGuidanceFilterState();
@@ -187,121 +184,30 @@ function ManagementDashboardContent() {
   }
 
   if (Object.keys(managementData).length === 0) {
-    const transcriptCall = transcriptCalls[0];
     return (
-      <div className="min-h-screen p-4" style={{ background: "var(--qc-bg)" }}>
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <h1 className="text-sm font-bold mb-6" style={{ color: "var(--qc-ink)" }}>Management Factor Analysis</h1>
-          <div className="rounded-lg p-6" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}>
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-sm font-semibold mb-2" style={{ color: "var(--qc-ink)" }}>{transcriptCall.company_name}</h2>
-                <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>{transcriptCall.basic_industry}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 py-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
-                <div>
-                  <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Ticker</p>
-                  <p className="font-semibold" style={{ color: "var(--qc-ink)" }}>{transcriptCall.company}</p>
-                </div>
-                <div>
-                  <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Quarter</p>
-                  <p className="font-semibold" style={{ color: "var(--qc-ink)" }}>{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
-                </div>
-                <div>
-                  <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Call Date</p>
-                  <p className="font-semibold" style={{ color: "var(--qc-ink)" }}>{transcriptCall.call_date}</p>
-                </div>
-                <div>
-                  <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Call ID</p>
-                  <p className="font-semibold text-xs" style={{ color: "var(--qc-ink)" }}>{transcriptCall.id}</p>
-                </div>
-              </div>
-              <div className="pt-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
-                <p className="text-sm mb-4" style={{ color: "var(--qc-ink-2)" }}>
-                  No management analysis available for this transcript yet.
-                </p>
-                {analyzeError && (
-                  <div className="mb-4 p-3 rounded-md" style={{ background: "var(--qc-down-soft)", border: "1px solid var(--qc-down)" }}>
-                    <p className="text-sm" style={{ color: "var(--qc-down)" }}>{analyzeError}</p>
-                  </div>
-                )}
-                {aggregateStatus && (
-                  <div className="mb-4 p-3 rounded-md" style={{
-                    background: aggregateStatus === "completed" ? "var(--qc-up-soft)"
-                      : aggregateStatus === "failed" ? "var(--qc-down-soft)"
-                      : "var(--qc-blue-soft)",
-                    border: `1px solid ${aggregateStatus === "completed" ? "var(--qc-up)" : aggregateStatus === "failed" ? "var(--qc-down)" : "var(--qc-blue)"}`,
-                  }}>
-                    {aggregateStatus === "processing" || aggregateStatus === "completed" ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm" style={{ color: aggregateStatus === "completed" ? "var(--qc-up)" : "var(--qc-blue)" }}>
-                            {aggregateStatus === "completed" ? "Analysis complete!" : "Analyzing transcripts..."}
-                          </p>
-                          <p className="text-sm font-semibold" style={{ color: aggregateStatus === "completed" ? "var(--qc-up)" : "var(--qc-blue)" }}>
-                            {progress}%
-                          </p>
-                        </div>
-                        <div className="w-full rounded-full h-2 overflow-hidden" style={{ background: aggregateStatus === "completed" ? "var(--qc-up-soft)" : "var(--qc-blue-soft)" }}>
-                          <div
-                            className="h-full transition-all duration-300 ease-linear"
-                            style={{ width: `${progress}%`, background: aggregateStatus === "completed" ? "var(--qc-up)" : "var(--qc-blue)" }}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm" style={{ color: aggregateStatus === "failed" ? "var(--qc-down)" : "var(--qc-blue)" }}>
-                        {aggregateStatus === "failed" && "Analysis failed"}
-                        {aggregateStatus === "pending" && "Analysis jobs queued..."}
-                      </p>
-                    )}
-                  </div>
-                )}
-                <button
-                  onClick={handleAnalyzeClick}
-                  disabled={isAnalyzing}
-                  className="w-full font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}
-                >
-                  {isAnalyzing
-                    ? aggregateStatus === "pending" ? "Queued..."
-                    : aggregateStatus === "processing" ? "Processing..."
-                    : "Starting..."
-                    : "Analyze"}
-                </button>
-              </div>
-              {transcriptCall.ppt_url && (
-                <div className="pt-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
-                  <a href={transcriptCall.ppt_url} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: "var(--qc-ink)" }}>
-                    View Presentation →
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <AnalyzePrompt
+        transcriptCall={transcriptCalls[0]}
+        isAnalyzing={isAnalyzing}
+        aggregateStatus={aggregateStatus}
+        progress={progress}
+        analyzeError={analyzeError}
+        onAnalyze={handleAnalyzeClick}
+      />
     );
   }
 
-  // Hit rate from guidance_vs_actuals
   const hitRate = managementData.guidance_vs_actuals?.hit_rate;
   const hitRatePct = hitRate && hitRate.total_trackable > 0
     ? Math.round((hitRate.met_or_beat / hitRate.total_trackable) * 100)
     : null;
 
-  // Derive scorecard items from mqi_score.dimensions
   const dims = managementData.mqi_score?.dimensions;
   const scorecardItems = dims ? [
     {
-      label: "Guidance Accuracy",
-      descriptor: hitRate
-        ? `${hitRatePct}% hit rate — ${hitRate.met_or_beat} met of ${hitRate.total_trackable} trackable`
-        : `${dims.guidance_accuracy.score} / ${dims.guidance_accuracy.max} points`,
+      label: "Guidance",
+      descriptor: hitRate ? `${hitRatePct}% hit rate` : `${dims.guidance_accuracy.score} / ${dims.guidance_accuracy.max} points`,
       rating: pctToRating(dims.guidance_accuracy.score, dims.guidance_accuracy.max),
-      barValue: dims.guidance_accuracy.max > 0
-        ? (dims.guidance_accuracy.score / dims.guidance_accuracy.max) * 100
-        : null,
+      barValue: dims.guidance_accuracy.max > 0 ? (dims.guidance_accuracy.score / dims.guidance_accuracy.max) * 100 : null,
       icon: Target,
       scrollToId: "section-guidance",
     },
@@ -309,172 +215,98 @@ function ManagementDashboardContent() {
       label: "Red Flags",
       descriptor: `${dims.red_flags.score} / ${dims.red_flags.max} points`,
       rating: pctToRating(dims.red_flags.score, dims.red_flags.max),
-      barValue: dims.red_flags.max > 0
-        ? (dims.red_flags.score / dims.red_flags.max) * 100
-        : null,
+      barValue: dims.red_flags.max > 0 ? (dims.red_flags.score / dims.red_flags.max) * 100 : null,
       icon: Shield,
       scrollToId: "section-red-flags",
     },
-    {
-      label: "Investment Thesis",
-      descriptor: `${dims.investment_thesis.score} / ${dims.investment_thesis.max} points`,
-      rating: pctToRating(dims.investment_thesis.score, dims.investment_thesis.max),
-      barValue: dims.investment_thesis.max > 0
-        ? (dims.investment_thesis.score / dims.investment_thesis.max) * 100
-        : null,
-      icon: Briefcase,
-      scrollToId: "section-thesis",
-    },
-    {
-      label: "Promoter Activity",
-      descriptor: `${dims.promoter_activity.score} / ${dims.promoter_activity.max} points`,
-      rating: pctToRating(dims.promoter_activity.score, dims.promoter_activity.max),
-      barValue: dims.promoter_activity.max > 0
-        ? (dims.promoter_activity.score / dims.promoter_activity.max) * 100
-        : null,
-      icon: Target,
-      scrollToId: "section-promoter",
-    },
   ] : [];
 
-  // Format an ISO date string as a short relative label
-  function formatRelativeTime(isoString: string): string {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) return isoString;
-    const diffMs = Date.now() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins < 1) return "just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return date.toLocaleDateString();
-  }
-
-  const analyzedAt = managementData.analyzedAt ?? null;
-
-  const reanalyzeButton = (
-    <div className="flex flex-col items-end gap-1">
-      {/* Progress bar while analyzing */}
-      {isAnalyzing && (
-        <div className="w-32 h-1 rounded-full overflow-hidden" style={{ background: "var(--qc-hair)" }}>
-          <div
-            className="h-full transition-all duration-300 ease-linear"
-            style={{ width: `${progress}%`, background: "var(--qc-ink)" }}
-          />
-        </div>
-      )}
-      <button
-        onClick={handleAnalyzeClick}
-        disabled={isAnalyzing}
-        style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: isAnalyzing ? "var(--qc-ink-2)" : "var(--qc-on-dark)",
-          background: isAnalyzing ? "var(--qc-section)" : "var(--qc-ink)",
-          border: "1px solid var(--qc-hair)",
-          borderRadius: 6,
-          padding: "6px 14px",
-          cursor: isAnalyzing ? "not-allowed" : "pointer",
-          whiteSpace: "nowrap",
-          letterSpacing: "0.01em",
-        }}
-      >
-        {isAnalyzing
-          ? aggregateStatus === "pending" ? "Queued…"
-          : aggregateStatus === "processing" ? `Analyzing… ${progress}%`
-          : "Starting…"
-          : "Reanalyze"}
-      </button>
-      {analyzedAt && !isAnalyzing && (
-        <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
-          Updated {formatRelativeTime(analyzedAt)}
-        </span>
-      )}
-      {analyzeError && (
-        <span style={{ fontSize: 10, color: "var(--qc-down)" }}>{analyzeError}</span>
-      )}
-    </div>
-  );
-
   return (
-    <ScreenerPageShell navItems={NAV_ITEMS} headerRight={reanalyzeButton}>
-      <div className="mb-8 px-4 flex gap-6 items-start pt-4">
+    <ScreenerPageShell
+      navItems={NAV_ITEMS}
+      headerRight={
+        <ReanalyzeButton
+          isAnalyzing={isAnalyzing}
+          aggregateStatus={aggregateStatus}
+          progress={progress}
+          analyzedAt={managementData.analyzedAt ?? null}
+          analyzeError={analyzeError}
+          onClick={handleAnalyzeClick}
+        />
+      }
+    >
+      <div className="mb-8 px-4 space-y-6 pt-4">
 
-        {/* Left column: all sections stacked */}
-        <div className="flex-1 min-w-0 space-y-6">
-
-          {/* Score */}
-          <div id="section-score">
+        {/* Score row */}
+        <div id="section-score" className="flex gap-4 items-stretch">
+          <div style={{ flex: "0 0 40%", minWidth: 0 }}>
             <ScreenerScorecard
-              title="MANAGEMENT CREDIBILITY"
+              title="VERDICT"
               overallLevel={managementData.mqi_score ? mqiLabelToLevel(managementData.mqi_score.label) : undefined}
               score={managementData.mqi_score?.total ?? 0}
               maxScore={100}
               items={scorecardItems}
+              verdictAfter={managementData.management_intelligence?.key_takeaways?.[0] ?? undefined}
+              verdictSubtitle={managementData.management_intelligence?.recommended_strategy?.thesis ?? undefined}
             />
           </div>
-
-          {/* Guidance Accuracy */}
-          <div id="section-guidance">
-            <SectionPanel
-              title="Guidance Track Record"
-              headerAction={
-                hitRatePct !== null ? (
-                  <div className="flex items-center gap-2">
-                    <div className="flex flex-col items-end gap-0.5 rounded-xl px-4 py-2 min-w-[90px]" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
-                      <span style={{ fontSize: 10, fontWeight: 500, color: "var(--qc-ink-2)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-ink)", lineHeight: 1.4 }}>
-                        {hitRatePct}%
-                      </span>
-                    </div>
-                    {managementData.guidance_vs_actuals?.guidance_bias && (
-                      <div className="flex flex-col items-end gap-0.5 rounded-xl px-4 py-2 min-w-[90px]" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
-                        <span style={{ fontSize: 10, fontWeight: 500, color: "var(--qc-ink-2)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Bias</span>
-                        <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-ink)", lineHeight: 1.4 }}>
-                          {managementData.guidance_vs_actuals.guidance_bias}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ) : undefined
-              }
-              subHeader={<GuidanceFilterControls state={guidanceFilterState} />}
-            >
-              <GuidanceTrackTable rows={managementData.guidance_vs_actuals?.rows ?? []} filterState={guidanceFilterState} />
-            </SectionPanel>
-          </div>
-
-          {/* Red Flags */}
-          {managementData.red_flags && managementData.red_flags.length > 0 && (
-            <div id="section-red-flags">
-              <RedFlagsSection flags={managementData.red_flags} />
-            </div>
-          )}
-
-          {/* Investment Thesis */}
-          {managementData.investment_thesis && (
-            <div id="section-thesis">
-              <InvestmentThesisSection thesis={managementData.investment_thesis} />
-            </div>
-          )}
-
-          {/* Promoter Activity */}
-          {managementData.promoter_activity && (
-            <div id="section-promoter">
-              <PromoterSection
-                promoterActivity={managementData.promoter_activity}
+          {managementData.mqi_score && managementData.management_intelligence && (
+            <div style={{ flex: "0 0 60%", minWidth: 0 }}>
+              <ScoreBreakdownCard
                 mqiScore={managementData.mqi_score}
+                signals={managementData.management_intelligence.signals_breakdown}
+                action={managementData.management_intelligence?.recommended_strategy?.action ?? undefined}
+                rationale={managementData.management_intelligence?.recommended_strategy?.rationale ?? undefined}
               />
             </div>
           )}
-
         </div>
 
-        {/* Right column: sticky intelligence card */}
-        {managementData.management_intelligence && managementData.mqi_score && (
-          <div className="w-[380px] shrink-0 sticky top-4">
-            <ManagementIntelligenceCard
-              intelligence={managementData.management_intelligence}
+        {/* Guidance Accuracy */}
+        <div id="section-guidance">
+          <SectionPanel
+            title="Guidance Track Record"
+            headerAction={
+              hitRatePct !== null ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col items-end gap-0.5 rounded-xl px-4 py-2 min-w-[90px]" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
+                    <span style={{ fontSize: 10, fontWeight: 500, color: "var(--qc-ink-2)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-ink)", lineHeight: 1.4 }}>{hitRatePct}%</span>
+                  </div>
+                  {managementData.guidance_vs_actuals?.guidance_bias && (
+                    <div className="flex flex-col items-end gap-0.5 rounded-xl px-4 py-2 min-w-[90px]" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
+                      <span style={{ fontSize: 10, fontWeight: 500, color: "var(--qc-ink-2)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Bias</span>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-ink)", lineHeight: 1.4 }}>{managementData.guidance_vs_actuals.guidance_bias}</span>
+                    </div>
+                  )}
+                </div>
+              ) : undefined
+            }
+            subHeader={<GuidanceFilterControls state={guidanceFilterState} />}
+          >
+            <GuidanceTrackTable rows={managementData.guidance_vs_actuals?.rows ?? []} filterState={guidanceFilterState} />
+          </SectionPanel>
+        </div>
+
+        {/* Red Flags */}
+        {managementData.red_flags && managementData.red_flags.length > 0 && (
+          <div id="section-red-flags">
+            <RedFlagsSection flags={managementData.red_flags} />
+          </div>
+        )}
+
+        {/* Investment Thesis */}
+        {managementData.investment_thesis && (
+          <div id="section-thesis">
+            <InvestmentThesisSection thesis={managementData.investment_thesis} />
+          </div>
+        )}
+
+        {/* Promoter Activity */}
+        {managementData.promoter_activity && (
+          <div id="section-promoter">
+            <PromoterSection
+              promoterActivity={managementData.promoter_activity}
               mqiScore={managementData.mqi_score}
             />
           </div>

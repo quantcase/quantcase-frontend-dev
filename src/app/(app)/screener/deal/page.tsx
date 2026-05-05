@@ -171,7 +171,7 @@ function DealContent() {
     if (loading) {
       return (
         <div className="flex items-center justify-center py-20">
-          <div className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading...</div>
+          <div className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Loading...</div>
         </div>
       );
     }
@@ -187,7 +187,7 @@ function DealContent() {
     if (transcriptCalls.length === 0) {
       return (
         <div className="flex items-center justify-center py-20">
-          <div className="text-sm" style={{ color: "var(--qc-text-muted)" }}>No transcript calls found for {symbol}</div>
+          <div className="text-sm" style={{ color: "var(--qc-ink-2)" }}>No transcript calls found for {symbol}</div>
         </div>
       );
     }
@@ -197,20 +197,20 @@ function DealContent() {
       const transcriptCall = transcriptCalls[0];
       return (
         <div className="px-4 py-8 max-w-4xl mx-auto">
-          <div className="rounded-lg p-6" style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-default)" }}>
+          <div className="rounded-lg p-6" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 py-4">
                 <div>
-                  <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Quarter</p>
-                  <p className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
+                  <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Quarter</p>
+                  <p className="font-semibold" style={{ color: "var(--qc-ink)" }}>{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
                 </div>
                 <div>
-                  <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Call Date</p>
-                  <p className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>{transcriptCall.call_date}</p>
+                  <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Call Date</p>
+                  <p className="font-semibold" style={{ color: "var(--qc-ink)" }}>{transcriptCall.call_date}</p>
                 </div>
               </div>
-              <div className="pt-4" style={{ borderTop: "1px solid var(--qc-border-default)" }}>
-                <p className="text-sm mb-4" style={{ color: "var(--qc-text-muted)" }}>
+              <div className="pt-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
+                <p className="text-sm mb-4" style={{ color: "var(--qc-ink-2)" }}>
                   No deal analysis available for this transcript yet.
                 </p>
 
@@ -255,7 +255,7 @@ function DealContent() {
                   onClick={handleAnalyzeClick}
                   disabled={isAnalyzing}
                   className="w-full font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}
+                  style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}
                 >
                   {isAnalyzing
                     ? aggregateStatus === "pending" ? "Queued..." : aggregateStatus === "processing" ? "Processing..." : "Starting..."
@@ -263,8 +263,8 @@ function DealContent() {
                 </button>
               </div>
               {transcriptCall.ppt_url && (
-                <div className="pt-4" style={{ borderTop: "1px solid var(--qc-border-default)" }}>
-                  <a href={transcriptCall.ppt_url} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: "var(--qc-accent-primary)" }}>
+                <div className="pt-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
+                  <a href={transcriptCall.ppt_url} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: "var(--qc-ink)" }}>
                     View Presentation →
                   </a>
                 </div>

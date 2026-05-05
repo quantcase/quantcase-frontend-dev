@@ -38,16 +38,16 @@ export function AppSidebar() {
     <aside
       className="fixed left-0 top-0 z-40 flex h-screen w-[72px] flex-col items-center py-[22px] gap-1.5"
       style={{
-        borderRight: "1px solid var(--qc-sidebar-border)",
-        background: "var(--qc-sidebar-bg)",
+        borderRight: "1px solid var(--qc-hair)",
+        background: "var(--qc-card)",
       }}
     >
       {/* Logo mark — lime circle */}
       <div
         className="mb-2 flex items-center justify-center rounded-full"
-        style={{ width: 40, height: 40, background: "var(--qc-accent-primary)" }}
+        style={{ width: 40, height: 40, background: "var(--qc-ink)" }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--qc-accent-primary-fg)" strokeWidth="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--qc-on-dark)" strokeWidth="2">
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-3.5-3.5" />
         </svg>
@@ -69,19 +69,19 @@ export function AppSidebar() {
                     style={{
                       width: 40,
                       height: 40,
-                      background: active ? "var(--qc-sidebar-icon-active-bg)" : "transparent",
-                      color: active ? "var(--qc-sidebar-icon-active-fg)" : "var(--qc-sidebar-icon-idle-fg)",
+                      background: active ? "var(--qc-ink)" : "transparent",
+                      color: active ? "var(--qc-on-dark)" : "var(--qc-ink-3)",
                     }}
                     onMouseEnter={(e) => {
                       if (!active) {
-                        (e.currentTarget as HTMLElement).style.background = "var(--qc-sidebar-icon-hover-bg)";
-                        (e.currentTarget as HTMLElement).style.color = "var(--qc-text-heading)";
+                        (e.currentTarget as HTMLElement).style.background = "var(--qc-section)";
+                        (e.currentTarget as HTMLElement).style.color = "var(--qc-ink)";
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!active) {
                         (e.currentTarget as HTMLElement).style.background = "transparent";
-                        (e.currentTarget as HTMLElement).style.color = "var(--qc-sidebar-icon-idle-fg)";
+                        (e.currentTarget as HTMLElement).style.color = "var(--qc-ink-3)";
                       }
                     }}
                   >
@@ -105,15 +105,15 @@ export function AppSidebar() {
               style={{
                 width: 40,
                 height: 40,
-                color: "var(--qc-sidebar-icon-idle-fg)",
+                color: "var(--qc-ink-3)",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "var(--qc-sidebar-icon-hover-bg)";
-                (e.currentTarget as HTMLElement).style.color = "var(--qc-text-heading)";
+                (e.currentTarget as HTMLElement).style.background = "var(--qc-section)";
+                (e.currentTarget as HTMLElement).style.color = "var(--qc-ink)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background = "transparent";
-                (e.currentTarget as HTMLElement).style.color = "var(--qc-sidebar-icon-idle-fg)";
+                (e.currentTarget as HTMLElement).style.color = "var(--qc-ink-3)";
               }}
             >
               <LogOut size={18} strokeWidth={1.8} />

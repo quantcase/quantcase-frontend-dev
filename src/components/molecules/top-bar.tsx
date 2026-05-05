@@ -36,8 +36,8 @@ function PillTab({
   onClick?: () => void;
 }) {
   const base: React.CSSProperties = active
-    ? { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
-    : { background: "transparent", color: "var(--qc-text-muted)" };
+    ? { background: "var(--qc-ink)", color: "var(--qc-on-dark)" }
+    : { background: "transparent", color: "var(--qc-ink-2)" };
 
   const content = (
     <span
@@ -69,16 +69,16 @@ function SearchZone() {
     <div className="flex items-center gap-3">
       <div
         className="flex items-center gap-2 rounded-full px-3 py-1.5"
-        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
       >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ color: "var(--qc-text-muted)" }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ color: "var(--qc-ink-2)" }}>
           <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
         </svg>
         <input
           type="text"
           placeholder="Search Indian companies (e.g. HDFC, Reliance)..."
           className="w-72 bg-transparent text-[13px] focus:outline-none"
-          style={{ color: "var(--qc-text-body)" }}
+          style={{ color: "var(--qc-ink)" }}
         />
       </div>
       <div className="flex items-center gap-2">
@@ -86,7 +86,7 @@ function SearchZone() {
           <span
             key={sym}
             className="rounded-full px-3 py-1 text-xs font-medium"
-            style={{ background: "var(--qc-chip-bg)", border: "1px solid var(--qc-chip-border)", color: "var(--qc-text-muted)" }}
+            style={{ background: "var(--qc-chip)", border: "1px solid var(--qc-hair)", color: "var(--qc-ink-2)" }}
           >
             {sym}
           </span>
@@ -163,7 +163,7 @@ function TopBarInner() {
       /* pill-tabs container — card bg, border, rounded-full pill, small gap */
       <div
         className="flex items-center gap-0.5 rounded-full p-1"
-        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
       >
         {terminalTabs.map((tab) => (
           <PillTab key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href} icon={tab.icon}>
@@ -181,11 +181,11 @@ function TopBarInner() {
               className="relative flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium overflow-hidden transition-colors whitespace-nowrap"
               style={
                 isFactorActive
-                  ? { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
+                  ? { background: "var(--qc-ink)", color: "var(--qc-on-dark)" }
                   : {
-                      background: "var(--qc-surface-panel)",
-                      border: "1px solid var(--qc-border-default)",
-                      color: "var(--qc-text-heading)",
+                      background: "var(--qc-section)",
+                      border: "1px solid var(--qc-hair)",
+                      color: "var(--qc-ink)",
                     }
               }
             >
@@ -206,14 +206,14 @@ function TopBarInner() {
               <ChevronRight
                 size={12}
                 className={cn("transition-transform duration-200", showFactorItems ? "rotate-90" : "rotate-0")}
-                style={{ position: "relative", zIndex: 1, color: "var(--qc-text-muted)" }}
+                style={{ position: "relative", zIndex: 1, color: "var(--qc-ink-2)" }}
               />
             </span>
           </button>
 
           {showFactorItems && (
             <>
-              <span className="px-1 select-none text-sm" style={{ color: "var(--qc-topbar-separator)" }}>·</span>
+              <span className="px-1 select-none text-sm" style={{ color: "var(--qc-hair)" }}>·</span>
               {FACTOR_ITEMS.map((item) => (
                 <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
                   {item.label}
@@ -235,7 +235,7 @@ function TopBarInner() {
     leftZone = (
       <div
         className="flex items-center gap-0.5 rounded-full p-1"
-        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
       >
         {wealthTabs.map((tab) => (
           <PillTab key={tab.href} href={withRmId(tab.href)} active={pathname.startsWith(tab.href)} icon={tab.icon}>
@@ -252,7 +252,7 @@ function TopBarInner() {
     leftZone = (
       <div
         className="flex items-center gap-0.5 rounded-full p-1"
-        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
       >
         {modelTabs.map((tab) => (
           <PillTab
@@ -271,7 +271,7 @@ function TopBarInner() {
   return (
     <header
       className="fixed left-[72px] right-0 top-0 z-30 flex h-[60px] items-center justify-between px-6 pt-[22px]"
-      style={{ background: "var(--qc-topbar-bg)" }}
+      style={{ background: "var(--qc-card)" }}
     >
       <div className="flex h-full items-center">{leftZone}</div>
 
@@ -279,7 +279,7 @@ function TopBarInner() {
       <div className="flex items-center gap-4">
         <div
           className="flex size-9 items-center justify-center rounded-full text-sm font-semibold text-white"
-          style={{ background: "var(--qc-topbar-avatar-bg)" }}
+          style={{ background: "var(--qc-ink)" }}
         >
           PJ
         </div>
@@ -296,7 +296,7 @@ function TopBarGuard() {
       fallback={
         <header
           className="fixed left-[72px] right-0 top-0 z-30 h-14 border-b"
-          style={{ background: "var(--qc-topbar-bg)", borderColor: "var(--qc-topbar-border)" }}
+          style={{ background: "var(--qc-card)", borderColor: "var(--qc-hair)" }}
         />
       }
     >

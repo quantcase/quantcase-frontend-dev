@@ -74,25 +74,25 @@ function SignalTile({
       onMouseLeave={() => setShowTooltip(false)}
     >
       <div className="flex items-center justify-between mb-1">
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>
           {label}
         </p>
-        <Info className="h-3 w-3 flex-shrink-0" style={{ color: "var(--qc-text-muted)" }} />
+        <Info className="h-3 w-3 flex-shrink-0" style={{ color: "var(--qc-ink-2)" }} />
       </div>
       <p className="text-[12px] font-semibold" style={{ color: sc.color }}>{value}</p>
 
       {showTooltip && relatedMetrics.length > 0 && (
         <div
           className="absolute bottom-full left-0 mb-1.5 z-50 w-64 rounded-[10px] border shadow-lg overflow-hidden"
-          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
         >
           <div style={{
             padding: "8px 12px",
-            borderBottom: "1px solid var(--qc-border-default)",
+            borderBottom: "1px solid var(--qc-hair)",
             background: sc.bg,
             display: "flex", alignItems: "center", justifyContent: "space-between",
           }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}>{label}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
             <span style={{ fontSize: 11, fontWeight: 600, color: sc.color }}>{value}</span>
           </div>
           <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
@@ -101,10 +101,10 @@ function SignalTile({
               return (
                 <div key={m.name}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-heading)" }}>{m.name}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)" }}>{m.name}</span>
                     <span style={{ fontSize: 11, fontWeight: 600, color: mc.color }}>{m.value}</span>
                   </div>
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-text-body)", lineHeight: 1.5 }}>{m.comment}</p>
+                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink)", lineHeight: 1.5 }}>{m.comment}</p>
                 </div>
               );
             })}
@@ -126,8 +126,8 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
 
   return (
     <div style={{
-      background: "var(--qc-surface-row-alt)",
-      border: "1px solid var(--qc-border-default)",
+      background: "var(--qc-section)",
+      border: "1px solid var(--qc-hair)",
       borderRadius: 18,
       padding: 8,
       display: "flex",
@@ -139,27 +139,27 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 6px 2px" }}>
         <div style={{
           padding: 6, borderRadius: 8, display: "grid", placeItems: "center",
-          border: "1px solid var(--qc-icon-box-border)",
-          background: "var(--qc-icon-box-bg)",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-chip)",
         }}>
-          <Brain style={{ width: 14, height: 14, color: "var(--qc-text-body)" }} />
+          <Brain style={{ width: 14, height: 14, color: "var(--qc-ink)" }} />
         </div>
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
           Decision Intelligence
         </span>
       </div>
 
       {/* ── 1. Grade + Tag + Actionable Insight ── */}
       <div style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
         overflow: "hidden",
         position: "relative",
       }}>
         <div style={{
           position: "absolute", inset: "auto 0 0 0", height: "50%",
-          background: "linear-gradient(180deg, transparent 0%, var(--qc-accent-lime-bg) 100%)",
+          background: "linear-gradient(180deg, transparent 0%, var(--qc-lime-bg) 100%)",
           zIndex: 0, pointerEvents: "none",
         }} />
 
@@ -170,17 +170,17 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
             <div>
               <div style={{
                 fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const, marginBottom: 6,
+                letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const, marginBottom: 6,
               }}>
                 Tag
               </div>
-              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "var(--qc-text-heading)", lineHeight: 1.3 }}>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.3 }}>
                 {fi.tag}
               </p>
             </div>
             <div style={{
               padding: "4px 10px",
-              background: "var(--qc-text-heading)",
+              background: "var(--qc-ink)",
               borderRadius: 999,
               flexShrink: 0,
             }}>
@@ -191,21 +191,21 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
           </div>
 
           {/* Separator */}
-          <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+          <div style={{ height: 1, background: "var(--qc-hair)" }} />
 
           {/* Actionable Insight */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+              letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             }}>
               Actionable Insight
             </div>
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
               {fi.actionableInsight.action}
             </p>
             {fi.actionableInsight.rationale && (
-              <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>
+              <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>
                 {fi.actionableInsight.rationale}
               </p>
             )}
@@ -214,24 +214,24 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
           {/* Bias */}
           {fi.actionBias && (
             <>
-              <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+              <div style={{ height: 1, background: "var(--qc-hair)" }} />
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <div style={{
                   fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-                  letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+                  letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
                 }}>
                   Bias
                 </div>
-                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>
+                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>
                   {fi.actionBias}
                 </p>
                 {fi.actionableInsight.existingHolderAction && (
-                  <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>
                     {fi.actionableInsight.existingHolderAction}
                   </p>
                 )}
                 {fi.actionableInsight.reEvaluateCondition && (
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-text-muted)", lineHeight: 1.5 }}>
+                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
                     Re-evaluate: {fi.actionableInsight.reEvaluateCondition}
                   </p>
                 )}
@@ -243,8 +243,8 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
 
       {/* ── 2. Signal Breakdown ── */}
       <div style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
         padding: "14px 16px",
         display: "flex",
@@ -252,10 +252,10 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
         gap: 10,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <Zap style={{ width: 11, height: 11, color: "var(--qc-text-muted)" }} />
+          <Zap style={{ width: 11, height: 11, color: "var(--qc-ink-2)" }} />
           <span style={{
             fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-            letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+            letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
           }}>
             Signal Breakdown
           </span>
@@ -273,11 +273,11 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
         </div>
 
         {/* Conviction Meter */}
-        <div style={{ borderTop: "1px solid var(--qc-border-default)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ borderTop: "1px solid var(--qc-hair)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+              letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             }}>
               Conviction
             </span>
@@ -288,7 +288,7 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
           </div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             {["Low", "Medium", "High"].map((l) => (
-              <span key={l} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--qc-text-muted)" }}>{l}</span>
+              <span key={l} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--qc-ink-2)" }}>{l}</span>
             ))}
           </div>
         </div>
@@ -297,8 +297,8 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
       {/* ── 3. Risk Alerts + What Can Change ── */}
       {(fi.riskAlerts.length > 0 || fi.whatCanChange.length > 0) && (
         <div style={{
-          background: "var(--qc-surface-white)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           borderRadius: 14,
           padding: "14px 16px",
           display: "flex",
@@ -308,10 +308,10 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
           {fi.riskAlerts.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <AlertTriangle style={{ width: 11, height: 11, color: "var(--qc-text-muted)" }} />
+                <AlertTriangle style={{ width: 11, height: 11, color: "var(--qc-ink-2)" }} />
                 <span style={{
                   fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                  letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+                  letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
                 }}>
                   Risk Alerts
                 </span>
@@ -336,11 +336,11 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
 
           {fi.whatCanChange.length > 0 && (
             <>
-              {fi.riskAlerts.length > 0 && <div style={{ height: 1, background: "var(--qc-border-default)" }} />}
+              {fi.riskAlerts.length > 0 && <div style={{ height: 1, background: "var(--qc-hair)" }} />}
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <span style={{
                   fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                  letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+                  letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
                 }}>
                   What Can Change
                 </span>
@@ -349,10 +349,10 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
                     <div key={i} style={{
                       display: "flex", alignItems: "flex-start", gap: 8,
                       padding: "5px 0",
-                      borderBottom: i < fi.whatCanChange.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+                      borderBottom: i < fi.whatCanChange.length - 1 ? "1px solid var(--qc-hair)" : "none",
                     }}>
-                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--qc-text-muted)", flexShrink: 0, marginTop: 5 }} />
-                      <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>{item}</p>
+                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--qc-ink-2)", flexShrink: 0, marginTop: 5 }} />
+                      <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>{item}</p>
                     </div>
                   ))}
                 </div>

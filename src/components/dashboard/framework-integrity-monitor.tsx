@@ -40,9 +40,9 @@ const STATUS_CONFIG: Record<FrameworkStatus, {
   },
   watch: {
     label: "WATCH",
-    bg: "var(--qc-chip-bg)",
-    text: "var(--qc-text-muted)",
-    borderStyle: "3px solid var(--qc-border-default)",
+    bg: "var(--qc-chip)",
+    text: "var(--qc-ink-2)",
+    borderStyle: "3px solid var(--qc-hair)",
     Icon: Eye,
   },
 };
@@ -60,13 +60,13 @@ export function FrameworkIntegrityMonitor({ items, className }: FrameworkIntegri
   return (
     <div
       className={cn("rounded-[10px] p-2 h-full flex flex-col", className)}
-      style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
     >
       {/* Panel header */}
       <div className="px-2 pt-1 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Layers className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+          <Layers className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
             Framework Integrity Monitor
           </span>
         </div>
@@ -100,7 +100,7 @@ export function FrameworkIntegrityMonitor({ items, className }: FrameworkIntegri
       {/* Inner white box */}
       <div
         className="rounded-[10px] flex-1 flex flex-col divide-y overflow-hidden"
-        style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-inner)" }}
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)" }}
       >
         {items.map((item) => {
           const config = STATUS_CONFIG[item.status];
@@ -108,8 +108,8 @@ export function FrameworkIntegrityMonitor({ items, className }: FrameworkIntegri
           return (
             <div
               key={item.id}
-              className="flex items-center gap-4 pl-0 pr-4 py-3 cursor-pointer transition-colors group hover:bg-[var(--qc-surface-hover)]"
-              style={{ borderLeft: config.borderStyle, borderTopColor: "var(--qc-border-inner)" }}
+              className="flex items-center gap-4 pl-0 pr-4 py-3 cursor-pointer transition-colors group hover:bg-[var(--qc-section)]"
+              style={{ borderLeft: config.borderStyle, borderTopColor: "var(--qc-hair-2)" }}
             >
               {/* Icon box */}
               <div className="pl-4 flex-shrink-0">
@@ -126,8 +126,8 @@ export function FrameworkIntegrityMonitor({ items, className }: FrameworkIntegri
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{item.title}</p>
-                <p className="text-[11px] leading-snug mt-0.5" style={{ color: "var(--qc-text-body)" }}>{item.description}</p>
+                <p className="text-[13px] font-semibold" style={{ color: "var(--qc-ink)" }}>{item.title}</p>
+                <p className="text-[11px] leading-snug mt-0.5" style={{ color: "var(--qc-ink)" }}>{item.description}</p>
               </div>
 
               {/* Status badge */}

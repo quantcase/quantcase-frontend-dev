@@ -36,11 +36,11 @@ function modelsEqual(a: StoredModel, b: StoredModel) {
 function SummaryTile({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
-      <p className="text-[10px] uppercase tracking-wider font-medium mb-1" style={{ color: "var(--qc-text-muted)" }}>
+      <p className="text-[10px] uppercase tracking-wider font-medium mb-1" style={{ color: "var(--qc-ink-2)" }}>
         {label}
       </p>
-      <p className="text-base font-semibold" style={{ color: "var(--qc-text-heading)" }}>{value}</p>
-      {sub && <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{sub}</p>}
+      <p className="text-base font-semibold" style={{ color: "var(--qc-ink)" }}>{value}</p>
+      {sub && <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>{sub}</p>}
     </div>
   );
 }
@@ -76,7 +76,7 @@ export default function ModelDetailPage() {
   if (loading && !model) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading...</p>
+        <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Loading...</p>
       </div>
     );
   }
@@ -84,8 +84,8 @@ export default function ModelDetailPage() {
   if (!loading && !model) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
-        <p className="text-sm font-medium" style={{ color: "var(--qc-text-heading)" }}>Model not found</p>
-        <Link href="/model-builder" className="text-xs" style={{ color: "var(--qc-text-muted)" }}>
+        <p className="text-sm font-medium" style={{ color: "var(--qc-ink)" }}>Model not found</p>
+        <Link href="/model-builder" className="text-xs" style={{ color: "var(--qc-ink-2)" }}>
           ← Back to Models
         </Link>
       </div>
@@ -167,14 +167,14 @@ export default function ModelDetailPage() {
         {/* ── Page Header ── */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Link href="/model-builder" className="transition-colors shrink-0" style={{ color: "var(--qc-text-heading)" }}>
+            <Link href="/model-builder" className="transition-colors shrink-0" style={{ color: "var(--qc-ink)" }}>
               <ArrowLeft style={{ width: 28, height: 28, strokeWidth: 1.5 }} />
             </Link>
             <input
               value={draft?.name ?? ""}
               onChange={(e) => updateField("name", e.target.value)}
               className="text-[28px] font-medium bg-transparent focus:outline-none border-b border-transparent focus:border-[#E2E2E2] transition-colors"
-              style={{ color: "var(--qc-text-heading)", lineHeight: 1.2 }}
+              style={{ color: "var(--qc-ink)", lineHeight: 1.2 }}
             />
           </div>
 
@@ -184,7 +184,7 @@ export default function ModelDetailPage() {
                 <button
                   onClick={handleDiscard}
                   className="rounded-md border border-[#E2E2E2] px-3 py-1.5 text-sm font-medium transition-colors hover:bg-[#F5F5F5]"
-                  style={{ color: "var(--qc-text-muted)" }}
+                  style={{ color: "var(--qc-ink-2)" }}
                 >
                   Discard
                 </button>
@@ -192,7 +192,7 @@ export default function ModelDetailPage() {
                   onClick={handleSave}
                   disabled={saving}
                   className="rounded-md px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
-                  style={{ background: "var(--qc-text-heading)" }}
+                  style={{ background: "var(--qc-ink)" }}
                 >
                   {saving ? "Saving..." : "Save Changes"}
                 </button>
@@ -201,7 +201,7 @@ export default function ModelDetailPage() {
             <button
               onClick={handleDelete}
               className="rounded-md border border-[#E2E2E2] px-3 py-1.5 text-sm font-medium transition-colors hover:bg-red-50 hover:border-red-200 hover:text-red-600"
-              style={{ color: "var(--qc-text-muted)" }}
+              style={{ color: "var(--qc-ink-2)" }}
             >
               Delete
             </button>
@@ -253,7 +253,7 @@ export default function ModelDetailPage() {
                 </p>
                 <div className="flex h-3 rounded-full overflow-hidden gap-0.5">
                   {enabledItems.map((item, i) => {
-                    const SEGMENT_COLORS = ["var(--qc-text-heading)", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
+                    const SEGMENT_COLORS = ["var(--qc-ink)", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
                     return (
                       <div
                         key={item.key}
@@ -268,12 +268,12 @@ export default function ModelDetailPage() {
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1.5">
                   {enabledItems.map((item, i) => {
-                    const SEGMENT_COLORS = ["var(--qc-text-heading)", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
+                    const SEGMENT_COLORS = ["var(--qc-ink)", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
                     return (
                       <div key={item.key} className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: SEGMENT_COLORS[i % SEGMENT_COLORS.length] }} />
-                        <span className="text-xs" style={{ color: "var(--qc-text-muted)" }}>{item.key}</span>
-                        <span className="text-xs font-semibold" style={{ color: "var(--qc-text-heading)" }}>{item.pct}%</span>
+                        <span className="text-xs" style={{ color: "var(--qc-ink-2)" }}>{item.key}</span>
+                        <span className="text-xs font-semibold" style={{ color: "var(--qc-ink)" }}>{item.pct}%</span>
                       </div>
                     );
                   })}
@@ -334,14 +334,14 @@ export default function ModelDetailPage() {
             {/* Created / updated metadata */}
             <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-4 space-y-2">
               <div className="flex justify-between">
-                <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: "var(--qc-text-muted)" }}>Created</span>
-                <span className="text-xs" style={{ color: "var(--qc-text-heading)" }}>
+                <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: "var(--qc-ink-2)" }}>Created</span>
+                <span className="text-xs" style={{ color: "var(--qc-ink)" }}>
                   {new Date(model!.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: "var(--qc-text-muted)" }}>Updated</span>
-                <span className="text-xs" style={{ color: "var(--qc-text-heading)" }}>
+                <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: "var(--qc-ink-2)" }}>Updated</span>
+                <span className="text-xs" style={{ color: "var(--qc-ink)" }}>
                   {new Date(model!.updatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                 </span>
               </div>

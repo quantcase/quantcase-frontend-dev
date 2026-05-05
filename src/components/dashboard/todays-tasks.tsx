@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { ListTodo, Plus, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { CardShell, MonoLabel } from "@/components/ds";
 
 export type TaskStatus = "pending" | "done" | "overdue";
 
@@ -15,206 +14,116 @@ export interface TaskItem {
 
 interface TodaysTasksProps {
   tasks: TaskItem[];
-  className?: string;
 }
 
-function getStatusMeta(dueDate: string): { status: TaskStatus; meta: string } {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const due = new Date(dueDate);
-  due.setHours(0, 0, 0, 0);
-  const diff = due.getTime() - today.getTime();
-  if (diff < 0) return { status: "overdue", meta: "Overdue" };
-  if (diff === 0) return { status: "pending", meta: "Today" };
-  return { status: "pending", meta: due.toLocaleDateString("en-US", { month: "short", day: "numeric" }) };
-}
+const BADGE_STYLE: Record<TaskStatus, React.CSSProperties> = {
+  pending: { background: "transparent", color: "var(--qc-ink-3)", border: "none" },
+  overdue: { background: "var(--qc-down-soft)", color: "var(--qc-down)", border: "1px solid #E8C4BE" },
+  done:    { background: "var(--qc-up-soft)",   color: "var(--qc-up)",   border: "1px solid #BBD9C6" },
+};
 
-export function TodaysTasks({ tasks: initialTasks, className }: TodaysTasksProps) {
+export function TodaysTasks({ tasks: initialTasks }: TodaysTasksProps) {
   const [tasks, setTasks] = useState<TaskItem[]>(initialTasks);
-  const [showForm, setShowForm] = useState(false);
-  const [taskLabel, setTaskLabel] = useState("");
-  const [taskDate, setTaskDate] = useState(new Date().toISOString().split("T")[0]);
-  const formRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!showForm) return;
-    function handleClick(e: MouseEvent) {
-      if (formRef.current && !formRef.current.contains(e.target as Node)) {
-        setShowForm(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [showForm]);
-
-  useEffect(() => {
-    if (showForm) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
-  }, [showForm]);
 
   function toggleTask(id: string) {
     setTasks((prev) =>
       prev.map((t) => {
         if (t.id !== id) return t;
-        if (t.status === "done") {
-          const isOverdue = t.meta === "Overdue";
-          return { ...t, status: isOverdue ? "overdue" : "pending" };
-        }
-        return { ...t, status: "done", meta: "Done" };
+        if (t.status === "done") return { ...t, status: t.meta?.startsWith("Overdue") ? "overdue" as TaskStatus : "pending" as TaskStatus };
+        return { ...t, status: "done" as TaskStatus, meta: "DONE · " + new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) };
       })
     );
   }
 
-  function addTask(e: React.FormEvent) {
-    e.preventDefault();
-    const label = taskLabel.trim();
-    if (!label) return;
-    const { status, meta } = getStatusMeta(taskDate);
-    const newTask: TaskItem = {
-      id: Date.now().toString(),
-      label,
-      status,
-      meta,
-    };
-    setTasks((prev) => [newTask, ...prev]);
-    setTaskLabel("");
-    setTaskDate(new Date().toISOString().split("T")[0]);
-    setShowForm(false);
-  }
-
   return (
-    <div
-      className={cn("rounded-[10px] p-2 flex flex-col relative", className)}
-      style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
-    >
-      {/* Panel header */}
-      <div className="px-2 pt-1 pb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ListTodo className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
-            Today&apos;s Tasks
-          </span>
-        </div>
+    <CardShell style={{ padding: "14px 16px" }}>
+      {/* Head */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+        <MonoLabel style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ color: "var(--qc-ink-2)" }}>
+            <rect x="3" y="5" width="3.5" height="3.5" rx="0.5"/><rect x="3" y="15" width="3.5" height="3.5" rx="0.5"/>
+            <path d="M9 6.5h11 M9 16.5h11"/>
+          </svg>
+          Today&apos;s tasks
+        </MonoLabel>
+
         <button
-          onClick={() => setShowForm((v) => !v)}
-          className="flex items-center justify-center size-6 rounded-md transition-colors"
-          style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: 6,
+            background: "var(--qc-lime)",
+            color: "var(--qc-ink)",
+            border: "1px solid var(--qc-lime-edge)",
+            cursor: "pointer",
+            display: "grid",
+            placeItems: "center",
+          }}
           aria-label="Add task"
         >
-          <Plus className="size-3.5" style={{ color: "var(--qc-text-heading)" }} />
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M12 5v14 M5 12h14"/>
+          </svg>
         </button>
       </div>
 
-      {/* Add task popup */}
-      {showForm && (
-        <div
-          ref={formRef}
-          className="absolute right-2 top-10 z-50 w-64 rounded-[10px] shadow-lg p-3 flex flex-col gap-2"
-          style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}
-        >
-          <div className="flex items-center justify-between mb-0.5">
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
-              New Task
-            </span>
-            <button
-              onClick={() => setShowForm(false)}
-              className="transition-colors"
-              style={{ color: "var(--qc-text-muted)" }}
-              aria-label="Close"
-            >
-              <X className="size-3.5" />
-            </button>
-          </div>
-          <form onSubmit={addTask} className="flex flex-col gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="Task description"
-              value={taskLabel}
-              onChange={(e) => setTaskLabel(e.target.value)}
-              className="w-full rounded-md px-3 py-1.5 text-[13px] outline-none transition-colors"
-              style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)", color: "var(--qc-text-heading)" }}
-            />
-            <input
-              type="date"
-              value={taskDate}
-              onChange={(e) => setTaskDate(e.target.value)}
-              className="w-full rounded-md px-3 py-1.5 text-[13px] outline-none transition-colors"
-              style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)", color: "var(--qc-text-heading)" }}
-            />
-            <button
-              type="submit"
-              className="w-full rounded-md text-[12px] font-semibold py-1.5 transition-colors"
-              style={{ background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}
-            >
-              Add Task
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* Inner white box */}
-      <div
-        className="rounded-[10px] flex flex-col divide-y overflow-hidden"
-        style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-inner)" }}
-      >
-        {tasks.length === 0 && (
-          <p className="px-4 py-4 text-[13px] text-center" style={{ color: "var(--qc-text-muted)" }}>No tasks for today.</p>
-        )}
-        {tasks.map((task) => {
+      <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        {tasks.map((task, i) => {
           const isDone = task.status === "done";
-          const isOverdue = task.status === "overdue";
           return (
-            <div
+            <li
               key={task.id}
-              className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors"
-              style={{ borderTopColor: "var(--qc-border-inner)" }}
               onClick={() => toggleTask(task.id)}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "18px 1fr auto",
+                gap: 10,
+                alignItems: "center",
+                padding: "10px 0",
+                borderTop: i === 0 ? "none" : "1px dashed var(--qc-hair-2)",
+                fontSize: 13,
+                cursor: "pointer",
+              }}
             >
               {/* Checkbox */}
               <div
-                className={cn(
-                  "flex-shrink-0 size-4 rounded flex items-center justify-center transition-colors",
-                )}
                 style={{
-                  border: isDone ? "1px solid var(--qc-up)" : "1px solid var(--qc-border-default)",
-                  background: isDone ? "var(--qc-up)" : "var(--qc-surface-card)",
+                  width: 16,
+                  height: 16,
+                  borderRadius: 4,
+                  border: isDone ? "1px solid var(--qc-up)" : "1px solid var(--qc-hair)",
+                  background: isDone ? "var(--qc-up)" : "#fff",
+                  display: "grid",
+                  placeItems: "center",
+                  color: "#fff",
+                  flexShrink: 0,
                 }}
               >
                 {isDone && (
-                  <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
-                    <path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12l5 5L20 7"/>
                   </svg>
                 )}
               </div>
 
-              {/* Label */}
-              <p
-                className={cn("flex-1 text-[13px]", isDone && "line-through")}
-                style={{ color: isDone ? "var(--qc-text-muted)" : "var(--qc-text-heading)" }}
-              >
+              <span style={{ color: isDone ? "var(--qc-ink-3)" : "var(--qc-ink)", textDecoration: isDone ? "line-through" : "none" }}>
                 {task.label}
-              </p>
+              </span>
 
-              {/* Meta / status badge */}
               {task.meta && (
-                <span
-                  className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5"
-                  style={{
-                    background: isOverdue ? "var(--qc-down-soft)" : isDone ? "var(--qc-up-soft)" : "var(--qc-chip-bg)",
-                    color: isOverdue ? "var(--qc-down)" : isDone ? "var(--qc-up)" : "var(--qc-text-muted)",
-                    border: isOverdue ? "1px solid var(--qc-down)" : isDone ? "1px solid var(--qc-up)" : "1px solid var(--qc-chip-border)",
-                  }}
+                <MonoLabel
+                  size={9.5}
+                  tracking="0.12em"
+                  color={task.status === "overdue" ? "var(--qc-down)" : isDone ? "var(--qc-up)" : "var(--qc-ink-3)"}
+                  style={{ padding: "3px 7px", borderRadius: 4, ...BADGE_STYLE[task.status] }}
                 >
                   {task.meta}
-                </span>
+                </MonoLabel>
               )}
-            </div>
+            </li>
           );
         })}
-      </div>
-    </div>
+      </ul>
+    </CardShell>
   );
 }

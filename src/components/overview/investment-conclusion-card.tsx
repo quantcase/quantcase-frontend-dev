@@ -95,11 +95,11 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
   const narrativeTags = [
     ...(marketBias ? [{ label: marketBias, color: marketBias.toLowerCase().includes("bear") ? "var(--qc-down)" : marketBias.toLowerCase().includes("bull") ? "var(--qc-up)" : "var(--qc-warn)" }] : []),
     ...(marketCondition ? [{ label: marketCondition, color: "var(--qc-warn)" }] : []),
-    ...(conviction ? [{ label: `Conviction ${conviction}`, color: "var(--qc-text-muted)" }] : []),
+    ...(conviction ? [{ label: `Conviction ${conviction}`, color: "var(--qc-ink-2)" }] : []),
   ];
 
   const meters = [
-    { label: "Entry trigger", value: entryTrigger ?? "Pending", sub: entryRationale, fill: entryFill, color: "var(--qc-text-muted)" },
+    { label: "Entry trigger", value: entryTrigger ?? "Pending", sub: entryRationale, fill: entryFill, color: "var(--qc-ink-2)" },
     { label: "Suggested stop", value: stopLoss ?? "—", sub: null, fill: stopFill, color: "var(--qc-down, #B23A2F)" },
     { label: "Upside target", value: upside ?? "—", sub: riskReward ? `R/R ${riskReward}` : null, fill: upsideFill, color: "var(--qc-up, #1F7A4A)" },
     { label: "Time horizon", value: holdingPeriod ?? "—", sub: null, fill: timeFill, color: "var(--qc-blue, #3A6BEF)" },
@@ -115,15 +115,15 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
         {/* Left: verdict hero */}
         <section
           style={{
-            background: "var(--qc-surface-white)",
-            border: "1px solid var(--qc-border-default)",
+            background: "var(--qc-card)",
+            border: "1px solid var(--qc-hair)",
             borderRadius: 18,
             padding: "16px 20px 18px",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <MonoEyebrow>Final call · Overall</MonoEyebrow>
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: ".06em" }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: ".06em" }}>
               As of today · Valid 5 trading days
             </span>
           </div>
@@ -131,7 +131,7 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
           {/* Verdict + thesis */}
           <div style={{ display: "flex", gap: 20, marginBottom: 16 }}>
             <div style={{ flexShrink: 0 }}>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-text-muted)", marginBottom: 6 }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-ink-2)", marginBottom: 6 }}>
                 Verdict
               </div>
               <div style={{ fontSize: 36, fontWeight: 500, letterSpacing: "-0.02em", color: verdictColor, lineHeight: 1 }}>
@@ -150,16 +150,16 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
                   <span style={{ width: 5, height: 5, borderRadius: "50%", background: verdictColor, display: "inline-block" }} />
                   {pillLabel(rKey)}
                 </span>
-                <span style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>Conviction · {conviction}</span>
+                <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>Conviction · {conviction}</span>
               </div>
               {verdictTitle && verdictTitle !== rating && (
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: ".06em", textTransform: "uppercase", marginTop: 8 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: ".06em", textTransform: "uppercase", marginTop: 8 }}>
                   {verdictTitle}
                 </div>
               )}
             </div>
             {investThesis && (
-              <p style={{ margin: 0, fontSize: 12.5, color: "var(--qc-text-body)", lineHeight: 1.6, flex: 1 }} dangerouslySetInnerHTML={{ __html: investThesis }} />
+              <p style={{ margin: 0, fontSize: 12.5, color: "var(--qc-ink)", lineHeight: 1.6, flex: 1 }} dangerouslySetInnerHTML={{ __html: investThesis }} />
             )}
           </div>
 
@@ -167,19 +167,19 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
           <div
             style={{
               display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12,
-              borderTop: "1px solid var(--qc-border-inner)", paddingTop: 14,
+              borderTop: "1px solid var(--qc-hair-2)", paddingTop: 14,
             }}
           >
             {meters.map(({ label, value, sub, fill, color }) => (
               <div key={label}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-text-muted)", marginBottom: 4 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-ink-2)", marginBottom: 4 }}>
                   {label}
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: value === "—" || value === "Pending" ? "var(--qc-text-muted)" : "var(--qc-text-heading)", marginBottom: 2 }}>
+                <div style={{ fontSize: 14, fontWeight: 500, color: value === "—" || value === "Pending" ? "var(--qc-ink-2)" : "var(--qc-ink)", marginBottom: 2 }}>
                   {value}
-                  {sub && <span style={{ fontSize: 11, color: "var(--qc-text-muted)", marginLeft: 4 }}>{sub}</span>}
+                  {sub && <span style={{ fontSize: 11, color: "var(--qc-ink-2)", marginLeft: 4 }}>{sub}</span>}
                 </div>
-                <div style={{ height: 4, background: "var(--qc-chip-bg, #F2F1EC)", borderRadius: 999, overflow: "hidden" }}>
+                <div style={{ height: 4, background: "var(--qc-chip, #F2F1EC)", borderRadius: 999, overflow: "hidden" }}>
                   <span style={{ display: "block", height: "100%", width: `${fill}%`, borderRadius: 999, background: color }} />
                 </div>
               </div>
@@ -210,18 +210,18 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
             <div
               key={heading}
               style={{
-                background: "var(--qc-surface-white)",
-                border: "1px solid var(--qc-border-default)",
+                background: "var(--qc-card)",
+                border: "1px solid var(--qc-hair)",
                 borderRadius: 14,
                 padding: "14px 16px",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)", display: "flex", alignItems: "center", gap: 8 }}>
+                <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ width: 8, height: 8, borderRadius: "50%", background: color, display: "inline-block" }} />
                   {heading}
                 </h4>
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: ".06em" }}>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: ".06em" }}>
                   {items.length} {count}{items.length !== 1 ? "s" : ""}
                 </span>
               </div>
@@ -245,9 +245,9 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
                         {tag}
                       </span>
                       <div>
-                        <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.4 }}>{first}</div>
+                        <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.4 }}>{first}</div>
                         {more.length > 0 && (
-                          <div style={{ fontSize: 11.5, color: "var(--qc-text-body)", marginTop: 2, lineHeight: 1.45 }}>{more.join(". ")}</div>
+                          <div style={{ fontSize: 11.5, color: "var(--qc-ink)", marginTop: 2, lineHeight: 1.45 }}>{more.join(". ")}</div>
                         )}
                       </div>
                     </div>
@@ -263,20 +263,20 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
       <div
         style={{
           display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10,
-          background: "var(--qc-surface-white)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           borderRadius: 14,
           padding: "14px 16px",
         }}
       >
         {[actionOwn, actionDontOwn].map((act) => (
-          <div key={act.eyebrow} style={{ borderRight: act === actionOwn ? "1px solid var(--qc-border-inner)" : "none", paddingRight: act === actionOwn ? 16 : 0 }}>
+          <div key={act.eyebrow} style={{ borderRight: act === actionOwn ? "1px solid var(--qc-hair-2)" : "none", paddingRight: act === actionOwn ? 16 : 0 }}>
             <MonoEyebrow style={{ marginBottom: 6 }}>{act.eyebrow}</MonoEyebrow>
-            <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-text-heading)", marginBottom: 4, display: "flex", gap: 6 }}>
+            <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 4, display: "flex", gap: 6 }}>
               <span style={{ color: verdictColor }}>→</span>
               {act.title}
             </div>
-            <div style={{ fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.5 }}>{act.sub}</div>
+            <div style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.5 }}>{act.sub}</div>
           </div>
         ))}
       </div>

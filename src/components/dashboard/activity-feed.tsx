@@ -15,7 +15,7 @@ export interface ActivityItem {
 }
 
 const TAG_STYLES: Record<string, { bg: string; text: string; dot: string; ring: string }> = {
-  neutral:  { bg: "var(--qc-chip-bg)",      text: "var(--qc-text-muted)",  dot: "var(--qc-text-muted)",  ring: "var(--qc-border-default)" },
+  neutral:  { bg: "var(--qc-chip)",      text: "var(--qc-ink-2)",  dot: "var(--qc-ink-2)",  ring: "var(--qc-hair)" },
   alert:    { bg: "var(--qc-down-soft)",    text: "var(--qc-down)",        dot: "var(--qc-down)",        ring: "var(--qc-down-soft)" },
   positive: { bg: "var(--qc-up-soft)",      text: "var(--qc-up)",          dot: "var(--qc-up)",          ring: "var(--qc-up-soft)" },
 };
@@ -47,7 +47,7 @@ function TimelineDot({ colorKey, index }: { colorKey: string; index: number }) {
       {/* Outer ring */}
       <motion.div
         className="absolute rounded-full"
-        style={{ width: 14, height: 14, border: `1.5px solid ${hex.ring}`, background: "var(--qc-surface-card)" }}
+        style={{ width: 14, height: 14, border: `1.5px solid ${hex.ring}`, background: "var(--qc-card)" }}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3, delay: index * 0.1 + 0.2, type: "spring", stiffness: 280 }}
@@ -76,7 +76,7 @@ function TimelineItem({ item, index, isLast }: { item: ActivityItem; index: numb
         {!isLast && (
           <motion.div
             className="absolute"
-            style={{ width: 1.5, top: "50%", bottom: -12, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(to bottom, var(--qc-border-default) 70%, transparent)" }}
+            style={{ width: 1.5, top: "50%", bottom: -12, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(to bottom, var(--qc-hair) 70%, transparent)" }}
             initial={{ scaleY: 0, originY: 0 }}
             animate={{ scaleY: 1 }}
             transition={{ duration: 0.4, delay: index * 0.1 + 0.45, ease: "easeOut" }}
@@ -88,7 +88,7 @@ function TimelineItem({ item, index, isLast }: { item: ActivityItem; index: numb
       {/* Card */}
       <motion.div
         className="flex-1 ml-2 rounded-xl overflow-hidden cursor-pointer group"
-        style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)", boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)" }}
+        style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)", boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)" }}
         initial={{ opacity: 0, x: -12, y: 4 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ duration: 0.32, delay: index * 0.1 + 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -100,7 +100,7 @@ function TimelineItem({ item, index, isLast }: { item: ActivityItem; index: numb
         <div className="px-3 py-2">
           {/* Time + tag row */}
           <div className="flex items-center justify-between gap-2 mb-1">
-            <span className="text-[10px] tabular-nums font-medium" style={{ color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+            <span className="text-[10px] tabular-nums font-medium" style={{ color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
               {item.time}
             </span>
             {item.tag && (
@@ -118,13 +118,13 @@ function TimelineItem({ item, index, isLast }: { item: ActivityItem; index: numb
 
           {/* Company */}
           {item.company && (
-            <p className="text-[12.5px] font-semibold leading-tight mb-0.5" style={{ color: "var(--qc-text-heading)" }}>
+            <p className="text-[12.5px] font-semibold leading-tight mb-0.5" style={{ color: "var(--qc-ink)" }}>
               {item.company}
             </p>
           )}
 
           {/* Description */}
-          <p className="text-[11px] leading-snug" style={{ color: "var(--qc-text-body)" }}>
+          <p className="text-[11px] leading-snug" style={{ color: "var(--qc-ink)" }}>
             {item.description}
           </p>
         </div>
@@ -141,19 +141,19 @@ export function ActivityFeed({ items, className }: ActivityFeedProps) {
     <div
       ref={ref}
       className={cn("rounded-[10px] p-2 flex flex-col h-full", className)}
-      style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
     >
       {/* Panel header */}
       <div className="px-2 pt-1 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Activity className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+          <Activity className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
             What Changed Today
           </span>
         </div>
         <button
           className="flex items-center gap-1 text-[10px] font-medium rounded-md px-2 py-1 transition-colors flex-shrink-0"
-          style={{ color: "var(--qc-text-muted)", border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}
+          style={{ color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}
         >
           See All <ArrowRight className="size-3 ml-0.5" />
         </button>
@@ -162,7 +162,7 @@ export function ActivityFeed({ items, className }: ActivityFeedProps) {
       {/* Timeline */}
       <div
         className="rounded-[10px] px-3 pt-4 pb-1 flex-1"
-        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-inner)" }}
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)" }}
       >
         {inView && items.map((item, i) => (
           <TimelineItem key={item.id} item={item} index={i} isLast={i === items.length - 1} />

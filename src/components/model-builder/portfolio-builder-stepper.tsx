@@ -377,7 +377,7 @@ export function PortfolioBuilderStepper({ onSuccess, onCancel }: PortfolioBuilde
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               className="rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium hover:bg-zinc-50"
-              style={{ color: "var(--qc-text-heading)" }}
+              style={{ color: "var(--qc-ink)" }}
             >
               ← Back
             </motion.button>
@@ -391,7 +391,7 @@ export function PortfolioBuilderStepper({ onSuccess, onCancel }: PortfolioBuilde
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="text-sm hover:text-zinc-700 transition-colors"
-              style={{ color: "var(--qc-text-muted)" }}
+              style={{ color: "var(--qc-ink-2)" }}
             >
               Cancel
             </motion.button>
@@ -411,7 +411,7 @@ export function PortfolioBuilderStepper({ onSuccess, onCancel }: PortfolioBuilde
             whileHover={footerNextDisabled ? {} : { scale: 1.02 }}
             whileTap={footerNextDisabled ? {} : { scale: 0.97 }}
             className="rounded-md px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed"
-            style={{ background: "var(--qc-text-heading)" }}
+            style={{ background: "var(--qc-ink)" }}
           >
             {footerNextLabel}
           </motion.button>

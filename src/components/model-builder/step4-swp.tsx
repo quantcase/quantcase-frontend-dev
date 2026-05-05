@@ -9,7 +9,7 @@ import { GOALS, MILESTONE_DEFS } from "./stepper-constants";
 
 function FormLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[10px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: "var(--qc-text-muted)" }}>
+    <p className="text-[10px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: "var(--qc-ink-2)" }}>
       {children}
     </p>
   );
@@ -41,16 +41,16 @@ export function TextInput({
 }) {
   return (
     <div className="flex items-center gap-2 rounded-lg border border-[#E2E2E2] px-3 py-2 bg-white focus-within:border-[#0F172B] transition-all">
-      {prefix && <span className="text-sm shrink-0" style={{ color: "var(--qc-text-muted)" }}>{prefix}</span>}
+      {prefix && <span className="text-sm shrink-0" style={{ color: "var(--qc-ink-2)" }}>{prefix}</span>}
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-zinc-300"
-        style={{ color: value ? "var(--qc-text-heading)" : undefined }}
+        style={{ color: value ? "var(--qc-ink)" : undefined }}
       />
-      {suffix && <span className="text-sm shrink-0" style={{ color: "var(--qc-text-muted)" }}>{suffix}</span>}
+      {suffix && <span className="text-sm shrink-0" style={{ color: "var(--qc-ink-2)" }}>{suffix}</span>}
     </div>
   );
 }
@@ -72,14 +72,14 @@ export function SelectInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full appearance-none rounded-lg border border-[#E2E2E2] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#0F172B] transition-all pr-8"
-        style={{ color: value ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}
+        style={{ color: value ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
       >
         {placeholder && <option value="" disabled>{placeholder}</option>}
         {options.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--qc-text-muted)" }} />
+      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--qc-ink-2)" }} />
     </div>
   );
 }
@@ -102,8 +102,8 @@ export function TogglePill({
           onClick={() => onChange(o.value)}
           className="rounded-full px-3 py-1 text-xs font-medium transition-all"
           style={{
-            background: value === o.value ? "var(--qc-text-heading)" : "transparent",
-            color:      value === o.value ? "#fff" : "var(--qc-text-muted)",
+            background: value === o.value ? "var(--qc-ink)" : "transparent",
+            color:      value === o.value ? "#fff" : "var(--qc-ink-2)",
           }}
         >
           {o.label}
@@ -116,7 +116,7 @@ export function TogglePill({
 export function SectionBox({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
-      <p className="text-[11px] font-semibold uppercase tracking-wider px-2 pt-1 pb-3" style={{ color: "var(--qc-text-muted)" }}>{title}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wider px-2 pt-1 pb-3" style={{ color: "var(--qc-ink-2)" }}>{title}</p>
       <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4 space-y-4">
         {children}
       </div>
@@ -141,13 +141,13 @@ function MethodCard({
       onClick={onClick}
       className="flex-1 rounded-lg border p-3 text-left transition-all"
       style={{
-        borderColor: active ? "var(--qc-text-heading)" : "var(--qc-border-default)",
+        borderColor: active ? "var(--qc-ink)" : "var(--qc-hair)",
         borderWidth:  active ? 2 : 1,
         background:  active ? "#F8F9FB" : "#fff",
       }}
     >
-      <p className="text-[12px] font-bold mb-1" style={{ color: "var(--qc-text-heading)" }}>{label}</p>
-      <p className="text-[11px] leading-snug" style={{ color: "var(--qc-text-muted)" }}>{description}</p>
+      <p className="text-[12px] font-bold mb-1" style={{ color: "var(--qc-ink)" }}>{label}</p>
+      <p className="text-[11px] leading-snug" style={{ color: "var(--qc-ink-2)" }}>{description}</p>
     </button>
   );
 }
@@ -322,7 +322,7 @@ export function SwpRetirementIncomeForm({
           { label: "Tight",  condition: "Corpus 0–20% at target age",   bg: "#FFFBEB", color: "#92400E" },
           { label: "Breach", condition: "Corpus depletes before target", bg: "#FEF2F2", color: "#991B1B" },
         ]} />
-        <p className="text-[11px] leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>
+        <p className="text-[11px] leading-relaxed" style={{ color: "var(--qc-ink-2)" }}>
           If corpus runs out before target age — a <span className="font-semibold text-red-600">soft block</span> triggers. Plan cannot be saved without senior RM approval.
         </p>
       </SectionBox>
@@ -385,7 +385,7 @@ export function SwpChildEducationForm({
                 key={m.id}
                 className="flex items-center justify-between rounded-lg border px-4 py-3 transition-all"
                 style={{
-                  borderColor: active ? m.color : "var(--qc-border-default)",
+                  borderColor: active ? m.color : "var(--qc-hair)",
                   background:  active ? m.bg : "#fff",
                 }}
               >
@@ -398,16 +398,16 @@ export function SwpChildEducationForm({
                       {m.label}
                     </span>
                     {m.tag && (
-                      <span className="text-[11px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{m.tag}</span>
+                      <span className="text-[11px] font-semibold" style={{ color: "var(--qc-ink)" }}>{m.tag}</span>
                     )}
                   </div>
-                  <p className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{m.age}</p>
+                  <p className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{m.age}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => onChange({ ...value, [m.key]: !active })}
                   className="relative rounded-full transition-all"
-                  style={{ width: 40, height: 22, background: active ? m.color : "var(--qc-border-default)" }}
+                  style={{ width: 40, height: 22, background: active ? m.color : "var(--qc-hair)" }}
                 >
                   <span
                     className="absolute top-1 rounded-full bg-white transition-all shadow-sm"
@@ -428,7 +428,7 @@ export function SwpChildEducationForm({
             <div style={{ flex: 4,  background: "#10B981" }} title="18–21: UG" />
             <div style={{ flex: 4,  background: "#F59E0B" }} title="22–25: PG/Pro" />
           </div>
-          <div className="flex text-[9px] justify-between" style={{ color: "var(--qc-text-muted)" }}>
+          <div className="flex text-[9px] justify-between" style={{ color: "var(--qc-ink-2)" }}>
             <span>0 — Accumulation</span>
             <span>14 — School</span>
             <span>18 — UG</span>
@@ -444,10 +444,10 @@ export function SwpChildEducationForm({
           ].map((p) => (
             <div key={p.phase} className="rounded-lg border border-[#E2E2E2] p-3">
               <div className="flex items-center justify-between mb-1">
-                <p className="text-[11px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{p.phase}</p>
-                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[#F5F5F5]" style={{ color: "var(--qc-text-muted)" }}>{p.age}</span>
+                <p className="text-[11px] font-semibold" style={{ color: "var(--qc-ink)" }}>{p.phase}</p>
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[#F5F5F5]" style={{ color: "var(--qc-ink-2)" }}>{p.age}</span>
               </div>
-              <p className="text-[11px] leading-snug" style={{ color: "var(--qc-text-muted)" }}>{p.desc}</p>
+              <p className="text-[11px] leading-snug" style={{ color: "var(--qc-ink-2)" }}>{p.desc}</p>
             </div>
           ))}
         </div>
@@ -482,8 +482,8 @@ export function Step4SWP({
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
-        <p className="text-[10px] uppercase tracking-wider font-medium mb-0.5" style={{ color: "var(--qc-text-muted)" }}>Configuring SWP for goal</p>
-        <p className="text-sm font-semibold" style={{ color: "var(--qc-text-heading)" }}>{goalLabel}</p>
+        <p className="text-[10px] uppercase tracking-wider font-medium mb-0.5" style={{ color: "var(--qc-ink-2)" }}>Configuring SWP for goal</p>
+        <p className="text-sm font-semibold" style={{ color: "var(--qc-ink)" }}>{goalLabel}</p>
       </div>
 
       {goalType === "passive_income" && (

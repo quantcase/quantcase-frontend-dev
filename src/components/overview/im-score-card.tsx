@@ -69,28 +69,28 @@ function BulletItem({ item, color }: { item: TitledBullet; color: string }) {
         <span
           style={{
             width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
-            background: item.score != null ? color : "var(--qc-border-default)",
+            background: item.score != null ? color : "var(--qc-hair)",
           }}
         />
-        <span style={{ fontSize: 13, fontWeight: 500, flex: 1, color: "var(--qc-text-heading)" }}>
+        <span style={{ fontSize: 13, fontWeight: 500, flex: 1, color: "var(--qc-ink)" }}>
           {item.title}
         </span>
         {item.score != null && item.max != null && (
           <span
             style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 12,
-              color: "var(--qc-text-heading)", letterSpacing: "-0.01em",
+              color: "var(--qc-ink)", letterSpacing: "-0.01em",
             }}
           >
             {Math.round(item.score)}
-            <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>/{item.max}</span>
+            <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>/{item.max}</span>
           </span>
         )}
       </div>
       {pct != null && (
         <div
           style={{
-            height: 3, background: "var(--qc-chip-bg, #F2F1EC)",
+            height: 3, background: "var(--qc-chip, #F2F1EC)",
             borderRadius: 999, overflow: "hidden", marginBottom: 5,
           }}
         >
@@ -102,7 +102,7 @@ function BulletItem({ item, color }: { item: TitledBullet; color: string }) {
           />
         </div>
       )}
-      <div style={{ fontSize: 12, color: "var(--qc-text-muted)", lineHeight: 1.45 }}>
+      <div style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.45 }}>
         {item.text || <span style={{ opacity: 0.45 }}>No data available.</span>}
       </div>
     </div>
@@ -227,7 +227,7 @@ export function IMScoreCard({
           style={{
             fontFamily: "'IBM Plex Mono', monospace",
             fontSize: 11, letterSpacing: "0.14em",
-            color: "var(--qc-text-body)", textTransform: "uppercase",
+            color: "var(--qc-ink)", textTransform: "uppercase",
             marginBottom: 12, whiteSpace: "nowrap",
           }}
         >
@@ -238,8 +238,8 @@ export function IMScoreCard({
           {/* LEFT: Pillar tabs + 2-col split (bullets | pie) */}
           <section
             style={{
-              background: "var(--qc-surface-white)",
-              border: "1px solid var(--qc-border-default)",
+              background: "var(--qc-card)",
+              border: "1px solid var(--qc-hair)",
               borderRadius: 18, padding: "16px 20px 18px",
             }}
           >
@@ -252,7 +252,7 @@ export function IMScoreCard({
               <div
                 style={{
                   fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                  letterSpacing: "0.16em", color: "var(--qc-text-muted)", textTransform: "uppercase",
+                  letterSpacing: "0.16em", color: "var(--qc-ink-2)", textTransform: "uppercase",
                 }}
               >
                 M · O · D Framework
@@ -266,9 +266,9 @@ export function IMScoreCard({
                     key={i}
                     style={{
                       width: 28, height: 28, borderRadius: 8,
-                      border: "1px solid var(--qc-border-default)",
-                      background: "var(--qc-surface-white)",
-                      color: "var(--qc-text-muted)",
+                      border: "1px solid var(--qc-hair)",
+                      background: "var(--qc-card)",
+                      color: "var(--qc-ink-2)",
                       display: "grid", placeItems: "center", cursor: "pointer",
                     }}
                   >
@@ -290,7 +290,7 @@ export function IMScoreCard({
             {/* Pillar subtitle */}
             <div
               style={{
-                fontSize: 12, color: "var(--qc-text-muted)", marginBottom: 14,
+                fontSize: 12, color: "var(--qc-ink-2)", marginBottom: 14,
                 paddingTop: 2, lineHeight: 1.4,
               }}
             >
@@ -306,14 +306,14 @@ export function IMScoreCard({
                     <BulletItem key={i} item={item} color={activeColor} />
                   ))
                 ) : (
-                  <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "var(--qc-text-muted)" }}>
+                  <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "var(--qc-ink-2)" }}>
                     No analysis available.
                   </div>
                 )}
               </div>
 
               {/* Pie chart — right column */}
-              <div style={{ borderLeft: "1px solid var(--qc-border-inner)", paddingLeft: 20 }}>
+              <div style={{ borderLeft: "1px solid var(--qc-hair-2)", paddingLeft: 20 }}>
                 <PillarPieChart
                   activePillar={activePillar}
                   onSelect={setActivePillar}

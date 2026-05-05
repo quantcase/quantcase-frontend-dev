@@ -220,8 +220,8 @@ function OpportunityContent() {
               <div className="flex-1 min-w-0 space-y-4">
                 <CompetitionCard data={data.competition} />
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: "var(--qc-text-body)" }}>KPI Benchmarking</h4>
-                  <p className="text-xs mb-3" style={{ color: "var(--qc-text-muted)" }}>Latest KPI values across industry peers</p>
+                  <h4 className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: "var(--qc-ink)" }}>KPI Benchmarking</h4>
+                  <p className="text-xs mb-3" style={{ color: "var(--qc-ink-2)" }}>Latest KPI values across industry peers</p>
                   <KpiBenchmarkingTable data={peerData?.peer_kpi_timeseries} loading={peerLoading} />
                 </div>
                 <CompetitiveBenchmarking data={data.competition} peers={peerData?.competition?.peers ?? []} loading={peerLoading} />
@@ -258,7 +258,7 @@ function OpportunityContent() {
                     { label: "KPI Timeseries", subtitle: "Industry-specific KPI trends over time" },
                   ];
                   return (
-                    <div className="rounded-[10px] p-2" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
+                    <div className="rounded-[10px] p-2" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}>
                       <div className="flex gap-1 overflow-x-auto pb-2 px-1 pt-1">
                         {FINANCIAL_TABS.map((tab, i) => (
                           <button
@@ -267,18 +267,18 @@ function OpportunityContent() {
                             className="shrink-0 rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors whitespace-nowrap"
                             style={
                               activeFinancialTab === i
-                                ? { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
-                                : { background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", color: "var(--qc-text-muted)" }
+                                ? { background: "var(--qc-ink)", color: "var(--qc-on-dark)" }
+                                : { background: "var(--qc-card)", border: "1px solid var(--qc-hair)", color: "var(--qc-ink-2)" }
                             }
                           >
                             {tab.label}
                           </button>
                         ))}
                       </div>
-                      <div className="mt-1 text-[11px] px-2 pb-2" style={{ color: "var(--qc-text-muted)" }}>
+                      <div className="mt-1 text-[11px] px-2 pb-2" style={{ color: "var(--qc-ink-2)" }}>
                         {FINANCIAL_TABS[activeFinancialTab].subtitle}
                       </div>
-                      <div className="rounded-[10px] p-4" style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-inner)" }}>
+                      <div className="rounded-[10px] p-4" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)" }}>
                         {activeFinancialTab === 0 && <OperatingLeverageCard data={data.financial_strength?.operating_leverage} />}
                         {activeFinancialTab === 1 && <FreeCashFlowCard data={data.financial_strength?.free_cash_flow} />}
                         {activeFinancialTab === 2 && <WorkingCapitalCard data={data.financial_strength?.working_capital} />}

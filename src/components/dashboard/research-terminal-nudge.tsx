@@ -1,36 +1,49 @@
-import { Search } from "lucide-react";
+import { ActionButton, LimeGradientCard, MonoLabel } from "@/components/ds";
 
 export function ResearchTerminalNudge() {
   return (
-    <div
-      className="flex items-center justify-between px-5 py-5 rounded-[10px]"
-      style={{ border: "1px dashed var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+    <LimeGradientCard
+      radius={14}
+      style={{
+        padding: "16px 22px",
+        display: "grid",
+        gridTemplateColumns: "28px 1fr auto",
+        gap: 14,
+        alignItems: "center",
+        marginBottom: 28,
+      }}
     >
-      <div className="flex items-center gap-4">
-        <div
-          className="size-10 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)", color: "var(--qc-text-body)" }}
-        >
-          <Search className="size-5" />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        style={{ width: 24, height: 24, color: "var(--qc-lime-ink)" }}
+      >
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m20 20-3.5-3.5" strokeLinecap="round"/>
+      </svg>
+
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4, color: "var(--qc-lime-ink)" }}>
+          Research Terminal
         </div>
-        <div>
-          <p className="text-[17px] font-normal" style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-text-heading)" }}>
-            Research Terminal
-          </p>
-          <p className="text-[12px]" style={{ color: "var(--qc-text-muted)" }}>
-            <strong style={{ color: "var(--qc-text-heading)", fontWeight: 500 }}>3 thesis updates</strong>
-            {" · "}
-            <strong style={{ color: "var(--qc-text-heading)", fontWeight: 500 }}>5 catalysts in next 30 days</strong>
-            {" · IC drafts, watchlists & signal changes"}
-          </p>
-        </div>
+        <MonoLabel size={11} tracking="0.04em" color="var(--qc-lime-ink-2)">
+          3 thesis updates · 5 catalysts in next 30 days · IC drafts, watchlists &amp; signal changes
+        </MonoLabel>
       </div>
-      <button
-        className="text-[11px] font-medium px-3.5 py-1.5 rounded-md whitespace-nowrap"
-        style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)", color: "var(--qc-text-body)" }}
+
+      <ActionButton
+        noWrap
+        style={{
+          background: "rgba(255,255,255,0.5)",
+          border: "1px solid rgba(255,255,255,0.7)",
+          color: "var(--qc-lime-ink)",
+          borderRadius: 999,
+        }}
       >
         Open Research →
-      </button>
-    </div>
+      </ActionButton>
+    </LimeGradientCard>
   );
 }

@@ -19,12 +19,12 @@ function SectionScoreBar({ scoring }: { scoring: SectionScoring }) {
   const numericScore = !isNaN(parsedScore);
   const filled = numericScore ? Math.round(Math.min(parsedScore, scoring.max_score)) : 0;
   const total = scoring.max_score;
-  const fillColor = numericScore ? scoreColor(parsedScore, scoring.max_score) : "var(--qc-border-default)";
+  const fillColor = numericScore ? scoreColor(parsedScore, scoring.max_score) : "var(--qc-hair)";
   const textColor = fillColor;
 
   return (
     <div className="shrink-0 flex items-center gap-2">
-      <span style={{ fontSize: 13, fontWeight: 600, color: numericScore ? textColor : "var(--qc-text-muted)", letterSpacing: "0.01em" }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: numericScore ? textColor : "var(--qc-ink-2)", letterSpacing: "0.01em" }}>
         {numericScore ? `${parsedScore}/${scoring.max_score}` : "N/A"}
       </span>
       {numericScore && (
@@ -37,7 +37,7 @@ function SectionScoreBar({ scoring }: { scoring: SectionScoring }) {
                 height: 12,
                 flexShrink: 0,
                 borderRadius: 1,
-                backgroundColor: i < filled ? fillColor : "var(--qc-border-default)",
+                backgroundColor: i < filled ? fillColor : "var(--qc-hair)",
               }}
             />
           ))}
@@ -73,8 +73,8 @@ export function SectionPanel({
       className={`flex flex-col${className ? ` ${className}` : ""}`}
       style={{
         borderRadius: 10,
-        border: "1px solid var(--qc-border-default)",
-        background: "var(--qc-surface-panel)",
+        border: "1px solid var(--qc-hair)",
+        background: "var(--qc-section)",
         padding: 8,
       }}
     >
@@ -82,7 +82,7 @@ export function SectionPanel({
       <div className="flex items-center justify-between" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
         <div className="flex flex-col" style={{ gap: subHeader ? 6 : 0 }}>
           {typeof title === "string" ? (
-            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>{title}</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>{title}</div>
           ) : title}
           {subtitle && <p>{subtitle}</p>}
           {subHeader && <div>{subHeader}</div>}
@@ -95,8 +95,8 @@ export function SectionPanel({
         className={`flex-1 ${contentClassName ?? ""}`}
         style={{
           borderRadius: 10,
-          border: "1px solid var(--qc-border-inner)",
-          background: "var(--qc-surface-white)",
+          border: "1px solid var(--qc-hair-2)",
+          background: "var(--qc-card)",
           paddingTop: 16,
           paddingBottom: 16,
           paddingLeft: 16,

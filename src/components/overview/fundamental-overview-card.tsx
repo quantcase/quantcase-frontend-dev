@@ -63,7 +63,7 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
   if (roceIsGood) tags.push({ label: "High ROCE", color: "var(--qc-up)" });
   if (roeIsGood) tags.push({ label: "High ROE", color: "var(--qc-up)" });
   if (!deIsGood && deVal != null) tags.push({ label: "Elevated D/E", color: "var(--qc-warn)" });
-  if (deIsGood && deVal != null) tags.push({ label: "Low leverage", color: "var(--qc-text-muted)" });
+  if (deIsGood && deVal != null) tags.push({ label: "Low leverage", color: "var(--qc-ink-2)" });
 
   const getLatestById = (id: string): number | null => {
     if (!shareholdingData) return null;
@@ -81,10 +81,10 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
   const publicPct = getLatestById("npNonInst") ?? (own.public != null ? own.public * 100 : null);
 
   const shareholdingSegments = [
-    { label: "Promoter", pct: promoterPct, color: "var(--qc-text-heading)" },
+    { label: "Promoter", pct: promoterPct, color: "var(--qc-ink)" },
     { label: "FII", pct: fiiPct, color: "var(--qc-blue)" },
     { label: "DII", pct: diiPct, color: "var(--qc-up)" },
-    { label: "Public", pct: publicPct, color: "var(--qc-text-muted)" },
+    { label: "Public", pct: publicPct, color: "var(--qc-ink-2)" },
   ];
 
   return (

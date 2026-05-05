@@ -26,8 +26,8 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
   return (
     <div
       style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
         padding: "16px 18px",
         marginBottom: 14,
@@ -44,7 +44,7 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
         <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>
           Moving Averages · vs CMP {fp(cmp)}
         </h4>
-        <div style={{ fontSize: 11.5, color: "var(--qc-text-muted)" }}>{summaryText}</div>
+        <div style={{ fontSize: 11.5, color: "var(--qc-ink-2)" }}>{summaryText}</div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
         {smas.map((sma) => {
@@ -55,7 +55,7 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
               <div
                 style={{
                   fontSize: 11.5,
-                  color: "var(--qc-text-muted)",
+                  color: "var(--qc-ink-2)",
                   letterSpacing: ".02em",
                   marginBottom: 4,
                 }}
@@ -67,7 +67,7 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
                   fontSize: 15,
                   fontWeight: 500,
                   letterSpacing: "-0.01em",
-                  color: "var(--qc-text-heading)",
+                  color: "var(--qc-ink)",
                   marginBottom: 6,
                 }}
               >
@@ -78,7 +78,7 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
                 style={{
                   position: "relative",
                   height: 6,
-                  background: "var(--qc-chip-bg, #F2F1EC)",
+                  background: "var(--qc-chip, #F2F1EC)",
                   borderRadius: 999,
                   overflow: "visible",
                   marginBottom: 6,
@@ -90,7 +90,7 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
                     position: "absolute",
                     left: "50%", top: -3, bottom: -3,
                     width: 2,
-                    background: "var(--qc-text-muted)",
+                    background: "var(--qc-ink-2)",
                     opacity: 0.5,
                   }}
                 />
@@ -123,7 +123,7 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
                   style={{
                     fontFamily: "'IBM Plex Mono', monospace",
                     fontSize: 11,
-                    color: "var(--qc-text-body)",
+                    color: "var(--qc-ink)",
                     letterSpacing: ".02em",
                   }}
                 >

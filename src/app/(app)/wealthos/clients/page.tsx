@@ -76,7 +76,7 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
     <div
       onClick={() => router.push(`/wealthos/clients/${client.id}`)}
       className="group flex items-center gap-3 cursor-pointer px-4 py-3 hover:bg-[rgba(0,0,0,0.025)] transition-colors"
-      style={{ borderBottom: "1px solid var(--qc-border-default)" }}
+      style={{ borderBottom: "1px solid var(--qc-hair)" }}
     >
       {/* Rank */}
       <span
@@ -84,7 +84,7 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
           fontSize: 10,
           fontFamily: "var(--font-ibm-plex-mono, monospace)",
           fontWeight: 600,
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           width: 20,
           flexShrink: 0,
         }}
@@ -96,11 +96,11 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
       <div
         className="size-8 rounded-full flex items-center justify-center shrink-0"
         style={{
-          background: "var(--qc-surface-panel)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-section)",
+          border: "1px solid var(--qc-hair)",
           fontSize: 11,
           fontWeight: 700,
-          color: "var(--qc-text-heading)",
+          color: "var(--qc-ink)",
           letterSpacing: "-0.02em",
         }}
       >
@@ -112,14 +112,14 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
         <div className="flex items-center gap-2 mb-0.5">
           <span
             className="truncate"
-            style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}
+            style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}
           >
             {client.name}
           </span>
           <SegmentBadge segment={client.segment} />
         </div>
-        <p style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
-          Last contact <span style={{ fontWeight: 500, color: "var(--qc-text-heading)" }}>{lastContact}</span>
+        <p style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
+          Last contact <span style={{ fontWeight: 500, color: "var(--qc-ink)" }}>{lastContact}</span>
           {client.risk_profile && (
             <>
               {" · "}
@@ -132,7 +132,7 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
       {/* Stats */}
       <div className="flex items-center gap-6 shrink-0">
         <div className="text-right">
-          <p style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>
+          <p style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>
             Churn
           </p>
           <p
@@ -147,7 +147,7 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
           </p>
         </div>
         <div className="text-right">
-          <p style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>
+          <p style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>
             Engagement
           </p>
           <p
@@ -163,7 +163,7 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
         </div>
         <ArrowRight
           className="size-3.5 opacity-0 group-hover:opacity-50 transition-opacity"
-          style={{ color: "var(--qc-text-muted)" }}
+          style={{ color: "var(--qc-ink-2)" }}
         />
       </div>
     </div>
@@ -197,7 +197,7 @@ function RightPanel({
         className="relative overflow-hidden"
         style={{
           borderRadius: 14,
-          background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
+          background: "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)",
           padding: "22px 22px 18px",
           minHeight: 200,
         }}
@@ -244,16 +244,16 @@ function RightPanel({
         <div
           style={{
             borderRadius: 12,
-            border: "1px solid var(--qc-border-default)",
-            background: "var(--qc-surface-card)",
+            border: "1px solid var(--qc-hair)",
+            background: "var(--qc-card)",
             overflow: "hidden",
           }}
         >
           <div
             className="flex items-center justify-between px-4 py-2.5"
-            style={{ borderBottom: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+            style={{ borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
           >
-            <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--qc-text-heading)" }}>
+            <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--qc-ink)" }}>
               Segment Breakdown
             </span>
           </div>
@@ -265,20 +265,20 @@ function RightPanel({
                 return (
                   <div key={seg}>
                     <div className="flex items-center justify-between mb-1">
-                      <span style={{ fontSize: 12, fontWeight: 500, color: "var(--qc-text-heading)" }}>{seg}</span>
+                      <span style={{ fontSize: 12, fontWeight: 500, color: "var(--qc-ink)" }}>{seg}</span>
                       <div className="flex items-center gap-2">
-                        <span style={{ fontSize: 11, fontFamily: "var(--font-ibm-plex-mono, monospace)", fontWeight: 600, color: "var(--qc-text-heading)" }}>
+                        <span style={{ fontSize: 11, fontFamily: "var(--font-ibm-plex-mono, monospace)", fontWeight: 600, color: "var(--qc-ink)" }}>
                           {count}
                         </span>
-                        <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>
+                        <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
                           {pct.toFixed(0)}%
                         </span>
                       </div>
                     </div>
-                    <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--qc-surface-panel)" }}>
+                    <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--qc-section)" }}>
                       <div
                         className="h-full rounded-full"
-                        style={{ width: `${pct}%`, background: "var(--qc-accent-primary)" }}
+                        style={{ width: `${pct}%`, background: "var(--qc-ink)" }}
                       />
                     </div>
                   </div>
@@ -293,14 +293,14 @@ function RightPanel({
         <div
           style={{
             borderRadius: 12,
-            border: "1px solid var(--qc-border-default)",
-            background: "var(--qc-surface-card)",
+            border: "1px solid var(--qc-hair)",
+            background: "var(--qc-card)",
             padding: "15px 16px",
           }}
         >
           <div className="flex items-center gap-1.5 mb-3">
             <AlertCircle className="size-3" style={{ color: "var(--qc-down)" }} />
-            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-text-muted)" }}>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-2)" }}>
               Highest Churn Risk
             </p>
           </div>
@@ -308,19 +308,19 @@ function RightPanel({
             <div
               className="size-9 rounded-full flex items-center justify-center shrink-0"
               style={{
-                background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
+                background: "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)",
                 fontSize: 12,
                 fontWeight: 700,
-                color: "var(--qc-accent-primary-fg)",
+                color: "var(--qc-on-dark)",
               }}
             >
               {topRisk.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
             </div>
             <div className="flex-1 min-w-0">
-              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }} className="truncate">
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }} className="truncate">
                 {topRisk.name}
               </p>
-              <p style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
+              <p style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
                 Churn{" "}
                 <span
                   style={{
@@ -339,7 +339,7 @@ function RightPanel({
 
           {/* Mini churn bar */}
           <div className="mt-3">
-            <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--qc-surface-panel)" }}>
+            <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--qc-section)" }}>
               <div
                 className="h-full rounded-full"
                 style={{
@@ -356,12 +356,12 @@ function RightPanel({
       <div
         style={{
           borderRadius: 12,
-          border: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-card)",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-card)",
           padding: "15px 16px",
         }}
       >
-        <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-text-muted)", marginBottom: 10 }}>
+        <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-2)", marginBottom: 10 }}>
           Quick Actions
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -369,13 +369,13 @@ function RightPanel({
             <button
               key={label}
               className="flex flex-col gap-1.5 rounded-[9px] p-3 text-left hover:bg-[rgba(0,0,0,0.03)] transition-colors cursor-pointer"
-              style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+              style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
             >
-              <div className="flex items-center justify-center size-6 rounded-[6px]" style={{ background: "var(--qc-accent-primary)" }}>
-                <Icon className="size-3.5" style={{ color: "var(--qc-accent-primary-fg)" }} />
+              <div className="flex items-center justify-center size-6 rounded-[6px]" style={{ background: "var(--qc-ink)" }}>
+                <Icon className="size-3.5" style={{ color: "var(--qc-on-dark)" }} />
               </div>
-              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}>{label}</span>
-              <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>{desc}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
+              <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{desc}</span>
             </button>
           ))}
         </div>
@@ -420,19 +420,19 @@ function ClientsContent() {
   const offset = (page - 1) * 20;
 
   return (
-    <div className="min-h-screen pb-16" style={{ background: "var(--qc-surface-base)" }}>
+    <div className="min-h-screen pb-16" style={{ background: "var(--qc-bg)" }}>
 
       {/* Header */}
-      <div style={{ borderBottom: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)", padding: "18px 24px 16px" }}>
+      <div style={{ borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-bg)", padding: "18px 24px 16px" }}>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--qc-text-muted)", marginBottom: 3, fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--qc-ink-2)", marginBottom: 3, fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
               WealthOS · Client Registry
             </p>
-            <h1 style={{ fontSize: 24, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.15 }}>
+            <h1 style={{ fontSize: 24, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.15 }}>
               Clients
               {clientsData && (
-                <span style={{ fontSize: 15, fontWeight: 400, color: "var(--qc-text-muted)", marginLeft: 10 }}>
+                <span style={{ fontSize: 15, fontWeight: 400, color: "var(--qc-ink-2)", marginLeft: 10 }}>
                   {clientsData.total} total
                 </span>
               )}
@@ -444,8 +444,8 @@ function ClientsContent() {
             style={{
               borderRadius: 7,
               border: "none",
-              background: "var(--qc-accent-primary)",
-              color: "var(--qc-accent-primary-fg)",
+              background: "var(--qc-ink)",
+              color: "var(--qc-on-dark)",
               fontSize: 12,
               fontWeight: 600,
               padding: "7px 14px",
@@ -470,13 +470,13 @@ function ClientsContent() {
               className="flex flex-wrap items-center gap-2 px-4 py-3"
               style={{
                 borderRadius: 10,
-                border: "1px solid var(--qc-border-default)",
-                background: "var(--qc-surface-card)",
+                border: "1px solid var(--qc-hair)",
+                background: "var(--qc-card)",
               }}
             >
               {/* Search */}
               <div className="relative flex-1 min-w-[180px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5" style={{ color: "var(--qc-text-muted)" }} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5" style={{ color: "var(--qc-ink-2)" }} />
                 <input
                   type="text"
                   value={search}
@@ -485,9 +485,9 @@ function ClientsContent() {
                   style={{
                     width: "100%",
                     borderRadius: 6,
-                    border: "1px solid var(--qc-border-default)",
-                    background: "var(--qc-surface-panel)",
-                    color: "var(--qc-text-heading)",
+                    border: "1px solid var(--qc-hair)",
+                    background: "var(--qc-section)",
+                    color: "var(--qc-ink)",
                     fontSize: 13,
                     padding: "5px 10px 5px 30px",
                     outline: "none",
@@ -506,9 +506,9 @@ function ClientsContent() {
                       borderRadius: 20,
                       fontSize: 11,
                       fontWeight: 500,
-                      border: segment === s.value ? "1px solid var(--qc-border-active)" : "1px solid var(--qc-border-default)",
-                      background: segment === s.value ? "var(--qc-accent-primary)" : "transparent",
-                      color: segment === s.value ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
+                      border: segment === s.value ? "1px solid var(--qc-ink)" : "1px solid var(--qc-hair)",
+                      background: segment === s.value ? "var(--qc-ink)" : "transparent",
+                      color: segment === s.value ? "var(--qc-on-dark)" : "var(--qc-ink-2)",
                       cursor: "pointer",
                       transition: "all 0.12s",
                     }}
@@ -526,9 +526,9 @@ function ClientsContent() {
                   className="appearance-none cursor-pointer"
                   style={{
                     borderRadius: 6,
-                    border: "1px solid var(--qc-border-default)",
-                    background: "var(--qc-surface-panel)",
-                    color: "var(--qc-text-heading)",
+                    border: "1px solid var(--qc-hair)",
+                    background: "var(--qc-section)",
+                    color: "var(--qc-ink)",
                     fontSize: 12,
                     fontWeight: 500,
                     padding: "5px 26px 5px 10px",
@@ -538,7 +538,7 @@ function ClientsContent() {
                   <option value="">All RMs</option>
                   {rms.map((rm) => <option key={rm.id} value={rm.id}>{rm.name}</option>)}
                 </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none" style={{ color: "var(--qc-text-muted)" }} />
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none" style={{ color: "var(--qc-ink-2)" }} />
               </div>
             </div>
 
@@ -546,8 +546,8 @@ function ClientsContent() {
             <div
               style={{
                 borderRadius: 12,
-                border: "1px solid var(--qc-border-default)",
-                background: "var(--qc-surface-card)",
+                border: "1px solid var(--qc-hair)",
+                background: "var(--qc-card)",
                 overflow: "hidden",
               }}
             >
@@ -557,15 +557,15 @@ function ClientsContent() {
                 style={{
                   gridTemplateColumns: "20px 32px 1fr 80px 80px 20px",
                   gap: "12px",
-                  borderBottom: "1px solid var(--qc-border-default)",
-                  background: "var(--qc-surface-panel)",
+                  borderBottom: "1px solid var(--qc-hair)",
+                  background: "var(--qc-section)",
                 }}
               >
-                <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-text-muted)" }}>#</span>
+                <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-2)" }}>#</span>
                 <span />
-                <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-text-muted)" }}>Client</span>
-                <span className="text-right" style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-text-muted)" }}>Churn</span>
-                <span className="text-right" style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-text-muted)" }}>Engage</span>
+                <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-2)" }}>Client</span>
+                <span className="text-right" style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-2)" }}>Churn</span>
+                <span className="text-right" style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-2)" }}>Engage</span>
                 <span />
               </div>
 
@@ -576,16 +576,16 @@ function ClientsContent() {
                     <div
                       key={i}
                       className="flex items-center gap-3 px-4 py-3 animate-pulse"
-                      style={{ borderBottom: "1px solid var(--qc-border-default)" }}
+                      style={{ borderBottom: "1px solid var(--qc-hair)" }}
                     >
-                      <div className="h-3 rounded w-5" style={{ background: "var(--qc-surface-panel)" }} />
-                      <div className="size-8 rounded-full" style={{ background: "var(--qc-surface-panel)" }} />
+                      <div className="h-3 rounded w-5" style={{ background: "var(--qc-section)" }} />
+                      <div className="size-8 rounded-full" style={{ background: "var(--qc-section)" }} />
                       <div className="flex-1 space-y-1.5">
-                        <div className="h-3 rounded w-32" style={{ background: "var(--qc-surface-panel)" }} />
-                        <div className="h-2.5 rounded w-24" style={{ background: "var(--qc-surface-panel)" }} />
+                        <div className="h-3 rounded w-32" style={{ background: "var(--qc-section)" }} />
+                        <div className="h-2.5 rounded w-24" style={{ background: "var(--qc-section)" }} />
                       </div>
-                      <div className="h-3 rounded w-10" style={{ background: "var(--qc-surface-panel)" }} />
-                      <div className="h-3 rounded w-10" style={{ background: "var(--qc-surface-panel)" }} />
+                      <div className="h-3 rounded w-10" style={{ background: "var(--qc-section)" }} />
+                      <div className="h-3 rounded w-10" style={{ background: "var(--qc-section)" }} />
                     </div>
                   ))}
                 </div>
@@ -600,8 +600,8 @@ function ClientsContent() {
 
               {!loading && !error && clients.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 gap-2">
-                  <Users className="size-7 mb-1" style={{ color: "var(--qc-text-muted)", opacity: 0.3 }} />
-                  <p style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>No clients found</p>
+                  <Users className="size-7 mb-1" style={{ color: "var(--qc-ink-2)", opacity: 0.3 }} />
+                  <p style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>No clients found</p>
                 </div>
               )}
 
@@ -613,7 +613,7 @@ function ClientsContent() {
               {totalPages > 1 && (
                 <div
                   className="flex items-center justify-between px-4 py-3"
-                  style={{ borderTop: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+                  style={{ borderTop: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
                 >
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -622,7 +622,7 @@ function ClientsContent() {
                     style={{
                       fontSize: 12,
                       fontWeight: 500,
-                      color: "var(--qc-text-heading)",
+                      color: "var(--qc-ink)",
                       background: "none",
                       border: "none",
                       cursor: page === 1 ? "not-allowed" : "pointer",
@@ -630,7 +630,7 @@ function ClientsContent() {
                   >
                     <ChevronLeft className="size-3.5" /> Prev
                   </button>
-                  <span style={{ fontSize: 11, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+                  <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
                     {page} / {totalPages}
                   </span>
                   <button
@@ -640,7 +640,7 @@ function ClientsContent() {
                     style={{
                       fontSize: 12,
                       fontWeight: 500,
-                      color: "var(--qc-text-heading)",
+                      color: "var(--qc-ink)",
                       background: "none",
                       border: "none",
                       cursor: page === totalPages ? "not-allowed" : "pointer",
@@ -665,7 +665,7 @@ function ClientsContent() {
 
 export default function WealthOSClientsPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading...</div>}>
+    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-ink-2)" }}>Loading...</div>}>
       <ClientsContent />
     </Suspense>
   );

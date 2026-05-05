@@ -24,12 +24,12 @@ export function SignalScorecard({ signals }: SignalScorecardProps) {
     >
       <div
         className="flex items-center justify-between px-2 pt-2 pb-4"
-        style={{ borderBottom: "1px solid var(--qc-border-inner)" }}
+        style={{ borderBottom: "1px solid var(--qc-hair-2)" }}
       >
         <div>
           <p
             className="font-mono text-[10px] uppercase tracking-[0.14em] mb-1"
-            style={{ color: "var(--qc-text-muted)" }}
+            style={{ color: "var(--qc-ink-2)" }}
           >Overall Signal</p>
           <span
             className="text-xl font-semibold"
@@ -39,13 +39,13 @@ export function SignalScorecard({ signals }: SignalScorecardProps) {
         <div className="text-right">
           <p
             className="font-mono text-[10px] uppercase tracking-[0.14em] mb-1"
-            style={{ color: "var(--qc-text-muted)" }}
+            style={{ color: "var(--qc-ink-2)" }}
           >Score</p>
           <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-semibold" style={{ color: "var(--qc-text-heading)" }}>
+            <span className="text-3xl font-semibold" style={{ color: "var(--qc-ink)" }}>
               {signals.score.toFixed(1)}
             </span>
-            <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>/100</span>
+            <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>/100</span>
           </div>
         </div>
       </div>
@@ -61,16 +61,16 @@ export function SignalScorecard({ signals }: SignalScorecardProps) {
                   flex: 1,
                   height: 18,
                   borderRadius: 3,
-                  backgroundColor: filled ? "var(--qc-text-heading)" : "var(--qc-surface-row-alt)",
+                  backgroundColor: filled ? "var(--qc-ink)" : "var(--qc-section)",
                 }}
               />
             );
           })}
         </div>
         <div className="flex justify-between mt-1">
-          <span className="font-mono text-[9px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>SELL</span>
-          <span className="font-mono text-[9px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>NEUTRAL</span>
-          <span className="font-mono text-[9px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>BUY</span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>SELL</span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>NEUTRAL</span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>BUY</span>
         </div>
       </div>
 
@@ -79,23 +79,23 @@ export function SignalScorecard({ signals }: SignalScorecardProps) {
           <div
             key={key}
             className="rounded-[10px] border px-4 py-4 flex flex-col gap-2"
-            style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+            style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
           >
             <div
               className="p-1 rounded-[6px] border w-fit"
-              style={{ borderColor: "var(--qc-border-inner)", background: "var(--qc-surface-row-alt)" }}
+              style={{ borderColor: "var(--qc-hair-2)", background: "var(--qc-section)" }}
             >
-              <Icon className="h-4 w-4" style={{ color: "var(--qc-text-muted)" }} />
+              <Icon className="h-4 w-4" style={{ color: "var(--qc-ink-2)" }} />
             </div>
             <span
               className="font-mono text-[10px] uppercase tracking-[0.14em]"
-              style={{ color: "var(--qc-text-muted)" }}
+              style={{ color: "var(--qc-ink-2)" }}
             >{label}</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-semibold" style={{ color: "var(--qc-text-heading)" }}>
+              <span className="text-2xl font-semibold" style={{ color: "var(--qc-ink)" }}>
                 {signals.components[key]}
               </span>
-              <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>/100</span>
+              <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>/100</span>
             </div>
           </div>
         ))}

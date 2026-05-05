@@ -57,8 +57,8 @@ export function ClientCard({ mode, item, className }: ClientCardProps) {
       )}
       style={{
         borderRadius: 12,
-        border: "1px solid var(--qc-border-default)",
-        background: "var(--qc-surface-card)",
+        border: "1px solid var(--qc-hair)",
+        background: "var(--qc-card)",
         padding: "14px 16px 14px 20px",
       }}
     >
@@ -78,7 +78,7 @@ export function ClientCard({ mode, item, className }: ClientCardProps) {
             style={{
               fontSize: 14,
               fontWeight: 600,
-              color: "var(--qc-text-heading)",
+              color: "var(--qc-ink)",
               letterSpacing: "-0.01em",
             }}
           >
@@ -90,7 +90,7 @@ export function ClientCard({ mode, item, className }: ClientCardProps) {
           {mode === "dashboard" && <PriorityBadge priority={item.priority} />}
           <ArrowRight
             className="size-3.5 opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{ color: "var(--qc-text-muted)" }}
+            style={{ color: "var(--qc-ink-2)" }}
           />
         </div>
       </div>
@@ -98,7 +98,7 @@ export function ClientCard({ mode, item, className }: ClientCardProps) {
       {/* Meta row */}
       <div
         className="flex items-center gap-4 mb-3"
-        style={{ fontSize: 12, color: "var(--qc-text-muted)" }}
+        style={{ fontSize: 12, color: "var(--qc-ink-2)" }}
       >
         <span>
           Churn{" "}
@@ -115,7 +115,7 @@ export function ClientCard({ mode, item, className }: ClientCardProps) {
         {mode === "list" && (
           <span>
             Engagement{" "}
-            <span style={{ fontWeight: 600, color: "var(--qc-text-heading)" }}>
+            <span style={{ fontWeight: 600, color: "var(--qc-ink)" }}>
               {(item as WealthClient).engagement_score}
             </span>
           </span>
@@ -123,7 +123,7 @@ export function ClientCard({ mode, item, className }: ClientCardProps) {
         {mode === "list" && (item as WealthClient).last_contact_at && (
           <span>
             Last contact{" "}
-            <span style={{ fontWeight: 600, color: "var(--qc-text-heading)" }}>
+            <span style={{ fontWeight: 600, color: "var(--qc-ink)" }}>
               {new Date(
                 (item as WealthClient).last_contact_at!
               ).toLocaleDateString("en-IN", {
@@ -146,14 +146,14 @@ export function ClientCard({ mode, item, className }: ClientCardProps) {
             <div
               className="flex items-start gap-2 rounded-[8px] px-3 py-2"
               style={{
-                background: "var(--qc-surface-panel)",
-                border: "1px solid var(--qc-border-default)",
+                background: "var(--qc-section)",
+                border: "1px solid var(--qc-hair)",
               }}
             >
               <span
                 style={{
                   fontSize: 11,
-                  color: "var(--qc-text-muted)",
+                  color: "var(--qc-ink-2)",
                   lineHeight: 1.5,
                 }}
                 className="line-clamp-2"

@@ -12,18 +12,18 @@ export function TakeawayBox({ title, text, inline = false, noBleed = false }: Ta
   return (
     <div
       className={noBleed ? "rounded-lg" : "-mx-4 rounded-b-lg"}
-      style={{ background: "var(--qc-text-heading)", padding: 20 }}
+      style={{ background: "var(--qc-ink)", padding: 20 }}
     >
       {inline ? (
-        <p style={{ fontSize: 12, fontWeight: 300, color: "var(--qc-accent-lime)", lineHeight: 1.5 }}>
+        <p style={{ fontSize: 12, fontWeight: 300, color: "var(--qc-lime)", lineHeight: 1.5 }}>
           <span
             style={{
               display: "inline-block",
               marginRight: 6,
               fontSize: 9,
               fontWeight: 600,
-              color: "var(--qc-text-heading)",
-              background: "var(--qc-accent-lime)",
+              color: "var(--qc-ink)",
+              background: "var(--qc-lime)",
               borderRadius: 4,
               padding: "2px 6px",
               textTransform: "uppercase",
@@ -32,7 +32,7 @@ export function TakeawayBox({ title, text, inline = false, noBleed = false }: Ta
           >
             {title}
           </span>
-          <span style={{ color: "var(--qc-accent-primary-fg)" }}><BoldText text={text ?? "N/A"} /></span>
+          <span style={{ color: "var(--qc-on-dark)" }}><BoldText text={text ?? "N/A"} /></span>
         </p>
       ) : (
         <>
@@ -41,8 +41,8 @@ export function TakeawayBox({ title, text, inline = false, noBleed = false }: Ta
               display: "inline-block",
               fontSize: 9,
               fontWeight: 600,
-              color: "var(--qc-text-heading)",
-              background: "var(--qc-accent-lime)",
+              color: "var(--qc-ink)",
+              background: "var(--qc-lime)",
               borderRadius: 4,
               padding: "2px 6px",
               textTransform: "uppercase",
@@ -51,7 +51,7 @@ export function TakeawayBox({ title, text, inline = false, noBleed = false }: Ta
           >
             {title}
           </span>
-          <p style={{ color: "var(--qc-accent-primary-fg)", paddingTop: 16, fontSize: 13, lineHeight: 1.5 }}>
+          <p style={{ color: "var(--qc-on-dark)", paddingTop: 16, fontSize: 13, lineHeight: 1.5 }}>
             <BoldText text={text ?? "N/A"} />
           </p>
         </>

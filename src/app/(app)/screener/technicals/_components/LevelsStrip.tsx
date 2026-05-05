@@ -37,29 +37,29 @@ interface MetricItem {
 const SUB_COLOR: Record<SubColorToken, string> = {
   up: "var(--qc-up)",
   down: "var(--qc-down)",
-  muted: "var(--qc-text-muted)",
+  muted: "var(--qc-ink-2)",
 };
 
 function MetricCell({ label, value, sub, subColor, highlight, tooltip }: MetricItem) {
   return (
     <div className="relative flex flex-col gap-0.5 px-5 py-2 group">
-      <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
+      <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>
         {label}
       </span>
       <span
         className="text-base whitespace-nowrap"
-        style={{ color: "var(--qc-text-heading)", fontWeight: highlight ? 700 : 600 }}
+        style={{ color: "var(--qc-ink)", fontWeight: highlight ? 700 : 600 }}
       >
         {value}
       </span>
       {sub != null && (
-        <span className="text-[11px] font-semibold" style={{ color: subColor ? SUB_COLOR[subColor] : "var(--qc-text-muted)" }}>
+        <span className="text-[11px] font-semibold" style={{ color: subColor ? SUB_COLOR[subColor] : "var(--qc-ink-2)" }}>
           {sub}
         </span>
       )}
       {tooltip && (
         <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 whitespace-nowrap rounded-[6px] px-2 py-1 text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity z-10"
-          style={{ background: "var(--qc-text-heading)", color: "var(--qc-surface-white)" }}>
+          style={{ background: "var(--qc-ink)", color: "var(--qc-card)" }}>
           {tooltip}
         </div>
       )}
@@ -81,8 +81,8 @@ function MetricGroup({
       className={`flex flex-col `}
     >
       {/* Group header */}
-      <div className="px-5 pt-2 pb-1.5" style={{ borderBottom: "1px solid var(--qc-border-inner)" }}>
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
+      <div className="px-5 pt-2 pb-1.5" style={{ borderBottom: "1px solid var(--qc-hair-2)" }}>
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>
           {title}
         </span>
       </div>
@@ -90,7 +90,7 @@ function MetricGroup({
       <div className="flex">
         {items.map((item, i) => (
           <div key={item.label} className="flex">
-            {i > 0 && <div className="w-px self-stretch" style={{ background: "var(--qc-border-inner)" }} />}
+            {i > 0 && <div className="w-px self-stretch" style={{ background: "var(--qc-hair-2)" }} />}
             <MetricCell {...item} />
           </div>
         ))}

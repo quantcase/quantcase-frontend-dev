@@ -24,8 +24,8 @@ export function StepperHeader({ step, completedSteps, hasSWP }: StepperHeaderPro
               <motion.span
                 layout
                 animate={{
-                  background: active ? "var(--qc-text-heading)" : done ? "var(--qc-text-heading)" : "#EBEBEB",
-                  color:      active || done ? "#fff" : "var(--qc-text-muted)",
+                  background: active ? "var(--qc-ink)" : done ? "var(--qc-ink)" : "#EBEBEB",
+                  color:      active || done ? "#fff" : "var(--qc-ink-2)",
                   scale:      active ? 1.08 : 1,
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -57,11 +57,11 @@ export function StepperHeader({ step, completedSteps, hasSWP }: StepperHeaderPro
                 </AnimatePresence>
               </motion.span>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider leading-none mb-0.5" style={{ color: "var(--qc-text-muted)" }}>
+                <p className="text-[11px] font-semibold uppercase tracking-wider leading-none mb-0.5" style={{ color: "var(--qc-ink-2)" }}>
                   Step {s.number}
                 </p>
                 <motion.p
-                  animate={{ color: filled ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}
+                  animate={{ color: filled ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
                   transition={{ duration: 0.3 }}
                   className="text-[13px] font-semibold leading-tight"
                 >
@@ -69,10 +69,10 @@ export function StepperHeader({ step, completedSteps, hasSWP }: StepperHeaderPro
                 </motion.p>
               </div>
             </div>
-            <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: "var(--qc-border-default)" }}>
+            <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: "var(--qc-hair)" }}>
               <motion.div
                 className="absolute inset-y-0 left-0 rounded-full"
-                style={{ background: "var(--qc-text-heading)" }}
+                style={{ background: "var(--qc-ink)" }}
                 initial={false}
                 animate={{ width: filled ? "100%" : "0%" }}
                 transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}

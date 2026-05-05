@@ -25,7 +25,7 @@ function RiskMeter({ type }: { type: Exclude<RiskProfileType, "goal-based"> }) {
           style={{
             width: 5,
             height: 4 + i * 1.8,
-            background: i < dots ? color : "var(--qc-border-default)",
+            background: i < dots ? color : "var(--qc-hair)",
           }}
         />
       ))}
@@ -48,7 +48,7 @@ function AllocBar({ type }: { type: Exclude<RiskProfileType, "goal-based"> }) {
         {bars.map((b) => (
           <div key={b.label} className="flex items-center gap-1">
             <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: b.color }} />
-            <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>{b.label} {b.pct}%</span>
+            <span className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>{b.label} {b.pct}%</span>
           </div>
         ))}
       </div>
@@ -77,7 +77,7 @@ function GoalBasedCard({
       onClick={onSelect}
       className="rounded-xl text-left flex flex-col"
       animate={{
-        borderColor: active ? "var(--qc-text-heading)" : "var(--qc-border-default)",
+        borderColor: active ? "var(--qc-ink)" : "var(--qc-hair)",
         background:  active ? "#F8F9FB" : "#fff",
         borderWidth:  active ? 2 : 1,
         padding:      active ? 15 : 16,
@@ -90,10 +90,10 @@ function GoalBasedCard({
     >
       <div className="flex items-start justify-between mb-2">
         <div>
-          <p className="text-[13px] font-bold leading-tight" style={{ color: "var(--qc-text-heading)" }}>Goal-based</p>
-          <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-text-muted)" }}>Auto-maps risk by goal</p>
+          <p className="text-[13px] font-bold leading-tight" style={{ color: "var(--qc-ink)" }}>Goal-based</p>
+          <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-ink-2)" }}>Auto-maps risk by goal</p>
         </div>
-        <div className="rounded-md px-2 py-1 shrink-0 ml-2" style={{ background: "var(--qc-surface-panel)" }}>
+        <div className="rounded-md px-2 py-1 shrink-0 ml-2" style={{ background: "var(--qc-section)" }}>
           <div className="flex gap-1 items-end">
             {[3, 6, 9].map((dots, i) => (
               <div
@@ -114,7 +114,7 @@ function GoalBasedCard({
       </span>
 
       <div className="mt-auto w-full" onClick={(e) => e.stopPropagation()}>
-        <p className="text-[10px] uppercase tracking-wider font-medium mb-1.5" style={{ color: "var(--qc-text-muted)" }}>Client goal</p>
+        <p className="text-[10px] uppercase tracking-wider font-medium mb-1.5" style={{ color: "var(--qc-ink-2)" }}>Client goal</p>
         <div className="relative">
           <select
             value={selectedGoal ?? ""}
@@ -124,19 +124,19 @@ function GoalBasedCard({
               onSelect();
             }}
             className="w-full appearance-none rounded-lg border border-[#E2E2E2] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#0F172B] transition-all pr-8"
-            style={{ color: selectedGoal ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}
+            style={{ color: selectedGoal ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
           >
             <option value="" disabled>— pick a goal —</option>
             {GOALS.map((g) => (
               <option key={g.type} value={g.type}>{g.label}</option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--qc-text-muted)" }} />
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--qc-ink-2)" }} />
         </div>
         {goal && (
-          <p className="text-[10px] mt-1.5 flex items-center gap-1" style={{ color: "var(--qc-text-muted)" }}>
+          <p className="text-[10px] mt-1.5 flex items-center gap-1" style={{ color: "var(--qc-ink-2)" }}>
             <span>Maps to</span>
-            <span className="font-semibold capitalize" style={{ color: "var(--qc-text-heading)" }}>{goal.riskProfile}</span>
+            <span className="font-semibold capitalize" style={{ color: "var(--qc-ink)" }}>{goal.riskProfile}</span>
             {goal.hasSWP && (
               <>
                 <span>·</span>
@@ -181,7 +181,7 @@ export function Step1RiskCapital({
     <div className="space-y-5">
       {/* Risk Profile */}
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--qc-text-muted)" }}>Risk Profile</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--qc-ink-2)" }}>Risk Profile</p>
         <div className="grid grid-cols-2 gap-3">
           {RISK_PROFILES.map((profile) => {
             const active = profile.type === riskProfile;
@@ -193,7 +193,7 @@ export function Step1RiskCapital({
                 onClick={() => { setRiskProfile(profile.type); setSelectedGoal(null); }}
                 className="rounded-xl text-left flex flex-col"
                 animate={{
-                  borderColor: active ? "var(--qc-text-heading)" : "var(--qc-border-default)",
+                  borderColor: active ? "var(--qc-ink)" : "var(--qc-hair)",
                   background:  active ? "#F8F9FB" : "#fff",
                   borderWidth:  active ? 2 : 1,
                   padding:      active ? 15 : 16,
@@ -206,8 +206,8 @@ export function Step1RiskCapital({
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <p className="text-[13px] font-bold leading-tight" style={{ color: "var(--qc-text-heading)" }}>{profile.label}</p>
-                    <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{profile.description}</p>
+                    <p className="text-[13px] font-bold leading-tight" style={{ color: "var(--qc-ink)" }}>{profile.label}</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-ink-2)" }}>{profile.description}</p>
                   </div>
                   <div className="rounded-md px-2 py-1 shrink-0 ml-2" style={{ background: meter.accent }}>
                     <RiskMeter type={profile.type} />
@@ -237,16 +237,16 @@ export function Step1RiskCapital({
 
       {/* Portfolio Capital */}
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--qc-text-muted)" }}>Portfolio Capital</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--qc-ink-2)" }}>Portfolio Capital</p>
         <div className="flex items-center gap-2 rounded-xl border border-[#E2E2E2] px-4 py-3 bg-white focus-within:border-[#0F172B] focus-within:ring-1 focus-within:ring-[#0F172B] transition-all">
-          <span className="text-lg" style={{ color: "var(--qc-text-muted)" }}>₹</span>
+          <span className="text-lg" style={{ color: "var(--qc-ink-2)" }}>₹</span>
           <input
             type="text"
             value={capitalRaw}
             onChange={(e) => setCapitalRaw(e.target.value)}
             placeholder="Enter amount"
             className="flex-1 bg-transparent text-lg focus:outline-none placeholder:text-zinc-300"
-            style={{ color: capitalRaw ? "var(--qc-text-heading)" : undefined }}
+            style={{ color: capitalRaw ? "var(--qc-ink)" : undefined }}
           />
         </div>
         <div className="flex flex-wrap gap-2 mt-3">
@@ -258,8 +258,8 @@ export function Step1RiskCapital({
               className="rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:border-[#0F172B] hover:text-[#0F172B]"
               style={{
                 border:     capital === chip.value ? "1px solid #0F172B" : "1px solid #E2E2E2",
-                color:      capital === chip.value ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
-                background: capital === chip.value ? "var(--qc-surface-panel)" : "#fff",
+                color:      capital === chip.value ? "var(--qc-ink)" : "var(--qc-ink-2)",
+                background: capital === chip.value ? "var(--qc-section)" : "#fff",
               }}
             >
               {chip.label}
@@ -270,14 +270,14 @@ export function Step1RiskCapital({
 
       {/* Portfolio Name */}
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--qc-text-muted)" }}>Portfolio Name</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--qc-ink-2)" }}>Portfolio Name</p>
         <input
           type="text"
           value={portfolioName}
           onChange={(e) => setPortfolioName(e.target.value)}
           placeholder='e.g. "Aggressive Growth — HNI Tier 1" or "Conservative Income — Retiree"'
           className="w-full rounded-xl border border-[#E2E2E2] px-4 py-3 bg-white text-sm focus:outline-none focus:border-[#0F172B] focus:ring-1 focus:ring-[#0F172B] transition-all placeholder:text-zinc-300"
-          style={{ color: portfolioName ? "var(--qc-text-heading)" : undefined }}
+          style={{ color: portfolioName ? "var(--qc-ink)" : undefined }}
         />
       </div>
     </div>

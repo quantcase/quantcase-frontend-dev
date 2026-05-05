@@ -19,9 +19,9 @@ const SENTIMENT_CONFIG: Record<NarrativeSentiment, {
 }> = {
   neutral: {
     label: "NEUTRAL",
-    bg: "var(--qc-chip-bg)",
-    text: "var(--qc-text-muted)",
-    borderStyle: "3px solid var(--qc-border-default)",
+    bg: "var(--qc-chip)",
+    text: "var(--qc-ink-2)",
+    borderStyle: "3px solid var(--qc-hair)",
     Icon: Minus,
   },
   caution: {
@@ -56,12 +56,12 @@ export function MarketNarrativeShifts({ shifts, className }: MarketNarrativeShif
   return (
     <div
       className={cn("rounded-[10px] p-2 h-full flex flex-col", className)}
-      style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
     >
       {/* Panel header */}
       <div className="px-2 pt-1 pb-3 flex items-center gap-2">
-        <Radio className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
-        <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+        <Radio className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+        <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
           Market Narrative Shifts
         </span>
       </div>
@@ -69,7 +69,7 @@ export function MarketNarrativeShifts({ shifts, className }: MarketNarrativeShif
       {/* Inner white box */}
       <div
         className="rounded-[10px] flex-1 flex flex-col divide-y overflow-hidden"
-        style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-inner)" }}
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)" }}
       >
         {shifts.map((shift) => {
           const config = SENTIMENT_CONFIG[shift.sentiment];
@@ -77,8 +77,8 @@ export function MarketNarrativeShifts({ shifts, className }: MarketNarrativeShif
           return (
             <div
               key={shift.id}
-              className="flex items-start gap-3 pl-0 pr-4 py-3.5 cursor-pointer transition-colors group hover:bg-[var(--qc-surface-hover)]"
-              style={{ borderLeft: config.borderStyle, borderTopColor: "var(--qc-border-inner)" }}
+              className="flex items-start gap-3 pl-0 pr-4 py-3.5 cursor-pointer transition-colors group hover:bg-[var(--qc-section)]"
+              style={{ borderLeft: config.borderStyle, borderTopColor: "var(--qc-hair-2)" }}
             >
               {/* Icon box */}
               <div className="pl-4 pt-0.5 flex-shrink-0">
@@ -99,7 +99,7 @@ export function MarketNarrativeShifts({ shifts, className }: MarketNarrativeShif
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                   <span
                     className="text-[10px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5"
-                    style={{ background: "var(--qc-chip-bg)", color: "var(--qc-text-heading)", border: "1px solid var(--qc-chip-border)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}
+                    style={{ background: "var(--qc-chip)", color: "var(--qc-ink)", border: "1px solid var(--qc-hair)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}
                   >
                     {shift.category}
                   </span>
@@ -110,7 +110,7 @@ export function MarketNarrativeShifts({ shifts, className }: MarketNarrativeShif
                     {config.label}
                   </span>
                 </div>
-                <p className="text-[12px] leading-relaxed" style={{ color: "var(--qc-text-body)" }}>{shift.description}</p>
+                <p className="text-[12px] leading-relaxed" style={{ color: "var(--qc-ink)" }}>{shift.description}</p>
               </div>
             </div>
           );

@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Quantcase — Home</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ ICON DEFS ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5 M5 10v10h14V10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-display" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 21h6 M12 17v4" stroke="currentColor" stroke-width="1.8" fill="none"/></symbol>
+    <symbol id="i-port" viewBox="0 0 24 24"><path d="M4 7h16v13H4z M4 7l3-3h10l3 3 M9 11h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 17l5-6 4 4 7-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1M5.6 18.4l2.1-2.1m8.6-8.6 2.1-2.1" stroke="currentColor" stroke-width="1.8" fill="none"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 4H5v16h4 M16 8l4 4-4 4 M20 12H10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-tree" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="6" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="18" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 7.5 11 16 M16.5 7.5 13 16" stroke="currentColor" stroke-width="1.6" fill="none"/></symbol>
+    <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14 M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-tasks" viewBox="0 0 24 24"><rect x="3" y="5" width="3.5" height="3.5" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="15" width="3.5" height="3.5" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 6.5h11 M9 16.5h11" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6 M16 5a3 3 0 0 1 0 6 M21 19c0-2.5-1.4-4.7-3.5-5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-9 M14 6h6v6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <!-- ============ RAIL ============ -->
+  <nav class="rail">
+    <div class="mark"><svg width="16" height="16"><use href="#i-search"/></svg></div>
+    <button class="on" title="Home"><svg width="18" height="18"><use href="#i-home"/></svg></button>
+    <button title="Display"><svg width="18" height="18"><use href="#i-display"/></svg></button>
+    <button title="Portfolio"><svg width="18" height="18"><use href="#i-port"/></svg></button>
+    <button title="Chart"><svg width="18" height="18"><use href="#i-chart"/></svg></button>
+    <button title="Settings"><svg width="18" height="18"><use href="#i-gear"/></svg></button>
+    <button title="Shield"><svg width="18" height="18"><use href="#i-shield"/></svg></button>
+    <div class="spacer"></div>
+    <button title="Log out"><svg width="18" height="18"><use href="#i-logout"/></svg></button>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <header class="page-head">
+      <div>
+        <h1>Good afternoon, <span class="name">Palash</span></h1>
+        <div class="meta">TUESDAY, MAY 5 <span class="dot">·</span> 18 CLIENTS <span class="dot">·</span> ₹796 CR BOOK</div>
+      </div>
+      <button class="btn-primary">+ New Review</button>
+    </header>
+
+    <!-- TOP ROW: BRIEF + HEARTBEAT -->
+    <section class="top-row">
+      <article class="brief-card">
+        <div class="eyebrow-row">TODAY'S BRIEF · 09:42 IST</div>
+        <h2>Three clients need a conversation before market open. <span class="accent">Rahul</span> first — small-cap drift +6%.</h2>
+        <div class="actions">
+          <button class="brief-chip red"><span class="pip"></span>Call Rahul</button>
+          <button class="brief-chip amber"><span class="pip"></span>EV report → Anita</button>
+          <button class="brief-chip blue"><span class="pip"></span>Rebalance Varun</button>
+        </div>
+      </article>
+
+      <article class="heartbeat">
+        <div class="hb-head">
+          <div class="hb-head-l">
+            <svg class="hb-icon" width="16" height="16"><use href="#i-tree"/></svg>
+            <span class="hb-title">RM Heartbeat</span>
+            <span class="hb-pill crit">3 critical</span>
+            <span class="hb-pill warn">2 warning</span>
+          </div>
+          <div class="hb-head-l" style="gap:14px">
+            <div class="hb-legend">
+              <span class="item"><span class="pip crit"></span>Critical</span>
+              <span class="item"><span class="pip warn"></span>Warning</span>
+              <span class="item"><span class="pip mod"></span>Moderate</span>
+              <span class="item"><span class="pip clean"></span>Clean</span>
+            </div>
+            <button class="hb-fullview">Full View →</button>
+          </div>
+        </div>
+
+        <div class="hb-canvas">
+          <div class="hb-node">
+            <div class="ring crit">
+              <div class="badge crit">CRITICAL</div>
+              <div class="core crit">PJ</div>
+              <div class="down-chev crit"><svg width="10" height="10"><use href="#i-chev-down"/></svg></div>
+            </div>
+            <div class="name">Palash Jain</div>
+            <div class="stats">
+              <div class="row">
+                <span><svg width="11" height="11" style="vertical-align:-1px;color:var(--qc-ink-3)"><use href="#i-people"/></svg>&nbsp;2 clients</span>
+                <span><svg width="11" height="11" style="vertical-align:-1px;color:var(--qc-ink-3)"><use href="#i-trend"/></svg>&nbsp;₹10.3 Cr</span>
+              </div>
+              <div class="pips">
+                <span class="p"><span class="pip" style="background:#C44545"></span>2</span>
+                <span class="p"><span class="pip" style="background:#D89A2D"></span>1</span>
+                <span class="p"><span class="pip" style="background:#1F7A4A"></span>2 ok</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hb-node">
+            <div class="ring warn">
+              <div class="badge warn">WARNING</div>
+              <div class="core warn">SB</div>
+              <div class="down-chev warn"><svg width="10" height="10"><use href="#i-chev-down"/></svg></div>
+            </div>
+            <div class="name">Sonal Batra</div>
+            <div class="stats">
+              <div class="row">
+                <span><svg width="11" height="11" style="vertical-align:-1px;color:var(--qc-ink-3)"><use href="#i-people"/></svg>&nbsp;2 clients</span>
+                <span><svg width="11" height="11" style="vertical-align:-1px;color:var(--qc-ink-3)"><use href="#i-trend"/></svg>&nbsp;₹8.2 Cr</span>
+              </div>
+              <div class="pips">
+                <span class="p"><span class="pip" style="background:#D89A2D"></span>1</span>
+                <span class="p"><span class="pip" style="background:#1F7A4A"></span>3 ok</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hb-node">
+            <div class="ring mod">
+              <div class="badge mod">MODERATE</div>
+              <div class="core mod">AR</div>
+              <div class="down-chev mod"><svg width="10" height="10"><use href="#i-chev-down"/></svg></div>
+            </div>
+            <div class="name">Arjun Rao</div>
+            <div class="stats">
+              <div class="row">
+                <span><svg width="11" height="11" style="vertical-align:-1px;color:var(--qc-ink-3)"><use href="#i-people"/></svg>&nbsp;1 clients</span>
+                <span><svg width="11" height="11" style="vertical-align:-1px;color:var(--qc-ink-3)"><use href="#i-trend"/></svg>&nbsp;₹4.6 Cr</span>
+              </div>
+              <div class="pips">
+                <span class="p"><span class="pip" style="background:#4274C9"></span>1</span>
+                <span class="p"><span class="pip" style="background:#1F7A4A"></span>1 ok</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hb-canvas-foot">Click any node to expand · scroll to zoom · drag to pan</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- NEXT MEETING -->
+    <section class="next-meeting">
+      <div class="nm-time">
+        <div class="eyebrow">NEXT MEETING · IN 47 MIN</div>
+        <div class="t">11:30</div>
+        <div class="sub">Zoom · 30 min</div>
+      </div>
+      <div class="nm-client">
+        <div class="avatar">PV</div>
+        <div>
+          <div class="nm-name">Priya Venkat <span class="aum">₹4.6 Cr</span></div>
+          <div class="nm-meta">Client since Mar 2022 · last met 11 Apr</div>
+        </div>
+      </div>
+      <div class="nm-bring">
+        <div class="label">What to bring up</div>
+        <ul>
+          <li><span><b>Infra holding</b> pending review (flagged 2w ago)</span></li>
+          <li><span>She asked about <b>NPS allocation</b> last call — never followed up</span></li>
+          <li><span><b>Birthday next week</b> · personal note worth sending</span></li>
+        </ul>
+      </div>
+      <div class="nm-actions">
+        <button class="btn-light">Brief me</button>
+        <button class="btn-dark">Open file</button>
+      </div>
+    </section>
+
+    <!-- TWO COLUMNS -->
+    <section class="two-col">
+      <div>
+        <!-- WHO TO CALL -->
+        <div class="section-head">
+          <div class="left"><span class="title">Who to call today</span><span class="count-pip">3</span></div>
+          <div class="right">All clients →</div>
+        </div>
+        <div class="call-list">
+          <div class="call-row crit">
+            <div class="avatar">RM</div>
+            <div class="body">
+              <div class="row1"><span class="name">Rahul Mehta</span><span class="tag crit">CRITICAL</span></div>
+              <div class="desc">Anxious about small-cap volatility on last call. Portfolio drifted <b>+6% mid-cap</b>. No updated allocation brief sent.</div>
+            </div>
+            <div class="num">
+              <div class="v">₹3.2 Cr</div>
+              <div class="delta">−6.0% · 30d</div>
+              <div class="ago">2d ago</div>
+            </div>
+            <button class="cta">Call Now</button>
+          </div>
+
+          <div class="call-row high">
+            <div class="avatar">VK</div>
+            <div class="body">
+              <div class="row1"><span class="name">Varun Kapoor</span><span class="tag high">HIGH RISK</span></div>
+              <div class="desc">Mid-cap overweight <b>+9%</b>. Small-cap near threshold. <b>14 days no interaction</b> — relationship cold.</div>
+            </div>
+            <div class="num">
+              <div class="v">₹7.1 Cr</div>
+              <div class="delta">−9.2% · 30d</div>
+              <div class="ago">16d ago</div>
+            </div>
+            <button class="cta">Rebalance</button>
+          </div>
+
+          <div class="call-row pend">
+            <div class="avatar">AS</div>
+            <div class="body">
+              <div class="row1"><span class="name">Anita Shah</span><span class="tag pend">PENDING PROMISE</span></div>
+              <div class="desc">Asked for <b>EV &amp; Green Energy</b> sector update for 2025 allocation. Report drafted but not sent.</div>
+            </div>
+            <div class="num">
+              <div class="v">₹5.8 Cr</div>
+              <div class="delta up">+1.4% · 30d</div>
+              <div class="ago">7d ago</div>
+            </div>
+            <button class="cta">Send Report</button>
+          </div>
+        </div>
+      </div>
+
+      <aside>
+        <!-- BOOK AT A GLANCE -->
+        <div class="book-glance">
+          <div class="head">Book at a glance</div>
+          <div class="bg-grid">
+            <div class="bg-cell">
+              <div class="k">Total AUM</div>
+              <div class="v">₹796 <span class="small">Cr</span></div>
+              <div class="delta">+₹14 Cr · 7d</div>
+            </div>
+            <div class="bg-cell">
+              <div class="k">Clients</div>
+              <div class="v">18</div>
+              <div class="delta muted">+1 this month</div>
+            </div>
+            <div class="bg-cell">
+              <div class="k">Active alerts</div>
+              <div class="v" style="color:var(--qc-down)">3</div>
+              <div class="delta warn">2 from yesterday</div>
+            </div>
+            <div class="bg-cell">
+              <div class="k">Avg pulse</div>
+              <div class="v">71<span class="small" style="color:var(--qc-ink-3)">/100</span></div>
+              <div class="delta">+2 vs last wk</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TASKS -->
+        <div class="tasks">
+          <div class="head">
+            <span class="title"><svg width="13" height="13" style="color:var(--qc-ink-2)"><use href="#i-tasks"/></svg>Today's tasks</span>
+            <button class="add"><svg width="11" height="11"><use href="#i-plus"/></svg></button>
+          </div>
+          <ul>
+            <li>
+              <div class="check"></div>
+              <span class="label">Send Rahul updated portfolio PDF</span>
+              <span class="badge muted">BY 10:00</span>
+            </li>
+            <li>
+              <div class="check"></div>
+              <span class="label">Share EV report with Anita</span>
+              <span class="badge over">OVERDUE · 5 DAYS</span>
+            </li>
+            <li class="done">
+              <div class="check"><svg width="10" height="10"><use href="#i-check"/></svg></div>
+              <span class="label">KYC renewal — Suresh Nair</span>
+              <span class="badge done">DONE · 09:12</span>
+            </li>
+            <li>
+              <div class="check"></div>
+              <span class="label">Q4 review prep — Kapoor &amp; Sons</span>
+              <span class="badge muted">TOMORROW · 14:00</span>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <!-- WHAT CHANGED -->
+    <section class="changed">
+      <div class="section-head">
+        <div class="left"><span class="title">What changed today</span><span class="count-pip">5</span></div>
+        <div class="right">All activity →</div>
+      </div>
+      <div class="changed-list">
+        <div class="changed-row">
+          <div class="time">09:42<span class="kind alert">ALERT</span></div>
+          <div class="dot alert"></div>
+          <div class="body">
+            <div class="h">Meridian Holdings — portfolio value below threshold</div>
+            <div class="d">Triggered drift alert. Held by <b>Rahul Mehta</b> (₹3.2 Cr). Position size 4.2% of book.</div>
+          </div>
+          <button class="act">Review →</button>
+        </div>
+
+        <div class="changed-row">
+          <div class="time">08:15<span class="kind research">RESEARCH</span></div>
+          <div class="dot research"></div>
+          <div class="body">
+            <div class="h">Emerging Markets Outlook — new note published</div>
+            <div class="d">Relevant to <b>4 clients</b>: Anita Shah, Priya Venkat, Suresh Nair, Kapoor &amp; Sons. Auto-tagged to portfolios.</div>
+          </div>
+          <button class="act">Read →</button>
+        </div>
+
+        <div class="changed-row">
+          <div class="time">07:50<span class="kind completed">COMPLETED</span></div>
+          <div class="dot completed"></div>
+          <div class="body">
+            <div class="h">Northwind Capital — rebalance executed</div>
+            <div class="d">6 holdings rebalanced successfully. Confirmation sent to client. No further action needed.</div>
+          </div>
+          <button class="act">View →</button>
+        </div>
+
+        <div class="changed-row">
+          <div class="time">Yest<span class="kind action">ACTION</span></div>
+          <div class="dot action"></div>
+          <div class="body">
+            <div class="h">Apex Ventures — redemption request ₹8.2 Cr</div>
+            <div class="d">Submitted by client. Pending your approval. Settlement timeline: T+2.</div>
+          </div>
+          <button class="act">Approve →</button>
+        </div>
+
+        <div class="changed-row">
+          <div class="time">Yest<span class="kind research">RESEARCH</span></div>
+          <div class="dot research"></div>
+          <div class="body">
+            <div class="h">Bluechip Growth Fund — Q4 transcript flagged</div>
+            <div class="d">Management tone analysis flagged for review. Held by <b>3 clients</b>. Worth reading before next call.</div>
+          </div>
+          <button class="act">Open →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SMART SEGMENTS -->
+    <section class="segments">
+      <div class="section-head">
+        <div class="left"><span class="title">Smart segments</span></div>
+        <div class="right">Create segment →</div>
+      </div>
+      <div class="seg-chips">
+        <button class="seg-chip active">Needs immediate action <span class="n">3</span></button>
+        <button class="seg-chip">Portfolio drift alerts <span class="n">5</span></button>
+        <button class="seg-chip">High AUM (₹5Cr+) <span class="n">7</span></button>
+        <button class="seg-chip">EV / Green Energy interest <span class="n">4</span></button>
+        <button class="seg-chip">Conservative <span class="n">6</span></button>
+        <button class="seg-chip">Inactive &gt; 30 days <span class="n">2</span></button>
+        <button class="seg-chip">KYC expiring <span class="n">1</span></button>
+      </div>
+    </section>
+
+    <!-- RESEARCH TERMINAL -->
+    <section class="research-bar">
+      <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5" stroke-linecap="round"/></svg>
+      <div>
+        <div class="t">Research Terminal</div>
+        <div class="s">3 thesis updates · 5 catalysts in next 30 days · IC drafts, watchlists &amp; signal changes</div>
+      </div>
+      <button class="open">Open Research →</button>
+    </section>
+
+    <!-- OPPORTUNITIES -->
+    <section class="opps">
+      <div class="opps-head">
+        <div>
+          <div class="title">Opportunities worth a conversation <span class="count-pip">12</span></div>
+          <div class="sub">Observations from client data — ranked by receptivity, not commission</div>
+        </div>
+        <div class="all">All 12 →</div>
+      </div>
+
+      <div class="opps-grid">
+        <article class="opp-card crit">
+          <div class="opp-head">
+            <div class="who">
+              <div class="avatar">PV</div>
+              <div class="name">Priya Venkat</div>
+            </div>
+            <span class="fit">Fit 92%</span>
+          </div>
+          <span class="opp-tag green">CLIENT ASKED</span>
+          <div class="lead">Asked about <i>NPS allocation</i> on last call. Never followed up.</div>
+          <div class="quote">"Should we be doing NPS? What's the actual tax benefit at our slab?" · 11 Apr</div>
+          <div class="foot">
+            <span class="num">~<b>₹50K</b> /yr value</span>
+            <button class="brief">Brief →</button>
+          </div>
+        </article>
+
+        <article class="opp-card green">
+          <div class="opp-head">
+            <div class="who">
+              <div class="avatar">RM</div>
+              <div class="name">Rahul Mehta</div>
+            </div>
+            <span class="fit">Fit 88%</span>
+          </div>
+          <span class="opp-tag warn">LIFE EVENT</span>
+          <div class="lead">Daughter <i>turns 14 this month</i>. No education corpus.</div>
+          <div class="quote">4 years to undergrad · current SIPs are general-purpose, no goal-linked plan</div>
+          <div class="foot">
+            <span class="num"><b>₹35K</b>/mo SIP</span>
+            <button class="brief">Brief →</button>
+          </div>
+        </article>
+
+        <article class="opp-card warn">
+          <div class="opp-head">
+            <div class="who">
+              <div class="avatar">SN</div>
+              <div class="name">Suresh Nair</div>
+            </div>
+            <span class="fit">Fit 78%</span>
+          </div>
+          <span class="opp-tag crit">IDLE CASH</span>
+          <div class="lead"><i>₹62 L</i> in savings for 4 months · ~₹2L/yr lost vs liquid funds</div>
+          <div class="quote">HDFC SB balance &gt;₹50L since Dec · conservative profile fits liquid + ultra-short split</div>
+          <div class="foot">
+            <span class="num"><b>₹2.1 L</b>/yr uplift</span>
+            <button class="brief">Brief →</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="opps-foot">
+        <div class="sum"><b>9 more</b> opportunities · ₹38.4 Cr total opportunity AUM · 7 coverage gaps · ₹14.2 Cr idle cash across book</div>
+        <button class="open-opps">Open Opportunities →</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>

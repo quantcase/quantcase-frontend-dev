@@ -44,13 +44,13 @@ function SummaryTile({ label, value, sub, upDown }: {
   sub?: string;
   upDown?: "up" | "down" | null;
 }) {
-  const subColor = upDown === "up" ? "var(--qc-up)" : upDown === "down" ? "var(--qc-down)" : "var(--qc-text-muted)";
+  const subColor = upDown === "up" ? "var(--qc-up)" : upDown === "down" ? "var(--qc-down)" : "var(--qc-ink-2)";
   return (
-    <div className="flex flex-col gap-1 px-4 py-3 last:border-r-0" style={{ borderRight: "1px solid var(--qc-border-default)" }}>
-      <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+    <div className="flex flex-col gap-1 px-4 py-3 last:border-r-0" style={{ borderRight: "1px solid var(--qc-hair)" }}>
+      <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
         {label}
       </p>
-      <p className="text-[20px] font-semibold leading-none" style={{ color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+      <p className="text-[20px] font-semibold leading-none" style={{ color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
         {value}
       </p>
       {sub && (
@@ -72,31 +72,31 @@ function AssetRow({
   onNavigate: (symbol: string) => void;
 }) {
   const roeColor = quote?.roe != null
-    ? (quote.roe > 15 ? "var(--qc-up)" : quote.roe < 0 ? "var(--qc-down)" : "var(--qc-text-muted)")
-    : "var(--qc-text-muted)";
+    ? (quote.roe > 15 ? "var(--qc-up)" : quote.roe < 0 ? "var(--qc-down)" : "var(--qc-ink-2)")
+    : "var(--qc-ink-2)";
 
   return (
     <tr
       onClick={() => onNavigate(asset.symbol)}
       className="cursor-pointer transition-colors group"
-      style={{ borderBottom: isLast ? undefined : "1px solid var(--qc-border-inner)" }}
-      onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+      style={{ borderBottom: isLast ? undefined : "1px solid var(--qc-hair-2)" }}
+      onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
       onMouseLeave={e => (e.currentTarget.style.background = "")}
     >
       {/* Symbol */}
       <td className="px-4 py-3">
-        <span className="text-[12px] font-semibold" style={{ color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+        <span className="text-[12px] font-semibold" style={{ color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
           {asset.symbol}
         </span>
       </td>
 
       {/* Company + sector */}
       <td className="px-4 py-3 max-w-[160px]">
-        <p className="text-[12px] truncate" style={{ color: "var(--qc-text-heading)", fontWeight: 500 }}>
+        <p className="text-[12px] truncate" style={{ color: "var(--qc-ink)", fontWeight: 500 }}>
           {quote?.name ?? "—"}
         </p>
         {quote?.sector && (
-          <p className="text-[10px] truncate" style={{ color: "var(--qc-text-dimmed)" }}>
+          <p className="text-[10px] truncate" style={{ color: "var(--qc-ink-3)" }}>
             {quote.sector}
           </p>
         )}
@@ -104,11 +104,11 @@ function AssetRow({
 
       {/* P/E */}
       <td className="px-4 py-3 text-right">
-        <p className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+        <p className="text-[12px] tabular-nums" style={{ color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
           {quote?.pe != null ? quote.pe.toFixed(1) : "—"}
         </p>
         {quote?.peValuationLabel && (
-          <p className="text-[10px]" style={{ color: "var(--qc-text-dimmed)" }}>
+          <p className="text-[10px]" style={{ color: "var(--qc-ink-3)" }}>
             {quote.peValuationLabel}
           </p>
         )}
@@ -116,7 +116,7 @@ function AssetRow({
 
       {/* P/B */}
       <td className="px-4 py-3 text-right">
-        <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+        <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
           {quote?.pb != null ? quote.pb.toFixed(2) : "—"}
         </span>
       </td>
@@ -130,21 +130,21 @@ function AssetRow({
 
       {/* Book Value */}
       <td className="px-4 py-3 text-right">
-        <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+        <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
           {fmtBookValue(quote?.bookValue)}
         </span>
       </td>
 
       {/* Added */}
       <td className="px-4 py-3 text-right">
-        <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
+        <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
           {relDate(asset.added_on)}
         </span>
       </td>
 
       {/* Arrow */}
       <td className="px-3 py-3 w-8">
-        <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--qc-text-heading)" }} />
+        <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--qc-ink)" }} />
       </td>
     </tr>
   );
@@ -170,48 +170,48 @@ function WatchlistAccordion({
   const overflow = symbols.length - preview.length;
 
   return (
-    <div className="last:border-b-0" style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
+    <div className="last:border-b-0" style={{ borderBottom: "1px solid var(--qc-hair)" }}>
       {/* Row header */}
       <button
         onClick={onToggle}
         className="w-full text-left flex items-center gap-0 transition-colors group/header"
-        style={{ background: expanded ? "var(--qc-surface-white)" : "var(--qc-surface-panel)" }}
+        style={{ background: expanded ? "var(--qc-card)" : "var(--qc-section)" }}
       >
         {/* Expand indicator strip */}
         <div
           className="self-stretch w-1 flex-shrink-0 transition-colors"
-          style={{ background: expanded ? "var(--qc-accent-primary)" : "var(--qc-border-default)" }}
+          style={{ background: expanded ? "var(--qc-ink)" : "var(--qc-hair)" }}
         />
 
         <div
           className="flex-1 flex items-center gap-3 px-4 py-3.5 transition-colors min-w-0"
-          onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+          onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
           onMouseLeave={e => (e.currentTarget.style.background = "")}
         >
           {/* Chevron */}
           <div
             className="flex-shrink-0 rounded-full p-0.5 transition-colors"
-            style={{ background: "var(--qc-accent-primary)" }}
+            style={{ background: "var(--qc-ink)" }}
           >
             <ChevronDown
               className="h-3 w-3 transition-transform duration-200"
               style={{
-                color: "var(--qc-accent-primary-fg)",
+                color: "var(--qc-on-dark)",
                 transform: expanded ? "rotate(0deg)" : "rotate(-90deg)",
               }}
             />
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold truncate" style={{ color: "var(--qc-text-heading)" }}>
+            <p className="text-[13px] font-semibold truncate" style={{ color: "var(--qc-ink)" }}>
               {watchlist.name}
             </p>
-            <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
+            <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-ink-2)" }}>
               {relDate(watchlist.updated_at)}
               {!quotesLoading && symbols.length > 0 && (
                 <>
-                  <span className="mx-1.5" style={{ color: "var(--qc-border-default)" }}>·</span>
-                  <span style={{ color: "var(--qc-text-muted)" }}>{symbols.filter((s) => quotes[s] != null).length} loaded</span>
+                  <span className="mx-1.5" style={{ color: "var(--qc-hair)" }}>·</span>
+                  <span style={{ color: "var(--qc-ink-2)" }}>{symbols.filter((s) => quotes[s] != null).length} loaded</span>
                 </>
               )}
             </p>
@@ -223,7 +223,7 @@ function WatchlistAccordion({
               <span
                 key={sym}
                 className="text-[10px] rounded-sm px-1.5 py-0.5"
-                style={{ background: "var(--qc-chip-bg)", color: "var(--qc-text-heading)", border: "1px solid var(--qc-chip-border)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}
+                style={{ background: "var(--qc-chip)", color: "var(--qc-ink)", border: "1px solid var(--qc-hair)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}
               >
                 {sym}
               </span>
@@ -231,7 +231,7 @@ function WatchlistAccordion({
             {overflow > 0 && (
               <span
                 className="text-[10px] rounded-sm px-1.5 py-0.5"
-                style={{ background: "var(--qc-chip-bg)", color: "var(--qc-chip-fg)", border: "1px solid var(--qc-chip-border)" }}
+                style={{ background: "var(--qc-chip)", color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)" }}
               >
                 +{overflow}
               </span>
@@ -240,7 +240,7 @@ function WatchlistAccordion({
 
           <span
             className="flex-shrink-0 text-[11px] font-semibold rounded-sm px-2 py-0.5"
-            style={{ background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}
+            style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}
           >
             {watchlist.total_assets}
           </span>
@@ -249,9 +249,9 @@ function WatchlistAccordion({
 
       {/* Expanded table */}
       {expanded && (
-        <div style={{ borderTop: "1px solid var(--qc-border-default)" }}>
+        <div style={{ borderTop: "1px solid var(--qc-hair)" }}>
           {quotesLoading ? (
-            <div className="flex items-center justify-center gap-2 py-6" style={{ color: "var(--qc-text-muted)" }}>
+            <div className="flex items-center justify-center gap-2 py-6" style={{ color: "var(--qc-ink-2)" }}>
               <Loader2 className="h-4 w-4 animate-spin" />
               <span className="text-[12px]">Fetching quotes…</span>
             </div>
@@ -259,7 +259,7 @@ function WatchlistAccordion({
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr style={{ background: "var(--qc-surface-panel)", borderBottom: "1px solid var(--qc-border-default)" }}>
+                  <tr style={{ background: "var(--qc-section)", borderBottom: "1px solid var(--qc-hair)" }}>
                     {[
                       { h: "Symbol",      align: "left"  },
                       { h: "Company",     align: "left"  },
@@ -272,7 +272,7 @@ function WatchlistAccordion({
                       <th
                         key={h}
                         className={`px-4 py-2 text-[10px] font-medium uppercase tracking-wider whitespace-nowrap text-${align}`}
-                        style={{ color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}
+                        style={{ color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}
                       >
                         {h}
                       </th>
@@ -337,13 +337,13 @@ export function WatchlistPanel({ className }: { className?: string }) {
   return (
     <div
       className={`rounded-[10px] p-2 flex flex-col ${className ?? ""}`}
-      style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
     >
       {/* Panel header */}
       <div className="px-2 pt-1 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Bookmark className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+          <Bookmark className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
             My Watchlists
           </span>
         </div>
@@ -351,7 +351,7 @@ export function WatchlistPanel({ className }: { className?: string }) {
           onClick={handleRefresh}
           disabled={refreshing || wlLoading}
           className="flex items-center gap-1.5 text-[11px] font-medium rounded-md px-2 py-1 transition-colors disabled:opacity-40"
-          style={{ color: "var(--qc-text-muted)", border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}
+          style={{ color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}
         >
           <RefreshCw className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`} />
           Refresh
@@ -361,12 +361,12 @@ export function WatchlistPanel({ className }: { className?: string }) {
       {/* Inner white box */}
       <div
         className="rounded-[10px] flex-1 flex flex-col overflow-hidden"
-        style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-inner)" }}
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)" }}
       >
 
         {/* ── Loading skeleton ── */}
         {wlLoading && watchlists.length === 0 && (
-          <div className="flex items-center justify-center gap-2 py-10" style={{ color: "var(--qc-text-muted)" }}>
+          <div className="flex items-center justify-center gap-2 py-10" style={{ color: "var(--qc-ink-2)" }}>
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="text-[12px]">Loading watchlists…</span>
           </div>
@@ -386,9 +386,9 @@ export function WatchlistPanel({ className }: { className?: string }) {
         {/* ── Empty state ── */}
         {!wlLoading && !error && watchlists.length === 0 && (
           <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
-            <Bookmark className="h-6 w-6 mb-3" style={{ color: "var(--qc-text-muted)" }} />
-            <p className="text-[13px] font-medium" style={{ color: "var(--qc-text-heading)" }}>No watchlists yet</p>
-            <p className="text-[12px] mt-1" style={{ color: "var(--qc-text-muted)" }}>
+            <Bookmark className="h-6 w-6 mb-3" style={{ color: "var(--qc-ink-2)" }} />
+            <p className="text-[13px] font-medium" style={{ color: "var(--qc-ink)" }}>No watchlists yet</p>
+            <p className="text-[12px] mt-1" style={{ color: "var(--qc-ink-2)" }}>
               Select stocks from a research basket to create your first watchlist.
             </p>
           </div>
@@ -398,7 +398,7 @@ export function WatchlistPanel({ className }: { className?: string }) {
         {!error && watchlists.length > 0 && (
           <>
             {/* Summary stat bar */}
-            <div className="grid grid-cols-4" style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
+            <div className="grid grid-cols-4" style={{ borderBottom: "1px solid var(--qc-hair)" }}>
               <SummaryTile label="Watchlists" value={String(watchlists.length)} />
               <SummaryTile label="Tracked" value={String(totalSymbols)} sub="symbols" />
               <SummaryTile

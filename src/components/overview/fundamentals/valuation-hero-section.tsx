@@ -35,8 +35,8 @@ export function ValuationHeroSection({
   return (
     <section
       style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 18,
         padding: "18px 22px 20px",
         position: "relative",
@@ -57,7 +57,7 @@ export function ValuationHeroSection({
             fontFamily: "'IBM Plex Mono', monospace",
             fontSize: 10,
             letterSpacing: ".16em",
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             textTransform: "uppercase",
           }}
         >
@@ -74,29 +74,29 @@ export function ValuationHeroSection({
           gap: 24,
           alignItems: "end",
           paddingBottom: 18,
-          borderBottom: "1px solid var(--qc-border-inner)",
+          borderBottom: "1px solid var(--qc-hair-2)",
           marginBottom: 16,
         }}
       >
         <div>
-          <div style={{ fontSize: 12.5, color: "var(--qc-text-body)", marginBottom: 4 }}>
+          <div style={{ fontSize: 12.5, color: "var(--qc-ink)", marginBottom: 4 }}>
             Current P/E ratio
           </div>
           <div
             style={{
               fontSize: 64, fontWeight: 500, letterSpacing: "-0.035em",
-              lineHeight: 1, color: "var(--qc-text-heading)", fontVariantNumeric: "tabular-nums",
+              lineHeight: 1, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums",
               display: "flex", alignItems: "baseline", gap: 6,
             }}
           >
             {pe != null ? pe.toFixed(1) : "—"}
             <span
-              style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-text-muted)" }}
+              style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink-2)" }}
             >
               x
             </span>
           </div>
-          <div style={{ fontSize: 12.5, color: "var(--qc-text-body)", marginTop: 8, lineHeight: 1.4, maxWidth: 340 }}>
+          <div style={{ fontSize: 12.5, color: "var(--qc-ink)", marginTop: 8, lineHeight: 1.4, maxWidth: 340 }}>
             {narrative}
           </div>
         </div>
@@ -106,7 +106,7 @@ export function ValuationHeroSection({
           <div
             style={{
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
-              marginBottom: 8, fontSize: 12, color: "var(--qc-text-body)",
+              marginBottom: 8, fontSize: 12, color: "var(--qc-ink)",
             }}
           >
             <span>vs. Industry</span>
@@ -114,7 +114,7 @@ export function ValuationHeroSection({
               style={{
                 fontFamily: "'IBM Plex Mono', monospace",
                 fontWeight: 500,
-                color: "var(--qc-text-heading)",
+                color: "var(--qc-ink)",
               }}
             >
               {industryPE != null ? `${industryPE.toFixed(1)}x` : "—"}
@@ -140,7 +140,7 @@ export function ValuationHeroSection({
                 position: "absolute", top: -6, bottom: -6,
                 left: `calc(${benchmarkPct}% - 6px)`,
                 width: 12, borderRadius: 4,
-                background: "var(--qc-text-heading)",
+                background: "var(--qc-ink)",
                 border: "2px solid #fff",
                 boxShadow: "0 1px 4px rgba(0,0,0,.18)",
               }}
@@ -151,7 +151,7 @@ export function ValuationHeroSection({
             style={{
               display: "flex", justifyContent: "space-between", marginTop: 6,
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              color: "var(--qc-text-muted)", letterSpacing: ".06em", textTransform: "uppercase",
+              color: "var(--qc-ink-2)", letterSpacing: ".06em", textTransform: "uppercase",
             }}
           >
             <span>Cheap</span>
@@ -168,14 +168,14 @@ export function ValuationHeroSection({
             key={k}
             style={{
               padding: "0 16px",
-              borderRight: i < arr.length - 1 ? "1px solid var(--qc-border-inner)" : "none",
+              borderRight: i < arr.length - 1 ? "1px solid var(--qc-hair-2)" : "none",
               minWidth: 0,
               paddingLeft: i === 0 ? 0 : undefined,
               paddingRight: i === arr.length - 1 ? 0 : undefined,
             }}
           >
             <div
-              style={{ fontSize: 11, color: "var(--qc-text-muted)", letterSpacing: ".02em", marginBottom: 4 }}
+              style={{ fontSize: 11, color: "var(--qc-ink-2)", letterSpacing: ".02em", marginBottom: 4 }}
             >
               {k}
             </div>
@@ -184,13 +184,13 @@ export function ValuationHeroSection({
                 fontSize: 18,
                 fontWeight: v === "—" ? 400 : 500,
                 letterSpacing: "-0.01em",
-                color: v === "—" ? "var(--qc-text-muted)" : "var(--qc-text-heading)",
+                color: v === "—" ? "var(--qc-ink-2)" : "var(--qc-ink)",
                 fontVariantNumeric: "tabular-nums",
               }}
             >
               {v}
             </div>
-            <div style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 2 }}>{sub}</div>
+            <div style={{ fontSize: 11, color: "var(--qc-ink-2)", marginTop: 2 }}>{sub}</div>
           </div>
         ))}
       </div>

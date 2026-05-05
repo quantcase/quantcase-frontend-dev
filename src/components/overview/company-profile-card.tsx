@@ -11,14 +11,14 @@ function TagPill({ label, value, icon }: { label: string; value: string; icon: R
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-        <span style={{ color: "var(--qc-text-muted)", display: "flex" }}>{icon}</span>
+        <span style={{ color: "var(--qc-ink-2)", display: "flex" }}>{icon}</span>
         <span
           style={{
             fontFamily: "'IBM Plex Mono', monospace",
             fontSize: 9,
             letterSpacing: "0.13em",
             textTransform: "uppercase",
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
           }}
         >
           {label}
@@ -28,7 +28,7 @@ function TagPill({ label, value, icon }: { label: string; value: string; icon: R
         style={{
           fontSize: 13,
           fontWeight: 500,
-          color: "var(--qc-text-heading)",
+          color: "var(--qc-ink)",
           lineHeight: 1.3,
         }}
       >
@@ -163,8 +163,8 @@ export function CompanyProfileCard({ data }: Props) {
       {/* LEFT: description + classification tags */}
       <section
         style={{
-          background: "var(--qc-surface-white)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           borderRadius: 16,
           padding: "20px 22px",
           display: "flex",
@@ -177,7 +177,7 @@ export function CompanyProfileCard({ data }: Props) {
             fontFamily: "'IBM Plex Mono', monospace",
             fontSize: 10,
             letterSpacing: "0.16em",
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             textTransform: "uppercase",
           }}
         >
@@ -189,7 +189,7 @@ export function CompanyProfileCard({ data }: Props) {
             style={{
               fontSize: 13,
               lineHeight: 1.7,
-              color: "var(--qc-text-body)",
+              color: "var(--qc-ink)",
               margin: 0,
             }}
           >
@@ -204,7 +204,7 @@ export function CompanyProfileCard({ data }: Props) {
               gridTemplateColumns: `repeat(${tags.length}, 1fr)`,
               gap: "14px 0",
               paddingTop: 12,
-              borderTop: "1px solid var(--qc-border-inner)",
+              borderTop: "1px solid var(--qc-hair-2)",
             }}
           >
             {tags.map((t, i) => (
@@ -212,7 +212,7 @@ export function CompanyProfileCard({ data }: Props) {
                 key={t.label}
                 style={{
                   paddingLeft: i === 0 ? 0 : 20,
-                  borderLeft: i === 0 ? "none" : "1px solid var(--qc-border-inner)",
+                  borderLeft: i === 0 ? "none" : "1px solid var(--qc-hair-2)",
                 }}
               >
                 <TagPill label={t.label} value={t.value} icon={t.icon} />

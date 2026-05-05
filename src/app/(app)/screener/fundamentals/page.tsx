@@ -46,7 +46,7 @@ const SWOT_CONFIG = [
   { key: "strengths"    as const, icon: ShieldCheck,   label: "Strengths",     color: "var(--qc-up)" },
   { key: "weaknesses"   as const, icon: AlertTriangle,  label: "Weaknesses",    color: "var(--qc-down)" },
   { key: "opportunities"as const, icon: Lightbulb,      label: "Opportunities", color: "var(--qc-warn)" },
-  { key: "threats"      as const, icon: Zap,            label: "Threats",       color: "var(--qc-text-muted)" },
+  { key: "threats"      as const, icon: Zap,            label: "Threats",       color: "var(--qc-ink-2)" },
 ];
 
 function SwotSection({ swot }: { swot: FundamentalsSwot }) {
@@ -58,27 +58,27 @@ function SwotSection({ swot }: { swot: FundamentalsSwot }) {
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
             gap: 1,
-            background: "var(--qc-border-default)",
+            background: "var(--qc-hair)",
             borderRadius: 10,
             overflow: "hidden",
             margin: "-16px",
           }}
         >
           {SWOT_CONFIG.map(({ key, icon: Icon, label, color }) => (
-            <div key={key} style={{ background: "var(--qc-surface-white)", padding: "16px 18px" }}>
+            <div key={key} style={{ background: "var(--qc-card)", padding: "16px 18px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                 <div
                   style={{
                     padding: 5,
                     borderRadius: 6,
-                    border: "1px solid var(--qc-icon-box-border)",
-                    background: "var(--qc-icon-box-bg)",
+                    border: "1px solid var(--qc-hair)",
+                    background: "var(--qc-chip)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <Icon size={14} style={{ color: "var(--qc-text-muted)" }} />
+                  <Icon size={14} style={{ color: "var(--qc-ink-2)" }} />
                 </div>
                 <span
                   style={{
@@ -102,7 +102,7 @@ function SwotSection({ swot }: { swot: FundamentalsSwot }) {
                       alignItems: "flex-start",
                       gap: 8,
                       fontSize: 12.5,
-                      color: "var(--qc-text-body)",
+                      color: "var(--qc-ink)",
                       lineHeight: 1.45,
                     }}
                   >
@@ -112,7 +112,7 @@ function SwotSection({ swot }: { swot: FundamentalsSwot }) {
                         width: 5,
                         height: 5,
                         borderRadius: "50%",
-                        background: "var(--qc-text-muted)",
+                        background: "var(--qc-ink-2)",
                         flexShrink: 0,
                         display: "inline-block",
                       }}
@@ -155,7 +155,7 @@ function FinancialsContent() {
   if (loading) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div style={{ fontSize: 13, color: "var(--qc-text-muted)", padding: "24px 16px" }}>Loading…</div>
+        <div style={{ fontSize: 13, color: "var(--qc-ink-2)", padding: "24px 16px" }}>Loading…</div>
       </ScreenerPageShell>
     );
   }
@@ -171,7 +171,7 @@ function FinancialsContent() {
   if (!data) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div style={{ fontSize: 13, color: "var(--qc-text-muted)", padding: "24px 16px" }}>
+        <div style={{ fontSize: 13, color: "var(--qc-ink-2)", padding: "24px 16px" }}>
           No financial data found for {symbol}
         </div>
       </ScreenerPageShell>
@@ -280,8 +280,8 @@ function FinancialsContent() {
                         width: 20,
                         height: 20,
                         borderRadius: "50%",
-                        border: "2px solid var(--qc-border-default)",
-                        borderTopColor: "var(--qc-text-body)",
+                        border: "2px solid var(--qc-hair)",
+                        borderTopColor: "var(--qc-ink)",
                         animation: "spin 0.7s linear infinite",
                       }}
                     />
@@ -310,8 +310,8 @@ function FinancialsContent() {
                           width: 20,
                           height: 20,
                           borderRadius: "50%",
-                          border: "2px solid var(--qc-border-default)",
-                          borderTopColor: "var(--qc-text-body)",
+                          border: "2px solid var(--qc-hair)",
+                          borderTopColor: "var(--qc-ink)",
                           animation: "spin 0.7s linear infinite",
                         }}
                       />

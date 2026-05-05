@@ -21,15 +21,15 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
 
   const titleNode = (
     <div className="flex items-center gap-3">
-      <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>Rule Engine</span>
+      <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>Rule Engine</span>
       <div className="flex items-center gap-0.5">
         {(["GROWTH", "VALUE"] as const).map((p, i) => (
           <span key={p} className="contents">
-            {i > 0 && <span className="text-[10px] select-none" style={{ color: "var(--qc-border-default)" }}>·</span>}
+            {i > 0 && <span className="text-[10px] select-none" style={{ color: "var(--qc-hair)" }}>·</span>}
             <button
               onClick={() => setActivePerspective(p)}
               className="px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors"
-              style={{ color: activePerspective === p ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}
+              style={{ color: activePerspective === p ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
             >
               {p}
             </button>
@@ -42,7 +42,7 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
   const engineTabs = (
     <div
       className="inline-flex rounded-[8px] border p-0.5 gap-0.5"
-      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}
     >
       {ENGINE_TABS.map((tab) => (
         <button
@@ -50,8 +50,8 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
           onClick={() => onEngineChange(tab)}
           className="px-3 py-1.5 rounded-[6px] font-mono text-[10px] uppercase tracking-[0.14em] transition-all"
           style={activeEngine === tab
-            ? { background: "var(--qc-text-heading)", color: "var(--qc-surface-white)" }
-            : { color: "var(--qc-text-muted)" }
+            ? { background: "var(--qc-ink)", color: "var(--qc-card)" }
+            : { color: "var(--qc-ink-2)" }
           }
         >
           {tab}
@@ -72,7 +72,7 @@ export function TechnicalsRuleEngine({ ruleEngine, decisionIntelligence, activeE
         activePerspective={activePerspective}
         avgVolume20d={avgVolume20d}
       />
-      <p className="mt-3 px-1 text-[11px] text-right" style={{ color: "var(--qc-text-muted)" }}>
+      <p className="mt-3 px-1 text-[11px] text-right" style={{ color: "var(--qc-ink-2)" }}>
         * All analysis and indicators are calculated using daily timeframe data.
       </p>
     </SectionPanel>

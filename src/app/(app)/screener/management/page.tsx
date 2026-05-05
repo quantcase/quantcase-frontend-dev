@@ -156,7 +156,7 @@ function ManagementDashboardContent() {
 
   if (!symbol) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-surface-base)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-bg)" }}>
         <div className="text-sm" style={{ color: "var(--qc-down)" }}>Error: No symbol provided in query parameters</div>
       </div>
     );
@@ -164,15 +164,15 @@ function ManagementDashboardContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-surface-base)" }}>
-        <div className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-bg)" }}>
+        <div className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Loading...</div>
       </div>
     );
   }
 
   if (transcriptError) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-surface-base)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-bg)" }}>
         <div className="text-sm" style={{ color: "var(--qc-down)" }}>Error: {transcriptError}</div>
       </div>
     );
@@ -180,8 +180,8 @@ function ManagementDashboardContent() {
 
   if (transcriptCalls.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-surface-base)" }}>
-        <div className="text-sm" style={{ color: "var(--qc-text-muted)" }}>No transcript calls found for {symbol}</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-bg)" }}>
+        <div className="text-sm" style={{ color: "var(--qc-ink-2)" }}>No transcript calls found for {symbol}</div>
       </div>
     );
   }
@@ -189,35 +189,35 @@ function ManagementDashboardContent() {
   if (Object.keys(managementData).length === 0) {
     const transcriptCall = transcriptCalls[0];
     return (
-      <div className="min-h-screen p-4" style={{ background: "var(--qc-surface-base)" }}>
+      <div className="min-h-screen p-4" style={{ background: "var(--qc-bg)" }}>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <h1 className="text-sm font-bold mb-6" style={{ color: "var(--qc-text-heading)" }}>Management Factor Analysis</h1>
-          <div className="rounded-lg p-6" style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-default)" }}>
+          <h1 className="text-sm font-bold mb-6" style={{ color: "var(--qc-ink)" }}>Management Factor Analysis</h1>
+          <div className="rounded-lg p-6" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}>
             <div className="space-y-4">
               <div>
-                <h2 className="text-sm font-semibold mb-2" style={{ color: "var(--qc-text-heading)" }}>{transcriptCall.company_name}</h2>
-                <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>{transcriptCall.basic_industry}</p>
+                <h2 className="text-sm font-semibold mb-2" style={{ color: "var(--qc-ink)" }}>{transcriptCall.company_name}</h2>
+                <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>{transcriptCall.basic_industry}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4 py-4" style={{ borderTop: "1px solid var(--qc-border-default)" }}>
+              <div className="grid grid-cols-2 gap-4 py-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
                 <div>
-                  <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Ticker</p>
-                  <p className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>{transcriptCall.company}</p>
+                  <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Ticker</p>
+                  <p className="font-semibold" style={{ color: "var(--qc-ink)" }}>{transcriptCall.company}</p>
                 </div>
                 <div>
-                  <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Quarter</p>
-                  <p className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
+                  <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Quarter</p>
+                  <p className="font-semibold" style={{ color: "var(--qc-ink)" }}>{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
                 </div>
                 <div>
-                  <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Call Date</p>
-                  <p className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>{transcriptCall.call_date}</p>
+                  <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Call Date</p>
+                  <p className="font-semibold" style={{ color: "var(--qc-ink)" }}>{transcriptCall.call_date}</p>
                 </div>
                 <div>
-                  <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>Call ID</p>
-                  <p className="font-semibold text-xs" style={{ color: "var(--qc-text-heading)" }}>{transcriptCall.id}</p>
+                  <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Call ID</p>
+                  <p className="font-semibold text-xs" style={{ color: "var(--qc-ink)" }}>{transcriptCall.id}</p>
                 </div>
               </div>
-              <div className="pt-4" style={{ borderTop: "1px solid var(--qc-border-default)" }}>
-                <p className="text-sm mb-4" style={{ color: "var(--qc-text-muted)" }}>
+              <div className="pt-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
+                <p className="text-sm mb-4" style={{ color: "var(--qc-ink-2)" }}>
                   No management analysis available for this transcript yet.
                 </p>
                 {analyzeError && (
@@ -261,7 +261,7 @@ function ManagementDashboardContent() {
                   onClick={handleAnalyzeClick}
                   disabled={isAnalyzing}
                   className="w-full font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}
+                  style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}
                 >
                   {isAnalyzing
                     ? aggregateStatus === "pending" ? "Queued..."
@@ -271,8 +271,8 @@ function ManagementDashboardContent() {
                 </button>
               </div>
               {transcriptCall.ppt_url && (
-                <div className="pt-4" style={{ borderTop: "1px solid var(--qc-border-default)" }}>
-                  <a href={transcriptCall.ppt_url} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: "var(--qc-accent-primary)" }}>
+                <div className="pt-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
+                  <a href={transcriptCall.ppt_url} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: "var(--qc-ink)" }}>
                     View Presentation →
                   </a>
                 </div>
@@ -356,10 +356,10 @@ function ManagementDashboardContent() {
     <div className="flex flex-col items-end gap-1">
       {/* Progress bar while analyzing */}
       {isAnalyzing && (
-        <div className="w-32 h-1 rounded-full overflow-hidden" style={{ background: "var(--qc-border-default)" }}>
+        <div className="w-32 h-1 rounded-full overflow-hidden" style={{ background: "var(--qc-hair)" }}>
           <div
             className="h-full transition-all duration-300 ease-linear"
-            style={{ width: `${progress}%`, background: "var(--qc-accent-primary)" }}
+            style={{ width: `${progress}%`, background: "var(--qc-ink)" }}
           />
         </div>
       )}
@@ -369,9 +369,9 @@ function ManagementDashboardContent() {
         style={{
           fontSize: 12,
           fontWeight: 600,
-          color: isAnalyzing ? "var(--qc-text-muted)" : "var(--qc-accent-primary-fg)",
-          background: isAnalyzing ? "var(--qc-surface-panel)" : "var(--qc-accent-primary)",
-          border: "1px solid var(--qc-border-default)",
+          color: isAnalyzing ? "var(--qc-ink-2)" : "var(--qc-on-dark)",
+          background: isAnalyzing ? "var(--qc-section)" : "var(--qc-ink)",
+          border: "1px solid var(--qc-hair)",
           borderRadius: 6,
           padding: "6px 14px",
           cursor: isAnalyzing ? "not-allowed" : "pointer",
@@ -386,7 +386,7 @@ function ManagementDashboardContent() {
           : "Reanalyze"}
       </button>
       {analyzedAt && !isAnalyzing && (
-        <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>
+        <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
           Updated {formatRelativeTime(analyzedAt)}
         </span>
       )}
@@ -421,16 +421,16 @@ function ManagementDashboardContent() {
               headerAction={
                 hitRatePct !== null ? (
                   <div className="flex items-center gap-2">
-                    <div className="flex flex-col items-end gap-0.5 rounded-xl px-4 py-2 min-w-[90px]" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
-                      <span style={{ fontSize: 10, fontWeight: 500, color: "var(--qc-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-text-heading)", lineHeight: 1.4 }}>
+                    <div className="flex flex-col items-end gap-0.5 rounded-xl px-4 py-2 min-w-[90px]" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
+                      <span style={{ fontSize: 10, fontWeight: 500, color: "var(--qc-ink-2)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Hit Rate</span>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-ink)", lineHeight: 1.4 }}>
                         {hitRatePct}%
                       </span>
                     </div>
                     {managementData.guidance_vs_actuals?.guidance_bias && (
-                      <div className="flex flex-col items-end gap-0.5 rounded-xl px-4 py-2 min-w-[90px]" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
-                        <span style={{ fontSize: 10, fontWeight: 500, color: "var(--qc-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Bias</span>
-                        <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-text-heading)", lineHeight: 1.4 }}>
+                      <div className="flex flex-col items-end gap-0.5 rounded-xl px-4 py-2 min-w-[90px]" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
+                        <span style={{ fontSize: 10, fontWeight: 500, color: "var(--qc-ink-2)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Bias</span>
+                        <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-ink)", lineHeight: 1.4 }}>
                           {managementData.guidance_vs_actuals.guidance_bias}
                         </span>
                       </div>

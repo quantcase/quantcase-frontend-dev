@@ -347,19 +347,19 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
   const tag = TAG_STYLES[brief.tagType];
 
   return (
-    <div className="min-h-screen mb-16" style={{ background: "var(--qc-surface-base)" }}>
+    <div className="min-h-screen mb-16" style={{ background: "var(--qc-bg)" }}>
 
       {/* ── Breadcrumb bar ────────────────────────────────────────────── */}
       <div
         className="flex items-center justify-between px-6 py-3.5 sticky top-0 z-10"
-        style={{ borderBottom: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+        style={{ borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}
       >
         <div className="flex items-center gap-2 text-[12px]">
-          <Link href="/dashboard" style={{ color: "var(--qc-text-muted)", textDecoration: "none" }}>Today</Link>
-          <span style={{ color: "var(--qc-border-default)" }}>/</span>
-          <span style={{ color: "var(--qc-text-muted)" }}>Opportunities</span>
-          <span style={{ color: "var(--qc-border-default)" }}>/</span>
-          <span style={{ color: "var(--qc-text-heading)", fontWeight: 500 }}>
+          <Link href="/dashboard" style={{ color: "var(--qc-ink-2)", textDecoration: "none" }}>Today</Link>
+          <span style={{ color: "var(--qc-hair)" }}>/</span>
+          <span style={{ color: "var(--qc-ink-2)" }}>Opportunities</span>
+          <span style={{ color: "var(--qc-hair)" }}>/</span>
+          <span style={{ color: "var(--qc-ink)", fontWeight: 500 }}>
             Brief — {brief.title}
           </span>
         </div>
@@ -368,7 +368,7 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
             <button
               key={label}
               className="text-[11px] font-medium px-3.5 py-1.5 rounded-md"
-              style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)", color: "var(--qc-text-body)" }}
+              style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)", color: "var(--qc-ink)" }}
             >
               {label}
             </button>
@@ -381,12 +381,12 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
         {/* ── Page header ───────────────────────────────────────────────── */}
         <div
           className="grid items-center gap-5 pb-5 mb-6"
-          style={{ gridTemplateColumns: "auto 1fr auto", borderBottom: "1px solid var(--qc-border-default)" }}
+          style={{ gridTemplateColumns: "auto 1fr auto", borderBottom: "1px solid var(--qc-hair)" }}
         >
           {/* Avatar */}
           <div
             className="size-14 rounded-full flex items-center justify-center text-[18px] font-semibold flex-shrink-0"
-            style={{ background: "var(--qc-text-heading)", color: "var(--qc-text-on-dark)" }}
+            style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}
           >
             {brief.initials}
           </div>
@@ -400,19 +400,19 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
               >
                 {brief.tagLabel}
               </span>
-              <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{brief.eyebrow}</span>
+              <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{brief.eyebrow}</span>
             </div>
             <h1
               className="text-[28px] font-normal leading-[1.1] tracking-[-0.015em] mb-2"
-              style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-text-heading)" }}
+              style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-ink)" }}
             >
-              {brief.title} · <span style={{ color: "var(--qc-text-muted)", fontWeight: 300 }}>{brief.titleEmphasis}</span>
+              {brief.title} · <span style={{ color: "var(--qc-ink-2)", fontWeight: 300 }}>{brief.titleEmphasis}</span>
             </h1>
             <div className="flex items-center gap-2 flex-wrap">
               {brief.meta.map((m, i) => (
                 <span key={i} className="flex items-center gap-2">
-                  {i > 0 && <span style={{ color: "var(--qc-border-default)" }}>·</span>}
-                  <span className="text-[12px]" style={{ color: "var(--qc-text-body)" }}>{m}</span>
+                  {i > 0 && <span style={{ color: "var(--qc-hair)" }}>·</span>}
+                  <span className="text-[12px]" style={{ color: "var(--qc-ink)" }}>{m}</span>
                 </span>
               ))}
             </div>
@@ -420,17 +420,17 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
 
           {/* Fit score */}
           <div className="text-right">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] mb-1" style={{ color: "var(--qc-text-muted)" }}>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] mb-1" style={{ color: "var(--qc-ink-2)" }}>
               Conversation fit
             </p>
             <p
               className="text-[32px] font-normal leading-none tracking-[-0.02em]"
-              style={{ fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-heading)" }}
+              style={{ fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-ink)" }}
             >
               {brief.fit}
             </p>
-            <div className="w-24 h-1 rounded-full overflow-hidden mt-2 ml-auto" style={{ background: "var(--qc-border-default)" }}>
-              <div className="h-full rounded-full" style={{ background: "var(--qc-text-heading)", width: `${brief.fitPct}%` }} />
+            <div className="w-24 h-1 rounded-full overflow-hidden mt-2 ml-auto" style={{ background: "var(--qc-hair)" }}>
+              <div className="h-full rounded-full" style={{ background: "var(--qc-ink)", width: `${brief.fitPct}%` }} />
             </div>
           </div>
         </div>
@@ -446,18 +446,18 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
               {/* 2×2 stat grid — same pattern as BookAtAGlance */}
               <div
                 className="grid grid-cols-2 rounded-[10px] overflow-hidden mb-4"
-                style={{ gap: 1, background: "var(--qc-border-default)", border: "1px solid var(--qc-border-default)" }}
+                style={{ gap: 1, background: "var(--qc-hair)", border: "1px solid var(--qc-hair)" }}
               >
                 {brief.situation.cells.map((cell) => (
-                  <div key={cell.label} className="px-4 py-3.5" style={{ background: "var(--qc-surface-card)" }}>
-                    <p className="text-[10px] font-medium uppercase tracking-[0.1em] mb-1.5" style={{ color: "var(--qc-text-muted)" }}>{cell.label}</p>
+                  <div key={cell.label} className="px-4 py-3.5" style={{ background: "var(--qc-card)" }}>
+                    <p className="text-[10px] font-medium uppercase tracking-[0.1em] mb-1.5" style={{ color: "var(--qc-ink-2)" }}>{cell.label}</p>
                     <p
                       className="text-[20px] font-normal leading-none tracking-[-0.01em]"
-                      style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-text-heading)" }}
+                      style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-ink)" }}
                     >
                       {cell.value}
                     </p>
-                    <p className="text-[11px] mt-1" style={{ color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{cell.sub}</p>
+                    <p className="text-[11px] mt-1" style={{ color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{cell.sub}</p>
                   </div>
                 ))}
               </div>
@@ -465,7 +465,7 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
               {/* Quote block — dark card pattern from TodaysBriefing */}
               <div
                 className="relative rounded-[10px] px-5 py-5 overflow-hidden"
-                style={{ background: "var(--qc-text-heading)", color: "var(--qc-text-on-dark)" }}
+                style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}
               >
                 <div
                   className="absolute top-0 right-0 pointer-events-none"
@@ -479,7 +479,7 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
                 </p>
                 <p
                   className="text-[16px] leading-[1.55] relative"
-                  style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-text-on-dark)" }}
+                  style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-on-dark)" }}
                 >
                   &ldquo;{brief.situation.quote}&rdquo;
                 </p>
@@ -491,33 +491,33 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
               {/* Rec block */}
               <div
                 className="rounded-[10px] overflow-hidden mb-4"
-                style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}
+                style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}
               >
                 <div
                   className="grid items-center gap-5 px-5 py-4"
-                  style={{ gridTemplateColumns: "1fr auto", borderBottom: "1px solid var(--qc-border-default)" }}
+                  style={{ gridTemplateColumns: "1fr auto", borderBottom: "1px solid var(--qc-hair)" }}
                 >
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.12em] mb-1" style={{ color: "var(--qc-up)" }}>{brief.recommendation.eyebrow}</p>
-                    <p className="text-[18px] font-normal leading-[1.2] tracking-[-0.01em] mb-1" style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-text-heading)" }}>
+                    <p className="text-[18px] font-normal leading-[1.2] tracking-[-0.01em] mb-1" style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-ink)" }}>
                       {brief.recommendation.title}
                     </p>
-                    <p className="text-[12px]" style={{ color: "var(--qc-text-body)" }}>{brief.recommendation.detail}</p>
+                    <p className="text-[12px]" style={{ color: "var(--qc-ink)" }}>{brief.recommendation.detail}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.1em] mb-1" style={{ color: "var(--qc-text-muted)" }}>{brief.recommendation.amountLabel}</p>
-                    <p className="text-[24px] font-normal leading-none tracking-[-0.01em]" style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-text-heading)" }}>
+                    <p className="text-[10px] font-medium uppercase tracking-[0.1em] mb-1" style={{ color: "var(--qc-ink-2)" }}>{brief.recommendation.amountLabel}</p>
+                    <p className="text-[24px] font-normal leading-none tracking-[-0.01em]" style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-ink)" }}>
                       {brief.recommendation.amount}
                     </p>
                     <p className="text-[11px] mt-1" style={{ color: "var(--qc-up)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{brief.recommendation.amountSub}</p>
                   </div>
                 </div>
                 {/* Why cells — 3-col divider pattern */}
-                <div className="grid grid-cols-3" style={{ gap: 1, background: "var(--qc-border-default)" }}>
+                <div className="grid grid-cols-3" style={{ gap: 1, background: "var(--qc-hair)" }}>
                   {brief.recommendation.whyCells.map((cell) => (
-                    <div key={cell.label} className="px-4 py-3.5" style={{ background: "var(--qc-surface-card)" }}>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] mb-2" style={{ color: "var(--qc-text-muted)" }}>{cell.label}</p>
-                      <p className="text-[12px] leading-[1.5]" style={{ color: "var(--qc-text-heading)" }}>{cell.text}</p>
+                    <div key={cell.label} className="px-4 py-3.5" style={{ background: "var(--qc-card)" }}>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] mb-2" style={{ color: "var(--qc-ink-2)" }}>{cell.label}</p>
+                      <p className="text-[12px] leading-[1.5]" style={{ color: "var(--qc-ink)" }}>{cell.text}</p>
                     </div>
                   ))}
                 </div>
@@ -529,7 +529,7 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
               {/* Opener — dark card */}
               <div
                 className="relative rounded-[10px] px-5 py-5 mb-4 overflow-hidden"
-                style={{ background: "var(--qc-text-heading)", color: "var(--qc-text-on-dark)" }}
+                style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}
               >
                 <div
                   className="absolute top-0 right-0 pointer-events-none"
@@ -543,7 +543,7 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
                 </p>
                 <p
                   className="text-[15px] leading-[1.6] relative"
-                  style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-text-on-dark)" }}
+                  style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-on-dark)" }}
                 >
                   &ldquo;{brief.opener.text}&rdquo;
                 </p>
@@ -551,7 +551,7 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
                   <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.45)" }}>{brief.opener.footnote}</span>
                   <button
                     className="text-[11px] font-medium px-3 py-1.5 rounded-md"
-                    style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "var(--qc-text-on-dark)" }}
+                    style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "var(--qc-on-dark)" }}
                   >
                     Copy text
                   </button>
@@ -561,7 +561,7 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
               {/* Talking points */}
               <div
                 className="rounded-[10px] overflow-hidden"
-                style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}
+                style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}
               >
                 {brief.talkingPoints.map((pt, i) => (
                   <div
@@ -569,18 +569,18 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
                     className="grid gap-4 px-5 py-4"
                     style={{
                       gridTemplateColumns: "22px 1fr",
-                      borderBottom: i < brief.talkingPoints.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+                      borderBottom: i < brief.talkingPoints.length - 1 ? "1px solid var(--qc-hair)" : "none",
                     }}
                   >
                     <div
                       className="size-[22px] rounded-full flex items-center justify-center text-[10px] font-semibold flex-shrink-0 mt-0.5"
-                      style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-body)", fontFamily: "var(--font-ibm-plex-mono, monospace)", border: "1px solid var(--qc-border-default)" }}
+                      style={{ background: "var(--qc-section)", color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)", border: "1px solid var(--qc-hair)" }}
                     >
                       {i + 1}
                     </div>
                     <div>
-                      <p className="text-[13px] font-semibold mb-1" style={{ color: "var(--qc-text-heading)" }}>{pt.headline}</p>
-                      <p className="text-[12px] leading-[1.5]" style={{ color: "var(--qc-text-body)" }}>{pt.body}</p>
+                      <p className="text-[13px] font-semibold mb-1" style={{ color: "var(--qc-ink)" }}>{pt.headline}</p>
+                      <p className="text-[12px] leading-[1.5]" style={{ color: "var(--qc-ink)" }}>{pt.body}</p>
                     </div>
                   </div>
                 ))}
@@ -591,13 +591,13 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
             <BriefSection num={4} title="Likely objections">
               <div
                 className="rounded-[10px] overflow-hidden"
-                style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}
+                style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}
               >
                 {brief.objections.map((obj, i) => (
                   <div
                     key={i}
                     className="px-5 py-4"
-                    style={{ borderBottom: i < brief.objections.length - 1 ? "1px solid var(--qc-border-default)" : "none" }}
+                    style={{ borderBottom: i < brief.objections.length - 1 ? "1px solid var(--qc-hair)" : "none" }}
                   >
                     <div className="flex items-start gap-2 mb-2">
                       <span
@@ -606,13 +606,13 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
                       >
                         Q
                       </span>
-                      <p className="text-[13px] font-medium leading-[1.4]" style={{ color: "var(--qc-text-heading)" }}>
+                      <p className="text-[13px] font-medium leading-[1.4]" style={{ color: "var(--qc-ink)" }}>
                         {obj.q}
                       </p>
                     </div>
                     <p
                       className="text-[12px] leading-[1.55] ml-7 pl-3"
-                      style={{ color: "var(--qc-text-body)", borderLeft: "2px solid var(--qc-border-default)" }}
+                      style={{ color: "var(--qc-ink)", borderLeft: "2px solid var(--qc-hair)" }}
                     >
                       {obj.a}
                     </p>
@@ -629,7 +629,7 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
             {/* Actions card — dark card with action chips */}
             <div
               className="relative rounded-[10px] px-5 py-5 mb-4 overflow-hidden"
-              style={{ background: "var(--qc-text-heading)", color: "var(--qc-text-on-dark)" }}
+              style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}
             >
               <div
                 className="absolute top-0 right-0 pointer-events-none"
@@ -650,27 +650,27 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
             </div>
 
             {/* Client snapshot — same grid pattern as BookAtAGlance */}
-            <div className="rounded-[10px] overflow-hidden mb-4" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}>
-              <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
-                <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--qc-text-body)" }}>Snapshot</h2>
-                <button className="text-[11px] font-medium px-3 py-1 rounded-md" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)", color: "var(--qc-text-body)" }}>Full file →</button>
+            <div className="rounded-[10px] overflow-hidden mb-4" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
+              <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid var(--qc-hair)" }}>
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--qc-ink)" }}>Snapshot</h2>
+                <button className="text-[11px] font-medium px-3 py-1 rounded-md" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", color: "var(--qc-ink)" }}>Full file →</button>
               </div>
               {brief.snapshot.map((row, ri) => (
                 <div
                   key={ri}
                   className="grid grid-cols-2"
-                  style={{ gap: 1, background: "var(--qc-border-default)", borderBottom: ri < brief.snapshot.length - 1 ? "1px solid var(--qc-border-default)" : "none" }}
+                  style={{ gap: 1, background: "var(--qc-hair)", borderBottom: ri < brief.snapshot.length - 1 ? "1px solid var(--qc-hair)" : "none" }}
                 >
                   {row.map((cell) => (
-                    <div key={cell.label} className="px-4 py-3" style={{ background: "var(--qc-surface-card)" }}>
-                      <p className="text-[10px] font-medium uppercase tracking-[0.1em] mb-1" style={{ color: "var(--qc-text-muted)" }}>{cell.label}</p>
+                    <div key={cell.label} className="px-4 py-3" style={{ background: "var(--qc-card)" }}>
+                      <p className="text-[10px] font-medium uppercase tracking-[0.1em] mb-1" style={{ color: "var(--qc-ink-2)" }}>{cell.label}</p>
                       <p
                         className="text-[18px] font-normal leading-none"
-                        style={{ fontFamily: cell.mono ? "var(--font-ibm-plex-mono, monospace)" : "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-text-heading)" }}
+                        style={{ fontFamily: cell.mono ? "var(--font-ibm-plex-mono, monospace)" : "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-ink)" }}
                       >
                         {cell.value}
                       </p>
-                      <p className="text-[11px] mt-1" style={{ color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{cell.sub}</p>
+                      <p className="text-[11px] mt-1" style={{ color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{cell.sub}</p>
                     </div>
                   ))}
                 </div>
@@ -678,9 +678,9 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
             </div>
 
             {/* Portfolio mix */}
-            <div className="rounded-[10px] overflow-hidden mb-4" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}>
-              <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
-                <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--qc-text-body)" }}>Portfolio mix</h2>
+            <div className="rounded-[10px] overflow-hidden mb-4" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
+              <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid var(--qc-hair)" }}>
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--qc-ink)" }}>Portfolio mix</h2>
                 <span
                   className="text-[9px] font-semibold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-sm"
                   style={{
@@ -699,22 +699,22 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
                     style={{
                       gridTemplateColumns: "1fr auto auto",
                       gap: 12,
-                      borderBottom: i < brief.portfolio.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+                      borderBottom: i < brief.portfolio.length - 1 ? "1px solid var(--qc-hair)" : "none",
                     }}
                   >
-                    <span style={{ color: "var(--qc-text-body)" }}>{row.label}</span>
-                    <span style={{ fontFamily: "var(--font-ibm-plex-mono, monospace)", fontWeight: 500, color: "var(--qc-text-heading)" }}>{row.value}</span>
-                    <span style={{ fontFamily: "var(--font-ibm-plex-mono, monospace)", fontSize: 11, color: "var(--qc-text-muted)" }}>{row.pct}</span>
+                    <span style={{ color: "var(--qc-ink)" }}>{row.label}</span>
+                    <span style={{ fontFamily: "var(--font-ibm-plex-mono, monospace)", fontWeight: 500, color: "var(--qc-ink)" }}>{row.value}</span>
+                    <span style={{ fontFamily: "var(--font-ibm-plex-mono, monospace)", fontSize: 11, color: "var(--qc-ink-2)" }}>{row.pct}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Recent conversations */}
-            <div className="rounded-[10px] overflow-hidden" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}>
-              <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
-                <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--qc-text-body)" }}>Recent conversations</h2>
-                <button className="text-[11px] font-medium px-3 py-1 rounded-md" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)", color: "var(--qc-text-body)" }}>Timeline →</button>
+            <div className="rounded-[10px] overflow-hidden" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
+              <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid var(--qc-hair)" }}>
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--qc-ink)" }}>Recent conversations</h2>
+                <button className="text-[11px] font-medium px-3 py-1 rounded-md" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", color: "var(--qc-ink)" }}>Timeline →</button>
               </div>
               {brief.conversations.map((c, i) => (
                 <div
@@ -722,21 +722,21 @@ export default function BriefPage({ params }: { params: { clientId: string } }) 
                   className="grid gap-3 px-5 py-3.5"
                   style={{
                     gridTemplateColumns: "64px 1fr",
-                    borderBottom: i < brief.conversations.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+                    borderBottom: i < brief.conversations.length - 1 ? "1px solid var(--qc-hair)" : "none",
                   }}
                 >
                   <div>
-                    <p className="text-[12px] font-medium" style={{ color: "var(--qc-text-body)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{c.date}</p>
-                    <p className="text-[10px] mt-0.5" style={{ color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{c.ago}</p>
+                    <p className="text-[12px] font-medium" style={{ color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{c.date}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{c.ago}</p>
                   </div>
                   <div>
                     <span
                       className="inline-block text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-sm mr-1.5 mb-1"
-                      style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)", border: "1px solid var(--qc-border-default)", letterSpacing: "0.04em" }}
+                      style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)", letterSpacing: "0.04em" }}
                     >
                       {c.topic}
                     </span>
-                    <span className="text-[12px] leading-[1.5]" style={{ color: "var(--qc-text-body)" }}>{c.text}</span>
+                    <span className="text-[12px] leading-[1.5]" style={{ color: "var(--qc-ink)" }}>{c.text}</span>
                   </div>
                 </div>
               ))}
@@ -755,18 +755,18 @@ function BriefSection({ num, title, hint, children }: { num?: number; title: str
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-2.5 px-1">
-        <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--qc-text-body)" }}>
+        <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--qc-ink)" }}>
           {num !== undefined && (
             <span
               className="size-[18px] rounded-full flex items-center justify-center text-[10px] flex-shrink-0"
-              style={{ background: "var(--qc-text-heading)", color: "var(--qc-text-on-dark)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}
+              style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}
             >
               {num}
             </span>
           )}
           {title}
         </h2>
-        {hint && <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{hint}</span>}
+        {hint && <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{hint}</span>}
       </div>
       {children}
     </div>
@@ -787,16 +787,16 @@ function ActionButton({ primary, icon, label, desc }: { primary: boolean; icon: 
     <button
       className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-md mb-2 text-left transition-colors relative"
       style={{
-        background: primary ? "var(--qc-surface-card)" : "rgba(255,255,255,0.06)",
-        border: primary ? "1px solid var(--qc-surface-card)" : "1px solid rgba(255,255,255,0.1)",
-        color: primary ? "var(--qc-text-heading)" : "var(--qc-text-on-dark)",
+        background: primary ? "var(--qc-card)" : "rgba(255,255,255,0.06)",
+        border: primary ? "1px solid var(--qc-card)" : "1px solid rgba(255,255,255,0.1)",
+        color: primary ? "var(--qc-ink)" : "var(--qc-on-dark)",
       }}
     >
       <span
         className="size-6 rounded flex items-center justify-center flex-shrink-0"
         style={{
-          background: primary ? "var(--qc-surface-panel)" : "rgba(255,255,255,0.1)",
-          color: primary ? "var(--qc-text-body)" : "rgba(255,255,255,0.7)",
+          background: primary ? "var(--qc-section)" : "rgba(255,255,255,0.1)",
+          color: primary ? "var(--qc-ink)" : "rgba(255,255,255,0.7)",
         }}
       >
         {ACTION_ICONS[icon]}
@@ -805,12 +805,12 @@ function ActionButton({ primary, icon, label, desc }: { primary: boolean; icon: 
         <span className="block text-[12px] font-semibold">{label}</span>
         <span
           className="block text-[10px] mt-0.5"
-          style={{ color: primary ? "var(--qc-text-muted)" : "rgba(255,255,255,0.45)" }}
+          style={{ color: primary ? "var(--qc-ink-2)" : "rgba(255,255,255,0.45)" }}
         >
           {desc}
         </span>
       </span>
-      <span style={{ color: primary ? "var(--qc-text-muted)" : "rgba(255,255,255,0.35)", fontSize: 13 }}>→</span>
+      <span style={{ color: primary ? "var(--qc-ink-2)" : "rgba(255,255,255,0.35)", fontSize: 13 }}>→</span>
     </button>
   );
 }

@@ -24,7 +24,7 @@ const segmentCssColor: Record<string, string> = {
 
 function RichDescription({ segments }: { segments: (DescriptionSegment | ValuationRichSegment)[] }) {
   return (
-    <p className="text-sm leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>
+    <p className="text-sm leading-relaxed" style={{ color: "var(--qc-ink-2)" }}>
       {segments.map((seg, i) => {
         const cssColor = seg.color ? segmentCssColor[seg.color] : undefined;
         return (
@@ -53,7 +53,7 @@ export function PeReratingPotential({ data }: PeReratingPotentialProps) {
             <div
               key={i}
               className="rounded-lg p-5 space-y-3"
-              style={{ borderLeft: `4px solid ${accent}`, border: `1px solid var(--qc-border-default)`, borderLeftWidth: 4, borderLeftColor: accent, background: "var(--qc-surface-white)" }}
+              style={{ borderLeft: `4px solid ${accent}`, border: `1px solid var(--qc-hair)`, borderLeftWidth: 4, borderLeftColor: accent, background: "var(--qc-card)" }}
             >
               <span
                 className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -80,44 +80,44 @@ export function PeReratingPotential({ data }: PeReratingPotentialProps) {
       {/* Re-rating view */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>
+          <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--qc-ink-2)" }}>
             Re-rating view
           </p>
-          <span className="text-[10px] font-bold rounded px-1.5 py-0.5" style={{ color: "var(--qc-text-muted)", border: "1px solid var(--qc-border-default)" }}>
+          <span className="text-[10px] font-bold rounded px-1.5 py-0.5" style={{ color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)" }}>
             {reRatingView.badge}
           </span>
         </div>
-        <h4 className="text-base font-semibold" style={{ color: "var(--qc-text-heading)" }}>{reRatingView.title}</h4>
+        <h4 className="text-base font-semibold" style={{ color: "var(--qc-ink)" }}>{reRatingView.title}</h4>
         <RichDescription segments={reRatingView.description} />
       </div>
 
       {/* Expansion Drivers + Contraction Risks */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-lg p-5 space-y-4" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
+        <div className="rounded-lg p-5 space-y-4" style={{ background: "var(--qc-section)", border: "1px solid var(--qc-hair)" }}>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full" style={{ background: "var(--qc-up)" }} />
-            <h4 className="text-sm font-bold" style={{ color: "var(--qc-text-heading)" }}>Expansion drivers</h4>
+            <h4 className="text-sm font-bold" style={{ color: "var(--qc-ink)" }}>Expansion drivers</h4>
           </div>
           <div className="space-y-4">
             {expansionDrivers.map((item, i) => (
               <div key={i}>
-                <p className="text-sm font-semibold" style={{ color: "var(--qc-text-body)" }}>{item.text}</p>
-                <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{item.detail}</p>
+                <p className="text-sm font-semibold" style={{ color: "var(--qc-ink)" }}>{item.text}</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>{item.detail}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-lg p-5 space-y-4" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
+        <div className="rounded-lg p-5 space-y-4" style={{ background: "var(--qc-section)", border: "1px solid var(--qc-hair)" }}>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full" style={{ background: "var(--qc-down)" }} />
-            <h4 className="text-sm font-bold" style={{ color: "var(--qc-text-heading)" }}>Contraction risks</h4>
+            <h4 className="text-sm font-bold" style={{ color: "var(--qc-ink)" }}>Contraction risks</h4>
           </div>
           <div className="space-y-4">
             {contractionRisks.map((item, i) => (
               <div key={i}>
-                <p className="text-sm font-semibold" style={{ color: "var(--qc-text-body)" }}>{item.text}</p>
-                <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{item.detail}</p>
+                <p className="text-sm font-semibold" style={{ color: "var(--qc-ink)" }}>{item.text}</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>{item.detail}</p>
               </div>
             ))}
           </div>

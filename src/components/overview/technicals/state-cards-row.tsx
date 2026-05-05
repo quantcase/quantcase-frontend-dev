@@ -21,18 +21,18 @@ function StateCard({
       ? "var(--qc-up)"
       : sentiment === "down"
       ? "var(--qc-down)"
-      : "var(--qc-text-muted)");
+      : "var(--qc-ink-2)");
   const valueColor =
     sentiment === "up"
       ? "var(--qc-up)"
       : sentiment === "down"
       ? "var(--qc-down)"
-      : "var(--qc-text-heading)";
+      : "var(--qc-ink)";
 
   return (
     <div
       style={{
-        background: "var(--qc-surface-white)",
+        background: "var(--qc-card)",
         padding: "14px 16px",
         display: "flex",
         flexDirection: "column",
@@ -41,7 +41,7 @@ function StateCard({
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 11.5, color: "var(--qc-text-body)", letterSpacing: ".01em" }}>
+        <span style={{ fontSize: 11.5, color: "var(--qc-ink)", letterSpacing: ".01em" }}>
           {label}
         </span>
         <div
@@ -70,7 +70,7 @@ function StateCard({
       >
         {value}
       </div>
-      <div style={{ fontSize: 11.5, color: "var(--qc-text-muted)", marginTop: "auto", lineHeight: 1.35 }}>
+      <div style={{ fontSize: 11.5, color: "var(--qc-ink-2)", marginTop: "auto", lineHeight: 1.35 }}>
         {sub}
       </div>
     </div>
@@ -96,8 +96,8 @@ export function StateCardsRow({ items }: { items: StateCardsRowItem[] }) {
         display: "grid",
         gridTemplateColumns: `repeat(${items.length},1fr)`,
         gap: 1,
-        background: "var(--qc-border-default)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-hair)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
         overflow: "hidden",
         margin: "14px 0",

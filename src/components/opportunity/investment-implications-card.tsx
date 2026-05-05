@@ -34,7 +34,7 @@ function ImplicationColumn({ title, subtitle, items, sentiment }: ImplicationCol
               <p className="text-[12px] font-semibold text-[#0F172B]">— {item.heading}</p>
               <ul className="space-y-0.5 pl-3">
                 {item.bullets.map((bullet, j) => (
-                  <li key={j} style={{ fontSize: 12, color: "var(--qc-text-muted)", lineHeight: 1.6 }}>
+                  <li key={j} style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.6 }}>
                     – {bullet}
                   </li>
                 ))}
@@ -68,7 +68,7 @@ export function InvestmentImplicationsCard({ data }: InvestmentImplicationsCardP
     <div className="space-y-3">
       {/* Section label */}
       <div className="flex items-center gap-2">
-        <p style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
           Investment Implications
         </p>
         <div className="flex-1 h-px bg-[#E2E2E2]" />

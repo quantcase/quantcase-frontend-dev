@@ -91,8 +91,8 @@ export function ScreenerScorecard({
     <div
       style={{
         borderRadius: 10,
-        border: "1px solid var(--qc-border-default)",
-        background: "var(--qc-surface-panel)",
+        border: "1px solid var(--qc-hair)",
+        background: "var(--qc-section)",
         padding: 8,
       }}
     >
@@ -105,7 +105,7 @@ export function ScreenerScorecard({
           style={{
             fontSize: 14,
             fontWeight: 600,
-            color: "var(--qc-text-heading)",
+            color: "var(--qc-ink)",
             textTransform: "uppercase",
             letterSpacing: "0.01em",
           }}
@@ -126,8 +126,8 @@ export function ScreenerScorecard({
       <div
         style={{
           borderRadius: 10,
-          border: "1px solid var(--qc-border-inner)",
-          background: "var(--qc-surface-white)",
+          border: "1px solid var(--qc-hair-2)",
+          background: "var(--qc-card)",
           padding: 8,
         }}
       >
@@ -138,7 +138,7 @@ export function ScreenerScorecard({
           >
             {items.map((item, idx) => {
               const Icon = item.icon ?? Star;
-              const ratingColor = item.rating ? getLevelColor(item.rating) : "var(--qc-text-muted)";
+              const ratingColor = item.rating ? getLevelColor(item.rating) : "var(--qc-ink-2)";
               const ratingBg = item.rating ? getLevelBg(item.rating) : "transparent";
               const filledBlocks = item.barValue != null ? getFilledBlocks(item.barValue) : null;
               const isClickable = !!item.scrollToId;
@@ -150,7 +150,7 @@ export function ScreenerScorecard({
                   style={{
                     paddingTop: idx === 0 ? 0 : 8,
                     paddingBottom: idx === items.length - 1 ? 0 : 8,
-                    borderTop: idx > 0 ? "1px solid var(--qc-border-inner)" : "none",
+                    borderTop: idx > 0 ? "1px solid var(--qc-hair-2)" : "none",
                   }}
                   onClick={isClickable ? () => handleScrollTo(item.scrollToId!) : undefined}
                   role={isClickable ? "button" : undefined}
@@ -172,24 +172,24 @@ export function ScreenerScorecard({
                       display: "flex",
                       padding: 6,
                       borderRadius: 6,
-                      border: "1px solid var(--qc-icon-box-border)",
-                      background: "var(--qc-icon-box-bg)",
+                      border: "1px solid var(--qc-hair)",
+                      background: "var(--qc-chip)",
                       flexShrink: 0,
                     }}
                   >
-                    <Icon style={{ height: 14, width: 14, color: "var(--qc-text-muted)" }} />
+                    <Icon style={{ height: 14, width: 14, color: "var(--qc-ink-2)" }} />
                   </div>
 
                   {/* Label + descriptor */}
                   <div className="flex-1 min-w-0">
                     <p
                       className="uppercase tracking-wider"
-                      style={{ fontSize: 10, fontWeight: 500, color: "var(--qc-text-muted)", letterSpacing: "0.08em" }}
+                      style={{ fontSize: 10, fontWeight: 500, color: "var(--qc-ink-2)", letterSpacing: "0.08em" }}
                     >
                       {item.label}
                     </p>
                     {item.descriptor && (
-                      <p style={{ fontSize: 13, color: "var(--qc-text-body)" }}>{item.descriptor}</p>
+                      <p style={{ fontSize: 13, color: "var(--qc-ink)" }}>{item.descriptor}</p>
                     )}
                   </div>
 
@@ -203,7 +203,7 @@ export function ScreenerScorecard({
                             flex: 1,
                             height: 18,
                             borderRadius: 2,
-                            backgroundColor: i < filledBlocks ? ratingColor : "var(--qc-border-default)",
+                            backgroundColor: i < filledBlocks ? ratingColor : "var(--qc-hair)",
                           }}
                         />
                       ))}
@@ -239,13 +239,13 @@ export function ScreenerScorecard({
           {/* Right: overall score + segmented bar */}
           <div
             className="flex flex-col justify-end items-end flex-shrink-0 gap-1"
-            style={{ width: 280, borderLeft: "1px solid var(--qc-border-default)", paddingLeft: 24 }}
+            style={{ width: 280, borderLeft: "1px solid var(--qc-hair)", paddingLeft: 24 }}
           >
             <p
               style={{
                 fontSize: 10,
                 fontWeight: 500,
-                color: "var(--qc-text-muted)",
+                color: "var(--qc-ink-2)",
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",
               }}
@@ -255,8 +255,8 @@ export function ScreenerScorecard({
 
             {/* Big score */}
             <div style={{ lineHeight: 1 }}>
-              <span style={{ fontSize: 52, fontWeight: 500, color: "var(--qc-text-heading)" }}>{Math.round(score)}</span>
-              <span style={{ fontSize: 24, fontWeight: 400, color: "var(--qc-text-dimmed)" }}>
+              <span style={{ fontSize: 52, fontWeight: 500, color: "var(--qc-ink)" }}>{Math.round(score)}</span>
+              <span style={{ fontSize: 24, fontWeight: 400, color: "var(--qc-ink-3)" }}>
                 /{maxScore}
               </span>
             </div>
@@ -266,7 +266,7 @@ export function ScreenerScorecard({
               <div
                 style={{
                   height: 14, borderRadius: 4,
-                  background: "var(--qc-border-default)", overflow: "hidden",
+                  background: "var(--qc-hair)", overflow: "hidden",
                 }}
               >
                 <div
@@ -279,9 +279,9 @@ export function ScreenerScorecard({
                 />
               </div>
               <div className="flex justify-between">
-                <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Low</span>
-                <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Moderate</span>
-                <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>High</span>
+                <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Low</span>
+                <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Moderate</span>
+                <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em" }}>High</span>
               </div>
             </div>
           </div>

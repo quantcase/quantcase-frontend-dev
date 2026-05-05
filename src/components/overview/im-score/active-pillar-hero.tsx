@@ -23,13 +23,13 @@ function FwxSub({ item, color, muted }: FwxSubProps) {
         <span
           style={{
             width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
-            background: muted ? "var(--qc-border-default)" : color,
+            background: muted ? "var(--qc-hair)" : color,
           }}
         />
         <span
           style={{
             fontSize: 13, fontWeight: 500, flex: 1,
-            color: muted ? "var(--qc-text-muted)" : "var(--qc-text-heading)",
+            color: muted ? "var(--qc-ink-2)" : "var(--qc-ink)",
           }}
         >
           {item.title}
@@ -37,28 +37,28 @@ function FwxSub({ item, color, muted }: FwxSubProps) {
         <span
           style={{
             fontFamily: "'IBM Plex Mono', monospace", fontSize: 12,
-            color: muted ? "var(--qc-text-muted)" : "var(--qc-text-heading)",
+            color: muted ? "var(--qc-ink-2)" : "var(--qc-ink)",
             letterSpacing: "-0.01em",
           }}
         >
           {item.score != null ? Math.round(item.score) : "—"}
-          <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>/{item.max ?? 5}</span>
+          <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>/{item.max ?? 5}</span>
         </span>
       </div>
       <div
         style={{
-          height: 3, background: "var(--qc-chip-bg, #F2F1EC)",
+          height: 3, background: "var(--qc-chip, #F2F1EC)",
           borderRadius: 999, overflow: "hidden", marginBottom: 6,
         }}
       >
         <span
           style={{
             display: "block", height: "100%", width: `${pct}%`,
-            borderRadius: 999, background: muted ? "var(--qc-border-default)" : color,
+            borderRadius: 999, background: muted ? "var(--qc-hair)" : color,
           }}
         />
       </div>
-      <div style={{ fontSize: 12, color: "var(--qc-text-muted)", lineHeight: 1.45 }}>
+      <div style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.45 }}>
         {item.text}
       </div>
     </div>
@@ -91,8 +91,8 @@ export function ActivePillarHero({
           display: "grid", gridTemplateColumns: "1fr auto auto",
           gap: 20, alignItems: "center",
           padding: "14px 4px 16px",
-          borderTop: "1px solid var(--qc-border-inner)",
-          borderBottom: "1px solid var(--qc-border-inner)",
+          borderTop: "1px solid var(--qc-hair-2)",
+          borderBottom: "1px solid var(--qc-hair-2)",
           marginBottom: 14,
         }}
       >
@@ -100,7 +100,7 @@ export function ActivePillarHero({
           <div
             style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              letterSpacing: "0.16em", color: "var(--qc-text-muted)",
+              letterSpacing: "0.16em", color: "var(--qc-ink-2)",
               textTransform: "uppercase", marginBottom: 6,
             }}
           >
@@ -124,7 +124,7 @@ export function ActivePillarHero({
               {activePillar}
             </span>
           </div>
-          <div style={{ fontSize: 12.5, color: "var(--qc-text-muted)", marginTop: 6, lineHeight: 1.4 }}>
+          <div style={{ fontSize: 12.5, color: "var(--qc-ink-2)", marginTop: 6, lineHeight: 1.4 }}>
             {pillarSub}
           </div>
         </div>
@@ -139,7 +139,7 @@ export function ActivePillarHero({
             <span
               style={{
                 fontFamily: "'IBM Plex Mono', monospace", fontSize: 14,
-                color: "var(--qc-text-muted)", letterSpacing: 0, fontWeight: 400, marginLeft: 2,
+                color: "var(--qc-ink-2)", letterSpacing: 0, fontWeight: 400, marginLeft: 2,
               }}
             >
               /{max}
@@ -149,7 +149,7 @@ export function ActivePillarHero({
             style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
               letterSpacing: "0.12em", textTransform: "uppercase",
-              color: "var(--qc-text-muted)", marginTop: 8,
+              color: "var(--qc-ink-2)", marginTop: 8,
             }}
           >
             {pct}% of max · {weight}% weight
@@ -158,7 +158,7 @@ export function ActivePillarHero({
         {/* Gauge ring */}
         <div style={{ position: "relative", width: 120, height: 120 }}>
           <svg viewBox="0 0 120 120" width="120" height="120">
-            <circle cx="60" cy="60" r="52" stroke="var(--qc-border-default)" strokeWidth="8" fill="none" />
+            <circle cx="60" cy="60" r="52" stroke="var(--qc-hair)" strokeWidth="8" fill="none" />
             <circle
               cx="60" cy="60" r="52"
               stroke={color} strokeWidth="8" fill="none"
@@ -175,7 +175,7 @@ export function ActivePillarHero({
             }}
           >
             {pct}
-            <span style={{ fontSize: 12, color: "var(--qc-text-muted)", fontWeight: 400, marginLeft: 1 }}>
+            <span style={{ fontSize: 12, color: "var(--qc-ink-2)", fontWeight: 400, marginLeft: 1 }}>
               %
             </span>
           </div>
@@ -194,7 +194,7 @@ export function ActivePillarHero({
             />
           ))
         ) : (
-          <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "var(--qc-text-muted)" }}>
+          <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "var(--qc-ink-2)" }}>
             No analysis available.
           </div>
         )}

@@ -22,7 +22,7 @@ function verdictVars(status: string) {
 function valueColor(val: string) {
   if (val.startsWith("-")) return "var(--qc-down)";
   if (val.startsWith("+")) return "var(--qc-up)";
-  return "var(--qc-text-heading)";
+  return "var(--qc-ink)";
 }
 
 // ─── Operating Leverage sub-card ──────────────────────────────────────────────
@@ -43,7 +43,7 @@ function OperatingLeverageCard({ data }: { data: NonNullable<FinancialStrengthSe
       {/* tag line under eyebrow */}
       {verdict?.tag && (
         <span style={{
-          fontSize: 10, color: "var(--qc-text-muted)", lineHeight: 1.4,
+          fontSize: 10, color: "var(--qc-ink-2)", lineHeight: 1.4,
           paddingLeft: 2,
         }}>
           {verdict.tag}
@@ -57,9 +57,9 @@ function OperatingLeverageCard({ data }: { data: NonNullable<FinancialStrengthSe
             <div key={m!.label} style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: "5px 0",
-              borderBottom: i < metricList.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+              borderBottom: i < metricList.length - 1 ? "1px solid var(--qc-hair)" : "none",
             }}>
-              <span style={{ fontSize: 12, color: "var(--qc-text-body)" }}>{m!.label}</span>
+              <span style={{ fontSize: 12, color: "var(--qc-ink)" }}>{m!.label}</span>
               <span style={{
                 fontSize: 12, fontWeight: 600,
                 color: valueColor(m!.value ?? ""),
@@ -76,21 +76,21 @@ function OperatingLeverageCard({ data }: { data: NonNullable<FinancialStrengthSe
       {/* Fixed cost breakdown */}
       {fixedLines.length > 0 && (
         <div style={{
-          background: "var(--qc-surface-row-alt)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-section)",
+          border: "1px solid var(--qc-hair)",
           borderRadius: 8, padding: "8px 10px",
           display: "flex", flexDirection: "column", gap: 6,
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span style={{
-              fontSize: 9, color: "var(--qc-text-muted)",
+              fontSize: 9, color: "var(--qc-ink-2)",
               fontFamily: "'IBM Plex Mono', monospace",
               textTransform: "uppercase" as const, letterSpacing: ".1em",
             }}>
               Fixed Costs
             </span>
             {totalFixed?.current_pct != null && (
-              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-text-heading)" }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink)" }}>
                 {totalFixed.current_pct}% of revenue
               </span>
             )}
@@ -100,24 +100,24 @@ function OperatingLeverageCard({ data }: { data: NonNullable<FinancialStrengthSe
               const pct = line.current_pct ?? 0;
               const total = totalFixed?.current_pct || 1;
               const barPct = (pct / total) * 100;
-              const colors = ["var(--qc-blue, #3A6BEF)", "var(--qc-warn)", "var(--qc-text-muted)"];
+              const colors = ["var(--qc-blue, #3A6BEF)", "var(--qc-warn)", "var(--qc-ink-2)"];
               return (
                 <div key={line.label} title={`${line.label}: ${pct}%`} style={{
                   width: `${barPct}%`, height: "100%",
                   background: colors[i % colors.length],
-                  borderRight: i < fixedLines.length - 1 ? "1px solid var(--qc-surface-white)" : "none",
+                  borderRight: i < fixedLines.length - 1 ? "1px solid var(--qc-card)" : "none",
                 }} />
               );
             })}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "4px 10px" }}>
             {fixedLines.map((line, i) => {
-              const colors = ["var(--qc-blue, #3A6BEF)", "var(--qc-warn)", "var(--qc-text-muted)"];
+              const colors = ["var(--qc-blue, #3A6BEF)", "var(--qc-warn)", "var(--qc-ink-2)"];
               return (
                 <div key={line.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <span style={{ width: 6, height: 6, borderRadius: 2, background: colors[i % colors.length], flexShrink: 0 }} />
-                  <span style={{ fontSize: 10, color: "var(--qc-text-body)" }}>{line.label}</span>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-text-heading)" }}>
+                  <span style={{ fontSize: 10, color: "var(--qc-ink)" }}>{line.label}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink)" }}>
                     {line.current_pct != null ? `${line.current_pct}%` : "—"}
                   </span>
                 </div>
@@ -152,17 +152,17 @@ function WorkingCapitalCard({ data }: { data: NonNullable<FinancialStrengthSecti
         {/* Header */}
         <div style={{
           display: "flex", alignItems: "center",
-          padding: "3px 0 5px", borderBottom: "1px solid var(--qc-border-default)",
+          padding: "3px 0 5px", borderBottom: "1px solid var(--qc-hair)",
         }}>
-          <span style={{ flex: 1, fontSize: 9, color: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase" as const, letterSpacing: ".08em" }}>
+          <span style={{ flex: 1, fontSize: 9, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase" as const, letterSpacing: ".08em" }}>
             Metric
           </span>
           {lastTwo.map((q) => (
-            <span key={q} style={{ width: 52, textAlign: "right" as const, fontSize: 9, color: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase" as const, letterSpacing: ".06em" }}>
+            <span key={q} style={{ width: 52, textAlign: "right" as const, fontSize: 9, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase" as const, letterSpacing: ".06em" }}>
               {q}
             </span>
           ))}
-          <span style={{ width: 24, textAlign: "center" as const, fontSize: 9, color: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>
+          <span style={{ width: 24, textAlign: "center" as const, fontSize: 9, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}>
             ↕
           </span>
         </div>
@@ -171,7 +171,7 @@ function WorkingCapitalCard({ data }: { data: NonNullable<FinancialStrengthSecti
         {rows.map((row, ri) => {
           const vals = lastTwoIdx.map((idx) => row.values[idx]);
           const [prev, curr] = vals;
-          let trendColor = "var(--qc-text-muted)";
+          let trendColor = "var(--qc-ink-2)";
           let trendSymbol = "—";
           if (curr != null && prev != null) {
             const diff = curr - prev;
@@ -188,14 +188,14 @@ function WorkingCapitalCard({ data }: { data: NonNullable<FinancialStrengthSecti
             <div key={row.key} style={{
               display: "flex", alignItems: "center",
               padding: "5px 0",
-              borderBottom: ri < rows.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+              borderBottom: ri < rows.length - 1 ? "1px solid var(--qc-hair)" : "none",
             }}>
-              <span style={{ flex: 1, fontSize: 11, color: "var(--qc-text-body)" }}>{row.label}</span>
+              <span style={{ flex: 1, fontSize: 11, color: "var(--qc-ink)" }}>{row.label}</span>
               {vals.map((v, vi) => (
                 <span key={vi} style={{
                   width: 52, textAlign: "right" as const,
                   fontSize: 11, fontWeight: vi === 1 ? 600 : 400,
-                  color: vi === 1 ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+                  color: vi === 1 ? "var(--qc-ink)" : "var(--qc-ink-2)",
                   fontVariantNumeric: "tabular-nums",
                 }}>
                   {v != null ? v : "—"}
@@ -236,7 +236,7 @@ export function FinancialIntelligenceCard({ data }: Props) {
   return (
     <IntelligenceCardShell>
       <IntelligenceCardHeader
-        icon={<DollarSign style={{ width: 14, height: 14, color: "var(--qc-text-body)" }} />}
+        icon={<DollarSign style={{ width: 14, height: 14, color: "var(--qc-ink)" }} />}
         title="Financial Intelligence"
       />
 
@@ -255,7 +255,7 @@ export function FinancialIntelligenceCard({ data }: Props) {
         const vv = opLev.verdict ? verdictVars(opLev.verdict.status) : null;
         return (
           <IntelligenceSubCard
-            icon={<Activity style={{ width: 10, height: 10, color: "var(--qc-text-body)" }} />}
+            icon={<Activity style={{ width: 10, height: 10, color: "var(--qc-ink)" }} />}
             eyebrow="Operating Leverage"
             badge={opLev.verdict?.label?.split(" ")[0]}
             badgeColor={vv?.color}
@@ -271,7 +271,7 @@ export function FinancialIntelligenceCard({ data }: Props) {
         const vv = verdictColor ? verdictVars(verdictColor) : null;
         return (
           <IntelligenceSubCard
-            icon={<LayoutGrid style={{ width: 10, height: 10, color: "var(--qc-text-body)" }} />}
+            icon={<LayoutGrid style={{ width: 10, height: 10, color: "var(--qc-ink)" }} />}
             eyebrow="Working Capital"
             badge={wc!.trend_chart?.verdict_badge?.split(" ")[0]}
             badgeColor={vv?.color}

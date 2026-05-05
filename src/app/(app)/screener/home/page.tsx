@@ -61,10 +61,10 @@ const MF_COLUMNS: ColDef[] = [
     sortKey: "name",
     render: (s) => (
       <div className="flex flex-col gap-0.5 min-w-0">
-        <span className="truncate max-w-[300px] block" style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>
+        <span className="truncate max-w-[300px] block" style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>
           {s.name}
         </span>
-        <span className="truncate max-w-[300px] block" style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
+        <span className="truncate max-w-[300px] block" style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
           {[s.amc_name, s.category].filter(Boolean).join(" · ")}
         </span>
       </div>
@@ -77,7 +77,7 @@ const MF_COLUMNS: ColDef[] = [
     render: (s) => (
       <span
         className="inline-block rounded-sm px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
-        style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}
+        style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}
       >
         {s.plan_type ?? "—"}
       </span>
@@ -87,7 +87,7 @@ const MF_COLUMNS: ColDef[] = [
     key: "risk_label",
     label: "Risk",
     align: "left",
-    render: (s) => <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>{s.risk_label ?? "—"}</span>,
+    render: (s) => <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>{s.risk_label ?? "—"}</span>,
   },
   {
     key: "morningstar",
@@ -96,7 +96,7 @@ const MF_COLUMNS: ColDef[] = [
     sortKey: "morningstar",
     render: (s) => (
       s.morningstar == null
-        ? <span style={{ fontSize: 12, color: "var(--qc-text-dimmed)" }}>—</span>
+        ? <span style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>—</span>
         : (
           <span className="flex items-center justify-end gap-0.5">
             <span style={{ color: "var(--qc-warn)", fontSize: 11, letterSpacing: 1 }}>{"★".repeat(s.morningstar)}</span>
@@ -109,14 +109,14 @@ const MF_COLUMNS: ColDef[] = [
     label: "AUM",
     align: "right",
     sortKey: "aum",
-    render: (s) => <span style={{ fontSize: 12, fontWeight: 500, color: "var(--qc-text-heading)" }}>{cr(s.aum)}</span>,
+    render: (s) => <span style={{ fontSize: 12, fontWeight: 500, color: "var(--qc-ink)" }}>{cr(s.aum)}</span>,
   },
   {
     key: "expense_ratio",
     label: "Exp. Ratio",
     align: "right",
     sortKey: "expense_ratio",
-    render: (s) => <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>{pct(s.expense_ratio)}</span>,
+    render: (s) => <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>{pct(s.expense_ratio)}</span>,
   },
   {
     key: "nav",
@@ -124,8 +124,8 @@ const MF_COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "nav",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "var(--qc-text-body)", fontWeight: 500 }}>
-        {s.nav == null ? <span style={{ color: "var(--qc-text-dimmed)" }}>—</span> : `₹${s.nav.toFixed(2)}`}
+      <span style={{ fontSize: 12, color: "var(--qc-ink)", fontWeight: 500 }}>
+        {s.nav == null ? <span style={{ color: "var(--qc-ink-3)" }}>—</span> : `₹${s.nav.toFixed(2)}`}
       </span>
     ),
   },
@@ -162,8 +162,8 @@ function FilterSelect({
         className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[12px] font-medium transition-all"
         style={
           active
-            ? { border: "1px solid var(--qc-border-active)", background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
-            : { border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)", color: "var(--qc-text-muted)" }
+            ? { border: "1px solid var(--qc-ink)", background: "var(--qc-ink)", color: "var(--qc-on-dark)" }
+            : { border: "1px solid var(--qc-hair)", background: "var(--qc-bg)", color: "var(--qc-ink-2)" }
         }
       >
         {label}
@@ -178,7 +178,7 @@ function FilterSelect({
             onClick={(e) => { e.stopPropagation(); onChange([]); setOpen(false); }}
           />
         ) : (
-          <ChevronRight className="h-2.5 w-2.5 rotate-90" style={{ color: "var(--qc-text-muted)" }} />
+          <ChevronRight className="h-2.5 w-2.5 rotate-90" style={{ color: "var(--qc-ink-2)" }} />
         )}
       </button>
       {open && (
@@ -186,7 +186,7 @@ function FilterSelect({
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
             className="absolute left-0 top-full mt-1.5 z-20 rounded-[10px] shadow-lg py-1"
-            style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", minWidth: 200, maxHeight: 280, overflowY: "auto", boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}
+            style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", minWidth: 200, maxHeight: 280, overflowY: "auto", boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}
           >
             {options.map((opt) => {
               const checked = value.includes(opt);
@@ -195,15 +195,15 @@ function FilterSelect({
                   key={opt}
                   onClick={() => onChange(checked ? value.filter((v) => v !== opt) : [...value, opt])}
                   className="w-full flex items-center gap-2.5 px-3.5 py-2 text-left text-[12px] transition-colors"
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-surface-panel)")}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-section)")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "")}
-                  style={{ color: checked ? "var(--qc-accent-primary)" : "var(--qc-text-body)", fontWeight: checked ? 500 : 400 }}
+                  style={{ color: checked ? "var(--qc-ink)" : "var(--qc-ink)", fontWeight: checked ? 500 : 400 }}
                 >
                   <span
                     className="w-3.5 h-3.5 rounded-[3px] flex items-center justify-center shrink-0 transition-colors"
                     style={{
-                      border: `1.5px solid ${checked ? "var(--qc-accent-primary)" : "var(--qc-text-dimmed)"}`,
-                      background: checked ? "var(--qc-accent-primary)" : "transparent",
+                      border: `1.5px solid ${checked ? "var(--qc-ink)" : "var(--qc-ink-3)"}`,
+                      background: checked ? "var(--qc-ink)" : "transparent",
                     }}
                   >
                     {checked && (
@@ -235,8 +235,8 @@ function RatingFilter({ value, onChange }: { value: number | undefined; onChange
         className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[12px] font-medium transition-all"
         style={
           active
-            ? { border: "1px solid var(--qc-border-active)", background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
-            : { border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)", color: "var(--qc-text-muted)" }
+            ? { border: "1px solid var(--qc-ink)", background: "var(--qc-ink)", color: "var(--qc-on-dark)" }
+            : { border: "1px solid var(--qc-hair)", background: "var(--qc-bg)", color: "var(--qc-ink-2)" }
         }
       >
         {active ? `★ ${value}+` : "★ Rating"}
@@ -246,7 +246,7 @@ function RatingFilter({ value, onChange }: { value: number | undefined; onChange
             onClick={(e) => { e.stopPropagation(); onChange(undefined); setOpen(false); }}
           />
         ) : (
-          <ChevronRight className="h-2.5 w-2.5 rotate-90" style={{ color: "var(--qc-text-muted)" }} />
+          <ChevronRight className="h-2.5 w-2.5 rotate-90" style={{ color: "var(--qc-ink-2)" }} />
         )}
       </button>
       {open && (
@@ -254,19 +254,19 @@ function RatingFilter({ value, onChange }: { value: number | undefined; onChange
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
             className="absolute left-0 top-full mt-1.5 z-20 rounded-[10px] overflow-hidden py-1"
-            style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", minWidth: 140, boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}
+            style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", minWidth: 140, boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}
           >
             {[5, 4, 3, 2, 1].map((n) => (
               <button
                 key={n}
                 onClick={() => { onChange(value === n ? undefined : n); setOpen(false); }}
                 className="w-full flex items-center gap-2 px-3.5 py-2 text-left text-[12px] transition-colors"
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-surface-panel)")}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-section)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "")}
-                style={{ color: value === n ? "var(--qc-accent-primary)" : "var(--qc-text-body)", fontWeight: value === n ? 600 : 400 }}
+                style={{ color: value === n ? "var(--qc-ink)" : "var(--qc-ink)", fontWeight: value === n ? 600 : 400 }}
               >
                 <span style={{ color: "var(--qc-warn)", letterSpacing: 1 }}>{"★".repeat(n)}</span>
-                <span style={{ color: "var(--qc-text-muted)", fontSize: 11 }}>{n}+</span>
+                <span style={{ color: "var(--qc-ink-2)", fontSize: 11 }}>{n}+</span>
               </button>
             ))}
           </div>
@@ -349,7 +349,7 @@ function MfScreenerSection() {
       {/* Basket quick-picks */}
       {!mfBasketsLoading && mfBasketsData && mfBasketsData.baskets.length > 0 && (
         <div className="mb-6">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--qc-text-muted)" }}>
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--qc-ink-2)" }}>
             Fund Baskets
           </p>
           <div className="flex flex-wrap gap-2">
@@ -358,16 +358,16 @@ function MfScreenerSection() {
                 key={b.id}
                 onClick={() => applyBasket(b.filter_params)}
                 className="rounded-full px-3.5 py-1.5 text-[12px] font-medium transition-all border"
-                style={{ borderColor: "var(--qc-text-dimmed)", background: "var(--qc-surface-white)", color: "var(--qc-text-body)" }}
+                style={{ borderColor: "var(--qc-ink-3)", background: "var(--qc-card)", color: "var(--qc-ink)" }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "var(--qc-accent-primary)";
-                  e.currentTarget.style.color = "var(--qc-surface-white)";
-                  e.currentTarget.style.borderColor = "var(--qc-accent-primary)";
+                  e.currentTarget.style.background = "var(--qc-ink)";
+                  e.currentTarget.style.color = "var(--qc-card)";
+                  e.currentTarget.style.borderColor = "var(--qc-ink)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "var(--qc-surface-white)";
-                  e.currentTarget.style.color = "var(--qc-text-body)";
-                  e.currentTarget.style.borderColor = "var(--qc-text-dimmed)";
+                  e.currentTarget.style.background = "var(--qc-card)";
+                  e.currentTarget.style.color = "var(--qc-ink)";
+                  e.currentTarget.style.borderColor = "var(--qc-ink-3)";
                 }}
               >
                 {b.title}
@@ -380,27 +380,27 @@ function MfScreenerSection() {
       {/* Filters bar */}
       <div
         className="flex items-center gap-2 flex-wrap mb-3 px-3 py-2.5 rounded-[10px]"
-        style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
       >
-        <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
+        <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--qc-ink-2)" }} />
 
         {/* Search */}
         <div
           className="flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5"
-          style={{ background: "var(--qc-surface-base)", border: "1px solid var(--qc-border-default)" }}
+          style={{ background: "var(--qc-bg)", border: "1px solid var(--qc-hair)" }}
         >
-          <Search className="h-3 w-3 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
+          <Search className="h-3 w-3 shrink-0" style={{ color: "var(--qc-ink-2)" }} />
           <input
             type="text"
             value={q}
             onChange={(e) => { setQ(e.target.value); setPage(1); }}
             placeholder="Search funds…"
-            className="w-36 text-[12px] outline-none bg-transparent placeholder:text-[var(--qc-text-muted)]"
-            style={{ color: "var(--qc-text-heading)" }}
+            className="w-36 text-[12px] outline-none bg-transparent placeholder:text-[var(--qc-ink-2)]"
+            style={{ color: "var(--qc-ink)" }}
           />
           {q && (
             <button onClick={() => { setQ(""); setPage(1); }}>
-              <X className="h-3 w-3 hover:opacity-70" style={{ color: "var(--qc-text-muted)" }} />
+              <X className="h-3 w-3 hover:opacity-70" style={{ color: "var(--qc-ink-2)" }} />
             </button>
           )}
         </div>
@@ -419,8 +419,8 @@ function MfScreenerSection() {
                 className="appearance-none rounded-[8px] px-3 pr-7 py-1.5 text-[12px] outline-none cursor-pointer font-medium"
                 style={
                   amcSlug
-                    ? { border: "1px solid var(--qc-border-active)", background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }
-                    : { border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)", color: "var(--qc-text-muted)" }
+                    ? { border: "1px solid var(--qc-ink)", background: "var(--qc-ink)", color: "var(--qc-on-dark)" }
+                    : { border: "1px solid var(--qc-hair)", background: "var(--qc-bg)", color: "var(--qc-ink-2)" }
                 }
               >
                 <option value="">AMC</option>
@@ -430,7 +430,7 @@ function MfScreenerSection() {
               </select>
               <ChevronRight
                 className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 rotate-90"
-                style={{ color: amcSlug ? "var(--qc-surface-white)" : "var(--qc-text-muted)" }}
+                style={{ color: amcSlug ? "var(--qc-card)" : "var(--qc-ink-2)" }}
               />
             </div>
           </>
@@ -441,15 +441,15 @@ function MfScreenerSection() {
             <button
               onClick={resetFilters}
               className="flex items-center gap-1 text-[11px] font-medium rounded-[6px] px-2 py-1 transition-colors"
-              style={{ color: "var(--qc-text-muted)", background: "var(--qc-surface-panel)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-border-default)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--qc-surface-panel)")}
+              style={{ color: "var(--qc-ink-2)", background: "var(--qc-section)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-hair)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--qc-section)")}
             >
               <X className="h-2.5 w-2.5" /> Clear all
             </button>
           )}
           {data && (
-            <span className="text-[12px] font-medium tabular-nums" style={{ color: "var(--qc-text-body)" }}>
+            <span className="text-[12px] font-medium tabular-nums" style={{ color: "var(--qc-ink)" }}>
               {data.total.toLocaleString()} funds
             </span>
           )}
@@ -467,22 +467,22 @@ function MfScreenerSection() {
       {/* Table */}
       <div
         className="rounded-[10px] overflow-hidden"
-        style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
+        style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
       >
         {/* Table header — always visible */}
         <div style={{ overflowX: "auto" }}>
           <table className="w-full" style={{ borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "var(--qc-surface-base)", borderBottom: "2px solid var(--qc-border-default)" }}>
-                <th className="px-4 py-3 text-left" style={{ width: 48, color: "var(--qc-text-muted)", fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em" }}>#</th>
+              <tr style={{ background: "var(--qc-bg)", borderBottom: "2px solid var(--qc-hair)" }}>
+                <th className="px-4 py-3 text-left" style={{ width: 48, color: "var(--qc-ink-2)", fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em" }}>#</th>
                 {MF_COLUMNS.map((col) => (
                   <th
                     key={col.key}
                     onClick={() => handleSort(col)}
                     className={`px-4 py-3 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap select-none ${col.sortKey ? "cursor-pointer" : ""} ${col.align === "right" ? "text-right" : "text-left"}`}
-                    style={{ color: sort === col.sortKey ? "var(--qc-accent-primary)" : "var(--qc-text-muted)" }}
-                    onMouseEnter={(e) => { if (col.sortKey) e.currentTarget.style.color = "var(--qc-accent-primary)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = sort === col.sortKey ? "var(--qc-accent-primary)" : "var(--qc-text-muted)"; }}
+                    style={{ color: sort === col.sortKey ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
+                    onMouseEnter={(e) => { if (col.sortKey) e.currentTarget.style.color = "var(--qc-ink)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = sort === col.sortKey ? "var(--qc-ink)" : "var(--qc-ink-2)"; }}
                   >
                     {col.label}
                     {col.sortKey && <SortIcon active={sort === col.sortKey} dir={order} />}
@@ -496,7 +496,7 @@ function MfScreenerSection() {
             {loading && (
               <tbody>
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid var(--qc-border-inner)" }}>
+                  <tr key={i} style={{ borderBottom: "1px solid var(--qc-hair-2)" }}>
                     <td className="px-4 py-3.5" style={{ width: 48 }}>
                       <div className="h-3 w-5 rounded bg-zinc-100 animate-pulse" />
                     </td>
@@ -517,7 +517,7 @@ function MfScreenerSection() {
               <tbody>
                 <tr>
                   <td colSpan={MF_COLUMNS.length + 2} className="px-4 py-16 text-center">
-                    <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>No funds matched your criteria.</p>
+                    <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>No funds matched your criteria.</p>
                   </td>
                 </tr>
               </tbody>
@@ -531,12 +531,12 @@ function MfScreenerSection() {
                     key={scheme.amfi_code}
                     onClick={() => router.push(`/screener/mutual-fund/${encodeURIComponent(scheme.amfi_code)}`)}
                     className="cursor-pointer group"
-                    style={{ borderBottom: i < data.schemes.length - 1 ? "1px solid var(--qc-border-inner)" : undefined }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-surface-base)")}
+                    style={{ borderBottom: i < data.schemes.length - 1 ? "1px solid var(--qc-hair-2)" : undefined }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-bg)")}
                     onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                   >
                     <td className="px-4 py-3.5" style={{ width: 48 }}>
-                      <span className="tabular-nums" style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
+                      <span className="tabular-nums" style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
                         {(page - 1) * PAGE_SIZE + i + 1}
                       </span>
                     </td>
@@ -546,7 +546,7 @@ function MfScreenerSection() {
                       </td>
                     ))}
                     <td className="px-4 py-3.5" style={{ width: 40 }}>
-                      <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-50 transition-opacity" style={{ color: "var(--qc-accent-primary)" }} />
+                      <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-50 transition-opacity" style={{ color: "var(--qc-ink)" }} />
                     </td>
                   </tr>
                 ))}
@@ -559,13 +559,13 @@ function MfScreenerSection() {
         {!loading && data && data.total > 0 && (
           <div
             className="flex items-center justify-between px-5 py-3"
-            style={{ borderTop: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)" }}
+            style={{ borderTop: "1px solid var(--qc-hair)", background: "var(--qc-bg)" }}
           >
-            <p className="text-[12px]" style={{ color: "var(--qc-text-muted)" }}>
+            <p className="text-[12px]" style={{ color: "var(--qc-ink-2)" }}>
               {data.total.toLocaleString()} total
-              <span className="mx-1.5" style={{ color: "var(--qc-text-dimmed)" }}>·</span>
+              <span className="mx-1.5" style={{ color: "var(--qc-ink-3)" }}>·</span>
               showing {((page - 1) * PAGE_SIZE + 1).toLocaleString()}–{Math.min(page * PAGE_SIZE, data.total).toLocaleString()}
-              <span className="mx-1.5" style={{ color: "var(--qc-text-dimmed)" }}>·</span>
+              <span className="mx-1.5" style={{ color: "var(--qc-ink-3)" }}>·</span>
               page {page} of {totalPages}
             </p>
             <div className="flex items-center gap-1">
@@ -573,9 +573,9 @@ function MfScreenerSection() {
                 onClick={() => setPage(1)}
                 disabled={page === 1}
                 className="rounded-[6px] px-2 py-1 text-[11px] font-medium disabled:opacity-30 transition-colors"
-                style={{ color: "var(--qc-text-body)", background: page === 1 ? "transparent" : "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
-                onMouseEnter={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-surface-panel)"; }}
-                onMouseLeave={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-surface-white)"; }}
+                style={{ color: "var(--qc-ink)", background: page === 1 ? "transparent" : "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
+                onMouseEnter={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-section)"; }}
+                onMouseLeave={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-card)"; }}
               >
                 «
               </button>
@@ -583,9 +583,9 @@ function MfScreenerSection() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
                 className="rounded-[6px] p-1.5 disabled:opacity-30 transition-colors"
-                style={{ color: "var(--qc-text-body)", background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
-                onMouseEnter={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-surface-panel)"; }}
-                onMouseLeave={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-surface-white)"; }}
+                style={{ color: "var(--qc-ink)", background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
+                onMouseEnter={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-section)"; }}
+                onMouseLeave={(e) => { if (page !== 1) e.currentTarget.style.background = "var(--qc-card)"; }}
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
               </button>
@@ -603,7 +603,7 @@ function MfScreenerSection() {
                 }
                 return pages.map((p, idx) =>
                   p === "..." ? (
-                    <span key={`ellipsis-${idx}`} className="px-1 text-[11px]" style={{ color: "var(--qc-text-muted)" }}>…</span>
+                    <span key={`ellipsis-${idx}`} className="px-1 text-[11px]" style={{ color: "var(--qc-ink-2)" }}>…</span>
                   ) : (
                     <button
                       key={p}
@@ -611,11 +611,11 @@ function MfScreenerSection() {
                       className="rounded-[6px] min-w-[28px] h-7 text-[11px] font-medium transition-colors"
                       style={
                         page === p
-                          ? { background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)", border: "1px solid var(--qc-border-active)" }
-                          : { background: "var(--qc-surface-white)", color: "var(--qc-text-body)", border: "1px solid var(--qc-border-default)" }
+                          ? { background: "var(--qc-ink)", color: "var(--qc-on-dark)", border: "1px solid var(--qc-ink)" }
+                          : { background: "var(--qc-card)", color: "var(--qc-ink)", border: "1px solid var(--qc-hair)" }
                       }
-                      onMouseEnter={(e) => { if (page !== p) e.currentTarget.style.background = "var(--qc-surface-panel)"; }}
-                      onMouseLeave={(e) => { if (page !== p) e.currentTarget.style.background = "var(--qc-surface-white)"; }}
+                      onMouseEnter={(e) => { if (page !== p) e.currentTarget.style.background = "var(--qc-section)"; }}
+                      onMouseLeave={(e) => { if (page !== p) e.currentTarget.style.background = "var(--qc-card)"; }}
                     >
                       {p}
                     </button>
@@ -627,9 +627,9 @@ function MfScreenerSection() {
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
                 className="rounded-[6px] p-1.5 disabled:opacity-30 transition-colors"
-                style={{ color: "var(--qc-text-body)", background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
-                onMouseEnter={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-surface-panel)"; }}
-                onMouseLeave={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-surface-white)"; }}
+                style={{ color: "var(--qc-ink)", background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
+                onMouseEnter={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-section)"; }}
+                onMouseLeave={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-card)"; }}
               >
                 <ChevronRight className="h-3.5 w-3.5" />
               </button>
@@ -637,9 +637,9 @@ function MfScreenerSection() {
                 onClick={() => setPage(totalPages)}
                 disabled={page >= totalPages}
                 className="rounded-[6px] px-2 py-1 text-[11px] font-medium disabled:opacity-30 transition-colors"
-                style={{ color: "var(--qc-text-body)", background: page >= totalPages ? "transparent" : "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
-                onMouseEnter={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-surface-panel)"; }}
-                onMouseLeave={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-surface-white)"; }}
+                style={{ color: "var(--qc-ink)", background: page >= totalPages ? "transparent" : "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
+                onMouseEnter={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-section)"; }}
+                onMouseLeave={(e) => { if (page < totalPages) e.currentTarget.style.background = "var(--qc-card)"; }}
               >
                 »
               </button>
@@ -658,25 +658,25 @@ function BasketRow({ basket }: { basket: Basket }) {
     <Link
       href={`/screener/basket?id=${encodeURIComponent(basket.id)}`}
       className="group flex items-start justify-between gap-3 px-4 py-3 transition-colors"
-      onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+      onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
       onMouseLeave={e => (e.currentTarget.style.background = "")}
     >
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-medium leading-snug truncate" style={{ color: "var(--qc-text-heading)" }}>
+        <p className="text-[13px] font-medium leading-snug truncate" style={{ color: "var(--qc-ink)" }}>
           {basket.title}
         </p>
-        <p className="text-[11px] mt-0.5 line-clamp-1 leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>
+        <p className="text-[11px] mt-0.5 line-clamp-1 leading-relaxed" style={{ color: "var(--qc-ink-2)" }}>
           {basket.description}
         </p>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
         <span
           className="text-[10px] font-medium rounded-sm px-1.5 py-0.5 tabular-nums"
-          style={{ background: "var(--qc-accent-lime-bg)", color: "var(--qc-text-heading)" }}
+          style={{ background: "var(--qc-lime-bg)", color: "var(--qc-ink)" }}
         >
           {basket.conditions.length}
         </span>
-        <ArrowRight className="size-3 opacity-0 group-hover:opacity-40 transition-opacity" style={{ color: "var(--qc-text-heading)" }} />
+        <ArrowRight className="size-3 opacity-0 group-hover:opacity-40 transition-opacity" style={{ color: "var(--qc-ink)" }} />
       </div>
     </Link>
   );
@@ -718,27 +718,27 @@ export default function ScreenerHomePage() {
   const { data: basketsData, loading: basketsLoading, error: basketsError } = useBaskets();
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--qc-surface-base)" }}>
+    <div className="min-h-screen" style={{ background: "var(--qc-bg)" }}>
       {/* Hero search section */}
-      <div className="relative" style={{ background: "var(--qc-surface-base)" }}>
+      <div className="relative" style={{ background: "var(--qc-bg)" }}>
         <div className="pointer-events-none absolute inset-x-0 top-0 h-64 overflow-hidden">
           <div
             className="absolute inset-0"
-            style={{ background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-accent-lime-bg) 0%, transparent 70%)" }}
+            style={{ background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime-bg) 0%, transparent 70%)" }}
           />
         </div>
         <div className="relative max-w-3xl mx-auto px-6 pt-16 pb-14 flex flex-col items-center gap-6">
           <div className="text-center space-y-2">
-            <h2 className="text-[32px] font-medium leading-tight" style={{ color: "var(--qc-text-heading)" }}>
+            <h2 className="text-[32px] font-medium leading-tight" style={{ color: "var(--qc-ink)" }}>
               What would you like to research today?
             </h2>
-            <p className="text-sm" style={{ color: "var(--qc-text-muted)" }}>
+            <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>
               Search a company to open its screener, or pick a research basket below.
             </p>
           </div>
 
           {/* Asset class tab selector */}
-          <div className="flex items-center gap-1 rounded-full border p-1" style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
+          <div className="flex items-center gap-1 rounded-full border p-1" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}>
             {ASSET_TABS.map((tab) => (
               <button
                 key={tab}
@@ -746,8 +746,8 @@ export default function ScreenerHomePage() {
                 className="px-4 py-1.5 rounded-full text-xs font-medium transition-all"
                 style={
                   activeTab === tab
-                    ? { background: "var(--qc-accent-lime)", color: "#ffffff" }
-                    : { color: "var(--qc-text-muted)" }
+                    ? { background: "var(--qc-lime)", color: "#ffffff" }
+                    : { color: "var(--qc-ink-2)" }
                 }
               >
                 {tab}
@@ -779,31 +779,31 @@ export default function ScreenerHomePage() {
                   disabled={item.comingSoon}
                   onClick={() => { if (!item.comingSoon) router.push("/private-equity/pre-ipo"); }}
                   className="group relative flex flex-col items-start gap-3 rounded-[10px] border px-5 py-5 text-left transition-all hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+                  style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
                 >
                   {item.comingSoon && (
-                    <span className="absolute top-3 right-3 text-[9px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>
+                    <span className="absolute top-3 right-3 text-[9px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5" style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}>
                       Soon
                     </span>
                   )}
                   <span className="text-2xl">{item.icon}</span>
                   <div>
-                    <p className="text-[14px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{item.label}</p>
-                    <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>{item.description}</p>
+                    <p className="text-[14px] font-semibold" style={{ color: "var(--qc-ink)" }}>{item.label}</p>
+                    <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "var(--qc-ink-2)" }}>{item.description}</p>
                   </div>
                   {!item.comingSoon && (
-                    <ArrowRight className="size-4 mt-auto self-end opacity-0 group-hover:opacity-60 transition-opacity" style={{ color: "var(--qc-text-heading)" }} />
+                    <ArrowRight className="size-4 mt-auto self-end opacity-0 group-hover:opacity-60 transition-opacity" style={{ color: "var(--qc-ink)" }} />
                   )}
                 </button>
               ))}
             </div>
           ) : activeTab === "US Stocks" ? (
             <div className="w-full flex flex-col items-center gap-3 py-6">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
+              <div className="flex items-center justify-center w-12 h-12 rounded-full" style={{ background: "var(--qc-section)", border: "1px solid var(--qc-hair)" }}>
                 <span className="text-2xl">🇺🇸</span>
               </div>
-              <p className="text-[15px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>US Stocks — Coming Soon</p>
-              <p className="text-[13px] text-center max-w-sm" style={{ color: "var(--qc-text-muted)" }}>
+              <p className="text-[15px] font-semibold" style={{ color: "var(--qc-ink)" }}>US Stocks — Coming Soon</p>
+              <p className="text-[13px] text-center max-w-sm" style={{ color: "var(--qc-ink-2)" }}>
                 Earnings call analysis and management quality scoring for US-listed companies is on the way.
               </p>
             </div>
@@ -826,16 +826,16 @@ export default function ScreenerHomePage() {
       {activeTab === "Mutual Funds" && (
         <>
           <div className="flex items-center gap-4 px-6 py-5">
-            <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />
+            <div className="flex-1 h-px" style={{ background: "var(--qc-hair)" }} />
             <div className="flex flex-col items-center gap-0.5 px-1">
-              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.12em" }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--qc-ink)", textTransform: "uppercase", letterSpacing: "0.12em" }}>
                 Fund Screener
               </span>
-              <span style={{ fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: "0.02em" }}>
+              <span style={{ fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: "0.02em" }}>
                 Filter and sort across all mutual funds
               </span>
             </div>
-            <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />
+            <div className="flex-1 h-px" style={{ background: "var(--qc-hair)" }} />
           </div>
           <MfScreenerSection />
         </>
@@ -845,16 +845,16 @@ export default function ScreenerHomePage() {
       {activeTab !== "PE / Pre-IPO" && activeTab !== "Mutual Funds" && activeTab !== "US Stocks" && (
         <>
           <div className="flex items-center gap-4 px-6 py-5">
-            <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />
+            <div className="flex-1 h-px" style={{ background: "var(--qc-hair)" }} />
             <div className="flex flex-col items-center gap-0.5 px-1">
-              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.12em" }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--qc-ink)", textTransform: "uppercase", letterSpacing: "0.12em" }}>
                 Research Baskets
               </span>
-              <span style={{ fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: "0.02em" }}>
+              <span style={{ fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: "0.02em" }}>
                 Pre-built screening strategies
               </span>
             </div>
-            <div className="flex-1 h-px" style={{ background: "var(--qc-border-default)" }} />
+            <div className="flex-1 h-px" style={{ background: "var(--qc-hair)" }} />
           </div>
 
           <div className="max-w-[1400px] mx-auto px-6 pb-12">
@@ -868,7 +868,7 @@ export default function ScreenerHomePage() {
             {basketsLoading && (
               <div className="grid grid-cols-5 gap-4">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="rounded-[10px] border h-[320px] animate-pulse" style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }} />
+                  <div key={i} className="rounded-[10px] border h-[320px] animate-pulse" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }} />
                 ))}
               </div>
             )}
@@ -876,15 +876,15 @@ export default function ScreenerHomePage() {
             {!basketsLoading && !basketsError && basketsData && (
               <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Object.keys(basketsData.grouped).length}, 1fr)` }}>
                 {Object.entries(basketsData.grouped).map(([category, baskets]) => (
-                  <div key={category} className="relative rounded-[10px] border overflow-hidden" style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
-                    <div className="px-4 py-4 border-b" style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.10em] leading-tight" style={{ color: "var(--qc-text-heading)" }}>{category}</p>
-                      <p className="text-[11px] mt-1" style={{ color: "var(--qc-text-muted)" }}>{baskets.length} basket{baskets.length !== 1 ? "s" : ""}</p>
+                  <div key={category} className="relative rounded-[10px] border overflow-hidden" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}>
+                    <div className="px-4 py-4 border-b" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.10em] leading-tight" style={{ color: "var(--qc-ink)" }}>{category}</p>
+                      <p className="text-[11px] mt-1" style={{ color: "var(--qc-ink-2)" }}>{baskets.length} basket{baskets.length !== 1 ? "s" : ""}</p>
                     </div>
-                    <div className="divide-y divide-[var(--qc-border-inner)]">
+                    <div className="divide-y divide-[var(--qc-hair-2)]">
                       {baskets.map((basket) => <BasketRow key={basket.id} basket={basket} />)}
                     </div>
-                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10" style={{ background: "linear-gradient(180deg, transparent 0%, var(--qc-surface-panel) 100%)" }} />
+                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10" style={{ background: "linear-gradient(180deg, transparent 0%, var(--qc-section) 100%)" }} />
                   </div>
                 ))}
               </div>

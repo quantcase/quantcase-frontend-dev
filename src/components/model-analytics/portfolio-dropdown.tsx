@@ -23,7 +23,7 @@ export function PortfolioDropdown({ portfolios, selected, onChange }: Props) {
       >
         <div className="flex-1 text-left">
           <div className="flex items-center gap-2">
-            <span style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-text-heading)" }}>{selected.name}</span>
+            <span style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)" }}>{selected.name}</span>
             <span
               className="rounded-sm px-1.5 py-0.5"
               style={{
@@ -38,7 +38,7 @@ export function PortfolioDropdown({ portfolios, selected, onChange }: Props) {
               {riskLabel(selected.riskProfile)}
             </span>
           </div>
-          <div style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 1 }}>
+          <div style={{ fontSize: 11, color: "var(--qc-ink-2)", marginTop: 1 }}>
             {selected.client.clientName} · {selected.client.aum}
           </div>
         </div>
@@ -61,8 +61,8 @@ export function PortfolioDropdown({ portfolios, selected, onChange }: Props) {
             >
               <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: riskColor(p.riskProfile) }} />
               <div className="flex-1 min-w-0">
-                <div style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>{p.name}</div>
-                <div style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>{p.name}</div>
+                <div style={{ fontSize: 11, color: "var(--qc-ink-2)", marginTop: 1 }}>
                   {p.client.clientName} · {p.client.aum}
                 </div>
               </div>

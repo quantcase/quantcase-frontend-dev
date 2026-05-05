@@ -17,8 +17,8 @@ export function ShareholdingPanel({ segments }: ShareholdingPanelProps) {
   return (
     <div
       style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
         padding: "16px 18px",
       }}
@@ -35,7 +35,7 @@ export function ShareholdingPanel({ segments }: ShareholdingPanelProps) {
         <span
           style={{
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10.5, color: "var(--qc-text-muted)",
+            fontSize: 10.5, color: "var(--qc-ink-2)",
             letterSpacing: ".06em", textTransform: "uppercase",
           }}
         >
@@ -73,7 +73,7 @@ export function ShareholdingPanel({ segments }: ShareholdingPanelProps) {
           <div
             style={{
               flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-start",
-              padding: "0 10px", color: "var(--qc-text-muted)",
+              padding: "0 10px", color: "var(--qc-ink-2)",
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, fontWeight: 500,
               background: "repeating-linear-gradient(45deg,#F2F1EC,#F2F1EC 6px,#EAE9E2 6px,#EAE9E2 12px)",
             }}
@@ -93,14 +93,14 @@ export function ShareholdingPanel({ segments }: ShareholdingPanelProps) {
               paddingLeft: 10, borderLeft: `2px solid ${color}`,
             }}
           >
-            <span style={{ fontSize: 11, color: "var(--qc-text-muted)", letterSpacing: ".02em" }}>
+            <span style={{ fontSize: 11, color: "var(--qc-ink-2)", letterSpacing: ".02em" }}>
               {label}
             </span>
             <span
               style={{
                 fontSize: 14,
                 fontWeight: p != null ? 500 : 400,
-                color: p != null ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+                color: p != null ? "var(--qc-ink)" : "var(--qc-ink-2)",
                 fontVariantNumeric: "tabular-nums",
                 letterSpacing: "-0.005em",
               }}

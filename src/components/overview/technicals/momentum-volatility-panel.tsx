@@ -46,11 +46,11 @@ export function MomentumVolatilityPanel({
               marginBottom: 6,
             }}
           >
-            <span style={{ fontSize: 12, color: "var(--qc-text-body)", fontWeight: 500 }}>RSI (14)</span>
+            <span style={{ fontSize: 12, color: "var(--qc-ink)", fontWeight: 500 }}>RSI (14)</span>
             <span
               style={{
                 fontSize: 17, fontWeight: 500, letterSpacing: "-0.015em",
-                color: "var(--qc-text-heading)", fontVariantNumeric: "tabular-nums", lineHeight: 1,
+                color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums", lineHeight: 1,
               }}
             >
               {rsiValue.toFixed(0)}
@@ -68,7 +68,7 @@ export function MomentumVolatilityPanel({
               style={{
                 position: "absolute", top: -5, bottom: -5,
                 left: `${rsiPct}%`,
-                width: 3, background: "var(--qc-text-heading)", borderRadius: 2,
+                width: 3, background: "var(--qc-ink)", borderRadius: 2,
                 boxShadow: "0 0 0 2px rgba(255,255,255,.9)",
               }}
             />
@@ -77,7 +77,7 @@ export function MomentumVolatilityPanel({
             style={{
               display: "flex", justifyContent: "space-between",
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: ".04em", marginTop: 6,
+              fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: ".04em", marginTop: 6,
             }}
           >
             <span>0 · Oversold</span>

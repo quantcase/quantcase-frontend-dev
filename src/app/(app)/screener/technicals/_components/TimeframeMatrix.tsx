@@ -38,10 +38,10 @@ export function TimeframeMatrix({ timeframes }: TimeframeMatrixProps) {
             <div
               key={key}
               className="flex items-center justify-between py-2.5 px-2"
-              style={i > 0 ? { borderTop: "1px solid var(--qc-border-inner)" } : undefined}
+              style={i > 0 ? { borderTop: "1px solid var(--qc-hair-2)" } : undefined}
             >
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-heading)" }}>{label}</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink)" }}>{label}</p>
                 <p className="text-[12px] font-medium" style={{ color: directionColor(tf.trend) }}>{tf.trend}</p>
               </div>
               <SignalBadge label={tf.signal.replace(/_/g, " ")} color={signalColor(tf.signal)} />
@@ -50,11 +50,11 @@ export function TimeframeMatrix({ timeframes }: TimeframeMatrixProps) {
         })}
         <div
           className="flex items-center justify-between py-2.5 px-2"
-          style={{ borderTop: "1px solid var(--qc-border-inner)" }}
+          style={{ borderTop: "1px solid var(--qc-hair-2)" }}
         >
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-heading)" }}>Multi-TF Score</p>
-            <p className="text-[12px]" style={{ color: "var(--qc-text-body)" }}>{timeframes.multiTimeframeScore.toFixed(1)}/100</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink)" }}>Multi-TF Score</p>
+            <p className="text-[12px]" style={{ color: "var(--qc-ink)" }}>{timeframes.multiTimeframeScore.toFixed(1)}/100</p>
           </div>
           <SignalBadge label={timeframes.multiTimeframeSignal} color={signalColor(timeframes.multiTimeframeSignal)} />
         </div>

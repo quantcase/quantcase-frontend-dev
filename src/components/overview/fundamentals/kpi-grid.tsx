@@ -22,11 +22,11 @@ function KpiCard({ label, value, unit, yoy, muted }: KpiCardProps) {
   const yoyBg =
     yoy.cls === "pos" ? "var(--qc-up-soft)"
     : yoy.cls === "neg" ? "var(--qc-down-soft)"
-    : "var(--qc-chip-bg, #F2F1EC)";
+    : "var(--qc-chip, #F2F1EC)";
   const yoyColor =
     yoy.cls === "pos" ? "var(--qc-up)"
     : yoy.cls === "neg" ? "var(--qc-down)"
-    : "var(--qc-text-muted)";
+    : "var(--qc-ink-2)";
 
   const Icon =
     yoy.cls === "pos" ? TrendingUp
@@ -36,7 +36,7 @@ function KpiCard({ label, value, unit, yoy, muted }: KpiCardProps) {
   return (
     <div
       style={{
-        background: muted ? "var(--qc-surface-panel, #F2F1EC)" : "var(--qc-surface-white)",
+        background: muted ? "var(--qc-section, #F2F1EC)" : "var(--qc-card)",
         padding: "10px 14px",
         display: "flex",
         flexDirection: "column",
@@ -45,7 +45,7 @@ function KpiCard({ label, value, unit, yoy, muted }: KpiCardProps) {
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <span style={{ fontSize: 11.5, color: "var(--qc-text-body)", letterSpacing: ".01em" }}>
+        <span style={{ fontSize: 11.5, color: "var(--qc-ink)", letterSpacing: ".01em" }}>
           {label}
         </span>
         <span
@@ -65,7 +65,7 @@ function KpiCard({ label, value, unit, yoy, muted }: KpiCardProps) {
         <div
           style={{
             fontSize: 18, fontWeight: 400,
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             fontVariantNumeric: "tabular-nums", lineHeight: 1.1, marginTop: "auto",
           }}
         >
@@ -75,14 +75,14 @@ function KpiCard({ label, value, unit, yoy, muted }: KpiCardProps) {
         <div
           style={{
             fontSize: 18, fontWeight: 500, letterSpacing: "-0.015em",
-            color: "var(--qc-text-heading)", fontVariantNumeric: "tabular-nums",
+            color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums",
             lineHeight: 1.1, marginTop: "auto",
           }}
         >
           {value}
           {unit && (
             <span
-              style={{ fontSize: 12, fontWeight: 400, color: "var(--qc-text-muted)", marginLeft: 3, letterSpacing: 0 }}
+              style={{ fontSize: 12, fontWeight: 400, color: "var(--qc-ink-2)", marginLeft: 3, letterSpacing: 0 }}
             >
               {unit}
             </span>
@@ -143,8 +143,8 @@ export function KpiGrid({
         display: "grid",
         gridTemplateColumns: "repeat(4,1fr)",
         gap: 1,
-        background: "var(--qc-border-default)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-hair)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
         overflow: "hidden",
         marginBottom: 14,

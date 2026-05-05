@@ -16,9 +16,9 @@ const MODEL_TYPES: ModelType[] = ["equity", "debt", "hybrid", "structured", "pms
 const inputStyle: React.CSSProperties = {
   width: "100%",
   borderRadius: 6,
-  border: "1px solid var(--qc-border-default)",
-  background: "var(--qc-surface-card)",
-  color: "var(--qc-text-heading)",
+  border: "1px solid var(--qc-hair)",
+  background: "var(--qc-card)",
+  color: "var(--qc-ink)",
   fontSize: 13,
   padding: "7px 12px",
   outline: "none",
@@ -28,7 +28,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: 11,
   fontWeight: 500,
-  color: "var(--qc-text-muted)",
+  color: "var(--qc-ink-2)",
   marginBottom: 4,
   textTransform: "uppercase",
   letterSpacing: "0.06em",
@@ -77,18 +77,18 @@ export function CreateModelForm({ onSuccess, onCancel }: CreateModelFormProps) {
       onSubmit={handleSubmit}
       className="space-y-4 rounded-[14px] p-5"
       style={{
-        border: "1px solid var(--qc-border-default)",
-        background: "var(--qc-surface-card)",
+        border: "1px solid var(--qc-hair)",
+        background: "var(--qc-card)",
       }}
     >
       <div className="flex items-center justify-between">
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>
+        <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>
           New Approved Model
         </h3>
         <button
           type="button"
           onClick={onCancel}
-          style={{ fontSize: 12, color: "var(--qc-text-muted)" }}
+          style={{ fontSize: 12, color: "var(--qc-ink-2)" }}
           className="hover:opacity-70 transition-opacity"
         >
           Cancel

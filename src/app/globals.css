@@ -119,6 +119,9 @@
     --qc-lime-ink:    var(--qc-ink);
     --qc-lime-ink-2:  #4A5F20;
 
+    --qc-golden-grad-from: #f8f6ee;
+    --qc-golden-grad-to:   #FFEB99;
+
     --qc-chip:        var(--qc-section);
 
     --qc-up:          #1F7A4A;
@@ -323,6 +326,12 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
+}
+
+/* ── Golden card ────────────────────────────────────────────────── */
+.qc-golden-card {
+  background: linear-gradient(175deg, var(--qc-golden-grad-from) 0%, var(--qc-golden-grad-to) 100%);
+  border: 1px solid var(--qc-lime-edge);
 }
 
 /* ── Dark gradient card ─────────────────────────────────────────── */

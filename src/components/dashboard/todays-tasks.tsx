@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CardShell, MonoLabel } from "@/components/ds";
+import { CommonCard, MonoLabel } from "@/components/ds";
 
 export type TaskStatus = "pending" | "done" | "overdue";
 
@@ -22,6 +22,34 @@ const BADGE_STYLE: Record<TaskStatus, React.CSSProperties> = {
   done:    { background: "var(--qc-up-soft)",   color: "var(--qc-up)",   border: "1px solid #BBD9C6" },
 };
 
+const TITLE_ICON = (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ color: "var(--qc-ink-2)" }}>
+    <rect x="3" y="5" width="3.5" height="3.5" rx="0.5"/><rect x="3" y="15" width="3.5" height="3.5" rx="0.5"/>
+    <path d="M9 6.5h11 M9 16.5h11"/>
+  </svg>
+);
+
+const ADD_ACTION = (
+  <button
+    style={{
+      width: 22,
+      height: 22,
+      borderRadius: 6,
+      background: "var(--qc-lime)",
+      color: "var(--qc-ink)",
+      border: "1px solid var(--qc-lime-edge)",
+      cursor: "pointer",
+      display: "grid",
+      placeItems: "center",
+    }}
+    aria-label="Add task"
+  >
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M12 5v14 M5 12h14"/>
+    </svg>
+  </button>
+);
+
 export function TodaysTasks({ tasks: initialTasks }: TodaysTasksProps) {
   const [tasks, setTasks] = useState<TaskItem[]>(initialTasks);
 
@@ -36,37 +64,7 @@ export function TodaysTasks({ tasks: initialTasks }: TodaysTasksProps) {
   }
 
   return (
-    <CardShell style={{ padding: "14px 16px" }}>
-      {/* Head */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-        <MonoLabel style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ color: "var(--qc-ink-2)" }}>
-            <rect x="3" y="5" width="3.5" height="3.5" rx="0.5"/><rect x="3" y="15" width="3.5" height="3.5" rx="0.5"/>
-            <path d="M9 6.5h11 M9 16.5h11"/>
-          </svg>
-          Today&apos;s tasks
-        </MonoLabel>
-
-        <button
-          style={{
-            width: 22,
-            height: 22,
-            borderRadius: 6,
-            background: "var(--qc-lime)",
-            color: "var(--qc-ink)",
-            border: "1px solid var(--qc-lime-edge)",
-            cursor: "pointer",
-            display: "grid",
-            placeItems: "center",
-          }}
-          aria-label="Add task"
-        >
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M12 5v14 M5 12h14"/>
-          </svg>
-        </button>
-      </div>
-
+    <CommonCard title="Today's tasks" titleIcon={TITLE_ICON} action={ADD_ACTION} style={{ paddingBottom: 2 }}>
       <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
         {tasks.map((task, i) => {
           const isDone = task.status === "done";
@@ -85,7 +83,6 @@ export function TodaysTasks({ tasks: initialTasks }: TodaysTasksProps) {
                 cursor: "pointer",
               }}
             >
-              {/* Checkbox */}
               <div
                 style={{
                   width: 16,
@@ -124,6 +121,6 @@ export function TodaysTasks({ tasks: initialTasks }: TodaysTasksProps) {
           );
         })}
       </ul>
-    </CardShell>
+    </CommonCard>
   );
 }

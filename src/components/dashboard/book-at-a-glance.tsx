@@ -1,4 +1,4 @@
-import { CardShell, MonoLabel } from "@/components/ds";
+import { CommonCard, MonoLabel } from "@/components/ds";
 import type { ReactNode } from "react";
 
 const DELTA_COLOR: Record<string, string> = {
@@ -24,9 +24,7 @@ const CELLS: Cell[] = [
 
 export function BookAtAGlance() {
   return (
-    <CardShell style={{ padding: "14px 16px 16px", marginBottom: 14 }}>
-      <MonoLabel style={{ display: "block", marginBottom: 14 }}>Book at a glance</MonoLabel>
-
+    <CommonCard title="Book at a glance" style={{ marginBottom: 14 }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 18px" }}>
         {CELLS.map((cell, i) => (
           <div key={i}>
@@ -51,6 +49,6 @@ export function BookAtAGlance() {
           </div>
         ))}
       </div>
-    </CardShell>
+    </CommonCard>
   );
 }

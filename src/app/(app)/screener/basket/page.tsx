@@ -533,7 +533,7 @@ function BasketContent() {
             <div
               className="absolute inset-0"
               style={{
-                background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime-bg) 0%, transparent 70%)",
+                background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime) 0%, transparent 70%)",
               }}
             />
           </div>
@@ -611,7 +611,7 @@ function BasketContent() {
                   {conditions.length > 0 && (
                     <div
                       className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border"
-                      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-lime-bg)" }}
+                      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-lime)" }}
                     >
                       <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--qc-ink)" }}>Conditions</span>
                       <span className="text-[15px] font-semibold" style={{ color: "var(--qc-ink)" }}>{conditions.length}</span>
@@ -793,10 +793,10 @@ function BasketContent() {
                                 }
                                 className="cursor-pointer transition-colors group"
                                 onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
-                                onMouseLeave={e => (e.currentTarget.style.background = row.getIsSelected() ? "var(--qc-lime-bg)" : "")}
+                                onMouseLeave={e => (e.currentTarget.style.background = row.getIsSelected() ? "var(--qc-lime)" : "")}
                                 style={{
                                   borderBottom: !isLast ? "1px solid var(--qc-hair-2)" : undefined,
-                                  background: row.getIsSelected() ? "var(--qc-lime-bg)" : undefined,
+                                  background: row.getIsSelected() ? "var(--qc-lime)" : undefined,
                                 }}
                               >
                                 {row.getVisibleCells().map((cell) => {

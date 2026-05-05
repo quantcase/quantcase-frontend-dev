@@ -220,7 +220,7 @@ function MfBasketContent() {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-56 overflow-hidden">
           <div
             className="absolute inset-0"
-            style={{ background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime-bg) 0%, transparent 70%)" }}
+            style={{ background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime) 0%, transparent 70%)" }}
           />
         </div>
 
@@ -281,7 +281,7 @@ function MfBasketContent() {
                 {conditions.length > 0 && (
                   <div
                     className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border"
-                    style={{ borderColor: "var(--qc-hair)", background: "var(--qc-lime-bg)" }}
+                    style={{ borderColor: "var(--qc-hair)", background: "var(--qc-lime)" }}
                   >
                     <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--qc-ink)" }}>Conditions</span>
                     <span className="text-[15px] font-semibold" style={{ color: "var(--qc-ink)" }}>{conditions.length}</span>

@@ -1,5 +1,6 @@
-import { Avatar, Badge, ActionButton, CardShell, ColorRail, SectionHeader } from "@/components/ds";
+import { Avatar, Badge, ActionButton, ColorRail, LimeCountPip, MonoLabel } from "@/components/ds";
 import type { BadgeVariant } from "@/components/ds/Badge";
+import { PhoneCall } from "lucide-react";
 
 const CLIENTS = [
   {
@@ -51,10 +52,33 @@ const CLIENTS = [
 
 export function WhoToCallToday() {
   return (
-    <div>
-      <SectionHeader label="Who to call today" count={3} linkLabel="All clients →" />
+    <div
+      className="rounded-[10px] p-2"
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", alignSelf: "start" }}
+    >
+      {/* Header — matches RM Heartbeat header style */}
+      <div className="px-2 pt-1 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <PhoneCall className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Who to call today</MonoLabel>
+          <LimeCountPip count={3} />
+        </div>
+        <span
+          style={{
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.04em",
+            color: "var(--qc-ink-3)",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+          }}
+        >
+          ALL CLIENTS →
+        </span>
+      </div>
 
-      <CardShell style={{ overflow: "hidden" }}>
+      {/* Content — white inner card matching RM Heartbeat's graph canvas wrapper */}
+      <div className="rounded-[10px] overflow-hidden" style={{ background: "var(--qc-card)" }}>
         {CLIENTS.map((c, i) => (
           <div
             key={c.id}
@@ -78,19 +102,19 @@ export function WhoToCallToday() {
                 <Badge variant={c.badgeVariant}>{c.badge}</Badge>
               </div>
               <div style={{ fontSize: 12.5, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>{c.why}</div>
+              <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: 10, color: "var(--qc-ink-3)", marginTop: 6 }}>{c.lastTouch}</div>
             </div>
 
             {/* Numbers */}
             <div style={{ textAlign: "right", fontFamily: "var(--qc-font-mono)", fontSize: 13, lineHeight: 1.4 }}>
               <div style={{ color: "var(--qc-ink)", fontSize: 13.5 }}>{c.aum}</div>
               <div style={{ fontSize: 11, color: c.retNeg ? "var(--qc-down)" : "var(--qc-up)" }}>{c.ret}</div>
-              <div style={{ fontSize: 10.5, color: "var(--qc-ink-3)", marginTop: 2 }}>{c.lastTouch}</div>
             </div>
 
-            <ActionButton variant="primary" style={{ borderRadius: 8 }}>{c.cta}</ActionButton>
+            <ActionButton noWrap>{c.cta}</ActionButton>
           </div>
         ))}
-      </CardShell>
+      </div>
     </div>
   );
 }

@@ -268,7 +268,7 @@ export function ManagementIntelligenceCard({ intelligence, mqiScore }: Props) {
         {/* lime gradient overlay at bottom */}
         <div style={{
           position: "absolute", inset: "auto 0 0 0", height: "50%",
-          background: "linear-gradient(180deg, transparent 0%, var(--qc-lime-bg) 100%)",
+          background: "linear-gradient(180deg, transparent 0%, var(--qc-lime) 100%)",
           zIndex: 0, pointerEvents: "none",
         }} />
 

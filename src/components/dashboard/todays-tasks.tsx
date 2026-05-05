@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CommonCard, MonoLabel } from "@/components/ds";
+import { MonoLabel } from "@/components/ds";
 
 export type TaskStatus = "pending" | "done" | "overdue";
 
@@ -64,63 +64,102 @@ export function TodaysTasks({ tasks: initialTasks }: TodaysTasksProps) {
   }
 
   return (
-    <CommonCard title="Today's tasks" titleIcon={TITLE_ICON} action={ADD_ACTION} style={{ paddingBottom: 2 }}>
-      <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-        {tasks.map((task, i) => {
-          const isDone = task.status === "done";
-          return (
-            <li
-              key={task.id}
-              onClick={() => toggleTask(task.id)}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "18px 1fr auto",
-                gap: 10,
-                alignItems: "center",
-                padding: "10px 0",
-                borderTop: i === 0 ? "none" : "1px dashed var(--qc-hair-2)",
-                fontSize: 13,
-                cursor: "pointer",
-              }}
-            >
-              <div
+    <aside
+      style={{
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
+        borderRadius: 18,
+        padding: "14px 16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+        position: "relative",
+        overflow: "hidden",
+        marginTop: 14,
+      }}
+    >
+      {/* Lime gradient overlay (bottom 60%) */}
+      <div
+        style={{
+          position: "absolute",
+          inset: "auto 0 0 0",
+          height: "60%",
+          background: "linear-gradient(180deg, transparent 0%, var(--qc-lime) 100%)",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      />
+
+      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <MonoLabel style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {TITLE_ICON}
+            Today&apos;s tasks
+          </MonoLabel>
+          {ADD_ACTION}
+        </div>
+
+        {/* Task list */}
+        <ul style={{ listStyle: "none", margin: 0, padding: 0, paddingTop: 8, gap: 0 }}>
+          {tasks.map((task, i) => {
+            const isDone = task.status === "done";
+            return (
+              <li
+                key={task.id}
+                onClick={() => toggleTask(task.id)}
                 style={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: 4,
-                  border: isDone ? "1px solid var(--qc-up)" : "1px solid var(--qc-hair)",
-                  background: isDone ? "var(--qc-up)" : "#fff",
-                  display: "grid",
-                  placeItems: "center",
-                  color: "#fff",
-                  flexShrink: 0,
+                  display: "flex",
+                  gap: 10,
+                  alignItems: "start",
+                  paddingTop: i === 0 ? 0 : 8,
+                  paddingBottom: 8,
+                  borderTop: i === 0 ? "none" : "1px dashed var(--qc-hair-2)",
+                  fontSize: 13,
+                  cursor: "pointer",
+                  marginLeft: 0,
                 }}
               >
-                {isDone && (
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12l5 5L20 7"/>
-                  </svg>
-                )}
-              </div>
-
-              <span style={{ color: isDone ? "var(--qc-ink-3)" : "var(--qc-ink)", textDecoration: isDone ? "line-through" : "none" }}>
-                {task.label}
-              </span>
-
-              {task.meta && (
-                <MonoLabel
-                  size={9.5}
-                  tracking="0.12em"
-                  color={task.status === "overdue" ? "var(--qc-down)" : isDone ? "var(--qc-up)" : "var(--qc-ink-3)"}
-                  style={{ padding: "3px 7px", borderRadius: 4, ...BADGE_STYLE[task.status] }}
+                <div
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: 4,
+                    border: isDone ? "1px solid var(--qc-up)" : "1px solid var(--qc-hair)",
+                    background: isDone ? "var(--qc-up)" : "#fff",
+                    display: "grid",
+                    placeItems: "center",
+                    color: "#fff",
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
                 >
-                  {task.meta}
-                </MonoLabel>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </CommonCard>
+                  {isDone && (
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12l5 5L20 7"/>
+                    </svg>
+                  )}
+                </div>
+
+                <span style={{ flex: 1, color: isDone ? "var(--qc-ink-3)" : "var(--qc-ink)", textDecoration: isDone ? "line-through" : "none" }}>
+                  {task.label}
+                </span>
+
+                {task.meta && (
+                  <MonoLabel
+                    size={9.5}
+                    tracking="0.12em"
+                    color={task.status === "overdue" ? "var(--qc-down)" : isDone ? "var(--qc-up)" : "var(--qc-ink-3)"}
+                    style={{ padding: "3px 7px", borderRadius: 4, alignSelf: "start", marginTop: 1, ...BADGE_STYLE[task.status] }}
+                  >
+                    {task.meta}
+                  </MonoLabel>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </aside>
   );
 }

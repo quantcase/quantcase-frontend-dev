@@ -672,7 +672,7 @@ function BasketRow({ basket }: { basket: Basket }) {
       <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
         <span
           className="text-[10px] font-medium rounded-sm px-1.5 py-0.5 tabular-nums"
-          style={{ background: "var(--qc-lime-bg)", color: "var(--qc-ink)" }}
+          style={{ background: "var(--qc-lime)", color: "var(--qc-ink)" }}
         >
           {basket.conditions.length}
         </span>
@@ -724,7 +724,7 @@ export default function ScreenerHomePage() {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-64 overflow-hidden">
           <div
             className="absolute inset-0"
-            style={{ background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime-bg) 0%, transparent 70%)" }}
+            style={{ background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime) 0%, transparent 70%)" }}
           />
         </div>
         <div className="relative max-w-3xl mx-auto px-6 pt-16 pb-14 flex flex-col items-center gap-6">

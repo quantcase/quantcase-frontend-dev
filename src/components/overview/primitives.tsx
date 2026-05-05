@@ -182,7 +182,7 @@ export function NarrativeSidebar({ eyebrow, headline, body, tags }: NarrativeSid
           position: "absolute",
           inset: "auto 0 0 0",
           height: "60%",
-          background: "linear-gradient(180deg, transparent 0%, var(--qc-lime-bg) 100%)",
+          background: "linear-gradient(180deg, transparent 0%, var(--qc-lime) 100%)",
           zIndex: 0,
           pointerEvents: "none",
         }}

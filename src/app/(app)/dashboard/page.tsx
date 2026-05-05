@@ -7,7 +7,6 @@ import { BookAtAGlance } from "@/components/dashboard/book-at-a-glance";
 import { TodaysTasks } from "@/components/dashboard/todays-tasks";
 import { WhatChangedToday } from "@/components/dashboard/what-changed-today";
 import { SmartSegmentsPills } from "@/components/dashboard/smart-segments-pills";
-import { ResearchTerminalNudge } from "@/components/dashboard/research-terminal-nudge";
 import { OpportunitiesPanel } from "@/components/dashboard/opportunities-panel";
 import type { TaskItem } from "@/components/dashboard/todays-tasks";
 
@@ -305,11 +304,6 @@ export default function DashboardPage() {
             SMART SEGMENTS
         ═══════════════════════════════════════════════════════════════ */}
         <SmartSegmentsPills />
-
-        {/* ════════════════════════════════════════════════════════════
-            RESEARCH TERMINAL NUDGE
-        ═══════════════════════════════════════════════════════════════ */}
-        <ResearchTerminalNudge />
 
         {/* ════════════════════════════════════════════════════════════
             OPPORTUNITIES WORTH A CONVERSATION

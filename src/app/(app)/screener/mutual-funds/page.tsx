@@ -474,7 +474,7 @@ function MfScreenerContent() {
             className="absolute inset-0"
             style={{
               background:
-                "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime-bg) 0%, transparent 70%)",
+                "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime) 0%, transparent 70%)",
             }}
           />
         </div>

@@ -86,7 +86,7 @@ function CardHeader({
         {Icon && (
           <span
             className="flex items-center justify-center w-6 h-6 rounded-[6px]"
-            style={{ background: "var(--qc-lime-bg)", border: "1px solid var(--qc-hair)" }}
+            style={{ background: "var(--qc-lime)", border: "1px solid var(--qc-hair)" }}
           >
             <Icon size={12} style={{ color: "var(--qc-ink)" }} />
           </span>
@@ -173,7 +173,7 @@ function HeroTile({
       className="rounded-[10px] border px-4 py-4 flex flex-col gap-1.5 relative overflow-hidden"
       style={{
         borderColor: accent ? "var(--qc-lime)" : "var(--qc-hair)",
-        background: accent ? "var(--qc-lime-bg)" : "var(--qc-card)",
+        background: accent ? "var(--qc-lime)" : "var(--qc-card)",
       }}
     >
       {accent && (
@@ -244,7 +244,7 @@ function ReturnsStrip({ returns, rankTotal }: { returns: MFReturns; rankTotal: n
               <span
                 className="text-[9px] px-1.5 py-0.5 rounded-sm tabular-nums"
                 style={{
-                  background: isTop ? "var(--qc-lime-bg)" : "var(--qc-section)",
+                  background: isTop ? "var(--qc-lime)" : "var(--qc-section)",
                   color: isTop ? "var(--qc-ink)" : "var(--qc-ink-2)",
                 }}
               >
@@ -581,7 +581,7 @@ function RelatedVariants({ variants, currentCode }: { variants: MFRelatedVariant
           <div
             key={v.amfi_code}
             className="flex items-center justify-between px-5 py-3 transition-colors"
-            style={{ background: v.amfi_code === currentCode ? "var(--qc-lime-bg)" : undefined }}
+            style={{ background: v.amfi_code === currentCode ? "var(--qc-lime)" : undefined }}
             onMouseEnter={e => { if (v.amfi_code !== currentCode) e.currentTarget.style.background = "var(--qc-section)"; }}
             onMouseLeave={e => { if (v.amfi_code !== currentCode) e.currentTarget.style.background = ""; }}
           >
@@ -623,7 +623,7 @@ function EquityHoldingsTable({ holdings }: { holdings: EquityHolding[] }) {
       {top10Weight > 0 && (
         <div
           className="px-5 py-2.5 border-b flex gap-6 text-[11px]"
-          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-lime-bg)" }}
+          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-lime)" }}
         >
           <span style={{ color: "var(--qc-ink-2)" }}>
             Top-10 concentration:{" "}
@@ -1153,7 +1153,7 @@ export default function MutualFundDetailPage() {
               badge={
                 <span
                   className="ml-1 text-[10px] font-semibold rounded-sm px-1.5 py-0.5 tabular-nums"
-                  style={{ background: "var(--qc-lime-bg)", color: "var(--qc-ink)" }}
+                  style={{ background: "var(--qc-lime)", color: "var(--qc-ink)" }}
                 >
                   {holdings.equity_holdings.length}
                 </span>
@@ -1172,7 +1172,7 @@ export default function MutualFundDetailPage() {
               badge={
                 <span
                   className="ml-1 text-[10px] font-semibold rounded-sm px-1.5 py-0.5 tabular-nums"
-                  style={{ background: "var(--qc-lime-bg)", color: "var(--qc-ink)" }}
+                  style={{ background: "var(--qc-lime)", color: "var(--qc-ink)" }}
                 >
                   {holdings.debt_holdings.length}
                 </span>

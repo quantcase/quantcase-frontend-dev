@@ -15,8 +15,9 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { motion } from "framer-motion";
-import { Network, ChevronRight, Users, TrendingUp } from "lucide-react";
+import { Network, Maximize2, Minimize2, Users, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MonoLabel } from "@/components/ds";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -125,12 +126,12 @@ function RMCardNode({ data }: NodeProps) {
         style={{
           background: "var(--qc-card)",
           border: `1.5px solid ${cfg.border}`,
-          boxShadow: `0 4px 24px ${cfg.glow}, 0 1px 4px rgba(0,0,0,0.06)`,
+          boxShadow: `0 1px 3px rgba(0,0,0,0.06)`,
           padding: "14px 18px 12px",
           minWidth: 160,
           position: "relative",
         }}
-        whileHover={{ scale: 1.03, boxShadow: `0 8px 32px ${cfg.glow}` }}
+        whileHover={{ scale: 1.03, boxShadow: `0 2px 8px rgba(0,0,0,0.08)` }}
         transition={{ type: "spring", stiffness: 400, damping: 20 }}
       >
         {/* Severity badge top-right */}
@@ -478,21 +479,6 @@ function buildNodesEdges(
   return { nodes, edges };
 }
 
-// ── Legend ────────────────────────────────────────────────────────────────────
-
-function Legend() {
-  return (
-    <div className="flex items-center gap-4">
-      {(["critical", "warning", "moderate", "clean"] as SignalSeverity[]).map((sev) => (
-        <div key={sev} className="flex items-center gap-1.5">
-          <span className="inline-block rounded-full" style={{ width: 7, height: 7, background: SEV[sev].border }} />
-          <span className="text-[10px] font-medium" style={{ color: "var(--qc-ink-2)" }}>{SEV[sev].label}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // ── Inner graph (needs ReactFlow context) ─────────────────────────────────────
 
 interface InnerGraphProps {
@@ -558,9 +544,7 @@ function InnerGraph({ rms, expandedIds, handleToggle, isFullyExpanded, setExpand
       <div className="px-2 pt-1 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Network className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
-            RM Heartbeat
-          </span>
+          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">RM Heartbeat</MonoLabel>
           {critCount > 0 && (
             <span className="text-[9px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5"
               style={{ background: "var(--qc-down-soft)", color: "var(--qc-down)", border: "1px solid var(--qc-down)" }}>
@@ -574,33 +558,34 @@ function InnerGraph({ rms, expandedIds, handleToggle, isFullyExpanded, setExpand
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <Legend />
-          <button
-            onClick={() => {
-              if (isFullyExpanded) {
-                setExpandedIds(() => new Set());
-                setTimeout(() => fitView({ padding: 0.25, duration: 500 }), 80);
-              } else {
-                const all = new Set<string>();
-                rms.forEach((rm) => {
-                  all.add(rm.id);
-                  rm.clients.forEach((c) => { all.add(c.id); c.assetClasses.forEach((a) => all.add(a.id)); });
-                });
-                setExpandedIds(() => all);
-                setTimeout(() => fitView({ padding: 0.15, duration: 600 }), 80);
-              }
-            }}
-            className="flex items-center gap-1 text-[11px] font-medium rounded-md px-2 py-1 transition-colors"
-            style={{ color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}
-          >
-            {isFullyExpanded ? "Collapse" : "Full View"} <ChevronRight className="size-3 ml-0.5" />
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            if (isFullyExpanded) {
+              setExpandedIds(() => new Set());
+              setTimeout(() => fitView({ padding: 0.25, duration: 500 }), 80);
+            } else {
+              const all = new Set<string>();
+              rms.forEach((rm) => {
+                all.add(rm.id);
+                rm.clients.forEach((c) => { all.add(c.id); c.assetClasses.forEach((a) => all.add(a.id)); });
+              });
+              setExpandedIds(() => all);
+              setTimeout(() => fitView({ padding: 0.15, duration: 600 }), 80);
+            }
+          }}
+          className="rounded-md p-1.5 transition-colors"
+          style={{ color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}
+          aria-label={isFullyExpanded ? "Collapse all" : "Expand all"}
+        >
+          {isFullyExpanded
+            ? <Minimize2 className="size-3.5" />
+            : <Maximize2 className="size-3.5" />
+          }
+        </button>
       </div>
 
       {/* Graph canvas */}
-      <div className="rounded-[10px] overflow-hidden flex-1" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)" }}>
+      <div className="rounded-[10px] overflow-hidden flex-1" style={{ background: "var(--qc-card)" }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -621,10 +606,6 @@ function InnerGraph({ rms, expandedIds, handleToggle, isFullyExpanded, setExpand
           <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--qc-hair)" />
         </ReactFlow>
       </div>
-
-      <p className="text-center text-[10px] mt-1.5" style={{ color: "var(--qc-ink-3)" }}>
-        Click any node to expand · scroll to zoom · drag to pan
-      </p>
     </div>
   );
 }

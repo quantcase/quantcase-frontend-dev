@@ -262,7 +262,7 @@ export default function DashboardPage() {
         <section
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: "2fr 3fr",
             gap: 14,
             marginBottom: 14,
           }}

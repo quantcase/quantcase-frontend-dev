@@ -12,7 +12,7 @@ export function TodaysBriefing() {
       style={{
         padding: "22px 26px 20px",
         color: "#fff",
-        minHeight: 250,
+        minHeight: 320,
         display: "flex",
         flexDirection: "column",
       }}

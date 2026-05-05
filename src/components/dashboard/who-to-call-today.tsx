@@ -84,7 +84,7 @@ export function WhoToCallToday() {
             key={c.id}
             style={{
               display: "grid",
-              gridTemplateColumns: "36px minmax(0,1fr) 120px 130px",
+              gridTemplateColumns: "36px minmax(0,1fr) 120px 100px",
               gap: 18,
               alignItems: "center",
               padding: "16px 18px",

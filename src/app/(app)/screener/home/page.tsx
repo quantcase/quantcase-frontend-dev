@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -13,7 +13,13 @@ import {
   ChevronLeft,
   ChevronRight,
   SlidersHorizontal,
+  Scale,
+  CloudLightning,
+  TrendingUp,
+  Sprout,
+  Zap,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { AutocompleteInput, AutocompleteOption } from "@/components/molecules/autocomplete-input";
 import { useBaskets } from "@/hooks/useBaskets";
 import { useMfBaskets } from "@/hooks/useMfBaskets";
@@ -651,15 +657,47 @@ function MfScreenerSection() {
   );
 }
 
+// ── Category icon map ─────────────────────────────────────────────────────────
+
+interface CategoryMeta { icon: React.ReactNode; label: string }
+
+const CATEGORY_META: Record<string, CategoryMeta> = {
+  "VALUE INVESTING":                       { icon: <Scale className="size-3.5" />,        label: "Value Investing"   },
+  "MARKET CONDITION — BEAR / FEAR":        { icon: <CloudLightning className="size-3.5" />, label: "Bear / Fear"      },
+  "MARKET CONDITION — RECOVERY / REBOUND": { icon: <TrendingUp className="size-3.5" />,    label: "Recovery / Rebound"},
+  "GROWTH INVESTING":                      { icon: <Sprout className="size-3.5" />,        label: "Growth Investing"  },
+  "SPECIAL SITUATIONS":                    { icon: <Zap className="size-3.5" />,           label: "Special Situations"},
+};
+
+function getCategoryMeta(category: string): CategoryMeta {
+  const upper = category.toUpperCase();
+  const key = Object.keys(CATEGORY_META).find((k) => upper === k);
+  return key ? CATEGORY_META[key] : { icon: <Scale className="size-3.5" />, label: category };
+}
+
 // ── Stock basket row ──────────────────────────────────────────────────────────
 
 function BasketRow({ basket }: { basket: Basket }) {
+  const [hovered, setHovered] = useState(false);
+  const rowRef = useRef<HTMLAnchorElement>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
+
+  const handleMouseEnter = () => {
+    setHovered(true);
+    if (rowRef.current) {
+      const rect = rowRef.current.getBoundingClientRect();
+      setTooltipPos({ top: rect.bottom + 6, left: rect.left });
+    }
+  };
+
   return (
     <Link
+      ref={rowRef}
       href={`/screener/basket?id=${encodeURIComponent(basket.id)}`}
-      className="group flex items-start justify-between gap-3 px-4 py-3 transition-colors"
-      onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
-      onMouseLeave={e => (e.currentTarget.style.background = "")}
+      className="flex items-start px-4 py-3 transition-colors"
+      style={{ background: hovered ? "var(--qc-section)" : "" }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={() => { setHovered(false); setTooltipPos(null); }}
     >
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-medium leading-snug truncate" style={{ color: "var(--qc-ink)" }}>
@@ -669,15 +707,47 @@ function BasketRow({ basket }: { basket: Basket }) {
           {basket.description}
         </p>
       </div>
-      <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
+      <div className="flex items-center gap-2 flex-shrink-0 pt-0.5 ml-3">
+        <motion.div
+          animate={{ opacity: hovered ? 0.5 : 0, x: hovered ? 0 : -4 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
+        >
+          <ArrowRight className="size-3" style={{ color: "var(--qc-ink)" }} />
+        </motion.div>
         <span
           className="text-[10px] font-medium rounded-sm px-1.5 py-0.5 tabular-nums"
           style={{ background: "var(--qc-lime)", color: "var(--qc-ink)" }}
         >
           {basket.conditions.length}
         </span>
-        <ArrowRight className="size-3 opacity-0 group-hover:opacity-40 transition-opacity" style={{ color: "var(--qc-ink)" }} />
       </div>
+
+      <AnimatePresence>
+        {hovered && tooltipPos && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            style={{
+              position: "fixed",
+              top: tooltipPos.top,
+              left: tooltipPos.left,
+              zIndex: 50,
+              maxWidth: 300,
+              background: "var(--qc-card)",
+              border: "1px solid var(--qc-hair)",
+              borderRadius: 10,
+              padding: "10px 14px",
+              pointerEvents: "none",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06)",
+            }}
+          >
+            <p style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.3, marginBottom: 5, color: "var(--qc-ink)" }}>{basket.title}</p>
+            <p style={{ fontSize: 11.5, lineHeight: 1.6, color: "var(--qc-ink-2)" }}>{basket.description}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Link>
   );
 }
@@ -718,15 +788,9 @@ export default function ScreenerHomePage() {
   const { data: basketsData, loading: basketsLoading, error: basketsError } = useBaskets();
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--qc-bg)" }}>
+    <div style={{ background: "var(--qc-bg)", minHeight: "100vh" }}>
       {/* Hero search section */}
       <div className="relative" style={{ background: "var(--qc-bg)" }}>
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-64 overflow-hidden">
-          <div
-            className="absolute inset-0"
-            style={{ background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime) 0%, transparent 70%)" }}
-          />
-        </div>
         <div className="relative max-w-3xl mx-auto px-6 pt-16 pb-14 flex flex-col items-center gap-6">
           <div className="text-center space-y-2">
             <h2 className="text-[32px] font-medium leading-tight" style={{ color: "var(--qc-ink)" }}>
@@ -746,7 +810,7 @@ export default function ScreenerHomePage() {
                 className="px-4 py-1.5 rounded-full text-xs font-medium transition-all"
                 style={
                   activeTab === tab
-                    ? { background: "var(--qc-lime)", color: "#ffffff" }
+                    ? { background: "var(--qc-ink)", color: "var(--qc-on-dark)" }
                     : { color: "var(--qc-ink-2)" }
                 }
               >
@@ -878,8 +942,23 @@ export default function ScreenerHomePage() {
                 {Object.entries(basketsData.grouped).map(([category, baskets]) => (
                   <div key={category} className="relative rounded-[10px] border overflow-hidden" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}>
                     <div className="px-4 py-4 border-b" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.10em] leading-tight" style={{ color: "var(--qc-ink)" }}>{category}</p>
-                      <p className="text-[11px] mt-1" style={{ color: "var(--qc-ink-2)" }}>{baskets.length} basket{baskets.length !== 1 ? "s" : ""}</p>
+                      {(() => {
+                        const meta = getCategoryMeta(category);
+                        return (
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="flex-shrink-0 inline-flex items-center justify-center rounded-[6px]"
+                              style={{ width: 30, height: 30, background: "var(--qc-card)", border: "1px solid var(--qc-hair)", color: "var(--qc-ink-2)" }}
+                            >
+                              {meta.icon}
+                            </div>
+                            <div>
+                              <p className="text-[12px] font-semibold leading-tight" style={{ color: "var(--qc-ink)" }}>{meta.label}</p>
+                              <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-ink-2)" }}>{baskets.length} basket{baskets.length !== 1 ? "s" : ""}</p>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div className="divide-y divide-[var(--qc-hair-2)]">
                       {baskets.map((basket) => <BasketRow key={basket.id} basket={basket} />)}

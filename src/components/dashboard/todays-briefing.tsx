@@ -1,5 +1,4 @@
-import { ActionButton } from "@/components/ds";
-import { MonoLabel } from "@/components/ds";
+import { ActionButton, DarkGradientCard, MonoLabel } from "@/components/ds";
 
 const CHIPS = [
   { pip: "var(--qc-down)", label: "Call Rahul" },
@@ -9,28 +8,15 @@ const CHIPS = [
 
 export function TodaysBriefing() {
   return (
-    <article
+    <DarkGradientCard
       style={{
-        background: "var(--qc-ink)",
-        borderRadius: 18,
         padding: "22px 26px 20px",
         color: "#fff",
-        position: "relative",
-        overflow: "hidden",
         minHeight: 250,
         display: "flex",
         flexDirection: "column",
       }}
     >
-      {/* Lime corner glow */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "radial-gradient(circle at 30% 0%, rgba(212,242,106,0.14), transparent 55%)",
-          pointerEvents: "none",
-        }}
-      />
 
       <MonoLabel
         size={10}
@@ -87,6 +73,6 @@ export function TodaysBriefing() {
           </ActionButton>
         ))}
       </div>
-    </article>
+    </DarkGradientCard>
   );
 }

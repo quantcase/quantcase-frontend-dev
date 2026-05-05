@@ -65,41 +65,8 @@
   :root {
     --radius: 0.625rem;
 
-    /* shadcn tokens */
-    --background: #FBFAF7;
-    --foreground: #210B2C;
-    --card: #FFFFFF;
-    --card-foreground: #210B2C;
-    --popover: #FFFFFF;
-    --popover-foreground: #210B2C;
-    --primary: #210B2C;
-    --primary-foreground: #FFFFFF;
-    --secondary: #F3F2EE;
-    --secondary-foreground: #210B2C;
-    --muted: #F3F2EE;
-    --muted-foreground: #5A5A54;
-    --accent: #F3F2EE;
-    --accent-foreground: #210B2C;
-    --destructive: #B23A2F;
-    --border: #E9E7E1;
-    --input: #E9E7E1;
-    --ring: #210B2C;
-    --chart-1: #210B2C;
-    --chart-2: #5A5A54;
-    --chart-3: #9A9A92;
-    --chart-4: #1F7A4A;
-    --chart-5: #3A6BEF;
-    --sidebar: #FFFFFF;
-    --sidebar-foreground: #210B2C;
-    --sidebar-primary: #210B2C;
-    --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #F3F2EE;
-    --sidebar-accent-foreground: #210B2C;
-    --sidebar-border: #E9E7E1;
-    --sidebar-ring: #210B2C;
-
     /* ── QuantCase design tokens ── */
-    --qc-bg:          #EDECE8;
+    --qc-bg:          var(--qc-hair-2);
     --qc-surface:     #FBFAF7;
     --qc-section:     #F3F2EE;
     --qc-card:        #FFFFFF;
@@ -109,22 +76,54 @@
     --qc-ink-3:       #9A9A92;
     --qc-on-dark:     #FFFFFF;
 
+    /* shadcn tokens — derived from qc-* vars */
+    --background: var(--qc-surface);
+    --foreground: var(--qc-ink);
+    --card: var(--qc-card);
+    --card-foreground: var(--qc-ink);
+    --popover: var(--qc-card);
+    --popover-foreground: var(--qc-ink);
+    --primary: var(--qc-ink);
+    --primary-foreground: var(--qc-on-dark);
+    --secondary: var(--qc-section);
+    --secondary-foreground: var(--qc-ink);
+    --muted: var(--qc-section);
+    --muted-foreground: var(--qc-ink-2);
+    --accent: var(--qc-section);
+    --accent-foreground: var(--qc-ink);
+    --destructive: #B23A2F;
+    --border: var(--qc-hair);
+    --input: var(--qc-hair);
+    --ring: var(--qc-ink);
+    --chart-1: var(--qc-ink);
+    --chart-2: var(--qc-ink-2);
+    --chart-3: var(--qc-ink-3);
+    --chart-4: var(--qc-up);
+    --chart-5: var(--qc-blue);
+    --sidebar: var(--qc-card);
+    --sidebar-foreground: var(--qc-ink);
+    --sidebar-primary: var(--qc-ink);
+    --sidebar-primary-foreground: var(--qc-on-dark);
+    --sidebar-accent: var(--qc-section);
+    --sidebar-accent-foreground: var(--qc-ink);
+    --sidebar-border: var(--qc-hair);
+    --sidebar-ring: var(--qc-ink);
+
     --qc-hair:        #E9E7E1;
     --qc-hair-2:      #EFEDE7;
 
     --qc-lime:        #FFEB99;
-    --qc-lime-2:      #C9EE55;
     --qc-lime-soft:   #EAF7BC;
-    --qc-lime-bg:     #E9F4C4;
+    --qc-lime-bg:     var(--qc-lime-soft);
     --qc-lime-edge:   #C6DC8A;
-    --qc-lime-ink:    #210b2c;
+    --qc-lime-ink:    var(--qc-ink);
     --qc-lime-ink-2:  #4A5F20;
 
-    --qc-chip:        #F2F1EC;
+    --qc-chip:        var(--qc-section);
 
     --qc-up:          #1F7A4A;
     --qc-up-soft:     #E3F1E8;
-    --qc-down:        #B23A2F;
+    --qc-down:        var(--destructive);
     --qc-down-soft:   #F7E6E3;
     --qc-warn:        #B4731A;
     --qc-warn-soft:   #FAF0D8;
@@ -132,8 +131,8 @@
     --qc-blue-soft:   #E9EEFE;
 
     --qc-brand-pill-bg-1: #F4FBDD;
-    --qc-brand-pill-bg-2: #EAF5C3;
-    --qc-brand-pill-edge: #D9E8A6;
+    --qc-brand-pill-bg-2: var(--qc-lime-soft);
+    --qc-brand-pill-edge: var(--qc-lime-edge);
     --qc-brand-chip:      #E86854;
 
     --qc-font-sans: 'DM Sans', 'Inter', system-ui, -apple-system, Segoe UI, sans-serif;
@@ -182,6 +181,13 @@
     --qc-r-5:    18px;
     --qc-r-6:    24px;
     --qc-r-pill: 999px;
+
+    --qc-dark-card-base:         var(--primary);
+    --qc-dark-card-glow:         #191265;
+    --qc-dark-card-glow-near:    #172f70d9;
+    --qc-dark-card-glow-tail:    #0808288c;
+    --qc-dark-card-vignette:     #000000d9;
+    --qc-dark-card-vignette-mid: #0000008c;
 
     --qc-shadow-shell: 0 30px 60px -30px rgba(0, 0, 0, .18), 0 1px 0 rgba(255, 255, 255, .8) inset;
     --qc-shadow-annot: 0 8px 24px rgba(14, 14, 12, 0.08);
@@ -317,4 +323,47 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
+}
+
+/* ── Dark gradient card ─────────────────────────────────────────── */
+.qc-dark-gradient-card {
+  background: var(--qc-dark-card-base);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.qc-dark-gradient-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 55% at 100% 100%,
+      var(--qc-dark-card-glow-near) 0%,
+      var(--qc-dark-card-glow)      25%,
+      var(--qc-dark-card-glow-tail) 40%,
+      transparent                   75%),
+    linear-gradient(165deg,
+      var(--qc-dark-card-base)  0%,
+      var(--qc-dark-card-base)  40%,
+      var(--qc-dark-card-glow)  100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.qc-dark-gradient-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 60% at 0% 0%,
+    var(--qc-dark-card-vignette)     0%,
+    var(--qc-dark-card-vignette-mid) 30%,
+    transparent                      65%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.qc-dark-gradient-card > * {
+  position: relative;
+  z-index: 2;
 }

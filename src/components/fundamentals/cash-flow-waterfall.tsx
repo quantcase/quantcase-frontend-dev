@@ -115,7 +115,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
       },
     },
     grid: {
-      borderColor: "#EFEDE7", // --qc-section / --qc-hair-2
+      borderColor: "var(--qc-hair-2)",
       strokeDashArray: 3,
       xaxis: { lines: { show: false } },
     },

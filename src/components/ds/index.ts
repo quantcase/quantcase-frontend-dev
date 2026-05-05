@@ -7,3 +7,4 @@ export { ColorRail } from "./ColorRail";
 export { ActionButton } from "./ActionButton";
 export { MonoLabel } from "./MonoLabel";
 export { LimeGradientCard } from "./LimeGradientCard";
+export { DarkGradientCard } from "./DarkGradientCard";

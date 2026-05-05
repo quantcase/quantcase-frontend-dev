@@ -122,20 +122,12 @@ export function InvestmentThesisSection({ thesis }: InvestmentThesisSectionProps
   ) : undefined;
 
   return (
-    <SectionPanel title="Investment Thesis + Next Concall Watchlist" headerAction={headerAction}>
+    <SectionPanel title="Investment Thesis" headerAction={headerAction}>
       <div className="flex flex-col gap-5">
         {(bull_case.length > 0 || bear_case.length > 0) && (
           <BullBearSplit bullCase={bull_case} bearCase={bear_case} />
         )}
 
-        {next_concall_watchlist.length > 0 && (
-          <div>
-            <p style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
-              Next Concall Watchlist
-            </p>
-            <WatchlistTable items={next_concall_watchlist} />
-          </div>
-        )}
       </div>
     </SectionPanel>
   );

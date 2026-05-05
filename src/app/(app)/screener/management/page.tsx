@@ -19,6 +19,11 @@ import { InvestmentThesisSection } from "@/components/management/investment-thes
 import { ScoreBreakdownCard } from "@/components/management/score-breakdown-card";
 import { ReanalyzeButton } from "@/components/management/reanalyze-button";
 import { AnalyzePrompt } from "@/components/management/analyze-prompt";
+import { ThreePointStorySection } from "@/components/management/three-point-story-section";
+import { SectionScoresSection } from "@/components/management/section-scores-section";
+import { DecisionIntelligenceSection } from "@/components/management/decision-intelligence-section";
+import { NextConcallWatchlistSection } from "@/components/management/next-concall-watchlist-section";
+import type { StoryPoint } from "@/components/management/three-point-story-section";
 
 const NAV_ITEMS = [
   { id: "section-score", label: "Score" },
@@ -262,6 +267,37 @@ function ManagementDashboardContent() {
           )}
         </div>
 
+        {/* 3-Point Story */}
+        {managementData.management_intelligence && (() => {
+          const signals = managementData.management_intelligence!.signals_breakdown.filter(s => s.max_score > 0);
+          const storyPoints: StoryPoint[] = signals.slice(0, 3).map(s => ({
+            type: s.sentiment === "positive" ? "strength" : s.sentiment === "negative" ? "risk" : "neutral",
+            headline: s.details?.[0] ?? s.label,
+          }));
+          return storyPoints.length > 0 ? <ThreePointStorySection points={storyPoints} /> : null;
+        })()}
+
+        {/* Section Scores */}
+        {managementData.management_intelligence?.signals_breakdown && (
+          <SectionScoresSection signals={managementData.management_intelligence.signals_breakdown} />
+        )}
+
+        {/* Decision Intelligence */}
+        {managementData.investment_thesis && managementData.red_flags && managementData.red_flags.length > 0 && (
+          <DecisionIntelligenceSection
+            thesis={managementData.investment_thesis}
+            redFlags={managementData.red_flags}
+          />
+        )}
+
+        {/* Next Concall Watchlist */}
+        {managementData.investment_thesis?.next_concall_watchlist && managementData.investment_thesis.next_concall_watchlist.length > 0 && (
+          <NextConcallWatchlistSection
+            watchlist={managementData.investment_thesis.next_concall_watchlist}
+            period={transcriptCalls[0]?.quarter}
+          />
+        )}
+
         {/* Guidance Accuracy */}
         <div id="section-guidance">
           <SectionPanel
@@ -287,13 +323,6 @@ function ManagementDashboardContent() {
             <GuidanceTrackTable rows={managementData.guidance_vs_actuals?.rows ?? []} filterState={guidanceFilterState} />
           </SectionPanel>
         </div>
-
-        {/* Red Flags */}
-        {managementData.red_flags && managementData.red_flags.length > 0 && (
-          <div id="section-red-flags">
-            <RedFlagsSection flags={managementData.red_flags} />
-          </div>
-        )}
 
         {/* Investment Thesis */}
         {managementData.investment_thesis && (

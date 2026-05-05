@@ -84,7 +84,7 @@ export function SectionPanel({
           {typeof title === "string" ? (
             <div style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>{title}</div>
           ) : title}
-          {subtitle && <p>{subtitle}</p>}
+          {subtitle && <p style={{ margin: 0, fontSize: 13, fontWeight: 400, color: "var(--qc-ink-2)", lineHeight: 1.3 }}>{subtitle}</p>}
           {subHeader && <div>{subHeader}</div>}
         </div>
         {scoring && <SectionScoreBar scoring={scoring} />}

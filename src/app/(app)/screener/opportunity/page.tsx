@@ -7,9 +7,10 @@ import { useOpportunityAnalysis } from "@/hooks/useOpportunityAnalysis";
 import { usePeerData } from "@/hooks/usePeerData";
 import type { OFactorResponse } from "@/types/opportunity";
 
-import { PanelRight, TrendingUp, BarChart3, DollarSign, Users } from "lucide-react";
+import { TrendingUp, BarChart3, DollarSign, Users } from "lucide-react";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { ScreenerScorecard } from "@/components/molecules/screener-scorecard";
+import { OpportunityScoreBreakdownCard } from "@/components/opportunity/opportunity-score-breakdown-card";
 import { PromptSideWindow } from "@/components/opportunity/prompt-side-window";
 import { CompetitionCard } from "@/components/opportunity/competition-card";
 import { CompetitiveBenchmarking } from "@/components/opportunity/competitive-benchmarking";
@@ -22,7 +23,6 @@ import { IndustryKpiTable } from "@/components/opportunity/industry-kpi-table";
 import { KpiBenchmarkingTable } from "@/components/opportunity/kpi-benchmarking-table";
 import { CustomerTractionCard } from "@/components/opportunity/customer-traction-card";
 import { SectionPanel } from "@/components/opportunity/section-panel";
-import { TakeawayBox } from "@/components/opportunity/takeaway-box";
 import { IndustryAnalysisCard } from "@/components/opportunity/industry-analysis-card";
 import { IndustryIntelligenceCard } from "@/components/opportunity/industry-intelligence-card";
 import { CompetitionIntelligenceCard } from "@/components/opportunity/competition-intelligence-card";
@@ -125,10 +125,10 @@ function OpportunityContent() {
 
   const scorecardItems = (
     [
-      { name: "Industry", scoring: industryScoring, takeaway: data.industry_overview?.text?.takeaway },
-      { name: "Competition", scoring: competitionScoring, takeaway: data.competition?.text?.takeaway },
-      { name: "Financial Strength", scoring: financialScoring, takeaway: data.financial_strength?.text?.takeaway },
-      { name: "Customer Traction", scoring: customerScoring, takeaway: data.customer_traction?.core?.text?.takeaway },
+      { name: "Industry", scoring: industryScoring, takeaway: data.final_takeaways?.section_scores?.industry?.status },
+      { name: "Competition", scoring: competitionScoring, takeaway: data.final_takeaways?.section_scores?.competition?.status },
+      { name: "Financial Strength", scoring: financialScoring, takeaway: data.final_takeaways?.section_scores?.financial_strength?.status },
+      { name: "Customer Traction", scoring: customerScoring, takeaway: data.final_takeaways?.section_scores?.customer_traction?.status },
     ] as const
   ).map((row) => {
     const s = row.scoring;
@@ -161,14 +161,27 @@ function OpportunityContent() {
         </button> */}
 
         {/* Score */}
-        <div id="section-score" className="pt-4">
-          <ScreenerScorecard
-            title="OPPORTUNITY FACTOR"
-            overallLevel={opportunityLevel(overallScore, overallMax)}
-            score={overallScore}
-            maxScore={overallMax}
-            items={scorecardItems}
-          />
+        <div id="section-score" className="flex gap-4 items-stretch pt-4">
+          <div style={{ flex: "0 0 40%", minWidth: 0 }}>
+            <ScreenerScorecard
+              title="VERDICT"
+              overallLevel={opportunityLevel(overallScore, overallMax)}
+              score={overallScore}
+              maxScore={overallMax}
+              items={scorecardItems}
+              verdictAfter={data.final_takeaways?.investment_thesis ?? undefined}
+            />
+          </div>
+          <div style={{ flex: "0 0 60%", minWidth: 0 }}>
+            <OpportunityScoreBreakdownCard
+              overallScore={overallScore}
+              overallMax={overallMax}
+              overallStatus={data.final_takeaways?.overall_status ?? opportunityLevel(overallScore, overallMax)}
+              sectionScores={data.final_takeaways?.section_scores ?? {}}
+              title={data.final_takeaways?.key_highlights?.[0] ?? undefined}
+              subtitle={data.final_takeaways?.key_highlights?.[1] ?? undefined}
+            />
+          </div>
         </div>
 
         {/* Industry Analysis */}

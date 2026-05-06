@@ -5,10 +5,9 @@ import { TrendingUp } from "lucide-react";
 
 interface DealOverviewProps {
   data?: OverviewSection;
-  riskReward?: RiskRewardSummarySection;
 }
 
-export function DealOverview({ data, riskReward }: DealOverviewProps) {
+export function DealOverview({ data }: DealOverviewProps) {
   if (!data) return null;
 
   const { eps_engine_card, valuation_rerating_card, deal_factor_score, deal_verdict, key_takeaway } = data;
@@ -53,7 +52,7 @@ export function DealOverview({ data, riskReward }: DealOverviewProps) {
 
       {/* Right: score breakdown card */}
       <div style={{ flex: "0 0 60%", minWidth: 0 }}>
-        <DealScoreBreakdownCard overview={data} riskReward={riskReward} />
+        <DealScoreBreakdownCard overview={data} />
       </div>
 
     </div>

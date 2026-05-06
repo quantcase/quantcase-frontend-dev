@@ -283,7 +283,7 @@ function DealContent() {
         <div className="flex-1 min-w-0 space-y-6">
           {data.overview && (
             <div id="score">
-              <DealOverview data={data.overview} riskReward={data.risk_reward_summary} />
+              <DealOverview data={data.overview} />
             </div>
           )}
           <div id="target-price">

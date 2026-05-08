@@ -5,6 +5,9 @@ import { Loader2 } from "lucide-react";
 import { rawFetch } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { AutocompleteInput, AutocompleteOption } from "@/components/molecules/autocomplete-input";
+import { TabToggle } from "@/components/molecules/tab-toggle";
+
+type Granularity = "annual" | "quarterly";
 
 interface Indicator {
   id: string;
@@ -28,6 +31,11 @@ interface DeltaEntry {
   delta: number | null;
 }
 
+interface FiscalPeriod {
+  fiscal_year: string;
+  quarter: string;
+}
+
 interface IndicatorDetail {
   success: boolean;
   ticker: string;
@@ -36,11 +44,14 @@ interface IndicatorDetail {
   name: string;
   unit: string;
   bfsi: boolean;
+  granularity?: Granularity;
   value?: number;
   source: string;
   formula?: unknown;
   inputs?: unknown;
   inputValues?: Record<string, number | DeltaEntry>;
+  currentPeriod?: FiscalPeriod;
+  prevPeriod?: FiscalPeriod;
   seriesUsed?: PeriodEntry[];
   allPeriods?: PeriodEntry[];
   spanYears?: number;
@@ -168,10 +179,32 @@ function DetailView({ data }: { data: IndicatorDetail }) {
           <span className="text-[#888888]">Unit: </span>
           <span className="text-[#0F172B] font-medium">{data.unit}</span>
         </span>
+        {data.granularity && (
+          <span>
+            <span className="text-[#888888]">Granularity: </span>
+            <span className="text-[#0F172B] font-medium capitalize">{data.granularity}</span>
+          </span>
+        )}
         <span>
           <span className="text-[#888888]">BFSI: </span>
           <span className="text-[#0F172B] font-medium">{data.bfsi ? "Yes" : "No"}</span>
         </span>
+        {data.currentPeriod && (
+          <span>
+            <span className="text-[#888888]">Current: </span>
+            <span className="text-[#0F172B] font-medium">
+              {data.currentPeriod.fiscal_year} {data.currentPeriod.quarter}
+            </span>
+          </span>
+        )}
+        {data.prevPeriod && (
+          <span>
+            <span className="text-[#888888]">Previous: </span>
+            <span className="text-[#0F172B] font-medium">
+              {data.prevPeriod.fiscal_year} {data.prevPeriod.quarter}
+            </span>
+          </span>
+        )}
       </div>
 
       {/* Formula */}
@@ -315,6 +348,7 @@ export function DataSanityTab() {
   const [ticker, setTicker] = useState("");
   const [metricLabel, setMetricLabel] = useState("");
   const [selectedMetricId, setSelectedMetricId] = useState("");
+  const [granularity, setGranularity] = useState<Granularity>("annual");
 
   const [detail, setDetail] = useState<IndicatorDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -335,17 +369,37 @@ export function DataSanityTab() {
     );
   }, []);
 
+  // Re-fetch when granularity toggles (only if a metric is already selected)
+  useEffect(() => {
+    const t = ticker.trim().toUpperCase();
+    if (!t || !selectedMetricId) return;
+    rawFetch<IndicatorDetail>(
+      `${BACKEND_URL}/admin/indicators/${t}/${selectedMetricId}?granularity=${granularity}`,
+      {
+        onStart: () => {
+          setLoadingDetail(true);
+          setDetail(null);
+          setDetailError(null);
+        },
+        onSuccess: (res) => setDetail(res),
+        onError: (err) => setDetailError(err),
+        onComplete: () => setLoadingDetail(false),
+      }
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [granularity]);
+
   const options: AutocompleteOption[] = indicators.map((ind) => ({
     value: ind.id,
     label: ind.name,
     subtitle: ind.desc ?? `${ind.computationType} · ${ind.unit}`,
   }));
 
-  function fetchDetail(metricId: string) {
+  function fetchDetail(metricId: string, gran: Granularity = granularity) {
     const t = ticker.trim().toUpperCase();
     if (!t || !metricId) return;
     rawFetch<IndicatorDetail>(
-      `${BACKEND_URL}/admin/indicators/${t}/${metricId}`,
+      `${BACKEND_URL}/admin/indicators/${t}/${metricId}?granularity=${gran}`,
       {
         onStart: () => {
           setLoadingDetail(true);
@@ -359,7 +413,14 @@ export function DataSanityTab() {
     );
   }
 
-  function handleMetricSelect(metricId: string) {
+  function handleMetricSelect(valueOrLabel: string) {
+    // AutocompleteInput may call onSubmit with option.value (id) when clicking,
+    // or with the raw input text (label/name) when submitting via the form button.
+    // Resolve whichever we get to the canonical indicator id.
+    const match = indicators.find(
+      (ind) => ind.id === valueOrLabel || ind.name === valueOrLabel
+    );
+    const metricId = match?.id ?? valueOrLabel;
     setSelectedMetricId(metricId);
     fetchDetail(metricId);
   }
@@ -406,6 +467,19 @@ export function DataSanityTab() {
               maxSuggestions={22}
             />
           )}
+        </div>
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5 block">
+            Granularity
+          </label>
+          <div className="h-[58px] flex items-center">
+            <TabToggle
+              options={["annual", "quarterly"]}
+              value={granularity}
+              onChange={(v) => setGranularity(v as Granularity)}
+              variant="outline"
+            />
+          </div>
         </div>
       </div>
 

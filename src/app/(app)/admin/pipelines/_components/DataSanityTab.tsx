@@ -19,6 +19,18 @@ interface Indicator {
   inputs?: unknown;
 }
 
+// Entry in the new data[] array (raw / formula / delta types)
+interface PeriodDataEntry {
+  fiscal_year: string;
+  quarter: string;
+  value?: number;
+  source: string;
+  formula?: unknown;
+  inputs?: unknown;
+  inputValues?: Record<string, number | DeltaEntry>;
+}
+
+// cagr / average period row
 interface PeriodEntry {
   period: string;
   fiscal_year: string;
@@ -45,26 +57,29 @@ interface IndicatorDetail {
   unit: string;
   bfsi: boolean;
   granularity?: Granularity;
+  // New array format (raw / formula / delta types)
+  data?: PeriodDataEntry[];
+  // Legacy single-value (kept for cagr / average types, which are unchanged)
   value?: number;
-  source: string;
+  source?: string;
   formula?: unknown;
   inputs?: unknown;
   inputValues?: Record<string, number | DeltaEntry>;
   currentPeriod?: FiscalPeriod;
   prevPeriod?: FiscalPeriod;
+  // cagr
   seriesUsed?: PeriodEntry[];
   allPeriods?: PeriodEntry[];
   spanYears?: number;
+  // average
   periods?: PeriodEntry[];
   windowSize?: number;
 }
 
+// Backend now returns values already in the correct unit (Cr, %, etc.)
 function fmtNum(v: number | null | undefined, unit: string): string {
   if (v == null) return "—";
-  if (unit === "Cr") {
-    const cr = v / 1e7;
-    return `${cr.toLocaleString("en-IN", { maximumFractionDigits: 2 })} Cr`;
-  }
+  if (unit === "Cr") return `${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })} Cr`;
   if (unit === "%") return `${v.toFixed(2)}%`;
   return v.toLocaleString("en-IN", { maximumFractionDigits: 4 });
 }
@@ -96,6 +111,102 @@ function FormulaDisplay({ formula }: { formula: unknown }) {
     );
   }
   return null;
+}
+
+function InputValuesTable({
+  inputValues,
+  unit,
+}: {
+  inputValues: Record<string, number | DeltaEntry>;
+  unit: string;
+}) {
+  const hasDelta = Object.values(inputValues).some(isDeltaEntry);
+
+  if (hasDelta) {
+    return (
+      <div className="rounded-md border border-[var(--qc-border-default)] overflow-hidden">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="bg-[#F5F5F5] border-b border-[var(--qc-border-default)]">
+              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Component</th>
+              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">Current</th>
+              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">Previous</th>
+              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">Delta</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(inputValues).map(([k, v]) => {
+              const e = v as DeltaEntry;
+              const deltaColor =
+                e.delta == null ? "text-[#888888]" :
+                e.delta > 0 ? "text-emerald-600" :
+                e.delta < 0 ? "text-red-600" : "text-[#888888]";
+              return (
+                <tr key={k} className="border-b last:border-0">
+                  <td className="px-3 py-2 font-mono text-[#0F172B]">{k}</td>
+                  <td className="px-3 py-2 text-right text-[#0F172B]">{fmtNum(e.curr, unit)}</td>
+                  <td className="px-3 py-2 text-right text-[#888888]">{fmtNum(e.prev, unit)}</td>
+                  <td className={`px-3 py-2 text-right font-medium ${deltaColor}`}>{fmtNum(e.delta, unit)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-md border border-[var(--qc-border-default)] overflow-hidden">
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="bg-[#F5F5F5] border-b border-[var(--qc-border-default)]">
+            <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Input</th>
+            <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(inputValues).map(([k, v]) => (
+            <tr key={k} className="border-b last:border-0">
+              <td className="px-3 py-2 font-mono text-[#0F172B]">{k}</td>
+              <td className="px-3 py-2 text-right text-[#0F172B]">{fmtNum(v as number, unit)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function PeriodSection({ entry, unit }: { entry: PeriodDataEntry; unit: string }) {
+  return (
+    <div className="space-y-2">
+      {/* Period header row */}
+      <div className="flex items-center justify-between py-1 border-b border-[var(--qc-border-default)]">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-mono font-medium text-[#0F172B]">
+            {entry.fiscal_year} {entry.quarter}
+          </span>
+          <span className="text-[10px] text-[#888888]">{entry.source}</span>
+        </div>
+        {entry.value != null && (
+          <span className="text-[15px] font-[500] text-[#0F172B]">{fmtNum(entry.value, unit)}</span>
+        )}
+      </div>
+
+      {/* Formula */}
+      {!!entry.formula && (
+        <div className="bg-[#F5F5F5] rounded-md px-3 py-2">
+          <FormulaDisplay formula={entry.formula} />
+        </div>
+      )}
+
+      {/* Input values */}
+      {entry.inputValues && (
+        <InputValuesTable inputValues={entry.inputValues} unit={unit} />
+      )}
+    </div>
+  );
 }
 
 function PeriodTable({
@@ -140,11 +251,9 @@ function PeriodTable({
 }
 
 function DetailView({ data }: { data: IndicatorDetail }) {
-  const hasDelta =
-    !!data.inputValues &&
-    Object.values(data.inputValues).some(isDeltaEntry);
-  const hasSeriesUsed = !!data.seriesUsed;
-  const hasPeriods = !hasSeriesUsed && !!data.periods;
+  const hasArrayData = Array.isArray(data.data) && data.data.length > 0;
+  const hasSeriesUsed = !hasArrayData && !!data.seriesUsed;
+  const hasPeriodRows = !hasArrayData && !hasSeriesUsed && !!data.periods;
 
   return (
     <div className="rounded-[10px] border border-[var(--qc-border-default)] bg-white p-4 space-y-4">
@@ -159,22 +268,17 @@ function DetailView({ data }: { data: IndicatorDetail }) {
             <div className="text-[12px] text-[#888888] mt-0.5">{data.company}</div>
           )}
         </div>
-        {data.value != null && (
+        {/* Show top-level value only for cagr/average (unchanged types) */}
+        {!hasArrayData && data.value != null && (
           <div className="text-right shrink-0">
             <div className="text-[10px] uppercase tracking-wider text-[#888888]">Value</div>
-            <div className="text-[22px] font-[500] text-[#0F172B]">
-              {fmtNum(data.value, data.unit)}
-            </div>
+            <div className="text-[22px] font-[500] text-[#0F172B]">{fmtNum(data.value, data.unit)}</div>
           </div>
         )}
       </div>
 
       {/* Meta row */}
       <div className="flex gap-6 text-[12px] flex-wrap">
-        <span>
-          <span className="text-[#888888]">Source: </span>
-          <span className="text-[#0F172B] font-medium">{data.source}</span>
-        </span>
         <span>
           <span className="text-[#888888]">Unit: </span>
           <span className="text-[#0F172B] font-medium">{data.unit}</span>
@@ -189,7 +293,8 @@ function DetailView({ data }: { data: IndicatorDetail }) {
           <span className="text-[#888888]">BFSI: </span>
           <span className="text-[#0F172B] font-medium">{data.bfsi ? "Yes" : "No"}</span>
         </span>
-        {data.currentPeriod && (
+        {/* Legacy single-period meta */}
+        {!hasArrayData && data.currentPeriod && (
           <span>
             <span className="text-[#888888]">Current: </span>
             <span className="text-[#0F172B] font-medium">
@@ -197,7 +302,7 @@ function DetailView({ data }: { data: IndicatorDetail }) {
             </span>
           </span>
         )}
-        {data.prevPeriod && (
+        {!hasArrayData && data.prevPeriod && (
           <span>
             <span className="text-[#888888]">Previous: </span>
             <span className="text-[#0F172B] font-medium">
@@ -205,110 +310,24 @@ function DetailView({ data }: { data: IndicatorDetail }) {
             </span>
           </span>
         )}
+        {!hasArrayData && data.source && (
+          <span>
+            <span className="text-[#888888]">Source: </span>
+            <span className="text-[#0F172B] font-medium">{data.source}</span>
+          </span>
+        )}
       </div>
 
-      {/* Formula */}
-      {!!data.formula && (
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1">
-            Formula
-          </div>
-          <div className="bg-[#F5F5F5] rounded-md px-3 py-2">
-            <FormulaDisplay formula={data.formula} />
-          </div>
+      {/* New array-based periods (raw / formula / delta types) */}
+      {hasArrayData && (
+        <div className="space-y-4">
+          {data.data!.map((entry, i) => (
+            <PeriodSection key={`${entry.fiscal_year}-${entry.quarter}-${i}`} entry={entry} unit={data.unit} />
+          ))}
         </div>
       )}
 
-      {/* Formula type — inputValues: { key: number } */}
-      {data.inputValues && !hasDelta && (
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1">
-            Input Values
-          </div>
-          <div className="rounded-md border border-[var(--qc-border-default)] overflow-hidden">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-[#F5F5F5] border-b border-[var(--qc-border-default)]">
-                  <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">
-                    Input
-                  </th>
-                  <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">
-                    Value
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(data.inputValues).map(([k, v]) => (
-                  <tr key={k} className="border-b last:border-0">
-                    <td className="px-3 py-2 font-mono text-[#0F172B]">{k}</td>
-                    <td className="px-3 py-2 text-right text-[#0F172B]">
-                      {fmtNum(v as number, data.unit)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Delta type — inputValues: { key: { curr, prev, delta } } */}
-      {data.inputValues && hasDelta && (
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1">
-            Input Components (Δ)
-          </div>
-          <div className="rounded-md border border-[var(--qc-border-default)] overflow-hidden">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-[#F5F5F5] border-b border-[var(--qc-border-default)]">
-                  <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">
-                    Component
-                  </th>
-                  <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">
-                    Current
-                  </th>
-                  <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">
-                    Previous
-                  </th>
-                  <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">
-                    Delta
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(data.inputValues).map(([k, v]) => {
-                  const e = v as DeltaEntry;
-                  const deltaColor =
-                    e.delta == null
-                      ? "text-[#888888]"
-                      : e.delta > 0
-                      ? "text-emerald-600"
-                      : e.delta < 0
-                      ? "text-red-600"
-                      : "text-[#888888]";
-                  return (
-                    <tr key={k} className="border-b last:border-0">
-                      <td className="px-3 py-2 font-mono text-[#0F172B]">{k}</td>
-                      <td className="px-3 py-2 text-right text-[#0F172B]">
-                        {fmtNum(e.curr, data.unit)}
-                      </td>
-                      <td className="px-3 py-2 text-right text-[#888888]">
-                        {fmtNum(e.prev, data.unit)}
-                      </td>
-                      <td className={`px-3 py-2 text-right font-medium ${deltaColor}`}>
-                        {fmtNum(e.delta, data.unit)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* CAGR type */}
+      {/* CAGR type (unchanged) */}
       {hasSeriesUsed && data.seriesUsed && (
         <div className="space-y-3">
           <PeriodTable
@@ -318,17 +337,13 @@ function DetailView({ data }: { data: IndicatorDetail }) {
             note={data.spanYears != null ? `${data.spanYears}y span` : undefined}
           />
           {data.allPeriods && data.allPeriods.length > data.seriesUsed.length && (
-            <PeriodTable
-              rows={data.allPeriods}
-              unit={data.unit}
-              label="All Periods"
-            />
+            <PeriodTable rows={data.allPeriods} unit={data.unit} label="All Periods" />
           )}
         </div>
       )}
 
-      {/* Average type */}
-      {hasPeriods && data.periods && (
+      {/* Average type (unchanged) */}
+      {hasPeriodRows && data.periods && (
         <PeriodTable
           rows={data.periods}
           unit={data.unit}
@@ -349,6 +364,7 @@ export function DataSanityTab() {
   const [metricLabel, setMetricLabel] = useState("");
   const [selectedMetricId, setSelectedMetricId] = useState("");
   const [granularity, setGranularity] = useState<Granularity>("annual");
+  const [periods, setPeriods] = useState(1);
 
   const [detail, setDetail] = useState<IndicatorDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -358,10 +374,7 @@ export function DataSanityTab() {
     rawFetch<{ success: boolean; count: number; indicators: Indicator[] }>(
       `${BACKEND_URL}/admin/indicators`,
       {
-        onStart: () => {
-          setLoadingIndicators(true);
-          setIndicatorError(null);
-        },
+        onStart: () => { setLoadingIndicators(true); setIndicatorError(null); },
         onSuccess: (res) => setIndicators(res.indicators ?? []),
         onError: (err) => setIndicatorError(err),
         onComplete: () => setLoadingIndicators(false),
@@ -369,25 +382,13 @@ export function DataSanityTab() {
     );
   }, []);
 
-  // Re-fetch when granularity toggles (only if a metric is already selected)
+  // Re-fetch when granularity or periods changes (only if a metric is already selected)
   useEffect(() => {
     const t = ticker.trim().toUpperCase();
     if (!t || !selectedMetricId) return;
-    rawFetch<IndicatorDetail>(
-      `${BACKEND_URL}/admin/indicators/${t}/${selectedMetricId}?granularity=${granularity}`,
-      {
-        onStart: () => {
-          setLoadingDetail(true);
-          setDetail(null);
-          setDetailError(null);
-        },
-        onSuccess: (res) => setDetail(res),
-        onError: (err) => setDetailError(err),
-        onComplete: () => setLoadingDetail(false),
-      }
-    );
+    doFetch(t, selectedMetricId, granularity, periods);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [granularity]);
+  }, [granularity, periods]);
 
   const options: AutocompleteOption[] = indicators.map((ind) => ({
     value: ind.id,
@@ -395,17 +396,11 @@ export function DataSanityTab() {
     subtitle: ind.desc ?? `${ind.computationType} · ${ind.unit}`,
   }));
 
-  function fetchDetail(metricId: string, gran: Granularity = granularity) {
-    const t = ticker.trim().toUpperCase();
-    if (!t || !metricId) return;
+  function doFetch(t: string, metricId: string, gran: Granularity, p: number) {
     rawFetch<IndicatorDetail>(
-      `${BACKEND_URL}/admin/indicators/${t}/${metricId}?granularity=${gran}`,
+      `${BACKEND_URL}/admin/indicators/${t}/${metricId}?granularity=${gran}&periods=${p}`,
       {
-        onStart: () => {
-          setLoadingDetail(true);
-          setDetail(null);
-          setDetailError(null);
-        },
+        onStart: () => { setLoadingDetail(true); setDetail(null); setDetailError(null); },
         onSuccess: (res) => setDetail(res),
         onError: (err) => setDetailError(err),
         onComplete: () => setLoadingDetail(false),
@@ -413,10 +408,13 @@ export function DataSanityTab() {
     );
   }
 
+  function fetchDetail(metricId: string) {
+    const t = ticker.trim().toUpperCase();
+    if (!t || !metricId) return;
+    doFetch(t, metricId, granularity, periods);
+  }
+
   function handleMetricSelect(valueOrLabel: string) {
-    // AutocompleteInput may call onSubmit with option.value (id) when clicking,
-    // or with the raw input text (label/name) when submitting via the form button.
-    // Resolve whichever we get to the canonical indicator id.
     const match = indicators.find(
       (ind) => ind.id === valueOrLabel || ind.name === valueOrLabel
     );
@@ -429,10 +427,15 @@ export function DataSanityTab() {
     if (e.key === "Enter" && selectedMetricId) fetchDetail(selectedMetricId);
   }
 
+  function handlePeriodsChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const v = Math.min(20, Math.max(1, parseInt(e.target.value) || 1));
+    setPeriods(v);
+  }
+
   return (
     <div className="space-y-4">
       {/* Controls */}
-      <div className="flex gap-3 items-end">
+      <div className="flex gap-3 items-end flex-wrap">
         <div>
           <label className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5 block">
             Ticker
@@ -446,13 +449,11 @@ export function DataSanityTab() {
             className="px-3 py-2 text-sm rounded-md border border-[var(--qc-border-default)] bg-white text-[var(--qc-text-heading)] placeholder:text-[#888888] focus:outline-none focus:ring-1 focus:ring-[#0F172B] w-36 h-[58px]"
           />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-[220px]">
           <label className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5 block">
             Indicator
             {loadingIndicators && (
-              <span className="normal-case tracking-normal font-normal ml-1 text-[#888888]">
-                — loading…
-              </span>
+              <span className="normal-case tracking-normal font-normal ml-1 text-[#888888]">— loading…</span>
             )}
           </label>
           {indicatorError ? (
@@ -480,6 +481,19 @@ export function DataSanityTab() {
               variant="outline"
             />
           </div>
+        </div>
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5 block">
+            Periods
+          </label>
+          <input
+            type="number"
+            min={1}
+            max={20}
+            value={periods}
+            onChange={handlePeriodsChange}
+            className="px-3 py-2 text-sm rounded-md border border-[var(--qc-border-default)] bg-white text-[var(--qc-text-heading)] focus:outline-none focus:ring-1 focus:ring-[#0F172B] w-20 h-[58px] text-center"
+          />
         </div>
       </div>
 

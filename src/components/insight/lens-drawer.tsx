@@ -1,0 +1,265 @@
+"use client";
+
+import { useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import type { LensDetail } from "@/hooks/useLenses";
+import type { Signal } from "@/hooks/useSignals";
+import { LensDetailGuidance } from "@/components/insight/lens-detail-guidance";
+import { LensDetailPromoter } from "@/components/insight/lens-detail-promoter";
+import { LensDetailDisclosure } from "@/components/insight/lens-detail-disclosure";
+import { LensDetailCapital } from "@/components/insight/lens-detail-capital";
+import { LensDetailIndustry } from "@/components/insight/lens-detail-industry";
+import { LensDetailCompetition } from "@/components/insight/lens-detail-competition";
+import { LensDetailFinancial } from "@/components/insight/lens-detail-financial";
+import { LensDetailCustomer } from "@/components/insight/lens-detail-customer";
+import { LensDetailEps } from "@/components/insight/lens-detail-eps";
+import { LensDetailPeRerating } from "@/components/insight/lens-detail-pe-rerating";
+
+interface LensDrawerProps {
+  lens: LensDetail | null;
+  signals: Signal[];
+  onClose: () => void;
+}
+
+function statusColor(status: string) {
+  const s = status.toUpperCase();
+  if (s === "STRONG") return "var(--qc-up)";
+  if (s === "WEAK") return "var(--qc-down)";
+  return "var(--qc-warn)";
+}
+
+function statusBg(status: string) {
+  const s = status.toUpperCase();
+  if (s === "STRONG") return "rgba(31,122,74,0.12)";
+  if (s === "WEAK") return "rgba(220,38,38,0.12)";
+  return "rgba(180,115,26,0.12)";
+}
+
+function ScoreGauge({ score, max = 100 }: { score: number; max?: number }) {
+  const pct = Math.min(100, Math.round((score / max) * 100));
+  const color = pct >= 70 ? "var(--qc-up)" : pct >= 40 ? "var(--qc-warn)" : "var(--qc-down)";
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ flex: 1, height: 4, borderRadius: 99, background: "var(--qc-hair)", overflow: "hidden" }}>
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          style={{ height: "100%", background: color, borderRadius: 99 }}
+        />
+      </div>
+      <span style={{ fontSize: 13, fontWeight: 600, color, minWidth: 36, textAlign: "right" }}>{pct}</span>
+    </div>
+  );
+}
+
+function LensDetailView({ lens, signals }: { lens: LensDetail; signals: Signal[] }) {
+  switch (lens.slug) {
+    case "guidance-credibility":
+      return <LensDetailGuidance lens={lens} signals={signals} />;
+    case "promoter-activity":
+      return <LensDetailPromoter lens={lens} signals={signals} />;
+    case "disclosure-honesty":
+      return <LensDetailDisclosure lens={lens} signals={signals} />;
+    case "capital-allocation":
+      return <LensDetailCapital lens={lens} signals={signals} />;
+    case "industry-analysis":
+      return <LensDetailIndustry lens={lens} signals={signals} />;
+    case "competition":
+      return <LensDetailCompetition lens={lens} signals={signals} />;
+    case "financial-strength":
+      return <LensDetailFinancial lens={lens} signals={signals} />;
+    case "customer-distribution":
+      return <LensDetailCustomer lens={lens} signals={signals} />;
+    case "eps-engine":
+      return <LensDetailEps lens={lens} signals={signals} />;
+    case "pe-rerating-potential":
+      return <LensDetailPeRerating lens={lens} signals={signals} />;
+    default:
+      return null;
+  }
+}
+
+export function LensDrawer({ lens, signals, onClose }: LensDrawerProps) {
+  useEffect(() => {
+    if (!lens) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [lens, onClose]);
+
+  const color = lens ? statusColor(lens.status) : "var(--qc-up)";
+  const bg = lens ? statusBg(lens.status) : "rgba(31,122,74,0.12)";
+
+  return (
+    <AnimatePresence>
+      {lens && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+            style={{
+              position: "fixed", inset: 0, zIndex: 40,
+              background: "rgba(0,0,0,0.30)", backdropFilter: "blur(2px)",
+            }}
+          />
+
+          {/* Drawer panel */}
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 260 }}
+            style={{
+              position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 50,
+              width: "min(70vw, 1100px)",
+              background: "var(--qc-card)",
+              borderLeft: "1px solid var(--qc-hair)",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              position: "sticky", top: 0, zIndex: 10,
+              background: "var(--qc-card)",
+              borderBottom: "1px solid var(--qc-hair)",
+              padding: "18px 24px 16px",
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: 16,
+            }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <span style={{
+                    fontSize: 9, fontWeight: 700, letterSpacing: "0.12em",
+                    textTransform: "uppercase", color: "var(--qc-ink-3)",
+                  }}>
+                    {lens.category} lens
+                  </span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+                    color, background: bg, border: `1px solid ${color}`,
+                    borderRadius: 4, padding: "2px 8px", textTransform: "uppercase",
+                  }}>
+                    {lens.status}
+                  </span>
+                </div>
+                <h2 style={{
+                  fontSize: 20, fontWeight: 400, margin: 0, lineHeight: 1.3,
+                  color: "var(--qc-ink)", fontFamily: "var(--qc-font-serif, Georgia, serif)",
+                }}>
+                  {lens.name}
+                </h2>
+              </div>
+              <button
+                onClick={onClose}
+                aria-label="Close"
+                style={{
+                  flexShrink: 0, background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+                  borderRadius: 8, width: 32, height: 32, display: "flex",
+                  alignItems: "center", justifyContent: "center", cursor: "pointer",
+                  color: "var(--qc-ink-3)", fontSize: 16, lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Body */}
+            <div style={{ flex: 1, padding: "20px 24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
+
+              {/* Score gauge — always shown */}
+              <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>
+                    Score
+                  </span>
+                  <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>
+                    {lens.signal_count} signals · z={lens.z_score.toFixed(2)}
+                  </span>
+                </div>
+                <ScoreGauge score={lens.score} />
+              </div>
+
+              {/* Takeaway — always shown */}
+              <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
+                <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
+                  Takeaway
+                </p>
+                <p style={{ fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.65, margin: 0 }}>{lens.takeaway}</p>
+              </div>
+
+              {/* Lens-specific rich view — or fall back to generic */}
+              <LensDetailView lens={lens} signals={signals} />
+
+              {/* Generic fallback: key metrics, highlights, risks */}
+              {!["guidance-credibility", "promoter-activity", "disclosure-honesty", "capital-allocation", "industry-analysis", "competition", "financial-strength", "customer-distribution", "eps-engine", "pe-rerating-potential"].includes(lens.slug) && (
+                <>
+                  {Object.keys(lens.key_metrics).length > 0 && (
+                    <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: "0 0 12px" }}>
+                        Key Metrics
+                      </p>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
+                        {Object.entries(lens.key_metrics).map(([k, v]) => (
+                          <div key={k}>
+                            <p style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>{k}</p>
+                            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", margin: 0, lineHeight: 1.3 }}>{v}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {lens.highlights.length > 0 && (
+                    <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-up)", margin: "0 0 10px" }}>
+                        Highlights
+                      </p>
+                      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+                        {lens.highlights.map((h, i) => (
+                          <li key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                            <span style={{ flexShrink: 0, marginTop: 4, width: 6, height: 6, borderRadius: "50%", background: "var(--qc-up)" }} />
+                            <span style={{ fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>{h}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {lens.risks.length > 0 && (
+                    <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-down)", margin: "0 0 10px" }}>
+                        Risks
+                      </p>
+                      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+                        {lens.risks.map((r, i) => (
+                          <li key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                            <span style={{ flexShrink: 0, marginTop: 4, width: 6, height: 6, borderRadius: "50%", background: "var(--qc-down)" }} />
+                            <span style={{ fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>{r}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Footer meta */}
+              <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, textAlign: "right" }}>
+                Computed {new Date(lens.computed_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+              </p>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}

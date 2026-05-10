@@ -1,10 +1,12 @@
 "use client";
 
+import { motion } from "framer-motion";
 import type { InsightLens } from "@/types/analysis";
 
 interface InsightLensesProps {
   lenses: InsightLens[];
   heading?: string;
+  onLensClick?: (slug: string) => void;
 }
 
 function lensStatusColor(pct: number) {
@@ -25,7 +27,15 @@ function lensStatusEmoji(pct: number, status: string) {
   return "🟡";
 }
 
-export function InsightLenses({ lenses, heading }: InsightLensesProps) {
+function ExpandIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 2h4v4M6 14H2v-4M14 2l-5 5M2 14l5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesProps) {
   if (!lenses.length) return null;
 
   return (
@@ -45,11 +55,21 @@ export function InsightLenses({ lenses, heading }: InsightLensesProps) {
           const accentColor = lensAccentColor(pct);
           const statusLabel = (lens.status || (pct >= 70 ? "STRONG" : pct >= 40 ? "MODERATE" : "NEUTRAL")).toUpperCase();
           const statusIcon = lensStatusEmoji(pct, lens.status);
+          const isClickable = !!onLensClick;
 
           return (
-            <div
+            <motion.div
               key={lens.slug}
               id={`lens-${lens.slug}`}
+              onClick={() => onLensClick?.(lens.slug)}
+              initial="rest"
+              whileHover={isClickable ? "hover" : undefined}
+              animate="rest"
+              variants={isClickable ? {
+                rest: { y: 0, boxShadow: "0 0px 0px rgba(0,0,0,0)" },
+                hover: { y: -2, boxShadow: "0 6px 20px rgba(0,0,0,0.09)" },
+              } : undefined}
+              transition={{ duration: 0.15 }}
               style={{
                 background: "var(--qc-card)",
                 border: "1px solid var(--qc-hair)",
@@ -61,6 +81,7 @@ export function InsightLenses({ lenses, heading }: InsightLensesProps) {
                 gap: 0,
                 position: "relative",
                 overflow: "hidden",
+                cursor: isClickable ? "pointer" : "default",
               }}
             >
               {/* Number badge + status pill */}
@@ -110,6 +131,20 @@ export function InsightLenses({ lenses, heading }: InsightLensesProps) {
                 {lens.description}
               </p>
 
+              {/* Hover expand icon — shown via CSS group-hover */}
+              {isClickable && (
+                <motion.div
+                  variants={{ rest: { opacity: 0, scale: 0.75 }, hover: { opacity: 1, scale: 1 } }}
+                  transition={{ duration: 0.15 }}
+                  style={{
+                    position: "absolute", bottom: 14, right: 16,
+                    color: "var(--qc-ink-3)",
+                  }}
+                >
+                  <ExpandIcon />
+                </motion.div>
+              )}
+
               {/* Decorative blob */}
               <div style={{
                 position: "absolute", top: -20, right: -20,
@@ -117,7 +152,7 @@ export function InsightLenses({ lenses, heading }: InsightLensesProps) {
                 background: `${statusColor}14`,
                 pointerEvents: "none",
               }} />
-            </div>
+            </motion.div>
           );
         })}
       </div>

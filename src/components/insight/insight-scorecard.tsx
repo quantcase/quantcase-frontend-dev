@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import type { InsightData, InsightLens } from "@/types/analysis";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
 import { DarkGradientCard, MonoLabel } from "@/components/ds";
@@ -7,6 +8,7 @@ import { DarkGradientCard, MonoLabel } from "@/components/ds";
 interface InsightScorecardProps {
   insight: InsightData;
   verdictLabel: string;
+  onLensClick?: (slug: string) => void;
 }
 
 function verdictBandColor(band: string) {
@@ -66,7 +68,7 @@ function WrappedRadarTick({ x, y, payload, textAnchor }: { x: number; y: number;
   );
 }
 
-export function InsightScorecard({ insight, verdictLabel }: InsightScorecardProps) {
+export function InsightScorecard({ insight, verdictLabel, onLensClick }: InsightScorecardProps) {
   const { before, highlight, after } = parseHeadline(insight.headline);
   const bandColor = verdictBandColor(insight.verdict_band ?? insight.verdict);
   const bandBg = verdictBandBg(insight.verdict_band ?? insight.verdict);
@@ -204,13 +206,25 @@ export function InsightScorecard({ insight, verdictLabel }: InsightScorecardProp
             const statusLabel = lensStatusLabel(pct, lens.status);
             const isLast = i === insight.lenses.length - 1;
             const isStrong = pct >= 70;
+            const isClickable = !!onLensClick;
             return (
-              <div
+              <motion.div
                 key={lens.slug}
+                onClick={() => onLensClick?.(lens.slug)}
+                initial="rest"
+                whileHover={isClickable ? "hover" : undefined}
+                animate="rest"
+                variants={isClickable ? {
+                  rest: { backgroundColor: "var(--qc-card)" },
+                  hover: { backgroundColor: "var(--qc-section)" },
+                } : undefined}
+                transition={{ duration: 0.15 }}
                 style={{
                   padding: "14px 16px 12px",
                   borderRight: !isLast ? "1px solid var(--qc-hair)" : undefined,
                   borderTop: "0",
+                  cursor: isClickable ? "pointer" : "default",
+                  position: "relative",
                 }}
               >
                 <MonoLabel size={9} tracking="0.12em" color="var(--qc-ink-3)" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>{lens.name.toUpperCase()}</MonoLabel>
@@ -226,7 +240,18 @@ export function InsightScorecard({ insight, verdictLabel }: InsightScorecardProp
                 <div style={{ height: 3, borderRadius: 99, background: "var(--qc-hair)", overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 99 }} />
                 </div>
-              </div>
+                {isClickable && (
+                  <motion.div
+                    variants={{ rest: { opacity: 0 }, hover: { opacity: 1 } }}
+                    transition={{ duration: 0.15 }}
+                    style={{ position: "absolute", top: 10, right: 10, color: "var(--qc-ink-3)" }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                      <path d="M10 2h4v4M6 14H2v-4M14 2l-5 5M2 14l5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </motion.div>
+                )}
+              </motion.div>
             );
           })}
         </div>

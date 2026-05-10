@@ -1,16 +1,19 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { useAnalyzeTrigger } from "@/hooks/useAnalyzeTrigger";
+import { useLenses } from "@/hooks/useLenses";
+import { useSignals } from "@/hooks/useSignals";
 
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { ReanalyzeButton } from "@/components/management/reanalyze-button";
 import { InsightScorecard } from "@/components/insight/insight-scorecard";
 import { InsightLenses } from "@/components/insight/insight-lenses";
 import { InsightSignalMap } from "@/components/insight/insight-signal-map";
+import { LensDrawer } from "@/components/insight/lens-drawer";
 
 import type { InsightType } from "@/types/analysis";
 import type { TranscriptCall } from "@/types/management";
@@ -148,29 +151,53 @@ function CenteredMessage({ children, error }: { children: React.ReactNode; error
 
 // ─── Dashboard layout ──────────────────────────────────────────────────────────
 
-function InsightDashboard({ insight, type }: { insight: import("@/types/analysis").InsightData; type: InsightType }) {
+function InsightDashboard({
+  insight,
+  type,
+  callId,
+}: {
+  insight: import("@/types/analysis").InsightData;
+  type: InsightType;
+  callId: string;
+}) {
+  const [activeLensSlug, setActiveLensSlug] = useState<string | null>(null);
+  const { lenses: lensDetails } = useLenses(callId);
+  const { signals } = useSignals(callId);
+
+  const handleLensClick = useCallback((slug: string) => {
+    setActiveLensSlug(slug);
+  }, []);
+
+  const activeLens = activeLensSlug
+    ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug) ?? null
+    : null;
+
   const lensCount = insight.lenses.length;
   const lensHeading = `${lensCount === 4 ? "Four" : lensCount === 3 ? "Three" : lensCount === 2 ? "Two" : lensCount === 5 ? "Five" : String(lensCount)} lenses on ${TYPE_LABELS[type].toLowerCase()}`;
 
   return (
-    <div className="mb-8 px-4 pt-4 space-y-8">
-      <div id="section-score">
-        <InsightScorecard insight={insight} verdictLabel={TYPE_VERDICT_LABELS[type]} />
+    <>
+      <div className="mb-8 px-4 pt-4 space-y-8">
+        <div id="section-score">
+          <InsightScorecard insight={insight} verdictLabel={TYPE_VERDICT_LABELS[type]} onLensClick={handleLensClick} />
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 24, alignItems: "start" }}>
+          {insight.lenses.length > 0 && (
+            <div id="section-lenses">
+              <InsightLenses lenses={insight.lenses} heading={lensHeading} onLensClick={handleLensClick} />
+            </div>
+          )}
+          {insight.signal_map.length > 0 && (
+            <div id="section-signal-map">
+              <InsightSignalMap signals={insight.signal_map} heading="Signals" />
+            </div>
+          )}
+        </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 24, alignItems: "start" }}>
-        {insight.lenses.length > 0 && (
-          <div id="section-lenses">
-            <InsightLenses lenses={insight.lenses} heading={lensHeading} />
-          </div>
-        )}
-        {insight.signal_map.length > 0 && (
-          <div id="section-signal-map">
-            <InsightSignalMap signals={insight.signal_map} heading="Signals" />
-          </div>
-        )}
-      </div>
-    </div>
+      <LensDrawer lens={activeLens} signals={signals} onClose={() => setActiveLensSlug(null)} />
+    </>
   );
 }
 
@@ -224,7 +251,7 @@ function InsightTabContent({ type }: { type: InsightType }) {
         />
       }
     >
-      <InsightDashboard insight={insight} type={type} />
+      <InsightDashboard insight={insight} type={type} callId={firstCallId} />
     </ScreenerPageShell>
   );
 }

@@ -9,6 +9,8 @@ interface OpportunityScoreBreakdownCardProps {
   overallStatus: string;
   sectionScores: Partial<FinalTakeaways["section_scores"]>;
   investmentThesis?: string;
+  title?: string;
+  subtitle?: string;
 }
 
 const SECTION_MAX: Record<string, number> = {

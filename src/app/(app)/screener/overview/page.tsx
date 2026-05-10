@@ -16,9 +16,6 @@ import { useDealAnalysis } from "@/hooks/useDealAnalysis";
 import { useTechnicals } from "@/hooks/useTechnicals";
 import { KeyRatioTiles } from "@/components/overview/key-ratio-tiles";
 import { CompanyProfileCard } from "@/components/overview/company-profile-card";
-import type { ManagementDashboardData } from "@/types/management";
-import type { OFactorResponse } from "@/types/opportunity";
-import type { DFactorResponse } from "@/types/deal";
 
 const OVERVIEW_NAV = [
   { id: "section-about",                  label: "About" },
@@ -46,27 +43,14 @@ function OverviewContent() {
   const { data: transcriptCalls } = useTranscriptCalls(symbol === "—" ? "" : symbol);
   const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
 
-  const { data: managementData } = useManagementAnalysis(firstCallId);
-  const { data: opportunityData, totalScore: oppTotalScore } = useOpportunityAnalysis(firstCallId);
-  const { data: dealData, totalScore: dealTotalScore } = useDealAnalysis(firstCallId);
+  const { data: managementInsight } = useManagementAnalysis(firstCallId);
+  const { data: opportunityInsight } = useOpportunityAnalysis(firstCallId);
+  const { data: dealInsight } = useDealAnalysis(firstCallId);
   const { data: technicalsData } = useTechnicals(symbol === "—" ? "" : symbol);
 
-  const mgmtDashboard = Object.keys(managementData).length > 0
-    ? (managementData as ManagementDashboardData)
-    : null;
-  const oppData = Object.keys(opportunityData).length > 0
-    ? (opportunityData as OFactorResponse)
-    : null;
-  const dFactorData = Object.keys(dealData).length > 0
-    ? (dealData as DFactorResponse)
-    : null;
-
-  const derivedDealScore = dealTotalScore?.total_score
-    ?? (dFactorData?.overview?.deal_factor_score?.overall ?? null);
-
-  const mScore = mgmtDashboard?.mqi_score?.total ?? null;
-  const oScore = oppTotalScore?.total_score ?? null;
-  const dScore = derivedDealScore;
+  const mScore = managementInsight?.score ?? null;
+  const oScore = opportunityInsight?.score ?? null;
+  const dScore = dealInsight?.score ?? null;
 
   let partialSum = 0;
   let partialCount = 0;
@@ -99,16 +83,16 @@ function OverviewContent() {
         {/* Row 3: QC Insight */}
         <div id="section-qc-insight" className="px-4">
           <IMScoreCard
-            managementScore={mgmtDashboard?.mqi_score?.total ?? null}
+            managementScore={mScore}
             managementMax={100}
-            opportunityScore={oppTotalScore?.total_score ?? null}
+            opportunityScore={oScore}
             opportunityMax={100}
-            dealScore={derivedDealScore}
+            dealScore={dScore}
             dealMax={100}
-            managementIntelligence={mgmtDashboard?.management_intelligence ?? null}
-            opportunityTakeaways={oppData?.final_takeaways ?? null}
-            opportunityData={oppData}
-            dealOverview={dFactorData?.overview ?? null}
+            managementIntelligence={null}
+            opportunityTakeaways={null}
+            opportunityData={null}
+            dealOverview={null}
           />
         </div>
 
@@ -130,8 +114,8 @@ function OverviewContent() {
         {/* Section: Investment Conclusion */}
         <div id="section-investment-conclusion" className="px-4">
           <InvestmentConclusionCard
-            dealData={dFactorData}
-            oppTakeaways={oppData?.final_takeaways ?? null}
+            dealData={null}
+            oppTakeaways={null}
             technicalsData={technicalsData ?? null}
             rating={rating}
           />

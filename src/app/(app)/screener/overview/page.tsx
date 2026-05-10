@@ -6,7 +6,6 @@ import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { IMScoreCard } from "@/components/overview/im-score-card";
 import { FundamentalOverviewCard } from "@/components/overview/fundamental-overview-card";
 import { TechnicalsCard } from "@/components/overview/technicals-card";
-import { MarketViewCard } from "@/components/overview/market-view-card";
 import { InvestmentConclusionCard } from "@/components/overview/investment-conclusion-card";
 import { useScreenerData } from "@/hooks/useScreenerData";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
@@ -20,9 +19,8 @@ import { CompanyProfileCard } from "@/components/overview/company-profile-card";
 const OVERVIEW_NAV = [
   { id: "section-about",                  label: "About" },
   { id: "section-qc-insight",             label: "QC Insight" },
-  { id: "section-fundamentals",           label: "Fundamentals" },
   { id: "section-technicals",             label: "Technicals" },
-  { id: "section-market-view",            label: "Market View" },
+  { id: "section-fundamentals",           label: "Fundamentals" },
   { id: "section-investment-conclusion",  label: "Investment Conclusion" },
 ];
 
@@ -52,15 +50,11 @@ function OverviewContent() {
   const oScore = opportunityInsight?.score ?? null;
   const dScore = dealInsight?.score ?? null;
 
-  let partialSum = 0;
-  let partialCount = 0;
+  let partialSum = 0, partialCount = 0;
   if (mScore !== null) { partialSum += mScore; partialCount++; }
   if (oScore !== null) { partialSum += oScore; partialCount++; }
   if (dScore !== null) { partialSum += dScore; partialCount++; }
-
-  const hasAnyScore = partialCount > 0;
-  const avgScore = hasAnyScore ? partialSum / partialCount : 0;
-  const rating = hasAnyScore ? getRating(avgScore / 100) : null;
+  const rating = partialCount > 0 ? getRating((partialSum / partialCount) / 100) : null;
 
   return (
     <ScreenerPageShell navItems={OVERVIEW_NAV}>
@@ -83,22 +77,10 @@ function OverviewContent() {
         {/* Row 3: QC Insight */}
         <div id="section-qc-insight" className="px-4">
           <IMScoreCard
-            managementScore={mScore}
-            managementMax={100}
-            opportunityScore={oScore}
-            opportunityMax={100}
-            dealScore={dScore}
-            dealMax={100}
-            managementIntelligence={null}
-            opportunityTakeaways={null}
-            opportunityData={null}
-            dealOverview={null}
+            management={managementInsight ?? null}
+            opportunity={opportunityInsight ?? null}
+            deal={dealInsight ?? null}
           />
-        </div>
-
-        {/* Section: Fundamentals */}
-        <div id="section-fundamentals" className="px-4">
-          {data && <FundamentalOverviewCard data={data} symbol={symbol} />}
         </div>
 
         {/* Section: Technicals */}
@@ -106,9 +88,9 @@ function OverviewContent() {
           {technicalsData && <TechnicalsCard data={technicalsData} />}
         </div>
 
-        {/* Section: Market View */}
-        <div id="section-market-view" className="px-4">
-          <MarketViewCard />
+        {/* Section: Fundamentals */}
+        <div id="section-fundamentals" className="px-4">
+          {data && <FundamentalOverviewCard data={data} symbol={symbol} />}
         </div>
 
         {/* Section: Investment Conclusion */}

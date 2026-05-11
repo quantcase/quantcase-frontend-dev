@@ -3,6 +3,7 @@
 import type { DFactorResponse } from "@/types/deal";
 import type { FinalTakeaways } from "@/types/opportunity";
 import type { TechnicalsResponse } from "@/types/technicals";
+import type { InsightData } from "@/types/analysis";
 import { SectionShell, SectionLabel, NarrativeSidebar, MonoEyebrow } from "./primitives";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -12,6 +13,7 @@ interface Props {
   oppTakeaways: FinalTakeaways | null;
   technicalsData: TechnicalsResponse | null;
   rating: string | null;
+  oppInsight?: InsightData | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -41,14 +43,28 @@ function convictionFromStatus(status: string | undefined): string {
 
 // ─── Main export ───────────────────────────────────────────────────────────────
 
-export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsData, rating }: Props) {
+export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsData, rating, oppInsight }: Props) {
   const verdict       = dealData?.overview?.deal_verdict;
-  // Display label: deal verdict title if available, otherwise QC score rating
   const verdictTitle  = verdict?.title ?? rating;
-  const investThesis  = oppTakeaways?.investment_thesis ?? verdict?.description ?? null;
-  const keyHighlights = oppTakeaways?.key_highlights ?? dealData?.overview?.key_takeaway ?? [];
-  const keyRisks      = oppTakeaways?.key_risks ?? [];
 
+  // Prefer InsightData fields when available, fall back to legacy typed data
+  const investThesis  = oppInsight?.thesis ?? oppTakeaways?.investment_thesis ?? verdict?.description ?? null;
+
+  const keyHighlights: string[] = oppInsight
+    ? [
+        ...(oppInsight.key_signals.filter(s => s.sentiment === "positive").map(s => s.label)),
+        ...(oppInsight.evidence ?? []),
+      ]
+    : (oppTakeaways?.key_highlights ?? dealData?.overview?.key_takeaway ?? []);
+
+  const keyRisks: string[] = oppInsight
+    ? [
+        ...(oppInsight.key_signals.filter(s => s.sentiment === "negative").map(s => s.label)),
+        ...(oppInsight.watch_outs ?? []),
+      ]
+    : (oppTakeaways?.key_risks ?? []);
+
+  // Price targets — from deal legacy data only (InsightData doesn't carry price targets)
   const baseScenario  = dealData?.target_price_matrix?.base;
   const entryTrigger  = baseScenario?.target_range ?? null;
   const entryRationale= baseScenario?.pe_rationale ?? null;
@@ -59,50 +75,85 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
   const upside        = rr?.probability_weighted_return?.value ?? null;
   const riskReward    = rr?.risk_reward_ratio?.value ?? null;
 
+  // Technicals — prefer decisionIntelligence over legacy ruleEngine
+  const di              = technicalsData?.decisionIntelligence;
   const re              = technicalsData?.ruleEngine;
   const marketBias      = re?.decisionContext?.marketBias ?? null;
   const marketCondition = re?.decisionContext?.overallCondition ?? null;
   const marketSummary   = re?.decisionContext?.summary ?? null;
-  const conviction      = convictionFromStatus(oppTakeaways?.overall_status);
 
-  // Always derive color/style from the QC score rating, not the free-form deal verdict title
+  // Conviction: decisionIntelligence.convictionLevel > oppTakeaways status
+  const conviction = di?.convictionLevel ?? convictionFromStatus(oppTakeaways?.overall_status);
+
+  // Time horizon: decisionIntelligence.timeframe (e.g. "0-3M") > deal holding_period
+  const timeHorizon = holdingPeriod ?? (di?.timeframe ? di.timeframe + " horizon" : null);
+
+  // Suggested stop: from price support levels when no deal data
+  const sr = technicalsData?.supportResistance;
+  const supportLevel = sr?.static?.support?.[0];
+  const cmp = technicalsData?.price?.cmp;
+  const derivedStop = (supportLevel && cmp)
+    ? `${(((supportLevel - cmp) / cmp) * 100).toFixed(0)}%`
+    : null;
+  const effectiveStop = stopLoss ?? derivedStop;
+
+  // Upside: from resistance when no deal data
+  const resistanceLevel = sr?.static?.resistance?.[0];
+  const derivedUpside = (resistanceLevel && cmp)
+    ? `+${(((resistanceLevel - cmp) / cmp) * 100).toFixed(0)}%`
+    : null;
+  const effectiveUpside = upside ?? derivedUpside;
+
+  // Always derive color/style from the QC score rating
   const rKey = ratingKey(rating);
 
-  const hasContent = rating || verdictTitle || investThesis;
+  const hasContent = rating || verdictTitle || investThesis || di;
   if (!hasContent) return null;
 
-  // Meter bar fills (0–100%)
-  const entryFill  = entryTrigger  ? 0   : 0;    // pending = 0
-  const stopFill   = stopLoss      ? 38  : 0;
-  const upsideFill = upside        ? 52  : 0;
-  const timeFill   = holdingPeriod ? 66  : 0;
+  // Meter bar fills (0–100%) — use actual numeric values where possible
+  const stopPct = effectiveStop ? Math.abs(parseFloat(effectiveStop)) : 0;
+  const upsidePct = effectiveUpside ? Math.abs(parseFloat(effectiveUpside)) : 0;
+  const entryFill  = entryTrigger ? 30 : 0;
+  const stopFill   = stopPct ? Math.min(stopPct * 2, 80) : 0;
+  const upsideFill = upsidePct ? Math.min(upsidePct, 80) : 0;
+  const timeFill   = timeHorizon ? 66 : 0;
 
-  // Action bar text — derive from technicals + rating
+  // Action bar — use decisionIntelligence.actionableInsight when available
   const isBullish = rKey === "buy" || rKey === "strong-buy";
-  const actionOwn = isBullish
-    ? { eyebrow: "If you own", title: "Hold and add on every dip", sub: `${marketSummary ? marketSummary.slice(0, 90) + "." : "Monitor key support and resistance levels."}` }
-    : { eyebrow: "If you own", title: `Trim into strength${entryTrigger ? " above " + entryTrigger : ""}`, sub: `${marketCondition ? "Market condition: " + marketCondition + "." : ""} Keep core exposure only if macro thesis is your primary reason.` };
+  const aiInsight = di?.actionableInsight;
 
-  const actionDontOwn = isBullish
-    ? { eyebrow: "If you don't own", title: "Enter on a pullback to support", sub: "Wait for a clean base or breakout with volume confirmation before adding." }
-    : { eyebrow: "If you don't own", title: "Wait for pullback or breadth turn", sub: `${marketBias ? "Market bias: " + marketBias + "." : ""} Re-assess when breadth frameworks flip neutral.` };
+  const actionOwn = aiInsight?.existingHolderAction
+    ? { eyebrow: "If you own", title: aiInsight.existingHolderAction.split(";")[0].trim(), sub: aiInsight.existingHolderAction.split(";").slice(1).join(";").trim() || di?.actionBias || "" }
+    : isBullish
+      ? { eyebrow: "If you own", title: "Hold and add on every dip", sub: marketSummary ? marketSummary.slice(0, 90) + "." : "Monitor key support and resistance levels." }
+      : { eyebrow: "If you own", title: `Trim into strength${entryTrigger ? " above " + entryTrigger : ""}`, sub: `${marketCondition ? "Market condition: " + marketCondition + "." : ""} Keep core exposure only if macro thesis is your primary reason.` };
+
+  const actionDontOwn = (aiInsight?.firstShift || aiInsight?.reEvaluateCondition)
+    ? { eyebrow: "If you don't own", title: aiInsight.action ?? "Wait for entry signal", sub: aiInsight.firstShift ?? aiInsight.reEvaluateCondition ?? "" }
+    : isBullish
+      ? { eyebrow: "If you don't own", title: "Enter on a pullback to support", sub: "Wait for a clean base or breakout with volume confirmation before adding." }
+      : { eyebrow: "If you don't own", title: "Wait for pullback or breadth turn", sub: `${marketBias ? "Market bias: " + marketBias + "." : ""} Re-assess when breadth frameworks flip neutral.` };
 
   const verdictColor =
     rKey === "strong-buy" || rKey === "buy" ? "var(--qc-up, #1F7A4A)"
     : rKey === "sell" || rKey === "underperform" ? "var(--qc-down, #B23A2F)"
     : "var(--qc-warn, #B4731A)";
 
+  // Narrative sidebar — prefer decisionIntelligence regime
+  const regimeLabel = di?.currentRegime?.label ?? (marketBias && marketCondition ? `${marketBias} bias — ${marketCondition.toLowerCase()}.` : null);
+  const regimeBody  = di?.currentRegime?.description ?? di?.actionBias ?? marketSummary ?? "Market analysis data unavailable.";
+
   const narrativeTags = [
-    ...(marketBias ? [{ label: marketBias, color: marketBias.toLowerCase().includes("bear") ? "var(--qc-down)" : marketBias.toLowerCase().includes("bull") ? "var(--qc-up)" : "var(--qc-warn)" }] : []),
-    ...(marketCondition ? [{ label: marketCondition, color: "var(--qc-warn)" }] : []),
+    ...(di?.lens ? [{ label: di.lens, color: "var(--qc-ink-2)" }] : marketBias ? [{ label: marketBias, color: marketBias.toLowerCase().includes("bear") ? "var(--qc-down)" : marketBias.toLowerCase().includes("bull") ? "var(--qc-up)" : "var(--qc-warn)" }] : []),
+    ...(di?.idealFor ? [{ label: `For ${di.idealFor}`, color: "var(--qc-warn)" }] : marketCondition ? [{ label: marketCondition, color: "var(--qc-warn)" }] : []),
     ...(conviction ? [{ label: `Conviction ${conviction}`, color: "var(--qc-ink-2)" }] : []),
   ];
 
   const meters = [
     { label: "Entry trigger", value: entryTrigger ?? "Pending", sub: entryRationale, fill: entryFill, color: "var(--qc-ink-2)" },
-    { label: "Suggested stop", value: stopLoss ?? "—", sub: null, fill: stopFill, color: "var(--qc-down, #B23A2F)" },
-    { label: "Upside target", value: upside ?? "—", sub: riskReward ? `R/R ${riskReward}` : null, fill: upsideFill, color: "var(--qc-up, #1F7A4A)" },
-    { label: "Time horizon", value: holdingPeriod ?? "—", sub: null, fill: timeFill, color: "var(--qc-blue, #3A6BEF)" },
+    { label: "Suggested stop", value: effectiveStop ?? "—", sub: null, fill: stopFill, color: "var(--qc-down, #B23A2F)" },
+    { label: "Upside target", value: effectiveUpside ?? "—", sub: riskReward ? `R/R ${riskReward}` : null, fill: upsideFill, color: "var(--qc-up, #1F7A4A)" },
+    { label: "Time horizon", value: timeHorizon ?? "—", sub: null, fill: timeFill, color: "var(--qc-blue, #3A6BEF)" },
   ];
 
   return (
@@ -190,12 +241,8 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
         {/* Right: narrative sidebar */}
         <NarrativeSidebar
           eyebrow="Market context"
-          headline={
-            marketBias && marketCondition
-              ? `${marketBias} bias — ${marketCondition.toLowerCase()}.`
-              : "Market context unavailable for this analysis."
-          }
-          body={marketSummary ?? "Market analysis data is being loaded. Check the Technicals section for current signal readings."}
+          headline={regimeLabel ?? "Market context unavailable for this analysis."}
+          body={regimeBody}
           tags={narrativeTags}
         />
       </div>

@@ -141,6 +141,7 @@ function OverviewContent() {
               oppTakeaways={null}
               technicalsData={technicalsData ?? null}
               rating={rating}
+              oppInsight={opportunityInsight ?? null}
             />
           </div>
 

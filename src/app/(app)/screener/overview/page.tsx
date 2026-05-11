@@ -118,6 +118,7 @@ function OverviewContent() {
               technicalsData={technicalsData ?? null}
               screenerData={data ?? null}
               rating={rating}
+              symbol={symbol}
             />
           </div>
 

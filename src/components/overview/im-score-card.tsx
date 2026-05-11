@@ -1,5 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import type { InsightData } from "@/types/analysis";
 import { SectionShell } from "./primitives";
 
@@ -10,9 +14,9 @@ interface IMScoreCardProps {
 }
 
 const PILLAR_META = [
-  { key: "management" as const, label: "Management" },
-  { key: "opportunity" as const, label: "Opportunity" },
-  { key: "deal" as const, label: "Deal" },
+  { key: "management" as const, label: "Management", href: "/screener/management" },
+  { key: "opportunity" as const, label: "Opportunity", href: "/screener/opportunity" },
+  { key: "deal" as const, label: "Deal", href: "/screener/deal" },
 ];
 
 function sentimentColor(s: "positive" | "negative" | "neutral"): string {
@@ -33,21 +37,38 @@ function scoreColor(score: number): string {
   return "var(--qc-down, #B23A2F)";
 }
 
-function PillarColumn({ insight, label }: { insight: InsightData | null; label: string }) {
+function PillarColumn({
+  insight,
+  label,
+  href,
+  symbol,
+}: {
+  insight: InsightData | null;
+  label: string;
+  href: string;
+  symbol: string;
+}) {
+  const [hovered, setHovered] = useState(false);
   const score = insight?.score ?? null;
   const hasData = insight != null && insight.available;
+  const dest = `${href}?symbol=${encodeURIComponent(symbol)}`;
 
   return (
     <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         background: "var(--qc-card)",
-        border: "1px solid var(--qc-hair)",
+        border: `1px solid ${hovered ? "var(--qc-ink-2)" : "var(--qc-hair)"}`,
         borderRadius: 14,
         padding: "16px 18px",
         display: "flex",
         flexDirection: "column",
         gap: 14,
         minWidth: 0,
+        position: "relative",
+        transition: "border-color 0.15s ease",
+        cursor: "default",
       }}
     >
       {/* Header: label + score */}
@@ -63,40 +84,65 @@ function PillarColumn({ insight, label }: { insight: InsightData | null; label: 
         >
           {label}
         </span>
-        {score !== null && (
-          <div
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {/* Arrow link — visible on hover */}
+          <Link
+            href={dest}
+            aria-label={`Go to ${label} page`}
             style={{
-              width: 38,
-              height: 38,
-              borderRadius: "50%",
-              border: `2px solid ${scoreColor(score)}`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              width: 22,
+              height: 22,
+              borderRadius: "50%",
+              background: "var(--qc-ink)",
+              color: "var(--qc-card)",
+              opacity: hovered ? 1 : 0,
+              transform: hovered ? "scale(1)" : "scale(0.7)",
+              transition: "opacity 0.15s ease, transform 0.15s ease",
               flexShrink: 0,
-              background: sentimentBg(score >= 70 ? "positive" : score >= 50 ? "neutral" : "negative"),
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <span
+            <ArrowUpRight size={12} strokeWidth={2.5} />
+          </Link>
+
+          {score !== null && (
+            <div
               style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: scoreColor(score),
-                fontVariantNumeric: "tabular-nums",
+                width: 38,
+                height: 38,
+                borderRadius: "50%",
+                border: `2px solid ${scoreColor(score)}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                background: sentimentBg(score >= 70 ? "positive" : score >= 50 ? "neutral" : "negative"),
               }}
             >
-              {score}
+              <span
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: scoreColor(score),
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {score}
+              </span>
+            </div>
+          )}
+          {!hasData && (
+            <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontStyle: "italic" }}>
+              N/A
             </span>
-          </div>
-        )}
-        {!hasData && (
-          <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontStyle: "italic" }}>
-            N/A
-          </span>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Lens rows: name label above, subtitle badge below */}
+      {/* Lens rows */}
       {hasData && insight.lenses.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {insight.lenses.map((lens) => {
@@ -200,6 +246,9 @@ function NarrativeBar({
 }
 
 export function IMScoreCard({ management, opportunity, deal }: IMScoreCardProps) {
+  const searchParams = useSearchParams();
+  const symbol = searchParams.get("symbol") ?? "";
+
   return (
     <div>
       <SectionShell>
@@ -211,9 +260,9 @@ export function IMScoreCard({ management, opportunity, deal }: IMScoreCardProps)
             gap: 10,
           }}
         >
-          {PILLAR_META.map(({ key, label }) => {
+          {PILLAR_META.map(({ key, label, href }) => {
             const insight = key === "management" ? management : key === "opportunity" ? opportunity : deal;
-            return <PillarColumn key={key} insight={insight} label={label} />;
+            return <PillarColumn key={key} insight={insight} label={label} href={href} symbol={symbol} />;
           })}
         </div>
       </SectionShell>

@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import type { InsightData } from "@/types/analysis";
 import type { TechnicalsResponse } from "@/types/technicals";
 import type { ScreenerData } from "@/types/screener";
@@ -12,6 +15,7 @@ interface Props {
   technicalsData: TechnicalsResponse | null;
   screenerData: ScreenerData | null;
   rating: string | null;
+  symbol?: string;
 }
 
 function scoreColor(score: number): string {
@@ -105,6 +109,91 @@ function CompactCard({
       >
         {value}
       </span>
+    </div>
+  );
+}
+
+// ─── Linkable Compact Card (for QuantCase Framework) ─────────────────────────
+
+function LinkableCompactCard({
+  label,
+  value,
+  sentiment = "neutral",
+  href,
+}: {
+  label: string;
+  value: string;
+  sentiment?: "positive" | "negative" | "neutral";
+  href: string;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const bg = sentBg(sentiment);
+  const color = sentColor(sentiment);
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+        padding: "7px 10px",
+        background: bg,
+        border: `1px solid ${hovered ? color : color + "30"}`,
+        borderRadius: 8,
+        transition: "border-color 0.15s ease",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 9,
+          letterSpacing: ".12em",
+          textTransform: "uppercase",
+          color: "var(--qc-ink-2)",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {label}
+      </span>
+      <span
+        style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {value}
+      </span>
+      <Link
+        href={href}
+        aria-label={`Go to ${label} page`}
+        style={{
+          position: "absolute",
+          top: 6,
+          right: 6,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          background: "var(--qc-ink)",
+          color: "var(--qc-card)",
+          opacity: hovered ? 1 : 0,
+          transform: hovered ? "scale(1)" : "scale(0.6)",
+          transition: "opacity 0.15s ease, transform 0.15s ease",
+        }}
+      >
+        <ArrowUpRight size={10} strokeWidth={2.5} />
+      </Link>
     </div>
   );
 }
@@ -229,6 +318,7 @@ export function DecisionIntelligencePanel({
   technicalsData,
   screenerData,
   rating,
+  symbol = "",
 }: Props) {
   const rKey = ratingKey(rating);
   const ratingColor =
@@ -582,20 +672,23 @@ export function DecisionIntelligencePanel({
       <div>
         <MonoEyebrow style={{ marginBottom: 6 }}>QuantCase Framework</MonoEyebrow>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
-          <CompactCard
+          <LinkableCompactCard
             label="Management"
             value={mVerdict ?? "—"}
             sentiment={mScore !== null ? (mScore >= 70 ? "positive" : mScore >= 50 ? "neutral" : "negative") : "neutral"}
+            href={`/screener/management?symbol=${encodeURIComponent(symbol)}`}
           />
-          <CompactCard
+          <LinkableCompactCard
             label="Opportunity"
             value={oVerdict ?? "—"}
             sentiment={oScore !== null ? (oScore >= 70 ? "positive" : oScore >= 50 ? "neutral" : "negative") : "neutral"}
+            href={`/screener/opportunity?symbol=${encodeURIComponent(symbol)}`}
           />
-          <CompactCard
+          <LinkableCompactCard
             label="Deal"
             value={dVerdict ?? "—"}
             sentiment={dScore !== null ? (dScore >= 70 ? "positive" : dScore >= 50 ? "neutral" : "negative") : "neutral"}
+            href={`/screener/deal?symbol=${encodeURIComponent(symbol)}`}
           />
         </div>
       </div>

@@ -5,8 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { IMScoreCard } from "@/components/overview/im-score-card";
 import { FundamentalOverviewCard } from "@/components/overview/fundamental-overview-card";
-import { TechnicalsCard } from "@/components/overview/technicals-card";
+import { TechnicalsCard, PriceLevelsSection } from "@/components/overview/technicals-card";
 import { InvestmentConclusionCard } from "@/components/overview/investment-conclusion-card";
+import { DecisionIntelligencePanel } from "@/components/overview/decision-intelligence-panel";
 import { useScreenerData } from "@/hooks/useScreenerData";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useManagementAnalysis } from "@/hooks/useManagementAnalysis";
@@ -58,7 +59,7 @@ function OverviewContent() {
 
   return (
     <ScreenerPageShell navItems={OVERVIEW_NAV}>
-      <div className="space-y-6 pb-8 pt-6">
+      <div className="pb-8 pt-6">
 
         {error && (
           <div className="mx-4 mt-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
@@ -66,43 +67,84 @@ function OverviewContent() {
           </div>
         )}
 
-        {/* Row 1: About + Company Facts */}
-        <div id="section-about">
-          {data && <CompanyProfileCard data={data} />}
+        {/* Metric tiles — full width across top */}
+        {data && (
+          <div className="mb-5">
+            <KeyRatioTiles data={data} />
+          </div>
+        )}
+
+        {/* 2-column layout: 70% left, 30% right */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 420px",
+            gap: 16,
+            alignItems: "start",
+            padding: "0 16px",
+            marginBottom: 16,
+          }}
+        >
+          {/* ── Left column ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, minWidth: 0 }}>
+
+            {/* About */}
+            <div id="section-about">
+              {data && <CompanyProfileCard data={data} />}
+            </div>
+
+            {/* QC Insight */}
+            <div id="section-qc-insight">
+              <IMScoreCard
+                management={managementInsight ?? null}
+                opportunity={opportunityInsight ?? null}
+                deal={dealInsight ?? null}
+              />
+            </div>
+
+            {/* Technicals */}
+            <div id="section-technicals">
+              {technicalsData && <TechnicalsCard data={technicalsData} />}
+            </div>
+
+          </div>
+
+          {/* ── Right column: Decision Intelligence ── */}
+          <div>
+            <DecisionIntelligencePanel
+              management={managementInsight ?? null}
+              opportunity={opportunityInsight ?? null}
+              deal={dealInsight ?? null}
+              technicalsData={technicalsData ?? null}
+              screenerData={data ?? null}
+              rating={rating}
+            />
+          </div>
+
         </div>
 
-        {/* Row 2: Key metric tiles */}
-        {data && <KeyRatioTiles data={data} />}
+        {/* Full-width sections below the 2-column grid */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "0 16px" }}>
 
-        {/* Row 3: QC Insight */}
-        <div id="section-qc-insight" className="px-4">
-          <IMScoreCard
-            management={managementInsight ?? null}
-            opportunity={opportunityInsight ?? null}
-            deal={dealInsight ?? null}
-          />
+          {/* Price Levels */}
+          {technicalsData && <PriceLevelsSection data={technicalsData} />}
+
+          {/* Fundamentals */}
+          <div id="section-fundamentals">
+            {data && <FundamentalOverviewCard data={data} symbol={symbol} />}
+          </div>
+
+          {/* Investment Conclusion */}
+          <div id="section-investment-conclusion">
+            <InvestmentConclusionCard
+              dealData={null}
+              oppTakeaways={null}
+              technicalsData={technicalsData ?? null}
+              rating={rating}
+            />
+          </div>
+
         </div>
-
-        {/* Section: Technicals */}
-        <div id="section-technicals" className="px-4">
-          {technicalsData && <TechnicalsCard data={technicalsData} />}
-        </div>
-
-        {/* Section: Fundamentals */}
-        <div id="section-fundamentals" className="px-4">
-          {data && <FundamentalOverviewCard data={data} symbol={symbol} />}
-        </div>
-
-        {/* Section: Investment Conclusion */}
-        <div id="section-investment-conclusion" className="px-4">
-          <InvestmentConclusionCard
-            dealData={null}
-            oppTakeaways={null}
-            technicalsData={technicalsData ?? null}
-            rating={rating}
-          />
-        </div>
-
       </div>
     </ScreenerPageShell>
   );

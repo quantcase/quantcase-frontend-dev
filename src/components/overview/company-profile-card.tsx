@@ -12,7 +12,7 @@ export function CompanyProfileCard({ data }: Props) {
   if (!co.description) return null;
 
   return (
-    <div style={{ padding: "0 16px 4px" }}>
+    <div>
       <section
         style={{
           background: "var(--qc-card)",

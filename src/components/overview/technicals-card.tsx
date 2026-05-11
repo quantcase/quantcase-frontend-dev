@@ -133,11 +133,66 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
 // ─── Price Levels Bar ─────────────────────────────────────────────────────────
 
 interface PriceLevelMarker {
-  label: string;          // e.g. "CMP", "SMA 200"
-  subLabel?: string;      // e.g. date or description
+  label: string;
+  subLabel?: string;
   value: number;
   style: "cmp" | "sma" | "support" | "resistance" | "range-high" | "range-low" | "atl" | "ath";
+  side: "top" | "bottom";
 }
+
+const CLUSTER_PCT = 3.5; // markers within this % are "close"
+
+function assignLabelRows(markers: PriceLevelMarker[], toPct: (v: number) => number): (PriceLevelMarker & { row: number })[] {
+  const sorted = [...markers].sort((a, b) => toPct(a.value) - toPct(b.value));
+  const result: (PriceLevelMarker & { row: number })[] = [];
+  // greedily assign rows so no two same-row labels are within CLUSTER_PCT
+  for (const m of sorted) {
+    const pct = toPct(m.value);
+    let row = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const conflict = result.find(
+        (r) => r.side === m.side && r.row === row && Math.abs(toPct(r.value) - pct) < CLUSTER_PCT
+      );
+      if (!conflict) break;
+      row++;
+    }
+    result.push({ ...m, row });
+  }
+  return result;
+}
+
+function markerDotStyle(style: PriceLevelMarker["style"]): { bg: string; border: string; size: number } {
+  switch (style) {
+    case "cmp":        return { bg: "#0F172B",              border: "#0F172B",              size: 14 };
+    case "support":    return { bg: "var(--qc-card)",       border: "var(--qc-up)",         size: 11 };
+    case "resistance": return { bg: "var(--qc-card)",       border: "var(--qc-down)",       size: 11 };
+    case "range-high": return { bg: "var(--qc-card)",       border: "var(--qc-warn)",       size: 11 };
+    case "range-low":  return { bg: "var(--qc-card)",       border: "var(--qc-ink-2)",      size: 11 };
+    case "atl":        return { bg: "var(--qc-card)",       border: "var(--qc-ink-2)",      size: 9  };
+    case "ath":        return { bg: "var(--qc-card)",       border: "var(--qc-down)",       size: 11 };
+    default:           return { bg: "var(--qc-card)",       border: "var(--qc-blue)",       size: 9  };
+  }
+}
+
+function labelColor(style: PriceLevelMarker["style"]): string {
+  switch (style) {
+    case "cmp":        return "#0F172B";
+    case "support":    return "var(--qc-up)";
+    case "resistance":
+    case "ath":        return "var(--qc-down)";
+    case "range-high": return "var(--qc-warn)";
+    default:           return "var(--qc-ink-2)";
+  }
+}
+
+// Label box: value line ~14px + pill ~16px + optional subLabel ~12px = ~42px total
+// STEM_GAP: gap between dot edge and start of stem line
+// ROW_STEP: distance from bar centre to label box edge (top of bottom label / bottom of top label)
+const LABEL_H = 46;    // foreignObject height (value + pill + optional subLabel)
+const STEM_GAP = 6;    // px gap between dot edge and stem start
+const ROW_STEP = LABEL_H + 14; // stem length ~14px between label bottom and bar
+const BAR_EDGE_MARGIN = 28;    // extra space at top for ATL/ATH date text
 
 function PriceLevelsBar({
   markers,
@@ -163,21 +218,43 @@ function PriceLevelsBar({
 
   const toPct = (v: number) => Math.max(0, Math.min(100, ((v - low) / span) * 100));
 
-  const markerDotStyle = (style: PriceLevelMarker["style"]): { bg: string; border: string; size: number } => {
-    switch (style) {
-      case "cmp": return { bg: "var(--qc-ink)", border: "var(--qc-ink)", size: 14 };
-      case "support": return { bg: "var(--qc-card)", border: "var(--qc-up)", size: 12 };
-      case "resistance": return { bg: "var(--qc-card)", border: "var(--qc-down)", size: 12 };
-      case "range-high": return { bg: "var(--qc-card)", border: "var(--qc-warn)", size: 12 };
-      case "range-low": return { bg: "var(--qc-card)", border: "var(--qc-ink-2)", size: 12 };
-      case "atl": return { bg: "var(--qc-card)", border: "var(--qc-ink-2)", size: 10 };
-      case "ath": return { bg: "var(--qc-card)", border: "var(--qc-down)", size: 12 };
-      default: return { bg: "var(--qc-card)", border: "var(--qc-blue)", size: 10 };
+  const withRows = assignLabelRows(markers, toPct);
+  const topMarkers = withRows.filter((m) => m.side === "top");
+  const bottomMarkers = withRows.filter((m) => m.side === "bottom");
+  const maxTopRow = topMarkers.length > 0 ? topMarkers.reduce((mx, m) => Math.max(mx, m.row), 0) : -1;
+  const maxBottomRow = bottomMarkers.length > 0 ? bottomMarkers.reduce((mx, m) => Math.max(mx, m.row), 0) : -1;
+
+  // barY: enough room above for all top label rows + ATL/ATH date text
+  const barY = BAR_EDGE_MARGIN + (maxTopRow + 1) * ROW_STEP;
+  // totalHeight: bar + all bottom label rows + bottom padding
+  const totalHeight = barY + (maxBottomRow + 1) * ROW_STEP + LABEL_H + 16;
+
+  // For top labels: label box bottom edge is at barY - stemLength, top edge is LABEL_H above that
+  // For bottom labels: label box top edge is at barY + stemLength
+  const STEM_LEN = 14; // px from dot edge to label box edge
+
+  // Returns the Y of the TOP edge of the label foreignObject
+  const labelBoxTop = (side: "top" | "bottom", row: number, dotRadius: number): number => {
+    if (side === "top") {
+      // label box bottom = barY - dotRadius - STEM_GAP - STEM_LEN - row*(LABEL_H + STEM_LEN)
+      const boxBottom = barY - dotRadius - STEM_GAP - STEM_LEN - row * ROW_STEP;
+      return boxBottom - LABEL_H;
+    } else {
+      // label box top = barY + dotRadius + STEM_GAP + STEM_LEN + row*(LABEL_H + STEM_LEN)
+      return barY + dotRadius + STEM_GAP + STEM_LEN + row * ROW_STEP;
     }
   };
 
-  // Separate markers into top (CMP, SMAs) and bottom (support/resistance labels)
-  const sortedMarkers = [...markers].sort((a, b) => a.value - b.value);
+  const stemStart = (side: "top" | "bottom", dotRadius: number): number =>
+    side === "top" ? barY - dotRadius - STEM_GAP : barY + dotRadius + STEM_GAP;
+
+  const stemEnd = (side: "top" | "bottom", row: number, dotRadius: number): number => {
+    if (side === "top") {
+      return labelBoxTop(side, row, dotRadius) + LABEL_H + 2; // just below label box bottom
+    } else {
+      return labelBoxTop(side, row, dotRadius) - 2; // just above label box top
+    }
+  };
 
   return (
     <div
@@ -185,159 +262,124 @@ function PriceLevelsBar({
         background: "var(--qc-card)",
         border: "1px solid var(--qc-hair)",
         borderRadius: 12,
-        padding: "16px 20px",
-        marginTop: 10,
+        padding: "16px 20px 12px",
       }}
     >
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 16 }}>
-        <MonoEyebrow>Price Levels · All-Time to Current</MonoEyebrow>
-        <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}>
-          {atl != null && `ATL ${fp(atl)}`}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+        <MonoEyebrow>Price Levels · All-Time Scale</MonoEyebrow>
+        <span style={{ fontSize: 10, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}>
+          {atl != null && `ATL ${fp(atl)}${atlDate ? ` (${atlDate})` : ""}`}
           {atl != null && ath != null && " · "}
-          {ath != null && `ATH ${fp(ath)}`}
-          {" · Range on scale"}
+          {ath != null && `ATH ${fp(ath)}${athDate ? ` (${athDate})` : ""}`}
+          {" · Dots placed proportionally on price scale"}
         </span>
       </div>
 
-      {/* Top labels row (ATL, range labels, ATH) */}
-      <div style={{ position: "relative", height: 28, marginBottom: 4 }}>
-        {/* ATL */}
-        {atl != null && (
-          <div
-            style={{
-              position: "absolute",
-              left: "0%",
-              transform: "translateX(0%)",
-              bottom: 0,
-              fontSize: 10,
-              color: "var(--qc-ink-2)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <div style={{ fontWeight: 500, color: "var(--qc-down, #B23A2F)" }}>ATL</div>
-            <div>{fp(atl)}</div>
-          </div>
-        )}
-        {/* ATH */}
-        {ath != null && (
-          <div
-            style={{
-              position: "absolute",
-              right: "0%",
-              transform: "translateX(0%)",
-              bottom: 0,
-              fontSize: 10,
-              color: "var(--qc-ink-2)",
-              whiteSpace: "nowrap",
-              textAlign: "right",
-            }}
-          >
-            <div style={{ fontWeight: 500, color: "var(--qc-down, #B23A2F)" }}>ATH</div>
-            <div>{fp(ath)}</div>
-          </div>
-        )}
-        {/* Dates */}
-        {atlDate && (
-          <div
-            style={{
-              position: "absolute",
-              left: "0%",
-              top: 0,
-              fontSize: 9,
-              color: "var(--qc-ink-2)",
-            }}
-          >
-            {atlDate}
-          </div>
-        )}
-        {athDate && (
-          <div
-            style={{
-              position: "absolute",
-              right: "0%",
-              top: 0,
-              fontSize: 9,
-              color: "var(--qc-ink-2)",
-              textAlign: "right",
-            }}
-          >
-            {athDate}
-          </div>
-        )}
-      </div>
+      {/* SVG chart — PAD keeps dots/labels inset so edges never clip */}
+      <div style={{ width: "100%" }}>
+        {(() => {
+          const PAD = 40; // horizontal padding in SVG units on each side
+          const W = 1000;
+          const barW = W - PAD * 2;
+          // map price % → SVG x within padded bar
+          const toX = (v: number) => PAD + toPct(v) * barW / 100;
 
-      {/* The bar track */}
-      <div
-        style={{
-          position: "relative",
-          height: 6,
-          background: "linear-gradient(90deg, #D9E8B3 0%, #F3E4C3 50%, #F0D3C9 100%)",
-          borderRadius: 999,
-          marginBottom: 8,
-        }}
-      >
-        {/* Dots on the bar */}
-        {sortedMarkers.map((m, i) => {
-          const pct = toPct(m.value);
-          const ds = markerDotStyle(m.style);
           return (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: `${pct}%`,
-                transform: "translate(-50%, -50%)",
-                width: ds.size,
-                height: ds.size,
-                borderRadius: "50%",
-                background: ds.bg,
-                border: `2px solid ${ds.border}`,
-                boxShadow: m.style === "cmp" ? "0 0 0 3px rgba(0,0,0,0.10)" : undefined,
-                zIndex: m.style === "cmp" ? 3 : 2,
-              }}
-            />
-          );
-        })}
-      </div>
-
-      {/* Bottom labels row for each marker */}
-      <div style={{ position: "relative", height: 52 }}>
-        {sortedMarkers.map((m, i) => {
-          const pct = toPct(m.value);
-          const ds = markerDotStyle(m.style);
-          return (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                left: `${pct}%`,
-                transform: "translateX(-50%)",
-                top: 0,
-                textAlign: "center",
-                whiteSpace: "nowrap",
-              }}
+            <svg
+              width="100%"
+              viewBox={`0 0 ${W} ${totalHeight}`}
+              style={{ display: "block" }}
+              preserveAspectRatio="xMidYMid meet"
             >
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  color: ds.border,
-                  fontFamily: "'IBM Plex Mono', monospace",
-                }}
-              >
-                {m.label}
-              </div>
-              <div style={{ fontSize: 11, color: "var(--qc-ink)", fontWeight: m.style === "cmp" ? 600 : 400 }}>
-                {fp(m.value)}
-              </div>
-              {m.subLabel && (
-                <div style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{m.subLabel}</div>
+              <defs>
+                <linearGradient id="plBarGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%"   stopColor="#D9E8B3" />
+                  <stop offset="50%"  stopColor="#F3E4C3" />
+                  <stop offset="100%" stopColor="#F0D3C9" />
+                </linearGradient>
+              </defs>
+
+              {/* Bar track */}
+              <rect x={PAD} y={barY - 3} width={barW} height="6" rx="3" fill="url(#plBarGrad)" />
+
+              {/* Markers: dot + connector line + label */}
+              {withRows.map((m, i) => {
+                const x = toX(m.value);
+                const ds = markerDotStyle(m.style);
+                const r = ds.size / 2;
+                const color = labelColor(m.style);
+                const isCmp = m.style === "cmp";
+                const boxTop = labelBoxTop(m.side, m.row, r);
+
+                return (
+                  <g key={i}>
+                    {/* Dashed stem */}
+                    <line
+                      x1={x} y1={stemStart(m.side, r)}
+                      x2={x} y2={stemEnd(m.side, m.row, r)}
+                      stroke={color} strokeWidth="1.2"
+                      strokeDasharray="3 3" opacity="0.6"
+                    />
+
+                    {/* Dot */}
+                    <circle cx={x} cy={barY} r={r} fill={ds.bg} stroke={ds.border} strokeWidth={isCmp ? 2.5 : 1.8} />
+                    {isCmp && (
+                      <circle cx={x} cy={barY} r={r + 3} fill="none" stroke="#0F172B" strokeWidth="1" opacity="0.18" />
+                    )}
+
+                    {/* Label: value + pill tag */}
+                    <foreignObject x={x - 38} y={boxTop} width="76" height={LABEL_H} style={{ overflow: "visible" }}>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                        <span style={{
+                          fontSize: 11, fontWeight: isCmp ? 700 : 500,
+                          fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
+                          background: isCmp ? "#0F172B" : "transparent",
+                          color: isCmp ? "#fff" : "var(--qc-ink)",
+                          padding: isCmp ? "1px 6px" : "0",
+                          borderRadius: isCmp ? 4 : 0,
+                        }}>
+                          {fp(m.value)}
+                        </span>
+                        <span style={{
+                          fontSize: 9, fontWeight: 600, color,
+                          background: "var(--qc-surface, #F5F5F5)",
+                          border: `1px solid ${color}`,
+                          borderRadius: 3, padding: "1px 5px",
+                          whiteSpace: "nowrap",
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          letterSpacing: "0.05em",
+                        }}>
+                          {m.label}
+                        </span>
+                        {m.subLabel && (
+                          <span style={{ fontSize: 8.5, color: "var(--qc-ink-2)", whiteSpace: "nowrap" }}>
+                            {m.subLabel}
+                          </span>
+                        )}
+                      </div>
+                    </foreignObject>
+                  </g>
+                );
+              })}
+
+              {/* ATL edge label (left, below bar) */}
+              {atl != null && (
+                <g>
+                  {atlDate && <text x={PAD} y={barY - 8} fontSize="8" fill="var(--qc-ink-2)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">{atlDate}</text>}
+                  <text x={PAD} y={barY + 16} fontSize="9" fontWeight="600" fill="var(--qc-down, #B23A2F)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">ATL</text>
+                </g>
               )}
-            </div>
+              {/* ATH edge label (right, below bar) */}
+              {ath != null && (
+                <g>
+                  {athDate && <text x={PAD + barW} y={barY - 8} fontSize="8" fill="var(--qc-ink-2)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">{athDate}</text>}
+                  <text x={PAD + barW} y={barY + 16} fontSize="9" fontWeight="600" fill="var(--qc-down, #B23A2F)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">ATH</text>
+                </g>
+              )}
+            </svg>
           );
-        })}
+        })()}
       </div>
 
       {/* Legend */}
@@ -345,31 +387,22 @@ function PriceLevelsBar({
         style={{
           borderTop: "1px solid var(--qc-hair-2)",
           paddingTop: 8,
-          marginTop: 8,
+          marginTop: 4,
           display: "flex",
           gap: 14,
           flexWrap: "wrap",
         }}
       >
         {[
-          { dot: "var(--qc-ink)", label: "CMP" },
-          { dot: "var(--qc-blue)", label: "SMA 20 / 50 / 100 / 200" },
-          { dot: "var(--qc-up)", label: "Support (S1)" },
-          { dot: "var(--qc-down)", label: "Resistance (R1) / ATH" },
-          { dot: "var(--qc-warn)", label: "52-Week High" },
-          { dot: "var(--qc-ink-2)", label: "52-Week Low / ATL" },
+          { dot: "#0F172B",           label: "CMP" },
+          { dot: "var(--qc-blue)",    label: "SMA 20 / 50 / 100 / 200" },
+          { dot: "var(--qc-up)",      label: "Support" },
+          { dot: "var(--qc-down)",    label: "Resistance / ATH" },
+          { dot: "var(--qc-warn)",    label: "52-Week High" },
+          { dot: "var(--qc-ink-2)",   label: "52-Week Low / ATL" },
         ].map(({ dot, label }) => (
           <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: dot,
-                display: "inline-block",
-                flexShrink: 0,
-              }}
-            />
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: dot, display: "inline-block", flexShrink: 0 }} />
             <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{label}</span>
           </div>
         ))}
@@ -384,7 +417,7 @@ interface Props {
   data: TechnicalsResponse;
 }
 
-export function TechnicalsCard({ data }: Props) {
+function buildTechnicalsCard({ data }: Props) {
   const { supportResistance: sr, movingAverages: ma, price, trend, ruleEngine: re, momentum } = data;
 
   const cmp = price.cmp;
@@ -536,61 +569,63 @@ export function TechnicalsCard({ data }: Props) {
 
   // Build price level markers
   const markers: PriceLevelMarker[] = [
-    { label: "CMP", value: cmp, style: "cmp" as const },
-    { label: "52W LOW", value: low52w, style: "range-low" as const, subLabel: price.low52wDate ?? undefined },
-    { label: "52W HIGH", value: high52w, style: "range-high" as const, subLabel: price.high52wDate ?? undefined },
-    { label: "SMA 20", value: ma.sma[20], style: "sma" as const },
-    { label: "SMA 50", value: ma.sma[50], style: "sma" as const },
-    { label: "SMA 100", value: ma.sma[100], style: "sma" as const },
-    { label: "SMA 200", value: ma.sma[200], style: "sma" as const },
-    ...(r1 != null ? [{ label: "R1", value: r1, style: "resistance" as const }] : []),
-    ...(s1 != null ? [{ label: "S1", value: s1, style: "support" as const }] : []),
+    { label: "CMP",      value: cmp,        style: "cmp" as const,        side: "top" as const },
+    { label: "52W Low",  value: low52w,     style: "range-low" as const,  side: "top" as const,    subLabel: price.low52wDate ?? undefined },
+    { label: "52W High", value: high52w,    style: "range-high" as const, side: "top" as const,    subLabel: price.high52wDate ?? undefined },
+    { label: "SMA 20",   value: ma.sma[20], style: "sma" as const,        side: "bottom" as const },
+    { label: "SMA 50",   value: ma.sma[50], style: "sma" as const,        side: "top" as const },
+    { label: "SMA 100",  value: ma.sma[100],style: "sma" as const,        side: "bottom" as const },
+    { label: "SMA 200",  value: ma.sma[200],style: "sma" as const,        side: "bottom" as const },
+    ...(r1 != null ? [{ label: "R1", value: r1, style: "resistance" as const, side: "bottom" as const }] : []),
+    ...(s1 != null ? [{ label: "S1", value: s1, style: "support" as const,    side: "bottom" as const }] : []),
   ].filter((m, i, arr) =>
     arr.findIndex((x) => Math.abs(x.value - m.value) < 1) === i
   );
 
-  return (
-    <SectionShell>
-      <SectionLabel>Technicals</SectionLabel>
+  return {
+    card: (
+      <SectionShell>
+        <SectionLabel>Technicals</SectionLabel>
 
-      {/* Narrative bar */}
-      {summary && (
-        <div
-          style={{
-            background: "var(--qc-card)",
-            border: "1px solid var(--qc-hair)",
-            borderRadius: 10,
-            padding: "12px 16px",
-            fontSize: 12.5,
-            lineHeight: 1.65,
-            color: "var(--qc-ink)",
-            marginBottom: 12,
-          }}
-        >
-          <span
+        {/* Narrative bar */}
+        {summary && (
+          <div
             style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 9,
-              letterSpacing: ".12em",
-              textTransform: "uppercase",
-              color: "var(--qc-ink-2)",
-              marginRight: 10,
+              background: "var(--qc-card)",
+              border: "1px solid var(--qc-hair)",
+              borderRadius: 10,
+              padding: "12px 16px",
+              fontSize: 12.5,
+              lineHeight: 1.65,
+              color: "var(--qc-ink)",
+              marginBottom: 12,
             }}
           >
-            Technicals
-          </span>
-          {summary}
+            <span
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 9,
+                letterSpacing: ".12em",
+                textTransform: "uppercase",
+                color: "var(--qc-ink-2)",
+                marginRight: 10,
+              }}
+            >
+              Technicals
+            </span>
+            {summary}
+          </div>
+        )}
+
+        {/* 4-column state cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+          {stateCards.map((card) => (
+            <StateCard key={card.label} {...card} />
+          ))}
         </div>
-      )}
-
-      {/* 4-column state cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-        {stateCards.map((card) => (
-          <StateCard key={card.label} {...card} />
-        ))}
-      </div>
-
-      {/* Price Levels bar */}
+      </SectionShell>
+    ),
+    priceLevels: (
       <PriceLevelsBar
         markers={markers}
         rangeMin={low52w}
@@ -600,6 +635,14 @@ export function TechnicalsCard({ data }: Props) {
         atlDate={atlDate ?? undefined}
         athDate={athDate ?? undefined}
       />
-    </SectionShell>
-  );
+    ),
+  };
+}
+
+export function TechnicalsCard({ data }: Props) {
+  return buildTechnicalsCard({ data }).card;
+}
+
+export function PriceLevelsSection({ data }: Props) {
+  return buildTechnicalsCard({ data }).priceLevels;
 }

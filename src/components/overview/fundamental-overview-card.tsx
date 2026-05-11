@@ -1,16 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import type { ScreenerData } from "@/types/screener";
-import { SectionShell, SectionLabel, MonoEyebrow, NarrativeSidebar } from "./primitives";
+import { SectionShell, SectionLabel, MonoEyebrow } from "./primitives";
 import { ValuationHeroSection } from "./fundamentals/valuation-hero-section";
+import { ValuationChartSidebar, type ChartMetricKey } from "./fundamentals/valuation-chart-sidebar";
 import { KpiGrid } from "./fundamentals/kpi-grid";
 import { ReturnsLeveragePanel } from "./fundamentals/returns-leverage-panel";
 import { ShareholdingPanel } from "./fundamentals/shareholding-panel";
 import { useShareholding } from "@/hooks/useShareholding";
+import { formatINR } from "@/lib/utils";
 
 interface Props {
   data: ScreenerData;
   symbol: string;
+}
+
+const METRIC_LABELS: Record<ChartMetricKey, string> = {
+  revenue: "Revenue",
+  ebitda: "EBITDA",
+  netIncome: "Net Profit",
+  eps: "EPS",
+  cfo: "CFO",
+  totalDebt: "Debt",
+  totalEquity: "Equity",
+};
+
+function formatForMetric(key: ChartMetricKey, v: number): string {
+  if (key === "eps") return `₹${v.toFixed(2)}`;
+  return formatINR(v);
 }
 
 export function FundamentalOverviewCard({ data, symbol }: Props) {
@@ -20,6 +38,8 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
   const own = data.ownership;
   const ratios = data.ratios;
   const perShare = data.perShare;
+
+  const [selectedMetric, setSelectedMetric] = useState<ChartMetricKey | null>(null);
 
   const { data: shareholdingData } = useShareholding(symbol);
 
@@ -44,7 +64,6 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
   const roeVal = ratios.roe;
   const deVal = eff.debtToEquity;
   const roceIsGood = roceVal != null && roceVal > 15;
-  const roeIsGood = roeVal != null && roeVal > 12;
   const deIsGood = deVal != null && deVal < 1;
 
   const narrative = (() => {
@@ -56,14 +75,6 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
     if (deIsGood) parts.push("Balance sheet leverage is modest.");
     return parts.join(" ");
   })();
-
-  const tags: { label: string; color: string }[] = [];
-  if (verdictLabel === "Undervalued") tags.push({ label: "Undervalued", color: "var(--qc-up)" });
-  if (verdictLabel === "Overvalued") tags.push({ label: "Overvalued", color: "var(--qc-down)" });
-  if (roceIsGood) tags.push({ label: "High ROCE", color: "var(--qc-up)" });
-  if (roeIsGood) tags.push({ label: "High ROE", color: "var(--qc-up)" });
-  if (!deIsGood && deVal != null) tags.push({ label: "Elevated D/E", color: "var(--qc-warn)" });
-  if (deIsGood && deVal != null) tags.push({ label: "Low leverage", color: "var(--qc-ink-2)" });
 
   const getLatestById = (id: string): number | null => {
     if (!shareholdingData) return null;
@@ -87,6 +98,8 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
     { label: "Public", pct: publicPct, color: "var(--qc-ink-2)" },
   ];
 
+  const trend = fp.quarterlyTrend ?? [];
+
   return (
     <SectionShell>
       <SectionLabel>Fundamentals</SectionLabel>
@@ -103,23 +116,15 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
           pbRatio={val.pbRatio}
           dividendYield={perShare.dividendYield}
           narrative={narrative}
+          trend={trend}
+          selectedMetric={selectedMetric}
+          onSelectMetric={setSelectedMetric}
         />
-        <NarrativeSidebar
-          eyebrow="What the numbers say"
-          headline={
-            verdictLabel === "Undervalued"
-              ? "Cheap on earnings — potential upside if growth holds."
-              : verdictLabel === "Overvalued"
-              ? "Priced at a premium — execution must justify the multiple."
-              : "Fairly valued against sector peers."
-          }
-          body={
-            narrative +
-            (roceIsGood || roeIsGood
-              ? " Return metrics indicate efficient capital deployment."
-              : " Return metrics warrant monitoring.")
-          }
-          tags={tags}
+        <ValuationChartSidebar
+          trend={trend}
+          selectedMetric={selectedMetric}
+          selectedLabel={selectedMetric ? METRIC_LABELS[selectedMetric] : null}
+          formatValue={selectedMetric ? (v) => formatForMetric(selectedMetric, v) : () => ""}
         />
       </div>
 
@@ -140,6 +145,9 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
         reservesGrowth={fp.reservesGrowth}
         totalDebt={eff.totalDebt}
         debtGrowth={eff.debtGrowth}
+        trend={trend}
+        selectedMetric={selectedMetric}
+        onSelectMetric={setSelectedMetric}
       />
 
       <ReturnsLeveragePanel

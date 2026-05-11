@@ -138,15 +138,14 @@ export function KeyRatioTiles({ data }: Props) {
   // EPS CAGR 3Y
   const epsCagrRaw = fin.eps_cagr_3y;
   const epsCagrDisplay = epsCagrRaw != null
-    ? `${epsCagrRaw >= 0 ? "+" : ""}${(epsCagrRaw * 100).toFixed(1)}%`
-    : ks.earningsQuarterlyGrowth != null
-      ? `${ks.earningsQuarterlyGrowth >= 0 ? "+" : ""}${(ks.earningsQuarterlyGrowth * 100).toFixed(1)}%`
-      : "—";
+    ? `${epsCagrRaw >= 0 ? "+" : ""}${epsCagrRaw.toFixed(1)}%`
+    : "—";
   const epsCagrIsPositive = epsCagrDisplay !== "—" && !epsCagrDisplay.startsWith("-");
   const epsCagrLabel = fin.eps_cagr_3y_label ?? null;
 
   // Dividend Yield — backend sends value already in % (e.g. 0.98 means 0.98%)
-  const divYield = ps.dividendYield != null ? `${ps.dividendYield.toFixed(2)}%` : "—";
+  const divYieldRaw = ps.dividendYield;
+  const divYield = divYieldRaw != null && divYieldRaw > 0 ? `${divYieldRaw.toFixed(2)}%` : "—";
 
   return (
     <div className="px-4">

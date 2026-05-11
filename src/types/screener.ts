@@ -99,13 +99,11 @@ interface QuarterlyTrend {
   period: string;
   revenue: number | null;
   ebitda: number | null;
-  grossProfit: number | null;
-  operatingIncome: number | null;
   netIncome: number | null;
   eps: number | null;
+  cfo: number | null;
   totalDebt: number | null;
   totalEquity: number | null;
-  netDebt: number | null;
 }
 
 export interface ScreenerData {

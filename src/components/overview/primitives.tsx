@@ -7,8 +7,8 @@ export function SectionShell({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
-        background: "var(--qc-surface-row-alt)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-section)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 18,
         padding: 16,
       }}
@@ -27,7 +27,7 @@ export function SectionLabel({ children }: { children: React.ReactNode }) {
         fontFamily: "'IBM Plex Mono', monospace",
         fontSize: 11,
         letterSpacing: ".12em",
-        color: "var(--qc-text-body)",
+        color: "var(--qc-ink)",
         textTransform: "uppercase",
         marginBottom: 14,
       }}
@@ -52,7 +52,7 @@ export function MonoEyebrow({
         fontFamily: "'IBM Plex Mono', monospace",
         fontSize: 10,
         letterSpacing: ".16em",
-        color: "var(--qc-text-muted)",
+        color: "var(--qc-ink-2)",
         textTransform: "uppercase",
         ...style,
       }}
@@ -132,10 +132,10 @@ function DotChip({ label, dotColor }: { label: string; dotColor: string }) {
         gap: 6,
         padding: "5px 10px",
         borderRadius: 999,
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         fontSize: 11.5,
-        color: "var(--qc-text-body)",
+        color: "var(--qc-ink)",
         fontWeight: 500,
       }}
     >
@@ -166,8 +166,8 @@ export function NarrativeSidebar({ eyebrow, headline, body, tags }: NarrativeSid
   return (
     <aside
       style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 18,
         padding: "20px 22px",
         display: "flex",
@@ -182,7 +182,7 @@ export function NarrativeSidebar({ eyebrow, headline, body, tags }: NarrativeSid
           position: "absolute",
           inset: "auto 0 0 0",
           height: "60%",
-          background: "linear-gradient(180deg, transparent 0%, var(--qc-accent-lime-bg) 100%)",
+          background: "linear-gradient(180deg, transparent 0%, var(--qc-lime) 100%)",
           zIndex: 0,
           pointerEvents: "none",
         }}
@@ -204,12 +204,12 @@ export function NarrativeSidebar({ eyebrow, headline, body, tags }: NarrativeSid
             fontWeight: 500,
             letterSpacing: "-0.01em",
             lineHeight: 1.3,
-            color: "var(--qc-text-heading)",
+            color: "var(--qc-ink)",
           }}
         >
           {headline}
         </div>
-        <p style={{ fontSize: 12.5, lineHeight: 1.6, color: "var(--qc-text-body)", margin: 0 }}>
+        <p style={{ fontSize: 12.5, lineHeight: 1.6, color: "var(--qc-ink)", margin: 0 }}>
           {body}
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: "auto" }}>
@@ -255,7 +255,7 @@ export function MetricBar({
           marginBottom: 6,
         }}
       >
-        <span style={{ fontSize: 12, color: "var(--qc-text-body)", fontWeight: 500 }}>
+        <span style={{ fontSize: 12, color: "var(--qc-ink)", fontWeight: 500 }}>
           {label}
         </span>
         <span
@@ -263,7 +263,7 @@ export function MetricBar({
             fontSize: 17,
             fontWeight: 500,
             letterSpacing: "-0.015em",
-            color: "var(--qc-text-heading)",
+            color: "var(--qc-ink)",
             fontVariantNumeric: "tabular-nums",
             lineHeight: 1,
           }}
@@ -274,7 +274,7 @@ export function MetricBar({
       <div
         style={{
           height: 6,
-          background: "var(--qc-chip-bg, #F2F1EC)",
+          background: "var(--qc-chip, #F2F1EC)",
           borderRadius: 999,
           overflow: "visible",
           marginBottom: 6,
@@ -297,7 +297,7 @@ export function MetricBar({
             bottom: -3,
             width: 2,
             left: `${benchmarkPct}%`,
-            background: "var(--qc-text-heading)",
+            background: "var(--qc-ink)",
             opacity: 0.5,
           }}
         />
@@ -305,7 +305,7 @@ export function MetricBar({
       <div
         style={{
           fontSize: 11,
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           display: "flex",
           justifyContent: "space-between",
         }}
@@ -313,7 +313,7 @@ export function MetricBar({
         <span>{subLeft}</span>
         <b
           style={{
-            color: "var(--qc-text-body)",
+            color: "var(--qc-ink)",
             fontWeight: 500,
             fontFamily: "'IBM Plex Mono', monospace",
           }}
@@ -345,11 +345,11 @@ export function StatTile({
       ? "var(--qc-up)"
       : subSentiment === "neg"
       ? "var(--qc-down)"
-      : "var(--qc-text-muted)";
+      : "var(--qc-ink-2)";
   return (
     <div
       style={{
-        border: "1px solid var(--qc-border-default)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 10,
         padding: "10px 12px",
       }}
@@ -357,7 +357,7 @@ export function StatTile({
       <div
         style={{
           fontSize: 11,
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           letterSpacing: ".02em",
           marginBottom: 2,
         }}
@@ -369,7 +369,7 @@ export function StatTile({
           fontSize: 17,
           fontWeight: 500,
           letterSpacing: "-0.01em",
-          color: "var(--qc-text-heading)",
+          color: "var(--qc-ink)",
           fontVariantNumeric: "tabular-nums",
         }}
       >
@@ -378,7 +378,7 @@ export function StatTile({
           <span
             style={{
               fontSize: 11,
-              color: "var(--qc-text-muted)",
+              color: "var(--qc-ink-2)",
               marginLeft: 2,
               fontWeight: 400,
             }}
@@ -411,8 +411,8 @@ export function SidebarPanelLayout({
   return (
     <div
       style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
         padding: "16px 18px",
         display: "grid",
@@ -426,7 +426,7 @@ export function SidebarPanelLayout({
         style={{
           minWidth: 160,
           paddingRight: 16,
-          borderRight: "1px solid var(--qc-border-inner)",
+          borderRight: "1px solid var(--qc-hair-2)",
         }}
       >
         <MonoEyebrow style={{ marginBottom: 6 }}>{eyebrow}</MonoEyebrow>
@@ -436,12 +436,12 @@ export function SidebarPanelLayout({
             fontSize: 15,
             fontWeight: 500,
             letterSpacing: "-0.005em",
-            color: "var(--qc-text-heading)",
+            color: "var(--qc-ink)",
           }}
         >
           {heading}
         </h4>
-        <p style={{ margin: 0, fontSize: 11.5, color: "var(--qc-text-body)", lineHeight: 1.45 }}>
+        <p style={{ margin: 0, fontSize: 11.5, color: "var(--qc-ink)", lineHeight: 1.45 }}>
           {description}
         </p>
       </div>

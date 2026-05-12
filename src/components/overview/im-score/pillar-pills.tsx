@@ -1,7 +1,7 @@
 "use client";
 
 export const PILLAR_COLORS = {
-  M: { dot: "var(--qc-blue, #2563EB)", seg: "var(--qc-text-heading)" },
+  M: { dot: "var(--qc-blue, #2563EB)", seg: "var(--qc-ink)" },
   O: { dot: "var(--qc-up, #1F7A4A)", seg: "#1E3A2B" },
   D: { dot: "var(--qc-warn, #B4731A)", seg: "#7A5A12" },
 } as const;
@@ -28,9 +28,9 @@ export function PillarPills({ activePillar, onSelect, scores, labels }: PillarPi
             style={{
               display: "flex", alignItems: "center", gap: 10,
               padding: "10px 14px",
-              border: `1px solid ${isOn ? "var(--qc-text-heading)" : "var(--qc-border-default)"}`,
+              border: `1px solid ${isOn ? "var(--qc-ink)" : "var(--qc-hair)"}`,
               borderRadius: 10,
-              background: isOn ? "var(--qc-text-heading)" : "var(--qc-surface-white)",
+              background: isOn ? "var(--qc-ink)" : "var(--qc-card)",
               cursor: "pointer", textAlign: "left", fontFamily: "inherit",
               color: isOn ? "#fff" : "inherit",
               transition: "background 0.15s, border-color 0.15s",
@@ -45,7 +45,7 @@ export function PillarPills({ activePillar, onSelect, scores, labels }: PillarPi
             <span
               style={{
                 fontSize: 13, fontWeight: 500, flex: 1,
-                color: isOn ? "#fff" : "var(--qc-text-heading)",
+                color: isOn ? "#fff" : "var(--qc-ink)",
               }}
             >
               {labels[key]}
@@ -53,7 +53,7 @@ export function PillarPills({ activePillar, onSelect, scores, labels }: PillarPi
             <span
               style={{
                 fontFamily: "'IBM Plex Mono', monospace", fontSize: 13,
-                color: isOn ? "#fff" : score == null ? "var(--qc-text-muted)" : "var(--qc-text-heading)",
+                color: isOn ? "#fff" : score == null ? "var(--qc-ink-2)" : "var(--qc-ink)",
                 letterSpacing: "-0.01em",
               }}
             >
@@ -61,7 +61,7 @@ export function PillarPills({ activePillar, onSelect, scores, labels }: PillarPi
               <span
                 style={{
                   fontSize: 10.5,
-                  color: isOn ? "rgba(255,255,255,0.55)" : "var(--qc-text-muted)",
+                  color: isOn ? "rgba(255,255,255,0.55)" : "var(--qc-ink-2)",
                   marginLeft: 1,
                 }}
               >

@@ -4,7 +4,7 @@ export type RiskProfile = "conservative" | "moderate" | "aggressive";
 export type InteractionType = "call" | "email" | "whatsapp" | "meeting" | "sms";
 export type SuggestionPriority = "HIGH" | "MEDIUM" | "LOW";
 export type SuggestionStatus = "pending" | "used" | "ignored";
-export type ModelType = "equity" | "debt" | "hybrid" | "structured" | "pms" | "aif";
+type ModelType = "equity" | "debt" | "hybrid" | "structured" | "pms" | "aif";
 export type MessageChannel = "call" | "email" | "whatsapp";
 
 // Core entities
@@ -32,7 +32,7 @@ export interface WealthPortfolio {
   holdings: PortfolioHolding[];
 }
 
-export interface PortfolioHolding {
+interface PortfolioHolding {
   symbol: string;
   weight: number;
   qty: number;
@@ -129,7 +129,7 @@ export interface SegmentAnalytic {
   avg_churn: number;
 }
 
-export interface InteractionTypeCount {
+interface InteractionTypeCount {
   type: InteractionType;
   count: number;
 }

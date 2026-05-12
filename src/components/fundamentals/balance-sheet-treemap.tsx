@@ -44,7 +44,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
         fontSize: "12px",
         fontWeight: "500",
         fontFamily: "'IBM Plex Mono', monospace",
-        colors: ["var(--qc-surface-base)"], // --qc-surface-white resolved (text on dark treemap fills)
+        colors: ["var(--qc-bg)"], // --qc-card resolved (text on dark treemap fills)
       },
       formatter: (text: string, op?: ApexCharts.ApexFormatterOpts) =>
         op?.value !== undefined ? [`${text}`, fmtCr(op.value as number)] : text,
@@ -68,7 +68,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
         style={{
           fontFamily: "'IBM Plex Mono', monospace",
           fontSize: 10,
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           textAlign: "right",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
@@ -84,7 +84,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: 10,
               fontWeight: 500,
-              color: "var(--qc-text-muted)",
+              color: "var(--qc-ink-2)",
               textTransform: "uppercase",
               letterSpacing: "0.12em",
               textAlign: "center",
@@ -93,7 +93,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
           >
             Assets{" "}
             {assetTotal > 0 && (
-              <span style={{ fontWeight: 400, textTransform: "none", color: "var(--qc-text-body)" }}>
+              <span style={{ fontWeight: 400, textTransform: "none", color: "var(--qc-ink)" }}>
                 · {fmtCr(assetTotal)}
               </span>
             )}
@@ -106,7 +106,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: 10,
               fontWeight: 500,
-              color: "var(--qc-text-muted)",
+              color: "var(--qc-ink-2)",
               textTransform: "uppercase",
               letterSpacing: "0.12em",
               textAlign: "center",
@@ -115,7 +115,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
           >
             Liabilities{" "}
             {liabilityTotal > 0 && (
-              <span style={{ fontWeight: 400, textTransform: "none", color: "var(--qc-text-body)" }}>
+              <span style={{ fontWeight: 400, textTransform: "none", color: "var(--qc-ink)" }}>
                 · {fmtCr(liabilityTotal)}
               </span>
             )}

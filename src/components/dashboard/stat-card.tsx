@@ -15,12 +15,12 @@ export function StatCard({ value, label, icon, sublabel, trend, className, flat 
   const trendColor =
     trend === "up" ? "var(--qc-up)" :
     trend === "down" ? "var(--qc-down)" :
-    "var(--qc-text-muted)";
+    "var(--qc-ink-2)";
 
   const inner = (
     <div
       className="rounded-[10px] px-4 py-4 flex flex-col gap-3 h-full"
-      style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-inner)" }}
+      style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)" }}
     >
       {/* Icon + optional trend indicator on same row */}
       <div className="flex items-center justify-between">
@@ -28,8 +28,8 @@ export function StatCard({ value, label, icon, sublabel, trend, className, flat 
           style={{
             padding: 6,
             borderRadius: 6,
-            border: "1px solid var(--qc-icon-box-border)",
-            background: "var(--qc-icon-box-bg)",
+            border: "1px solid var(--qc-hair)",
+            background: "var(--qc-chip)",
           }}
         >
           {icon}
@@ -38,9 +38,9 @@ export function StatCard({ value, label, icon, sublabel, trend, className, flat 
           <span
             className="text-[10px] font-medium rounded-sm px-1.5 py-0.5"
             style={{
-              background: "var(--qc-chip-bg)",
-              color: trend ? trendColor : "var(--qc-text-muted)",
-              border: "1px solid var(--qc-chip-border)",
+              background: "var(--qc-chip)",
+              color: trend ? trendColor : "var(--qc-ink-2)",
+              border: "1px solid var(--qc-hair)",
             }}
           >
             {sublabel}
@@ -49,12 +49,12 @@ export function StatCard({ value, label, icon, sublabel, trend, className, flat 
       </div>
 
       {/* Value */}
-      <div style={{ fontSize: 32, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1, letterSpacing: "-0.02em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+      <div style={{ fontSize: 32, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1, letterSpacing: "-0.02em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
         {value}
       </div>
 
       {/* Label */}
-      <div style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+      <div style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
         {label}
       </div>
     </div>
@@ -65,7 +65,7 @@ export function StatCard({ value, label, icon, sublabel, trend, className, flat 
   return (
     <div
       className={cn("rounded-[10px] p-2", className)}
-      style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
     >
       {inner}
     </div>

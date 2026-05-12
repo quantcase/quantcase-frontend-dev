@@ -23,9 +23,9 @@ export function TabToggle({ options, value, onChange, className, variant = "pill
               fontWeight: 500,
               padding: "4px 12px",
               borderRadius: 6,
-              border: `1px solid ${value === option ? "var(--qc-text-heading)" : "var(--qc-border-default)"}`,
-              background: value === option ? "var(--qc-text-heading)" : "transparent",
-              color: value === option ? "#ffffff" : "var(--qc-text-muted)",
+              border: `1px solid ${value === option ? "var(--qc-ink)" : "var(--qc-hair)"}`,
+              background: value === option ? "var(--qc-ink)" : "transparent",
+              color: value === option ? "#ffffff" : "var(--qc-ink-2)",
               cursor: "pointer",
               whiteSpace: "nowrap",
             }}

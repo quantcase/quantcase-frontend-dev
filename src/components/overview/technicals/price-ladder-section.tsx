@@ -36,18 +36,18 @@ function LadderRow({
     nodeType === "cur"
       ? {
           width: 18, height: 18, borderRadius: "50%",
-          background: "var(--qc-text-heading)", border: "2px solid var(--qc-text-heading)",
+          background: "var(--qc-ink)", border: "2px solid var(--qc-ink)",
           margin: "0 auto", position: "relative", zIndex: 2,
           boxShadow: "0 0 0 4px rgba(14,14,12,0.08)",
         }
       : {
           width: 14, height: 14, borderRadius: "50%",
-          background: "var(--qc-surface-white)",
+          background: "var(--qc-card)",
           border: `2px solid ${
             nodeType === "res" ? "var(--qc-down)"
             : nodeType === "ath" ? "var(--qc-warn)"
             : nodeType === "sup" ? "var(--qc-up)"
-            : "var(--qc-border-default)"
+            : "var(--qc-hair)"
           }`,
           margin: "0 auto", position: "relative", zIndex: 2,
         };
@@ -55,7 +55,7 @@ function LadderRow({
   const pctColor =
     pctType === "pos" ? "var(--qc-up)"
     : pctType === "neg" ? "var(--qc-down)"
-    : "var(--qc-text-muted)";
+    : "var(--qc-ink-2)";
 
   return (
     <div
@@ -73,7 +73,7 @@ function LadderRow({
         <div
           style={{
             fontSize: 11,
-            color: isCurrent ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+            color: isCurrent ? "var(--qc-ink)" : "var(--qc-ink-2)",
             letterSpacing: ".02em",
             lineHeight: 1.1,
             fontWeight: isCurrent ? 500 : 400,
@@ -105,7 +105,7 @@ function LadderRow({
           paddingLeft: 10,
           fontSize: isCurrent ? 14 : 12,
           fontWeight: isCurrent ? 500 : 400,
-          color: "var(--qc-text-heading)",
+          color: "var(--qc-ink)",
         }}
       >
         {value}
@@ -146,8 +146,8 @@ export function PriceLadderSection({
   return (
     <section
       style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 18,
         padding: "18px 22px 20px",
         position: "relative",
@@ -168,7 +168,7 @@ export function PriceLadderSection({
             fontFamily: "'IBM Plex Mono', monospace",
             fontSize: 10,
             letterSpacing: ".16em",
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             textTransform: "uppercase",
           }}
         >
@@ -206,7 +206,7 @@ export function PriceLadderSection({
             const entries: LadderEntry[] = [
               {
                 price: cmp, labelK: "Current price", chipLabel: "CMP",
-                chipBg: "var(--qc-text-heading)", chipColor: "#fff",
+                chipBg: "var(--qc-ink)", chipColor: "#fff",
                 nodeType: "cur", value: fp(cmp), pct: "—",
                 pctType: "neutral", isCurrent: true,
               },
@@ -218,7 +218,7 @@ export function PriceLadderSection({
               },
               {
                 price: low52w, labelK: "52-week low", chipLabel: "52W",
-                chipBg: "var(--qc-chip-bg, #F2F1EC)", chipColor: "var(--qc-text-body)",
+                chipBg: "var(--qc-chip, #F2F1EC)", chipColor: "var(--qc-ink)",
                 nodeType: "plain", value: fp(low52w), pct: pctChange(low52w, cmp),
                 pctType: "pos", isCurrent: false,
               },
@@ -261,14 +261,14 @@ export function PriceLadderSection({
                 marginBottom: 6,
               }}
             >
-              <span style={{ fontSize: 12, color: "var(--qc-text-body)" }}>
+              <span style={{ fontSize: 12, color: "var(--qc-ink)" }}>
                 52-week range position
               </span>
               <span
                 style={{
                   fontFamily: "'IBM Plex Mono', monospace",
                   fontSize: 11,
-                  color: "var(--qc-text-heading)",
+                  color: "var(--qc-ink)",
                   fontWeight: 500,
                 }}
               >
@@ -301,7 +301,7 @@ export function PriceLadderSection({
                   top: -3, bottom: -3,
                   left: `calc(${rangePct}% - 1px)`,
                   width: 3,
-                  background: "var(--qc-text-heading)",
+                  background: "var(--qc-ink)",
                   borderRadius: 2,
                   boxShadow: "0 0 0 2px rgba(255,255,255,.9)",
                 }}
@@ -313,7 +313,7 @@ export function PriceLadderSection({
                 justifyContent: "space-between",
                 fontFamily: "'IBM Plex Mono', monospace",
                 fontSize: 10,
-                color: "var(--qc-text-muted)",
+                color: "var(--qc-ink-2)",
                 letterSpacing: ".04em",
                 marginTop: 3,
               }}

@@ -1,4 +1,4 @@
-export interface DrhpHeroHeader {
+interface DrhpHeroHeader {
   companyName: string;
   companyDescription: string;
   totalIssueSizeCr: number;
@@ -8,14 +8,14 @@ export interface DrhpHeroHeader {
   issueDate: string;
 }
 
-export interface DrhpOfsVsFreshSplit {
+interface DrhpOfsVsFreshSplit {
   freshIssueCr: number;
   ofsCr: number;
   ofsPct: number;
   ofsHeavyFlag: boolean;
 }
 
-export interface DrhpQuickVerdict {
+interface DrhpQuickVerdict {
   verdict: string;
   verdictHeadline: string;
   verdictBullets: string[];
@@ -44,7 +44,7 @@ export interface DrhpProceedsBreakdown {
   pct: number | null;
 }
 
-export interface DrhpIpoPricingAssessment {
+interface DrhpIpoPricingAssessment {
   freshIssueCr: number;
   ofsCr: number;
   ofsPct: number;
@@ -88,7 +88,7 @@ export interface DrhpIntelligenceData {
   quick_verdict_issue_split_analysis: string;
 }
 
-export interface DrhpIntelligence {
+interface DrhpIntelligence {
   intelligence: DrhpIntelligenceData;
 }
 

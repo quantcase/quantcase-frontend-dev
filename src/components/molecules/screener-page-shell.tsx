@@ -18,9 +18,9 @@ function Chip({ children }: { children: React.ReactNode }) {
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-[10px] py-1 text-[11.5px] font-medium"
       style={{
-        background: "var(--qc-chip-bg, #F2F1EC)",
-        border: "1px solid var(--qc-chip-border, #E9E7E1)",
-        color: "var(--qc-text-muted)",
+        background: "var(--qc-chip, #F2F1EC)",
+        border: "1px solid var(--qc-hair, #E9E7E1)",
+        color: "var(--qc-ink-2)",
       }}
     >
       {children}
@@ -40,19 +40,19 @@ function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps)
   const industry = screenerInfo?.company?.industry;
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--qc-surface-white)" }}>
+    <div className="min-h-screen" style={{ background: "var(--qc-card)" }}>
       {/* Company Header — design-sample style */}
       <div className="flex items-start justify-between gap-4" style={{ padding: "20px 24px 16px" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <h1
-            style={{ margin: 0, fontSize: 30, fontWeight: 500, letterSpacing: "-0.015em", color: "var(--qc-text-heading)", lineHeight: 1.2 }}
+            style={{ margin: 0, fontSize: 30, fontWeight: 500, letterSpacing: "-0.015em", color: "var(--qc-ink)", lineHeight: 1.2 }}
           >
             {companyName}
           </h1>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {symbol && (
               <Chip>
-                <span style={{ color: "var(--qc-text-muted)" }}>{exchange}:</span>&nbsp;{symbol}
+                <span style={{ color: "var(--qc-ink-2)" }}>{exchange}:</span>&nbsp;{symbol}
               </Chip>
             )}
             {sector && <Chip>{sector}</Chip>}
@@ -77,9 +77,9 @@ export function ScreenerPageShell({ navItems, headerRight, children }: ScreenerP
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen" style={{ background: "var(--qc-surface-white)" }}>
+        <div className="min-h-screen" style={{ background: "var(--qc-card)" }}>
           <div className="h-20 px-6 pt-8">
-            <div className="h-7 w-64 rounded animate-pulse" style={{ background: "var(--qc-surface-panel)" }} />
+            <div className="h-7 w-64 rounded animate-pulse" style={{ background: "var(--qc-section)" }} />
           </div>
         </div>
       }

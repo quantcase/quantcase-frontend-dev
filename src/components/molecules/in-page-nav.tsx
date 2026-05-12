@@ -103,7 +103,7 @@ export function InPageNav({ items, className }: InPageNavProps) {
   return (
     <div
       className={cn("sticky z-20", className)}
-      style={{ top: 56, background: "var(--qc-surface-white)", borderBottom: "1px solid var(--qc-border-default)" }}
+      style={{ top: 56, background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}
     >
       <nav
         ref={navRef}
@@ -119,9 +119,9 @@ export function InPageNav({ items, className }: InPageNavProps) {
               onClick={() => handleClick(item.id)}
               className="relative flex h-full items-center text-[13px] whitespace-nowrap transition-colors duration-150 focus:outline-none"
               style={{
-                color: isActive ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+                color: isActive ? "var(--qc-ink)" : "var(--qc-ink-2)",
                 fontWeight: isActive ? 500 : 400,
-                borderBottom: `1.5px solid ${isActive ? "var(--qc-border-active)" : "transparent"}`,
+                borderBottom: `1.5px solid ${isActive ? "var(--qc-ink)" : "transparent"}`,
                 marginBottom: -1,
                 padding: "10px 0",
               }}
@@ -138,7 +138,7 @@ export function InPageNav({ items, className }: InPageNavProps) {
           layout
           transition={{ type: "spring", stiffness: 380, damping: 34 }}
           className="pointer-events-none absolute bottom-0 h-[1.5px] opacity-0"
-          style={{ left: indicatorStyle.current.left, width: indicatorStyle.current.width, background: "var(--qc-border-active)" }}
+          style={{ left: indicatorStyle.current.left, width: indicatorStyle.current.width, background: "var(--qc-ink)" }}
         />
       </nav>
     </div>

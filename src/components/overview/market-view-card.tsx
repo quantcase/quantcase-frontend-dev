@@ -126,16 +126,16 @@ function MvTile({ tile }: { tile: FrameworkTile }) {
   return (
     <div
       style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 12,
         padding: "12px 14px",
       }}
     >
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
         <div>
-          <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-text-heading)", marginBottom: 2 }}>{tile.name}</div>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".08em", color: "var(--qc-text-muted)", textTransform: "uppercase" }}>{tile.tf}</div>
+          <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2 }}>{tile.name}</div>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".08em", color: "var(--qc-ink-2)", textTransform: "uppercase" }}>{tile.tf}</div>
         </div>
         <span
           style={{
@@ -152,14 +152,14 @@ function MvTile({ tile }: { tile: FrameworkTile }) {
         {tile.signals.map((sig) => (
           <div key={sig.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ width: 5, height: 5, borderRadius: "50%", background: sentColor(sig.sent), flexShrink: 0 }} />
-            <span style={{ flex: 1, fontSize: 11.5, color: "var(--qc-text-body)" }}>{sig.label}</span>
+            <span style={{ flex: 1, fontSize: 11.5, color: "var(--qc-ink)" }}>{sig.label}</span>
             <span style={{ fontSize: 11.5, fontWeight: 500, color: sentColor(sig.sent) }}>{sig.value}</span>
           </div>
         ))}
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--qc-border-inner)", paddingTop: 8 }}>
-        <span style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>{tile.signalCount} signals</span>
-        <b style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-text-body)" }}>{tile.footNote}</b>
+      <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--qc-hair-2)", paddingTop: 8 }}>
+        <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>{tile.signalCount} signals</span>
+        <b style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-ink)" }}>{tile.footNote}</b>
       </div>
     </div>
   );
@@ -186,8 +186,8 @@ export function MarketViewCard() {
         {/* Left: sentiment hero */}
         <section
           style={{
-            background: "var(--qc-surface-white)",
-            border: "1px solid var(--qc-border-default)",
+            background: "var(--qc-card)",
+            border: "1px solid var(--qc-hair)",
             borderRadius: 18,
             padding: "16px 20px 18px",
           }}
@@ -220,32 +220,32 @@ export function MarketViewCard() {
                     <stop offset="100%" stopColor="var(--qc-up, #1F7A4A)" />
                   </linearGradient>
                 </defs>
-                <path d="M 15 85 A 65 65 0 0 1 145 85" stroke="var(--qc-border-inner, #EFEDE7)" strokeWidth="10" fill="none" strokeLinecap="round" />
+                <path d="M 15 85 A 65 65 0 0 1 145 85" stroke="var(--qc-hair-2, #EFEDE7)" strokeWidth="10" fill="none" strokeLinecap="round" />
                 <path d="M 15 85 A 65 65 0 0 1 145 85" stroke="url(#mvGaugeGrad)" strokeWidth="10" fill="none" strokeLinecap="round" strokeDasharray="204" strokeDashoffset="0" opacity=".28" />
                 <g transform={`rotate(${needleAngle} 80 85)`}>
-                  <line x1="80" y1="85" x2="80" y2="28" stroke="var(--qc-text-heading, #0E0E0C)" strokeWidth="2.5" strokeLinecap="round" />
-                  <circle cx="80" cy="85" r="5" fill="var(--qc-text-heading, #0E0E0C)" />
+                  <line x1="80" y1="85" x2="80" y2="28" stroke="var(--qc-ink, #0E0E0C)" strokeWidth="2.5" strokeLinecap="round" />
+                  <circle cx="80" cy="85" r="5" fill="var(--qc-ink, #0E0E0C)" />
                 </g>
               </svg>
               <div style={{ textAlign: "center", marginTop: -8 }}>
-                <div style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-                  {SENTIMENT_SCORE}<span style={{ fontSize: 12, color: "var(--qc-text-muted)", fontWeight: 400 }}>/100</span>
+                <div style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                  {SENTIMENT_SCORE}<span style={{ fontSize: 12, color: "var(--qc-ink-2)", fontWeight: 400 }}>/100</span>
                 </div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--qc-text-muted)", marginTop: 4 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--qc-ink-2)", marginTop: 4 }}>
                   Sentiment
                 </div>
               </div>
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <h3 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 500, letterSpacing: "-0.01em", color: "var(--qc-text-heading)", lineHeight: 1.3 }}>
+              <h3 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 500, letterSpacing: "-0.01em", color: "var(--qc-ink)", lineHeight: 1.3 }}>
                 {FW.bear >= 4
                   ? `${FW.bear} of six frameworks read bearish.`
                   : FW.bull >= 4
                   ? `${FW.bull} of six frameworks read bullish.`
                   : "Market signals are mixed across frameworks."}
               </h3>
-              <p style={{ margin: 0, fontSize: 12.5, color: "var(--qc-text-body)", lineHeight: 1.55 }}>
+              <p style={{ margin: 0, fontSize: 12.5, color: "var(--qc-ink)", lineHeight: 1.55 }}>
                 {FW.bear >= 3
                   ? "Price structure, momentum, breadth and valuation are all flashing caution. Only macro and policy offer a partial offset. Capital flows are mixed, with FII selling and DII buying."
                   : "Signals are mixed — check individual framework tiles below for detail."}
@@ -257,21 +257,21 @@ export function MarketViewCard() {
           <div
             style={{
               display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
-              borderTop: "1px solid var(--qc-border-inner)", paddingTop: 14, gap: 8,
+              borderTop: "1px solid var(--qc-hair-2)", paddingTop: 14, gap: 8,
             }}
           >
             {(["bull", "neu", "bear"] as Sent[]).map((sent) => (
               <div key={sent}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                   <span style={{ width: 7, height: 7, borderRadius: "50%", background: sentColor(sent), flexShrink: 0 }} />
-                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-text-muted)" }}>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-ink-2)" }}>
                     {sent === "bull" ? "Bullish" : sent === "bear" ? "Bearish" : "Neutral"}
                   </span>
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-                  {FW[sent]}<span style={{ fontSize: 13, color: "var(--qc-text-muted)", fontWeight: 400 }}>/6</span>
+                <div style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                  {FW[sent]}<span style={{ fontSize: 13, color: "var(--qc-ink-2)", fontWeight: 400 }}>/6</span>
                 </div>
-                <div style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 3 }}>{fwSubLabel(sent)}</div>
+                <div style={{ fontSize: 11, color: "var(--qc-ink-2)", marginTop: 3 }}>{fwSubLabel(sent)}</div>
               </div>
             ))}
           </div>
@@ -302,17 +302,17 @@ export function MarketViewCard() {
       {/* Signal tally */}
       <div
         style={{
-          background: "var(--qc-surface-white)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           borderRadius: 14,
           padding: "14px 16px",
         }}
       >
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
-          <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>
+          <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>
             Signal tally · across 6 frameworks
           </h4>
-          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-text-muted)", letterSpacing: ".08em" }}>
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: ".08em" }}>
             {TALLY_TOTAL} readings · weight-neutral
           </span>
         </div>
@@ -352,9 +352,9 @@ export function MarketViewCard() {
                   paddingLeft: 8,
                 }}
               >
-                <div style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-text-body)", marginBottom: 2 }}>{tile.shortName}</div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "var(--qc-text-heading)" }}>
-                  {bear}<span style={{ color: "var(--qc-text-muted)" }}>·{neu}·{bull}</span>
+                <div style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2 }}>{tile.shortName}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "var(--qc-ink)" }}>
+                  {bear}<span style={{ color: "var(--qc-ink-2)" }}>·{neu}·{bull}</span>
                 </div>
               </div>
             );

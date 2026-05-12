@@ -55,17 +55,17 @@ function PortfolioBuilderModal({
     >
       <div
         className="relative flex flex-col w-full max-w-4xl mx-auto my-0 sm:my-10 sm:rounded-lg overflow-hidden"
-        style={{ background: "var(--qc-surface-white)", maxHeight: "calc(100dvh - 80px)" }}
+        style={{ background: "var(--qc-card)", maxHeight: "calc(100dvh - 80px)" }}
       >
         <div
           className="shrink-0 flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
         >
           <div>
-            <h2 className="text-xl font-semibold" style={{ color: "var(--qc-text-heading)" }}>
+            <h2 className="text-xl font-semibold" style={{ color: "var(--qc-ink)" }}>
               Wealth Builder
             </h2>
-            <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
+            <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>
               Model Portfolio Library — configure and save for relationship managers
             </p>
           </div>
@@ -73,7 +73,7 @@ function PortfolioBuilderModal({
             type="button"
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-200 transition-colors shrink-0"
-            style={{ color: "var(--qc-text-muted)" }}
+            style={{ color: "var(--qc-ink-2)" }}
           >
             <X className="w-4 h-4" />
           </button>
@@ -98,7 +98,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
     : isBalanced
     ? "var(--qc-up)"
     : "var(--qc-warn)";
-  const riskColor = RISK_COLOR[model.riskProfile] ?? "var(--qc-text-muted)";
+  const riskColor = RISK_COLOR[model.riskProfile] ?? "var(--qc-ink-2)";
 
   return (
     <Link
@@ -106,7 +106,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
       className="group flex items-center gap-4 transition-all duration-150 no-underline"
       style={{
         padding: "11px 16px",
-        borderBottom: "1px solid var(--qc-border-default)",
+        borderBottom: "1px solid var(--qc-hair)",
         background: "transparent",
         display: "flex",
         textDecoration: "none",
@@ -117,7 +117,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
         style={{
           fontSize: 10,
           fontFamily: "var(--font-ibm-plex-mono, monospace)",
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           width: 20,
           flexShrink: 0,
           textAlign: "right",
@@ -133,11 +133,11 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
           width: 32,
           height: 32,
           borderRadius: 8,
-          background: "var(--qc-surface-panel)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-section)",
+          border: "1px solid var(--qc-hair)",
         }}
       >
-        <Layers className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
+        <Layers className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
       </div>
 
       {/* Name + description */}
@@ -145,7 +145,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
         <div className="flex items-center gap-2">
           <span
             className="truncate"
-            style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}
+            style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}
           >
             {model.name}
           </span>
@@ -153,7 +153,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
         {model.whyThisPortfolio?.[0] && (
           <p
             className="truncate"
-            style={{ fontSize: 10, color: "var(--qc-text-muted)", marginTop: 1 }}
+            style={{ fontSize: 10, color: "var(--qc-ink-2)", marginTop: 1 }}
           >
             {model.whyThisPortfolio[0]}
           </p>
@@ -175,7 +175,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
                 />
               ))}
               {totalPct < 100 && (
-                <div style={{ width: `${100 - totalPct}%`, background: "var(--qc-border-default)" }} />
+                <div style={{ width: `${100 - totalPct}%`, background: "var(--qc-hair)" }} />
               )}
             </div>
             <span
@@ -190,7 +190,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
             </span>
           </>
         ) : (
-          <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>—</span>
+          <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>—</span>
         )}
       </div>
 
@@ -201,12 +201,12 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
             fontSize: 12,
             fontWeight: 700,
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
-            color: "var(--qc-text-heading)",
+            color: "var(--qc-ink)",
           }}
         >
           {formatCapital(model.capital)}
         </span>
-        <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase" }}>
           capital
         </span>
       </div>
@@ -230,7 +230,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
 
       {/* Date */}
       <div className="shrink-0" style={{ minWidth: 60, textAlign: "right" }}>
-        <span style={{ fontSize: 10, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+        <span style={{ fontSize: 10, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
           {formatDate(model.createdAt)}
         </span>
       </div>
@@ -238,7 +238,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
       {/* Arrow */}
       <ArrowUpRight
         className="size-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-        style={{ color: "var(--qc-text-muted)" }}
+        style={{ color: "var(--qc-ink-2)" }}
       />
     </Link>
   );
@@ -253,15 +253,15 @@ function StatPill({ label, value, color }: { label: string; value: string; color
       style={{
         padding: "10px 14px",
         borderRadius: 10,
-        background: "var(--qc-surface-panel)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-section)",
+        border: "1px solid var(--qc-hair)",
         minWidth: 0,
       }}
     >
       <span
         style={{
           fontSize: 9,
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           textTransform: "uppercase",
           letterSpacing: "0.06em",
         }}
@@ -273,7 +273,7 @@ function StatPill({ label, value, color }: { label: string; value: string; color
           fontSize: 16,
           fontWeight: 700,
           fontFamily: "var(--font-ibm-plex-mono, monospace)",
-          color: color ?? "var(--qc-text-heading)",
+          color: color ?? "var(--qc-ink)",
           letterSpacing: "-0.02em",
         }}
       >
@@ -320,7 +320,7 @@ function RightPanel({
       <div
         className="rounded-[14px] overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
+          background: "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)",
           padding: "20px 18px 16px",
         }}
       >
@@ -330,7 +330,7 @@ function RightPanel({
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
             fontWeight: 700,
             letterSpacing: "0.12em",
-            color: "var(--qc-accent-primary-fg)",
+            color: "var(--qc-on-dark)",
             textTransform: "uppercase",
             marginBottom: 8,
           }}
@@ -344,14 +344,14 @@ function RightPanel({
                 fontSize: 40,
                 fontWeight: 800,
                 fontFamily: "var(--font-ibm-plex-mono, monospace)",
-                color: "var(--qc-accent-primary-fg)",
+                color: "var(--qc-on-dark)",
                 letterSpacing: "-0.04em",
                 lineHeight: 1,
               }}
             >
               {models.length}
             </p>
-            <p style={{ fontSize: 11, color: "var(--qc-accent-primary-fg)", marginTop: 2 }}>
+            <p style={{ fontSize: 11, color: "var(--qc-on-dark)", marginTop: 2 }}>
               Portfolio Models
             </p>
           </div>
@@ -361,18 +361,18 @@ function RightPanel({
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
             style={{ background: "rgba(26,58,0,0.15)" }}
           >
-            <TrendingUp className="size-2.5" style={{ color: "var(--qc-accent-primary-fg)" }} />
+            <TrendingUp className="size-2.5" style={{ color: "var(--qc-on-dark)" }} />
             <span
               style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: "var(--qc-accent-primary-fg)",
+                color: "var(--qc-on-dark)",
                 fontFamily: "var(--font-ibm-plex-mono, monospace)",
               }}
             >
               {formatCapital(totalCapital)}
             </span>
-            <span style={{ fontSize: 10, color: "var(--qc-accent-primary-fg)" }}>total AUM</span>
+            <span style={{ fontSize: 10, color: "var(--qc-on-dark)" }}>total AUM</span>
           </div>
         </div>
       </div>
@@ -381,15 +381,15 @@ function RightPanel({
       <div
         className="rounded-[14px]"
         style={{
-          background: "var(--qc-surface-card)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           padding: "14px 16px",
         }}
       >
         <p
           style={{
             fontSize: 9,
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             textTransform: "uppercase",
             letterSpacing: "0.08em",
             marginBottom: 12,
@@ -406,7 +406,7 @@ function RightPanel({
                 <span
                   style={{
                     fontSize: 11,
-                    color: "var(--qc-text-heading)",
+                    color: "var(--qc-ink)",
                     fontWeight: 500,
                     textTransform: "capitalize",
                   }}
@@ -426,7 +426,7 @@ function RightPanel({
               </div>
               <div
                 className="h-[4px] rounded-full overflow-hidden"
-                style={{ background: "var(--qc-surface-panel)" }}
+                style={{ background: "var(--qc-section)" }}
               >
                 <div
                   className="h-full rounded-full transition-all"
@@ -442,15 +442,15 @@ function RightPanel({
       <div
         className="rounded-[14px]"
         style={{
-          background: "var(--qc-surface-card)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           padding: "14px 16px",
         }}
       >
         <p
           style={{
             fontSize: 9,
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             textTransform: "uppercase",
             letterSpacing: "0.08em",
             marginBottom: 10,
@@ -468,15 +468,15 @@ function RightPanel({
       <div
         className="rounded-[14px]"
         style={{
-          background: "var(--qc-surface-card)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           padding: "14px 16px",
         }}
       >
         <p
           style={{
             fontSize: 9,
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             textTransform: "uppercase",
             letterSpacing: "0.08em",
             marginBottom: 10,
@@ -497,17 +497,17 @@ function RightPanel({
               className="flex flex-col items-center gap-1.5 rounded-[10px] transition-all"
               style={{
                 padding: "10px 8px",
-                background: "var(--qc-surface-panel)",
-                border: "1px solid var(--qc-border-default)",
+                background: "var(--qc-section)",
+                border: "1px solid var(--qc-hair)",
                 cursor: action ? "pointer" : "default",
                 opacity: action ? 1 : 0.5,
               }}
             >
-              <Icon className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
+              <Icon className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
               <span
                 style={{
                   fontSize: 9,
-                  color: "var(--qc-text-muted)",
+                  color: "var(--qc-ink-2)",
                   textAlign: "center",
                   lineHeight: 1.3,
                 }}
@@ -541,7 +541,7 @@ function ModelsContent() {
 
   return (
     <>
-      <div style={{ background: "var(--qc-surface-base)", minHeight: "100vh", padding: "20px 24px" }}>
+      <div style={{ background: "var(--qc-bg)", minHeight: "100vh", padding: "20px 24px" }}>
         {/* Header */}
         <div className="flex items-start justify-between mb-5">
           <div>
@@ -551,7 +551,7 @@ function ModelsContent() {
                 fontFamily: "var(--font-ibm-plex-mono, monospace)",
                 fontWeight: 700,
                 letterSpacing: "0.14em",
-                color: "var(--qc-text-muted)",
+                color: "var(--qc-ink-2)",
                 textTransform: "uppercase",
                 marginBottom: 4,
               }}
@@ -562,7 +562,7 @@ function ModelsContent() {
               style={{
                 fontSize: 24,
                 fontWeight: 700,
-                color: "var(--qc-text-heading)",
+                color: "var(--qc-ink)",
                 letterSpacing: "-0.02em",
                 lineHeight: 1.1,
               }}
@@ -573,7 +573,7 @@ function ModelsContent() {
                   style={{
                     fontSize: 14,
                     fontWeight: 400,
-                    color: "var(--qc-text-muted)",
+                    color: "var(--qc-ink-2)",
                     fontFamily: "var(--font-ibm-plex-mono, monospace)",
                     letterSpacing: 0,
                   }}
@@ -589,8 +589,8 @@ function ModelsContent() {
             style={{
               padding: "8px 14px",
               borderRadius: 8,
-              background: "var(--qc-accent-primary)",
-              color: "var(--qc-accent-primary-fg)",
+              background: "var(--qc-ink)",
+              color: "var(--qc-on-dark)",
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
@@ -609,8 +609,8 @@ function ModelsContent() {
             <div
               className="rounded-[14px] overflow-hidden"
               style={{
-                background: "var(--qc-surface-card)",
-                border: "1px solid var(--qc-border-default)",
+                background: "var(--qc-card)",
+                border: "1px solid var(--qc-hair)",
               }}
             >
               {/* Table header */}
@@ -618,8 +618,8 @@ function ModelsContent() {
                 className="flex items-center gap-4"
                 style={{
                   padding: "8px 16px",
-                  borderBottom: "1px solid var(--qc-border-default)",
-                  background: "var(--qc-surface-panel)",
+                  borderBottom: "1px solid var(--qc-hair)",
+                  background: "var(--qc-section)",
                 }}
               >
                 <span style={{ width: 20, flexShrink: 0 }} />
@@ -628,7 +628,7 @@ function ModelsContent() {
                   className="flex-1"
                   style={{
                     fontSize: 9,
-                    color: "var(--qc-text-muted)",
+                    color: "var(--qc-ink-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
                   }}
@@ -638,7 +638,7 @@ function ModelsContent() {
                 <span
                   style={{
                     fontSize: 9,
-                    color: "var(--qc-text-muted)",
+                    color: "var(--qc-ink-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
                     width: 80,
@@ -650,7 +650,7 @@ function ModelsContent() {
                 <span
                   style={{
                     fontSize: 9,
-                    color: "var(--qc-text-muted)",
+                    color: "var(--qc-ink-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
                     minWidth: 60,
@@ -662,7 +662,7 @@ function ModelsContent() {
                 <span
                   style={{
                     fontSize: 9,
-                    color: "var(--qc-text-muted)",
+                    color: "var(--qc-ink-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
                     minWidth: 76,
@@ -674,7 +674,7 @@ function ModelsContent() {
                 <span
                   style={{
                     fontSize: 9,
-                    color: "var(--qc-text-muted)",
+                    color: "var(--qc-ink-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
                     minWidth: 60,
@@ -692,7 +692,7 @@ function ModelsContent() {
                     <div
                       key={i}
                       className="h-12 rounded-xl animate-pulse"
-                      style={{ background: "var(--qc-surface-panel)" }}
+                      style={{ background: "var(--qc-section)" }}
                     />
                   ))}
                 </div>
@@ -712,16 +712,16 @@ function ModelsContent() {
                       width: 48,
                       height: 48,
                       borderRadius: 12,
-                      background: "var(--qc-surface-panel)",
-                      border: "1px solid var(--qc-border-default)",
+                      background: "var(--qc-section)",
+                      border: "1px solid var(--qc-hair)",
                     }}
                   >
-                    <Layers className="size-5" style={{ color: "var(--qc-text-muted)" }} />
+                    <Layers className="size-5" style={{ color: "var(--qc-ink-2)" }} />
                   </div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", marginBottom: 4 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", marginBottom: 4 }}>
                     No models yet
                   </p>
-                  <p style={{ fontSize: 11, color: "var(--qc-text-muted)", marginBottom: 16 }}>
+                  <p style={{ fontSize: 11, color: "var(--qc-ink-2)", marginBottom: 16 }}>
                     Build your first model portfolio to enable AI suggestions.
                   </p>
                   <button
@@ -730,8 +730,8 @@ function ModelsContent() {
                     style={{
                       padding: "7px 14px",
                       borderRadius: 8,
-                      background: "var(--qc-accent-primary)",
-                      color: "var(--qc-accent-primary-fg)",
+                      background: "var(--qc-ink)",
+                      color: "var(--qc-on-dark)",
                       fontSize: 12,
                       fontWeight: 600,
                       cursor: "pointer",
@@ -769,7 +769,7 @@ export default function WealthOSModelsPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-6 text-sm" style={{ color: "var(--qc-text-muted)" }}>
+        <div className="p-6 text-sm" style={{ color: "var(--qc-ink-2)" }}>
           Loading…
         </div>
       }

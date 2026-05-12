@@ -45,7 +45,7 @@ function FindingsGrid({ data }: { data: IndustryOverviewSection }) {
             style={{
               borderLeft: `4px solid ${borderColor}`,
               paddingLeft: 12, paddingTop: 10, paddingBottom: 10, paddingRight: 12,
-              background: "var(--qc-surface-panel)", borderRadius: "0 6px 6px 0",
+              background: "var(--qc-section)", borderRadius: "0 6px 6px 0",
             }}
           >
             <div className="flex items-center justify-between mb-1.5">
@@ -58,7 +58,7 @@ function FindingsGrid({ data }: { data: IndustryOverviewSection }) {
             </div>
             <ul className="space-y-0.5">
               {s.details.map((d, i) => (
-                <li key={i} style={{ fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>• {d}</li>
+                <li key={i} style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>• {d}</li>
               ))}
             </ul>
           </div>
@@ -83,10 +83,10 @@ function ChecksList({ data }: { data: IndustryOverviewSection }) {
             <span className="mt-0.5 shrink-0">
               {c.result
                 ? <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "var(--qc-up)" }} />
-                : <XCircle className="h-3.5 w-3.5" style={{ color: "var(--qc-text-muted)" }} />
+                : <XCircle className="h-3.5 w-3.5" style={{ color: "var(--qc-ink-2)" }} />
               }
             </span>
-            <p style={{ fontSize: 11, color: c.result ? "var(--qc-text-body)" : "var(--qc-text-muted)", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 11, color: c.result ? "var(--qc-ink)" : "var(--qc-ink-2)", lineHeight: 1.5 }}>
               {label}
               {c.score > 0 && <span style={{ color: "var(--qc-up)", fontWeight: 600 }}> +{c.score}</span>}
             </p>
@@ -131,8 +131,8 @@ export function IndustryAnalysisCard({ data }: IndustryAnalysisCardProps) {
 
       <div className="space-y-4">
         {fs?.checks && !Array.isArray(fs.checks) && (
-          <div className="rounded-lg p-4 space-y-3" style={{ border: "1px solid var(--qc-border-inner)", background: "var(--qc-surface-white)" }}>
-            <p style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <div className="rounded-lg p-4 space-y-3" style={{ border: "1px solid var(--qc-hair-2)", background: "var(--qc-card)" }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
               Scoring Criteria
             </p>
             <ChecksList data={data} />

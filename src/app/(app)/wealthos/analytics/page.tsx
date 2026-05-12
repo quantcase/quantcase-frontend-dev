@@ -26,7 +26,7 @@ import {
 import type { RiskProfileType } from "@/types/portfolio";
 import type { SegmentAnalytic } from "@/types/wealthos";
 
-const LIME_GRADIENT = "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)";
+const LIME_GRADIENT = "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)";
 
 const RISK_COLOR: Record<RiskProfileType, string> = {
   conservative: "var(--qc-up)",
@@ -83,8 +83,8 @@ function RMSelectorRow({
             onClick={() => onSelect(isSelected ? "" : rm.id)}
             style={{
               borderRadius: 8,
-              border: isSelected ? "1.5px solid #a8e63d" : "1px solid var(--qc-border-default)",
-              background: isSelected ? "rgba(200,245,105,0.08)" : "var(--qc-surface-card)",
+              border: isSelected ? "1.5px solid #a8e63d" : "1px solid var(--qc-hair)",
+              background: isSelected ? "rgba(200,245,105,0.08)" : "var(--qc-card)",
               padding: "7px 12px",
               cursor: "pointer",
               display: "flex",
@@ -98,19 +98,19 @@ function RMSelectorRow({
                 width: 26,
                 height: 26,
                 borderRadius: "50%",
-                background: isSelected ? LIME_GRADIENT : "var(--qc-surface-panel)",
+                background: isSelected ? LIME_GRADIENT : "var(--qc-section)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: 10,
                 fontWeight: 700,
-                color: isSelected ? "rgba(255,255,255,0.95)" : "var(--qc-text-muted)",
+                color: isSelected ? "rgba(255,255,255,0.95)" : "var(--qc-ink-2)",
                 flexShrink: 0,
               }}
             >
               {rm.name.slice(0, 2).toUpperCase()}
             </span>
-            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>{rm.name}</span>
+            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>{rm.name}</span>
             {rm.performance_score !== undefined && (
               <span
                 style={{
@@ -128,7 +128,7 @@ function RMSelectorRow({
               style={{
                 width: 12,
                 height: 12,
-                color: "var(--qc-text-muted)",
+                color: "var(--qc-ink-2)",
                 transform: isSelected ? "rotate(180deg)" : "none",
                 transition: "transform 0.15s",
               }}
@@ -152,7 +152,7 @@ function RMAnalyticsPanel({ rmId, rmName }: { rmId: string; rmName: string }) {
           <div
             key={i}
             className="h-20 rounded-xl animate-pulse"
-            style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}
+            style={{ background: "var(--qc-section)", border: "1px solid var(--qc-hair)" }}
           />
         ))}
       </div>
@@ -189,8 +189,8 @@ function RMAnalyticsPanel({ rmId, rmName }: { rmId: string; rmName: string }) {
     <div
       style={{
         borderRadius: 14,
-        border: "1px solid var(--qc-border-default)",
-        background: "var(--qc-surface-card)",
+        border: "1px solid var(--qc-hair)",
+        background: "var(--qc-card)",
         overflow: "hidden",
       }}
     >
@@ -198,8 +198,8 @@ function RMAnalyticsPanel({ rmId, rmName }: { rmId: string; rmName: string }) {
       <div
         style={{
           padding: "12px 16px",
-          borderBottom: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-panel)",
+          borderBottom: "1px solid var(--qc-hair)",
+          background: "var(--qc-section)",
           display: "flex",
           alignItems: "center",
           gap: 8,
@@ -223,26 +223,26 @@ function RMAnalyticsPanel({ rmId, rmName }: { rmId: string; rmName: string }) {
           {rmName.slice(0, 2).toUpperCase()}
         </span>
         <div>
-          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>{rmName}</p>
-          <p style={{ fontSize: 10, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{rmName}</p>
+          <p style={{ fontSize: 10, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
             Performance snapshot
           </p>
         </div>
       </div>
 
       {/* Metric grid */}
-      <div className="grid grid-cols-3 gap-px" style={{ background: "var(--qc-border-default)" }}>
+      <div className="grid grid-cols-3 gap-px" style={{ background: "var(--qc-hair)" }}>
         {metrics.map(({ label, value, icon: Icon, color, note }) => (
           <div
             key={label}
             style={{
-              background: "var(--qc-surface-card)",
+              background: "var(--qc-card)",
               padding: "14px 16px",
             }}
           >
             <div className="flex items-center gap-1.5 mb-2">
-              <Icon style={{ width: 11, height: 11, color: "var(--qc-text-muted)" }} />
-              <span style={{ fontSize: 10, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <Icon style={{ width: 11, height: 11, color: "var(--qc-ink-2)" }} />
+              <span style={{ fontSize: 10, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 {label}
               </span>
             </div>
@@ -251,7 +251,7 @@ function RMAnalyticsPanel({ rmId, rmName }: { rmId: string; rmName: string }) {
                 fontSize: 22,
                 fontWeight: 700,
                 fontFamily: "var(--font-ibm-plex-mono, monospace)",
-                color: color ?? "var(--qc-text-heading)",
+                color: color ?? "var(--qc-ink)",
                 letterSpacing: "-0.03em",
                 lineHeight: 1,
                 marginBottom: 3,
@@ -260,7 +260,7 @@ function RMAnalyticsPanel({ rmId, rmName }: { rmId: string; rmName: string }) {
               {value}
             </p>
             {note && (
-              <p style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>{note}</p>
+              <p style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{note}</p>
             )}
           </div>
         ))}
@@ -284,19 +284,19 @@ function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
     <div>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", marginBottom: 2 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", marginBottom: 2 }}>
             Segment Performance
           </p>
-          <p style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
+          <p style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
             Avg engagement vs churn probability — by client segment
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>
-            <span style={{ width: 8, height: 8, borderRadius: 2, background: "var(--qc-text-heading)", display: "inline-block" }} />
+          <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: "var(--qc-ink)", display: "inline-block" }} />
             Engagement
           </span>
-          <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>
+          <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
             <span style={{ width: 8, height: 8, borderRadius: 2, background: "#a1a1aa", display: "inline-block" }} />
             Churn %
           </span>
@@ -308,12 +308,12 @@ function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
           <BarChart data={chartData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }} barGap={4}>
             <XAxis
               dataKey="segment"
-              tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono)" }}
+              tick={{ fontSize: 10, fill: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono)" }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono)" }}
+              tick={{ fontSize: 10, fill: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono)" }}
               axisLine={false}
               tickLine={false}
             />
@@ -321,13 +321,13 @@ function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
               contentStyle={{
                 fontSize: 11,
                 borderRadius: 8,
-                border: "1px solid var(--qc-border-default)",
-                background: "var(--qc-surface-card)",
+                border: "1px solid var(--qc-hair)",
+                background: "var(--qc-card)",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
               }}
               cursor={{ fill: "rgba(0,0,0,0.03)" }}
             />
-            <Bar dataKey="engagement" fill="var(--qc-text-heading)" radius={[3, 3, 0, 0]} maxBarSize={28} />
+            <Bar dataKey="engagement" fill="var(--qc-ink)" radius={[3, 3, 0, 0]} maxBarSize={28} />
             <Bar dataKey="churn" fill="#a1a1aa" radius={[3, 3, 0, 0]} maxBarSize={28} />
           </BarChart>
         </ResponsiveContainer>
@@ -341,16 +341,16 @@ function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
             style={{
               flex: 1,
               borderRadius: 8,
-              border: "1px solid var(--qc-border-default)",
-              background: "var(--qc-surface-panel)",
+              border: "1px solid var(--qc-hair)",
+              background: "var(--qc-section)",
               padding: "8px 10px",
             }}
           >
-            <p style={{ fontSize: 10, color: "var(--qc-text-muted)", marginBottom: 3 }}>{seg.segment}</p>
-            <p style={{ fontSize: 15, fontWeight: 700, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)", letterSpacing: "-0.02em" }}>
+            <p style={{ fontSize: 10, color: "var(--qc-ink-2)", marginBottom: 3 }}>{seg.segment}</p>
+            <p style={{ fontSize: 15, fontWeight: 700, color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)", letterSpacing: "-0.02em" }}>
               {seg.count}
             </p>
-            <p style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>clients</p>
+            <p style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>clients</p>
           </div>
         ))}
       </div>
@@ -393,10 +393,10 @@ function RiskProfileMatrix({ clients }: { clients: ClientDot[] }) {
 
   return (
     <div>
-      <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", marginBottom: 2 }}>
+      <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", marginBottom: 2 }}>
         Risk Profile Breakdown
       </p>
-      <p style={{ fontSize: 11, color: "var(--qc-text-muted)", marginBottom: 16 }}>
+      <p style={{ fontSize: 11, color: "var(--qc-ink-2)", marginBottom: 16 }}>
         Clients by risk appetite — engagement vs churn probability
       </p>
 
@@ -434,25 +434,25 @@ function RiskProfileMatrix({ clients }: { clients: ClientDot[] }) {
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>
                     {RISK_LABEL[risk]}
                   </span>
                   <span
                     style={{
                       fontSize: 11,
                       fontFamily: "var(--font-ibm-plex-mono, monospace)",
-                      color: "var(--qc-text-muted)",
+                      color: "var(--qc-ink-2)",
                     }}
                   >
                     {items.length} clients · {pct}%
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>
-                    eng <span style={{ fontWeight: 700, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{avgEng}</span>
+                  <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
+                    eng <span style={{ fontWeight: 700, color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{avgEng}</span>
                   </span>
-                  <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>
-                    churn <span style={{ fontWeight: 700, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{avgChurn}%</span>
+                  <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
+                    churn <span style={{ fontWeight: 700, color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{avgChurn}%</span>
                   </span>
                 </div>
               </div>
@@ -466,8 +466,8 @@ function RiskProfileMatrix({ clients }: { clients: ClientDot[] }) {
                       title={`${c.name} · ${c.segment} · eng ${c.engagement} · churn ${(c.churn * 100).toFixed(0)}%`}
                       style={{
                         borderRadius: 6,
-                        border: "1px solid var(--qc-border-default)",
-                        background: "var(--qc-surface-panel)",
+                        border: "1px solid var(--qc-hair)",
+                        background: "var(--qc-section)",
                         padding: "4px 8px",
                         display: "flex",
                         alignItems: "center",
@@ -483,10 +483,10 @@ function RiskProfileMatrix({ clients }: { clients: ClientDot[] }) {
                           flexShrink: 0,
                         }}
                       />
-                      <span style={{ fontSize: 10, color: "var(--qc-text-heading)", fontWeight: 500 }}>
+                      <span style={{ fontSize: 10, color: "var(--qc-ink)", fontWeight: 500 }}>
                         {c.name.split(" ")[0]}
                       </span>
-                      <span style={{ fontSize: 9, color: "var(--qc-text-muted)" }}>{c.segment}</span>
+                      <span style={{ fontSize: 9, color: "var(--qc-ink-2)" }}>{c.segment}</span>
                     </div>
                   ))}
                 </div>
@@ -566,18 +566,18 @@ function RightPanel({
       <div
         style={{
           borderRadius: 14,
-          border: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-card)",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-card)",
           padding: "16px",
         }}
       >
         <div className="flex items-center gap-2 mb-3">
-          <Layers style={{ width: 13, height: 13, color: "var(--qc-text-muted)" }} />
-          <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}>
+          <Layers style={{ width: 13, height: 13, color: "var(--qc-ink-2)" }} />
+          <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>
             Model Risk Mix
           </p>
         </div>
-        <p style={{ fontSize: 10, color: "var(--qc-text-muted)", marginBottom: 12 }}>
+        <p style={{ fontSize: 10, color: "var(--qc-ink-2)", marginBottom: 12 }}>
           Portfolio models by risk profile
         </p>
         <div className="space-y-3">
@@ -586,7 +586,7 @@ function RightPanel({
             return (
               <div key={key}>
                 <div className="flex items-center justify-between mb-1">
-                  <span style={{ fontSize: 11, color: "var(--qc-text-muted)", textTransform: "capitalize" }}>
+                  <span style={{ fontSize: 11, color: "var(--qc-ink-2)", textTransform: "capitalize" }}>
                     {label}
                   </span>
                   <div className="flex items-center gap-2">
@@ -600,13 +600,13 @@ function RightPanel({
                     >
                       {count}
                     </span>
-                    <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>{pct}%</span>
+                    <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{pct}%</span>
                   </div>
                 </div>
                 <div
                   style={{
                     height: 4,
-                    background: "var(--qc-surface-panel)",
+                    background: "var(--qc-section)",
                     borderRadius: 2,
                     overflow: "hidden",
                   }}
@@ -631,12 +631,12 @@ function RightPanel({
       <div
         style={{
           borderRadius: 14,
-          border: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-card)",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-card)",
           padding: "16px",
         }}
       >
-        <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)", marginBottom: 12 }}>
+        <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)", marginBottom: 12 }}>
           Quick Navigate
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -651,12 +651,12 @@ function RightPanel({
               href={href}
               style={{
                 borderRadius: 8,
-                border: "1px solid var(--qc-border-default)",
-                background: "var(--qc-surface-panel)",
+                border: "1px solid var(--qc-hair)",
+                background: "var(--qc-section)",
                 padding: "8px 10px",
                 fontSize: 11,
                 fontWeight: 500,
-                color: "var(--qc-text-heading)",
+                color: "var(--qc-ink)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
@@ -665,7 +665,7 @@ function RightPanel({
               }}
             >
               {label}
-              <ArrowUpRight style={{ width: 11, height: 11, color: "var(--qc-text-muted)" }} />
+              <ArrowUpRight style={{ width: 11, height: 11, color: "var(--qc-ink-2)" }} />
             </a>
           ))}
         </div>
@@ -712,7 +712,7 @@ function AnalyticsContent() {
   return (
     <div
       style={{
-        background: "var(--qc-surface-base)",
+        background: "var(--qc-bg)",
         minHeight: "100vh",
         padding: "28px 28px 40px",
       }}
@@ -723,7 +723,7 @@ function AnalyticsContent() {
           style={{
             fontSize: 9,
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             textTransform: "uppercase",
             letterSpacing: "0.12em",
             marginBottom: 6,
@@ -735,14 +735,14 @@ function AnalyticsContent() {
           style={{
             fontSize: 28,
             fontWeight: 700,
-            color: "var(--qc-text-heading)",
+            color: "var(--qc-ink)",
             letterSpacing: "-0.03em",
             lineHeight: 1.1,
           }}
         >
           Intelligence Overview
         </h1>
-        <p style={{ fontSize: 13, color: "var(--qc-text-muted)", marginTop: 4 }}>
+        <p style={{ fontSize: 13, color: "var(--qc-ink-2)", marginTop: 4 }}>
           Client segmentation, interaction patterns, and RM performance
         </p>
       </div>
@@ -755,15 +755,15 @@ function AnalyticsContent() {
           <div
             style={{
               borderRadius: 16,
-              border: "1px solid var(--qc-border-default)",
-              background: "var(--qc-surface-card)",
+              border: "1px solid var(--qc-hair)",
+              background: "var(--qc-card)",
               padding: "20px 24px",
             }}
           >
             {clientLoading ? (
               <div className="space-y-3">
-                <div className="h-4 w-48 rounded animate-pulse" style={{ background: "var(--qc-surface-panel)" }} />
-                <div className="h-52 rounded-xl animate-pulse" style={{ background: "var(--qc-surface-panel)" }} />
+                <div className="h-4 w-48 rounded animate-pulse" style={{ background: "var(--qc-section)" }} />
+                <div className="h-52 rounded-xl animate-pulse" style={{ background: "var(--qc-section)" }} />
               </div>
             ) : clientAnalytics ? (
               <SegmentChart data={clientAnalytics.by_segment} />
@@ -774,15 +774,15 @@ function AnalyticsContent() {
           <div
             style={{
               borderRadius: 16,
-              border: "1px solid var(--qc-border-default)",
-              background: "var(--qc-surface-card)",
+              border: "1px solid var(--qc-hair)",
+              background: "var(--qc-card)",
               padding: "20px 24px",
             }}
           >
             {clientsLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: "var(--qc-surface-panel)" }} />
+                  <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: "var(--qc-section)" }} />
                 ))}
               </div>
             ) : (
@@ -794,22 +794,22 @@ function AnalyticsContent() {
           <div
             style={{
               borderRadius: 16,
-              border: "1px solid var(--qc-border-default)",
-              background: "var(--qc-surface-card)",
+              border: "1px solid var(--qc-hair)",
+              background: "var(--qc-card)",
               padding: "20px 24px",
             }}
           >
             <div className="mb-4">
-              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", marginBottom: 2 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", marginBottom: 2 }}>
                 RM Performance
               </p>
-              <p style={{ fontSize: 11, color: "var(--qc-text-muted)", marginBottom: 12 }}>
+              <p style={{ fontSize: 11, color: "var(--qc-ink-2)", marginBottom: 12 }}>
                 Select an RM to view detailed performance analytics
               </p>
               {rms.length > 0 ? (
                 <RMSelectorRow rms={rms} selectedRmId={selectedRmId} onSelect={setSelectedRmId} />
               ) : (
-                <p style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>No RMs found</p>
+                <p style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>No RMs found</p>
               )}
             </div>
 
@@ -821,7 +821,7 @@ function AnalyticsContent() {
               <div
                 style={{
                   borderRadius: 10,
-                  border: "1px dashed var(--qc-border-default)",
+                  border: "1px dashed var(--qc-hair)",
                   padding: "32px 24px",
                   display: "flex",
                   flexDirection: "column",
@@ -830,8 +830,8 @@ function AnalyticsContent() {
                   marginTop: 4,
                 }}
               >
-                <Activity style={{ width: 24, height: 24, color: "var(--qc-text-muted)", opacity: 0.4 }} />
-                <p style={{ fontSize: 12, color: "var(--qc-text-muted)", textAlign: "center" }}>
+                <Activity style={{ width: 24, height: 24, color: "var(--qc-ink-2)", opacity: 0.4 }} />
+                <p style={{ fontSize: 12, color: "var(--qc-ink-2)", textAlign: "center" }}>
                   Select an RM above to view their performance metrics
                 </p>
               </div>
@@ -855,7 +855,7 @@ function AnalyticsContent() {
 
 export default function WealthOSAnalyticsPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading...</div>}>
+    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-ink-2)" }}>Loading...</div>}>
       <AnalyticsContent />
     </Suspense>
   );

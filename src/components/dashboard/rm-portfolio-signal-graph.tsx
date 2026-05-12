@@ -15,28 +15,29 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { motion } from "framer-motion";
-import { Network, ChevronRight, Users, TrendingUp } from "lucide-react";
+import { Network, Maximize2, Minimize2, Users, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MonoLabel } from "@/components/ds";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type SignalSeverity = "critical" | "warning" | "moderate" | "clean";
+type SignalSeverity = "critical" | "warning" | "moderate" | "clean";
 
-export interface AssetSubclass {
+interface AssetSubclass {
   id: string;
   label: string;
   severity: SignalSeverity;
   signal?: string;
 }
 
-export interface AssetClass {
+interface AssetClass {
   id: string;
   label: string;
   severity: SignalSeverity;
   subclasses: AssetSubclass[];
 }
 
-export interface RMClient {
+interface RMClient {
   id: string;
   name: string;
   aum: string;
@@ -123,14 +124,14 @@ function RMCardNode({ data }: NodeProps) {
       <motion.div
         className="rounded-2xl flex flex-col items-center"
         style={{
-          background: "var(--qc-surface-card)",
+          background: "var(--qc-card)",
           border: `1.5px solid ${cfg.border}`,
-          boxShadow: `0 4px 24px ${cfg.glow}, 0 1px 4px rgba(0,0,0,0.06)`,
+          boxShadow: `0 1px 3px rgba(0,0,0,0.06)`,
           padding: "14px 18px 12px",
           minWidth: 160,
           position: "relative",
         }}
-        whileHover={{ scale: 1.03, boxShadow: `0 8px 32px ${cfg.glow}` }}
+        whileHover={{ scale: 1.03, boxShadow: `0 2px 8px rgba(0,0,0,0.08)` }}
         transition={{ type: "spring", stiffness: 400, damping: 20 }}
       >
         {/* Severity badge top-right */}
@@ -191,7 +192,7 @@ function RMCardNode({ data }: NodeProps) {
         </div>
 
         {/* Name */}
-        <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-sans, sans-serif)", textAlign: "center", marginBottom: 6 }}>
+        <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-sans, sans-serif)", textAlign: "center", marginBottom: 6 }}>
           {d.label}
         </p>
 
@@ -199,19 +200,19 @@ function RMCardNode({ data }: NodeProps) {
         {stats && (
           <div className="w-full flex flex-col gap-1.5">
             {/* Divider */}
-            <div style={{ height: 1, background: "var(--qc-border-inner)", marginBottom: 2 }} />
+            <div style={{ height: 1, background: "var(--qc-hair-2)", marginBottom: 2 }} />
 
             {/* Clients + AUM */}
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-1">
                 <Users style={{ width: 10, height: 10, color: "#888" }} />
-                <span style={{ fontSize: 10, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" }}>
+                <span style={{ fontSize: 10, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" }}>
                   {stats.clientCount} clients
                 </span>
               </div>
               <div className="flex items-center gap-1">
                 <TrendingUp style={{ width: 10, height: 10, color: "#888" }} />
-                <span style={{ fontSize: 10, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" }}>
+                <span style={{ fontSize: 10, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" }}>
                   {stats.totalAum}
                 </span>
               </div>
@@ -322,11 +323,11 @@ function SignalNode({ data }: NodeProps) {
       </div>
 
       <div className="mt-1.5 text-center" style={{ maxWidth: size + 40 }}>
-        <p style={{ fontSize: labelSize, fontWeight: d.kind === "client" ? 600 : 500, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-sans, sans-serif)", whiteSpace: "nowrap" }}>
+        <p style={{ fontSize: labelSize, fontWeight: d.kind === "client" ? 600 : 500, color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-sans, sans-serif)", whiteSpace: "nowrap" }}>
           {d.label}
         </p>
         {d.sublabel && (
-          <p style={{ fontSize: 9, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" }}>{d.sublabel}</p>
+          <p style={{ fontSize: 9, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-sans, sans-serif)" }}>{d.sublabel}</p>
         )}
         {d.signal && (
           <p style={{ fontSize: 8, color: cfg.text, fontFamily: "IBM Plex Sans, sans-serif", fontWeight: 600 }}>{d.signal}</p>
@@ -478,21 +479,6 @@ function buildNodesEdges(
   return { nodes, edges };
 }
 
-// ── Legend ────────────────────────────────────────────────────────────────────
-
-function Legend() {
-  return (
-    <div className="flex items-center gap-4">
-      {(["critical", "warning", "moderate", "clean"] as SignalSeverity[]).map((sev) => (
-        <div key={sev} className="flex items-center gap-1.5">
-          <span className="inline-block rounded-full" style={{ width: 7, height: 7, background: SEV[sev].border }} />
-          <span className="text-[10px] font-medium" style={{ color: "var(--qc-text-muted)" }}>{SEV[sev].label}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // ── Inner graph (needs ReactFlow context) ─────────────────────────────────────
 
 interface InnerGraphProps {
@@ -553,14 +539,12 @@ function InnerGraph({ rms, expandedIds, handleToggle, isFullyExpanded, setExpand
   }, [handleToggle, fitView, expandedIds, rms]);
 
   return (
-    <div className={cn("rounded-[10px] p-2 flex flex-col", className)} style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
+    <div className={cn("rounded-[10px] p-2 flex flex-col", className)} style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}>
       {/* Header */}
       <div className="px-2 pt-1 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Network className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)", textTransform: "uppercase", letterSpacing: "0.01em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
-            RM Heartbeat
-          </span>
+          <Network className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">RM Heartbeat</MonoLabel>
           {critCount > 0 && (
             <span className="text-[9px] font-semibold uppercase tracking-wider rounded-sm px-1.5 py-0.5"
               style={{ background: "var(--qc-down-soft)", color: "var(--qc-down)", border: "1px solid var(--qc-down)" }}>
@@ -574,33 +558,34 @@ function InnerGraph({ rms, expandedIds, handleToggle, isFullyExpanded, setExpand
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <Legend />
-          <button
-            onClick={() => {
-              if (isFullyExpanded) {
-                setExpandedIds(() => new Set());
-                setTimeout(() => fitView({ padding: 0.25, duration: 500 }), 80);
-              } else {
-                const all = new Set<string>();
-                rms.forEach((rm) => {
-                  all.add(rm.id);
-                  rm.clients.forEach((c) => { all.add(c.id); c.assetClasses.forEach((a) => all.add(a.id)); });
-                });
-                setExpandedIds(() => all);
-                setTimeout(() => fitView({ padding: 0.15, duration: 600 }), 80);
-              }
-            }}
-            className="flex items-center gap-1 text-[11px] font-medium rounded-md px-2 py-1 transition-colors"
-            style={{ color: "var(--qc-text-muted)", border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)" }}
-          >
-            {isFullyExpanded ? "Collapse" : "Full View"} <ChevronRight className="size-3 ml-0.5" />
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            if (isFullyExpanded) {
+              setExpandedIds(() => new Set());
+              setTimeout(() => fitView({ padding: 0.25, duration: 500 }), 80);
+            } else {
+              const all = new Set<string>();
+              rms.forEach((rm) => {
+                all.add(rm.id);
+                rm.clients.forEach((c) => { all.add(c.id); c.assetClasses.forEach((a) => all.add(a.id)); });
+              });
+              setExpandedIds(() => all);
+              setTimeout(() => fitView({ padding: 0.15, duration: 600 }), 80);
+            }
+          }}
+          className="rounded-md p-1.5 transition-colors"
+          style={{ color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}
+          aria-label={isFullyExpanded ? "Collapse all" : "Expand all"}
+        >
+          {isFullyExpanded
+            ? <Minimize2 className="size-3.5" />
+            : <Maximize2 className="size-3.5" />
+          }
+        </button>
       </div>
 
       {/* Graph canvas */}
-      <div className="rounded-[10px] overflow-hidden flex-1" style={{ background: "var(--qc-surface-card)", border: "1px solid var(--qc-border-inner)" }}>
+      <div className="rounded-[10px] overflow-hidden flex-1" style={{ background: "var(--qc-card)" }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -618,13 +603,9 @@ function InnerGraph({ rms, expandedIds, handleToggle, isFullyExpanded, setExpand
           proOptions={{ hideAttribution: true }}
           onNodeClick={onNodeClick}
         >
-          <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--qc-border-default)" />
+          <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--qc-hair)" />
         </ReactFlow>
       </div>
-
-      <p className="text-center text-[10px] mt-1.5" style={{ color: "var(--qc-text-dimmed)" }}>
-        Click any node to expand · scroll to zoom · drag to pan
-      </p>
     </div>
   );
 }

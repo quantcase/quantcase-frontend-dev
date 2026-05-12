@@ -60,13 +60,13 @@ const COLUMNS: ColDef[] = [
       <div className="flex flex-col gap-0.5 min-w-0">
         <span
           className="truncate max-w-[280px] block"
-          style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}
+          style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}
         >
           {s.name}
         </span>
         <span
           className="truncate max-w-[280px] block"
-          style={{ fontSize: 10, color: "var(--qc-text-muted)" }}
+          style={{ fontSize: 10, color: "var(--qc-ink-2)" }}
         >
           {[s.amc_name, s.category].filter(Boolean).join(" · ")}
         </span>
@@ -78,7 +78,7 @@ const COLUMNS: ColDef[] = [
     label: "Plan",
     align: "left",
     render: (s) => (
-      <span style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>{s.plan_type ?? "—"}</span>
+      <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>{s.plan_type ?? "—"}</span>
     ),
   },
   {
@@ -86,7 +86,7 @@ const COLUMNS: ColDef[] = [
     label: "Risk",
     align: "left",
     render: (s) => (
-      <span style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>{s.risk_label ?? "—"}</span>
+      <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>{s.risk_label ?? "—"}</span>
     ),
   },
   {
@@ -95,7 +95,7 @@ const COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "morningstar",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "var(--qc-text-heading)", fontWeight: 500 }}>
+      <span style={{ fontSize: 12, color: "var(--qc-ink)", fontWeight: 500 }}>
         {s.morningstar == null ? "—" : `${s.morningstar}/5`}
       </span>
     ),
@@ -113,7 +113,7 @@ const COLUMNS: ColDef[] = [
             fontSize: 12,
             fontWeight: 500,
             color:
-              v == null ? "var(--qc-text-muted)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
+              v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
           }}
         >
           {retPct(v)}
@@ -134,7 +134,7 @@ const COLUMNS: ColDef[] = [
             fontSize: 12,
             fontWeight: 500,
             color:
-              v == null ? "var(--qc-text-muted)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
+              v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
           }}
         >
           {retPct(v)}
@@ -155,7 +155,7 @@ const COLUMNS: ColDef[] = [
             fontSize: 12,
             fontWeight: 500,
             color:
-              v == null ? "var(--qc-text-muted)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
+              v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
           }}
         >
           {retPct(v)}
@@ -169,7 +169,7 @@ const COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "aum",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "var(--qc-text-heading)" }}>{cr(s.aum)}</span>
+      <span style={{ fontSize: 12, color: "var(--qc-ink)" }}>{cr(s.aum)}</span>
     ),
   },
   {
@@ -178,7 +178,7 @@ const COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "expense_ratio",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>{pct(s.expense_ratio)}</span>
+      <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>{pct(s.expense_ratio)}</span>
     ),
   },
   {
@@ -187,7 +187,7 @@ const COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "nav",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>
+      <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>
         {s.nav == null ? "—" : `₹${s.nav.toFixed(2)}`}
       </span>
     ),
@@ -224,9 +224,9 @@ function FilterSelect({
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[11px] transition-all"
         style={{
-          border: `1px solid ${active ? "var(--qc-text-heading)" : "var(--qc-border-default)"}`,
-          background: active ? "var(--qc-text-heading)" : "var(--qc-surface-white)",
-          color: active ? "var(--qc-surface-white)" : "var(--qc-text-muted)",
+          border: `1px solid ${active ? "var(--qc-ink)" : "var(--qc-hair)"}`,
+          background: active ? "var(--qc-ink)" : "var(--qc-card)",
+          color: active ? "var(--qc-card)" : "var(--qc-ink-2)",
           fontWeight: active ? 600 : 400,
         }}
       >
@@ -259,8 +259,8 @@ function FilterSelect({
           <div
             className="absolute left-0 top-full mt-1 z-20 rounded-[10px] border shadow-lg overflow-hidden"
             style={{
-              background: "var(--qc-surface-white)",
-              borderColor: "var(--qc-border-default)",
+              background: "var(--qc-card)",
+              borderColor: "var(--qc-hair)",
               minWidth: 180,
               maxHeight: 260,
               overflowY: "auto",
@@ -278,16 +278,16 @@ function FilterSelect({
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-left text-[12px] transition-colors"
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "var(--qc-surface-hover)")
+                    (e.currentTarget.style.background = "var(--qc-section)")
                   }
                   onMouseLeave={(e) => (e.currentTarget.style.background = "")}
-                  style={{ color: checked ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}
+                  style={{ color: checked ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
                 >
                   <span
                     className="w-3 h-3 rounded-sm border flex items-center justify-center shrink-0"
                     style={{
-                      borderColor: checked ? "var(--qc-text-heading)" : "var(--qc-border-default)",
-                      background: checked ? "var(--qc-text-heading)" : "transparent",
+                      borderColor: checked ? "var(--qc-ink)" : "var(--qc-hair)",
+                      background: checked ? "var(--qc-ink)" : "transparent",
                     }}
                   >
                     {checked && (
@@ -325,9 +325,9 @@ function RatingFilter({
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[11px] transition-all"
         style={{
-          border: `1px solid ${active ? "var(--qc-text-heading)" : "var(--qc-border-default)"}`,
-          background: active ? "var(--qc-text-heading)" : "var(--qc-surface-white)",
-          color: active ? "var(--qc-surface-white)" : "var(--qc-text-muted)",
+          border: `1px solid ${active ? "var(--qc-ink)" : "var(--qc-hair)"}`,
+          background: active ? "var(--qc-ink)" : "var(--qc-card)",
+          color: active ? "var(--qc-card)" : "var(--qc-ink-2)",
           fontWeight: active ? 600 : 400,
         }}
       >
@@ -351,7 +351,7 @@ function RatingFilter({
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
             className="absolute left-0 top-full mt-1 z-20 rounded-[10px] border shadow-lg overflow-hidden"
-            style={{ background: "var(--qc-surface-white)", borderColor: "var(--qc-border-default)", minWidth: 120 }}
+            style={{ background: "var(--qc-card)", borderColor: "var(--qc-hair)", minWidth: 120 }}
           >
             {[5, 4, 3, 2, 1].map((n) => (
               <button
@@ -362,10 +362,10 @@ function RatingFilter({
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-left text-[12px] transition-colors"
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "var(--qc-surface-hover)")
+                  (e.currentTarget.style.background = "var(--qc-section)")
                 }
                 onMouseLeave={(e) => (e.currentTarget.style.background = "")}
-                style={{ color: value === n ? "var(--qc-text-heading)" : "var(--qc-text-muted)", fontWeight: value === n ? 600 : 400 }}
+                style={{ color: value === n ? "var(--qc-ink)" : "var(--qc-ink-2)", fontWeight: value === n ? 600 : 400 }}
               >
                 {"★".repeat(n)} {n}+
               </button>
@@ -466,15 +466,15 @@ function MfScreenerContent() {
   );
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--qc-surface-base)" }}>
+    <div className="min-h-screen" style={{ background: "var(--qc-bg)" }}>
       {/* Hero header */}
-      <div className="relative" style={{ background: "var(--qc-surface-base)" }}>
+      <div className="relative" style={{ background: "var(--qc-bg)" }}>
         <div className="pointer-events-none absolute inset-x-0 top-0 h-48 overflow-hidden">
           <div
             className="absolute inset-0"
             style={{
               background:
-                "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-accent-lime-bg) 0%, transparent 70%)",
+                "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime) 0%, transparent 70%)",
             }}
           />
         </div>
@@ -483,7 +483,7 @@ function MfScreenerContent() {
           <button
             onClick={() => router.push("/screener/home")}
             className="inline-flex items-center gap-1.5 text-[11px] font-medium mb-3 transition-opacity hover:opacity-60"
-            style={{ color: "var(--qc-text-muted)" }}
+            style={{ color: "var(--qc-ink-2)" }}
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Fund Baskets
@@ -493,12 +493,12 @@ function MfScreenerContent() {
             <div>
               <h1
                 className="text-[28px] font-medium leading-tight"
-                style={{ color: "var(--qc-text-heading)" }}
+                style={{ color: "var(--qc-ink)" }}
               >
                 {basketTitle ?? "Mutual Fund Screener"}
               </h1>
               {data && (
-                <p className="text-[13px] mt-1" style={{ color: "var(--qc-text-muted)" }}>
+                <p className="text-[13px] mt-1" style={{ color: "var(--qc-ink-2)" }}>
                   {data.total.toLocaleString()} fund
                   {data.total !== 1 ? "s" : ""} match your criteria
                 </p>
@@ -523,15 +523,15 @@ function MfScreenerContent() {
                     }}
                     className="rounded-full px-2.5 py-1 text-[10px] font-medium transition-all"
                     style={{
-                      border: "1px solid var(--qc-border-default)",
-                      background: "var(--qc-surface-white)",
-                      color: "var(--qc-text-muted)",
+                      border: "1px solid var(--qc-hair)",
+                      background: "var(--qc-card)",
+                      color: "var(--qc-ink-2)",
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = "var(--qc-surface-hover)")
+                      (e.currentTarget.style.background = "var(--qc-section)")
                     }
                     onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "var(--qc-surface-white)")
+                      (e.currentTarget.style.background = "var(--qc-card)")
                     }
                   >
                     {b.title}
@@ -547,22 +547,22 @@ function MfScreenerContent() {
       <div
         className="sticky top-0 z-10 border-b"
         style={{
-          background: "var(--qc-surface-base)",
-          borderColor: "var(--qc-border-default)",
+          background: "var(--qc-bg)",
+          borderColor: "var(--qc-hair)",
         }}
       >
         <div className="max-w-[1400px] mx-auto px-8 py-3 flex items-center gap-2 flex-wrap">
           <SlidersHorizontal
             className="h-3.5 w-3.5 shrink-0"
-            style={{ color: "var(--qc-text-muted)" }}
+            style={{ color: "var(--qc-ink-2)" }}
           />
 
           {/* Search */}
           <div
             className="flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5"
-            style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)" }}
+            style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
           >
-            <Search className="h-3 w-3 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
+            <Search className="h-3 w-3 shrink-0" style={{ color: "var(--qc-ink-2)" }} />
             <input
               type="text"
               value={q}
@@ -572,11 +572,11 @@ function MfScreenerContent() {
               }}
               placeholder="Search funds…"
               className="w-32 text-[12px] outline-none bg-transparent"
-              style={{ color: "var(--qc-text-heading)" }}
+              style={{ color: "var(--qc-ink)" }}
             />
             {q && (
               <button onClick={() => { setQ(""); setPage(1); }}>
-                <X className="h-3 w-3" style={{ color: "var(--qc-text-muted)" }} />
+                <X className="h-3 w-3" style={{ color: "var(--qc-ink-2)" }} />
               </button>
             )}
           </div>
@@ -615,9 +615,9 @@ function MfScreenerContent() {
                   }}
                   className="rounded-[8px] px-3 py-1.5 text-[11px] outline-none cursor-pointer pr-6"
                   style={{
-                    border: amcSlug ? "1px solid var(--qc-text-heading)" : "1px solid var(--qc-border-default)",
-                    background: amcSlug ? "var(--qc-text-heading)" : "var(--qc-surface-white)",
-                    color: amcSlug ? "var(--qc-surface-white)" : "var(--qc-text-muted)",
+                    border: amcSlug ? "1px solid var(--qc-ink)" : "1px solid var(--qc-hair)",
+                    background: amcSlug ? "var(--qc-ink)" : "var(--qc-card)",
+                    color: amcSlug ? "var(--qc-card)" : "var(--qc-ink-2)",
                     fontWeight: amcSlug ? 600 : 400,
                   }}
                 >
@@ -636,7 +636,7 @@ function MfScreenerContent() {
             <button
               onClick={resetFilters}
               className="flex items-center gap-1 text-[11px] ml-1"
-              style={{ color: "var(--qc-text-muted)" }}
+              style={{ color: "var(--qc-ink-2)" }}
             >
               <X className="h-2.5 w-2.5" />
               Clear all
@@ -656,13 +656,13 @@ function MfScreenerContent() {
 
         <div
           className="rounded-[10px] border overflow-hidden"
-          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
         >
           {/* Table header */}
           <div
             style={{
-              borderBottom: "1px solid var(--qc-border-default)",
-              background: "var(--qc-surface-panel)",
+              borderBottom: "1px solid var(--qc-hair)",
+              background: "var(--qc-section)",
             }}
           >
             <table className="w-full">
@@ -670,7 +670,7 @@ function MfScreenerContent() {
                 <tr>
                   <th
                     className="px-4 py-2.5 text-left"
-                    style={{ width: 40, color: "var(--qc-text-muted)", fontSize: 10 }}
+                    style={{ width: 40, color: "var(--qc-ink-2)", fontSize: 10 }}
                   >
                     #
                   </th>
@@ -681,7 +681,7 @@ function MfScreenerContent() {
                       className={`px-4 py-2.5 text-[10px] font-medium uppercase tracking-wider whitespace-nowrap select-none ${
                         col.sortKey ? "cursor-pointer hover:opacity-70" : ""
                       } ${col.align === "right" ? "text-right" : "text-left"}`}
-                      style={{ color: "var(--qc-text-muted)" }}
+                      style={{ color: "var(--qc-ink-2)" }}
                     >
                       {col.label}
                       {col.sortKey && (
@@ -699,7 +699,7 @@ function MfScreenerContent() {
           {loading && (
             <div
               className="flex items-center justify-center py-16 gap-2"
-              style={{ color: "var(--qc-text-muted)" }}
+              style={{ color: "var(--qc-ink-2)" }}
             >
               <Loader2 className="h-4 w-4 animate-spin" />
               <span className="text-sm">Loading funds…</span>
@@ -708,7 +708,7 @@ function MfScreenerContent() {
 
           {/* Empty */}
           {!loading && !error && data?.schemes.length === 0 && (
-            <p className="text-sm text-center py-14" style={{ color: "var(--qc-text-muted)" }}>
+            <p className="text-sm text-center py-14" style={{ color: "var(--qc-ink-2)" }}>
               No funds matched your criteria.
             </p>
           )}
@@ -728,20 +728,20 @@ function MfScreenerContent() {
                       }
                       className="cursor-pointer transition-colors group"
                       onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = "var(--qc-surface-hover)")
+                        (e.currentTarget.style.background = "var(--qc-section)")
                       }
                       onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                       style={{
                         borderBottom:
                           i < data.schemes.length - 1
-                            ? "1px solid var(--qc-border-inner)"
+                            ? "1px solid var(--qc-hair-2)"
                             : undefined,
                       }}
                     >
                       <td className="px-4 py-3" style={{ width: 40 }}>
                         <span
                           className="tabular-nums"
-                          style={{ fontSize: 11, color: "var(--qc-text-muted)" }}
+                          style={{ fontSize: 11, color: "var(--qc-ink-2)" }}
                         >
                           {(page - 1) * 25 + i + 1}
                         </span>
@@ -759,7 +759,7 @@ function MfScreenerContent() {
                       <td className="px-4 py-3" style={{ width: 40 }}>
                         <ArrowRight
                           className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                          style={{ color: "var(--qc-text-heading)" }}
+                          style={{ color: "var(--qc-ink)" }}
                         />
                       </td>
                     </tr>
@@ -773,9 +773,9 @@ function MfScreenerContent() {
           {!loading && data && data.schemes.length > 0 && (
             <div
               className="flex items-center justify-between px-4 py-3"
-              style={{ borderTop: "1px solid var(--qc-border-default)" }}
+              style={{ borderTop: "1px solid var(--qc-hair)" }}
             >
-              <p className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
+              <p className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
                 {data.total.toLocaleString()} total · page {page} of {totalPages}
               </p>
               <div className="flex items-center gap-2">
@@ -784,13 +784,13 @@ function MfScreenerContent() {
                   disabled={page === 1}
                   className="rounded-[6px] p-1 disabled:opacity-30 transition-colors"
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "var(--qc-surface-hover)")
+                    (e.currentTarget.style.background = "var(--qc-section)")
                   }
                   onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                 >
-                  <ChevronLeft className="h-4 w-4" style={{ color: "var(--qc-text-heading)" }} />
+                  <ChevronLeft className="h-4 w-4" style={{ color: "var(--qc-ink)" }} />
                 </button>
-                <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
+                <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
                   {page} / {totalPages}
                 </span>
                 <button
@@ -798,11 +798,11 @@ function MfScreenerContent() {
                   disabled={page >= totalPages}
                   className="rounded-[6px] p-1 disabled:opacity-30 transition-colors"
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "var(--qc-surface-hover)")
+                    (e.currentTarget.style.background = "var(--qc-section)")
                   }
                   onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                 >
-                  <ChevronRight className="h-4 w-4" style={{ color: "var(--qc-text-heading)" }} />
+                  <ChevronRight className="h-4 w-4" style={{ color: "var(--qc-ink)" }} />
                 </button>
               </div>
             </div>
@@ -819,7 +819,7 @@ export default function MfScreenerPage() {
       fallback={
         <div
           className="flex items-center justify-center py-32 gap-2"
-          style={{ color: "var(--qc-text-muted)" }}
+          style={{ color: "var(--qc-ink-2)" }}
         >
           <Loader2 className="h-4 w-4 animate-spin" />
           <span className="text-sm">Loading…</span>

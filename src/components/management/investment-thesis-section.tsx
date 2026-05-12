@@ -8,9 +8,9 @@ interface InvestmentThesisSectionProps {
 
 function BullBearSplit({ bullCase, bearCase }: { bullCase: string[]; bearCase: string[] }) {
   return (
-    <div className="flex" style={{ borderRadius: 8, overflow: "hidden", border: "1px solid var(--qc-border-default)" }}>
+    <div className="flex" style={{ borderRadius: 8, overflow: "hidden", border: "1px solid var(--qc-hair)" }}>
       {/* Bull */}
-      <div className="flex-1 min-w-0" style={{ borderRight: "1px solid var(--qc-border-default)" }}>
+      <div className="flex-1 min-w-0" style={{ borderRight: "1px solid var(--qc-hair)" }}>
         <div style={{ background: "var(--qc-up-soft)", borderLeft: "4px solid var(--qc-up)", padding: "10px 14px" }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-up)" }}>
             Bull Case (Management Lens)
@@ -21,7 +21,7 @@ function BullBearSplit({ bullCase, bearCase }: { bullCase: string[]; bearCase: s
             {bullCase.map((point, i) => (
               <li key={i} className="flex gap-2">
                 <span style={{ color: "var(--qc-up)", flexShrink: 0, marginTop: 2, fontSize: 10 }}>●</span>
-                <span style={{ fontSize: 13, color: "var(--qc-text-body)", lineHeight: 1.6 }}>{point}</span>
+                <span style={{ fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>{point}</span>
               </li>
             ))}
           </ul>
@@ -40,7 +40,7 @@ function BullBearSplit({ bullCase, bearCase }: { bullCase: string[]; bearCase: s
             {bearCase.map((point, i) => (
               <li key={i} className="flex gap-2">
                 <span style={{ color: "var(--qc-down)", flexShrink: 0, marginTop: 2, fontSize: 10 }}>●</span>
-                <span style={{ fontSize: 13, color: "var(--qc-text-body)", lineHeight: 1.6 }}>{point}</span>
+                <span style={{ fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>{point}</span>
               </li>
             ))}
           </ul>
@@ -63,12 +63,12 @@ function WatchlistTable({ items }: { items: InvestmentThesis["next_concall_watch
           <col style={{ width: "26%" }} />
         </colgroup>
         <TableHeader>
-          <TableRow style={{ borderColor: "var(--qc-border-default)" }}>
+          <TableRow style={{ borderColor: "var(--qc-hair)" }}>
             {["#", "What to Listen For", "Why It Matters", "Green Signal", "Red Signal"].map((h) => (
               <TableHead
                 key={h}
                 className="text-[10px] font-medium uppercase tracking-wider"
-                style={{ color: "var(--qc-text-muted)" }}
+                style={{ color: "var(--qc-ink-2)" }}
               >
                 {h}
               </TableHead>
@@ -77,14 +77,14 @@ function WatchlistTable({ items }: { items: InvestmentThesis["next_concall_watch
         </TableHeader>
         <TableBody>
           {items.map((item) => (
-            <TableRow key={item.number} className="align-top" style={{ borderColor: "var(--qc-border-inner)" }}>
-              <TableCell className="text-xs font-semibold pt-4" style={{ color: "var(--qc-text-muted)" }}>
+            <TableRow key={item.number} className="align-top" style={{ borderColor: "var(--qc-hair-2)" }}>
+              <TableCell className="text-xs font-semibold pt-4" style={{ color: "var(--qc-ink-2)" }}>
                 {item.number}
               </TableCell>
-              <TableCell className="text-xs break-words whitespace-normal py-4" style={{ color: "var(--qc-text-body)" }}>
+              <TableCell className="text-xs break-words whitespace-normal py-4" style={{ color: "var(--qc-ink)" }}>
                 {item.what_to_listen_for}
               </TableCell>
-              <TableCell className="text-xs break-words whitespace-normal py-4" style={{ color: "var(--qc-text-muted)" }}>
+              <TableCell className="text-xs break-words whitespace-normal py-4" style={{ color: "var(--qc-ink-2)" }}>
                 {item.why_it_matters}
               </TableCell>
               <TableCell className="text-xs break-words whitespace-normal py-4" style={{ color: "var(--qc-up)" }}>
@@ -109,9 +109,9 @@ export function InvestmentThesisSection({ thesis }: InvestmentThesisSectionProps
       style={{
         fontSize: 11,
         fontWeight: 600,
-        color: "var(--qc-text-heading)",
-        background: "var(--qc-surface-panel)",
-        border: "1px solid var(--qc-border-default)",
+        color: "var(--qc-ink)",
+        background: "var(--qc-section)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 4,
         padding: "3px 10px",
         letterSpacing: "0.05em",
@@ -122,20 +122,12 @@ export function InvestmentThesisSection({ thesis }: InvestmentThesisSectionProps
   ) : undefined;
 
   return (
-    <SectionPanel title="Investment Thesis + Next Concall Watchlist" headerAction={headerAction}>
+    <SectionPanel title="Investment Thesis" headerAction={headerAction}>
       <div className="flex flex-col gap-5">
         {(bull_case.length > 0 || bear_case.length > 0) && (
           <BullBearSplit bullCase={bull_case} bearCase={bear_case} />
         )}
 
-        {next_concall_watchlist.length > 0 && (
-          <div>
-            <p style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
-              Next Concall Watchlist
-            </p>
-            <WatchlistTable items={next_concall_watchlist} />
-          </div>
-        )}
       </div>
     </SectionPanel>
   );

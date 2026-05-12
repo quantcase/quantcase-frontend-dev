@@ -34,19 +34,19 @@ function fmtCr(val: number | null | undefined): string {
 
 // Maps to --qc-* tokens (resolved hex for SVG fill compatibility)
 const COLORS = {
-  revenue:  "#C8C6C0",  // --qc-text-muted lighter: neutral bar for revenue
-  expenses: "#E9E7E1",  // --qc-border-default: muted expenses bar
+  revenue:  "#C8C6C0",  // --qc-ink-2 lighter: neutral bar for revenue
+  expenses: "#E9E7E1",  // --qc-hair: muted expenses bar
   interest: "#B23A2F",  // --qc-down: interest is a cost drag
-  opProfit: "var(--qc-text-heading)",  // --qc-text-heading: primary line
-  netProfit:"#9A9A92",  // --qc-text-muted: secondary dashed line
+  opProfit: "var(--qc-ink)",  // --qc-ink: primary line
+  netProfit:"#9A9A92",  // --qc-ink-2: secondary dashed line
 };
 
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{
-      background: "var(--qc-surface-white)",
-      border: "1px solid var(--qc-border-default)",
+      background: "var(--qc-card)",
+      border: "1px solid var(--qc-hair)",
       borderRadius: 10,
       padding: "10px 14px",
       fontSize: 12,
@@ -54,16 +54,16 @@ function CustomTooltip({ active, payload, label }: TooltipProps<number, string>)
       minWidth: 180,
       boxShadow: "0 4px 16px rgba(14,14,12,0.08)",
     }}>
-      <div style={{ fontWeight: 600, color: "var(--qc-text-heading)", marginBottom: 8, fontFamily: "inherit" }}>
+      <div style={{ fontWeight: 600, color: "var(--qc-ink)", marginBottom: 8, fontFamily: "inherit" }}>
         {label}
       </div>
       {payload.map((entry) => (
-        <div key={entry.name} style={{ display: "flex", justifyContent: "space-between", gap: 16, color: "var(--qc-text-body)", marginBottom: 3 }}>
+        <div key={entry.name} style={{ display: "flex", justifyContent: "space-between", gap: 16, color: "var(--qc-ink)", marginBottom: 3 }}>
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: entry.color as string, display: "inline-block", flexShrink: 0 }} />
             {entry.name}:
           </span>
-          <span style={{ fontWeight: 600, color: "var(--qc-text-heading)" }}>{fmtCr(entry.value)}</span>
+          <span style={{ fontWeight: 600, color: "var(--qc-ink)" }}>{fmtCr(entry.value)}</span>
         </div>
       ))}
     </div>
@@ -112,17 +112,17 @@ export function PnLChart({ table }: { table: FinancialTable }) {
         barCategoryGap="20%"
         barGap={-barSize}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="var(--qc-border-inner)" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--qc-hair-2)" vertical={false} />
         <XAxis
           dataKey="period"
-          tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}
+          tick={{ fontSize: 10, fill: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
           domain={[yMin, yMax]}
           tickFormatter={yFmt}
-          tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}
+          tick={{ fontSize: 10, fill: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}
           axisLine={false}
           tickLine={false}
           width={52}
@@ -134,7 +134,7 @@ export function PnLChart({ table }: { table: FinancialTable }) {
               display: "flex", flexDirection: "row", flexWrap: "wrap",
               justifyContent: "center", gap: "10px 20px", paddingTop: 12,
               fontSize: 11, fontFamily: "'IBM Plex Mono', monospace",
-              color: "var(--qc-text-body)",
+              color: "var(--qc-ink)",
             }}>
               {[
                 { color: COLORS.revenue,  label: "Revenue",          line: false },
@@ -158,7 +158,7 @@ export function PnLChart({ table }: { table: FinancialTable }) {
             </div>
           )}
         />
-        <ReferenceLine y={0} stroke="var(--qc-border-default)" strokeWidth={1} />
+        <ReferenceLine y={0} stroke="var(--qc-hair)" strokeWidth={1} />
 
         <Bar dataKey="revenue"  name="Revenue"  stackId="pos" fill={COLORS.revenue}  barSize={barSize} />
         <Bar dataKey="expenses" name="Expenses" stackId="neg" fill={COLORS.expenses} barSize={barSize} />

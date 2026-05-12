@@ -78,11 +78,11 @@ function ClientDetailContent() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-4" style={{ background: "var(--qc-surface-base)", minHeight: "100vh" }}>
-        <div className="h-8 rounded animate-pulse w-48" style={{ background: "var(--qc-surface-panel)" }} />
+      <div className="p-6 space-y-4" style={{ background: "var(--qc-bg)", minHeight: "100vh" }}>
+        <div className="h-8 rounded animate-pulse w-48" style={{ background: "var(--qc-section)" }} />
         <div className="grid grid-cols-4 gap-3">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-20 rounded-lg animate-pulse" style={{ background: "var(--qc-surface-panel)" }} />
+            <div key={i} className="h-20 rounded-lg animate-pulse" style={{ background: "var(--qc-section)" }} />
           ))}
         </div>
       </div>
@@ -98,25 +98,25 @@ function ClientDetailContent() {
   }
 
   return (
-    <div className="p-6 space-y-5" style={{ background: "var(--qc-surface-base)", minHeight: "100vh" }}>
+    <div className="p-6 space-y-5" style={{ background: "var(--qc-bg)", minHeight: "100vh" }}>
       {/* Back link */}
       <Link
         href="/wealthos/clients"
         className="flex items-center gap-1 w-fit transition-opacity hover:opacity-70"
-        style={{ fontSize: 13, color: "var(--qc-text-muted)" }}
+        style={{ fontSize: 13, color: "var(--qc-ink-2)" }}
       >
         <ChevronLeft className="size-4" /> Back to Clients
       </Link>
 
       {/* Client Header */}
       <div className="flex items-center gap-3">
-        <h1 style={{ fontSize: 22, fontWeight: 400, color: "var(--qc-text-heading)" }}>{client.name}</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 400, color: "var(--qc-ink)" }}>{client.name}</h1>
         <SegmentBadge segment={client.segment} />
-        <span className="capitalize" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
+        <span className="capitalize" style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>
           {client.risk_profile} risk
         </span>
         {client.rm && (
-          <span style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>· RM: {client.rm.name}</span>
+          <span style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>· RM: {client.rm.name}</span>
         )}
       </div>
 
@@ -155,44 +155,44 @@ function ClientDetailContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {client.email && (
               <div>
-                <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   Email
                 </p>
-                <p style={{ fontSize: 13, color: "var(--qc-text-body)" }}>{client.email}</p>
+                <p style={{ fontSize: 13, color: "var(--qc-ink)" }}>{client.email}</p>
               </div>
             )}
             {client.phone && (
               <div>
-                <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   Phone
                 </p>
-                <p style={{ fontSize: 13, color: "var(--qc-text-body)" }}>{client.phone}</p>
+                <p style={{ fontSize: 13, color: "var(--qc-ink)" }}>{client.phone}</p>
               </div>
             )}
             {client.last_contact_at && (
               <div>
-                <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   Last Contact
                 </p>
-                <p style={{ fontSize: 13, color: "var(--qc-text-body)" }}>
+                <p style={{ fontSize: 13, color: "var(--qc-ink)" }}>
                   {new Date(client.last_contact_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                 </p>
               </div>
             )}
             <div>
-              <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                 Segment
               </p>
-              <p style={{ fontSize: 13, color: "var(--qc-text-body)" }}>{client.segment}</p>
+              <p style={{ fontSize: 13, color: "var(--qc-ink)" }}>{client.segment}</p>
             </div>
           </div>
 
           <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", marginBottom: 12 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", marginBottom: 12 }}>
               Approved Models
             </p>
             {models.length === 0 ? (
-              <p style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>No models available</p>
+              <p style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>No models available</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {models.map(model => (
@@ -226,10 +226,10 @@ function ClientDetailContent() {
       {activeTab === "portfolio" && (
         <SectionPanel title="Portfolio" contentClassName="px-6 pb-6">
           {portfolioLoading && (
-            <p className="py-4" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>Loading portfolio...</p>
+            <p className="py-4" style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>Loading portfolio...</p>
           )}
           {!portfolioLoading && !portfolio && (
-            <p className="py-4 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
+            <p className="py-4 text-center" style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>
               No portfolio data available
             </p>
           )}
@@ -241,7 +241,7 @@ function ClientDetailContent() {
         <SectionPanel title="Interactions" contentClassName="px-6 pb-6 space-y-4">
           <LogInteractionForm clientId={clientId} onSuccess={refetchInteractions} />
           {interactionsLoading && (
-            <p className="py-4" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>Loading interactions...</p>
+            <p className="py-4" style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>Loading interactions...</p>
           )}
           {interactionsData && <InteractionTimeline interactions={interactionsData.items} />}
         </SectionPanel>
@@ -256,7 +256,7 @@ function ClientDetailContent() {
       {activeTab === "actions" && (
         <SectionPanel title="Action Log" contentClassName="px-6 pb-6">
           {actionsLoading && (
-            <p className="py-4" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>Loading actions...</p>
+            <p className="py-4" style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>Loading actions...</p>
           )}
           {actionsData && <ActionLogTable actions={actionsData.items} />}
         </SectionPanel>
@@ -267,7 +267,7 @@ function ClientDetailContent() {
 
 export default function ClientDetailPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading client...</div>}>
+    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-ink-2)" }}>Loading client...</div>}>
       <ClientDetailContent />
     </Suspense>
   );

@@ -11,12 +11,12 @@ export interface FinancialTable {
   rows: FinancialRow[];
 }
 
-export interface BalanceSheetData {
+interface BalanceSheetData {
   annual: FinancialTable;
   quarterly?: FinancialTable;
 }
 
-export interface GrowthMetric {
+interface GrowthMetric {
   "10y"?: number | null;
   "5y"?: number | null;
   "3y"?: number | null;
@@ -24,21 +24,21 @@ export interface GrowthMetric {
   last?: number | null;
 }
 
-export interface StockPriceCagr {
+interface StockPriceCagr {
   "10y"?: number | null;
   "5y"?: number | null;
   "3y"?: number | null;
   "1y"?: number | null;
 }
 
-export interface FinancialsMetrics {
+interface FinancialsMetrics {
   salesGrowth: GrowthMetric;
   profitGrowth: GrowthMetric;
   roe: GrowthMetric;
   stockPriceCagr: StockPriceCagr;
 }
 
-export interface FinancialsValuation {
+interface FinancialsValuation {
   marketCap: number | null;
   peRatio: number | null;
   forwardPE: number | null;
@@ -50,14 +50,14 @@ export interface FinancialsValuation {
   eps: number | null;
 }
 
-export interface FinancialsTTM {
+interface FinancialsTTM {
   revenue: number | null;
   ebitda: number | null;
   netProfit: number | null;
   eps: number | null;
 }
 
-export interface FinancialsStandardized {
+interface FinancialsStandardized {
   quarterly: FinancialTable;
   annual: FinancialTable;
   balanceSheet: BalanceSheetData;
@@ -68,7 +68,7 @@ export interface FinancialsStandardized {
   valuation: FinancialsValuation;
 }
 
-export interface FundamentalsSignals {
+interface FundamentalsSignals {
   growth: string;
   valuation: string;
   balanceSheet: string;
@@ -76,7 +76,7 @@ export interface FundamentalsSignals {
   cashConversion: string;
 }
 
-export interface FundamentalsActionableInsight {
+interface FundamentalsActionableInsight {
   action: string;
   rationale: string;
   reEvaluateCondition?: string;
@@ -122,12 +122,12 @@ export interface FinancialsResponse {
 
 // ─── Chart types ───────────────────────────────────────────────────────────────
 
-export interface ChartDataPoint {
+interface ChartDataPoint {
   x: string;
   y: number | null;
 }
 
-export interface ChartSeriesDefinition {
+interface ChartSeriesDefinition {
   dataKey: string;
   name: string;
   data: ChartDataPoint[];

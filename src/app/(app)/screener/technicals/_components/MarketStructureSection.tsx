@@ -38,7 +38,7 @@ export function MarketStructureSection({ trend, patterns }: MarketStructureSecti
       title="Market Structure"
       subtitle="Trend direction, Wyckoff phase & identified price pattern"
     >
-      <div className="pb-4" style={{ borderColor: "var(--qc-border-inner)" }}>
+      <div className="pb-4" style={{ borderColor: "var(--qc-hair-2)" }}>
         {[
           {
             title: "Trend",
@@ -61,7 +61,7 @@ export function MarketStructureSection({ trend, patterns }: MarketStructureSecti
             right: (
               <span
                 className="inline-flex items-center rounded-[4px] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.10em]"
-                style={{ color: "var(--qc-text-muted)", background: "var(--qc-surface-row-alt)", border: "1px solid var(--qc-border-inner)" }}
+                style={{ color: "var(--qc-ink-2)", background: "var(--qc-section)", border: "1px solid var(--qc-hair-2)" }}
               >
                 {patterns[0]?.name ?? "None"}
               </span>
@@ -91,11 +91,11 @@ export function MarketStructureSection({ trend, patterns }: MarketStructureSecti
           <div
             key={title}
             className="flex items-center justify-between py-2.5 px-2"
-            style={i > 0 ? { borderTop: "1px solid var(--qc-border-inner)" } : undefined}
+            style={i > 0 ? { borderTop: "1px solid var(--qc-hair-2)" } : undefined}
           >
             <div className="space-y-0.5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-heading)" }}>{title}</p>
-              <p className="text-[12px]" style={{ color: "var(--qc-text-body)" }}>{desc}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink)" }}>{title}</p>
+              <p className="text-[12px]" style={{ color: "var(--qc-ink)" }}>{desc}</p>
             </div>
             {right}
           </div>

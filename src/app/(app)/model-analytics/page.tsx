@@ -30,8 +30,8 @@ export default function ModelAnalyticsPage() {
         {/* Header + dropdown on one line */}
         <div className="pt-6 pb-2 flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h3 style={{ color: "var(--qc-text-heading)", fontWeight: 500, fontSize: 28 }}>Model Analytics</h3>
-            <p style={{ fontSize: 13, color: "var(--qc-text-muted)", marginTop: 2 }}>
+            <h3 style={{ color: "var(--qc-ink)", fontWeight: 500, fontSize: 28 }}>Model Analytics</h3>
+            <p style={{ fontSize: 13, color: "var(--qc-ink-2)", marginTop: 2 }}>
               Portfolio allocation, drift monitoring, and position intelligence.
             </p>
           </div>

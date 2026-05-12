@@ -23,12 +23,12 @@ export function ProceedsTable({ breakdown }: ProceedsTableProps) {
         <div key={i}>
           <div className="flex items-center justify-between mb-1">
             <p className="text-[12px] leading-snug pr-4" style={{ color: "#121212" }}>{item.purpose}</p>
-            <span className="text-[12px] font-semibold flex-shrink-0" style={{ color: "var(--qc-text-heading)" }}>{item.pct}%</span>
+            <span className="text-[12px] font-semibold flex-shrink-0" style={{ color: "var(--qc-ink)" }}>{item.pct}%</span>
           </div>
-          <div className="h-1.5 rounded-full" style={{ background: "var(--qc-surface-panel)" }}>
+          <div className="h-1.5 rounded-full" style={{ background: "var(--qc-section)" }}>
             <div
               className="h-full rounded-full"
-              style={{ width: `${((item.pct ?? 0) / max) * 100}%`, background: "var(--qc-text-heading)" }}
+              style={{ width: `${((item.pct ?? 0) / max) * 100}%`, background: "var(--qc-ink)" }}
             />
           </div>
         </div>

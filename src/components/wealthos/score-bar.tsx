@@ -31,7 +31,7 @@ export function ScoreBar({ score, components, className }: ScoreBarProps) {
           style={{
             fontSize: 10,
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             textTransform: "uppercase",
             letterSpacing: "0.08em",
           }}
@@ -43,7 +43,7 @@ export function ScoreBar({ score, components, className }: ScoreBarProps) {
             fontSize: 12,
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
             fontWeight: 700,
-            color: "var(--qc-text-heading)",
+            color: "var(--qc-ink)",
             letterSpacing: "-0.02em",
           }}
         >
@@ -80,7 +80,7 @@ export function ScoreBar({ score, components, className }: ScoreBarProps) {
           <span
             key={key}
             className="flex items-center gap-1"
-            style={{ fontSize: 10, color: "var(--qc-text-muted)" }}
+            style={{ fontSize: 10, color: "var(--qc-ink-2)" }}
           >
             <span
               className="inline-block size-1.5 rounded-full shrink-0"

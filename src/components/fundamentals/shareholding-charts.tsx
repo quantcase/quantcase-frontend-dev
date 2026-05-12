@@ -170,7 +170,7 @@ export function ShareholdingCharts({
                   style={{
                     fontSize: 12,
                     fontWeight: isSelected ? 700 : 500,
-                    color: isSelected ? "var(--qc-text-heading)" : "var(--qc-text-body)",
+                    color: isSelected ? "var(--qc-ink)" : "var(--qc-ink)",
                     marginBottom: 6,
                     display: "flex",
                     alignItems: "center",
@@ -179,7 +179,7 @@ export function ShareholdingCharts({
                 >
                   {group.label}
                   {isSelected && (
-                    <span style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", color: "var(--qc-text-muted)", letterSpacing: "0.05em" }}>
+                    <span style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", color: "var(--qc-ink-2)", letterSpacing: "0.05em" }}>
                       ← breakdown
                     </span>
                   )}
@@ -189,17 +189,17 @@ export function ShareholdingCharts({
                     style={{
                       flex: 1,
                       height: 24,
-                      background: "var(--qc-surface-panel)",
+                      background: "var(--qc-section)",
                       borderRadius: 6,
                       overflow: "hidden",
-                      border: isSelected ? "1px solid var(--qc-text-heading)" : "1px solid var(--qc-border-inner)",
+                      border: isSelected ? "1px solid var(--qc-ink)" : "1px solid var(--qc-hair-2)",
                     }}
                   >
                     <div
                       style={{
                         width: `${(group.value / maxValue) * 100}%`,
                         height: "100%",
-                        background: "var(--qc-text-heading)",
+                        background: "var(--qc-ink)",
                         opacity: isSelected ? 1 : 0.45,
                         borderRadius: 6,
                         transition: "width 0.4s ease, opacity 0.2s ease",
@@ -210,7 +210,7 @@ export function ShareholdingCharts({
                     style={{
                       fontSize: 13,
                       fontWeight: 600,
-                      color: "var(--qc-text-heading)",
+                      color: "var(--qc-ink)",
                       fontFamily: "'IBM Plex Mono', monospace",
                       letterSpacing: "0.02em",
                       minWidth: 52,
@@ -262,12 +262,12 @@ export function ShareholdingCharts({
                   <span
                     style={{
                       fontSize: 11,
-                      color: "var(--qc-text-body)",
+                      color: "var(--qc-ink)",
                       fontFamily: "'IBM Plex Mono', monospace",
                     }}
                   >
                     {child.label}:{" "}
-                    <strong style={{ color: "var(--qc-text-heading)" }}>
+                    <strong style={{ color: "var(--qc-ink)" }}>
                       {child.value.toFixed(1)}
                     </strong>
                   </span>
@@ -276,7 +276,7 @@ export function ShareholdingCharts({
             </div>
           </>
         ) : (
-          <div style={{ fontSize: 12, color: "var(--qc-text-muted)", padding: "40px 0", textAlign: "center" }}>
+          <div style={{ fontSize: 12, color: "var(--qc-ink-2)", padding: "40px 0", textAlign: "center" }}>
             No breakdown available
           </div>
         )}

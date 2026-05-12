@@ -89,23 +89,23 @@ function TechnicalsContent() {
           <div
             key={name}
             className="rounded-[8px] border px-3 py-1.5 text-center"
-            style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+            style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
           >
-            <p className="font-mono text-[9px] uppercase tracking-[0.14em] mb-px" style={{ color: "var(--qc-text-muted)" }}>
+            <p className="font-mono text-[9px] uppercase tracking-[0.14em] mb-px" style={{ color: "var(--qc-ink-2)" }}>
               {ind.name}
             </p>
-            <p className="text-[12px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{ind.tag}</p>
+            <p className="text-[12px] font-semibold" style={{ color: "var(--qc-ink)" }}>{ind.tag}</p>
           </div>
         );
       })}
       <div
         className="rounded-[8px] border px-3 py-1.5 text-center"
-        style={{ borderColor: "var(--qc-text-heading)", background: "var(--qc-surface-white)" }}
+        style={{ borderColor: "var(--qc-ink)", background: "var(--qc-card)" }}
       >
-        <p className="font-mono text-[9px] uppercase tracking-[0.14em] mb-px" style={{ color: "var(--qc-text-muted)" }}>
+        <p className="font-mono text-[9px] uppercase tracking-[0.14em] mb-px" style={{ color: "var(--qc-ink-2)" }}>
           Tag
         </p>
-        <p className="text-[12px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{di.tag}</p>
+        <p className="text-[12px] font-semibold" style={{ color: "var(--qc-ink)" }}>{di.tag}</p>
       </div>
     </>
   ) : null;
@@ -135,7 +135,7 @@ function TechnicalsContent() {
                     <button
                       onClick={() => setChartMode("DEFAULT")}
                       className="px-2.5 py-1 rounded-[8px] font-mono text-[10px] uppercase tracking-[0.14em] border transition-colors"
-                      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)", color: "var(--qc-text-heading)" }}
+                      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)", color: "var(--qc-ink)" }}
                     >
                       Default View
                     </button>

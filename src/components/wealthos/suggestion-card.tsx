@@ -19,9 +19,9 @@ const CHANNELS: MessageChannel[] = ["call", "email", "whatsapp"];
 
 const inputStyle: React.CSSProperties = {
   borderRadius: 6,
-  border: "1px solid var(--qc-border-default)",
-  background: "var(--qc-surface-card)",
-  color: "var(--qc-text-heading)",
+  border: "1px solid var(--qc-hair)",
+  background: "var(--qc-card)",
+  color: "var(--qc-ink)",
   fontSize: 12,
   padding: "4px 8px",
   outline: "none",
@@ -74,8 +74,8 @@ export function SuggestionCard({ suggestion, clientId, onStatusChange }: Suggest
     <div
       className="rounded-[14px]"
       style={{
-        border: "1px solid var(--qc-border-default)",
-        background: "var(--qc-surface-card)",
+        border: "1px solid var(--qc-hair)",
+        background: "var(--qc-card)",
         padding: "14px 16px",
       }}
     >
@@ -85,27 +85,27 @@ export function SuggestionCard({ suggestion, clientId, onStatusChange }: Suggest
           style={{
             fontSize: 10,
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
           }}
         >
           Score {(suggestion.score * 100).toFixed(0)}
         </span>
       </div>
 
-      <p className="mb-1" style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>
+      <p className="mb-1" style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>
         {suggestion.suggested_action}
       </p>
-      <p className="mb-3" style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>
+      <p className="mb-3" style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>
         {suggestion.reason}
       </p>
 
       {suggestion.talking_points.length > 0 && (
         <ul className="space-y-1 mb-3">
           {suggestion.talking_points.map((point, i) => (
-            <li key={i} className="flex items-start gap-1.5" style={{ fontSize: 12, color: "var(--qc-text-body)" }}>
+            <li key={i} className="flex items-start gap-1.5" style={{ fontSize: 12, color: "var(--qc-ink)" }}>
               <span
                 className="mt-0.5 size-1.5 shrink-0 rounded-full"
-                style={{ background: "var(--qc-text-muted)" }}
+                style={{ background: "var(--qc-ink-2)" }}
               />
               {point}
             </li>
@@ -117,18 +117,18 @@ export function SuggestionCard({ suggestion, clientId, onStatusChange }: Suggest
         <div
           className="rounded-md px-3 py-2 mb-3"
           style={{
-            border: "1px solid var(--qc-border-inner)",
-            background: "var(--qc-surface-panel)",
+            border: "1px solid var(--qc-hair-2)",
+            background: "var(--qc-section)",
           }}
         >
-          <p className="italic" style={{ fontSize: 12, color: "var(--qc-text-body)" }}>
+          <p className="italic" style={{ fontSize: 12, color: "var(--qc-ink)" }}>
             &ldquo;{suggestion.message}&rdquo;
           </p>
         </div>
       )}
 
       {suggestion.status !== "pending" && (
-        <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }} className="inline-flex items-center capitalize">
+        <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }} className="inline-flex items-center capitalize">
           {suggestion.status === "used" ? "✓ Acted on" : "✗ Ignored"}
         </span>
       )}
@@ -146,7 +146,7 @@ export function SuggestionCard({ suggestion, clientId, onStatusChange }: Suggest
       {showMessageForm && isPending && (
         <div
           className="mt-3 space-y-2 pt-3"
-          style={{ borderTop: "1px dashed var(--qc-border-inner)" }}
+          style={{ borderTop: "1px dashed var(--qc-hair-2)" }}
         >
           <div className="flex gap-2">
             <select
@@ -171,7 +171,7 @@ export function SuggestionCard({ suggestion, clientId, onStatusChange }: Suggest
           {(isPolling || msgJobQueued) && (
             <div className="space-y-1">
               <Progress value={progress} className="h-1" />
-              <p style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>
+              <p style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
                 Generating message... {progress}%
               </p>
             </div>

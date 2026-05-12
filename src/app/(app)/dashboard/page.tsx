@@ -7,7 +7,6 @@ import { BookAtAGlance } from "@/components/dashboard/book-at-a-glance";
 import { TodaysTasks } from "@/components/dashboard/todays-tasks";
 import { WhatChangedToday } from "@/components/dashboard/what-changed-today";
 import { SmartSegmentsPills } from "@/components/dashboard/smart-segments-pills";
-import { ResearchTerminalNudge } from "@/components/dashboard/research-terminal-nudge";
 import { OpportunitiesPanel } from "@/components/dashboard/opportunities-panel";
 import type { TaskItem } from "@/components/dashboard/todays-tasks";
 
@@ -31,8 +30,8 @@ const RM_GRAPH_DATA: RMNode[] = [
             label: "Equity",
             severity: "critical",
             subclasses: [
-              { id: "sub-midcap", label: "Mid-cap",    severity: "critical", signal: "Drift +6%" },
-              { id: "sub-lrgcap", label: "Large-cap",  severity: "clean",   signal: "On track"  },
+              { id: "sub-midcap", label: "Mid-cap",   severity: "critical", signal: "Drift +6%"  },
+              { id: "sub-lrgcap", label: "Large-cap", severity: "clean",    signal: "On track"   },
             ],
           },
           {
@@ -40,7 +39,7 @@ const RM_GRAPH_DATA: RMNode[] = [
             label: "Mutual Funds",
             severity: "moderate",
             subclasses: [
-              { id: "sub-hybrid", label: "Hybrid",   severity: "moderate", signal: "Rebalance due" },
+              { id: "sub-hybrid", label: "Hybrid", severity: "moderate", signal: "Rebalance due" },
             ],
           },
         ],
@@ -56,8 +55,8 @@ const RM_GRAPH_DATA: RMNode[] = [
             label: "Equity",
             severity: "critical",
             subclasses: [
-              { id: "sub-midcap-vk", label: "Mid-cap",    severity: "critical", signal: "Overweight +9%" },
-              { id: "sub-smcap-vk", label: "Small-cap",   severity: "warning",  signal: "Threshold near" },
+              { id: "sub-midcap-vk", label: "Mid-cap",   severity: "critical", signal: "Overweight +9%"  },
+              { id: "sub-smcap-vk",  label: "Small-cap", severity: "warning",  signal: "Threshold near" },
             ],
           },
           {
@@ -90,7 +89,7 @@ const RM_GRAPH_DATA: RMNode[] = [
             severity: "warning",
             subclasses: [
               { id: "sub-ev",    label: "EV / Green", severity: "warning",  signal: "Report pending" },
-              { id: "sub-it-as", label: "IT",         severity: "moderate", signal: "Watch"         },
+              { id: "sub-it-as", label: "IT",         severity: "moderate", signal: "Watch"          },
             ],
           },
           {
@@ -114,7 +113,7 @@ const RM_GRAPH_DATA: RMNode[] = [
             label: "Mutual Funds",
             severity: "clean",
             subclasses: [
-              { id: "sub-debt-sn",  label: "Debt",   severity: "clean", signal: "Stable" },
+              { id: "sub-debt-sn",   label: "Debt",   severity: "clean", signal: "Stable" },
               { id: "sub-equity-sn", label: "Equity", severity: "clean", signal: "Stable" },
             ],
           },
@@ -139,8 +138,8 @@ const RM_GRAPH_DATA: RMNode[] = [
             label: "Equity",
             severity: "moderate",
             subclasses: [
-              { id: "sub-infra",   label: "Infra",      severity: "moderate", signal: "Pending review" },
-              { id: "sub-pharma",  label: "Pharma",     severity: "clean",    signal: "On track"      },
+              { id: "sub-infra",  label: "Infra",  severity: "moderate", signal: "Pending review" },
+              { id: "sub-pharma", label: "Pharma", severity: "clean",    signal: "On track"       },
             ],
           },
           {
@@ -148,7 +147,7 @@ const RM_GRAPH_DATA: RMNode[] = [
             label: "Intl Funds",
             severity: "warning",
             subclasses: [
-              { id: "sub-us",  label: "US Equity", severity: "warning", signal: "FX exposure" },
+              { id: "sub-us", label: "US Equity", severity: "warning", signal: "FX exposure" },
             ],
           },
         ],
@@ -158,10 +157,10 @@ const RM_GRAPH_DATA: RMNode[] = [
 ];
 
 const TODAYS_TASKS: TaskItem[] = [
-  { id: "1", label: "Send Rahul updated portfolio PDF", status: "pending", meta: "By 10:00" },
-  { id: "2", label: "Share EV report with Anita",       status: "overdue", meta: "Overdue · 5 days" },
-  { id: "3", label: "KYC renewal — Suresh Nair",        status: "done",    meta: "Done · 09:12"    },
-  { id: "4", label: "Q4 review prep — Kapoor & Sons",   status: "pending", meta: "Tomorrow · 14:00" },
+  { id: "1", label: "Send Rahul updated portfolio PDF", status: "pending", meta: "BY 10:00"        },
+  { id: "2", label: "Share EV report with Anita",       status: "overdue", meta: "OVERDUE · 5 DAYS" },
+  { id: "3", label: "KYC renewal — Suresh Nair",        status: "done",    meta: "DONE · 09:12"     },
+  { id: "4", label: "Q4 review prep — Kapoor & Sons",   status: "pending", meta: "TOMORROW · 14:00" },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -173,67 +172,128 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-function getTodayLabel(): string {
-  return new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+function getTodayMeta(): string {
+  const d = new Date();
+  const day = d.toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
+  const month = d.toLocaleDateString("en-US", { month: "long" }).toUpperCase();
+  const date = d.getDate();
+  return `${day}, ${month} ${date}`;
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const greeting = getGreeting();
-  const today = getTodayLabel();
+  const todayMeta = getTodayMeta();
 
   return (
-    <div className="min-h-screen mb-16 px-6" style={{ background: "var(--qc-surface-white)" }}>
-      <div className="space-y-6">
-
-        {/* ── Page header ────────────────────────────────────────────── */}
-        <div className="pt-6 pb-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
+    <div style={{ background: "var(--qc-bg)", minHeight: "100vh" }}>
+      <main
+        style={{
+          padding: "28px 36px 60px",
+          maxWidth: 1440,
+          fontFamily: "var(--qc-font-sans)",
+          color: "var(--qc-ink)",
+        }}
+      >
+        {/* ── Page header ───────────────────────────────────────────────── */}
+        <header
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            marginBottom: 22,
+          }}
+        >
           <div>
-            <h1 style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", fontSize: 38, fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.05, color: "var(--qc-text-heading)" }}>
-              {greeting}<span style={{ color: "var(--qc-text-muted)" }}>,</span> Palash
-            </h1>
-            <p style={{ fontSize: 13, color: "var(--qc-text-muted)", marginTop: 6 }}>
-              {today} · 18 clients · ₹796 Cr book
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              className="text-[12px] font-medium px-4 py-2 rounded-md"
-              style={{ background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}
+            <h1
+              style={{
+                fontSize: 30,
+                fontWeight: 500,
+                letterSpacing: "-0.02em",
+                margin: 0,
+                lineHeight: 1.15,
+                color: "var(--qc-ink)",
+                fontFamily: "var(--qc-font-sans)",
+              }}
             >
-              + New Review
-            </button>
+              {greeting}, <span style={{ fontWeight: 500 }}>Palash</span>
+            </h1>
+            <div
+              style={{
+                marginTop: 6,
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: 11,
+                color: "var(--qc-ink-3)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {todayMeta}
+              <span style={{ padding: "0 8px", color: "var(--qc-ink-3)" }}>·</span>
+              18 CLIENTS
+              <span style={{ padding: "0 8px", color: "var(--qc-ink-3)" }}>·</span>
+              ₹796 CR BOOK
+            </div>
           </div>
-        </div>
+          <button
+            style={{
+              background: "var(--qc-ink)",
+              color: "#fff",
+              border: "1px solid var(--qc-ink)",
+              borderRadius: 10,
+              padding: "9px 14px",
+              fontSize: 12.5,
+              fontWeight: 500,
+              fontFamily: "var(--qc-font-sans)",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            + New Review
+          </button>
+        </header>
 
         {/* ════════════════════════════════════════════════════════════
-            HERO ROW — Today's Brief + Portfolio Signal Map
+            TOP ROW — Today's Brief + RM Heartbeat
         ═══════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-[1fr_1.1fr] gap-4" style={{ minHeight: 360 }}>
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns: "2fr 3fr",
+            gap: 14,
+            marginBottom: 14,
+          }}
+        >
           <TodaysBriefing />
           <RMPortfolioSignalGraph rms={RM_GRAPH_DATA} className="h-full" />
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════
+            NEXT MEETING STRIP
+        ═══════════════════════════════════════════════════════════════ */}
+        <div style={{ marginBottom: 28 }}>
+          <NextMeetingPrep />
         </div>
 
         {/* ════════════════════════════════════════════════════════════
-            NEXT MEETING PREP STRIP
+            TWO-COLUMN — Who to call (left) + Book glance + Tasks (right)
         ═══════════════════════════════════════════════════════════════ */}
-        <NextMeetingPrep />
-
-        {/* ════════════════════════════════════════════════════════════
-            TWO-COLUMN ROW — Who to call (left) + Today stack (right)
-        ═══════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-[2fr_1fr] gap-4 items-start">
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 360px",
+            gap: 28,
+            marginBottom: 28,
+          }}
+        >
           <WhoToCallToday />
-          <div className="flex flex-col gap-4">
+          <aside>
             <BookAtAGlance />
             <TodaysTasks tasks={TODAYS_TASKS} />
-          </div>
-        </div>
+          </aside>
+        </section>
 
         {/* ════════════════════════════════════════════════════════════
             WHAT CHANGED TODAY
@@ -246,16 +306,11 @@ export default function DashboardPage() {
         <SmartSegmentsPills />
 
         {/* ════════════════════════════════════════════════════════════
-            RESEARCH TERMINAL NUDGE
-        ═══════════════════════════════════════════════════════════════ */}
-        <ResearchTerminalNudge />
-
-        {/* ════════════════════════════════════════════════════════════
             OPPORTUNITIES WORTH A CONVERSATION
         ═══════════════════════════════════════════════════════════════ */}
         <OpportunitiesPanel />
 
-      </div>
+      </main>
     </div>
   );
 }

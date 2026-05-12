@@ -23,7 +23,7 @@ export function MainContentWrapper({ children }: { children: React.ReactNode }) 
   return (
     <div
       className={cn("ml-[72px] min-h-screen", !hideTopBar && "pt-14")}
-      style={{ background: "var(--qc-surface-base)", paddingTop: !hideTopBar ? 56 : undefined }}
+      style={{ background: "var(--qc-bg)", paddingTop: !hideTopBar ? 56 : undefined }}
     >
       {children}
     </div>

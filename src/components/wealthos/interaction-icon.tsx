@@ -17,5 +17,5 @@ const iconMap: Record<InteractionType, React.ElementType> = {
 
 export function InteractionIcon({ type, className }: InteractionIconProps) {
   const Icon = iconMap[type];
-  return <Icon className={cn("size-4", className)} style={{ color: "var(--qc-text-muted)" }} />;
+  return <Icon className={cn("size-4", className)} style={{ color: "var(--qc-ink-2)" }} />;
 }

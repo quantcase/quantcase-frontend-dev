@@ -82,12 +82,12 @@ export function PillarPieChart({
             </g>
           );
         })}
-        <circle cx={cx} cy={cy} r={rInner} fill="var(--qc-surface-white)" />
+        <circle cx={cx} cy={cy} r={rInner} fill="var(--qc-card)" />
         <text
           x={cx} y={cy - 8}
           textAnchor="middle"
           fontSize="22" fontWeight="500"
-          fill="var(--qc-text-heading)"
+          fill="var(--qc-ink)"
           style={{ letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums" }}
         >
           {displayScore != null ? displayScore : "—"}
@@ -96,7 +96,7 @@ export function PillarPieChart({
           x={cx} y={cy + 10}
           textAnchor="middle"
           fontSize="8" fontWeight="500"
-          fill="var(--qc-text-muted)"
+          fill="var(--qc-ink-2)"
           fontFamily="'IBM Plex Mono', monospace"
           letterSpacing="0.1em"
         >

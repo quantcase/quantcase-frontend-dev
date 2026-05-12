@@ -103,10 +103,10 @@ export function SupportResistanceAnalysis({
             positionInRange={derived.positionInRange}
           />
           {supportResistance.fibonacci.length > 0 && (
-            <div className="pt-4" style={{ borderTop: "1px solid var(--qc-border-inner)" }}>
+            <div className="pt-4" style={{ borderTop: "1px solid var(--qc-hair-2)" }}>
               <span
                 className="font-mono text-[10px] uppercase tracking-[0.14em] mb-3 block px-2"
-                style={{ color: "var(--qc-text-muted)" }}
+                style={{ color: "var(--qc-ink-2)" }}
               >
                 Fibonacci Retracement Levels
               </span>
@@ -125,7 +125,7 @@ export function SupportResistanceAnalysis({
                         <span
                           className="font-mono text-[10px]"
                           style={{
-                            color: "var(--qc-text-muted)",
+                            color: "var(--qc-ink-2)",
                             width: 36,
                             textAlign: "right",
                             flexShrink: 0,
@@ -136,20 +136,20 @@ export function SupportResistanceAnalysis({
                         <div className="flex-1 relative h-5 flex items-center">
                           <div
                             className="absolute inset-0 rounded-[4px]"
-                            style={{ background: "var(--qc-surface-row-alt)", border: "1px solid var(--qc-border-inner)" }}
+                            style={{ background: "var(--qc-section)", border: "1px solid var(--qc-hair-2)" }}
                           />
                           <div
                             className="absolute left-0 top-0 h-full rounded-[4px]"
                             style={{
                               width: `${pct}%`,
-                              background: isCurrent ? "var(--qc-text-heading)" : "rgba(14,14,12,0.12)",
+                              background: isCurrent ? "var(--qc-ink)" : "rgba(14,14,12,0.12)",
                             }}
                           />
                           <span
                             className="relative z-10 pl-2 font-semibold"
                             style={{
                               fontSize: 11,
-                              color: isCurrent ? "var(--qc-text-on-dark)" : "var(--qc-text-heading)",
+                              color: isCurrent ? "var(--qc-on-dark)" : "var(--qc-ink)",
                             }}
                           >
                             ₹{level.toFixed(2)}
@@ -168,18 +168,18 @@ export function SupportResistanceAnalysis({
         <div className="col-span-2 pb-4">
           <div
             className="rounded-[10px] border overflow-hidden"
-            style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+            style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
           >
             <div className="grid grid-cols-4">
               {row1Items.map(({ icon: Icon, label, value, sub, change }, i) => (
                 <div
                   key={label}
                   className="flex flex-col gap-1 px-4 py-3"
-                  style={i > 0 ? { borderLeft: "1px dashed var(--qc-border-inner)" } : undefined}
+                  style={i > 0 ? { borderLeft: "1px dashed var(--qc-hair-2)" } : undefined}
                 >
                   <div className="flex items-center gap-1.5">
-                    <Icon className="w-3 h-3" style={{ color: "var(--qc-text-muted)" }} />
-                    <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
+                    <Icon className="w-3 h-3" style={{ color: "var(--qc-ink-2)" }} />
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>
                       {label}
                     </span>
                   </div>
@@ -190,33 +190,33 @@ export function SupportResistanceAnalysis({
                         ? "var(--qc-up)"
                         : change === "negative"
                           ? "var(--qc-down)"
-                          : "var(--qc-text-heading)"
+                          : "var(--qc-ink)"
                     }}
                   >
                     {value}
                   </span>
-                  {sub && <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{sub}</span>}
+                  {sub && <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{sub}</span>}
                 </div>
               ))}
             </div>
-            <div style={{ borderTop: "1px dashed var(--qc-border-inner)" }} />
+            <div style={{ borderTop: "1px dashed var(--qc-hair-2)" }} />
             <div className="grid grid-cols-4">
               {row2Items.map(({ icon: Icon, label, value, sub }, i) => (
                 <div
                   key={label}
                   className="flex flex-col gap-1 px-4 py-3"
-                  style={i > 0 ? { borderLeft: "1px dashed var(--qc-border-inner)" } : undefined}
+                  style={i > 0 ? { borderLeft: "1px dashed var(--qc-hair-2)" } : undefined}
                 >
                   <div className="flex items-center gap-1.5">
-                    <Icon className="w-3 h-3" style={{ color: "var(--qc-text-muted)" }} />
-                    <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>
+                    <Icon className="w-3 h-3" style={{ color: "var(--qc-ink-2)" }} />
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>
                       {label}
                     </span>
                   </div>
-                  <span className="text-lg font-semibold leading-tight" style={{ color: "var(--qc-text-heading)" }}>
+                  <span className="text-lg font-semibold leading-tight" style={{ color: "var(--qc-ink)" }}>
                     {value}
                   </span>
-                  {sub && <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{sub}</span>}
+                  {sub && <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{sub}</span>}
                 </div>
               ))}
             </div>

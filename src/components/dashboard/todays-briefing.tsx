@@ -1,47 +1,78 @@
+import { ActionButton, DarkGradientCard, MonoLabel } from "@/components/ds";
+
+const CHIPS = [
+  { pip: "var(--qc-down)", label: "Call Rahul" },
+  { pip: "var(--qc-warn)", label: "EV report → Anita" },
+  { pip: "var(--qc-blue)", label: "Rebalance Varun" },
+];
+
 export function TodaysBriefing() {
   return (
-    <div
-      className="rounded-xl px-7 py-6 flex flex-col relative overflow-hidden"
-      style={{ background: "var(--qc-text-heading)", color: "#FCFCFA", minHeight: 360 }}
+    <DarkGradientCard
+      style={{
+        padding: "22px 26px 20px",
+        color: "#fff",
+        minHeight: 320,
+        display: "flex",
+        flexDirection: "column",
+      }}
     >
-      {/* Subtle radial accent */}
-      <div
-        className="absolute top-0 right-0 pointer-events-none"
+
+      <MonoLabel
+        size={10}
+        tracking="0.18em"
+        color="rgba(255,255,255,0.5)"
+        style={{ marginBottom: 28, position: "relative" }}
+      >
+        TODAY&apos;S BRIEF · 09:42 IST
+      </MonoLabel>
+
+      <h2
         style={{
-          width: 220, height: "100%",
-          background: "radial-gradient(circle at top right, rgba(194,65,12,0.18), transparent 70%)",
+          fontSize: 22,
+          fontWeight: 400,
+          lineHeight: 1.4,
+          letterSpacing: "-0.01em",
+          margin: 0,
+          maxWidth: "92%",
+          position: "relative",
+          fontFamily: "var(--qc-font-sans)",
+          color: "var(--qc-on-dark)",
         }}
-      />
-
-      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] mb-3 relative" style={{ color: "rgba(255,255,255,0.5)" }}>
-        Today&apos;s Brief · 09:42 IST
-      </p>
-
-      <p className="text-[22px] font-normal leading-[1.25] tracking-[-0.01em] mb-auto pb-5 relative" style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)" }}>
+      >
         Three clients need a conversation before market open.{" "}
-        <em className="not-italic" style={{ color: "#F59E0B" }}>Rahul</em> first — small-cap drift +6%.
-      </p>
+        <span style={{ color: "var(--qc-lime)", fontWeight: 500 }}>Rahul</span> first — small-cap drift +6%.
+      </h2>
 
-      <div className="flex gap-2 flex-wrap relative">
-        {[
-          { dot: "#EF4444", label: "Call Rahul" },
-          { dot: "#F59E0B", label: "EV report → Anita" },
-          { dot: "#EF4444", label: "Rebalance Varun" },
-        ].map(({ dot, label }) => (
-          <button
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          marginTop: "auto",
+          paddingTop: 28,
+          flexWrap: "wrap",
+          position: "relative",
+        }}
+      >
+        {CHIPS.map(({ pip, label }) => (
+          <ActionButton
             key={label}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-[12px] transition-all"
+            size="sm"
             style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              color: "#FCFCFA",
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.14)",
+              color: "rgba(255,255,255,0.92)",
+              borderRadius: 999,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
             }}
           >
-            <span className="size-1.5 rounded-full flex-shrink-0" style={{ background: dot }} />
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: pip, flexShrink: 0, display: "inline-block" }} />
             {label}
-          </button>
+          </ActionButton>
         ))}
       </div>
-    </div>
+    </DarkGradientCard>
   );
 }

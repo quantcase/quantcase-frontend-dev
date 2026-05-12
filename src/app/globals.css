@@ -3,15 +3,6 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
-@custom-variant theme-purple (&:is(.theme-purple *));
-@custom-variant theme-dark-purple (&:is(.theme-dark-purple *));
-
-/* Global base — warm background, Inter body, IBM Plex Mono data */
-html, body {
-  background: var(--qc-surface-base);
-  color: var(--qc-text-body);
-  -webkit-font-smoothing: antialiased;
-}
 
 /* IBM Plex Mono for numeric/data labels */
 .mono {
@@ -67,231 +58,157 @@ html, body {
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-
-  /* QuantCase design token aliases */
-  --color-heading:           var(--qc-text-heading);
-  --color-body:              var(--qc-text-body);
-  --color-muted-text:        var(--qc-text-muted);
-  --color-dimmed:            var(--qc-text-dimmed);
-  --color-on-dark:           var(--qc-text-on-dark);
-  --color-surface:           var(--qc-surface-base);
-  --color-surface-white:     var(--qc-surface-white);
-  --color-surface-panel:     var(--qc-surface-panel);
-  --color-surface-alt:       var(--qc-surface-row-alt);
-  --color-surface-hover:     var(--qc-surface-hover);
-  --color-border-default:    var(--qc-border-default);
-  --color-border-inner:      var(--qc-border-inner);
-  --color-border-subtle:     var(--qc-border-subtle);
-  --color-border-active:     var(--qc-border-active);
-  --color-primary-action:    var(--qc-accent-primary);
-  --color-primary-action-fg: var(--qc-accent-primary-fg);
-  --color-logo:              var(--qc-accent-logo);
-}
-
-/* ── Purple Light (default) ──────────────────────────────────────── */
-:root {
-  --radius: 0.625rem;
-
-  /* shadcn tokens — purple light */
-  --background: #FAF8FF;
-  --foreground: #1A0A2E;
-  --card: #FFFFFF;
-  --card-foreground: #1A0A2E;
-  --popover: #FFFFFF;
-  --popover-foreground: #1A0A2E;
-  --primary: #3b1f6e;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F5F0FA;
-  --secondary-foreground: #1A0A2E;
-  --muted: #EDE8F5;
-  --muted-foreground: #7C6998;
-  --accent: #2d1b5e;
-  --accent-foreground: #FFFFFF;
-  --destructive: #C2410C;
-  --border: #E4DCF0;
-  --input: #E4DCF0;
-  --ring: #3b1f6e;
-  --chart-1: #3b1f6e;
-  --chart-2: #2d1b5e;
-  --chart-3: #7c3aed;
-  --chart-4: #6d28d9;
-  --chart-5: #4c1d95;
-  --sidebar: #FFFFFF;
-  --sidebar-foreground: #1A0A2E;
-  --sidebar-primary: #3b1f6e;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F5F0FA;
-  --sidebar-accent-foreground: #1A0A2E;
-  --sidebar-border: #E4DCF0;
-  --sidebar-ring: #3b1f6e;
-
-  /* QuantCase design tokens — purple light */
-  --qc-text-heading:          #1A0A2E;
-  --qc-text-body:             #3D2460;
-  --qc-text-muted:            #7C6998;
-  --qc-text-dimmed:           rgba(26, 10, 46, 0.40);
-  --qc-text-on-dark:          #FFFFFF;
-
-  --qc-surface-base:          #FAF8FF;
-  --qc-surface-white:         #FFFFFF;
-  --qc-surface-card:          #FFFFFF;
-  --qc-surface-panel:         #F5F0FA;
-  --qc-surface-row-alt:       #EDE8F5;
-  --qc-surface-hover:         #EDE8F5;
-
-  --qc-border-default:        #E4DCF0;
-  --qc-border-inner:          #EDE8F5;
-  --qc-border-subtle:         rgba(59, 31, 110, 0.12);
-  --qc-border-active:         #3b1f6e;
-
-  --qc-accent-primary:        #3b1f6e;
-  --qc-accent-primary-fg:     #FFFFFF;
-  --qc-accent-logo:           #3b1f6e;
-  --qc-accent-lime:           #2d1b5e;
-  --qc-accent-lime-bg:        #F5F0FA;
-
-  /* Semantic */
-  --qc-up:                    #15803D;
-  --qc-up-soft:               #DCFCE7;
-  --qc-down:                  #B91C1C;
-  --qc-down-soft:             #FEE2E2;
-  --qc-warn:                  #B45309;
-  --qc-warn-soft:             #FEF3C7;
-  --qc-blue:                  #1D4ED8;
-  --qc-blue-soft:             #DBEAFE;
-
-  --qc-sidebar-bg:            #FFFFFF;
-  --qc-sidebar-border:        #E4DCF0;
-  --qc-sidebar-icon-active-bg:#3b1f6e;
-  --qc-sidebar-icon-active-fg:#FFFFFF;
-  --qc-sidebar-icon-idle-fg:  #7C6998;
-  --qc-sidebar-icon-hover-bg: #F5F0FA;
-
-  --qc-topbar-bg:             #FFFFFF;
-  --qc-topbar-border:         #E4DCF0;
-  --qc-topbar-tab-active-fg:  #3b1f6e;
-  --qc-topbar-tab-idle-fg:    #7C6998;
-  --qc-topbar-separator:      #D6CEE8;
-  --qc-topbar-avatar-bg:      #3b1f6e;
-  --qc-topbar-search-bg:      #FAF8FF;
-  --qc-topbar-search-border:  #E4DCF0;
-
-  --qc-range-track:           #E4DCF0;
-  --qc-range-thumb:           #3b1f6e;
-
-  --qc-icon-box-bg:           rgba(59, 31, 110, 0.08);
-  --qc-icon-box-border:       rgba(59, 31, 110, 0.18);
-  --qc-chip-bg:               #F5F0FA;
-  --qc-chip-border:           #E4DCF0;
-  --qc-chip-fg:               #7C6998;
-}
-
-/* ── Purple Dark ─────────────────────────────────────────────────── */
-.theme-dark-purple {
-  /* shadcn overrides */
-  --background: #0D0618;
-  --foreground: #E9D5FF;
-  --card: #160927;
-  --card-foreground: #F3E8FF;
-  --popover: #160927;
-  --popover-foreground: #F3E8FF;
-  --primary: #A855F7;
-  --primary-foreground: #0D0618;
-  --secondary: #1E1030;
-  --secondary-foreground: #F3E8FF;
-  --muted: #1A0D2E;
-  --muted-foreground: #7C5BA8;
-  --accent: #C084FC;
-  --accent-foreground: #0D0618;
-  --destructive: #F87171;
-  --border: rgba(168, 85, 247, 0.18);
-  --input: rgba(168, 85, 247, 0.20);
-  --ring: #A855F7;
-  --chart-1: #A855F7;
-  --chart-2: #C084FC;
-  --chart-3: #E879F9;
-  --chart-4: #7C3AED;
-  --chart-5: #6D28D9;
-  --sidebar: #0A0414;
-  --sidebar-foreground: #F3E8FF;
-  --sidebar-primary: #A855F7;
-  --sidebar-primary-foreground: #0D0618;
-  --sidebar-accent: #1E1030;
-  --sidebar-accent-foreground: #F3E8FF;
-  --sidebar-border: rgba(168, 85, 247, 0.15);
-  --sidebar-ring: #A855F7;
-
-  /* QuantCase tokens */
-  --qc-text-heading:          #F3E8FF;
-  --qc-text-body:             #D8B4FE;
-  --qc-text-muted:            #7C5BA8;
-  --qc-text-dimmed:           rgba(232, 213, 255, 0.40);
-  --qc-text-on-dark:          #0D0618;
-
-  --qc-surface-base:          #0D0618;
-  --qc-surface-white:         #160927;
-  --qc-surface-card:          #160927;
-  --qc-surface-panel:         #1A0D2E;
-  --qc-surface-row-alt:       #130820;
-  --qc-surface-hover:         #221040;
-
-  --qc-border-default:        rgba(168, 85, 247, 0.18);
-  --qc-border-inner:          rgba(168, 85, 247, 0.08);
-  --qc-border-subtle:         rgba(216, 180, 254, 0.08);
-  --qc-border-active:         #A855F7;
-
-  --qc-accent-primary:        #A855F7;
-  --qc-accent-primary-fg:     #0D0618;
-  --qc-accent-logo:           #C084FC;
-  --qc-accent-lime:           #C084FC;
-  --qc-accent-lime-bg:        rgba(192, 132, 252, 0.10);
-
-  /* Semantic */
-  --qc-up:                    #4ADE80;
-  --qc-up-soft:               rgba(74, 222, 128, 0.12);
-  --qc-down:                  #F87171;
-  --qc-down-soft:             rgba(248, 113, 113, 0.12);
-  --qc-warn:                  #FBBF24;
-  --qc-warn-soft:             rgba(251, 191, 36, 0.12);
-  --qc-blue:                  #60A5FA;
-  --qc-blue-soft:             rgba(96, 165, 250, 0.12);
-
-  --qc-sidebar-bg:            #0A0414;
-  --qc-sidebar-border:        rgba(168, 85, 247, 0.15);
-  --qc-sidebar-icon-active-bg:#1E1030;
-  --qc-sidebar-icon-active-fg:#C084FC;
-  --qc-sidebar-icon-idle-fg:  #4A3070;
-  --qc-sidebar-icon-hover-bg: #1A0D2E;
-
-  --qc-topbar-bg:             #0A0414;
-  --qc-topbar-border:         rgba(168, 85, 247, 0.15);
-  --qc-topbar-tab-active-fg:  #C084FC;
-  --qc-topbar-tab-idle-fg:    #4A3070;
-  --qc-topbar-separator:      #2A1450;
-  --qc-topbar-avatar-bg:      #A855F7;
-  --qc-topbar-search-bg:      #1A0D2E;
-  --qc-topbar-search-border:  rgba(168, 85, 247, 0.18);
-
-  --qc-range-track:           rgba(168, 85, 247, 0.22);
-  --qc-range-thumb:           #A855F7;
-
-  --qc-icon-box-bg:           rgba(168, 85, 247, 0.10);
-  --qc-icon-box-border:       rgba(168, 85, 247, 0.22);
-  --qc-chip-bg:               rgba(168, 85, 247, 0.10);
-  --qc-chip-border:           rgba(168, 85, 247, 0.20);
-  --qc-chip-fg:               #7C5BA8;
-}
-
-/* .theme-dark-purple + .dark — prevent generic .dark from overriding tokens */
-.theme-dark-purple.dark {
-  --background: var(--qc-surface-base);
-  --foreground: var(--qc-text-body);
-  --card: var(--qc-surface-white);
-  --card-foreground: var(--qc-text-heading);
 }
 
 /* ── Base layer ──────────────────────────────────────────────────── */
 @layer base {
+  :root {
+    --radius: 0.625rem;
+
+    /* ── QuantCase design tokens ── */
+    --qc-bg:          var(--qc-hair-2);
+    --qc-surface:     #FBFAF7;
+    --qc-section:     #F3F2EE;
+    --qc-card:        #FFFFFF;
+
+    --qc-ink:         #210B2C;
+    --qc-ink-2:       #5A5A54;
+    --qc-ink-3:       #9A9A92;
+    --qc-on-dark:     #FFFFFF;
+
+    /* shadcn tokens — derived from qc-* vars */
+    --background: var(--qc-surface);
+    --foreground: var(--qc-ink);
+    --card: var(--qc-card);
+    --card-foreground: var(--qc-ink);
+    --popover: var(--qc-card);
+    --popover-foreground: var(--qc-ink);
+    --primary: var(--qc-ink);
+    --primary-foreground: var(--qc-on-dark);
+    --secondary: var(--qc-section);
+    --secondary-foreground: var(--qc-ink);
+    --muted: var(--qc-section);
+    --muted-foreground: var(--qc-ink-2);
+    --accent: var(--qc-section);
+    --accent-foreground: var(--qc-ink);
+    --destructive: #B23A2F;
+    --border: var(--qc-hair);
+    --input: var(--qc-hair);
+    --ring: var(--qc-ink);
+    --chart-1: var(--qc-ink);
+    --chart-2: var(--qc-ink-2);
+    --chart-3: var(--qc-ink-3);
+    --chart-4: var(--qc-up);
+    --chart-5: var(--qc-blue);
+    --sidebar: var(--qc-card);
+    --sidebar-foreground: var(--qc-ink);
+    --sidebar-primary: var(--qc-ink);
+    --sidebar-primary-foreground: var(--qc-on-dark);
+    --sidebar-accent: var(--qc-section);
+    --sidebar-accent-foreground: var(--qc-ink);
+    --sidebar-border: var(--qc-hair);
+    --sidebar-ring: var(--qc-ink);
+
+    --qc-hair:        #E9E7E1;
+    --qc-hair-2:      #EFEDE7;
+
+    --qc-lime:        #FFF5CA;
+    --qc-lime-soft:   #EAF7BC;
+    --qc-lime-edge:   #C6DC8A;
+    --qc-lime-ink:    var(--qc-ink);
+    --qc-lime-ink-2:  #4A5F20;
+
+    --qc-golden-grad-from: #f8f6ee;
+    --qc-golden-grad-to:   #FFEB99;
+
+    --qc-chip:        var(--qc-section);
+
+    --qc-up:          #1F7A4A;
+    --qc-up-soft:     #E3F1E8;
+    --qc-down:        var(--destructive);
+    --qc-down-soft:   #F7E6E3;
+    --qc-warn:        #B4731A;
+    --qc-warn-soft:   #FAF0D8;
+    --qc-blue:        #3A6BEF;
+    --qc-blue-soft:   #E9EEFE;
+
+    --qc-brand-pill-bg-1: #F4FBDD;
+    --qc-brand-pill-bg-2: var(--qc-lime-soft);
+    --qc-brand-pill-edge: var(--qc-lime-edge);
+    --qc-brand-chip:      #E86854;
+
+    --qc-font-sans: 'DM Sans', 'Inter', system-ui, -apple-system, Segoe UI, sans-serif;
+    --qc-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --qc-w-light:   300;
+    --qc-w-regular: 400;
+    --qc-w-medium:  500;
+    --qc-w-semi:    600;
+    --qc-w-bold:    700;
+
+    --qc-fz-9:   9px;
+    --qc-fz-10:  10px;
+    --qc-fz-105: 10.5px;
+    --qc-fz-11:  11px;
+    --qc-fz-115: 11.5px;
+    --qc-fz-12:  12px;
+    --qc-fz-125: 12.5px;
+    --qc-fz-13:  13px;
+    --qc-fz-135: 13.5px;
+    --qc-fz-14:  14px;
+    --qc-fz-16:  16px;
+    --qc-fz-17:  17px;
+    --qc-fz-18:  18px;
+    --qc-fz-22:  22px;
+    --qc-fz-26:  26px;
+    --qc-fz-30:  30px;
+    --qc-fz-44:  44px;
+    --qc-fz-52:  52px;
+    --qc-fz-64:  64px;
+    --qc-fz-68:  68px;
+
+    --qc-track-eyebrow:    0.14em;
+    --qc-track-eyebrow-l:  0.16em;
+    --qc-track-mono:       0.02em;
+    --qc-track-pill:       0.04em;
+    --qc-track-display:    -0.015em;
+    --qc-track-display-t:  -0.02em;
+    --qc-track-display-tt: -0.035em;
+
+    --qc-r-2:    4px;
+    --qc-r-1:    6px;
+    --qc-r-2x:   8px;
+    --qc-r-3:    10px;
+    --qc-r-4:    14px;
+    --qc-r-5:    18px;
+    --qc-r-6:    24px;
+    --qc-r-pill: 999px;
+
+    --qc-dark-card-base:         var(--primary);
+    --qc-dark-card-glow:         #191265;
+    --qc-dark-card-glow-near:    #172f70d9;
+    --qc-dark-card-glow-tail:    #0808288c;
+    --qc-dark-card-vignette:     #000000d9;
+    --qc-dark-card-vignette-mid: #0000008c;
+
+    --qc-shadow-shell: 0 30px 60px -30px rgba(0, 0, 0, .18), 0 1px 0 rgba(255, 255, 255, .8) inset;
+    --qc-shadow-annot: 0 8px 24px rgba(14, 14, 12, 0.08);
+    --qc-ring-track:   0 0 0 1px var(--qc-hair);
+
+    --qc-s-1:  4px;
+    --qc-s-2:  6px;
+    --qc-s-3:  8px;
+    --qc-s-4:  10px;
+    --qc-s-5:  12px;
+    --qc-s-6:  14px;
+    --qc-s-7:  16px;
+    --qc-s-8:  18px;
+    --qc-s-9:  20px;
+    --qc-s-10: 22px;
+    --qc-s-12: 30px;
+    --qc-s-14: 40px;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
@@ -304,43 +221,43 @@ html, body {
     -moz-osx-font-smoothing: grayscale;
   }
   h1 {
-    color: var(--qc-text-heading);
+    color: var(--qc-ink);
     font-size: 56px;
     font-weight: 500;
     line-height: 64px;
   }
   h2 {
-    color: var(--qc-text-heading);
+    color: var(--qc-ink);
     font-size: 36px;
     font-weight: 500;
     line-height: 40px;
   }
   h3 {
-    color: var(--qc-text-heading);
+    color: var(--qc-ink);
     font-size: 28px;
     font-weight: 400;
     line-height: 36px;
   }
   h4 {
-    color: var(--qc-text-heading);
+    color: var(--qc-ink);
     font-size: 22px;
     font-weight: 400;
     line-height: 30px;
   }
   h5 {
-    color: var(--qc-text-heading);
+    color: var(--qc-ink);
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
   }
   h6 {
-    color: var(--qc-text-muted);
+    color: var(--qc-ink-2);
     font-size: 12px;
     font-weight: 500;
     line-height: 20px;
   }
   p {
-    color: var(--qc-text-muted);
+    color: var(--qc-ink-2);
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
@@ -351,7 +268,7 @@ html, body {
     gap: 12px;
   }
   li {
-    color: var(--qc-text-muted);
+    color: var(--qc-ink-2);
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
@@ -359,7 +276,7 @@ html, body {
     margin-left: 1.25rem;
   }
   small {
-    color: var(--qc-text-muted);
+    color: var(--qc-ink-2);
     font-size: 11px;
     font-weight: 400;
     line-height: 18px;
@@ -378,7 +295,7 @@ html, body {
   input[type="range"]::-webkit-slider-runnable-track {
     height: 4px !important;
     border-radius: 9999px !important;
-    background: var(--qc-range-track) !important;
+    background: var(--qc-hair) !important;
   }
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none !important;
@@ -386,7 +303,7 @@ html, body {
     width: 14px !important;
     height: 14px !important;
     border-radius: 9999px !important;
-    background: var(--qc-range-thumb) !important;
+    background: var(--qc-ink) !important;
     margin-top: -5px !important;
     box-shadow: none !important;
     border: none !important;
@@ -394,13 +311,13 @@ html, body {
   input[type="range"]::-moz-range-track {
     height: 4px !important;
     border-radius: 9999px !important;
-    background: var(--qc-range-track) !important;
+    background: var(--qc-hair) !important;
   }
   input[type="range"]::-moz-range-thumb {
     width: 14px !important;
     height: 14px !important;
     border-radius: 9999px !important;
-    background: var(--qc-range-thumb) !important;
+    background: var(--qc-ink) !important;
     border: none !important;
     box-shadow: none !important;
   }
@@ -408,4 +325,53 @@ html, body {
     opacity: 0.4;
     cursor: not-allowed;
   }
+}
+
+/* ── Golden card ────────────────────────────────────────────────── */
+.qc-golden-card {
+  background: linear-gradient(175deg, var(--qc-golden-grad-from) 0%, var(--qc-golden-grad-to) 100%);
+  border: 1px solid var(--qc-hair);
+}
+
+/* ── Dark gradient card ─────────────────────────────────────────── */
+.qc-dark-gradient-card {
+  background: var(--qc-dark-card-base);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.qc-dark-gradient-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 55% at 100% 100%,
+      var(--qc-dark-card-glow-near) 0%,
+      var(--qc-dark-card-glow)      25%,
+      var(--qc-dark-card-glow-tail) 40%,
+      transparent                   75%),
+    linear-gradient(165deg,
+      var(--qc-dark-card-base)  0%,
+      var(--qc-dark-card-base)  40%,
+      var(--qc-dark-card-glow)  100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.qc-dark-gradient-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 60% at 0% 0%,
+    var(--qc-dark-card-vignette)     0%,
+    var(--qc-dark-card-vignette-mid) 30%,
+    transparent                      65%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.qc-dark-gradient-card > * {
+  position: relative;
+  z-index: 2;
 }

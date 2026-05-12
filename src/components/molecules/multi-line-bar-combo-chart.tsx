@@ -34,7 +34,7 @@ interface MultiLineBarComboChartProps {
 
 // Warm-neutral palette aligned to the design system
 const BAR_COLORS = ["#A5B4FC", "#93C5FD", "#6EE7B7", "#FCD34D"];
-const LINE_COLORS = ["var(--qc-text-heading)", "#B4731A", "#5A5A54", "#3A6BEF"];
+const LINE_COLORS = ["var(--qc-ink)", "#B4731A", "#5A5A54", "#3A6BEF"];
 
 // ─── Merge series data into flat recharts rows keyed by x ────────────────────
 
@@ -109,7 +109,7 @@ function LegendItem({
         </svg>
       )}
 
-      <span style={{ fontSize: 11, color: "var(--qc-text-body)", fontFamily: "'IBM Plex Mono', monospace", whiteSpace: "nowrap" }}>{name}</span>
+      <span style={{ fontSize: 11, color: "var(--qc-ink)", fontFamily: "'IBM Plex Mono', monospace", whiteSpace: "nowrap" }}>{name}</span>
     </button>
   );
 }
@@ -127,9 +127,9 @@ function GroupButton({ label, active, onClick }: { label: string; active: boolea
         borderRadius: 6,
         fontFamily: "'IBM Plex Mono', monospace",
         letterSpacing: "0.06em",
-        border: `1px solid ${active ? "var(--qc-accent-primary)" : "var(--qc-border-default)"}`,
-        background: active ? "var(--qc-accent-primary)" : "transparent",
-        color: active ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
+        border: `1px solid ${active ? "var(--qc-ink)" : "var(--qc-hair)"}`,
+        background: active ? "var(--qc-ink)" : "transparent",
+        color: active ? "var(--qc-on-dark)" : "var(--qc-ink-2)",
         cursor: "pointer",
         whiteSpace: "nowrap",
       }}
@@ -206,11 +206,11 @@ export function MultiLineBarComboChart({
       {/* Chart */}
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={chartData} margin={{ top: 4, right: 20, bottom: 20, left: 20 }}>
-          <CartesianGrid vertical={false} stroke="var(--qc-border-inner)" />
+          <CartesianGrid vertical={false} stroke="var(--qc-hair-2)" />
 
           <XAxis
             dataKey="x"
-            tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}
+            tick={{ fontSize: 10, fill: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}
             axisLine={false}
             tickLine={false}
           />
@@ -219,7 +219,7 @@ export function MultiLineBarComboChart({
           <YAxis
             yAxisId="left"
             orientation="left"
-            tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}
+            tick={{ fontSize: 10, fill: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}
             axisLine={false}
             tickLine={false}
             tickFormatter={fmtTick}
@@ -230,7 +230,7 @@ export function MultiLineBarComboChart({
             }}
             label={
               resolvedLeftLabel
-                ? { value: resolvedLeftLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 10, fill: "var(--qc-text-muted)", textAnchor: "middle", fontFamily: "'IBM Plex Mono', monospace" } }
+                ? { value: resolvedLeftLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 10, fill: "var(--qc-ink-2)", textAnchor: "middle", fontFamily: "'IBM Plex Mono', monospace" } }
                 : undefined
             }
           />
@@ -240,7 +240,7 @@ export function MultiLineBarComboChart({
             <YAxis
               yAxisId="right"
               orientation="right"
-              tick={{ fontSize: 10, fill: "var(--qc-text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}
+              tick={{ fontSize: 10, fill: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={fmtTick}
@@ -251,7 +251,7 @@ export function MultiLineBarComboChart({
               }}
               label={
                 resolvedRightLabel
-                  ? { value: resolvedRightLabel, angle: 90, position: "insideRight", offset: -10, style: { fontSize: 10, fill: "var(--qc-text-muted)", textAnchor: "middle", fontFamily: "'IBM Plex Mono', monospace" } }
+                  ? { value: resolvedRightLabel, angle: 90, position: "insideRight", offset: -10, style: { fontSize: 10, fill: "var(--qc-ink-2)", textAnchor: "middle", fontFamily: "'IBM Plex Mono', monospace" } }
                   : undefined
               }
             />
@@ -260,14 +260,14 @@ export function MultiLineBarComboChart({
           <Tooltip
             contentStyle={{
               fontSize: 11,
-              border: "1px solid var(--qc-border-default)",
+              border: "1px solid var(--qc-hair)",
               borderRadius: 10,
-              background: "var(--qc-surface-white)",
+              background: "var(--qc-card)",
               boxShadow: "0 4px 16px rgba(14,14,12,0.08)",
               fontFamily: "'IBM Plex Mono', monospace",
             }}
-            labelStyle={{ fontWeight: 600, color: "var(--qc-text-heading)", marginBottom: 4 }}
-            itemStyle={{ color: "var(--qc-text-body)" }}
+            labelStyle={{ fontWeight: 600, color: "var(--qc-ink)", marginBottom: 4 }}
+            itemStyle={{ color: "var(--qc-ink)" }}
           />
 
           {activeGroup.barSeries.map((s, i) => (
@@ -332,8 +332,8 @@ export function MultiLineBarComboChart({
         className={className}
         style={{
           borderRadius: 10,
-          border: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-panel)",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-section)",
           padding: 8,
         }}
       >
@@ -348,7 +348,7 @@ export function MultiLineBarComboChart({
                 fontFamily: "'IBM Plex Mono', monospace",
                 fontSize: 11,
                 fontWeight: 500,
-                color: "var(--qc-text-body)",
+                color: "var(--qc-ink)",
                 textTransform: "uppercase",
                 letterSpacing: "0.12em",
               }}
@@ -356,7 +356,7 @@ export function MultiLineBarComboChart({
               {title}
             </div>
             {subtitle && (
-              <div style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 2, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.04em" }}>
+              <div style={{ fontSize: 11, color: "var(--qc-ink-2)", marginTop: 2, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.04em" }}>
                 {subtitle}
               </div>
             )}
@@ -367,8 +367,8 @@ export function MultiLineBarComboChart({
         <div
           style={{
             borderRadius: 10,
-            border: "1px solid var(--qc-border-inner)",
-            background: "var(--qc-surface-white)",
+            border: "1px solid var(--qc-hair-2)",
+            background: "var(--qc-card)",
             padding: 16,
           }}
         >

@@ -109,7 +109,7 @@ export function ValuationHeroSection({
       </div>
 
       {footer && (
-        <div style={{ marginLeft: -22, marginRight: -22, borderTop: "1px solid var(--qc-hair-2)" }}>
+        <div style={{ marginLeft: -22, marginRight: -22, borderTop: "1px solid var(--qc-hair)" }}>
           {footer}
         </div>
       )}

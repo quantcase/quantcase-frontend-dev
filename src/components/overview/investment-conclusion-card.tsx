@@ -253,78 +253,82 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
         </section>
       </div>
 
-      {/* Pros & Cons — max 3 items, no PRO/RISK badges */}
+      {/* Combined card: Key Highlights, Key Risks, If You Own, If You Don't Own */}
       {(keyHighlights.length > 0 || keyRisks.length > 0) && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-          {[
-            { items: keyHighlights.slice(0, 3), heading: "Key highlights", count: "reasons to own", color: "var(--qc-up, #1F7A4A)" },
-            { items: keyRisks.slice(0, 3),      heading: "Key risks",      count: "reasons to wait", color: "var(--qc-down, #B23A2F)" },
-          ].map(({ items, heading, count, color }) => (
-            <div
-              key={heading}
-              style={{
-                background: "var(--qc-card)",
-                border: "1px solid var(--qc-hair)",
-                borderRadius: 14,
-                padding: "14px 16px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <MonoEyebrow>{heading}</MonoEyebrow>
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: ".06em" }}>
-                  {items.length} {count}
-                </span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {items.map((h, i) => {
-                  const [tagRaw, ...rest] = h.split(":");
-                  const hasTag = rest.length > 0 && tagRaw.length < 20;
-                  const body = hasTag ? rest.join(":").trim() : h;
-                  const [first, ...more] = body.split(". ");
-                  return (
-                    <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                      <div
-                        style={{
-                          flexShrink: 0, marginTop: 5, width: 6, height: 6, borderRadius: 2,
-                          background: color,
-                        }}
-                      />
-                      <div>
-                        <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.4 }}>{first}</div>
-                        {more.length > 0 && (
-                          <div style={{ fontSize: 11.5, color: "var(--qc-ink-2)", marginTop: 2, lineHeight: 1.45 }}>{more.join(". ")}</div>
-                        )}
+        <div
+          style={{
+            background: "var(--qc-card)",
+            border: "1px solid var(--qc-hair)",
+            borderRadius: 14,
+            overflow: "hidden",
+          }}
+        >
+          {/* Top half: Key Highlights | Key Risks */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+            {[
+              { items: keyHighlights.slice(0, 3), heading: "Key highlights", count: "reasons to own", color: "var(--qc-up, #1F7A4A)" },
+              { items: keyRisks.slice(0, 3),      heading: "Key risks",      count: "reasons to wait", color: "var(--qc-down, #B23A2F)" },
+            ].map(({ items, heading, count, color }, idx) => (
+              <div
+                key={heading}
+                style={{
+                  padding: "14px 16px",
+                  borderRight: idx === 0 ? "1px solid var(--qc-hair)" : "none",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                  <MonoEyebrow>{heading}</MonoEyebrow>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: ".06em" }}>
+                    {items.length} {count}
+                  </span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {items.map((h, i) => {
+                    const [tagRaw, ...rest] = h.split(":");
+                    const hasTag = rest.length > 0 && tagRaw.length < 20;
+                    const body = hasTag ? rest.join(":").trim() : h;
+                    const [first, ...more] = body.split(". ");
+                    return (
+                      <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                        <div style={{ flexShrink: 0, marginTop: 5, width: 6, height: 6, borderRadius: 2, background: color }} />
+                        <div>
+                          <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.4 }}>{first}</div>
+                          {more.length > 0 && (
+                            <div style={{ fontSize: 11.5, color: "var(--qc-ink-2)", marginTop: 2, lineHeight: 1.45 }}>{more.join(". ")}</div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Horizontal divider */}
+          <div style={{ height: 1, background: "var(--qc-hair)" }} />
+
+          {/* Bottom half: If You Own | If You Don't Own */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+            {[actionOwn, actionDontOwn].map((act, idx) => (
+              <div
+                key={act.eyebrow}
+                style={{
+                  padding: "14px 16px",
+                  borderRight: idx === 0 ? "1px solid var(--qc-hair)" : "none",
+                }}
+              >
+                <MonoEyebrow style={{ marginBottom: 6 }}>{act.eyebrow}</MonoEyebrow>
+                <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 4, display: "flex", gap: 6 }}>
+                  <span style={{ color: verdictColor }}>→</span>
+                  {act.title}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.5 }}>{act.sub}</div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
-
-      {/* Action bar */}
-      <div
-        style={{
-          display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10,
-          background: "var(--qc-card)",
-          border: "1px solid var(--qc-hair)",
-          borderRadius: 14,
-          padding: "14px 16px",
-        }}
-      >
-        {[actionOwn, actionDontOwn].map((act) => (
-          <div key={act.eyebrow} style={{ borderRight: act === actionOwn ? "1px solid var(--qc-hair-2)" : "none", paddingRight: act === actionOwn ? 16 : 0 }}>
-            <MonoEyebrow style={{ marginBottom: 6 }}>{act.eyebrow}</MonoEyebrow>
-            <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 4, display: "flex", gap: 6 }}>
-              <span style={{ color: verdictColor }}>→</span>
-              {act.title}
-            </div>
-            <div style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.5 }}>{act.sub}</div>
-          </div>
-        ))}
-      </div>
 
     </SectionShell>
   );

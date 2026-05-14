@@ -77,7 +77,7 @@ function KpiCard({ label, value, unit, yoy, muted, sparkValues, metricKey, selec
       onClick={isClickable ? () => onSelect(selected ? null : metricKey) : undefined}
       style={{
         background: selected
-          ? "linear-gradient(180deg, #f8f6ee 0%, #FFEB99 100%)"
+          ? "linear-gradient(180deg, #fdfbf3 0%, #faefc4 100%)"
           : muted
           ? "var(--qc-section, #F2F1EC)"
           : "var(--qc-card)",

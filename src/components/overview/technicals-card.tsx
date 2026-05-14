@@ -2,6 +2,7 @@
 
 import type { TechnicalsResponse } from "@/types/technicals";
 import { SectionShell, SectionLabel, MonoEyebrow } from "./primitives";
+import { TooltipProvider, TooltipRoot, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 function humanize(val: string | null | undefined): string {
   if (!val) return "—";
@@ -43,90 +44,144 @@ function fp(val: number | null | undefined): string {
 
 // ─── Compact State Card ───────────────────────────────────────────────────────
 
+interface StateCardRow {
+  label: string;
+  value: string;
+  valueSentiment?: "up" | "down" | "neutral";
+  barPct?: number; // 0–100, renders a position-indicator bar when present
+}
+
 interface StateCardProps {
   label: string;
   verdict: string;
   verdictSentiment: "up" | "down" | "neutral";
-  rows: { label: string; value: string; valueSentiment?: "up" | "down" | "neutral" }[];
+  rows: StateCardRow[];
   description: string;
 }
 
 function StateCard({ label, verdict, verdictSentiment, rows, description }: StateCardProps) {
   return (
-    <div
-      style={{
-        background: "var(--qc-card)",
-        border: "1px solid var(--qc-hair)",
-        borderRadius: 12,
-        padding: "14px 16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-      }}
-    >
-      {/* Label + verdict pill */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-        <span
-          style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10,
-            letterSpacing: ".12em",
-            color: "var(--qc-ink-2)",
-            textTransform: "uppercase",
-          }}
-        >
-          {label}
-        </span>
-        <span
-          style={{
-            fontSize: 10,
-            fontWeight: 600,
-            padding: "3px 8px",
-            borderRadius: 4,
-            background: sentBg(verdictSentiment),
-            color: sentColor(verdictSentiment),
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-          }}
-        >
-          {verdict}
-        </span>
-      </div>
-
-      {/* Data rows */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        {rows.map((row, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>{row.label}</span>
-            <span
-              style={{
-                fontSize: 12,
-                fontWeight: 500,
-                color: row.valueSentiment
-                  ? sentColor(row.valueSentiment)
-                  : "var(--qc-ink)",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {row.value}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Separator + description */}
+    <TooltipProvider delayDuration={300}>
       <div
         style={{
-          borderTop: "1px solid var(--qc-hair-2)",
-          paddingTop: 8,
-          fontSize: 11,
-          color: "var(--qc-ink-2)",
-          lineHeight: 1.5,
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
+          borderRadius: 12,
+          padding: "14px 16px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
         }}
       >
-        {description}
+        {/* Label + verdict pill — both nowrap to prevent wrapping */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
+          <span
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10,
+              letterSpacing: ".12em",
+              color: "var(--qc-ink)",
+              textTransform: "uppercase",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              minWidth: 0,
+            }}
+          >
+            {label}
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              padding: "3px 8px",
+              borderRadius: 4,
+              background: sentBg(verdictSentiment),
+              color: sentColor(verdictSentiment),
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            {verdict}
+          </span>
+        </div>
+
+        {/* Data rows */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {rows.map((row, i) => (
+            <div key={i}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: row.barPct != null ? 5 : 0 }}>
+                <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>{row.label}</span>
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: row.valueSentiment ? sentColor(row.valueSentiment) : "var(--qc-ink)",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {row.value}
+                </span>
+              </div>
+              {row.barPct != null && (
+                <div style={{ position: "relative", height: 4, background: "var(--qc-chip, #F2F1EC)", borderRadius: 999 }}>
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      top: 0,
+                      height: "100%",
+                      width: `${row.barPct}%`,
+                      background: row.valueSentiment ? sentColor(row.valueSentiment) : sentColor(verdictSentiment),
+                      borderRadius: 999,
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: `clamp(4px, ${row.barPct}%, calc(100% - 4px))`,
+                      transform: "translate(-50%, -50%)",
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      background: "var(--qc-card)",
+                      border: `2px solid ${row.valueSentiment ? sentColor(row.valueSentiment) : sentColor(verdictSentiment)}`,
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Separator + description clamped to 2 lines with tooltip */}
+        <div style={{ borderTop: "1px solid var(--qc-hair-2)", paddingTop: 8 }}>
+          <TooltipRoot>
+            <TooltipTrigger asChild>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 11,
+                  color: "var(--qc-ink-2)",
+                  lineHeight: 1.5,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  cursor: "default",
+                }}
+              >
+                {description}
+              </p>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" style={{ maxWidth: 220 }}>
+              {description}
+            </TooltipContent>
+          </TooltipRoot>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
 
@@ -499,6 +554,14 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
   const rsDesc =
     `Lagging ${rsSentiment === "up" ? "ahead of" : "both"} broader index${rsVsSectorSignal ? ` and ${humanize(rsVsSectorSignal).toLowerCase()} vs sector` : ""} over 6 months.`;
 
+  const pos52w = Math.round(((cmp - low52w) / (high52w - low52w || 1)) * 100);
+  // ADX bar: 0–50 scale, cap at 100
+  const adxBarPct = Math.min(100, (adx / 50) * 100);
+  // RSI bar: 0–100 directly
+  const rsiBarPct = Math.min(100, Math.max(0, rsiValue));
+  // RS bar: signals → approximate pct (outperform ~75, underperform ~25, neutral ~50)
+  const rsBarPct = rsSentiment === "up" ? 75 : rsSentiment === "down" ? 20 : 50;
+
   const stateCards = [
     {
       label: "Structure",
@@ -507,7 +570,9 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
       rows: [
         {
           label: "52W Position",
-          value: `${Math.round(((cmp - low52w) / (high52w - low52w || 1)) * 100)}%`,
+          value: `Mid (${pos52w}%)`,
+          valueSentiment: pos52w > 66 ? "up" as const : pos52w < 33 ? "down" as const : "neutral" as const,
+          barPct: pos52w,
         },
         {
           label: "vs SMA 50",
@@ -527,7 +592,12 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
       verdict: humanize(trend.direction),
       verdictSentiment: trendSentiment,
       rows: [
-        { label: "ADX (14)", value: adxLabel },
+        {
+          label: "ADX (14)",
+          value: adxLabel,
+          valueSentiment: trendSentiment,
+          barPct: adxBarPct,
+        },
         {
           label: "+DI / −DI",
           value: diLabel ?? "—",
@@ -546,7 +616,12 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
       verdict: rsiZone.replace(/_/g, " "),
       verdictSentiment: "neutral" as const,
       rows: [
-        { label: "RSI (14)", value: `${rsiValue.toFixed(0)} — ${humanize(rsiZone)}` },
+        {
+          label: "RSI (14)",
+          value: `${rsiValue.toFixed(0)} — ${humanize(rsiZone)}`,
+          valueSentiment: "neutral" as const,
+          barPct: rsiBarPct,
+        },
         {
           label: "MACD",
           value: macdCross ? humanize(macdCross) : "—",
@@ -567,6 +642,7 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
             ? humanize(re.dominanceEngine.leadership.vsNifty.signal)
             : "—",
           valueSentiment: rsSentiment,
+          barPct: rsBarPct,
         },
         {
           label: "vs Nifty IT",
@@ -576,7 +652,7 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
           valueSentiment: signalSentiment(rsVsSectorSignal),
         },
         {
-          label: "RS Score",
+          label: "RS Rank",
           value: data.signals.components?.trend != null
             ? `${data.signals.components.trend} / 100`
             : data.signals.score != null ? `${data.signals.score} / 100` : "—",

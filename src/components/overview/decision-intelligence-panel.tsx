@@ -209,50 +209,48 @@ function AlertRow({
   text: string;
   sentiment: "positive" | "negative" | "neutral";
 }) {
-  const dot =
+  const color =
     sentiment === "positive"
       ? "var(--qc-up)"
       : sentiment === "negative"
       ? "var(--qc-down)"
       : "var(--qc-warn)";
 
+  const bg =
+    sentiment === "positive"
+      ? "var(--qc-up-soft)"
+      : sentiment === "negative"
+      ? "var(--qc-down-soft)"
+      : "var(--qc-warn-soft)";
+
   return (
     <div
       style={{
         display: "flex",
-        gap: 8,
-        alignItems: "baseline",
-        padding: "7px 0",
-        borderBottom: "1px solid var(--qc-hair-2)",
+        flexDirection: "column",
+        gap: 5,
+        padding: "9px 0",
       }}
     >
       <span
         style={{
-          width: 6,
-          height: 6,
-          borderRadius: "50%",
-          background: dot,
-          flexShrink: 0,
-          display: "inline-block",
-          position: "relative",
-          top: 1,
+          alignSelf: "flex-start",
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 8.5,
+          letterSpacing: ".12em",
+          textTransform: "uppercase",
+          color,
+          background: bg,
+          border: `1px solid ${color}30`,
+          borderRadius: 4,
+          padding: "2px 7px",
         }}
-      />
-      <div style={{ minWidth: 0 }}>
-        <span
-          style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9,
-            letterSpacing: ".1em",
-            textTransform: "uppercase",
-            color: dot,
-            marginRight: 6,
-          }}
-        >
-          {source}
-        </span>
-        <span style={{ fontSize: 11.5, color: "var(--qc-ink)", lineHeight: 1.5 }}>{text}</span>
-      </div>
+      >
+        {source}
+      </span>
+      <span style={{ fontSize: 11.5, color: "var(--qc-ink)", lineHeight: 1.5 }}>
+        {text}
+      </span>
     </div>
   );
 }
@@ -444,30 +442,31 @@ export function DecisionIntelligencePanel({
     return "neutral";
   }
 
-  // Key alerts from decisionIntelligence and ruleEngine
+  // Key alerts — simple source + one-line text
   const di = technicalsData?.decisionIntelligence;
   const reAlerts = re?.decisionContext?.alerts ?? [];
 
-  const alerts: { source: string; text: string; sentiment: "positive" | "negative" | "neutral" }[] = [];
+  type Alert = { source: string; text: string; sentiment: "positive" | "negative" | "neutral" };
+  const alerts: Alert[] = [];
 
   // MOD-level alerts
   if (dScore !== null && dScore < 50) {
     alerts.push({
-      source: "M.O.D.",
+      source: "QuantCase",
       text: dVerdict ? `Deal ${dVerdict.toLowerCase()} — entry attractiveness limited.` : "Deal score below threshold.",
       sentiment: "negative",
     });
   }
   if (oScore !== null && oScore < 60) {
     alerts.push({
-      source: "M.O.D.",
+      source: "QuantCase",
       text: oVerdict ? `Opportunity ${oVerdict.toLowerCase()} — growth revival depends on macro recovery.` : "Opportunity score is moderate.",
       sentiment: "neutral",
     });
   }
   if (mScore !== null && mScore >= 70) {
     alerts.push({
-      source: "M.O.D.",
+      source: "QuantCase",
       text: mVerdict ? `Management ${mVerdict.toLowerCase()} — guidance track record is solid.` : "Management quality is strong.",
       sentiment: "positive",
     });
@@ -475,17 +474,13 @@ export function DecisionIntelligencePanel({
 
   // Fundamental alert
   if (fin?.eps_cagr_3y != null && fin.eps_cagr_3y < 0) {
-    alerts.push({
-      source: "Fundamental",
-      text: "Revenue decelerating — below sector average, re-rating risk.",
-      sentiment: "negative",
-    });
+    alerts.push({ source: "Fundamental", text: "Revenue decelerating — below sector average, re-rating risk.", sentiment: "negative" });
   }
 
   // Technical alerts from rule engine
-  reAlerts.slice(0, 2).forEach((a) => {
+  reAlerts.forEach((a) => {
     const s = a.toLowerCase();
-    const sent: "positive" | "negative" | "neutral" =
+    const sent: Alert["sentiment"] =
       s.includes("caution") || s.includes("below") || s.includes("risk") || s.includes("negative")
         ? "negative"
         : s.includes("strong") || s.includes("above") || s.includes("positive")
@@ -495,23 +490,15 @@ export function DecisionIntelligencePanel({
   });
 
   // DI risk alerts
-  if (di?.riskAlerts) {
-    di.riskAlerts.slice(0, 1).forEach((a) => {
-      alerts.push({ source: "Macro", text: a, sentiment: "negative" });
-    });
+  if (di?.riskAlerts?.length) {
+    alerts.push({ source: "Macro", text: di.riskAlerts[0], sentiment: "negative" });
   }
 
-  // Fallback technical alert
+  // Fallback
   if (reAlerts.length === 0 && !di?.riskAlerts?.length) {
-    const trendSent = technicalsData?.trend?.direction
-      ? techSent(technicalsData.trend.direction)
-      : "neutral";
+    const trendSent = technicalsData?.trend?.direction ? techSent(technicalsData.trend.direction) : "neutral";
     if (trendSent === "negative") {
-      alerts.push({
-        source: "Technical",
-        text: "Price below key moving averages — caution until structure recovers.",
-        sentiment: "negative",
-      });
+      alerts.push({ source: "Technical", text: "Price below key moving averages — caution until structure recovers.", sentiment: "negative" });
     }
   }
 

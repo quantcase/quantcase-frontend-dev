@@ -3,6 +3,7 @@
 import { formatINR } from "@/lib/utils";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { ChartMetricKey } from "./valuation-chart-sidebar";
+import type { FundamentalsTrendPoint } from "@/types/screener";
 
 // ─── Inline sparkline ─────────────────────────────────────────────────────────
 
@@ -26,7 +27,7 @@ function Sparkline({ values }: { values: number[] }) {
             width={barW}
             height={barH}
             rx={1}
-            fill={i === values.length - 1 ? "var(--qc-ink)" : "var(--qc-hair)"}
+            fill={i === values.length - 1 ? "#64748B" : "#CBD5E1"}
           />
         );
       })}
@@ -76,7 +77,7 @@ function KpiCard({ label, value, unit, yoy, muted, sparkValues, metricKey, selec
       onClick={isClickable ? () => onSelect(selected ? null : metricKey) : undefined}
       style={{
         background: selected
-          ? "var(--qc-ink)"
+          ? "linear-gradient(180deg, #f8f6ee 0%, #FFEB99 100%)"
           : muted
           ? "var(--qc-section, #F2F1EC)"
           : "var(--qc-card)",
@@ -90,7 +91,7 @@ function KpiCard({ label, value, unit, yoy, muted, sparkValues, metricKey, selec
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <span style={{ fontSize: 11.5, color: selected ? "rgba(255,255,255,0.65)" : "var(--qc-ink)", letterSpacing: ".01em" }}>
+        <span style={{ fontSize: 11.5, color: "var(--qc-ink)", letterSpacing: ".01em" }}>
           {label}
         </span>
         <span
@@ -98,8 +99,8 @@ function KpiCard({ label, value, unit, yoy, muted, sparkValues, metricKey, selec
             fontFamily: "'IBM Plex Mono', monospace",
             fontSize: 10.5, padding: "2px 6px", borderRadius: 4,
             letterSpacing: ".02em", fontWeight: 500, lineHeight: 1.3,
-            background: selected ? "rgba(255,255,255,0.12)" : yoyBg,
-            color: selected ? "rgba(255,255,255,0.8)" : yoyColor,
+            background: yoyBg,
+            color: yoyColor,
             display: "inline-flex", alignItems: "center", gap: 3,
           }}
         >
@@ -112,9 +113,9 @@ function KpiCard({ label, value, unit, yoy, muted, sparkValues, metricKey, selec
           —
         </div>
       ) : (
-        <div style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-0.015em", color: selected ? "#fff" : "var(--qc-ink)", fontVariantNumeric: "tabular-nums", lineHeight: 1.1, marginTop: "auto" }}>
+        <div style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-0.015em", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums", lineHeight: 1.1, marginTop: "auto" }}>
           {value}
-          {unit && <span style={{ fontSize: 12, fontWeight: 400, color: selected ? "rgba(255,255,255,0.5)" : "var(--qc-ink-2)", marginLeft: 3, letterSpacing: 0 }}>{unit}</span>}
+          {unit && <span style={{ fontSize: 12, fontWeight: 400, color: "var(--qc-ink-2)", marginLeft: 3, letterSpacing: 0 }}>{unit}</span>}
         </div>
       )}
       {/* Sparkline */}
@@ -187,6 +188,7 @@ interface KpiGridProps {
   interestCoverageGrowth: number | null;
   showInterestCoverage?: boolean;
   trend: QuarterlyTrendPoint[];
+  fundamentalsTrend?: FundamentalsTrendPoint[] | null;
   selectedMetric: ChartMetricKey | null;
   onSelectMetric: (key: ChartMetricKey | null) => void;
   embedded?: boolean;
@@ -196,6 +198,10 @@ type DivYieldTrendPoint = { period: string; dividendYield: number | null };
 
 function divYieldSparkValues(divTrend: DivYieldTrendPoint[] | null | undefined): number[] {
   return (divTrend ?? []).map((d) => d.dividendYield).filter((v): v is number => v != null);
+}
+
+function ftSparkFor(ft: FundamentalsTrendPoint[] | null | undefined, key: keyof Omit<FundamentalsTrendPoint, "period">): number[] {
+  return (ft ?? []).map((d) => d[key]).filter((v): v is number => v != null);
 }
 
 export function KpiGrid({
@@ -210,6 +216,7 @@ export function KpiGrid({
   interestCoverage, interestCoverageGrowth,
   showInterestCoverage = true,
   trend,
+  fundamentalsTrend,
   selectedMetric,
   onSelectMetric,
   embedded = false,
@@ -217,6 +224,12 @@ export function KpiGrid({
   const resolvedCfo = operatingCashflow ?? (trend.find((d) => d.cfoProxy != null)?.cfoProxy ?? null);
 
   const showValuationRow = pegRatio !== undefined || evToEbitda !== undefined || pbRatio !== undefined || dividendYield !== undefined;
+
+  // Helper: prefer quarterly trend spark, fall back to fundamentalsTrend
+  function sparkWithFallback(sparkKey: SparkKey, ftKey: keyof Omit<FundamentalsTrendPoint, "period">): number[] {
+    const fromQ = sparkFor(trend, sparkKey);
+    return fromQ.length > 0 ? fromQ : ftSparkFor(fundamentalsTrend, ftKey);
+  }
 
   const cards: {
     label: string;
@@ -232,6 +245,7 @@ export function KpiGrid({
         label: "PEG (Growth-adj.)", value: pegRatio != null ? `${pegRatio.toFixed(1)}x` : "—",
         yoy: { text: "—", cls: "na" as const }, muted: pegRatio == null,
         metricKey: "pegRatio" as ChartMetricKey, sparkKey: "eps" as SparkKey,
+        customSparkValues: sparkWithFallback("eps", "eps"),
       },
       {
         label: "EV/EBITDA (Enterprise)", value: evToEbitda != null ? `${evToEbitda.toFixed(1)}x` : "—",
@@ -242,6 +256,7 @@ export function KpiGrid({
         label: "P/B (Book value)", value: pbRatio != null ? `${pbRatio.toFixed(1)}x` : "—",
         yoy: { text: "—", cls: "na" as const }, muted: pbRatio == null,
         metricKey: "pbRatio" as ChartMetricKey, sparkKey: "totalEquity" as SparkKey,
+        customSparkValues: sparkWithFallback("totalEquity", "pb"),
       },
       {
         label: "Dividend Yield (Trailing 12M)",
@@ -256,6 +271,7 @@ export function KpiGrid({
     {
       label: "Revenue", value: formatINR(revenue), yoy: yoyText(revenueGrowth),
       muted: false, metricKey: "revenue", sparkKey: "revenue",
+      customSparkValues: sparkWithFallback("revenue", "revenue"),
     },
     {
       label: ebitdaLabel, value: ebitda != null ? formatINR(ebitda) : "—", yoy: yoyText(ebitdaGrowth),
@@ -264,6 +280,7 @@ export function KpiGrid({
     {
       label: "Net Profit", value: netProfit != null ? formatINR(netProfit) : "—", yoy: yoyText(netProfitGrowth),
       muted: netProfit == null, metricKey: "netIncome", sparkKey: "netIncome",
+      customSparkValues: sparkWithFallback("netIncome", "netProfit"),
     },
     {
       label: "CFO", value: resolvedCfo != null ? formatINR(resolvedCfo) : "—", yoy: yoyText(cfoGrowth),

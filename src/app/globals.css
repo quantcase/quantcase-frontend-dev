@@ -329,8 +329,8 @@
 
 /* ── Golden card ────────────────────────────────────────────────── */
 .qc-golden-card {
-  background: linear-gradient(175deg, var(--qc-golden-grad-from) 0%, var(--qc-golden-grad-to) 100%);
-  border: 1px solid var(--qc-hair);
+  background: linear-gradient(180deg, var(--qc-golden-grad-from) 0%, var(--qc-golden-grad-to) 100%);
+  border: 1px solid rgba(200,170,60,0.25);
 }
 
 /* ── Dark gradient card ─────────────────────────────────────────── */

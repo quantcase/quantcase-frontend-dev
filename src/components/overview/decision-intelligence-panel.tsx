@@ -536,167 +536,172 @@ export function DecisionIntelligencePanel({
         <MonoEyebrow>Decision Intelligence</MonoEyebrow>
       </div>
 
-      {/* Rating + Conviction */}
+      {/* Overall Rating card — prominent */}
       <div
         style={{
           background: "var(--qc-card)",
-          border: "1px solid var(--qc-hair)",
-          borderRadius: 10,
-          padding: "10px 12px",
+          border: `1.5px solid ${ratingColor}40`,
+          borderRadius: 12,
+          padding: "14px 14px 12px",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 8,
+          flexDirection: "column",
+          gap: 10,
         }}
       >
-        <div>
-          <MonoEyebrow style={{ marginBottom: 4 }}>Overall Rating</MonoEyebrow>
-          <span
-            style={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: ratingColor,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            {rating ?? "—"}
-          </span>
-        </div>
-        {/* Composite score */}
-        {mScore !== null && oScore !== null && dScore !== null && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              padding: "4px 10px",
-              background: scoreBg(Math.round((mScore + oScore + dScore) / 3)),
-              borderRadius: 999,
-              border: `1px solid ${scoreColor(Math.round((mScore + oScore + dScore) / 3))}30`,
-            }}
-          >
+        {/* Top row: label + composite score */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div>
+            <MonoEyebrow style={{ marginBottom: 5 }}>Overall Rating</MonoEyebrow>
             <span
               style={{
-                fontSize: 15,
+                fontSize: 24,
                 fontWeight: 700,
-                color: scoreColor(Math.round((mScore + oScore + dScore) / 3)),
+                color: ratingColor,
+                letterSpacing: "-0.02em",
+                lineHeight: 1,
               }}
             >
-              {Math.round((mScore + oScore + dScore) / 3)}
+              {rating ?? "—"}
             </span>
-            <span
+          </div>
+          {mScore !== null && oScore !== null && dScore !== null && (
+            <div
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 9,
-                color: "var(--qc-ink-2)",
-                letterSpacing: ".1em",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "6px 12px",
+                background: scoreBg(Math.round((mScore + oScore + dScore) / 3)),
+                borderRadius: 999,
+                border: `1px solid ${scoreColor(Math.round((mScore + oScore + dScore) / 3))}30`,
               }}
             >
-              / 100
-            </span>
+              <span
+                style={{
+                  fontSize: 17,
+                  fontWeight: 700,
+                  color: scoreColor(Math.round((mScore + oScore + dScore) / 3)),
+                }}
+              >
+                {Math.round((mScore + oScore + dScore) / 3)}
+              </span>
+              <span
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 9,
+                  color: "var(--qc-ink-2)",
+                  letterSpacing: ".1em",
+                }}
+              >
+                / 100
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Investor style tags inside the card */}
+        {di && (di.tag || di.idealFor) && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            {di.tag && (
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  padding: "3px 9px",
+                  borderRadius: 999,
+                  background: "var(--qc-chip)",
+                  color: "var(--qc-ink)",
+                  border: "1px solid var(--qc-hair)",
+                }}
+              >
+                {di.tag}
+              </span>
+            )}
+            {di.idealFor && (
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  padding: "3px 9px",
+                  borderRadius: 999,
+                  background: "var(--qc-chip)",
+                  color: "var(--qc-ink-2)",
+                  border: "1px solid var(--qc-hair)",
+                }}
+              >
+                {di.idealFor}
+              </span>
+            )}
           </div>
         )}
       </div>
 
-      {/* Investor style tags */}
-      {di && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-          {[di.tag, di.lens ?? di.idealFor].filter(Boolean).map((t) => (
-            <span
-              key={t}
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                padding: "3px 9px",
-                borderRadius: 999,
-                background: "var(--qc-chip)",
-                color: "var(--qc-ink)",
-                border: "1px solid var(--qc-hair)",
-              }}
-            >
-              {t}
-            </span>
-          ))}
-          {rating && (
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                padding: "3px 9px",
-                borderRadius: 999,
-                background: ratingColor + "18",
-                color: ratingColor,
-                border: `1px solid ${ratingColor}30`,
-              }}
-            >
-              {rating}
-            </span>
-          )}
-          {di.idealFor && di.idealFor !== di.lens && (
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                padding: "3px 9px",
-                borderRadius: 999,
-                background: "var(--qc-chip)",
-                color: "var(--qc-ink-2)",
-                border: "1px solid var(--qc-hair)",
-              }}
-            >
-              {di.idealFor}
-            </span>
-          )}
+      {/* QuantCase Framework + Fundamentals + Technicals — shared white card */}
+      <div
+        style={{
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
+          borderRadius: 12,
+          padding: "12px 12px 10px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
+      >
+        {/* QuantCase Framework */}
+        <div>
+          <MonoEyebrow style={{ marginBottom: 6 }}>QuantCase Framework</MonoEyebrow>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
+            <LinkableCompactCard
+              label="Management"
+              value={mVerdict ? humanize(mVerdict) : "—"}
+              sentiment={mScore !== null ? (mScore >= 70 ? "positive" : mScore >= 50 ? "neutral" : "negative") : "neutral"}
+              href={`/screener/management?symbol=${encodeURIComponent(symbol)}`}
+            />
+            <LinkableCompactCard
+              label="Opportunity"
+              value={oVerdict ? humanize(oVerdict) : "—"}
+              sentiment={oScore !== null ? (oScore >= 70 ? "positive" : oScore >= 50 ? "neutral" : "negative") : "neutral"}
+              href={`/screener/opportunity?symbol=${encodeURIComponent(symbol)}`}
+            />
+            <LinkableCompactCard
+              label="Deal"
+              value={dVerdict ? humanize(dVerdict) : "—"}
+              sentiment={dScore !== null ? (dScore >= 70 ? "positive" : dScore >= 50 ? "neutral" : "negative") : "neutral"}
+              href={`/screener/deal?symbol=${encodeURIComponent(symbol)}`}
+            />
+          </div>
         </div>
-      )}
 
-      {/* QuantCase Framework */}
-      <div>
-        <MonoEyebrow style={{ marginBottom: 6 }}>QuantCase Framework</MonoEyebrow>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
-          <LinkableCompactCard
-            label="Management"
-            value={mVerdict ?? "—"}
-            sentiment={mScore !== null ? (mScore >= 70 ? "positive" : mScore >= 50 ? "neutral" : "negative") : "neutral"}
-            href={`/screener/management?symbol=${encodeURIComponent(symbol)}`}
-          />
-          <LinkableCompactCard
-            label="Opportunity"
-            value={oVerdict ?? "—"}
-            sentiment={oScore !== null ? (oScore >= 70 ? "positive" : oScore >= 50 ? "neutral" : "negative") : "neutral"}
-            href={`/screener/opportunity?symbol=${encodeURIComponent(symbol)}`}
-          />
-          <LinkableCompactCard
-            label="Deal"
-            value={dVerdict ?? "—"}
-            sentiment={dScore !== null ? (dScore >= 70 ? "positive" : dScore >= 50 ? "neutral" : "negative") : "neutral"}
-            href={`/screener/deal?symbol=${encodeURIComponent(symbol)}`}
-          />
+        {/* Divider */}
+        <div style={{ height: 1, background: "var(--qc-hair)" }} />
+
+        {/* Fundamentals */}
+        <div>
+          <MonoEyebrow style={{ marginBottom: 6 }}>Fundamentals</MonoEyebrow>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
+            {fundamentalChips.map(({ label, value, sentiment = "neutral" }) => (
+              <CompactCard key={label} label={label} value={value} sentiment={sentiment} />
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Fundamentals */}
-      <div>
-        <MonoEyebrow style={{ marginBottom: 6 }}>Fundamentals</MonoEyebrow>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
-          {fundamentalChips.map(({ label, value, sentiment = "neutral" }) => (
-            <CompactCard key={label} label={label} value={value} sentiment={sentiment} />
-          ))}
-        </div>
-      </div>
+        {/* Divider */}
+        <div style={{ height: 1, background: "var(--qc-hair)" }} />
 
-      {/* Technicals */}
-      <div>
-        <MonoEyebrow style={{ marginBottom: 6 }}>Technicals</MonoEyebrow>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 5 }}>
-          <CompactCard label="Structure" value={structureZone} sentiment={techSent(structureZone)} />
-          <CompactCard label="Trend" value={trendDir} sentiment={techSent(trendDir)} />
-          <CompactCard
-            label="Timing"
-            value={`RSI ${technicalsData?.momentum?.rsi?.value != null ? Math.round(technicalsData.momentum.rsi.value) : "—"}`}
-            sentiment="neutral"
-          />
-          <CompactCard label="Rel. Str." value={rsNifty} sentiment={techSent(rsNifty)} />
+        {/* Technicals */}
+        <div>
+          <MonoEyebrow style={{ marginBottom: 6 }}>Technicals</MonoEyebrow>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 5 }}>
+            <CompactCard label="Structure" value={structureZone} sentiment={techSent(structureZone)} />
+            <CompactCard label="Trend" value={trendDir} sentiment={techSent(trendDir)} />
+            <CompactCard
+              label="Timing"
+              value={`RSI ${technicalsData?.momentum?.rsi?.value != null ? Math.round(technicalsData.momentum.rsi.value) : "—"}`}
+              sentiment="neutral"
+            />
+            <CompactCard label="Rel. Str." value={rsNifty} sentiment={techSent(rsNifty)} />
+          </div>
         </div>
       </div>
 

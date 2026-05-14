@@ -263,6 +263,8 @@ function PriceLevelsBar({
         border: "1px solid var(--qc-hair)",
         borderRadius: 12,
         padding: "16px 20px 12px",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       {/* Header */}
@@ -277,7 +279,7 @@ function PriceLevelsBar({
       </div>
 
       {/* SVG chart — PAD keeps dots/labels inset so edges never clip */}
-      <div style={{ width: "100%" }}>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
         {(() => {
           const PAD = 40; // horizontal padding in SVG units on each side
           const W = 1000;
@@ -289,7 +291,7 @@ function PriceLevelsBar({
             <svg
               width="100%"
               viewBox={`0 0 ${W} ${totalHeight}`}
-              style={{ display: "block" }}
+              style={{ display: "block", margin: "0 auto" }}
               preserveAspectRatio="xMidYMid meet"
             >
               <defs>

@@ -23,17 +23,55 @@ function StatCell({ label, value, sublabel, sublabelColor = "muted", isRange, ra
   const isDeltaChip = sublabelColor === "up" || sublabelColor === "down";
 
   return (
-    <div className="stat relative min-w-0 flex flex-col justify-between px-5 py-4">
-      {/* Vertical divider via CSS pseudo — simulated with border-left on non-first */}
-      <div
-        className="stat-k mb-2.5 flex items-center gap-1.5"
-        style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em", color: "var(--qc-ink-2)", textTransform: "uppercase" }}
-      >
-        {label}
+    <div className="stat relative min-w-0 flex flex-col gap-1.5 px-5 py-3.5">
+      {/* Top row: label + sublabel/status chip */}
+      <div className="flex items-center justify-between gap-2">
+        <div
+          className="stat-k flex items-center gap-1.5"
+          style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em", color: "var(--qc-ink-2)", textTransform: "uppercase" }}
+        >
+          {label}
+        </div>
+        {sublabel && (
+          isDeltaChip ? (
+            <div
+              style={{
+                ...sublabelStyle,
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10,
+                fontWeight: 500,
+                padding: "2px 6px",
+                borderRadius: 5,
+                letterSpacing: "0.02em",
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {sublabel}
+            </div>
+          ) : (
+            <div
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10,
+                color: "var(--qc-ink-2)",
+                letterSpacing: "0.04em",
+                whiteSpace: "nowrap",
+                background: "var(--qc-chip, #F2F1EC)",
+                border: "1px solid var(--qc-hair)",
+                padding: "2px 6px",
+                borderRadius: 5,
+                lineHeight: 1,
+              }}
+            >
+              {sublabel}
+            </div>
+          )
+        )}
       </div>
 
+      {/* Bottom row: value (+ range bar for 52W) */}
       {isRange ? (
-        /* 52W range layout */
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-[13px] font-medium" style={{ letterSpacing: "-0.005em", color: "var(--qc-ink)" }}>
             {value}
@@ -55,47 +93,14 @@ function StatCell({ label, value, sublabel, sublabelColor = "muted", isRange, ra
               />
             </div>
           )}
-          {sublabel && (
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11.5, color: "var(--qc-ink-2)", letterSpacing: "0.04em" }}>
-              {sublabel}
-            </div>
-          )}
         </div>
       ) : (
-        <>
-          <div
-            className="stat-v flex items-baseline gap-2 leading-none whitespace-nowrap"
-            style={{ fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}
-          >
-            {value}
-          </div>
-          {sublabel && (
-            isDeltaChip ? (
-              <div
-                className="mt-2 inline-flex items-center self-start rounded"
-                style={{
-                  ...sublabelStyle,
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 11,
-                  fontWeight: 500,
-                  padding: "3px 7px",
-                  borderRadius: 6,
-                  letterSpacing: "0.02em",
-                  lineHeight: 1,
-                }}
-              >
-                {sublabel}
-              </div>
-            ) : (
-              <div
-                className="mt-2"
-                style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11.5, color: "var(--qc-ink-2)", letterSpacing: "0.04em" }}
-              >
-                {sublabel}
-              </div>
-            )
-          )}
-        </>
+        <div
+          className="stat-v flex items-baseline gap-2 leading-none whitespace-nowrap"
+          style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}
+        >
+          {value}
+        </div>
       )}
     </div>
   );
@@ -109,8 +114,6 @@ export function KeyRatioTiles({ data }: Props) {
   const qt = data.quote;
   const ps = data.perShare;
   const fin = data.financials;
-  const ks = data.keyStats;
-
   // CMP
   const priceDisplay = qt.price != null ? formatPrice(qt.price, 0) : "—";
   const priceChange = qt.changePercent;

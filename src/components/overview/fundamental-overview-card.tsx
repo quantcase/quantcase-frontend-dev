@@ -31,11 +31,12 @@ const METRIC_LABELS: Record<ChartMetricKey, string> = {
   pegRatio: "PEG",
   evToEbitda: "EV/EBITDA",
   pbRatio: "P/B",
+  pe: "P/E",
 };
 
 function formatForMetric(key: ChartMetricKey, v: number): string {
   if (key === "eps" || key === "pegRatio") return `₹${v.toFixed(2)}`;
-  if (key === "interestCoverage" || key === "evToEbitda" || key === "pbRatio") return `${v.toFixed(1)}x`;
+  if (key === "interestCoverage" || key === "evToEbitda" || key === "pbRatio" || key === "pe") return `${v.toFixed(1)}x`;
   if (key === "dividendYield") return `${v.toFixed(2)}%`;
   return formatINR(v);
 }
@@ -113,6 +114,7 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
   ];
 
   const trend = fp.quarterlyTrend ?? [];
+  const fundamentalsTrend = fp.fundamentalsTrend ?? null;
 
   return (
     <SectionShell>
@@ -153,6 +155,7 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
               interestCoverageGrowth={eff.interestCoverageGrowth ?? null}
               showInterestCoverage={fp.quarterlyTrendMeta?.showInterestCoverage ?? !data.company.isBfsi}
               trend={trend}
+              fundamentalsTrend={fundamentalsTrend}
               selectedMetric={selectedMetric}
               onSelectMetric={setSelectedMetric}
             />
@@ -161,6 +164,7 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
         <ValuationChartSidebar
           trend={trend}
           dividendYieldTrend={fp.dividendYieldTrend ?? null}
+          fundamentalsTrend={fundamentalsTrend}
           selectedMetric={selectedMetric}
           selectedLabel={selectedMetric ? METRIC_LABELS[selectedMetric] : null}
           formatValue={selectedMetric ? (v) => formatForMetric(selectedMetric, v) : () => ""}

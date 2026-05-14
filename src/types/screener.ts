@@ -110,6 +110,16 @@ interface QuarterlyTrend {
   interestCoverage: number | null;
 }
 
+export interface FundamentalsTrendPoint {
+  period: string;
+  eps: number | null;
+  pe: number | null;
+  pb: number | null;
+  bookValue: number | null;
+  revenue: number | null;
+  netProfit: number | null;
+}
+
 export interface ScreenerData {
   symbol: string;
   ticker: string;
@@ -171,6 +181,7 @@ export interface ScreenerData {
     reserves: number | null;
     reservesGrowth: number | null;
     dividendYieldTrend: { period: string; dividendYield: number | null }[] | null;
+    fundamentalsTrend: FundamentalsTrendPoint[] | null;
     quarterlyTrendMeta: {
       ebitdaLabel: "EBITDA" | "Op. Profit";
       showInterestCoverage: boolean;

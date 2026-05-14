@@ -99,11 +99,15 @@ interface QuarterlyTrend {
   period: string;
   revenue: number | null;
   ebitda: number | null;
+  ebitdaLabel: string | null;
   netIncome: number | null;
   eps: number | null;
   cfo: number | null;
+  cfoProxy: number | null;
+  cfoLabel: string | null;
   totalDebt: number | null;
   totalEquity: number | null;
+  interestCoverage: number | null;
 }
 
 export interface ScreenerData {
@@ -126,6 +130,7 @@ export interface ScreenerData {
     listingDate?: string | null;
     ownershipGroup?: string | null;
     mainProduct?: string | null;
+    isBfsi?: boolean;
   };
   quote: {
     price: number;
@@ -165,6 +170,13 @@ export interface ScreenerData {
     fcfGrowth: number | null;
     reserves: number | null;
     reservesGrowth: number | null;
+    dividendYieldTrend: { period: string; dividendYield: number | null }[] | null;
+    quarterlyTrendMeta: {
+      ebitdaLabel: "EBITDA" | "Op. Profit";
+      showInterestCoverage: boolean;
+      cfoIsEstimated: boolean;
+      cfoTooltip: string;
+    } | null;
     quarterlyTrend: QuarterlyTrend[];
   };
   valuation: {
@@ -188,6 +200,8 @@ export interface ScreenerData {
     totalCash: number;
     totalDebt: number;
     totalCashPerShare: number;
+    interestCoverage: number | null;
+    interestCoverageGrowth: number | null;
   };
   ratios: {
     roce: number | null;

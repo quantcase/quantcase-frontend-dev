@@ -51,6 +51,7 @@ interface KpiCardProps {
   metricKey: ChartMetricKey | null;
   selected: boolean;
   onSelect: (key: ChartMetricKey | null) => void;
+  formatValue?: (v: number) => string;
 }
 
 function KpiCard({ label, value, unit, yoy, muted, sparkValues, metricKey, selected, onSelect }: KpiCardProps) {
@@ -140,24 +141,38 @@ interface QuarterlyTrendPoint {
   period: string;
   revenue: number | null;
   ebitda: number | null;
+  ebitdaLabel: string | null;
   netIncome: number | null;
   eps: number | null;
   cfo: number | null;
+  cfoProxy: number | null;
+  cfoLabel: string | null;
   totalDebt: number | null;
   totalEquity: number | null;
+  interestCoverage: number | null;
 }
 
 type SparkKey = keyof Omit<QuarterlyTrendPoint, "period">;
 
 function sparkFor(trend: QuarterlyTrendPoint[], key: SparkKey): number[] {
-  return trend.map((d) => d[key]).filter((v): v is number => v != null);
+  return trend
+    .map((d) => key === "cfo" ? (d.cfo ?? d.cfoProxy) : d[key])
+    .filter((v): v is number => v != null);
 }
 
 interface KpiGridProps {
+  // Valuation metrics (top row)
+  pegRatio?: number | null;
+  evToEbitda?: number | null;
+  pbRatio?: number | null;
+  dividendYield?: number | null;
+  dividendYieldTrend?: { period: string; dividendYield: number | null }[] | null;
+  // Financial metrics
   revenue: number | null;
   revenueGrowth: number | null | undefined;
   ebitda: number | null;
   ebitdaGrowth: number | null | undefined;
+  ebitdaLabel?: string;
   netProfit: number | null;
   netProfitGrowth: number | null | undefined;
   operatingCashflow: number | null;
@@ -168,23 +183,41 @@ interface KpiGridProps {
   reservesGrowth: number | null | undefined;
   totalDebt: number | null;
   debtGrowth: number | null | undefined;
+  interestCoverage: number | null;
+  interestCoverageGrowth: number | null;
+  showInterestCoverage?: boolean;
   trend: QuarterlyTrendPoint[];
   selectedMetric: ChartMetricKey | null;
   onSelectMetric: (key: ChartMetricKey | null) => void;
+  embedded?: boolean;
+}
+
+type DivYieldTrendPoint = { period: string; dividendYield: number | null };
+
+function divYieldSparkValues(divTrend: DivYieldTrendPoint[] | null | undefined): number[] {
+  return (divTrend ?? []).map((d) => d.dividendYield).filter((v): v is number => v != null);
 }
 
 export function KpiGrid({
+  pegRatio, evToEbitda, pbRatio, dividendYield, dividendYieldTrend,
   revenue, revenueGrowth,
-  ebitda, ebitdaGrowth,
+  ebitda, ebitdaGrowth, ebitdaLabel = "EBITDA",
   netProfit, netProfitGrowth,
   operatingCashflow, cfoGrowth,
   freeCashflow, fcfGrowth,
   reserves, reservesGrowth,
   totalDebt, debtGrowth,
+  interestCoverage, interestCoverageGrowth,
+  showInterestCoverage = true,
   trend,
   selectedMetric,
   onSelectMetric,
+  embedded = false,
 }: KpiGridProps) {
+  const resolvedCfo = operatingCashflow ?? (trend.find((d) => d.cfoProxy != null)?.cfoProxy ?? null);
+
+  const showValuationRow = pegRatio !== undefined || evToEbitda !== undefined || pbRatio !== undefined || dividendYield !== undefined;
+
   const cards: {
     label: string;
     value: string;
@@ -192,13 +225,40 @@ export function KpiGrid({
     muted: boolean;
     metricKey: ChartMetricKey | null;
     sparkKey: SparkKey | null;
+    customSparkValues?: number[];
   }[] = [
+    ...(showValuationRow ? [
+      {
+        label: "PEG (Growth-adj.)", value: pegRatio != null ? `${pegRatio.toFixed(1)}x` : "—",
+        yoy: { text: "—", cls: "na" as const }, muted: pegRatio == null,
+        metricKey: "pegRatio" as ChartMetricKey, sparkKey: "eps" as SparkKey,
+      },
+      {
+        label: "EV/EBITDA (Enterprise)", value: evToEbitda != null ? `${evToEbitda.toFixed(1)}x` : "—",
+        yoy: { text: "—", cls: "na" as const }, muted: evToEbitda == null,
+        metricKey: "evToEbitda" as ChartMetricKey, sparkKey: "ebitda" as SparkKey,
+      },
+      {
+        label: "P/B (Book value)", value: pbRatio != null ? `${pbRatio.toFixed(1)}x` : "—",
+        yoy: { text: "—", cls: "na" as const }, muted: pbRatio == null,
+        metricKey: "pbRatio" as ChartMetricKey, sparkKey: "totalEquity" as SparkKey,
+      },
+      {
+        label: "Dividend Yield (Trailing 12M)",
+        value: dividendYield != null && dividendYield > 0 ? `${dividendYield.toFixed(2)}%` : "—",
+        yoy: { text: "—", cls: "na" as const },
+        muted: dividendYield == null || dividendYield <= 0,
+        metricKey: "dividendYield" as ChartMetricKey,
+        sparkKey: null,
+        customSparkValues: divYieldSparkValues(dividendYieldTrend),
+      },
+    ] : []),
     {
       label: "Revenue", value: formatINR(revenue), yoy: yoyText(revenueGrowth),
       muted: false, metricKey: "revenue", sparkKey: "revenue",
     },
     {
-      label: "EBITDA", value: ebitda != null ? formatINR(ebitda) : "—", yoy: yoyText(ebitdaGrowth),
+      label: ebitdaLabel, value: ebitda != null ? formatINR(ebitda) : "—", yoy: yoyText(ebitdaGrowth),
       muted: ebitda == null, metricKey: "ebitda", sparkKey: "ebitda",
     },
     {
@@ -206,8 +266,8 @@ export function KpiGrid({
       muted: netProfit == null, metricKey: "netIncome", sparkKey: "netIncome",
     },
     {
-      label: "CFO", value: operatingCashflow != null ? formatINR(operatingCashflow) : "—", yoy: yoyText(cfoGrowth),
-      muted: operatingCashflow == null, metricKey: "cfo", sparkKey: "cfo",
+      label: "CFO", value: resolvedCfo != null ? formatINR(resolvedCfo) : "—", yoy: yoyText(cfoGrowth),
+      muted: resolvedCfo == null, metricKey: "cfo", sparkKey: "cfo",
     },
     {
       label: "FCF", value: freeCashflow != null ? formatINR(freeCashflow) : "—", yoy: yoyText(fcfGrowth),
@@ -221,10 +281,14 @@ export function KpiGrid({
       label: "Debt", value: totalDebt != null ? formatINR(totalDebt) : "—", yoy: yoyText(debtGrowth, true),
       muted: totalDebt == null, metricKey: "totalDebt", sparkKey: "totalDebt",
     },
-    {
-      label: "Interest Coverage", value: "—", yoy: { text: "—", cls: "na" },
-      muted: true, metricKey: null, sparkKey: null,
-    },
+    ...(showInterestCoverage ? [{
+      label: "Interest Coverage",
+      value: interestCoverage != null ? `${interestCoverage.toFixed(1)}x` : "—",
+      yoy: yoyText(interestCoverageGrowth),
+      muted: interestCoverage == null,
+      metricKey: "interestCoverage" as ChartMetricKey,
+      sparkKey: "interestCoverage" as SparkKey,
+    }] : []),
   ];
 
   return (
@@ -234,20 +298,22 @@ export function KpiGrid({
         gridTemplateColumns: "repeat(4,1fr)",
         gap: 1,
         background: "var(--qc-hair)",
-        border: "1px solid var(--qc-hair)",
-        borderRadius: 14,
+        ...(embedded ? {} : {
+          border: "1px solid var(--qc-hair)",
+          borderRadius: 14,
+          marginBottom: 14,
+        }),
         overflow: "hidden",
-        marginBottom: 14,
       }}
     >
-      {cards.map(({ label, value, yoy, muted, metricKey, sparkKey }) => (
+      {cards.map(({ label, value, yoy, muted, metricKey, sparkKey, customSparkValues }) => (
         <KpiCard
           key={label}
           label={label}
           value={value}
           yoy={yoy}
           muted={muted}
-          sparkValues={sparkKey != null ? sparkFor(trend, sparkKey) : []}
+          sparkValues={customSparkValues ?? (sparkKey != null ? sparkFor(trend, sparkKey) : [])}
           metricKey={metricKey}
           selected={metricKey != null && selectedMetric === metricKey}
           onSelect={onSelectMetric}

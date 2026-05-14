@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ScreenerData } from "@/types/screener";
 import type { OverviewAnalysis } from "@/types/overview";
-import { SectionShell, SectionLabel, MonoEyebrow } from "./primitives";
+import { SectionShell, SectionLabel } from "./primitives";
 import { ValuationHeroSection } from "./fundamentals/valuation-hero-section";
 import { ValuationChartSidebar, type ChartMetricKey } from "./fundamentals/valuation-chart-sidebar";
 import { KpiGrid } from "./fundamentals/kpi-grid";
@@ -26,10 +26,17 @@ const METRIC_LABELS: Record<ChartMetricKey, string> = {
   cfo: "CFO",
   totalDebt: "Debt",
   totalEquity: "Equity",
+  interestCoverage: "Interest Coverage",
+  dividendYield: "Dividend Yield",
+  pegRatio: "PEG",
+  evToEbitda: "EV/EBITDA",
+  pbRatio: "P/B",
 };
 
 function formatForMetric(key: ChartMetricKey, v: number): string {
-  if (key === "eps") return `₹${v.toFixed(2)}`;
+  if (key === "eps" || key === "pegRatio") return `₹${v.toFixed(2)}`;
+  if (key === "interestCoverage" || key === "evToEbitda" || key === "pbRatio") return `${v.toFixed(1)}x`;
+  if (key === "dividendYield") return `${v.toFixed(2)}%`;
   return formatINR(v);
 }
 
@@ -118,44 +125,47 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
           industryPE={industryPE}
           verdictLabel={verdictLabel}
           benchmarkPct={benchmarkPct}
-          pegRatio={val.pegRatio}
-          evToEbitda={val.evToEbitda}
-          pbRatio={val.pbRatio}
-          dividendYield={perShare.dividendYield}
           narrative={narrative}
-          trend={trend}
-          selectedMetric={selectedMetric}
-          onSelectMetric={setSelectedMetric}
+          footer={
+            <KpiGrid
+              embedded
+              pegRatio={val.pegRatio}
+              evToEbitda={val.evToEbitda}
+              pbRatio={val.pbRatio}
+              dividendYield={perShare.dividendYield}
+              dividendYieldTrend={fp.dividendYieldTrend ?? null}
+              revenue={fp.revenue}
+              revenueGrowth={fp.revenueGrowth}
+              ebitda={fp.ebitda}
+              ebitdaGrowth={fp.ebitdaGrowth}
+              ebitdaLabel={fp.quarterlyTrendMeta?.ebitdaLabel ?? "EBITDA"}
+              netProfit={fp.netProfit}
+              netProfitGrowth={fp.netProfitGrowth}
+              operatingCashflow={fp.operatingCashflow}
+              cfoGrowth={fp.cfoGrowth}
+              freeCashflow={fp.freeCashflow}
+              fcfGrowth={fp.fcfGrowth}
+              reserves={fp.reserves}
+              reservesGrowth={fp.reservesGrowth}
+              totalDebt={eff.totalDebt}
+              debtGrowth={eff.debtGrowth}
+              interestCoverage={eff.interestCoverage ?? null}
+              interestCoverageGrowth={eff.interestCoverageGrowth ?? null}
+              showInterestCoverage={fp.quarterlyTrendMeta?.showInterestCoverage ?? !data.company.isBfsi}
+              trend={trend}
+              selectedMetric={selectedMetric}
+              onSelectMetric={setSelectedMetric}
+            />
+          }
         />
         <ValuationChartSidebar
           trend={trend}
+          dividendYieldTrend={fp.dividendYieldTrend ?? null}
           selectedMetric={selectedMetric}
           selectedLabel={selectedMetric ? METRIC_LABELS[selectedMetric] : null}
           formatValue={selectedMetric ? (v) => formatForMetric(selectedMetric, v) : () => ""}
         />
       </div>
-
-      <MonoEyebrow style={{ margin: "4px 0 10px" }}>Key Metrics · Latest fiscal</MonoEyebrow>
-
-      <KpiGrid
-        revenue={fp.revenue}
-        revenueGrowth={fp.revenueGrowth}
-        ebitda={fp.ebitda}
-        ebitdaGrowth={fp.ebitdaGrowth}
-        netProfit={fp.netProfit}
-        netProfitGrowth={fp.netProfitGrowth}
-        operatingCashflow={fp.operatingCashflow}
-        cfoGrowth={fp.cfoGrowth}
-        freeCashflow={fp.freeCashflow}
-        fcfGrowth={fp.fcfGrowth}
-        reserves={fp.reserves}
-        reservesGrowth={fp.reservesGrowth}
-        totalDebt={eff.totalDebt}
-        debtGrowth={eff.debtGrowth}
-        trend={trend}
-        selectedMetric={selectedMetric}
-        onSelectMetric={setSelectedMetric}
-      />
 
       <ReturnsLeveragePanel
         roce={roceVal}

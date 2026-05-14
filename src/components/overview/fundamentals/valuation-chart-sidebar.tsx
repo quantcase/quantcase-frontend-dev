@@ -7,11 +7,15 @@ interface QuarterlyTrendPoint {
   period: string;
   revenue: number | null;
   ebitda: number | null;
+  ebitdaLabel: string | null;
   netIncome: number | null;
   eps: number | null;
   cfo: number | null;
+  cfoProxy: number | null;
+  cfoLabel: string | null;
   totalDebt: number | null;
   totalEquity: number | null;
+  interestCoverage: number | null;
 }
 
 export type ChartMetricKey =
@@ -21,7 +25,12 @@ export type ChartMetricKey =
   | "eps"
   | "cfo"
   | "totalDebt"
-  | "totalEquity";
+  | "totalEquity"
+  | "interestCoverage"
+  | "dividendYield"
+  | "pegRatio"
+  | "evToEbitda"
+  | "pbRatio";
 
 function shortPeriod(p: string) {
   const qMatch = p.match(/(\d{4})[- _]?Q(\d)/i);
@@ -61,19 +70,35 @@ function CustomTooltip({ active, payload, label, format }: CustomTooltipProps) {
 
 interface Props {
   trend: QuarterlyTrendPoint[];
+  dividendYieldTrend?: { period: string; dividendYield: number | null }[] | null;
   selectedMetric: ChartMetricKey | null;
   selectedLabel: string | null;
   formatValue: (v: number) => string;
 }
 
-export function ValuationChartSidebar({ trend, selectedMetric, selectedLabel, formatValue }: Props) {
+const VALUATION_RATIO_TO_TREND_KEY: Partial<Record<ChartMetricKey, keyof Omit<QuarterlyTrendPoint, "period" | "ebitdaLabel" | "cfoLabel">>> = {
+  pegRatio: "eps",
+  evToEbitda: "ebitda",
+  pbRatio: "totalEquity",
+};
+
+export function ValuationChartSidebar({ trend, dividendYieldTrend, selectedMetric, selectedLabel, formatValue }: Props) {
   const chartData = selectedMetric
-    ? trend
-        .filter((d) => d[selectedMetric] != null)
-        .map((d) => ({
-          period: shortPeriod(d.period),
-          value: d[selectedMetric] as number,
-        }))
+    ? selectedMetric === "dividendYield"
+      ? (dividendYieldTrend ?? [])
+          .map((d) => ({ period: shortPeriod(d.period), value: d.dividendYield }))
+          .filter((d): d is { period: string; value: number } => d.value != null)
+      : trend
+          .map((d) => {
+            const trendKey = selectedMetric === "cfo"
+              ? null
+              : VALUATION_RATIO_TO_TREND_KEY[selectedMetric] ?? (selectedMetric as keyof Omit<QuarterlyTrendPoint, "period" | "ebitdaLabel" | "cfoLabel">);
+            const value = selectedMetric === "cfo"
+              ? (d.cfo ?? d.cfoProxy)
+              : d[trendKey!];
+            return { period: shortPeriod(d.period), value };
+          })
+          .filter((d): d is { period: string; value: number } => d.value != null)
     : [];
 
   const hasData = chartData.length > 0;

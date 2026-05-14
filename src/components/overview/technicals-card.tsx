@@ -411,13 +411,30 @@ function PriceLevelsBar({
   );
 }
 
+// Render **bold** inline markdown
+function InlineMd({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        p.startsWith("**") && p.endsWith("**") ? (
+          <strong key={i} style={{ color: "var(--qc-ink)", fontWeight: 600 }}>{p.slice(2, -2)}</strong>
+        ) : (
+          <span key={i}>{p}</span>
+        )
+      )}
+    </>
+  );
+}
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 interface Props {
   data: TechnicalsResponse;
+  overviewSummary?: string | null;
 }
 
-function buildTechnicalsCard({ data }: Props) {
+function buildTechnicalsCard({ data, overviewSummary }: Props) {
   const { supportResistance: sr, movingAverages: ma, price, trend, ruleEngine: re, momentum } = data;
 
   const cmp = price.cmp;
@@ -463,7 +480,7 @@ function buildTechnicalsCard({ data }: Props) {
   const trendSentiment = signalSentiment(trend.direction);
   const rsSentiment = signalSentiment(rsVsNiftySignal ?? data.signals.overall);
 
-  const summary = re?.decisionContext?.summary ?? data.insights[0] ?? "";
+  const summary = overviewSummary ?? re?.decisionContext?.summary ?? data.insights[0] ?? "";
 
   const structureDesc =
     `Price sits ${aboveSMA200 ? "above" : "below"} SMA 200${wyckoff ? ` in ${humanize(wyckoff)} phase` : ""}. ` +
@@ -613,7 +630,7 @@ function buildTechnicalsCard({ data }: Props) {
             >
               Technicals
             </span>
-            {summary}
+            {overviewSummary ? <InlineMd text={summary} /> : summary}
           </div>
         )}
 
@@ -639,10 +656,10 @@ function buildTechnicalsCard({ data }: Props) {
   };
 }
 
-export function TechnicalsCard({ data }: Props) {
-  return buildTechnicalsCard({ data }).card;
+export function TechnicalsCard({ data, overviewSummary }: Props) {
+  return buildTechnicalsCard({ data, overviewSummary }).card;
 }
 
-export function PriceLevelsSection({ data }: Props) {
-  return buildTechnicalsCard({ data }).priceLevels;
+export function PriceLevelsSection({ data, overviewSummary }: Props) {
+  return buildTechnicalsCard({ data, overviewSummary }).priceLevels;
 }

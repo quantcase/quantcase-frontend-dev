@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ScreenerData } from "@/types/screener";
+import type { OverviewAnalysis } from "@/types/overview";
 import { SectionShell, SectionLabel, MonoEyebrow } from "./primitives";
 import { ValuationHeroSection } from "./fundamentals/valuation-hero-section";
 import { ValuationChartSidebar, type ChartMetricKey } from "./fundamentals/valuation-chart-sidebar";
@@ -14,6 +15,7 @@ import { formatINR } from "@/lib/utils";
 interface Props {
   data: ScreenerData;
   symbol: string;
+  overviewData?: OverviewAnalysis | null;
 }
 
 const METRIC_LABELS: Record<ChartMetricKey, string> = {
@@ -31,7 +33,7 @@ function formatForMetric(key: ChartMetricKey, v: number): string {
   return formatINR(v);
 }
 
-export function FundamentalOverviewCard({ data, symbol }: Props) {
+export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
   const fp = data.financialPerformance;
   const val = data.valuation;
   const eff = data.efficiency;
@@ -66,7 +68,7 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
   const roceIsGood = roceVal != null && roceVal > 15;
   const deIsGood = deVal != null && deVal < 1;
 
-  const narrative = (() => {
+  const derivedNarrative = (() => {
     const parts: string[] = [];
     if (verdictLabel === "Undervalued") parts.push("Trading at a discount to the sector median.");
     else if (verdictLabel === "Overvalued") parts.push("Trading at a premium to the sector median.");
@@ -75,6 +77,11 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
     if (deIsGood) parts.push("Balance sheet leverage is modest.");
     return parts.join(" ");
   })();
+
+  // Use overview snapshot first sentence as fundamentals narrative when available
+  const narrative = overviewData?.snapshot
+    ? overviewData.snapshot.replace(/\*\*/g, "").split(".").slice(0, 2).join(".") + "."
+    : derivedNarrative;
 
   const getLatestById = (id: string): number | null => {
     if (!shareholdingData) return null;

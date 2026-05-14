@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { IMScoreCard } from "@/components/overview/im-score-card";
@@ -16,6 +16,9 @@ import { useDealAnalysis } from "@/hooks/useDealAnalysis";
 import { useTechnicals } from "@/hooks/useTechnicals";
 import { KeyRatioTiles } from "@/components/overview/key-ratio-tiles";
 import { CompanyProfileCard } from "@/components/overview/company-profile-card";
+import { ReanalyzeButton } from "@/components/management/reanalyze-button";
+import { OverviewAnalyzePrompt } from "@/components/overview/overview-analysis";
+import { useOverviewFetch, useOverviewTrigger } from "@/hooks/useOverviewAnalysis";
 
 const OVERVIEW_NAV = [
   { id: "section-about",                  label: "About" },
@@ -47,6 +50,18 @@ function OverviewContent() {
   const { data: dealInsight } = useDealAnalysis(firstCallId);
   const { data: technicalsData } = useTechnicals(symbol === "—" ? "" : symbol);
 
+  // Overview analysis
+  const { data: overviewData, loading: overviewLoading, refetch: refetchOverview } = useOverviewFetch(firstCallId);
+
+  const handleOverviewComplete = useCallback(() => {
+    refetchOverview();
+  }, [refetchOverview]);
+
+  const { isAnalyzing, analyzeError, jobStatus, progress, trigger } = useOverviewTrigger({
+    callId: firstCallId,
+    onComplete: handleOverviewComplete,
+  });
+
   const mScore = managementInsight?.score ?? null;
   const oScore = opportunityInsight?.score ?? null;
   const dScore = dealInsight?.score ?? null;
@@ -58,7 +73,21 @@ function OverviewContent() {
   const rating = partialCount > 0 ? getRating((partialSum / partialCount) / 100) : null;
 
   return (
-    <ScreenerPageShell navItems={OVERVIEW_NAV}>
+    <ScreenerPageShell
+      navItems={OVERVIEW_NAV}
+      headerRight={
+        overviewData ? (
+          <ReanalyzeButton
+            isAnalyzing={isAnalyzing}
+            aggregateStatus={jobStatus}
+            progress={progress}
+            analyzedAt={overviewData.analyzed_at ?? null}
+            analyzeError={analyzeError}
+            onClick={trigger}
+          />
+        ) : undefined
+      }
+    >
       <div className="pb-8 pt-6">
 
         {error && (
@@ -90,7 +119,7 @@ function OverviewContent() {
 
             {/* About */}
             <div id="section-about">
-              {data && <CompanyProfileCard data={data} />}
+              {data && <CompanyProfileCard data={data} overviewData={overviewData} />}
             </div>
 
             {/* QC Insight */}
@@ -99,12 +128,27 @@ function OverviewContent() {
                 management={managementInsight ?? null}
                 opportunity={opportunityInsight ?? null}
                 deal={dealInsight ?? null}
+                overviewData={overviewData}
               />
             </div>
 
+            {/* Overview Analysis — trigger prompt only; data flows into existing section components */}
+            {!overviewData && firstCallId && (
+              <div id="section-overview-analysis">
+                <OverviewAnalyzePrompt
+                  isAnalyzing={isAnalyzing}
+                  jobStatus={jobStatus}
+                  progress={progress}
+                  analyzeError={analyzeError}
+                  onAnalyze={trigger}
+                  callId={firstCallId}
+                />
+              </div>
+            )}
+
             {/* Technicals */}
             <div id="section-technicals">
-              {technicalsData && <TechnicalsCard data={technicalsData} />}
+              {technicalsData && <TechnicalsCard data={technicalsData} overviewSummary={overviewData?.technical_summary ?? null} />}
             </div>
 
           </div>
@@ -128,11 +172,11 @@ function OverviewContent() {
         <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "0 16px" }}>
 
           {/* Price Levels */}
-          {technicalsData && <PriceLevelsSection data={technicalsData} />}
+          {technicalsData && <PriceLevelsSection data={technicalsData} overviewSummary={overviewData?.technical_summary ?? null} />}
 
           {/* Fundamentals */}
           <div id="section-fundamentals">
-            {data && <FundamentalOverviewCard data={data} symbol={symbol} />}
+            {data && <FundamentalOverviewCard data={data} symbol={symbol} overviewData={overviewData} />}
           </div>
 
           {/* Investment Conclusion */}
@@ -143,6 +187,7 @@ function OverviewContent() {
               technicalsData={technicalsData ?? null}
               rating={rating}
               oppInsight={opportunityInsight ?? null}
+              overviewData={overviewData}
             />
           </div>
 

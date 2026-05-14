@@ -5,12 +5,30 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { InsightData } from "@/types/analysis";
+import type { OverviewAnalysis } from "@/types/overview";
 import { SectionShell } from "./primitives";
+
+// Render **bold** inline markdown
+function InlineMd({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        p.startsWith("**") && p.endsWith("**") ? (
+          <strong key={i} style={{ color: "var(--qc-ink)", fontWeight: 600 }}>{p.slice(2, -2)}</strong>
+        ) : (
+          <span key={i}>{p}</span>
+        )
+      )}
+    </>
+  );
+}
 
 interface IMScoreCardProps {
   management: InsightData | null;
   opportunity: InsightData | null;
   deal: InsightData | null;
+  overviewData?: OverviewAnalysis | null;
 }
 
 const PILLAR_META = [
@@ -189,11 +207,44 @@ function NarrativeBar({
   management,
   opportunity,
   deal,
+  overviewNarrative,
 }: {
   management: InsightData | null;
   opportunity: InsightData | null;
   deal: InsightData | null;
+  overviewNarrative?: string | null;
 }) {
+  if (overviewNarrative) {
+    return (
+      <div
+        style={{
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
+          borderRadius: 10,
+          padding: "12px 16px",
+          fontSize: 12.5,
+          lineHeight: 1.65,
+          color: "var(--qc-ink)",
+          marginBottom: 12,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 9,
+            letterSpacing: ".12em",
+            textTransform: "uppercase",
+            color: "var(--qc-ink-2)",
+            marginRight: 10,
+          }}
+        >
+          QC Insight
+        </span>
+        <InlineMd text={overviewNarrative} />
+      </div>
+    );
+  }
+
   const parts: { bold: string; rest: string }[] = [];
   if (management?.description) {
     const first = management.description.split(".")[0];
@@ -245,14 +296,27 @@ function NarrativeBar({
   );
 }
 
-export function IMScoreCard({ management, opportunity, deal }: IMScoreCardProps) {
+export function IMScoreCard({ management, opportunity, deal, overviewData }: IMScoreCardProps) {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") ?? "";
+
+  // Build QC Insight narrative from overview dimensions when available
+  const overviewNarrative = overviewData?.dimensions
+    ? (() => {
+        const parts: string[] = [];
+        const dims = overviewData.dimensions.filter(d => d.headline && d.score != null && d.score > 0);
+        for (const d of dims) {
+          const label = d.type.charAt(0).toUpperCase() + d.type.slice(1);
+          parts.push(`**${label}** — ${d.headline}`);
+        }
+        return parts.length > 0 ? parts.join("; ") + "." : null;
+      })()
+    : null;
 
   return (
     <div>
       <SectionShell>
-        <NarrativeBar management={management} opportunity={opportunity} deal={deal} />
+        <NarrativeBar management={management} opportunity={opportunity} deal={deal} overviewNarrative={overviewNarrative} />
         <div
           style={{
             display: "grid",

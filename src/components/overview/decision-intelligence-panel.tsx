@@ -534,24 +534,6 @@ export function DecisionIntelligencePanel({
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <MonoEyebrow>Decision Intelligence</MonoEyebrow>
-        {/* User initials badge placeholder */}
-        <div
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: "50%",
-            background: "var(--qc-chip)",
-            border: "1px solid var(--qc-hair)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 10,
-            fontWeight: 700,
-            color: "var(--qc-ink)",
-          }}
-        >
-          AJ
-        </div>
       </div>
 
       {/* Rating + Conviction */}

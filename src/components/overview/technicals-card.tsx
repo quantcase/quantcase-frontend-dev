@@ -602,36 +602,26 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
   return {
     card: (
       <SectionShell>
-        <SectionLabel>Technicals</SectionLabel>
-
-        {/* Narrative bar */}
-        {summary && (
-          <div
-            style={{
-              background: "var(--qc-card)",
-              border: "1px solid var(--qc-hair)",
-              borderRadius: 10,
-              padding: "12px 16px",
-              fontSize: 12.5,
-              lineHeight: 1.65,
-              color: "var(--qc-ink)",
-              marginBottom: 12,
-            }}
-          >
-            <span
+        {summary ? (
+          <div style={{ marginBottom: 14 }}>
+            <div
               style={{
                 fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 9,
+                fontSize: 11,
                 letterSpacing: ".12em",
                 textTransform: "uppercase",
-                color: "var(--qc-ink-2)",
-                marginRight: 10,
+                color: "var(--qc-ink)",
+                marginBottom: 8,
               }}
             >
               Technicals
-            </span>
-            {overviewSummary ? <InlineMd text={summary} /> : summary}
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>
+              {overviewSummary ? <InlineMd text={summary} /> : summary}
+            </p>
           </div>
+        ) : (
+          <SectionLabel>Technicals</SectionLabel>
         )}
 
         {/* 4-column state cards */}

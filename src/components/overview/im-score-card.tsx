@@ -216,31 +216,22 @@ function NarrativeBar({
 }) {
   if (overviewNarrative) {
     return (
-      <div
-        style={{
-          background: "var(--qc-card)",
-          border: "1px solid var(--qc-hair)",
-          borderRadius: 10,
-          padding: "12px 16px",
-          fontSize: 12.5,
-          lineHeight: 1.65,
-          color: "var(--qc-ink)",
-          marginBottom: 12,
-        }}
-      >
-        <span
+      <div style={{ marginBottom: 14 }}>
+        <div
           style={{
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9,
+            fontSize: 11,
             letterSpacing: ".12em",
             textTransform: "uppercase",
-            color: "var(--qc-ink-2)",
-            marginRight: 10,
+            color: "var(--qc-ink)",
+            marginBottom: 8,
           }}
         >
           QC Insight
-        </span>
-        <InlineMd text={overviewNarrative} />
+        </div>
+        <p style={{ margin: 0, fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>
+          <InlineMd text={overviewNarrative} />
+        </p>
       </div>
     );
   }
@@ -261,37 +252,28 @@ function NarrativeBar({
   if (parts.length === 0) return null;
 
   return (
-    <div
-      style={{
-        background: "var(--qc-card)",
-        border: "1px solid var(--qc-hair)",
-        borderRadius: 10,
-        padding: "12px 16px",
-        fontSize: 12.5,
-        lineHeight: 1.65,
-        color: "var(--qc-ink)",
-        marginBottom: 12,
-      }}
-    >
-      <span
+    <div style={{ marginBottom: 14 }}>
+      <div
         style={{
           fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 9,
+          fontSize: 11,
           letterSpacing: ".12em",
           textTransform: "uppercase",
-          color: "var(--qc-ink-2)",
-          marginRight: 10,
+          color: "var(--qc-ink)",
+          marginBottom: 8,
         }}
       >
         QC Insight
-      </span>
-      {parts.map((p, i) => (
-        <span key={i}>
-          <strong style={{ fontWeight: 600, color: "var(--qc-ink)" }}>{p.bold}</strong>
-          {p.rest}
-          {i < parts.length - 1 ? " " : ""}
-        </span>
-      ))}
+      </div>
+      <p style={{ margin: 0, fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>
+        {parts.map((p, i) => (
+          <span key={i}>
+            <strong style={{ fontWeight: 600, color: "var(--qc-ink)" }}>{p.bold}</strong>
+            {p.rest}
+            {i < parts.length - 1 ? " " : ""}
+          </span>
+        ))}
+      </p>
     </div>
   );
 }

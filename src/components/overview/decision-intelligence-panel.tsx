@@ -371,6 +371,19 @@ export function DecisionIntelligencePanel({
     fundamentalChips.push({ label: "Cash Co.", value: "—" });
   }
 
+  // ROCE
+  const roce = screenerData?.ratios?.roce ?? screenerData?.ratios?.roce3yAvg ?? null;
+  if (roce != null) {
+    const rocePct = roce * 100;
+    fundamentalChips.push({
+      label: "ROCE",
+      value: rocePct >= 15 ? "Excellent" : rocePct >= 10 ? "Adequate" : "Weak",
+      sentiment: rocePct >= 15 ? "positive" : rocePct >= 10 ? "neutral" : "negative",
+    });
+  } else {
+    fundamentalChips.push({ label: "ROCE", value: "—" });
+  }
+
   // Technicals rows
   const re = technicalsData?.ruleEngine;
   const structureZone = re?.structureEngine?.priceStructure?.zone

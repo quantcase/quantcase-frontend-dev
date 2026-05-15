@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { InsightData, InsightLens } from "@/types/analysis";
 import { DarkGradientCard, MonoLabel } from "@/components/ds";
+import { renderMd } from "@/lib/render-md";
 
 // ─── Color helpers ─────────────────────────────────────────────────────────────
 
@@ -58,13 +59,6 @@ function scoreLabel(type: string): string {
   return "M-SCORE";
 }
 
-function parseHeadline(headline: string) {
-  const match = headline.match(/^([\s\S]*?)\*([\s\S]*?)\*([\s\S]*)$/);
-  if (match) return { before: match[1], highlight: match[2], after: match[3] };
-  const semi = headline.indexOf(";");
-  if (semi !== -1) return { before: headline.slice(0, semi + 1), highlight: headline.slice(semi + 1).trim(), after: "" };
-  return { before: "", highlight: headline, after: "" };
-}
 
 function getTotalScore(lenses: InsightLens[]) {
   const totalScore = lenses.reduce((sum, l) => sum + l.score, 0);
@@ -416,7 +410,6 @@ interface InsightScorecardProps {
 export function InsightScorecard({ insight, verdictLabel, onLensClick }: InsightScorecardProps) {
   const [hoveredVertex, setHoveredVertex] = useState<number | null>(null);
 
-  const { before, highlight, after } = parseHeadline(insight.headline);
   const bandColor = verdictBandColor(insight.verdict_band ?? insight.verdict);
   const bandBg = verdictBandBg(insight.verdict_band ?? insight.verdict);
   const bandLabel = (insight.verdict_band || insight.verdict || "").toUpperCase();
@@ -460,14 +453,12 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
                 fontSize: 26, fontWeight: 400, lineHeight: 1.35, letterSpacing: "-0.01em",
                 margin: 0, color: "var(--qc-on-dark)", fontFamily: "var(--qc-font-serif, Georgia, serif)",
               }}>
-                {before && <span>{before} </span>}
-                {highlight && <em style={{ color: bandColor, fontStyle: "italic" }}>{highlight}</em>}
-                {after && <span> {after}</span>}
+                {renderMd(insight.headline)}
               </h2>
 
               {insight.description && (
                 <p style={{ marginTop: 14, fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.65, maxWidth: "90%" }}>
-                  {insight.description}
+                  {renderMd(insight.description)}
                 </p>
               )}
             </div>
@@ -543,14 +534,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
                 fontSize: 16, fontWeight: 400, lineHeight: 1.4, margin: 0,
                 color: "var(--qc-ink)", fontFamily: "var(--qc-font-serif, Georgia, serif)",
               }}>
-                {insight.subtitle && (
-                  <>
-                    {insight.subtitle.split(";")[0]}
-                    {insight.subtitle.includes(";") && (
-                      <>; <em style={{ color: bandColor, fontStyle: "italic" }}>{insight.subtitle.split(";")[1].trim()}</em></>
-                    )}
-                  </>
-                )}
+                {insight.subtitle && renderMd(insight.subtitle)}
               </h3>
 
               {insight.analyzed_at && (

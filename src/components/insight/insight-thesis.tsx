@@ -3,6 +3,7 @@
 import type { InsightData } from "@/types/analysis";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { AlertTriangle, FileText, CheckCircle2 } from "lucide-react";
+import { renderMd } from "@/lib/render-md";
 
 interface InsightThesisProps {
   insight: InsightData;
@@ -15,7 +16,7 @@ export function InsightThesis({ insight }: InsightThesisProps) {
 
         {/* Main thesis */}
         <div>
-          <p style={{ fontSize: 14, color: "var(--qc-ink-2)", lineHeight: 1.7 }}>{insight.thesis}</p>
+          <p style={{ fontSize: 14, color: "var(--qc-ink-2)", lineHeight: 1.7 }}>{renderMd(insight.thesis)}</p>
         </div>
 
         {/* Evidence */}
@@ -31,7 +32,7 @@ export function InsightThesis({ insight }: InsightThesisProps) {
               {insight.evidence.map((e, i) => (
                 <div key={i} className="flex items-start gap-2">
                   <CheckCircle2 size={13} className="mt-0.5 shrink-0" style={{ color: "var(--qc-up)" }} />
-                  <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>{e}</p>
+                  <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>{renderMd(e)}</p>
                 </div>
               ))}
             </div>
@@ -51,7 +52,7 @@ export function InsightThesis({ insight }: InsightThesisProps) {
               {insight.watch_outs.map((w, i) => (
                 <div key={i} className="flex items-start gap-2">
                   <AlertTriangle size={13} className="mt-0.5 shrink-0" style={{ color: "var(--qc-warn)" }} />
-                  <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>{w}</p>
+                  <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>{renderMd(w)}</p>
                 </div>
               ))}
             </div>

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import type { InsightLens } from "@/types/analysis";
+import { renderMd } from "@/lib/render-md";
 
 interface InsightLensesProps {
   lenses: InsightLens[];
@@ -128,7 +129,7 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
 
               {/* Description */}
               <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.6, margin: 0, flex: 1 }}>
-                {lens.description}
+                {renderMd(lens.description)}
               </p>
 
               {/* Hover expand icon — shown via CSS group-hover */}

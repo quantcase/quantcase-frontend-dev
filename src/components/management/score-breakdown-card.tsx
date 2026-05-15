@@ -62,8 +62,8 @@ function ArcGauge({ score, maxScore, color }: { score: number; maxScore: number;
           transform={`rotate(-90 ${cx} ${cy})`}
         />
       )}
-      {/* Label: "MQI" */}
-      <text x={cx} y={cy - 14} textAnchor="middle" fontSize={8} fontWeight={600} fill="var(--qc-ink-2)" letterSpacing="0.12em">MQI</text>
+      {/* Label: "M-Score" */}
+      <text x={cx} y={cy - 14} textAnchor="middle" fontSize={8} fontWeight={600} fill="var(--qc-ink-2)" letterSpacing="0.12em">M-Score</text>
       {/* Score */}
       <text x={cx} y={cy + 14} textAnchor="middle" fontSize={30} fontWeight={600} fill="var(--qc-ink)" fontFamily="inherit">{score}</text>
       {/* Max */}
@@ -86,7 +86,7 @@ export function ScoreBreakdownCard({ mqiScore, signals, action, rationale }: Sco
   const visibleSignals = signals.filter((s) => s.max_score > 0);
 
   return (
-    <CommonCard title="MQI Score" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <CommonCard title="M-Score" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flex: 1 }}>
         <div style={{ flexShrink: 0 }}>
           <ArcGauge score={mqiScore.total} maxScore={100} color={color} />

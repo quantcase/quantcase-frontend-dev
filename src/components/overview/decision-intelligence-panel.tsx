@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import type { InsightData } from "@/types/analysis";
 import type { TechnicalsResponse } from "@/types/technicals";
 import type { ScreenerData } from "@/types/screener";
+import type { OverviewAnalysis } from "@/types/overview";
 import { MonoEyebrow } from "./primitives";
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
   technicalsData: TechnicalsResponse | null;
   screenerData: ScreenerData | null;
   rating: string | null;
+  overviewData?: OverviewAnalysis | null;
   symbol?: string;
 }
 
@@ -255,58 +257,6 @@ function AlertRow({
   );
 }
 
-// ─── Conviction Bar ───────────────────────────────────────────────────────────
-
-function ConvictionBar({ level }: { level: "Low" | "Medium" | "High" }) {
-  const pct = level === "High" ? 100 : level === "Medium" ? 55 : 20;
-  const color =
-    level === "High"
-      ? "var(--qc-up)"
-      : level === "Medium"
-      ? "var(--qc-warn)"
-      : "var(--qc-down)";
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <MonoEyebrow>Conviction</MonoEyebrow>
-        <span style={{ fontSize: 12, fontWeight: 600, color }}>{level}</span>
-      </div>
-      <div
-        style={{
-          height: 5,
-          background: "var(--qc-chip, #F2F1EC)",
-          borderRadius: 999,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            height: "100%",
-            width: `${pct}%`,
-            background: color,
-            borderRadius: 999,
-          }}
-        />
-      </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          fontSize: 9,
-          color: "var(--qc-ink-2)",
-          fontFamily: "'IBM Plex Mono', monospace",
-          letterSpacing: ".08em",
-        }}
-      >
-        <span>Low</span>
-        <span>Medium</span>
-        <span>High</span>
-      </div>
-    </div>
-  );
-}
-
 // ─── Main Export ──────────────────────────────────────────────────────────────
 
 export function DecisionIntelligencePanel({
@@ -316,20 +266,18 @@ export function DecisionIntelligencePanel({
   technicalsData,
   screenerData,
   rating,
+  overviewData,
   symbol = "",
 }: Props) {
-  const rKey = ratingKey(rating);
+  // Prefer Investment Conclusion's action_bias as the authoritative verdict
+  const effectiveRating = overviewData?.action_bias ?? rating;
+  const rKey = ratingKey(effectiveRating);
   const ratingColor =
     rKey === "strong-buy" || rKey === "buy"
       ? "var(--qc-up)"
       : rKey === "sell" || rKey === "underperform"
       ? "var(--qc-down)"
       : "var(--qc-warn)";
-
-  // Conviction from opportunity analysis
-  const oppStatus = (opportunity as (InsightData & { overall_status?: string }) | null)?.overall_status;
-  const convictionLevel: "Low" | "Medium" | "High" =
-    oppStatus === "STRONG" ? "High" : oppStatus === "WEAK" ? "Low" : "Medium";
 
   // MOD scores
   const mScore = management?.score ?? null;
@@ -548,7 +496,7 @@ export function DecisionIntelligencePanel({
                 lineHeight: 1,
               }}
             >
-              {rating ?? "—"}
+              {effectiveRating ?? "—"}
             </span>
           </div>
           {mScore !== null && oScore !== null && dScore !== null && (
@@ -585,6 +533,25 @@ export function DecisionIntelligencePanel({
             </div>
           )}
         </div>
+
+        {/* Fundamental interest sub-row — shown when action_bias overrides MOD rating */}
+        {overviewData?.action_bias && rating && overviewData.action_bias.toLowerCase() !== rating.toLowerCase() && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "7px 10px",
+              background: `${scoreColor(Math.round(((mScore ?? 0) + (oScore ?? 0) + (dScore ?? 0)) / Math.max(1, [mScore, oScore, dScore].filter(s => s !== null).length)))}12`,
+              borderRadius: 8,
+              border: `1px solid ${scoreColor(Math.round(((mScore ?? 0) + (oScore ?? 0) + (dScore ?? 0)) / Math.max(1, [mScore, oScore, dScore].filter(s => s !== null).length)))}25`,
+            }}
+          >
+            <span style={{ fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.4 }}>
+              Quality strong; timing unfavorable now
+            </span>
+          </div>
+        )}
 
         {/* Investor style tags inside the card */}
         {di && (di.tag || di.idealFor) && (
@@ -692,36 +659,23 @@ export function DecisionIntelligencePanel({
         </div>
       </div>
 
-      {/* Conviction bar */}
-      <div
-        style={{
-          background: "var(--qc-card)",
-          border: "1px solid var(--qc-hair)",
-          borderRadius: 10,
-          padding: "10px 12px",
-        }}
-      >
-        <ConvictionBar level={convictionLevel} />
-      </div>
-
       {/* Key Alerts */}
       {displayAlerts.length > 0 && (
-        <div>
-          <MonoEyebrow style={{ marginBottom: 4 }}>Key Alerts</MonoEyebrow>
-          <div
-            style={{
-              background: "var(--qc-card)",
-              border: "1px solid var(--qc-hair)",
-              borderRadius: 10,
-              padding: "4px 12px",
-            }}
-          >
-            {displayAlerts.map((a, i) => (
-              <div key={i} style={{ borderBottom: i < displayAlerts.length - 1 ? "1px solid var(--qc-hair-2)" : "none" }}>
-                <AlertRow source={a.source} text={a.text} sentiment={a.sentiment} />
-              </div>
-            ))}
-          </div>
+        <div
+          style={{
+            background: "var(--qc-card)",
+            border: "1px solid var(--qc-hair)",
+            borderRadius: 10,
+            padding: "10px 12px 4px",
+          }}
+        >
+          <MonoEyebrow style={{ marginBottom: 8 }}>Key Alerts</MonoEyebrow>
+          <div style={{ height: 1, background: "var(--qc-hair)", marginBottom: 4 }} />
+          {displayAlerts.map((a, i) => (
+            <div key={i} style={{ borderBottom: i < displayAlerts.length - 1 ? "1px solid var(--qc-hair-2)" : "none" }}>
+              <AlertRow source={a.source} text={a.text} sentiment={a.sentiment} />
+            </div>
+          ))}
         </div>
       )}
     </div>

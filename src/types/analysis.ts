@@ -21,6 +21,7 @@ export interface InsightSignalMapItem {
   signal: string;
   category?: string;
   label?: string;
+  summary?: string;
   sentiment: "positive" | "negative" | "neutral";
 }
 

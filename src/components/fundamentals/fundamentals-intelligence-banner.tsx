@@ -1,25 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Brain, Info, AlertTriangle, Zap } from "lucide-react";
-import type { FundamentalsIntelligence, FundamentalsKeyMetric } from "@/types/financials";
+import { Brain, AlertTriangle, Zap } from "lucide-react";
+import type { FundamentalsIntelligence } from "@/types/financials";
+import { SignalTile } from "@/components/ds";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function signalSentiment(value: string): { color: string; bg: string; border: string } {
-  const v = value.toLowerCase();
-  if (["strong", "good", "positive", "low risk", "stable"].some((k) => v.includes(k)))
-    return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "rgba(31, 122, 74, 0.25)" };
-  if (["weak", "expensive", "high risk", "negative", "poor"].some((k) => v.includes(k)))
-    return { color: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "rgba(178, 58, 47, 0.25)" };
-  return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "rgba(180, 115, 26, 0.25)" };
-}
-
-function assessmentVars(assessment: FundamentalsKeyMetric["assessment"]) {
-  if (assessment === "Positive") return { color: "var(--qc-up)", bg: "var(--qc-up-soft)" };
-  if (assessment === "Negative") return { color: "var(--qc-down)", bg: "var(--qc-down-soft)" };
-  return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)" };
-}
 
 function convictionConfig(level: string) {
   const l = level.toLowerCase();
@@ -28,7 +13,6 @@ function convictionConfig(level: string) {
   return { color: "var(--qc-down)", barColor: "var(--qc-down)", width: "33%" };
 }
 
-// Maps signal keys to relevant keyMetricsSummary name substrings for tooltip lookup
 const SIGNAL_METRIC_HINTS: Record<string, string[]> = {
   growth: ["Revenue Growth", "Profit Growth"],
   valuation: ["P/E", "P/B"],
@@ -44,76 +28,6 @@ const SIGNAL_LABELS: Record<string, string> = {
   profitability: "Profitability",
   cashConversion: "Cash Conversion",
 };
-
-// ─── Signal Tile ──────────────────────────────────────────────────────────────
-
-function SignalTile({
-  signalKey,
-  label,
-  value,
-  metrics,
-}: {
-  signalKey: string;
-  label: string;
-  value: string;
-  metrics: FundamentalsKeyMetric[];
-}) {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const sc = signalSentiment(value);
-
-  const hints = SIGNAL_METRIC_HINTS[signalKey] ?? [];
-  const relatedMetrics = metrics.filter((m) =>
-    hints.some((h) => m.name.toLowerCase().includes(h.toLowerCase()))
-  );
-
-  return (
-    <div
-      className="relative rounded-[8px] border px-3 py-2.5 cursor-default"
-      style={{ borderColor: sc.border, background: sc.bg }}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-    >
-      <div className="flex items-center justify-between mb-1">
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>
-          {label}
-        </p>
-        <Info className="h-3 w-3 flex-shrink-0" style={{ color: "var(--qc-ink-2)" }} />
-      </div>
-      <p className="text-[12px] font-semibold" style={{ color: sc.color }}>{value}</p>
-
-      {showTooltip && relatedMetrics.length > 0 && (
-        <div
-          className="absolute bottom-full left-0 mb-1.5 z-50 w-64 rounded-[10px] border shadow-lg overflow-hidden"
-          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
-        >
-          <div style={{
-            padding: "8px 12px",
-            borderBottom: "1px solid var(--qc-hair)",
-            background: sc.bg,
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-          }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: sc.color }}>{value}</span>
-          </div>
-          <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
-            {relatedMetrics.map((m) => {
-              const mc = assessmentVars(m.assessment);
-              return (
-                <div key={m.name}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)" }}>{m.name}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: mc.color }}>{m.value}</span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink)", lineHeight: 1.5 }}>{m.comment}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
@@ -261,15 +175,21 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
           </span>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
-          {Object.entries(fi.signals).map(([key, value]) => (
-            <SignalTile
-              key={key}
-              signalKey={key}
-              label={SIGNAL_LABELS[key] ?? key}
-              value={value}
-              metrics={fi.keyMetricsSummary ?? []}
-            />
-          ))}
+          {Object.entries(fi.signals).map(([key, value]) => {
+            const hints = SIGNAL_METRIC_HINTS[key] ?? [];
+            const allMetrics = fi.keyMetricsSummary ?? [];
+            const relatedMetrics = allMetrics.filter((m) =>
+              hints.some((h) => m.name.toLowerCase().includes(h.toLowerCase()))
+            );
+            return (
+              <SignalTile
+                key={key}
+                label={SIGNAL_LABELS[key] ?? key}
+                value={value}
+                metrics={relatedMetrics}
+              />
+            );
+          })}
         </div>
 
         {/* Conviction Meter */}

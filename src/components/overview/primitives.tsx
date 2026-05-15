@@ -2,6 +2,23 @@
 
 import React from "react";
 
+// ─── InlineMd ─────────────────────────────────────────────────────────────────
+// Renders **bold** markdown tokens inline. Exported for use in child components.
+export function InlineMd({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        p.startsWith("**") && p.endsWith("**") ? (
+          <strong key={i} style={{ color: "var(--qc-ink)", fontWeight: 600 }}>{p.slice(2, -2)}</strong>
+        ) : (
+          <span key={i}>{p}</span>
+        )
+      )}
+    </>
+  );
+}
+
 // ─── SectionShell ────────────────────────────────────────────────────────────
 export function SectionShell({ children }: { children: React.ReactNode }) {
   return (
@@ -207,10 +224,10 @@ export function NarrativeSidebar({ eyebrow, headline, body, tags }: NarrativeSid
             color: "var(--qc-ink)",
           }}
         >
-          {headline}
+          <InlineMd text={headline} />
         </div>
         <p style={{ fontSize: 12.5, lineHeight: 1.6, color: "var(--qc-ink)", margin: 0 }}>
-          {body}
+          <InlineMd text={body} />
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: "auto" }}>
           {tags.map(({ label, color }) => (

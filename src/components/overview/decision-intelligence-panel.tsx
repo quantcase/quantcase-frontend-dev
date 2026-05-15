@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import type { InsightData } from "@/types/analysis";
 import type { TechnicalsResponse } from "@/types/technicals";
 import type { ScreenerData } from "@/types/screener";
+import type { OverviewAnalysis } from "@/types/overview";
 import { MonoEyebrow } from "./primitives";
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
   technicalsData: TechnicalsResponse | null;
   screenerData: ScreenerData | null;
   rating: string | null;
+  overviewData?: OverviewAnalysis | null;
   symbol?: string;
 }
 
@@ -209,102 +211,48 @@ function AlertRow({
   text: string;
   sentiment: "positive" | "negative" | "neutral";
 }) {
-  const dot =
+  const color =
     sentiment === "positive"
       ? "var(--qc-up)"
       : sentiment === "negative"
       ? "var(--qc-down)"
       : "var(--qc-warn)";
 
+  const bg =
+    sentiment === "positive"
+      ? "var(--qc-up-soft)"
+      : sentiment === "negative"
+      ? "var(--qc-down-soft)"
+      : "var(--qc-warn-soft)";
+
   return (
     <div
       style={{
         display: "flex",
-        gap: 8,
-        alignItems: "baseline",
-        padding: "7px 0",
-        borderBottom: "1px solid var(--qc-hair-2)",
+        flexDirection: "column",
+        gap: 5,
+        padding: "9px 0",
       }}
     >
       <span
         style={{
-          width: 6,
-          height: 6,
-          borderRadius: "50%",
-          background: dot,
-          flexShrink: 0,
-          display: "inline-block",
-          position: "relative",
-          top: 1,
-        }}
-      />
-      <div style={{ minWidth: 0 }}>
-        <span
-          style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9,
-            letterSpacing: ".1em",
-            textTransform: "uppercase",
-            color: dot,
-            marginRight: 6,
-          }}
-        >
-          {source}
-        </span>
-        <span style={{ fontSize: 11.5, color: "var(--qc-ink)", lineHeight: 1.5 }}>{text}</span>
-      </div>
-    </div>
-  );
-}
-
-// ─── Conviction Bar ───────────────────────────────────────────────────────────
-
-function ConvictionBar({ level }: { level: "Low" | "Medium" | "High" }) {
-  const pct = level === "High" ? 100 : level === "Medium" ? 55 : 20;
-  const color =
-    level === "High"
-      ? "var(--qc-up)"
-      : level === "Medium"
-      ? "var(--qc-warn)"
-      : "var(--qc-down)";
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <MonoEyebrow>Conviction</MonoEyebrow>
-        <span style={{ fontSize: 12, fontWeight: 600, color }}>{level}</span>
-      </div>
-      <div
-        style={{
-          height: 5,
-          background: "var(--qc-chip, #F2F1EC)",
-          borderRadius: 999,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            height: "100%",
-            width: `${pct}%`,
-            background: color,
-            borderRadius: 999,
-          }}
-        />
-      </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          fontSize: 9,
-          color: "var(--qc-ink-2)",
+          alignSelf: "flex-start",
           fontFamily: "'IBM Plex Mono', monospace",
-          letterSpacing: ".08em",
+          fontSize: 8.5,
+          letterSpacing: ".12em",
+          textTransform: "uppercase",
+          color,
+          background: bg,
+          border: `1px solid ${color}30`,
+          borderRadius: 4,
+          padding: "2px 7px",
         }}
       >
-        <span>Low</span>
-        <span>Medium</span>
-        <span>High</span>
-      </div>
+        {source}
+      </span>
+      <span style={{ fontSize: 11.5, color: "var(--qc-ink)", lineHeight: 1.5 }}>
+        {text}
+      </span>
     </div>
   );
 }
@@ -318,20 +266,18 @@ export function DecisionIntelligencePanel({
   technicalsData,
   screenerData,
   rating,
+  overviewData,
   symbol = "",
 }: Props) {
-  const rKey = ratingKey(rating);
+  // Prefer Investment Conclusion's action_bias as the authoritative verdict
+  const effectiveRating = overviewData?.action_bias ?? rating;
+  const rKey = ratingKey(effectiveRating);
   const ratingColor =
     rKey === "strong-buy" || rKey === "buy"
       ? "var(--qc-up)"
       : rKey === "sell" || rKey === "underperform"
       ? "var(--qc-down)"
       : "var(--qc-warn)";
-
-  // Conviction from opportunity analysis
-  const oppStatus = (opportunity as (InsightData & { overall_status?: string }) | null)?.overall_status;
-  const convictionLevel: "Low" | "Medium" | "High" =
-    oppStatus === "STRONG" ? "High" : oppStatus === "WEAK" ? "Low" : "Medium";
 
   // MOD scores
   const mScore = management?.score ?? null;
@@ -444,30 +390,31 @@ export function DecisionIntelligencePanel({
     return "neutral";
   }
 
-  // Key alerts from decisionIntelligence and ruleEngine
+  // Key alerts — simple source + one-line text
   const di = technicalsData?.decisionIntelligence;
   const reAlerts = re?.decisionContext?.alerts ?? [];
 
-  const alerts: { source: string; text: string; sentiment: "positive" | "negative" | "neutral" }[] = [];
+  type Alert = { source: string; text: string; sentiment: "positive" | "negative" | "neutral" };
+  const alerts: Alert[] = [];
 
   // MOD-level alerts
   if (dScore !== null && dScore < 50) {
     alerts.push({
-      source: "M.O.D.",
+      source: "QuantCase",
       text: dVerdict ? `Deal ${dVerdict.toLowerCase()} — entry attractiveness limited.` : "Deal score below threshold.",
       sentiment: "negative",
     });
   }
   if (oScore !== null && oScore < 60) {
     alerts.push({
-      source: "M.O.D.",
+      source: "QuantCase",
       text: oVerdict ? `Opportunity ${oVerdict.toLowerCase()} — growth revival depends on macro recovery.` : "Opportunity score is moderate.",
       sentiment: "neutral",
     });
   }
   if (mScore !== null && mScore >= 70) {
     alerts.push({
-      source: "M.O.D.",
+      source: "QuantCase",
       text: mVerdict ? `Management ${mVerdict.toLowerCase()} — guidance track record is solid.` : "Management quality is strong.",
       sentiment: "positive",
     });
@@ -475,17 +422,13 @@ export function DecisionIntelligencePanel({
 
   // Fundamental alert
   if (fin?.eps_cagr_3y != null && fin.eps_cagr_3y < 0) {
-    alerts.push({
-      source: "Fundamental",
-      text: "Revenue decelerating — below sector average, re-rating risk.",
-      sentiment: "negative",
-    });
+    alerts.push({ source: "Fundamental", text: "Revenue decelerating — below sector average, re-rating risk.", sentiment: "negative" });
   }
 
   // Technical alerts from rule engine
-  reAlerts.slice(0, 2).forEach((a) => {
+  reAlerts.forEach((a) => {
     const s = a.toLowerCase();
-    const sent: "positive" | "negative" | "neutral" =
+    const sent: Alert["sentiment"] =
       s.includes("caution") || s.includes("below") || s.includes("risk") || s.includes("negative")
         ? "negative"
         : s.includes("strong") || s.includes("above") || s.includes("positive")
@@ -495,23 +438,15 @@ export function DecisionIntelligencePanel({
   });
 
   // DI risk alerts
-  if (di?.riskAlerts) {
-    di.riskAlerts.slice(0, 1).forEach((a) => {
-      alerts.push({ source: "Macro", text: a, sentiment: "negative" });
-    });
+  if (di?.riskAlerts?.length) {
+    alerts.push({ source: "Macro", text: di.riskAlerts[0], sentiment: "negative" });
   }
 
-  // Fallback technical alert
+  // Fallback
   if (reAlerts.length === 0 && !di?.riskAlerts?.length) {
-    const trendSent = technicalsData?.trend?.direction
-      ? techSent(technicalsData.trend.direction)
-      : "neutral";
+    const trendSent = technicalsData?.trend?.direction ? techSent(technicalsData.trend.direction) : "neutral";
     if (trendSent === "negative") {
-      alerts.push({
-        source: "Technical",
-        text: "Price below key moving averages — caution until structure recovers.",
-        sentiment: "negative",
-      });
+      alerts.push({ source: "Technical", text: "Price below key moving averages — caution until structure recovers.", sentiment: "negative" });
     }
   }
 
@@ -534,220 +469,213 @@ export function DecisionIntelligencePanel({
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <MonoEyebrow>Decision Intelligence</MonoEyebrow>
-        {/* User initials badge placeholder */}
-        <div
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: "50%",
-            background: "var(--qc-chip)",
-            border: "1px solid var(--qc-hair)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 10,
-            fontWeight: 700,
-            color: "var(--qc-ink)",
-          }}
-        >
-          AJ
-        </div>
       </div>
 
-      {/* Rating + Conviction */}
+      {/* Overall Rating card — prominent */}
       <div
         style={{
           background: "var(--qc-card)",
-          border: "1px solid var(--qc-hair)",
-          borderRadius: 10,
-          padding: "10px 12px",
+          border: `1.5px solid ${ratingColor}40`,
+          borderRadius: 12,
+          padding: "14px 14px 12px",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 8,
+          flexDirection: "column",
+          gap: 10,
         }}
       >
-        <div>
-          <MonoEyebrow style={{ marginBottom: 4 }}>Overall Rating</MonoEyebrow>
-          <span
-            style={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: ratingColor,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            {rating ?? "—"}
-          </span>
+        {/* Top row: label + composite score */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div>
+            <MonoEyebrow style={{ marginBottom: 5 }}>Overall Rating</MonoEyebrow>
+            <span
+              style={{
+                fontSize: 24,
+                fontWeight: 700,
+                color: ratingColor,
+                letterSpacing: "-0.02em",
+                lineHeight: 1,
+              }}
+            >
+              {effectiveRating ?? "—"}
+            </span>
+          </div>
+          {mScore !== null && oScore !== null && dScore !== null && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "6px 12px",
+                background: scoreBg(Math.round((mScore + oScore + dScore) / 3)),
+                borderRadius: 999,
+                border: `1px solid ${scoreColor(Math.round((mScore + oScore + dScore) / 3))}30`,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 17,
+                  fontWeight: 700,
+                  color: scoreColor(Math.round((mScore + oScore + dScore) / 3)),
+                }}
+              >
+                {Math.round((mScore + oScore + dScore) / 3)}
+              </span>
+              <span
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 9,
+                  color: "var(--qc-ink-2)",
+                  letterSpacing: ".1em",
+                }}
+              >
+                / 100
+              </span>
+            </div>
+          )}
         </div>
-        {/* Composite score */}
-        {mScore !== null && oScore !== null && dScore !== null && (
+
+        {/* Fundamental interest sub-row — shown when action_bias overrides MOD rating */}
+        {overviewData?.action_bias && rating && overviewData.action_bias.toLowerCase() !== rating.toLowerCase() && (
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 4,
-              padding: "4px 10px",
-              background: scoreBg(Math.round((mScore + oScore + dScore) / 3)),
-              borderRadius: 999,
-              border: `1px solid ${scoreColor(Math.round((mScore + oScore + dScore) / 3))}30`,
+              justifyContent: "space-between",
+              padding: "7px 10px",
+              background: `${scoreColor(Math.round(((mScore ?? 0) + (oScore ?? 0) + (dScore ?? 0)) / Math.max(1, [mScore, oScore, dScore].filter(s => s !== null).length)))}12`,
+              borderRadius: 8,
+              border: `1px solid ${scoreColor(Math.round(((mScore ?? 0) + (oScore ?? 0) + (dScore ?? 0)) / Math.max(1, [mScore, oScore, dScore].filter(s => s !== null).length)))}25`,
             }}
           >
-            <span
-              style={{
-                fontSize: 15,
-                fontWeight: 700,
-                color: scoreColor(Math.round((mScore + oScore + dScore) / 3)),
-              }}
-            >
-              {Math.round((mScore + oScore + dScore) / 3)}
+            <span style={{ fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.4 }}>
+              Quality strong; timing unfavorable now
             </span>
-            <span
-              style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 9,
-                color: "var(--qc-ink-2)",
-                letterSpacing: ".1em",
-              }}
-            >
-              / 100
-            </span>
+          </div>
+        )}
+
+        {/* Investor style tags inside the card */}
+        {di && (di.tag || di.idealFor) && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            {di.tag && (
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  padding: "3px 9px",
+                  borderRadius: 999,
+                  background: "var(--qc-chip)",
+                  color: "var(--qc-ink)",
+                  border: "1px solid var(--qc-hair)",
+                }}
+              >
+                {di.tag}
+              </span>
+            )}
+            {di.idealFor && (
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  padding: "3px 9px",
+                  borderRadius: 999,
+                  background: "var(--qc-chip)",
+                  color: "var(--qc-ink-2)",
+                  border: "1px solid var(--qc-hair)",
+                }}
+              >
+                {di.idealFor}
+              </span>
+            )}
           </div>
         )}
       </div>
 
-      {/* Investor style tags */}
-      {di && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-          {[di.tag, di.lens ?? di.idealFor].filter(Boolean).map((t) => (
-            <span
-              key={t}
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                padding: "3px 9px",
-                borderRadius: 999,
-                background: "var(--qc-chip)",
-                color: "var(--qc-ink)",
-                border: "1px solid var(--qc-hair)",
-              }}
-            >
-              {t}
-            </span>
-          ))}
-          {rating && (
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                padding: "3px 9px",
-                borderRadius: 999,
-                background: ratingColor + "18",
-                color: ratingColor,
-                border: `1px solid ${ratingColor}30`,
-              }}
-            >
-              {rating}
-            </span>
-          )}
-          {di.idealFor && di.idealFor !== di.lens && (
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                padding: "3px 9px",
-                borderRadius: 999,
-                background: "var(--qc-chip)",
-                color: "var(--qc-ink-2)",
-                border: "1px solid var(--qc-hair)",
-              }}
-            >
-              {di.idealFor}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* QuantCase Framework */}
-      <div>
-        <MonoEyebrow style={{ marginBottom: 6 }}>QuantCase Framework</MonoEyebrow>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
-          <LinkableCompactCard
-            label="Management"
-            value={mVerdict ?? "—"}
-            sentiment={mScore !== null ? (mScore >= 70 ? "positive" : mScore >= 50 ? "neutral" : "negative") : "neutral"}
-            href={`/screener/management?symbol=${encodeURIComponent(symbol)}`}
-          />
-          <LinkableCompactCard
-            label="Opportunity"
-            value={oVerdict ?? "—"}
-            sentiment={oScore !== null ? (oScore >= 70 ? "positive" : oScore >= 50 ? "neutral" : "negative") : "neutral"}
-            href={`/screener/opportunity?symbol=${encodeURIComponent(symbol)}`}
-          />
-          <LinkableCompactCard
-            label="Deal"
-            value={dVerdict ?? "—"}
-            sentiment={dScore !== null ? (dScore >= 70 ? "positive" : dScore >= 50 ? "neutral" : "negative") : "neutral"}
-            href={`/screener/deal?symbol=${encodeURIComponent(symbol)}`}
-          />
-        </div>
-      </div>
-
-      {/* Fundamentals */}
-      <div>
-        <MonoEyebrow style={{ marginBottom: 6 }}>Fundamentals</MonoEyebrow>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
-          {fundamentalChips.map(({ label, value, sentiment = "neutral" }) => (
-            <CompactCard key={label} label={label} value={value} sentiment={sentiment} />
-          ))}
-        </div>
-      </div>
-
-      {/* Technicals */}
-      <div>
-        <MonoEyebrow style={{ marginBottom: 6 }}>Technicals</MonoEyebrow>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 5 }}>
-          <CompactCard label="Structure" value={structureZone} sentiment={techSent(structureZone)} />
-          <CompactCard label="Trend" value={trendDir} sentiment={techSent(trendDir)} />
-          <CompactCard
-            label="Timing"
-            value={`RSI ${technicalsData?.momentum?.rsi?.value != null ? Math.round(technicalsData.momentum.rsi.value) : "—"}`}
-            sentiment="neutral"
-          />
-          <CompactCard label="Rel. Str." value={rsNifty} sentiment={techSent(rsNifty)} />
-        </div>
-      </div>
-
-      {/* Conviction bar */}
+      {/* QuantCase Framework + Fundamentals + Technicals — shared white card */}
       <div
         style={{
           background: "var(--qc-card)",
           border: "1px solid var(--qc-hair)",
-          borderRadius: 10,
-          padding: "10px 12px",
+          borderRadius: 12,
+          padding: "12px 12px 10px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
         }}
       >
-        <ConvictionBar level={convictionLevel} />
+        {/* QuantCase Framework */}
+        <div>
+          <MonoEyebrow style={{ marginBottom: 6 }}>QuantCase Framework</MonoEyebrow>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
+            <LinkableCompactCard
+              label="Management"
+              value={mVerdict ? humanize(mVerdict) : "—"}
+              sentiment={mScore !== null ? (mScore >= 70 ? "positive" : mScore >= 50 ? "neutral" : "negative") : "neutral"}
+              href={`/screener/management?symbol=${encodeURIComponent(symbol)}`}
+            />
+            <LinkableCompactCard
+              label="Opportunity"
+              value={oVerdict ? humanize(oVerdict) : "—"}
+              sentiment={oScore !== null ? (oScore >= 70 ? "positive" : oScore >= 50 ? "neutral" : "negative") : "neutral"}
+              href={`/screener/opportunity?symbol=${encodeURIComponent(symbol)}`}
+            />
+            <LinkableCompactCard
+              label="Deal"
+              value={dVerdict ? humanize(dVerdict) : "—"}
+              sentiment={dScore !== null ? (dScore >= 70 ? "positive" : dScore >= 50 ? "neutral" : "negative") : "neutral"}
+              href={`/screener/deal?symbol=${encodeURIComponent(symbol)}`}
+            />
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: "var(--qc-hair)" }} />
+
+        {/* Fundamentals */}
+        <div>
+          <MonoEyebrow style={{ marginBottom: 6 }}>Fundamentals</MonoEyebrow>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
+            {fundamentalChips.map(({ label, value, sentiment = "neutral" }) => (
+              <CompactCard key={label} label={label} value={value} sentiment={sentiment} />
+            ))}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: "var(--qc-hair)" }} />
+
+        {/* Technicals */}
+        <div>
+          <MonoEyebrow style={{ marginBottom: 6 }}>Technicals</MonoEyebrow>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 5 }}>
+            <CompactCard label="Structure" value={structureZone} sentiment={techSent(structureZone)} />
+            <CompactCard label="Trend" value={trendDir} sentiment={techSent(trendDir)} />
+            <CompactCard
+              label="Timing"
+              value={`RSI ${technicalsData?.momentum?.rsi?.value != null ? Math.round(technicalsData.momentum.rsi.value) : "—"}`}
+              sentiment="neutral"
+            />
+            <CompactCard label="Rel. Str." value={rsNifty} sentiment={techSent(rsNifty)} />
+          </div>
+        </div>
       </div>
 
       {/* Key Alerts */}
       {displayAlerts.length > 0 && (
-        <div>
-          <MonoEyebrow style={{ marginBottom: 4 }}>Key Alerts</MonoEyebrow>
-          <div
-            style={{
-              background: "var(--qc-card)",
-              border: "1px solid var(--qc-hair)",
-              borderRadius: 10,
-              padding: "4px 12px",
-            }}
-          >
-            {displayAlerts.map((a, i) => (
-              <div key={i} style={{ borderBottom: i < displayAlerts.length - 1 ? "1px solid var(--qc-hair-2)" : "none" }}>
-                <AlertRow source={a.source} text={a.text} sentiment={a.sentiment} />
-              </div>
-            ))}
-          </div>
+        <div
+          style={{
+            background: "var(--qc-card)",
+            border: "1px solid var(--qc-hair)",
+            borderRadius: 10,
+            padding: "10px 12px 4px",
+          }}
+        >
+          <MonoEyebrow style={{ marginBottom: 8 }}>Key Alerts</MonoEyebrow>
+          <div style={{ height: 1, background: "var(--qc-hair)", marginBottom: 4 }} />
+          {displayAlerts.map((a, i) => (
+            <div key={i} style={{ borderBottom: i < displayAlerts.length - 1 ? "1px solid var(--qc-hair-2)" : "none" }}>
+              <AlertRow source={a.source} text={a.text} sentiment={a.sentiment} />
+            </div>
+          ))}
         </div>
       )}
     </div>

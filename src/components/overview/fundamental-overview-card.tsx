@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { ScreenerData } from "@/types/screener";
-import { SectionShell, SectionLabel, MonoEyebrow } from "./primitives";
+import type { OverviewAnalysis } from "@/types/overview";
+import { SectionShell, SectionLabel } from "./primitives";
 import { ValuationHeroSection } from "./fundamentals/valuation-hero-section";
 import { ValuationChartSidebar, type ChartMetricKey } from "./fundamentals/valuation-chart-sidebar";
 import { KpiGrid } from "./fundamentals/kpi-grid";
@@ -14,6 +15,7 @@ import { formatINR } from "@/lib/utils";
 interface Props {
   data: ScreenerData;
   symbol: string;
+  overviewData?: OverviewAnalysis | null;
 }
 
 const METRIC_LABELS: Record<ChartMetricKey, string> = {
@@ -24,14 +26,22 @@ const METRIC_LABELS: Record<ChartMetricKey, string> = {
   cfo: "CFO",
   totalDebt: "Debt",
   totalEquity: "Equity",
+  interestCoverage: "Interest Coverage",
+  dividendYield: "Dividend Yield",
+  pegRatio: "PEG",
+  evToEbitda: "EV/EBITDA",
+  pbRatio: "P/B",
+  pe: "P/E",
 };
 
 function formatForMetric(key: ChartMetricKey, v: number): string {
-  if (key === "eps") return `₹${v.toFixed(2)}`;
+  if (key === "eps" || key === "pegRatio") return `₹${v.toFixed(2)}`;
+  if (key === "interestCoverage" || key === "evToEbitda" || key === "pbRatio" || key === "pe") return `${v.toFixed(1)}x`;
+  if (key === "dividendYield") return `${v.toFixed(2)}%`;
   return formatINR(v);
 }
 
-export function FundamentalOverviewCard({ data, symbol }: Props) {
+export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
   const fp = data.financialPerformance;
   const val = data.valuation;
   const eff = data.efficiency;
@@ -66,7 +76,7 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
   const roceIsGood = roceVal != null && roceVal > 15;
   const deIsGood = deVal != null && deVal < 1;
 
-  const narrative = (() => {
+  const derivedNarrative = (() => {
     const parts: string[] = [];
     if (verdictLabel === "Undervalued") parts.push("Trading at a discount to the sector median.");
     else if (verdictLabel === "Overvalued") parts.push("Trading at a premium to the sector median.");
@@ -75,6 +85,11 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
     if (deIsGood) parts.push("Balance sheet leverage is modest.");
     return parts.join(" ");
   })();
+
+  // Use overview snapshot first sentence as fundamentals narrative when available
+  const narrative = overviewData?.snapshot
+    ? overviewData.snapshot.replace(/\*\*/g, "").split(".").slice(0, 2).join(".") + "."
+    : derivedNarrative;
 
   const getLatestById = (id: string): number | null => {
     if (!shareholdingData) return null;
@@ -92,13 +107,14 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
   const publicPct = getLatestById("npNonInst") ?? (own.public != null ? own.public * 100 : null);
 
   const shareholdingSegments = [
-    { label: "Promoter", pct: promoterPct, color: "var(--qc-ink)" },
-    { label: "FII", pct: fiiPct, color: "var(--qc-blue)" },
-    { label: "DII", pct: diiPct, color: "var(--qc-up)" },
-    { label: "Public", pct: publicPct, color: "var(--qc-ink-2)" },
+    { label: "Promoter", pct: promoterPct, color: "#0F172B" },
+    { label: "FII", pct: fiiPct, color: "#2D4A7A" },
+    { label: "DII", pct: diiPct, color: "#4A7AB5" },
+    { label: "Public", pct: publicPct, color: "#8AAED4" },
   ];
 
   const trend = fp.quarterlyTrend ?? [];
+  const fundamentalsTrend = fp.fundamentalsTrend ?? null;
 
   return (
     <SectionShell>
@@ -111,44 +127,49 @@ export function FundamentalOverviewCard({ data, symbol }: Props) {
           industryPE={industryPE}
           verdictLabel={verdictLabel}
           benchmarkPct={benchmarkPct}
-          pegRatio={val.pegRatio}
-          evToEbitda={val.evToEbitda}
-          pbRatio={val.pbRatio}
-          dividendYield={perShare.dividendYield}
           narrative={narrative}
-          trend={trend}
-          selectedMetric={selectedMetric}
-          onSelectMetric={setSelectedMetric}
+          footer={
+            <KpiGrid
+              embedded
+              pegRatio={val.pegRatio}
+              evToEbitda={val.evToEbitda}
+              pbRatio={val.pbRatio}
+              dividendYield={perShare.dividendYield}
+              dividendYieldTrend={fp.dividendYieldTrend ?? null}
+              revenue={fp.revenue}
+              revenueGrowth={fp.revenueGrowth}
+              ebitda={fp.ebitda}
+              ebitdaGrowth={fp.ebitdaGrowth}
+              ebitdaLabel={fp.quarterlyTrendMeta?.ebitdaLabel ?? "EBITDA"}
+              netProfit={fp.netProfit}
+              netProfitGrowth={fp.netProfitGrowth}
+              operatingCashflow={fp.operatingCashflow}
+              cfoGrowth={fp.cfoGrowth}
+              freeCashflow={fp.freeCashflow}
+              fcfGrowth={fp.fcfGrowth}
+              reserves={fp.reserves}
+              reservesGrowth={fp.reservesGrowth}
+              totalDebt={eff.totalDebt}
+              debtGrowth={eff.debtGrowth}
+              interestCoverage={eff.interestCoverage ?? null}
+              interestCoverageGrowth={eff.interestCoverageGrowth ?? null}
+              showInterestCoverage={fp.quarterlyTrendMeta?.showInterestCoverage ?? !data.company.isBfsi}
+              trend={trend}
+              fundamentalsTrend={fundamentalsTrend}
+              selectedMetric={selectedMetric}
+              onSelectMetric={setSelectedMetric}
+            />
+          }
         />
         <ValuationChartSidebar
           trend={trend}
+          dividendYieldTrend={fp.dividendYieldTrend ?? null}
+          fundamentalsTrend={fundamentalsTrend}
           selectedMetric={selectedMetric}
           selectedLabel={selectedMetric ? METRIC_LABELS[selectedMetric] : null}
           formatValue={selectedMetric ? (v) => formatForMetric(selectedMetric, v) : () => ""}
         />
       </div>
-
-      <MonoEyebrow style={{ margin: "4px 0 10px" }}>Key Metrics · Latest fiscal</MonoEyebrow>
-
-      <KpiGrid
-        revenue={fp.revenue}
-        revenueGrowth={fp.revenueGrowth}
-        ebitda={fp.ebitda}
-        ebitdaGrowth={fp.ebitdaGrowth}
-        netProfit={fp.netProfit}
-        netProfitGrowth={fp.netProfitGrowth}
-        operatingCashflow={fp.operatingCashflow}
-        cfoGrowth={fp.cfoGrowth}
-        freeCashflow={fp.freeCashflow}
-        fcfGrowth={fp.fcfGrowth}
-        reserves={fp.reserves}
-        reservesGrowth={fp.reservesGrowth}
-        totalDebt={eff.totalDebt}
-        debtGrowth={eff.debtGrowth}
-        trend={trend}
-        selectedMetric={selectedMetric}
-        onSelectMetric={setSelectedMetric}
-      />
 
       <ReturnsLeveragePanel
         roce={roceVal}

@@ -1,152 +1,24 @@
 "use client";
 
+import React from "react";
 import { SentimentPill } from "@/components/overview/primitives";
-import type { ChartMetricKey } from "./valuation-chart-sidebar";
-
-// ─── Inline sparkline ─────────────────────────────────────────────────────────
-
-function Sparkline({ values, selected }: { values: number[]; selected: boolean }) {
-  if (!values.length) return null;
-  const w = 72;
-  const h = 16;
-  const max = Math.max(...values);
-  const min = Math.min(...values);
-  const range = max - min || 1;
-  const barW = Math.max(4, Math.floor(w / values.length) - 1);
-  return (
-    <svg width={w} height={h} style={{ display: "block", overflow: "visible" }}>
-      {values.map((v, i) => {
-        const barH = Math.max(2, ((v - min) / range) * (h - 2));
-        const isLast = i === values.length - 1;
-        return (
-          <rect
-            key={i}
-            x={i * (barW + 1)}
-            y={h - barH}
-            width={barW}
-            height={barH}
-            rx={1}
-            fill={
-              isLast
-                ? selected ? "rgba(255,255,255,0.9)" : "var(--qc-ink)"
-                : selected ? "rgba(255,255,255,0.25)" : "var(--qc-hair)"
-            }
-          />
-        );
-      })}
-    </svg>
-  );
-}
-
-// ─── Sub-metric card ──────────────────────────────────────────────────────────
-
-interface SubMetricCardProps {
-  label: string;
-  value: string;
-  sub: string;
-  metricKey: ChartMetricKey | null;
-  sparkValues: number[];
-  selected: boolean;
-  onSelect: (key: ChartMetricKey | null) => void;
-  isLast: boolean;
-}
-
-function SubMetricCard({ label, value, sub, metricKey, sparkValues, selected, onSelect, isLast }: SubMetricCardProps) {
-  const isClickable = metricKey != null && value !== "—";
-  return (
-    <div
-      onClick={isClickable ? () => onSelect(selected ? null : metricKey) : undefined}
-      style={{
-        padding: "14px 22px 14px",
-        borderRight: isLast ? "none" : "1px solid var(--qc-hair-2)",
-        minWidth: 0,
-        cursor: isClickable ? "pointer" : "default",
-        background: selected ? "var(--qc-ink)" : "transparent",
-        transition: "background 0.12s",
-      }}
-    >
-      <div style={{ fontSize: 11, color: selected ? "rgba(255,255,255,0.55)" : "var(--qc-ink-2)", letterSpacing: ".02em", marginBottom: 4 }}>
-        {label}
-      </div>
-      <div
-        style={{
-          fontSize: 18,
-          fontWeight: value === "—" ? 400 : 500,
-          letterSpacing: "-0.01em",
-          color: value === "—" ? (selected ? "rgba(255,255,255,0.4)" : "var(--qc-ink-2)") : (selected ? "#fff" : "var(--qc-ink)"),
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
-        {value}
-      </div>
-      <div style={{ fontSize: 11, color: selected ? "rgba(255,255,255,0.45)" : "var(--qc-ink-2)", marginTop: 2, marginBottom: sparkValues.length ? 6 : 0 }}>
-        {sub}
-      </div>
-      {sparkValues.length > 0 && <Sparkline values={sparkValues} selected={selected} />}
-    </div>
-  );
-}
 
 // ─── ValuationHeroSection ─────────────────────────────────────────────────────
-
-interface QuarterlyTrendPoint {
-  period: string;
-  revenue: number | null;
-  ebitda: number | null;
-  netIncome: number | null;
-  eps: number | null;
-  cfo: number | null;
-  totalDebt: number | null;
-  totalEquity: number | null;
-}
-
-type SparkKey = keyof Omit<QuarterlyTrendPoint, "period">;
 
 interface ValuationHeroSectionProps {
   pe: number | null;
   industryPE: number | null;
   verdictLabel: string;
   benchmarkPct: number;
-  pegRatio: number | null;
-  evToEbitda: number | null;
-  pbRatio: number | null;
-  dividendYield: number | null;
   narrative: string;
-  trend: QuarterlyTrendPoint[];
-  selectedMetric: ChartMetricKey | null;
-  onSelectMetric: (key: ChartMetricKey | null) => void;
+  footer?: React.ReactNode;
 }
 
 export function ValuationHeroSection({
-  pe, industryPE, verdictLabel, benchmarkPct,
-  pegRatio, evToEbitda, pbRatio, dividendYield, narrative,
-  trend, selectedMetric, onSelectMetric,
+  pe, industryPE, verdictLabel, benchmarkPct, narrative, footer,
 }: ValuationHeroSectionProps) {
   const sentiment =
     verdictLabel === "Undervalued" ? "up" : verdictLabel === "Overvalued" ? "down" : "neutral";
-
-  function sparkFor(key: SparkKey): number[] {
-    return trend.map((d) => d[key]).filter((v): v is number => v != null);
-  }
-
-  const subMetrics: {
-    k: string;
-    v: string;
-    sub: string;
-    metricKey: ChartMetricKey | null;
-    sparkKey: SparkKey | null;
-  }[] = [
-    { k: "PEG", v: pegRatio != null ? `${pegRatio.toFixed(1)}x` : "—", sub: "Growth-adjusted", metricKey: "eps", sparkKey: "eps" },
-    { k: "EV / EBITDA", v: evToEbitda != null ? `${evToEbitda.toFixed(1)}x` : "—", sub: "Enterprise multiple", metricKey: "ebitda", sparkKey: "ebitda" },
-    { k: "P / B", v: pbRatio != null ? `${pbRatio.toFixed(1)}x` : "—", sub: "Book value", metricKey: "totalEquity", sparkKey: "totalEquity" },
-    {
-      k: "Dividend Yield",
-      v: dividendYield != null && dividendYield > 0 ? `${dividendYield.toFixed(2)}%` : "—",
-      sub: "Trailing 12M",
-      metricKey: null,
-      sparkKey: null,
-    },
-  ];
 
   return (
     <section
@@ -159,42 +31,38 @@ export function ValuationHeroSection({
         overflow: "hidden",
       }}
     >
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }} />
-
       {/* PE figure + benchmark bar */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "1fr auto",
           gap: 24,
-          alignItems: "end",
-          paddingBottom: 18,
-          marginBottom: 16,
+          alignItems: "center",
+          paddingBottom: 16,
         }}
       >
         <div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <p style={{ fontSize: 12.5, color: "var(--qc-ink)" }}>Current P/E ratio</p>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 2 }}>
+            <p style={{ fontSize: 12, color: "var(--qc-ink)" }}>Current P/E ratio</p>
             <SentimentPill label={verdictLabel} sentiment={sentiment} />
           </div>
           <div
             style={{
-              fontSize: 64, fontWeight: 500, letterSpacing: "-0.035em",
+              fontSize: 48, fontWeight: 500, letterSpacing: "-0.035em",
               lineHeight: 1, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums",
-              display: "flex", alignItems: "baseline", gap: 6,
+              display: "flex", alignItems: "baseline", gap: 5,
             }}
           >
             {pe != null ? pe.toFixed(1) : "—"}
-            <span style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink-2)" }}>x</span>
+            <span style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink-2)" }}>x</span>
           </div>
-          <div style={{ fontSize: 12.5, color: "var(--qc-ink)", marginTop: 8, lineHeight: 1.4, maxWidth: 340 }}>
+          <div style={{ fontSize: 12, color: "var(--qc-ink)", marginTop: 6, lineHeight: 1.45 }}>
             {narrative}
           </div>
         </div>
 
         {/* Benchmark bar */}
-        <div style={{ minWidth: 260 }}>
+        <div style={{ minWidth: 240 }}>
           <div
             style={{
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
@@ -240,31 +108,11 @@ export function ValuationHeroSection({
         </div>
       </div>
 
-      {/* Sub-metrics row */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4,1fr)",
-          gap: 0,
-          marginLeft: -22,
-          marginRight: -22,
-          borderTop: "1px solid var(--qc-hair-2)",
-        }}
-      >
-        {subMetrics.map(({ k, v, sub, metricKey, sparkKey }, i, arr) => (
-          <SubMetricCard
-            key={k}
-            label={k}
-            value={v}
-            sub={sub}
-            metricKey={metricKey}
-            sparkValues={sparkKey ? sparkFor(sparkKey) : []}
-            selected={metricKey != null && selectedMetric === metricKey}
-            onSelect={onSelectMetric}
-            isLast={i === arr.length - 1}
-          />
-        ))}
-      </div>
+      {footer && (
+        <div style={{ marginLeft: -22, marginRight: -22, borderTop: "1px solid var(--qc-hair)" }}>
+          {footer}
+        </div>
+      )}
     </section>
   );
 }

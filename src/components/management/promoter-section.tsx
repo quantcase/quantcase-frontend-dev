@@ -56,7 +56,7 @@ function MqiDonut({ score, label }: { score: number; label: string }) {
           letterSpacing: "0.1em",
         }}
       >
-        MQI Score
+        M-Score
       </span>
 
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -219,7 +219,7 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
           )}
           {mqi_rationale && (
             <p style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>
-              <span style={{ fontWeight: 600 }}>MQI impact: </span>
+              <span style={{ fontWeight: 600 }}>M-Score impact: </span>
               {mqi_rationale}
             </p>
           )}

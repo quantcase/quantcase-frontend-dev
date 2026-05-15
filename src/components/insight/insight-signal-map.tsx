@@ -8,12 +8,6 @@ interface InsightSignalMapProps {
   heading?: string;
 }
 
-const SENTIMENT_LABEL: Record<string, string> = {
-  positive: "Positive",
-  negative: "Negative",
-  neutral: "Neutral",
-};
-
 export function InsightSignalMap({ signals, heading }: InsightSignalMapProps) {
   if (!signals.length) return null;
 
@@ -29,7 +23,7 @@ export function InsightSignalMap({ signals, heading }: InsightSignalMapProps) {
           <SignalTile
             key={i}
             label={(s.category ?? s.label ?? "Signal").toUpperCase()}
-            value={SENTIMENT_LABEL[s.sentiment] ?? "Neutral"}
+            value={s.summary ?? s.signal}
             sentiment={s.sentiment}
             detail={s.signal}
           />

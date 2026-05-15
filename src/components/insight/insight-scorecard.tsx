@@ -7,48 +7,55 @@ import { DarkGradientCard, MonoLabel } from "@/components/ds";
 
 // ─── Color helpers ─────────────────────────────────────────────────────────────
 
+// Thresholds: ≥80% Strong (green), 50–79% Moderate (amber), <50% Weak (red)
+function scoreToTier(pct: number): "strong" | "moderate" | "weak" {
+  if (pct >= 80) return "strong";
+  if (pct >= 50) return "moderate";
+  return "weak";
+}
+
+const TIER_COLORS = {
+  strong:   { hex: "#1F7A4A", soft: "rgba(31,122,74,0.14)",  fill: "rgba(31,122,74,0.50)",  var: "var(--qc-up)" },
+  moderate: { hex: "#B4731A", soft: "rgba(180,115,26,0.14)", fill: "rgba(180,115,26,0.50)", var: "var(--qc-warn)" },
+  weak:     { hex: "#DC2626", soft: "rgba(220,38,38,0.14)",  fill: "rgba(220,38,38,0.50)",  var: "var(--qc-down)" },
+};
+
+function axisStatusColor(pct: number) {
+  return TIER_COLORS[scoreToTier(pct)];
+}
+
 function verdictBandColor(band: string) {
   const b = (band ?? "").toUpperCase();
-  if (b.includes("STRONG") || b.includes("HIGH")) return "var(--qc-up)";
-  if (b.includes("WEAK") || b.includes("LOW")) return "var(--qc-down)";
-  return "var(--qc-warn)";
+  if (b.includes("STRONG") || b.includes("HIGH")) return TIER_COLORS.strong.var;
+  if (b.includes("WEAK") || b.includes("LOW")) return TIER_COLORS.weak.var;
+  return TIER_COLORS.moderate.var;
 }
 
 function verdictBandBg(band: string) {
   const b = (band ?? "").toUpperCase();
-  if (b.includes("STRONG") || b.includes("HIGH")) return "rgba(31,122,74,0.18)";
-  if (b.includes("WEAK") || b.includes("LOW")) return "rgba(220,38,38,0.15)";
-  return "rgba(180,115,26,0.15)";
+  if (b.includes("STRONG") || b.includes("HIGH")) return TIER_COLORS.strong.soft;
+  if (b.includes("WEAK") || b.includes("LOW")) return TIER_COLORS.weak.soft;
+  return TIER_COLORS.moderate.soft;
 }
 
-// Traffic-light fill colors for radar area — based on per-axis score
-function axisStatusColor(pct: number): { stroke: string; fill: string; soft: string } {
-  if (pct >= 70) return { stroke: "#1F7A4A", fill: "#1F7A4A", soft: "rgba(31,122,74,0.12)" };
-  if (pct >= 40) return { stroke: "#B4731A", fill: "#B4731A", soft: "rgba(180,115,26,0.12)" };
-  return { stroke: "#DC2626", fill: "#DC2626", soft: "rgba(220,38,38,0.12)" };
-}
-
-// Overall band → gradient stops
-function bandGradientStops(band: string): { c1: string; c2: string; soft: string } {
-  const b = (band ?? "").toUpperCase();
-  if (b.includes("STRONG") || b.includes("HIGH"))
-    return { c1: "rgba(31,122,74,0.55)", c2: "rgba(31,122,74,0.08)", soft: "#1F7A4A" };
-  if (b.includes("WEAK") || b.includes("LOW"))
-    return { c1: "rgba(220,38,38,0.50)", c2: "rgba(220,38,38,0.06)", soft: "#DC2626" };
-  return { c1: "rgba(180,115,26,0.50)", c2: "rgba(180,115,26,0.06)", soft: "#B4731A" };
-}
-
+// Per-lens fill colour for gradient & stroke — driven by each lens's own pct
 function lensBarColor(pct: number) {
-  if (pct >= 70) return "var(--qc-up)";
-  if (pct >= 40) return "var(--qc-warn)";
-  return "var(--qc-down)";
+  return TIER_COLORS[scoreToTier(pct)].var;
 }
 
 function lensStatusLabel(pct: number, status: string) {
   if (status) return status.toUpperCase();
-  if (pct >= 70) return "STRONG";
-  if (pct >= 40) return "MODERATE";
-  return "NEUTRAL";
+  const t = scoreToTier(pct);
+  if (t === "strong") return "STRONG";
+  if (t === "moderate") return "MODERATE";
+  return "WEAK";
+}
+
+// Score label per insight type
+function scoreLabel(type: string): string {
+  if (type === "opportunity") return "O-SCORE";
+  if (type === "deal") return "D-SCORE";
+  return "M-SCORE";
 }
 
 function parseHeadline(headline: string) {
@@ -69,7 +76,7 @@ function getTotalScore(lenses: InsightLens[]) {
 
 interface RadarPoint {
   subject: string;
-  pct: number; // 0–100
+  pct: number; // 0–100, computed as (score/max)*100
 }
 
 function polarToCartesian(cx: number, cy: number, r: number, angleRad: number) {
@@ -79,9 +86,9 @@ function polarToCartesian(cx: number, cy: number, r: number, angleRad: number) {
   };
 }
 
-function buildPolygonPoints(cx: number, cy: number, r: number, n: number, startAngle = 0) {
+function buildPolygonPoints(cx: number, cy: number, r: number, n: number) {
   return Array.from({ length: n }, (_, i) => {
-    const angle = startAngle + (2 * Math.PI * i) / n;
+    const angle = (2 * Math.PI * i) / n;
     return polarToCartesian(cx, cy, r, angle);
   });
 }
@@ -92,55 +99,82 @@ function pointsToPath(pts: { x: number; y: number }[]) {
 
 interface SVGRadarProps {
   data: RadarPoint[];
-  band: string;
   overallScore: number;
+  insightType: string;
   hoveredIndex: number | null;
   onHoverVertex: (i: number | null) => void;
 }
 
-function SVGRadar({ data, band, overallScore, hoveredIndex, onHoverVertex }: SVGRadarProps) {
+function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex }: SVGRadarProps) {
   const SIZE = 260;
   const cx = SIZE / 2;
   const cy = SIZE / 2;
   const maxR = SIZE * 0.34;
   const n = data.length;
+  // 4 rings: 25%, 50%, 75%, 100% — marks the threshold zones visually
   const rings = [0.25, 0.5, 0.75, 1];
-  const { c1, c2, soft } = bandGradientStops(band);
-  const gradId = `radar-fill-${band.replace(/\s+/g, "")}`;
-  const glowId = `radar-glow-${band.replace(/\s+/g, "")}`;
+  const glowId = "radar-glow";
 
-  // Vertices for data polygon
+  // One unique gradient per axis based on its own score tier
+  const gradIds = data.map((_, i) => `radar-seg-grad-${i}`);
+
+  // Vertex positions scaled by each axis's own pct
   const dataPoints = data.map((d, i) => {
     const angle = (2 * Math.PI * i) / n;
-    const r = (d.pct / 100) * maxR;
+    // clamp so a 0% score still has a tiny visible point at center
+    const r = Math.max((d.pct / 100) * maxR, 2);
     return polarToCartesian(cx, cy, r, angle);
   });
 
-  // Axis endpoints (full radius)
-  const axisPoints = Array.from({ length: n }, (_, i) => {
-    const angle = (2 * Math.PI * i) / n;
-    return polarToCartesian(cx, cy, maxR, angle);
-  });
+  // Full-radius axis endpoints
+  const axisPoints = buildPolygonPoints(cx, cy, maxR, n);
 
-  // Label positions (slightly outside maxR)
-  const labelPoints = Array.from({ length: n }, (_, i) => {
-    const angle = (2 * Math.PI * i) / n;
-    return polarToCartesian(cx, cy, maxR + 28, angle);
-  });
+  // Label positions — tight to the outer ring edge
+  const labelOffset = maxR + 14;
+  const labelPoints = buildPolygonPoints(cx, cy, labelOffset, n);
 
   const dataPath = pointsToPath(dataPoints);
+
+  // Overall fill color: average pct drives the gradient center color
+  const avgPct = data.length > 0 ? data.reduce((s, d) => s + d.pct, 0) / data.length : 0;
+  const fillTier = TIER_COLORS[scoreToTier(avgPct)];
+
+  const label = scoreLabel(insightType);
 
   return (
     <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ overflow: "visible" }}>
       <defs>
-        {/* Radial gradient for fill area */}
-        <radialGradient id={gradId} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor={c1} />
-          <stop offset="100%" stopColor={c2} />
+        {/* Per-segment gradients from center (transparent) → vertex color */}
+        {data.map((d, i) => {
+          const { hex } = axisStatusColor(d.pct);
+          const apt = axisPoints[i];
+          // linear gradient along the axis spoke direction
+          const pctX = ((apt.x - cx) / SIZE + 0.5);
+          const pctY = ((apt.y - cy) / SIZE + 0.5);
+          return (
+            <linearGradient
+              key={i}
+              id={gradIds[i]}
+              x1="50%" y1="50%"
+              x2={`${(pctX * 100).toFixed(1)}%`}
+              y2={`${(pctY * 100).toFixed(1)}%`}
+              gradientUnits="objectBoundingBox"
+            >
+              <stop offset="0%" stopColor={hex} stopOpacity={0} />
+              <stop offset="100%" stopColor={hex} stopOpacity={0.55} />
+            </linearGradient>
+          );
+        })}
+
+        {/* Radial fill from center — uses average tier color */}
+        <radialGradient id="radar-area-fill" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor={fillTier.hex} stopOpacity={0.35} />
+          <stop offset="100%" stopColor={fillTier.hex} stopOpacity={0.06} />
         </radialGradient>
-        {/* Glow filter for the stroke */}
-        <filter id={glowId} x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="2.5" result="blur" />
+
+        {/* Subtle glow on stroke */}
+        <filter id={glowId} x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
@@ -148,68 +182,92 @@ function SVGRadar({ data, band, overallScore, hoveredIndex, onHoverVertex }: SVG
         </filter>
       </defs>
 
-      {/* Ring grid */}
+      {/* ── Background rings ── */}
       {rings.map((ratio, ri) => {
         const ringPts = buildPolygonPoints(cx, cy, maxR * ratio, n);
+        // dashed ring at 75% to visually reinforce the ~80% strong zone
+        const isThreshold = ri === 2;
         return (
           <polygon
             key={ri}
             points={ringPts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}
             fill="none"
-            stroke="#E9E7E1"
-            strokeWidth={ri === rings.length - 1 ? 1.2 : 0.8}
-            strokeOpacity={ri === rings.length - 1 ? 0.9 : 0.55}
+            stroke={isThreshold ? "#AAAAAA" : "#BBBBBB"}
+            strokeWidth={isThreshold ? 1.2 : 0.9}
+            strokeOpacity={1}
+            strokeDasharray={isThreshold ? "3 3" : undefined}
           />
         );
       })}
 
-      {/* Axis spokes */}
+      {/* ── Axis spokes ── */}
       {axisPoints.map((pt, i) => (
         <line
           key={i}
           x1={cx} y1={cy}
           x2={pt.x.toFixed(2)} y2={pt.y.toFixed(2)}
-          stroke="#E9E7E1"
-          strokeWidth={0.8}
-          strokeOpacity={0.7}
+          stroke="#BBBBBB"
+          strokeWidth={0.9}
+          strokeOpacity={1}
         />
       ))}
 
-      {/* Data area fill — animated */}
+      {/* ── Data area fill (radial gradient, overall tier) ── */}
       <motion.path
         d={dataPath}
-        fill={`url(#${gradId})`}
-        initial={{ opacity: 0, scale: 0.3 }}
+        fill="url(#radar-area-fill)"
+        initial={{ opacity: 0, scale: 0.2 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}
         style={{ transformOrigin: `${cx}px ${cy}px` }}
       />
 
-      {/* Data area stroke with glow */}
-      <motion.path
-        d={dataPath}
-        fill="none"
-        stroke={soft}
-        strokeWidth={2}
-        strokeLinejoin="round"
-        filter={`url(#${glowId})`}
-        initial={{ pathLength: 0, opacity: 0 }}
-        animate={{ pathLength: 1, opacity: 1 }}
-        transition={{ duration: 0.9, delay: 0.25, ease: "easeOut" }}
-      />
+      {/* ── Per-segment coloured stroke edges (one line per edge, coloured by the "from" vertex) ── */}
+      {dataPoints.map((pt, i) => {
+        const nextPt = dataPoints[(i + 1) % n];
+        const { hex: fromColor } = axisStatusColor(data[i].pct);
+        const { hex: toColor } = axisStatusColor(data[(i + 1) % n].pct);
+        const segGradId = `seg-stroke-${i}`;
+        return (
+          <g key={i}>
+            <defs>
+              <linearGradient id={segGradId} x1={`${((pt.x / SIZE) * 100).toFixed(1)}%`} y1={`${((pt.y / SIZE) * 100).toFixed(1)}%`} x2={`${((nextPt.x / SIZE) * 100).toFixed(1)}%`} y2={`${((nextPt.y / SIZE) * 100).toFixed(1)}%`} gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stopColor={fromColor} />
+                <stop offset="100%" stopColor={toColor} />
+              </linearGradient>
+            </defs>
+            <motion.line
+              x1={pt.x} y1={pt.y}
+              x2={nextPt.x} y2={nextPt.y}
+              stroke={`url(#${segGradId})`}
+              strokeWidth={2}
+              strokeLinecap="round"
+              filter={`url(#${glowId})`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 + i * 0.06 }}
+            />
+          </g>
+        );
+      })}
 
-      {/* Axis labels */}
+      {/* ── Axis labels ── */}
       {data.map((d, i) => {
         const lp = labelPoints[i];
         const words = d.subject.split(" ");
-        const { stroke: axColor } = axisStatusColor(d.pct);
+        const { hex: axColor } = axisStatusColor(d.pct);
         const isHovered = hoveredIndex === i;
         const textAnchor =
-          Math.abs(lp.x - cx) < 6 ? "middle"
+          Math.abs(lp.x - cx) < 8 ? "middle"
           : lp.x < cx ? "end"
           : "start";
         return (
-          <g key={i} style={{ cursor: "pointer" }} onMouseEnter={() => onHoverVertex(i)} onMouseLeave={() => onHoverVertex(null)}>
+          <g
+            key={i}
+            style={{ cursor: "pointer" }}
+            onMouseEnter={() => onHoverVertex(i)}
+            onMouseLeave={() => onHoverVertex(null)}
+          >
             {words.map((word, wi) => (
               <text
                 key={wi}
@@ -220,7 +278,7 @@ function SVGRadar({ data, band, overallScore, hoveredIndex, onHoverVertex }: SVG
                 fontWeight={isHovered ? 700 : 500}
                 letterSpacing="0.06em"
                 fill={isHovered ? axColor : "#9A9A92"}
-                style={{ transition: "fill 0.15s, font-weight 0.15s" }}
+                style={{ transition: "fill 0.15s" }}
               >
                 {word}
               </text>
@@ -229,55 +287,59 @@ function SVGRadar({ data, band, overallScore, hoveredIndex, onHoverVertex }: SVG
         );
       })}
 
-      {/* Vertex dots — color-coded by per-axis score */}
+      {/* ── Vertex dots — each colored by its own tier ── */}
       {dataPoints.map((pt, i) => {
-        const { stroke: dotColor } = axisStatusColor(data[i].pct);
+        const { hex: dotColor } = axisStatusColor(data[i].pct);
         const isHovered = hoveredIndex === i;
         return (
           <motion.circle
             key={i}
             cx={pt.x}
             cy={pt.y}
-            r={isHovered ? 6 : 4}
+            r={isHovered ? 6 : 4.5}
             fill={dotColor}
             stroke="white"
             strokeWidth={1.5}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.55 + i * 0.07, duration: 0.3, ease: "backOut" }}
+            transition={{ delay: 0.5 + i * 0.07, duration: 0.3, ease: "backOut" }}
             onMouseEnter={() => onHoverVertex(i)}
             onMouseLeave={() => onHoverVertex(null)}
-            style={{ cursor: "pointer", filter: isHovered ? `drop-shadow(0 0 4px ${dotColor})` : undefined }}
+            style={{
+              cursor: "pointer",
+              filter: isHovered ? `drop-shadow(0 0 5px ${dotColor})` : undefined,
+              transition: "r 0.15s",
+            }}
           />
         );
       })}
 
-      {/* Center: score + label */}
+      {/* ── Center score + label ── */}
       <motion.g
-        initial={{ opacity: 0, scale: 0.6 }}
+        initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.6, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ delay: 0.65, duration: 0.4, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}
         style={{ transformOrigin: `${cx}px ${cy}px` }}
       >
         <text
-          x={cx} y={cy + 6}
+          x={cx} y={cy + 7}
           textAnchor="middle"
-          fontSize={20}
-          fontWeight={600}
-          fill={soft}
-          letterSpacing="-0.02em"
+          fontSize={22}
+          fontWeight={700}
+          fill={fillTier.hex}
+          letterSpacing="-0.03em"
         >
           {overallScore}
         </text>
         <text
-          x={cx} y={cy + 17}
+          x={cx} y={cy + 20}
           textAnchor="middle"
-          fontSize={7}
-          fontWeight={600}
-          letterSpacing="0.12em"
-          fill="#9A9A92"
+          fontSize={8.5}
+          fontWeight={700}
+          letterSpacing="0.14em"
+          fill="#5A5A54"
         >
-          M-SCORE
+          {label}
         </text>
       </motion.g>
     </svg>
@@ -315,13 +377,16 @@ function VertexTooltip({ lens, visible }: { lens: InsightLens | null; visible: b
           <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", margin: 0 }}>
             {lens.score}
             <span style={{ fontSize: 11, fontWeight: 400, color: "rgba(255,255,255,0.45)", marginLeft: 2 }}>/ {lens.max_score}</span>
-            <span style={{
-              marginLeft: 8, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em",
-              color: lens.max_score > 0 && (lens.score / lens.max_score) >= 0.7 ? "#1F7A4A"
-                : (lens.score / lens.max_score) >= 0.4 ? "#B4731A" : "#DC2626",
-            }}>
-              {(lens.status || (lens.score / lens.max_score >= 0.7 ? "STRONG" : lens.score / lens.max_score >= 0.4 ? "MODERATE" : "WEAK")).toUpperCase()}
-            </span>
+            {(() => {
+              const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
+              const { hex } = axisStatusColor(pct);
+              const label = lensStatusLabel(pct, lens.status ?? "");
+              return (
+                <span style={{ marginLeft: 8, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", color: hex }}>
+                  {label}
+                </span>
+              );
+            })()}
           </p>
         </motion.div>
       )}
@@ -457,8 +522,8 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
               <VertexTooltip lens={hoveredLens} visible={hoveredVertex !== null} />
               <SVGRadar
                 data={radarData}
-                band={bandLabel}
                 overallScore={overallScore}
+                insightType={insight.type}
                 hoveredIndex={hoveredVertex}
                 onHoverVertex={setHoveredVertex}
               />
@@ -495,14 +560,17 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
               )}
 
               {/* Compact legend */}
-              <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 5 }}>
                 {[
-                  { label: "Strong ≥ 70%", color: "#1F7A4A", soft: "rgba(31,122,74,0.12)" },
-                  { label: "Moderate 40–69%", color: "#B4731A", soft: "rgba(180,115,26,0.12)" },
-                  { label: "Weak < 40%", color: "#DC2626", soft: "rgba(220,38,38,0.12)" },
+                  { label: "Strong ≥ 80%",    tier: TIER_COLORS.strong },
+                  { label: "Moderate 50–79%", tier: TIER_COLORS.moderate },
+                  { label: "Weak < 50%",      tier: TIER_COLORS.weak },
                 ].map((row) => (
                   <div key={row.label} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: 2, background: row.soft, border: `1.5px solid ${row.color}`, flexShrink: 0 }} />
+                    <span style={{
+                      width: 8, height: 8, borderRadius: 2, flexShrink: 0,
+                      background: row.tier.soft, border: `1.5px solid ${row.tier.hex}`,
+                    }} />
                     <span style={{ fontSize: 10, color: "var(--qc-ink-3)", letterSpacing: "0.02em" }}>{row.label}</span>
                   </div>
                 ))}

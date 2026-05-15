@@ -1,17 +1,17 @@
 export function GrowthStatCard({
   title,
   rows,
+  divider,
 }: {
   title: string;
   rows: { label: string; value: number | null | undefined }[];
+  divider?: boolean;
 }) {
   return (
     <div
       style={{
-        borderRadius: 14,
-        border: "1px solid var(--qc-hair)",
-        background: "var(--qc-card)",
         padding: "14px 16px",
+        borderLeft: divider ? "1px solid var(--qc-hair)" : undefined,
       }}
     >
       <div

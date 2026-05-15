@@ -34,11 +34,11 @@ function fmtCr(val: number | null | undefined): string {
 
 // Maps to --qc-* tokens (resolved hex for SVG fill compatibility)
 const COLORS = {
-  revenue:  "#C8C6C0",  // --qc-ink-2 lighter: neutral bar for revenue
-  expenses: "#E9E7E1",  // --qc-hair: muted expenses bar
+  revenue:  "#3D1C54",  // deep purple: primary revenue bar
+  expenses: "#7C4A9E",  // mid purple: expenses bar
   interest: "#B23A2F",  // --qc-down: interest is a cost drag
-  opProfit: "var(--qc-ink)",  // --qc-ink: primary line
-  netProfit:"#9A9A92",  // --qc-ink-2: secondary dashed line
+  opProfit: "#C6DC8A",  // lime-edge: operating profit line
+  netProfit:"#FFEB99",  // golden: net profit secondary line
 };
 
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {

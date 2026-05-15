@@ -90,11 +90,16 @@ export interface FundamentalsKeyMetric {
   assessment: "Positive" | "Negative" | "Neutral";
 }
 
+export interface SwotItem {
+  title: string;
+  description: string;
+}
+
 export interface FundamentalsSwot {
-  strengths: string[];
-  weaknesses: string[];
-  opportunities: string[];
-  threats: string[];
+  strengths: SwotItem[];
+  weaknesses: SwotItem[];
+  opportunities: SwotItem[];
+  threats: SwotItem[];
 }
 
 export interface FundamentalsIntelligence {

@@ -32,9 +32,9 @@ interface MultiLineBarComboChartProps {
 
 // ─── Default colors ───────────────────────────────────────────────────────────
 
-// Warm-neutral palette aligned to the design system
-const BAR_COLORS = ["#A5B4FC", "#93C5FD", "#6EE7B7", "#FCD34D"];
-const LINE_COLORS = ["var(--qc-ink)", "#B4731A", "#5A5A54", "#3A6BEF"];
+// Purple-ink + lime-golden palette aligned to the qc-* design tokens
+const BAR_COLORS = ["rgba(33,11,44,0.75)", "rgba(33,11,44,0.45)", "rgba(33,11,44,0.25)", "rgba(33,11,44,0.15)"];
+const LINE_COLORS = ["var(--qc-ink)", "#C6DC8A", "#7C3FAE", "#9A9A92"];
 
 // ─── Merge series data into flat recharts rows keyed by x ────────────────────
 

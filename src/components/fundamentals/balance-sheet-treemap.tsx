@@ -98,7 +98,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
               </span>
             )}
           </div>
-          <ApexChart type="treemap" series={[{ name: "Assets", data: assets }]} options={baseOptions("#1F7A4A" /* --qc-up */)} height={380} />
+          <ApexChart type="treemap" series={[{ name: "Assets", data: assets }]} options={baseOptions("#3D1C54" /* deep purple: primary asset color */)} height={380} />
         </div>
         <div>
           <div

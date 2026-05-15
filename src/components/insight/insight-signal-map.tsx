@@ -1,43 +1,18 @@
 "use client";
 
 import type { InsightSignalMapItem } from "@/types/analysis";
-import { MonoLabel } from "@/components/ds";
+import { SignalTile } from "@/components/ds";
 
 interface InsightSignalMapProps {
   signals: InsightSignalMapItem[];
   heading?: string;
 }
 
-function tileStyle(sentiment: string): React.CSSProperties {
-  if (sentiment === "positive") {
-    return {
-      background: "#F0FAF4",
-      border: "1px solid #C3E8D0",
-    };
-  }
-  if (sentiment === "negative") {
-    return {
-      background: "#FEF2F0",
-      border: "1px solid #F5C9C3",
-    };
-  }
-  return {
-    background: "#FDF8EE",
-    border: "1px solid #EDE4C8",
-  };
-}
-
-function signalTextColor(sentiment: string): string {
-  if (sentiment === "positive") return "#1A6640";
-  if (sentiment === "negative") return "#B83A2E";
-  return "#7A5C1E";
-}
-
-function categoryColor(sentiment: string): string {
-  if (sentiment === "positive") return "#3A8A5C";
-  if (sentiment === "negative") return "#B83A2E";
-  return "#9A7A3A";
-}
+const SENTIMENT_LABEL: Record<string, string> = {
+  positive: "Positive",
+  negative: "Negative",
+  neutral: "Neutral",
+};
 
 export function InsightSignalMap({ signals, heading }: InsightSignalMapProps) {
   if (!signals.length) return null;
@@ -50,38 +25,15 @@ export function InsightSignalMap({ signals, heading }: InsightSignalMapProps) {
         </h3>
       )}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-        {signals.map((s, i) => {
-          const cat = s.category ?? s.label;
-          const tile = tileStyle(s.sentiment);
-          const signalColor = signalTextColor(s.sentiment);
-          const catColor = categoryColor(s.sentiment);
-
-          return (
-            <div
-              key={i}
-              style={{
-                ...tile,
-                borderRadius: 8,
-                padding: "10px 12px",
-              }}
-            >
-              {cat && (
-                <MonoLabel size={8} tracking="0.10em" color={catColor} style={{ marginBottom: 4 }}>
-                  {cat.toUpperCase()}
-                </MonoLabel>
-              )}
-              <p style={{
-                fontSize: 11,
-                fontWeight: 500,
-                color: signalColor,
-                lineHeight: 1.4,
-                margin: 0,
-              }}>
-                {s.signal}
-              </p>
-            </div>
-          );
-        })}
+        {signals.map((s, i) => (
+          <SignalTile
+            key={i}
+            label={(s.category ?? s.label ?? "Signal").toUpperCase()}
+            value={SENTIMENT_LABEL[s.sentiment] ?? "Neutral"}
+            sentiment={s.sentiment}
+            detail={s.signal}
+          />
+        ))}
       </div>
     </div>
   );

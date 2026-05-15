@@ -10,3 +10,5 @@ export { MonoLabel } from "./MonoLabel";
 export { DarkGradientCard } from "./DarkGradientCard";
 export { CommonCard } from "./CommonCard";
 export { GoldenCard } from "./GoldenCard";
+export { SignalTile } from "./SignalTile";
+export type { SignalTileProps, SignalTileMetric } from "./SignalTile";

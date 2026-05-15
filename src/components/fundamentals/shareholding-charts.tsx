@@ -5,7 +5,8 @@ import ApexChart from "@/components/molecules/apex-chart";
 import type { ShareholdingSection, ShareholdingChild } from "@/hooks/useShareholding";
 import { MonoEyebrow } from "@/components/overview/primitives";
 
-const SHAREHOLDING_COLORS = ["#1A0A2E", "#3D2460", "#6B21A8", "#9333EA", "#C084FC", "#D8B4FE", "#EDE8F5"];
+// Purple-ink ramp → lime accent, derived from qc-* tokens
+const SHAREHOLDING_COLORS = ["#210B2C", "#3D1C54", "#6B2FA0", "#9A60C8", "#C6DC8A", "#FFEB99", "#F3F2EE"];
 
 // Non-promoter child IDs bucketed into DII / FII / Retail
 const DII_IDS = new Set([
@@ -107,7 +108,7 @@ function makeDonutOptions(labels: string[], groupLabel: string): ApexCharts.Apex
               label: groupLabel,
               fontSize: "11px",
               fontFamily: "'IBM Plex Mono', monospace",
-              color: "#7C6998",
+              color: "#5A5A54", // --qc-ink-2
               formatter: (w) => {
                 const total = w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0);
                 return `${total.toFixed(1)}%`;

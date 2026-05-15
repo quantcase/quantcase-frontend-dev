@@ -74,8 +74,8 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         dataLabels: { position: "top" },
       },
     },
-    // transparent spacer, --qc-up, --qc-down, --qc-ink (ApexCharts requires hex)
-    colors: ["transparent", "#1F7A4A", "#B23A2F", "#5A5A54"],
+    // transparent spacer, lime-edge increase, --qc-down decrease, deep-purple total
+    colors: ["transparent", "#7C9E3A", "#B23A2F", "#3D1C54"],
     dataLabels: {
       enabled: true,
       enabledOnSeries: [1, 2, 3],

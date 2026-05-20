@@ -1,6 +1,22 @@
 import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/constants";
 
+export interface TopSignal {
+  signal_id: string;
+  metric: string;
+  label: string;
+  guided_value: number | null;
+  guided_date: string | null;
+  actual_value: number | null;
+  actual_date: string | null;
+  unit: string | null;
+  delta: number | null;
+  delta_pct: number | null;
+  direction: string | null;
+  impact: string | null;
+  statement: string | null;
+}
+
 export interface LensDetail {
   slug: string;
   name: string;
@@ -16,6 +32,7 @@ export interface LensDetail {
   z_score: number;
   signal_count: number;
   computed_at: string;
+  top_signals?: TopSignal[];
 }
 
 export type LensCategory = "management" | "opportunity" | "deal";

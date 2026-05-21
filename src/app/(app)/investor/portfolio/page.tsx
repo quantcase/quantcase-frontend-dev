@@ -474,7 +474,7 @@ export default function InvestorPortfolioPage() {
 
   return (
     <div style={{ background: "var(--qc-bg,#F5F5F5)", minHeight: "100vh" }}>
-      <main style={{ padding: "28px 36px 60px", maxWidth: 1440, fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink,#0F172B)" }}>
+      <main style={{ padding: "28px 36px 60px", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink,#0F172B)" }}>
 
         {/* ── Page header ──────────────────────────────────────────── */}
         <header style={{ marginBottom: 22, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>

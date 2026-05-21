@@ -29,12 +29,9 @@ interface CommunityDiscussionRowProps {
   ipo: IpoDiscussion;
 }
 
-function DiscussionCard({
-  item,
-}: {
-  item: CommunityThread | IpoDiscussion;
-}) {
+function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
   const isIpo = item.kind === "ipo";
+  const isCommunity = !isIpo;
 
   return (
     <div
@@ -42,84 +39,156 @@ function DiscussionCard({
         background: "#fff",
         border: "1px solid #E2E2E2",
         borderRadius: 14,
-        padding: "18px 20px",
         display: "flex",
         flexDirection: "column",
-        gap: 0,
         flex: 1,
+        overflow: "hidden",
       }}
     >
-      {/* Top meta row */}
+      {/* Accent top bar */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 10,
+          height: 3,
+          background: isCommunity
+            ? "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)"
+            : "linear-gradient(90deg, #0F172B 0%, #475569 100%)",
         }}
-      >
-        <span
-          style={{
-            fontSize: 10,
-            fontWeight: 600,
-            color: "#aaa",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-          }}
-        >
-          {item.label}
-        </span>
-        {!isIpo && (item as CommunityThread).liveTag && (
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#ef4444", display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#ef4444", display: "inline-block" }} />
-            LIVE
-          </span>
-        )}
-        {isIpo && (
-          <span style={{ fontSize: 11, fontWeight: 500, color: "#888" }}>
-            OPENS {(item as IpoDiscussion).opensTag}
-          </span>
-        )}
-      </div>
-
-      {/* Title */}
-      <div
-        style={{ fontSize: 22, fontWeight: 400, color: "#0F172B", lineHeight: 1.25, marginBottom: 10, fontFamily: "Georgia, serif" }}
-        dangerouslySetInnerHTML={{ __html: item.titleHtml }}
       />
 
-      {/* Body */}
-      <p style={{ fontSize: 13, color: "#888", lineHeight: 1.55, margin: "0 0 18px" }}>
-        {item.body}
-      </p>
-
-      {/* Divider */}
-      <div style={{ height: 1, background: "#F0F0F0", marginBottom: 14 }} />
-
-      {/* Footer: stats + CTA */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", gap: 20 }}>
-          {item.stats.map((s) => (
-            <span key={s.label} style={{ fontSize: 12, color: "#555" }}>
-              <span style={{ fontWeight: 700 }}>{s.value}</span>
-              <span style={{ color: "#aaa", marginLeft: 4 }}>{s.label}</span>
+      <div style={{ padding: "18px 22px", display: "flex", flexDirection: "column", flex: 1 }}>
+        {/* Top meta row */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 14,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              color: "#aaa",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+            }}
+          >
+            {item.label}
+          </span>
+          {isCommunity && (item as CommunityThread).liveTag && (
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: "#ef4444",
+                background: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: 20,
+                padding: "3px 8px",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                letterSpacing: "0.06em",
+              }}
+            >
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "#ef4444",
+                  display: "inline-block",
+                  animation: "pulse 1.5s infinite",
+                }}
+              />
+              LIVE
             </span>
+          )}
+          {isIpo && (
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color: "#0F172B",
+                background: "#F5F5F5",
+                border: "1px solid #E2E2E2",
+                borderRadius: 20,
+                padding: "3px 10px",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+              }}
+            >
+              OPENS {(item as IpoDiscussion).opensTag}
+            </span>
+          )}
+        </div>
+
+        {/* Title */}
+        <div
+          style={{
+            fontSize: 21,
+            fontWeight: 400,
+            color: "#0F172B",
+            lineHeight: 1.3,
+            marginBottom: 12,
+            fontFamily: "Georgia, serif",
+            letterSpacing: "-0.01em",
+          }}
+          dangerouslySetInnerHTML={{ __html: item.titleHtml }}
+        />
+
+        {/* Body */}
+        <p style={{ fontSize: 13, color: "#888", lineHeight: 1.6, margin: "0 0 20px", flex: 1 }}>
+          {item.body}
+        </p>
+
+        {/* Stats row */}
+        <div
+          style={{
+            display: "flex",
+            gap: 0,
+            marginBottom: 18,
+            background: "#F8F8F8",
+            borderRadius: 8,
+            border: "1px solid #EFEFEF",
+            overflow: "hidden",
+          }}
+        >
+          {item.stats.map((s, i) => (
+            <div
+              key={s.label}
+              style={{
+                flex: 1,
+                padding: "10px 14px",
+                borderRight: i < item.stats.length - 1 ? "1px solid #EFEFEF" : "none",
+              }}
+            >
+              <div style={{ fontSize: 18, fontWeight: 700, color: "#0F172B", lineHeight: 1 }}>
+                {s.value}
+              </div>
+              <div style={{ fontSize: 10, color: "#aaa", marginTop: 3, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                {s.label}
+              </div>
+            </div>
           ))}
         </div>
+
+        {/* CTA */}
         <Link
           href={item.href}
-          target="_blank"
-          rel="noopener noreferrer"
           style={{
             fontSize: 12,
-            fontWeight: 500,
-            color: "#0F172B",
-            background: "#fff",
-            border: "1px solid #E2E2E2",
+            fontWeight: 600,
+            color: isCommunity ? "#7c3aed" : "#0F172B",
+            background: isCommunity ? "#f5f3ff" : "#F5F5F5",
+            border: `1px solid ${isCommunity ? "#ddd6fe" : "#E2E2E2"}`,
             borderRadius: 8,
-            padding: "6px 14px",
+            padding: "9px 18px",
             textDecoration: "none",
-            whiteSpace: "nowrap",
+            display: "block",
+            textAlign: "center",
+            letterSpacing: "0.02em",
           }}
         >
           {item.cta}

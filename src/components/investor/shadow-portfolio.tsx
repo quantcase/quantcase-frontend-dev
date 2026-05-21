@@ -25,31 +25,17 @@ interface ShadowPortfolioProps {
   thesisDriftCount: number;
 }
 
-const convictionStyle: Record<Conviction, { color: string }> = {
-  POSITIVE: { color: "#22c55e" },
-  NEUTRAL:  { color: "#888" },
-  WATCH:    { color: "#f59e0b" },
-  HOLD:     { color: "#6366f1" },
-};
-
-const thesisTagStyle: Record<ThesisTag, { bg: string; color: string; border: string }> = {
-  OPPORTUNITY: { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
-  MANAGEMENT:  { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
-  DEAL:        { bg: "#faf5ff", color: "#7e22ce", border: "#e9d5ff" },
-};
-
 function ThesisTag({ tag }: { tag: ThesisTag }) {
-  const s = thesisTagStyle[tag];
   return (
     <span
       style={{
         fontSize: 10,
-        fontWeight: 600,
-        background: s.bg,
-        color: s.color,
-        border: `1px solid ${s.border}`,
-        borderRadius: 4,
-        padding: "2px 7px",
+        fontWeight: 500,
+        background: "#F5F5F5",
+        color: "#555",
+        border: "1px solid #E2E2E2",
+        borderRadius: 3,
+        padding: "1px 6px",
         letterSpacing: "0.04em",
         textTransform: "uppercase",
       }}
@@ -76,7 +62,7 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
       }}
     >
       {/* Header */}
-      <div style={{ padding: "16px 20px 0" }}>
+      <div style={{ padding: "14px 20px 0" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: "#0F172B", letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -89,8 +75,8 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
                 color: "#555",
                 background: "#F0F0F0",
                 borderRadius: "50%",
-                width: 22,
-                height: 22,
+                width: 20,
+                height: 20,
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -102,16 +88,13 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <button
               style={{
-                fontSize: 12,
-                color: "#0F172B",
+                fontSize: 11,
+                color: "#555",
                 background: "#fff",
                 border: "1px solid #E2E2E2",
-                borderRadius: 8,
-                padding: "5px 12px",
+                borderRadius: 6,
+                padding: "4px 10px",
                 cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
               }}
             >
               All theses ▾
@@ -120,13 +103,13 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
               href="#"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ fontSize: 12, color: "#888", textDecoration: "none" }}
+              style={{ fontSize: 11, color: "#888", textDecoration: "none" }}
             >
               Manage →
             </Link>
           </div>
         </div>
-        <div style={{ fontSize: 12, color: "#888", marginBottom: 0, paddingBottom: 14 }}>
+        <div style={{ fontSize: 11, color: "#aaa", paddingBottom: 12 }}>
           Stocks you&apos;re tracking · tagged by your investment thesis (MOD)
         </div>
       </div>
@@ -138,11 +121,11 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "2fr 1fr 0.7fr 0.7fr 3fr 1.2fr 0.8fr",
-          padding: "8px 20px",
+          gridTemplateColumns: "2fr 1fr 0.6fr 0.6fr 3fr 1.1fr 0.7fr",
+          padding: "7px 20px",
           fontSize: 10,
           fontWeight: 500,
-          color: "#aaa",
+          color: "#bbb",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           borderBottom: "1px solid #E2E2E2",
@@ -151,8 +134,8 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
         <div>STOCK</div>
         <div>LTP</div>
         <div>1D</div>
-        <div>QC SCORE</div>
-        <div>WHY YOU INVESTED</div>
+        <div>QC</div>
+        <div>THESIS</div>
         <div>CONVICTION</div>
         <div></div>
       </div>
@@ -164,44 +147,41 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
             key={s.symbol}
             style={{
               display: "grid",
-              gridTemplateColumns: "2fr 1fr 0.7fr 0.7fr 3fr 1.2fr 0.8fr",
-              padding: "14px 20px",
+              gridTemplateColumns: "2fr 1fr 0.6fr 0.6fr 3fr 1.1fr 0.7fr",
+              padding: "10px 20px",
               alignItems: "center",
-              borderBottom: i < stocks.length - 1 ? "1px solid #F0F0F0" : "none",
+              borderBottom: i < stocks.length - 1 ? "1px solid #F5F5F5" : "none",
             }}
           >
             {/* Stock */}
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: "#0F172B" }}>{s.symbol}</div>
-              <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>{s.name}</div>
+              <div style={{ fontSize: 11, color: "#aaa", marginTop: 1 }}>{s.name}</div>
             </div>
 
             {/* LTP */}
-            <div style={{ fontSize: 13, fontWeight: 500, color: "#0F172B" }}>{s.ltp}</div>
+            <div style={{ fontSize: 12, fontWeight: 500, color: "#0F172B" }}>{s.ltp}</div>
 
             {/* 1D */}
-            <div style={{ fontSize: 13, fontWeight: 500, color: s.changePositive ? "#22c55e" : "#ef4444" }}>
+            <div style={{ fontSize: 12, fontWeight: 500, color: s.changePositive ? "#16a34a" : "#dc2626" }}>
               {s.change1d}
             </div>
 
             {/* QC Score */}
-            <div style={{ fontSize: 13, fontWeight: 500, color: "#0F172B" }}>{s.qcScore}</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#0F172B" }}>{s.qcScore}</div>
 
-            {/* Why You Invested */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+            {/* Thesis */}
+            <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
               {s.thesisTags.map(tag => <ThesisTag key={tag} tag={tag} />)}
               <button
                 style={{
-                  fontSize: 11,
-                  color: "#555",
+                  fontSize: 10,
+                  color: "#777",
                   background: "#F5F5F5",
                   border: "1px solid #E2E2E2",
-                  borderRadius: 5,
-                  padding: "2px 8px",
+                  borderRadius: 3,
+                  padding: "1px 6px",
                   cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 3,
                 }}
               >
                 {s.whyInvested} ▾
@@ -210,23 +190,23 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
                 <span
                   style={{
                     fontSize: 10,
-                    fontWeight: 600,
-                    color: "#b45309",
-                    background: "#fef9c3",
+                    fontWeight: 500,
+                    color: "#92400e",
+                    background: "#fef3c7",
                     border: "1px solid #fde68a",
-                    borderRadius: 4,
-                    padding: "2px 7px",
-                    letterSpacing: "0.04em",
+                    borderRadius: 3,
+                    padding: "1px 6px",
+                    letterSpacing: "0.03em",
                     textTransform: "uppercase",
                   }}
                 >
-                  THESIS DRIFT
+                  DRIFT
                 </span>
               )}
             </div>
 
-            {/* Conviction */}
-            <div style={{ fontSize: 12, fontWeight: 700, color: convictionStyle[s.conviction].color, letterSpacing: "0.05em" }}>
+            {/* Conviction — plain text, no color except semantic */}
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#555", letterSpacing: "0.04em", textTransform: "uppercase" }}>
               {s.conviction}
             </div>
 
@@ -237,12 +217,12 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  fontSize: 12,
+                  fontSize: 11,
                   color: "#0F172B",
                   background: "#fff",
                   border: "1px solid #E2E2E2",
-                  borderRadius: 7,
-                  padding: "5px 12px",
+                  borderRadius: 6,
+                  padding: "4px 10px",
                   textDecoration: "none",
                   fontWeight: 500,
                   whiteSpace: "nowrap",
@@ -259,28 +239,28 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
       <div style={{ height: 1, background: "#E2E2E2" }} />
 
       {/* Footer */}
-      <div style={{ padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontSize: 12, color: "#555" }}>
-          <span style={{ fontWeight: 600 }}>{mgmtCount} on Management</span>
-          <span style={{ color: "#aaa", margin: "0 5px" }}>·</span>
-          <span style={{ fontWeight: 600 }}>{oppCount} on Opportunity</span>
-          <span style={{ color: "#aaa", margin: "0 5px" }}>·</span>
-          <span style={{ fontWeight: 600 }}>{dealCount} on Deal</span>
+      <div style={{ padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ fontSize: 11, color: "#888" }}>
+          <span style={{ fontWeight: 600, color: "#555" }}>{mgmtCount} on Management</span>
+          <span style={{ color: "#ddd", margin: "0 5px" }}>·</span>
+          <span style={{ fontWeight: 600, color: "#555" }}>{oppCount} on Opportunity</span>
+          <span style={{ color: "#ddd", margin: "0 5px" }}>·</span>
+          <span style={{ fontWeight: 600, color: "#555" }}>{dealCount} on Deal</span>
           {thesisDriftCount > 0 && (
             <>
-              <span style={{ color: "#aaa", margin: "0 5px" }}>·</span>
-              <span style={{ color: "#b45309" }}>⚠ {thesisDriftCount} thesis drifting from QC view</span>
+              <span style={{ color: "#ddd", margin: "0 5px" }}>·</span>
+              <span style={{ color: "#92400e" }}>⚠ {thesisDriftCount} thesis drifting from QC view</span>
             </>
           )}
         </div>
         <button
           style={{
-            fontSize: 12,
+            fontSize: 11,
             color: "#0F172B",
             background: "#fff",
             border: "1px solid #E2E2E2",
-            borderRadius: 8,
-            padding: "6px 14px",
+            borderRadius: 6,
+            padding: "5px 12px",
             cursor: "pointer",
             fontWeight: 500,
           }}

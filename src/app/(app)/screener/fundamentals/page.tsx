@@ -169,10 +169,10 @@ function FinancialsContent() {
       <div className="px-4 pt-6 pb-8 space-y-6">
 
         {/* Two-column section: Left (Charts, SWOT, Growth & Returns) + Right (Decision Intelligence) */}
-        <div className="grid grid-cols-4 gap-[14px] items-start">
+        <div className="grid grid-cols-3 gap-[14px] items-start">
 
           {/* Left column */}
-          <div className="col-span-3 space-y-6">
+          <div className="col-span-2 space-y-6">
 
             {/* Price / PE / Sales chart */}
             {chartsData && (

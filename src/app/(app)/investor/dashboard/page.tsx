@@ -160,7 +160,7 @@ const COMMUNITY_THREAD: CommunityThread = {
     { value: 3,   label: "top contributors" },
   ],
   cta: "Join discussion →",
-  href: "#",
+  href: "/screener/home",
 };
 
 const IPO_DISCUSSION: IpoDiscussion = {
@@ -174,7 +174,7 @@ const IPO_DISCUSSION: IpoDiscussion = {
     { value: 12, label: "independent verdicts" },
   ],
   cta: "Open room →",
-  href: "#",
+  href: "/screener/home",
 };
 
 const DISCOVER_SCREENS: DiscoverScreen[] = [
@@ -190,7 +190,7 @@ const DISCOVER_SCREENS: DiscoverScreen[] = [
       { value: 7,  label: "QC SCORE >75"   },
       { value: 4,  label: "IN YOUR SECTORS"},
     ],
-    href: "#",
+    href: "/screener/home",
   },
   {
     id: "cash-rich",
@@ -204,7 +204,7 @@ const DISCOVER_SCREENS: DiscoverScreen[] = [
       { value: 11, label: "QC SCORE >70" },
       { value: 2,  label: "YOU HOLD"     },
     ],
-    href: "#",
+    href: "/screener/home",
   },
   {
     id: "52w-lows",
@@ -216,7 +216,7 @@ const DISCOVER_SCREENS: DiscoverScreen[] = [
       { value: 5,  label: "AVG DISC > 25%"},
       { value: 1,  label: "YOU WATCH"     },
     ],
-    href: "#",
+    href: "/screener/home",
   },
 ];
 
@@ -246,7 +246,6 @@ export default function InvestorDashboardPage() {
       <main
         style={{
           padding: "28px 36px 60px",
-          maxWidth: 1440,
           fontFamily: "var(--qc-font-sans)",
           color: "var(--qc-ink, #0F172B)",
         }}
@@ -353,7 +352,7 @@ export default function InvestorDashboardPage() {
         <section
           style={{
             display: "grid",
-            gridTemplateColumns: "280px 1fr",
+            gridTemplateColumns: "380px 1fr",
             gap: 14,
             marginBottom: 14,
             alignItems: "stretch",
@@ -406,7 +405,7 @@ export default function InvestorDashboardPage() {
             newIcNotes={3}
             catalystsNext30Days={5}
             subtitle="DRHP verdicts, management commentary & thesis updates"
-            href="#"
+            href="/screener/home"
           />
         </section>
       </main>

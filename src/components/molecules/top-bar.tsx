@@ -1,11 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { ChevronRight, Eye, CandlestickChart, BookOpen, Sparkles, LayoutDashboard, Users, PieChart, Wrench, LineChart } from "lucide-react";
 import { Suspense, useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+
+const INDUSTRY_TABS = [
+  { id: "dashboard",         label: "Dashboard" },
+  { id: "industry-ranking",  label: "Industry ranking" },
+  { id: "deep-dive",         label: "Deep-dive" },
+  { id: "stock-ranking",     label: "Stock ranking" },
+  { id: "rotation-alerts",   label: "Rotation & alerts" },
+  { id: "universe-browser",  label: "Universe browser" },
+  { id: "news-intelligence", label: "News intelligence" },
+] as const;
 
 const quickSymbols = ["HDFC", "TCS", "INFY", "ICICI"];
 
@@ -99,6 +109,7 @@ function SearchZone() {
 function TopBarInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const symbol = searchParams.get("symbol");
   const rmId = searchParams.get("rm_id");
 
@@ -144,14 +155,32 @@ function TopBarInner() {
 
   const isIndustryTerminal = pathname === "/screener/industry-intelligence";
   const isAdmin = pathname.startsWith("/admin");
-
   const isInvestorDashboard = pathname === "/investor/dashboard";
 
-  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin || isInvestorDashboard || isIndustryTerminal) return null;
+  const activeIndustryTab = searchParams.get("tab") ?? "dashboard";
+
+  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin || isInvestorDashboard) return null;
 
   let leftZone: React.ReactNode = null;
 
-  if (isHome || (isTerminal && !hasAssetSelected)) {
+  if (isIndustryTerminal) {
+    leftZone = (
+      <div
+        className="flex items-center gap-0.5 rounded-full p-1"
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
+      >
+        {INDUSTRY_TABS.map((tab) => (
+          <PillTab
+            key={tab.id}
+            active={activeIndustryTab === tab.id}
+            onClick={() => router.push(`/screener/industry-intelligence?tab=${tab.id}`)}
+          >
+            {tab.label}
+          </PillTab>
+        ))}
+      </div>
+    );
+  } else if (isHome || (isTerminal && !hasAssetSelected)) {
     leftZone = <SearchZone />;
   } else if (hasAssetSelected) {
     const terminalTabs = [

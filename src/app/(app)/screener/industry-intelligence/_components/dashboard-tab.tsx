@@ -1,6 +1,5 @@
 "use client";
 
-import { MetricTile } from "@/components/molecules/metric-tile";
 import { TabularCard } from "@/components/molecules/tabular-card";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -127,7 +126,6 @@ function NewsItemCard({ item }: { item: IITopNewsItem }) {
 
 export function DashboardTab({ data }: { data: IIDashboard }) {
   const {
-    summary_tiles: tiles,
     top_5_industries,
     bottom_3_industries,
     portfolio_holdings,
@@ -137,34 +135,6 @@ export function DashboardTab({ data }: { data: IIDashboard }) {
 
   return (
     <div className="px-6 py-5 space-y-5">
-
-      {/* Metric tiles */}
-      <div className="grid grid-cols-4 gap-4">
-        <MetricTile
-          label="Market Regime"
-          value={safeStr(tiles?.market_regime?.value)}
-          change={safeStr(tiles?.market_regime?.change)}
-          sublabel={safeStr(tiles?.market_regime?.since_label)}
-        />
-
-        <MetricTile
-          label="Top Cluster"
-          value={safeStr(tiles?.top_cluster?.name)}
-          sublabel={`Score ${safeNum(tiles?.top_cluster?.score)} · ${safeStr(tiles?.top_cluster?.quartile)} · #${safeNum(tiles?.top_cluster?.rank)}`}
-        />
-
-        <MetricTile
-          label="Biggest Mover"
-          value={safeStr(tiles?.biggest_mover?.name)}
-          change={safeStr(tiles?.biggest_mover?.label)}
-        />
-
-        <MetricTile
-          label="News This Week"
-          value={String(safeNum(tiles?.news_this_week?.count))}
-          sublabel={`${safeNum(tiles?.news_this_week?.clusters_affected)} clusters affected`}
-        />
-      </div>
 
       {/* Body */}
       <div className="flex gap-5 items-start">

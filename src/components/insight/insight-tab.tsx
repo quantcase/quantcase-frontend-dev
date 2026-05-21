@@ -18,11 +18,6 @@ import { LensDrawer } from "@/components/insight/lens-drawer";
 import type { InsightType } from "@/types/analysis";
 import type { TranscriptCall } from "@/types/management";
 
-const NAV_ITEMS = [
-  { id: "section-score", label: "Score" },
-  { id: "section-lenses", label: "Lenses" },
-  { id: "section-signal-map", label: "Signals" },
-];
 
 const TYPE_LABELS: Record<InsightType, string> = {
   management: "Management Factor",
@@ -239,7 +234,6 @@ function InsightTabContent({ type }: { type: InsightType }) {
 
   return (
     <ScreenerPageShell
-      navItems={NAV_ITEMS}
       headerRight={
         <ReanalyzeButton
           isAnalyzing={isAnalyzing}

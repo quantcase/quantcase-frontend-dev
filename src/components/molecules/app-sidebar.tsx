@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, LogOut, BarChart2, BookOpen } from "lucide-react";
+import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, LogOut, BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TooltipProvider,
@@ -26,7 +26,6 @@ const investorNavItems = [
   { label: "Home",      href: "/investor/dashboard", icon: Home,      isActive: (p: string) => p === "/investor/dashboard" },
   { label: "Terminal",  href: "/screener/home",      icon: Monitor,   isActive: (p: string) => p.startsWith("/screener") },
   { label: "Portfolio", href: "/investor/portfolio", icon: BarChart2, isActive: (p: string) => p.startsWith("/investor/portfolio") },
-  { label: "Research",  href: "/investor/research",  icon: BookOpen,  isActive: (p: string) => p.startsWith("/investor/research") },
   { label: "Settings",  href: "/settings",           icon: Settings,  isActive: (p: string) => p.startsWith("/settings") },
 ];
 

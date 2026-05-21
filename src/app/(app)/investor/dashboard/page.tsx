@@ -273,7 +273,7 @@ export default function InvestorDashboardPage() {
               fontFamily: "var(--qc-font-sans)",
             }}
           >
-            {greeting}, <span style={{ fontWeight: 500 }}>Arjun</span>
+            {greeting}, <span style={{ fontWeight: 500 }}>Raj</span>
           </h1>
           <div
             style={{

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, LogOut } from "lucide-react";
+import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, LogOut, BarChart2, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TooltipProvider,
@@ -11,8 +11,9 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { useUser } from "@/components/providers/UserContext";
 
-const navItems = [
+const managerNavItems = [
   { label: "Home",     href: "/dashboard",          icon: Home,       isActive: (p: string) => p === "/dashboard" },
   { label: "Terminal", href: "/screener/home",      icon: Monitor,    isActive: (p: string) => p.startsWith("/screener") },
   { label: "WealthOS", href: "/wealthos/dashboard", icon: Briefcase,  isActive: (p: string) => p.startsWith("/wealthos") },
@@ -21,10 +22,19 @@ const navItems = [
   { label: "Admin",    href: "/admin/pipelines",    icon: Shield,     isActive: (p: string) => p.startsWith("/admin") },
 ];
 
+const investorNavItems = [
+  { label: "Home",      href: "/investor/dashboard", icon: Home,      isActive: (p: string) => p === "/investor/dashboard" },
+  { label: "Terminal",  href: "/screener/home",      icon: Monitor,   isActive: (p: string) => p.startsWith("/screener") },
+  { label: "Portfolio", href: "/investor/portfolio", icon: BarChart2, isActive: (p: string) => p.startsWith("/investor/portfolio") },
+  { label: "Research",  href: "/investor/research",  icon: BookOpen,  isActive: (p: string) => p.startsWith("/investor/research") },
+  { label: "Settings",  href: "/settings",           icon: Settings,  isActive: (p: string) => p.startsWith("/settings") },
+];
+
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { accountType } = useUser();
 
   function handleLogout() {
     localStorage.clear();
@@ -33,6 +43,7 @@ export function AppSidebar() {
 
   if (pathname === "/signin") return null;
   const isDark = theme === "dark-purple";
+  const navItems = accountType === "investor" ? investorNavItems : managerNavItems;
 
   return (
     <aside

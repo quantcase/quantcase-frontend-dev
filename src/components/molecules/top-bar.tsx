@@ -144,7 +144,9 @@ function TopBarInner() {
 
   const isAdmin = pathname.startsWith("/admin");
 
-  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin) return null;
+  const isInvestorDashboard = pathname === "/investor/dashboard";
+
+  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin || isInvestorDashboard) return null;
 
   let leftZone: React.ReactNode = null;
 

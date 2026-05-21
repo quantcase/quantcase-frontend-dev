@@ -62,6 +62,8 @@ export function ResearchLibraryBanner({ newIcNotes, catalystsNext30Days, subtitl
       {/* CTA */}
       <Link
         href={href}
+        target="_blank"
+        rel="noopener noreferrer"
         style={{
           fontSize: 12,
           fontWeight: 500,

@@ -16,7 +16,6 @@ import {
   BookmarkCheck,
   ChevronLeft,
   ChevronRight,
-  Plus,
 } from "lucide-react";
 import {
   useReactTable,
@@ -33,6 +32,9 @@ import {
 import { useBaskets } from "@/hooks/useBaskets";
 import { useBasketStocks } from "@/hooks/useBasketStocks";
 import { useWatchlists } from "@/hooks/useWatchlists";
+import { useIndustryBaskets } from "@/hooks/useIndustryBaskets";
+import { useIndustryBasketStocks } from "@/hooks/useIndustryBasketStocks";
+import type { IndustryBasketStock } from "@/hooks/useIndustryBasketStocks";
 import type { BasketCondition, BasketStock } from "@/types/screener";
 
 // ── Formatters ────────────────────────────────────────────────────────────────
@@ -349,6 +351,390 @@ function SortIcon({ dir }: { dir: false | "asc" | "desc" }) {
   return <ChevronsUpDown className="h-3 w-3 inline-block ml-1 opacity-30" />;
 }
 
+// ── Industry basket signal badge ──────────────────────────────────────────────
+
+const SIGNAL_STYLE: Record<string, { bg: string; border: string; color: string }> = {
+  BUY:   { bg: "#f0faf0", border: "#c3e6c3", color: "#3a6b3a" },
+  WAIT:  { bg: "#fdf8ed", border: "#f0d89a", color: "#8a5e1a" },
+  AVOID: { bg: "#fdf0f0", border: "#f0c4c4", color: "#8a2020" },
+};
+
+// ── Industry basket detail view ───────────────────────────────────────────────
+
+function IndustryBasketView({ basketId }: { basketId: string }) {
+  const router = useRouter();
+  const { data: listData } = useIndustryBaskets();
+  const { data, loading, error } = useIndustryBasketStocks(basketId);
+
+  const basketMeta = listData?.baskets.find((b) => b.id === basketId);
+  const basket = data?.basket ?? (basketMeta ? { ...basketMeta } : null);
+  const stocks: IndustryBasketStock[] = data?.stocks ?? [];
+  const pagination = data?.pagination;
+
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [pageSize, setPageSize] = useState(20);
+  const [columnFilters] = useState<ColumnFiltersState>([]);
+
+  // Derive factor columns from first stock
+  const factorKeys: string[] = useMemo(() => {
+    if (!stocks.length) return [];
+    return Object.keys(stocks[0].factors ?? {});
+  }, [stocks]);
+
+  const columns = useMemo<ColumnDef<IndustryBasketStock>[]>(() => {
+    const cols: ColumnDef<IndustryBasketStock>[] = [
+      {
+        id: "select",
+        header: ({ table }) => (
+          <input
+            type="checkbox"
+            checked={table.getIsAllPageRowsSelected()}
+            ref={(el) => { if (el) el.indeterminate = table.getIsSomePageRowsSelected(); }}
+            onChange={table.getToggleAllPageRowsSelectedHandler()}
+            className="accent-[var(--qc-ink)] h-3.5 w-3.5 rounded cursor-pointer"
+          />
+        ),
+        cell: ({ row }) => (
+          <input
+            type="checkbox"
+            checked={row.getIsSelected()}
+            onChange={row.getToggleSelectedHandler()}
+            onClick={(e) => e.stopPropagation()}
+            className="accent-[var(--qc-ink)] h-3.5 w-3.5 rounded cursor-pointer"
+          />
+        ),
+        size: 40,
+        enableSorting: false,
+      },
+      {
+        id: "index",
+        header: "#",
+        cell: ({ row }) => (
+          <span className="text-[11px] tabular-nums" style={{ color: "var(--qc-ink-2)" }}>{row.index + 1}</span>
+        ),
+        size: 40,
+        enableSorting: false,
+      },
+      {
+        id: "ticker",
+        accessorKey: "ticker",
+        header: "Ticker",
+        cell: ({ getValue }) => (
+          <span className="font-mono text-[12px] font-semibold" style={{ color: "var(--qc-ink)" }}>
+            {getValue() as string}
+          </span>
+        ),
+        sortingFn: (a, b) => a.original.ticker.localeCompare(b.original.ticker),
+        filterFn: "includesString",
+      },
+      {
+        id: "composite_score",
+        accessorKey: "composite_score",
+        header: "QC Score",
+        cell: ({ getValue }) => {
+          const v = getValue() as number;
+          const color = v >= 70 ? "var(--qc-up)" : v >= 50 ? "var(--qc-warn)" : "var(--qc-down)";
+          return (
+            <span className="text-[13px] font-semibold tabular-nums" style={{ color }}>
+              {v.toFixed(1)}
+            </span>
+          );
+        },
+        sortingFn: (a, b) => a.original.composite_score - b.original.composite_score,
+      },
+    ];
+
+    for (const key of factorKeys) {
+      cols.push({
+        id: `factor_${key}`,
+        header: key.charAt(0).toUpperCase() + key.slice(1),
+        cell: ({ row }) => {
+          const v = row.original.factors[key];
+          if (v == null) return <span style={{ color: "var(--qc-ink-2)" }}>—</span>;
+          return (
+            <span className="text-[12px] tabular-nums" style={{ color: "var(--qc-ink-2)" }}>
+              {v.toFixed(1)}
+            </span>
+          );
+        },
+        sortingFn: (a, b) => {
+          const av = a.original.factors[key] ?? 0;
+          const bv = b.original.factors[key] ?? 0;
+          return av - bv;
+        },
+        accessorFn: (row) => row.factors[key],
+      });
+    }
+
+    cols.push({
+      id: "arrow",
+      header: "",
+      cell: () => (
+        <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--qc-ink)" }} />
+      ),
+      size: 40,
+      enableSorting: false,
+    });
+
+    return cols;
+  }, [factorKeys]);
+
+  const table = useReactTable({
+    data: stocks,
+    columns,
+    state: { sorting, columnFilters, globalFilter, rowSelection },
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize }, sorting: [{ id: "composite_score", desc: true }] },
+    enableRowSelection: true,
+    getRowId: (row) => row.ticker,
+  });
+
+  const currentPageSize = table.getState().pagination.pageSize;
+  if (currentPageSize !== pageSize) table.setPageSize(pageSize);
+
+  const selectedSymbols = Object.keys(rowSelection);
+  const selectedCount = selectedSymbols.length;
+  const signal = (basket?.signal ?? "WAIT") as string;
+  const sigStyle = SIGNAL_STYLE[signal] ?? SIGNAL_STYLE.WAIT;
+  const metrics = basket && "metrics" in basket ? (basket as { metrics: { composite_score: number; velocity_3w: number; breadth_pct: number; stock_count: number } }).metrics : null;
+
+  return (
+    <div className="min-h-screen" style={{ background: "var(--qc-bg)" }}>
+      {/* Hero */}
+      <div className="relative" style={{ background: "var(--qc-bg)" }}>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-56 overflow-hidden">
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime) 0%, transparent 70%)" }} />
+        </div>
+
+        <div className="relative max-w-[1400px] mx-auto px-8 pt-10 pb-8">
+          {loading && !basket && (
+            <div className="flex items-center gap-2 py-16 justify-center" style={{ color: "var(--qc-ink-2)" }}>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Loading basket…</span>
+            </div>
+          )}
+          {error && (
+            <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" style={{ color: "var(--qc-down)" }} />
+              <p className="text-sm" style={{ color: "var(--qc-down)" }}>{error}</p>
+            </div>
+          )}
+
+          {basket && (
+            <div className="flex items-start justify-between gap-6 flex-wrap">
+              <div className="space-y-2 flex-1 min-w-0">
+                <button
+                  onClick={() => router.push("/screener/home")}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-medium mb-1 transition-opacity hover:opacity-60"
+                  style={{ color: "var(--qc-ink-2)" }}
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Industry Signals
+                </button>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[6px] border text-[11px] font-bold uppercase tracking-[0.08em]"
+                    style={{ background: sigStyle.bg, borderColor: sigStyle.border, color: sigStyle.color }}
+                  >
+                    {signal}
+                  </div>
+                  {"etfTicker" in basket && basket.etfTicker && (
+                    <span className="text-[11px] font-mono" style={{ color: "var(--qc-ink-2)" }}>
+                      {basket.etfTicker}
+                    </span>
+                  )}
+                </div>
+
+                <h1 className="text-[32px] font-medium leading-tight" style={{ color: "var(--qc-ink)" }}>
+                  {"title" in basket && basket.title ? basket.title : basketId}
+                </h1>
+                <p className="text-[13px]" style={{ color: "var(--qc-ink-2)" }}>
+                  Constituent stocks · scored by QC composite framework
+                </p>
+              </div>
+
+              {metrics && (
+                <div className="flex items-center gap-3 flex-shrink-0 pt-6">
+                  {[
+                    { label: "Composite", value: metrics.composite_score.toFixed(1) },
+                    { label: "3W Velocity", value: `${metrics.velocity_3w > 0 ? "+" : ""}${metrics.velocity_3w}` },
+                    { label: "Breadth", value: `${metrics.breadth_pct.toFixed(0)}%` },
+                    { label: "Stocks", value: String(pagination?.total ?? metrics.stock_count) },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border"
+                      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
+                    >
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--qc-ink-2)" }}>{label}</span>
+                      <span className="text-[15px] font-semibold" style={{ color: "var(--qc-ink)" }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="max-w-[1400px] mx-auto px-8 py-8">
+        <div className="rounded-[10px] border p-2" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}>
+          {/* Toolbar */}
+          <div className="px-2 pt-1 pb-3 flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-[10px] font-bold uppercase tracking-[0.10em]" style={{ color: "var(--qc-ink)" }}>
+              Constituent Stocks
+            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5"
+                style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
+              >
+                <Search className="h-3 w-3 flex-shrink-0" style={{ color: "var(--qc-ink-2)" }} />
+                <input
+                  type="text"
+                  value={globalFilter}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  placeholder="Search…"
+                  className="w-32 text-[12px] outline-none bg-transparent"
+                  style={{ color: "var(--qc-ink)" }}
+                />
+                {globalFilter && (
+                  <button onClick={() => setGlobalFilter("")}>
+                    <X className="h-3 w-3" style={{ color: "var(--qc-ink-2)" }} />
+                  </button>
+                )}
+              </div>
+              <select
+                value={pageSize}
+                onChange={(e) => { setPageSize(Number(e.target.value)); table.setPageSize(Number(e.target.value)); }}
+                className="rounded-[8px] px-2 py-1.5 text-[11px] outline-none cursor-pointer"
+                style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", color: "var(--qc-ink-2)" }}
+              >
+                {[10, 20, 50].map((n) => <option key={n} value={n}>{n} / page</option>)}
+              </select>
+              {selectedCount > 0 && (
+                <span className="text-[11px] font-semibold" style={{ color: "var(--qc-ink)" }}>
+                  {selectedCount} selected
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-[10px] overflow-hidden" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)" }}>
+            {loading && (
+              <div className="flex items-center justify-center py-16 gap-2" style={{ color: "var(--qc-ink-2)" }}>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Loading stocks…</span>
+              </div>
+            )}
+            {!loading && error && (
+              <div className="flex items-center justify-center py-16 gap-2" style={{ color: "var(--qc-down)" }}>
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-sm">{error}</span>
+              </div>
+            )}
+            {!loading && !error && stocks.length === 0 && (
+              <p className="text-sm text-center py-14" style={{ color: "var(--qc-ink-2)" }}>No stocks found.</p>
+            )}
+            {!loading && !error && stocks.length > 0 && (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      {table.getHeaderGroups().map((hg) => (
+                        <tr key={hg.id} style={{ borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}>
+                          {hg.headers.map((header) => (
+                            <th
+                              key={header.id}
+                              onClick={header.column.getToggleSortingHandler()}
+                              className={`px-4 py-2.5 text-[10px] font-medium uppercase tracking-wider whitespace-nowrap select-none text-right first:text-left ${
+                                header.column.getCanSort() ? "cursor-pointer hover:opacity-70" : ""
+                              }`}
+                              style={{ color: "var(--qc-ink-2)" }}
+                            >
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                              {header.column.getCanSort() && <SortIcon dir={header.column.getIsSorted()} />}
+                            </th>
+                          ))}
+                        </tr>
+                      ))}
+                    </thead>
+                    <tbody>
+                      {table.getRowModel().rows.map((row, i) => {
+                        const isLast = i === table.getRowModel().rows.length - 1;
+                        return (
+                          <tr
+                            key={row.id}
+                            onClick={() => router.push(`/screener/management?symbol=${encodeURIComponent(row.original.ticker)}`)}
+                            className="cursor-pointer transition-colors group"
+                            onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
+                            onMouseLeave={e => (e.currentTarget.style.background = row.getIsSelected() ? "var(--qc-lime)" : "")}
+                            style={{ borderBottom: !isLast ? "1px solid var(--qc-hair-2)" : undefined, background: row.getIsSelected() ? "var(--qc-lime)" : undefined }}
+                          >
+                            {row.getVisibleCells().map((cell) => {
+                              const isLeft = cell.column.id === "select" || cell.column.id === "index" || cell.column.id === "ticker" || cell.column.id === "arrow";
+                              return (
+                                <td
+                                  key={cell.id}
+                                  className={`px-4 py-3 text-sm whitespace-nowrap ${isLeft ? "text-left" : "text-right"}`}
+                                  style={{ color: "var(--qc-ink-2)" }}
+                                >
+                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid var(--qc-hair)" }}>
+                  <p className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
+                    {table.getFilteredRowModel().rows.length} stocks
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => table.previousPage()}
+                      disabled={!table.getCanPreviousPage()}
+                      className="rounded-[6px] p-1 disabled:opacity-30 transition-colors"
+                      onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "")}
+                    >
+                      <ChevronLeft className="h-4 w-4" style={{ color: "var(--qc-ink)" }} />
+                    </button>
+                    <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
+                      {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+                    </span>
+                    <button
+                      onClick={() => table.nextPage()}
+                      disabled={!table.getCanNextPage()}
+                      className="rounded-[6px] p-1 disabled:opacity-30 transition-colors"
+                      onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "")}
+                    >
+                      <ChevronRight className="h-4 w-4" style={{ color: "var(--qc-ink)" }} />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main content ──────────────────────────────────────────────────────────────
 
 function BasketContent() {
@@ -356,8 +742,16 @@ function BasketContent() {
   const router = useRouter();
   const basketId = searchParams.get("id");
 
+  // Detect whether this is an industry basket ID by checking the industry baskets list.
+  // Pass null to the regular hooks until the industry list resolves, to avoid a spurious 404.
+  const { data: industryList, loading: industryListLoading } = useIndustryBaskets();
+  const industryResolved = !industryListLoading;
+  const isIndustryBasket = !!(basketId && industryList?.baskets.some((b) => b.id === basketId));
+
   const { data: basketsData, loading: basketsLoading, error: basketsError } = useBaskets();
-  const { data: stocksData, loading: stocksLoading, error: stocksError } = useBasketStocks(basketId);
+  const { data: stocksData, loading: stocksLoading, error: stocksError } = useBasketStocks(
+    industryResolved && !isIndustryBasket ? basketId : null
+  );
 
   // ── Basket metadata ───────────────────────────────────────────────────────
   const basketMeta = basketsData?.baskets.find((b) => b.id === basketId) ?? null;
@@ -508,6 +902,20 @@ function BasketContent() {
         <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>No basket selected.</p>
       </div>
     );
+  }
+
+  // Wait for industry list before deciding which path to take
+  if (industryListLoading) {
+    return (
+      <div className="flex items-center justify-center py-32 gap-2" style={{ color: "var(--qc-ink-2)" }}>
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span className="text-sm">Loading…</span>
+      </div>
+    );
+  }
+
+  if (isIndustryBasket) {
+    return <IndustryBasketView basketId={basketId} />;
   }
 
   const isLoading = basketsLoading || (!basket && stocksLoading);

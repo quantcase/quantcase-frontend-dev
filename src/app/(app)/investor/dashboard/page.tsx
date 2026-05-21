@@ -1,9 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { MODSynopsisCard } from "@/components/investor/mod-synopsis-card";
+import { MODBreakdownDrawer } from "@/components/investor/mod-breakdown-drawer";
 import { HoldingsPanel } from "@/components/investor/holdings-panel";
 import { WhatsMovingFeed } from "@/components/investor/whats-moving-feed";
 import type { MovingItem } from "@/components/investor/whats-moving-feed";
 import { IndustrySignalsGrid } from "@/components/investor/industry-signals-grid";
-import type { IndustrySignal } from "@/components/investor/industry-signals-grid";
 import { MarketViewCard } from "@/components/investor/market-view-card";
 import type { MarketMetric } from "@/components/investor/market-view-card";
 import { EventsMovingMarket } from "@/components/investor/events-moving-market";
@@ -21,76 +24,66 @@ import { ResearchLibraryBanner } from "@/components/investor/research-library-ba
 const MOVING_ITEMS: MovingItem[] = [
   {
     id: "1",
-    symbol: "HDFCBANK",
-    price: "₹1,728.40",
-    priceChange: "↑1.2%",
+    symbol: "HINDUNILVR",
+    price: "₹2,318.60",
+    priceChange: "↑0.9%",
     priceChangePositive: true,
     kind: "score_upgrade",
     headlineLabel: "Management score upgraded",
-    headlineDetail: "78 → 82",
-    body: "Q4 concall: ROA expansion holding above 1.95%, deposit growth back above credit growth for first time in 6 quarters.",
-    holdingDetail: "You hold 22 shares · 6.1% of equity book.",
-    qcScore: 82,
+    headlineDetail: "74 → 79",
+    body: "Q4 concall: rural volume recovery accelerated; pricing power maintained despite commodity headwinds. Disclosure quality flagged as improving.",
+    holdingDetail: "You hold 14 shares · 5.8% of equity book.",
+    qcScore: 79,
     ctaLabel: "Open",
-    ctaHref: "/screener/management?symbol=HDFCBANK",
+    ctaHref: "/screener/management?symbol=HINDUNILVR",
   },
   {
     id: "2",
-    symbol: "ASIANPAINT",
-    price: "₹2,418.10",
-    priceChange: "↓3.8%",
+    symbol: "ACC",
+    price: "₹1,874.30",
+    priceChange: "↓2.1%",
     priceChangePositive: false,
     kind: "score_downgrade",
     headlineLabel: "Management score downgraded",
-    headlineDetail: "62 → 54",
-    body: "Tier-2 demand weak; capex guidance walked back. Three years of margin assumptions now under review.",
-    holdingDetail: "You hold 8 shares · 2.4% of equity book.",
-    qcScore: 54,
+    headlineDetail: "68 → 61",
+    body: "Capacity utilisation guidance walked back; blended realisation under pressure from South India pricing war. Capital allocation under review.",
+    holdingDetail: "You hold 6 shares · 2.0% of equity book.",
+    qcScore: 61,
     ctaLabel: "Open",
-    ctaHref: "/screener/management?symbol=ASIANPAINT",
+    ctaHref: "/screener/management?symbol=ACC",
   },
   {
     id: "3",
-    symbol: "TATAMOTORS",
-    price: "₹942.80",
-    priceChange: "↑0.4%",
+    symbol: "POWERGRID",
+    price: "₹318.40",
+    priceChange: "↑0.6%",
     priceChangePositive: true,
     kind: "earnings",
     headlineLabel: "Earnings tonight · 17:30",
     headlineDetail: "your watchlist position",
-    body: "Street expects ₹17,400 Cr revenue, JLR margin watch is the key swing factor. Stock has rallied 8% into the print.",
+    body: "Street expects ₹4,680 Cr revenue; transmission asset capitalisation pace is the key swing factor. Stock up 5% into the print.",
     holdingDetail: "Watching · not held.",
-    qcScore: 71,
+    qcScore: 73,
     ctaLabel: "Brief",
-    ctaHref: "/screener/management?symbol=TATAMOTORS",
+    ctaHref: "/screener/management?symbol=POWERGRID",
   },
   {
     id: "4",
-    symbol: "DIVISLAB",
-    price: "₹5,418.00",
-    priceChange: "↓1.1%",
+    symbol: "HFCL",
+    price: "₹128.75",
+    priceChange: "↓1.4%",
     priceChangePositive: false,
     kind: "score_downgrade",
     headlineLabel: "Guidance revision flagged",
-    headlineDetail: "API export outlook cut",
-    body: "Management trimmed FY26 revenue guidance by 4% citing US FDA inspection delays at Kakinada plant. QC Insight flags disclosure quality drop.",
-    holdingDetail: "You hold 3 shares · 3.1% of equity book.",
-    qcScore: 69,
+    headlineDetail: "Optical fibre order pipeline cut",
+    body: "Management trimmed FY26 revenue guidance by 6% citing slower government rollout of BharatNet Phase III. QC Insight flags execution risk.",
+    holdingDetail: "You hold 120 shares · 2.8% of equity book.",
+    qcScore: 64,
     ctaLabel: "Open",
-    ctaHref: "/screener/management?symbol=DIVISLAB",
+    ctaHref: "/screener/management?symbol=HFCL",
   },
 ];
 
-const INDUSTRY_SIGNALS: IndustrySignal[] = [
-  { id: "1", rating: "BUY",   sector: "Private Banks",  etfLabel: "PVTBNK",  etfTicker: "PVTBNK ETF",  href: "/screener/home?sector=private-banks" },
-  { id: "2", rating: "BUY",   sector: "Capital Goods",  etfLabel: "INFRA",   etfTicker: "INFRA ETF",   href: "/screener/home?sector=capital-goods" },
-  { id: "3", rating: "BUY",   sector: "FMCG — Foods",   etfLabel: "FMCG",    etfTicker: "FMCG ETF",    href: "/screener/home?sector=fmcg" },
-  { id: "4", rating: "WAIT",  sector: "IT Services",    etfLabel: "ITBEES",  etfTicker: "ITBEES ETF",  href: "/screener/home?sector=it" },
-  { id: "5", rating: "WAIT",  sector: "Chemicals",      etfLabel: "CHEMX",   etfTicker: "CHEMX ETF",   href: "/screener/home?sector=chemicals" },
-  { id: "6", rating: "WAIT",  sector: "Real Estate",    etfLabel: "HOUSING", etfTicker: "HOUSING ETF", href: "/screener/home?sector=real-estate" },
-  { id: "7", rating: "AVOID", sector: "Power Gen",      etfLabel: "PSUINFRA",etfTicker: "PSUINFRA ETF",href: "/screener/home?sector=psu-infra" },
-  { id: "8", rating: "AVOID", sector: "Telecom",        etfLabel: "TELECOM", etfTicker: "TELECOM ETF", href: "/screener/home?sector=telecom" },
-];
 
 const MARKET_METRICS: MarketMetric[] = [
   { label: "F&O Put/Call Ratio", value: "↑ 1.24", annotation: "Bullish",  annotationPositive: true  },
@@ -148,22 +141,19 @@ const MACRO_REGIMES: MacroRegime[] = [
 ];
 
 const SHADOW_STOCKS: ShadowStock[] = [
-  { symbol: "TATAMOTORS", name: "Tata Motors",          ltp: "₹942.80",   change1d: "+0.4%", changePositive: true,  qcScore: 71, thesisTags: ["OPPORTUNITY"], whyInvested: "Industry Tailwind", conviction: "POSITIVE", href: "/screener/management?symbol=TATAMOTORS" },
-  { symbol: "ICICIBANK",  name: "ICICI Bank",            ltp: "₹1,184.20", change1d: "+0.8%", changePositive: true,  qcScore: 84, thesisTags: ["MANAGEMENT"],  whyInvested: "Capital Allocation", conviction: "POSITIVE", href: "/screener/management?symbol=ICICIBANK"  },
-  { symbol: "DIVISLAB",   name: "Divi's Laboratories",   ltp: "₹5,418.00", change1d: "-1.1%", changePositive: false, qcScore: 69, thesisTags: ["MANAGEMENT"],  whyInvested: "Disclosure Honesty", conviction: "NEUTRAL",  href: "/screener/management?symbol=DIVISLAB"   },
-  { symbol: "ZOMATO",     name: "Zomato",                ltp: "₹208.40",   change1d: "-2.3%", changePositive: false, qcScore: 52, thesisTags: ["OPPORTUNITY"], whyInvested: "TAM Expansion",      conviction: "WATCH",    href: "/screener/management?symbol=ZOMATO"     },
-  { symbol: "PIDILITIND", name: "Pidilite Industries",   ltp: "₹2,896.10", change1d: "+0.6%", changePositive: true,  qcScore: 79, thesisTags: ["OPPORTUNITY"], whyInvested: "Distribution Strength", conviction: "HOLD", href: "/screener/management?symbol=PIDILITIND" },
-  { symbol: "HDFCBANK",   name: "HDFC Bank",             ltp: "₹1,728.40", change1d: "+1.2%", changePositive: true,  qcScore: 82, thesisTags: ["MANAGEMENT"],  whyInvested: "Guidance Accuracy",  conviction: "POSITIVE", href: "/screener/management?symbol=HDFCBANK"   },
-  { symbol: "SBIN",       name: "State Bank of India",   ltp: "₹812.40",   change1d: "+1.4%", changePositive: true,  qcScore: 76, thesisTags: ["DEAL"],        whyInvested: "Valuation",          conviction: "POSITIVE", href: "/screener/management?symbol=SBIN"       },
-  { symbol: "ASIANPAINT", name: "Asian Paints",          ltp: "₹2,418.10", change1d: "-3.8%", changePositive: false, qcScore: 54, thesisTags: ["DEAL"],        whyInvested: "P/E Re-rating",      conviction: "WATCH",    href: "/screener/management?symbol=ASIANPAINT", thesisDrift: true },
+  { symbol: "MSUMI",      name: "Motherson Sumi Wiring", ltp: "₹62.40",    change1d: "+1.1%", changePositive: true,  qcScore: 76, thesisTags: ["OPPORTUNITY"], whyInvested: "EV Wiring Tailwind",    conviction: "POSITIVE", href: "/screener/management?symbol=MSUMI"      },
+  { symbol: "HINDUNILVR", name: "Hindustan Unilever",    ltp: "₹2,318.60", change1d: "+0.9%", changePositive: true,  qcScore: 79, thesisTags: ["MANAGEMENT"],  whyInvested: "Disclosure Quality",    conviction: "POSITIVE", href: "/screener/management?symbol=HINDUNILVR" },
+  { symbol: "ACC",        name: "ACC Ltd",               ltp: "₹1,874.30", change1d: "-2.1%", changePositive: false, qcScore: 61, thesisTags: ["DEAL"],        whyInvested: "Valuation Reset",       conviction: "WATCH",    href: "/screener/management?symbol=ACC",       thesisDrift: true },
+  { symbol: "HFCL",       name: "HFCL Ltd",              ltp: "₹128.75",   change1d: "-1.4%", changePositive: false, qcScore: 64, thesisTags: ["OPPORTUNITY"], whyInvested: "BharatNet Exposure",    conviction: "NEUTRAL",  href: "/screener/management?symbol=HFCL"       },
+  { symbol: "POWERGRID",  name: "Power Grid Corp",       ltp: "₹318.40",   change1d: "+0.6%", changePositive: true,  qcScore: 73, thesisTags: ["MANAGEMENT"],  whyInvested: "Regulated Asset Base",  conviction: "POSITIVE", href: "/screener/management?symbol=POWERGRID"  },
 ];
 
 const COMMUNITY_THREAD: CommunityThread = {
   kind: "community",
   label: "HOT IN COMMUNITY · LAST 24H",
   liveTag: true,
-  titleHtml: `Is <span style="color:#7c3aed;font-style:italic">HDFC Bank</span> finally turning the corner?`,
-  body: "187 comments · ROA print, deposit/credit ratio, and merger integration discussion picking up. Top thread by Sandeep Tekwani (badge: 4.6★).",
+  titleHtml: `Is <span style="color:#7c3aed;font-style:italic">Hindustan Unilever</span> staging a rural comeback?`,
+  body: "187 comments · Volume recovery pace, pricing power, and rural distribution trends picking up. Top thread by Sandeep Tekwani (badge: 4.6★).",
   stats: [
     { value: 187, label: "comments" },
     { value: 42,  label: "users"    },
@@ -249,6 +239,7 @@ function getTodayMeta(): string {
 export default function InvestorDashboardPage() {
   const greeting = getGreeting();
   const todayMeta = getTodayMeta();
+  const [modDrawerOpen, setModDrawerOpen] = useState(false);
 
   return (
     <div style={{ background: "var(--qc-bg, #F5F5F5)", minHeight: "100vh" }}>
@@ -321,7 +312,8 @@ export default function InvestorDashboardPage() {
               { label: "Opportunity", score: 74, rating: "FAIR"      },
               { label: "Deal",        score: 58, rating: "STRETCHED" },
             ]}
-            draggingSymbols={["ASIANPAINT", "TCS"]}
+            draggingSymbols={["ACC", "HFCL"]}
+            onOpenBreakdown={() => setModDrawerOpen(true)}
           />
 
           <HoldingsPanel
@@ -352,7 +344,7 @@ export default function InvestorDashboardPage() {
           }}
         >
           <WhatsMovingFeed count={4} items={MOVING_ITEMS} />
-          <IndustrySignalsGrid count={8} signals={INDUSTRY_SIGNALS} />
+          <IndustrySignalsGrid />
         </section>
 
         {/* ════════════════════════════════════════════════════════════
@@ -386,7 +378,7 @@ export default function InvestorDashboardPage() {
         ═══════════════════════════════════════════════════════════════ */}
         <section style={{ marginBottom: 14 }}>
           <ShadowPortfolio
-            count={9}
+            count={5}
             stocks={SHADOW_STOCKS}
             thesisDriftCount={1}
           />
@@ -418,6 +410,12 @@ export default function InvestorDashboardPage() {
           />
         </section>
       </main>
+
+      <MODBreakdownDrawer
+        open={modDrawerOpen}
+        stocks={[]}
+        onClose={() => setModDrawerOpen(false)}
+      />
     </div>
   );
 }

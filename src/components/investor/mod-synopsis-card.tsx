@@ -13,6 +13,7 @@ interface MODSynopsisCardProps {
   headline: string;
   subScores: SubScore[];
   draggingSymbols: string[];
+  onOpenBreakdown?: () => void;
 }
 
 const ratingColor: Record<SubScore["rating"], string> = {
@@ -70,7 +71,7 @@ function ScoreTile({ label, score, rating }: SubScore) {
   );
 }
 
-export function MODSynopsisCard({ overallScore, headline, subScores, draggingSymbols }: MODSynopsisCardProps) {
+export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBreakdown }: MODSynopsisCardProps) {
   return (
     <div
       style={{
@@ -118,19 +119,22 @@ export function MODSynopsisCard({ overallScore, headline, subScores, draggingSym
           {draggingSymbols.length} holdings dragging your Deal score ·{" "}
           {draggingSymbols.map((s, i) => (
             <span key={s}>
-              <Link href={`/screener/management?symbol=${s}`} style={{ color: "rgba(139,180,248,0.9)", textDecoration: "none" }}>
+              <Link href={`/screener/management?symbol=${s}`} target="_blank" rel="noopener noreferrer" style={{ color: "rgba(139,180,248,0.9)", textDecoration: "none" }}>
                 {s}
               </Link>
               {i < draggingSymbols.length - 1 && ", "}
             </span>
           ))}
         </span>
-        <Link
-          href="/screener/management"
-          style={{ fontSize: 12, color: "rgba(139,180,248,0.9)", textDecoration: "none", whiteSpace: "nowrap" }}
+        <button
+          onClick={onOpenBreakdown}
+          style={{
+            fontSize: 12, color: "rgba(139,180,248,0.9)", background: "none",
+            border: "none", cursor: "pointer", padding: 0, whiteSpace: "nowrap",
+          }}
         >
           Open MOD breakdown →
-        </Link>
+        </button>
       </div>
     </div>
   );

@@ -118,6 +118,8 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
             </button>
             <Link
               href="#"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{ fontSize: 12, color: "#888", textDecoration: "none" }}
             >
               Manage →
@@ -232,6 +234,8 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
             <div>
               <Link
                 href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   fontSize: 12,
                   color: "#0F172B",

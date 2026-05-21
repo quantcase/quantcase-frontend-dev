@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useIndustryBaskets } from "@/hooks/useIndustryBaskets";
+import type { IndustryBasket } from "@/hooks/useIndustryBaskets";
 
 export type SignalRating = "BUY" | "WAIT" | "AVOID";
 
+// Keep the static type for backward-compat if any page still imports it
 export interface IndustrySignal {
   id: string;
   rating: SignalRating;
@@ -14,8 +17,9 @@ export interface IndustrySignal {
 }
 
 interface IndustrySignalsGridProps {
-  count: number;
-  signals: IndustrySignal[];
+  // count / signals are now optional – the component fetches its own data
+  count?: number;
+  signals?: IndustrySignal[];
 }
 
 const ratingStyle: Record<SignalRating, { bg: string; border: string; labelColor: string; sectorColor: string; etfColor: string }> = {
@@ -24,10 +28,57 @@ const ratingStyle: Record<SignalRating, { bg: string; border: string; labelColor
   AVOID: { bg: "#fdf0f0", border: "#f0c4c4", labelColor: "#8a2020", sectorColor: "#3a0000", etfColor: "#8a2020" },
 };
 
-export function IndustrySignalsGrid({ count, signals }: IndustrySignalsGridProps) {
-  const buyCount   = signals.filter(s => s.rating === "BUY").length;
-  const waitCount  = signals.filter(s => s.rating === "WAIT").length;
-  const avoidCount = signals.filter(s => s.rating === "AVOID").length;
+function BasketCard({ basket }: { basket: IndustryBasket }) {
+  const rs = ratingStyle[basket.signal];
+  return (
+    <Link
+      href={`/screener/basket?id=${basket.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: "block",
+        background: rs.bg,
+        border: `1px solid ${rs.border}`,
+        borderRadius: 10,
+        padding: "14px 16px",
+        textDecoration: "none",
+      }}
+    >
+      <div style={{ fontSize: 10, fontWeight: 700, color: rs.labelColor, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>
+        {basket.signal}
+      </div>
+      <div style={{ fontSize: 16, fontWeight: 400, color: rs.sectorColor, marginBottom: 8, fontFamily: "Georgia, serif" }}>
+        {basket.title}
+      </div>
+      <div style={{ fontSize: 11, fontWeight: 600, color: rs.etfColor, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+        → {basket.etfTicker}
+      </div>
+    </Link>
+  );
+}
+
+// Skeleton placeholder while loading
+function SkeletonCard() {
+  return (
+    <div
+      style={{
+        background: "#f5f5f5",
+        border: "1px solid #e2e2e2",
+        borderRadius: 10,
+        padding: "14px 16px",
+        height: 88,
+        animation: "pulse 1.5s ease-in-out infinite",
+      }}
+    />
+  );
+}
+
+export function IndustrySignalsGrid({ count: countProp }: IndustrySignalsGridProps) {
+  const { data, loading } = useIndustryBaskets();
+
+  const baskets = data?.baskets ?? [];
+  const summary = data?.summary ?? { buy: 0, wait: 0, avoid: 0 };
+  const displayCount = data ? baskets.length : (countProp ?? 8);
 
   return (
     <div
@@ -61,10 +112,10 @@ export function IndustrySignalsGrid({ count, signals }: IndustrySignalsGridProps
                 justifyContent: "center",
               }}
             >
-              {count}
+              {displayCount}
             </span>
           </div>
-          <Link href="#" style={{ fontSize: 12, color: "#888", textDecoration: "none" }}>
+          <Link href="/screener/home" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "#888", textDecoration: "none" }}>
             All sectors →
           </Link>
         </div>
@@ -74,37 +125,14 @@ export function IndustrySignalsGrid({ count, signals }: IndustrySignalsGridProps
       </div>
 
       {/* Divider */}
-      <div style={{ height: 1, background: "#E2E2E2", margin: "0 0 0 0" }} />
+      <div style={{ height: 1, background: "#E2E2E2" }} />
 
       {/* 2-column grid */}
       <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, flex: 1 }}>
-        {signals.map((sig) => {
-          const rs = ratingStyle[sig.rating];
-          return (
-            <Link
-              key={sig.id}
-              href={sig.href}
-              style={{
-                display: "block",
-                background: rs.bg,
-                border: `1px solid ${rs.border}`,
-                borderRadius: 10,
-                padding: "14px 16px",
-                textDecoration: "none",
-              }}
-            >
-              <div style={{ fontSize: 10, fontWeight: 700, color: rs.labelColor, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>
-                {sig.rating}
-              </div>
-              <div style={{ fontSize: 16, fontWeight: 400, color: rs.sectorColor, marginBottom: 8, fontFamily: "Georgia, serif" }}>
-                {sig.sector}
-              </div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: rs.etfColor, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                → {sig.etfTicker}
-              </div>
-            </Link>
-          );
-        })}
+        {loading
+          ? Array.from({ length: displayCount }).map((_, i) => <SkeletonCard key={i} />)
+          : baskets.map((basket) => <BasketCard key={basket.id} basket={basket} />)
+        }
       </div>
 
       {/* Divider */}
@@ -113,15 +141,17 @@ export function IndustrySignalsGrid({ count, signals }: IndustrySignalsGridProps
       {/* Footer */}
       <div style={{ padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ fontSize: 12, color: "#444" }}>
-          <span style={{ fontWeight: 700 }}>{buyCount} buy</span>
+          <span style={{ fontWeight: 700 }}>{summary.buy} buy</span>
           <span style={{ color: "#aaa", margin: "0 5px" }}>·</span>
-          <span style={{ fontWeight: 700 }}>{waitCount} wait</span>
+          <span style={{ fontWeight: 700 }}>{summary.wait} wait</span>
           <span style={{ color: "#aaa", margin: "0 5px" }}>·</span>
-          <span style={{ fontWeight: 700 }}>{avoidCount} avoid</span>
+          <span style={{ fontWeight: 700 }}>{summary.avoid} avoid</span>
           <span style={{ color: "#aaa" }}> aligned to your sectors</span>
         </div>
         <Link
-          href="#"
+          href="/screener/home"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             fontSize: 12,
             color: "#0F172B",

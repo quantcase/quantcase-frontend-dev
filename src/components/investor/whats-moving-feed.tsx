@@ -60,7 +60,7 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
             {count}
           </span>
         </div>
-        <Link href="#" style={{ fontSize: 12, color: "#888", textDecoration: "none" }}>
+        <Link href="#" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "#888", textDecoration: "none" }}>
           All updates →
         </Link>
       </div>
@@ -121,6 +121,8 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
               </div>
               <Link
                 href={item.ctaHref}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   fontSize: 12,
                   fontWeight: 500,

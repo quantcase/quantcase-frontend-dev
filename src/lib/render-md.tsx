@@ -1,7 +1,8 @@
 import React from "react";
 
 // Converts **bold** and *italic* markdown spans to React elements.
-export function renderMd(text: string): React.ReactNode[] {
+export function renderMd(text: string | null | undefined): React.ReactNode[] {
+  if (!text) return [];
   const parts: React.ReactNode[] = [];
   const pattern = /\*\*(.+?)\*\*|\*(.+?)\*/g;
   let last = 0;

@@ -39,7 +39,7 @@ export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime,
           <div style={{ fontSize: 13, fontWeight: 600, color: "#0F172B", letterSpacing: "0.05em", textTransform: "uppercase" }}>
             EVENTS MOVING THE MARKET
           </div>
-          <Link href="#" style={{ fontSize: 12, color: "#888", textDecoration: "none", whiteSpace: "nowrap", marginLeft: 16 }}>
+          <Link href="#" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "#888", textDecoration: "none", whiteSpace: "nowrap", marginLeft: 16 }}>
             Full macro brief →
           </Link>
         </div>

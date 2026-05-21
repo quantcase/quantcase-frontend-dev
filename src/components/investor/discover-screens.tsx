@@ -21,6 +21,8 @@ function ScreenCard({ screen }: { screen: DiscoverScreen }) {
   return (
     <Link
       href={screen.href}
+      target="_blank"
+      rel="noopener noreferrer"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -110,7 +112,7 @@ export function DiscoverScreens({ screens }: DiscoverScreensProps) {
             Curated screens · click any to see the names
           </div>
         </div>
-        <Link href="#" style={{ fontSize: 12, color: "#888", textDecoration: "none", marginTop: 2 }}>
+        <Link href="#" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "#888", textDecoration: "none", marginTop: 2 }}>
           All screens →
         </Link>
       </div>

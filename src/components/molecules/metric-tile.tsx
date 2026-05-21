@@ -34,15 +34,18 @@ export function MetricTile({
   className,
 }: MetricTileProps) {
   return (
-    <div className={cn("rounded-lg border border-zinc-100 bg-white px-3 py-3 flex flex-col gap-1", className)}>
-      <p className="text-[10px] font-500 uppercase tracking-wider text-[#888888] leading-tight">{label}</p>
-      <p className="text-[15px] font-semibold text-[#0F172B] leading-snug">{value}</p>
+    <div
+      className={cn("rounded-lg border px-3 py-3 flex flex-col gap-1", className)}
+      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-card)" }}
+    >
+      <p className="text-[10px] font-500 uppercase tracking-wider leading-tight" style={{ color: "var(--qc-text-muted)" }}>{label}</p>
+      <p className="text-[15px] font-semibold leading-snug" style={{ color: "var(--qc-text-heading)" }}>{value}</p>
       {change && (
         <p className={cn("text-[10px] font-semibold", changeTextColor(change))}>
           {change}
         </p>
       )}
-      {sublabel && <p className="text-[10px] text-[#888888] line-clamp-2">{sublabel}</p>}
+      {sublabel && <p className="text-[10px] line-clamp-2" style={{ color: "var(--qc-text-muted)" }}>{sublabel}</p>}
     </div>
   );
 }

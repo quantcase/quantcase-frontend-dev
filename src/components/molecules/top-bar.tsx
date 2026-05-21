@@ -142,11 +142,12 @@ function TopBarInner() {
     if (!isFactorActive) setFactorOpen(false);
   }, [isFactorActive]);
 
+  const isIndustryTerminal = pathname === "/screener/industry-intelligence";
   const isAdmin = pathname.startsWith("/admin");
 
   const isInvestorDashboard = pathname === "/investor/dashboard";
 
-  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin || isInvestorDashboard) return null;
+  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin || isInvestorDashboard || isIndustryTerminal) return null;
 
   let leftZone: React.ReactNode = null;
 
@@ -154,9 +155,10 @@ function TopBarInner() {
     leftZone = <SearchZone />;
   } else if (hasAssetSelected) {
     const terminalTabs = [
-      { label: "Overview",     href: "/screener/overview",     icon: <Eye size={13} strokeWidth={1.8} /> },
-      { label: "Technicals",   href: "/screener/technicals",   icon: <CandlestickChart size={13} strokeWidth={1.8} /> },
-      { label: "Fundamentals", href: "/screener/fundamentals", icon: <BookOpen size={13} strokeWidth={1.8} /> },
+      { label: "Overview",     href: "/screener/overview",                icon: <Eye size={13} strokeWidth={1.8} /> },
+      { label: "Technicals",   href: "/screener/technicals",              icon: <CandlestickChart size={13} strokeWidth={1.8} /> },
+      { label: "Fundamentals", href: "/screener/fundamentals",            icon: <BookOpen size={13} strokeWidth={1.8} /> },
+      { label: "Industry",     href: "/screener/industry-intelligence",   icon: <LineChart size={13} strokeWidth={1.8} /> },
     ];
 
     const showFactorItems = isFactorActive || factorOpen;

@@ -77,7 +77,6 @@ export function IndustrySignalsGrid({ count: countProp }: IndustrySignalsGridPro
   const { data, loading } = useIndustryBaskets();
 
   const baskets = data?.baskets ?? [];
-  const summary = data?.summary ?? { buy: 0, wait: 0, avoid: 0 };
   const displayCount = data ? baskets.length : (countProp ?? 8);
 
   return (
@@ -115,8 +114,22 @@ export function IndustrySignalsGrid({ count: countProp }: IndustrySignalsGridPro
               {displayCount}
             </span>
           </div>
-          <Link href="/screener/home" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "#888", textDecoration: "none" }}>
-            All sectors →
+          <Link
+            href="/screener/industry-intelligence"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontSize: 12,
+              color: "#0F172B",
+              background: "#fff",
+              border: "1px solid #E2E2E2",
+              borderRadius: 8,
+              padding: "6px 14px",
+              textDecoration: "none",
+              fontWeight: 500,
+            }}
+          >
+            Industry Terminal →
           </Link>
         </div>
         <div style={{ fontSize: 12, color: "#888", marginBottom: 16 }}>
@@ -135,37 +148,6 @@ export function IndustrySignalsGrid({ count: countProp }: IndustrySignalsGridPro
         }
       </div>
 
-      {/* Divider */}
-      <div style={{ height: 1, background: "#E2E2E2" }} />
-
-      {/* Footer */}
-      <div style={{ padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontSize: 12, color: "#444" }}>
-          <span style={{ fontWeight: 700 }}>{summary.buy} buy</span>
-          <span style={{ color: "#aaa", margin: "0 5px" }}>·</span>
-          <span style={{ fontWeight: 700 }}>{summary.wait} wait</span>
-          <span style={{ color: "#aaa", margin: "0 5px" }}>·</span>
-          <span style={{ fontWeight: 700 }}>{summary.avoid} avoid</span>
-          <span style={{ color: "#aaa" }}> aligned to your sectors</span>
-        </div>
-        <Link
-          href="/screener/home"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            fontSize: 12,
-            color: "#0F172B",
-            background: "#fff",
-            border: "1px solid #E2E2E2",
-            borderRadius: 8,
-            padding: "6px 14px",
-            textDecoration: "none",
-            fontWeight: 500,
-          }}
-        >
-          Industry Terminal →
-        </Link>
-      </div>
     </div>
   );
 }

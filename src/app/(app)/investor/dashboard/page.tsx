@@ -327,6 +327,13 @@ export default function InvestorDashboardPage() {
               { label: "Mid cap",    value: "₹17.6 L", count: 4, pct: 31, color: "#7c3aed" },
               { label: "Small cap",  value: "₹9.7 L",  count: 2, pct: 17, color: "#d97706" },
             ]}
+            industrySegments={[
+              { label: "Financials",  value: "₹18.2 L", count: 3, pct: 32, color: "#0F172B" },
+              { label: "Technology",  value: "₹12.5 L", count: 3, pct: 22, color: "#7c3aed" },
+              { label: "Industrials", value: "₹9.1 L",  count: 2, pct: 16, color: "#d97706" },
+              { label: "Healthcare",  value: "₹8.5 L",  count: 2, pct: 15, color: "#0891b2" },
+              { label: "FMCG",        value: "₹8.5 L",  count: 2, pct: 15, color: "#71717a" },
+            ]}
           />
         </section>
 

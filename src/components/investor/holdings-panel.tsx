@@ -1,6 +1,8 @@
 "use client";
 
-interface CapSegment {
+import { useState } from "react";
+
+interface Segment {
   label: string;
   value: string;
   count: number;
@@ -15,7 +17,8 @@ interface HoldingsPanelProps {
   equityValue: string;
   todayChange: string;
   ytdChange: string;
-  capSegments: CapSegment[];
+  capSegments: Segment[];
+  industrySegments: Segment[];
 }
 
 function MiniSparkline() {
@@ -53,8 +56,10 @@ export function HoldingsPanel({
   todayChange,
   ytdChange,
   capSegments,
+  industrySegments,
 }: HoldingsPanelProps) {
-  const totalPct = capSegments.reduce((a, s) => a + s.pct, 0);
+  const [activeTab, setActiveTab] = useState<"cap" | "industry">("cap");
+  const segments = activeTab === "cap" ? capSegments : industrySegments;
 
   return (
     <div
@@ -121,27 +126,30 @@ export function HoldingsPanel({
       <div>
         <div style={{ display: "flex", gap: 20, borderBottom: "1px solid var(--qc-hair, #E2E2E2)", marginBottom: 12 }}>
           <button
+            onClick={() => setActiveTab("cap")}
             style={{
               fontSize: 12,
-              fontWeight: 500,
-              color: "var(--qc-ink, #0F172B)",
+              fontWeight: activeTab === "cap" ? 500 : 400,
+              color: activeTab === "cap" ? "var(--qc-ink, #0F172B)" : "#888",
               background: "none",
               border: "none",
               padding: "0 0 8px",
-              borderBottom: "2px solid var(--qc-ink, #0F172B)",
+              borderBottom: activeTab === "cap" ? "2px solid var(--qc-ink, #0F172B)" : "2px solid transparent",
               cursor: "pointer",
             }}
           >
             By Market Cap
           </button>
           <button
+            onClick={() => setActiveTab("industry")}
             style={{
               fontSize: 12,
-              fontWeight: 400,
-              color: "#888",
+              fontWeight: activeTab === "industry" ? 500 : 400,
+              color: activeTab === "industry" ? "var(--qc-ink, #0F172B)" : "#888",
               background: "none",
               border: "none",
               padding: "0 0 8px",
+              borderBottom: activeTab === "industry" ? "2px solid var(--qc-ink, #0F172B)" : "2px solid transparent",
               cursor: "pointer",
             }}
           >
@@ -153,13 +161,13 @@ export function HoldingsPanel({
         <div style={{ position: "relative" }}>
           {/* Bar */}
           <div style={{ display: "flex", height: 12, borderRadius: 6, overflow: "hidden", marginBottom: 10, gap: 2 }}>
-            {capSegments.map((seg) => (
+            {segments.map((seg) => (
               <div key={seg.label} style={{ flex: seg.pct, background: seg.color, minWidth: 2 }} />
             ))}
           </div>
           {/* Labels — flex children with same proportions as bar segments */}
           <div style={{ display: "flex", gap: 2 }}>
-            {capSegments.map((seg) => (
+            {segments.map((seg) => (
               <div key={seg.label} style={{ flex: seg.pct, minWidth: 0 }}>
                 <div style={{ fontSize: 11, color: "#888", whiteSpace: "nowrap" }}>{seg.label}</div>
                 <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink, #0F172B)" }}>{seg.value}</div>

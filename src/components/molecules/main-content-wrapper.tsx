@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 
-const HIDE_TOPBAR_PATHS = ["/dashboard", "/screener/home", "/screener/basket", "/investor/dashboard", "/screener/industry-intelligence"];
+const HIDE_TOPBAR_PATHS = ["/dashboard", "/screener/home", "/screener/basket", "/investor/dashboard"];
 const HIDE_CHROME_PATHS = ["/signin"];
 const HIDE_TOPBAR_PREFIXES = ["/admin"];
 
@@ -23,8 +23,8 @@ export function MainContentWrapper({ children }: { children: React.ReactNode }) 
 
   return (
     <div
-      className={cn("ml-[72px] min-h-screen", !hideTopBar && "pt-14")}
-      style={{ background: "var(--qc-bg)", paddingTop: !hideTopBar ? 56 : undefined }}
+      className={cn("ml-[72px] min-h-screen")}
+      style={{ background: "var(--qc-bg)", paddingTop: !hideTopBar ? 60 : undefined }}
     >
       {children}
     </div>

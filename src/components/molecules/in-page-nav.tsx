@@ -119,7 +119,7 @@ export function InPageNav({ items, className, activeTab, onTabChange }: InPageNa
   return (
     <div
       className={cn("sticky z-20", className)}
-      style={{ top: 56, background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}
+      style={{ top: 60, background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}
     >
       <nav
         ref={navRef}

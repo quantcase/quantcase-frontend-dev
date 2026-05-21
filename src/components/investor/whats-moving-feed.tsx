@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { TrendingUp } from "lucide-react";
+import { MonoLabel, LimeCountPip, ActionButton } from "@/components/ds";
 
 export type MovingItemKind = "score_upgrade" | "score_downgrade" | "earnings";
 
@@ -26,116 +28,124 @@ interface WhatsMovingFeedProps {
 }
 
 const kindColors: Record<MovingItemKind, string> = {
-  score_upgrade:   "#22c55e",
-  score_downgrade: "#ef4444",
-  earnings:        "#f59e0b",
+  score_upgrade:   "var(--qc-up,  #22c55e)",
+  score_downgrade: "var(--qc-down, #ef4444)",
+  earnings:        "var(--qc-warn, #f59e0b)",
 };
+
+function scoreColor(score: number) {
+  if (score >= 70) return "var(--qc-up, #22c55e)";
+  if (score >= 50) return "var(--qc-warn, #f59e0b)";
+  return "var(--qc-down, #ef4444)";
+}
 
 export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
   return (
     <div
-      style={{
-        background: "var(--qc-card, #fff)",
-        border: "1px solid var(--qc-hair, #E2E2E2)",
-        borderRadius: 14,
-        padding: "20px 22px",
-      }}
+      className="rounded-[10px] p-2"
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
     >
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink, #0F172B)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            WHAT&apos;S MOVING IN YOUR STOCKS
-          </span>
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: "#888",
-              background: "#F5F5F5",
-              borderRadius: 4,
-              padding: "1px 7px",
-            }}
-          >
-            {count}
-          </span>
+      {/* Header — matches WhoToCallToday */}
+      <div className="px-2 pt-1 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">What&apos;s moving in your stocks</MonoLabel>
+          <LimeCountPip count={count} />
         </div>
-        <Link href="#" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "#888", textDecoration: "none" }}>
-          All updates →
-        </Link>
+        <span
+          style={{
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.04em",
+            color: "var(--qc-ink-3)",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+          }}
+        >
+          ALL UPDATES →
+        </span>
       </div>
-      <div style={{ fontSize: 12, color: "#888", marginBottom: 16 }}>
+
+      {/* Subtitle */}
+      <div className="px-2 pb-2" style={{ fontSize: 12, color: "var(--qc-ink-3)", marginTop: -8 }}>
         Updates on stocks you hold or watch · scored by QC Insight
       </div>
 
-      {/* Items */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+      {/* Inner white card */}
+      <div className="rounded-[10px] overflow-hidden" style={{ background: "var(--qc-card)" }}>
         {items.map((item, idx) => (
           <div
             key={item.id}
             style={{
               display: "grid",
-              gridTemplateColumns: "120px 1fr auto",
+              gridTemplateColumns: "110px minmax(0,1fr) auto",
               gap: 16,
               alignItems: "start",
-              padding: "14px 0",
-              borderTop: idx > 0 ? "1px solid var(--qc-hair, #E2E2E2)" : undefined,
+              padding: "16px 18px",
+              borderTop: idx === 0 ? "none" : "1px solid var(--qc-hair-2)",
             }}
           >
             {/* Symbol + price */}
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink, #0F172B)" }}>{item.symbol}</div>
-              <div style={{ fontSize: 12, color: item.priceChangePositive ? "#22c55e" : "#ef4444" }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.3 }}>{item.symbol}</div>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontFamily: "var(--qc-font-mono)",
+                  color: item.priceChangePositive ? "var(--qc-up, #22c55e)" : "var(--qc-down, #ef4444)",
+                  marginTop: 2,
+                }}
+              >
                 {item.price} {item.priceChange}
               </div>
             </div>
 
             {/* Body */}
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 500, color: kindColors[item.kind], marginBottom: 3 }}>
                 {item.headlineLabel}
                 {item.headlineDetail && (
-                  <span style={{ color: "var(--qc-ink, #0F172B)", fontWeight: 400 }}> · {item.headlineDetail}</span>
+                  <span style={{ color: "var(--qc-ink)", fontWeight: 400 }}> · {item.headlineDetail}</span>
                 )}
               </div>
-              <div style={{ fontSize: 12, color: "#444", lineHeight: 1.5, marginBottom: 3 }}>{item.body}</div>
-              <div style={{ fontSize: 12, color: "#888" }}>{item.holdingDetail}</div>
+              <div style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.5, marginBottom: 3 }}>{item.body}</div>
+              <div style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>{item.holdingDetail}</div>
             </div>
 
             {/* QC Score + CTA */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10 }}>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: "#888", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
+                <div
+                  style={{
+                    fontFamily: "var(--qc-font-mono)",
+                    fontSize: 9,
+                    fontWeight: 600,
+                    color: "var(--qc-ink-3)",
+                    letterSpacing: "0.10em",
+                    textTransform: "uppercase",
+                    marginBottom: 3,
+                  }}
+                >
                   QC SCORE
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
                   <span
                     style={{
-                      width: 8, height: 8, borderRadius: "50%",
-                      background: item.qcScore >= 70 ? "#22c55e" : item.qcScore >= 50 ? "#f59e0b" : "#ef4444",
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      background: scoreColor(item.qcScore),
                       display: "inline-block",
+                      flexShrink: 0,
                     }}
                   />
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink, #0F172B)" }}>{item.qcScore}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>
+                    {item.qcScore}
+                  </span>
                 </div>
               </div>
-              <Link
-                href={item.ctaHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: "var(--qc-ink, #0F172B)",
-                  background: "#F5F5F5",
-                  border: "1px solid #E2E2E2",
-                  borderRadius: 8,
-                  padding: "5px 12px",
-                  textDecoration: "none",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {item.ctaLabel} →
+              <Link href={item.ctaHref} style={{ textDecoration: "none" }}>
+                <ActionButton noWrap size="sm">{item.ctaLabel} →</ActionButton>
               </Link>
             </div>
           </div>

@@ -46,8 +46,10 @@ export function AppSidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-0 z-40 flex h-screen w-[72px] flex-col items-center py-[22px] gap-1.5"
+      className="fixed left-0 top-0 z-40 flex h-screen w-[72px] flex-col items-center gap-1.5"
       style={{
+        paddingTop: 10,
+        paddingBottom: 10,
         borderRight: "1px solid var(--qc-hair)",
         background: "var(--qc-card)",
       }}

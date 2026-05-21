@@ -212,28 +212,22 @@ function TopBarInner() {
           >
             <span
               className="relative flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium overflow-hidden transition-colors whitespace-nowrap"
-              style={
-                isFactorActive
-                  ? { background: "var(--qc-ink)", color: "var(--qc-on-dark)" }
-                  : {
-                      background: "var(--qc-section)",
-                      border: "1px solid var(--qc-hair)",
-                      color: "var(--qc-ink)",
-                    }
-              }
+              style={{
+                background: "var(--qc-section)",
+                border: "1px solid var(--qc-hair)",
+                color: "var(--qc-ink)",
+              }}
             >
-              {!isFactorActive && (
-                <motion.span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 rounded-full"
-                  style={{
-                    background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.65) 48%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.65) 52%, transparent 60%)",
-                    backgroundSize: "220% 100%",
-                  }}
-                  animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
-                  transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
-                />
-              )}
+              <motion.span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-full"
+                style={{
+                  background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.65) 48%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.65) 52%, transparent 60%)",
+                  backgroundSize: "220% 100%",
+                }}
+                animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
+                transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
+              />
               <Sparkles size={12} />
               <span style={{ position: "relative", zIndex: 1 }}>QuantCase</span>
               <ChevronRight
@@ -303,8 +297,8 @@ function TopBarInner() {
 
   return (
     <header
-      className="fixed left-[72px] right-0 top-0 z-30 flex h-[60px] items-center justify-between px-6 pt-[22px]"
-      style={{ background: "var(--qc-card)" }}
+      className="fixed left-[72px] right-0 top-0 z-30 flex h-[60px] items-center justify-between px-6"
+      style={{ background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}
     >
       <div className="flex h-full items-center">{leftZone}</div>
 
@@ -328,8 +322,8 @@ function TopBarGuard() {
     <Suspense
       fallback={
         <header
-          className="fixed left-[72px] right-0 top-0 z-30 h-14 border-b"
-          style={{ background: "var(--qc-card)", borderColor: "var(--qc-hair)" }}
+          className="fixed left-[72px] right-0 top-0 z-30 h-[60px]"
+          style={{ background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}
         />
       }
     >

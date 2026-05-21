@@ -114,7 +114,7 @@ function IndustryIntelligenceInner() {
   const { bg: regimeBg, color: regimeColor, border: regimeBorder, Icon: RegimeIcon } = regimeStyle(regime);
 
   return (
-    <div style={{ background: "var(--qc-surface-base, #F5F5F5)", minHeight: "100vh", paddingTop: 60 }}>
+    <div style={{ background: "var(--qc-surface-base, #F5F5F5)", minHeight: "100vh" }}>
 
       {/* ── Page header ──────────────────────────────────────────────── */}
       <header

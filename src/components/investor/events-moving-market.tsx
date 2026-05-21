@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Zap } from "lucide-react";
+import { MonoLabel } from "@/components/ds";
 
 export interface MacroRegime {
   category: string;
@@ -17,90 +18,87 @@ interface EventsMovingMarketProps {
   refreshedDate: string;
 }
 
-const arrowColor = (dir: "up" | "down") => (dir === "up" ? "#22c55e" : "#ef4444");
-const arrowChar = (dir: "up" | "down") => (dir === "up" ? "↑" : "↓");
+const arrowColor = (dir: "up" | "down") => (dir === "up" ? "var(--qc-up, #22c55e)" : "var(--qc-down, #ef4444)");
+const arrowChar  = (dir: "up" | "down") => (dir === "up" ? "↑" : "↓");
 
 export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime, refreshedDate }: EventsMovingMarketProps) {
   return (
     <div
-      style={{
-        background: "var(--qc-card, #fff)",
-        border: "1px solid var(--qc-hair, #E2E2E2)",
-        borderRadius: 14,
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-      }}
+      className="rounded-[10px] p-2"
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", flex: 1 }}
     >
-      {/* Header */}
-      <div style={{ padding: "14px 20px 0" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 2 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#0F172B", letterSpacing: "0.05em", textTransform: "uppercase" }}>
-            EVENTS MOVING THE MARKET
-          </div>
-          <Link href="#" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "#888", textDecoration: "none", whiteSpace: "nowrap", marginLeft: 16 }}>
-            Full macro brief →
-          </Link>
+      {/* Header — matches WhoToCallToday */}
+      <div className="px-2 pt-1 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Zap className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Events Moving the Market</MonoLabel>
         </div>
-        <div style={{ fontSize: 12, color: "#888", marginBottom: 14 }}>
-          Macro regime signals · sector-level impact map
-        </div>
+        <span
+          style={{
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.04em",
+            color: "var(--qc-ink-3)",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+          }}
+        >
+          FULL MACRO BRIEF →
+        </span>
       </div>
 
-      {/* Divider */}
-      <div style={{ height: 1, background: "#E2E2E2" }} />
+      {/* Subtitle */}
+      <div className="px-2 pb-2" style={{ fontSize: 12, color: "var(--qc-ink-3)", marginTop: -8 }}>
+        Macro regime signals · sector-level impact map
+      </div>
 
-      {/* Regime columns */}
-      <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, flex: 1 }}>
-        {regimes.map((regime, i) => (
-          <div
-            key={regime.category}
-            style={{
-              borderRight: i < regimes.length - 1 ? "1px solid #E2E2E2" : "none",
-              paddingRight: i < regimes.length - 1 ? 20 : 0,
-              paddingLeft: i > 0 ? 20 : 0,
-            }}
-          >
-            {/* Category label */}
-            <div style={{ fontSize: 10, fontWeight: 600, color: "#aaa", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
-              {regime.category}
-            </div>
-            {/* Title + arrow + subtitle */}
-            <div style={{ fontSize: 14, fontWeight: 500, color: "#0F172B", marginBottom: 2 }}>
-              {regime.title}{" "}
-              <span style={{ color: "#555" }}>{regime.arrow}</span>{" "}
-              <span style={{ fontWeight: 400, color: "#555" }}>{regime.subtitle}</span>
-            </div>
+      {/* Inner white card */}
+      <div className="rounded-[10px] overflow-hidden" style={{ background: "var(--qc-card)", display: "flex", flexDirection: "column" }}>
+        {/* Regime columns */}
+        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, flex: 1 }}>
+          {regimes.map((regime, i) => (
+            <div
+              key={regime.category}
+              style={{
+                borderRight: i < regimes.length - 1 ? "1px solid var(--qc-hair-2)" : "none",
+                paddingRight: i < regimes.length - 1 ? 20 : 0,
+                paddingLeft: i > 0 ? 20 : 0,
+              }}
+            >
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink-3)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+                {regime.category}
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2, display: "flex", alignItems: "baseline", gap: 4, flexWrap: "nowrap", whiteSpace: "nowrap", overflow: "hidden" }}>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{regime.title}</span>
+                <span style={{ color: "var(--qc-ink-2)", flexShrink: 0 }}>{regime.arrow}</span>
+                <span style={{ fontWeight: 400, color: "var(--qc-ink-2)", flexShrink: 0 }}>{regime.subtitle}</span>
+              </div>
 
-            {/* Divider */}
-            <div style={{ height: 1, background: "#E2E2E2", margin: "10px 0" }} />
+              <div style={{ height: 1, background: "var(--qc-hair-2)", margin: "10px 0" }} />
 
-            {/* Sectors */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {regime.sectors.map((sec) => (
-                <div key={sec.name}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: "#0F172B" }}>{sec.name}</div>
-                  <div style={{ fontSize: 11, color: arrowColor(sec.direction) }}>
-                    {arrowChar(sec.direction)} {sec.metric}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {regime.sectors.map((sec) => (
+                  <div key={sec.name}>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>{sec.name}</div>
+                    <div style={{ fontSize: 11, color: arrowColor(sec.direction) }}>
+                      {arrowChar(sec.direction)} {sec.metric}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Divider */}
-      <div style={{ height: 1, background: "#E2E2E2" }} />
-
-      {/* Footer */}
-      <div style={{ padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontSize: 12, color: "#888" }}>
-          {regimes.length} active macro regimes · {totalSectorSignals} sector signals mapped
+          ))}
         </div>
-        <div style={{ fontSize: 12, color: "#aaa" }}>
-          Refreshed {refreshedTime} · {refreshedDate}
+
+        {/* Footer */}
+        <div style={{ height: 1, background: "var(--qc-hair-2)" }} />
+        <div style={{ padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>
+            {regimes.length} active macro regimes · {totalSectorSignals} sector signals mapped
+          </div>
+          <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: 11, letterSpacing: "0.04em", color: "var(--qc-ink-3)" }}>
+            Refreshed {refreshedTime} · {refreshedDate}
+          </div>
         </div>
       </div>
     </div>

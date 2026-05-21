@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { BarChart2 } from "lucide-react";
+import { MonoLabel, LimeCountPip } from "@/components/ds";
 import { useIndustryBaskets } from "@/hooks/useIndustryBaskets";
 import type { IndustryBasket } from "@/hooks/useIndustryBaskets";
 
@@ -17,7 +19,6 @@ export interface IndustrySignal {
 }
 
 interface IndustrySignalsGridProps {
-  // count / signals are now optional – the component fetches its own data
   count?: number;
   signals?: IndustrySignal[];
 }
@@ -57,7 +58,6 @@ function BasketCard({ basket }: { basket: IndustryBasket }) {
   );
 }
 
-// Skeleton placeholder while loading
 function SkeletonCard() {
   return (
     <div
@@ -81,73 +81,52 @@ export function IndustrySignalsGrid({ count: countProp }: IndustrySignalsGridPro
 
   return (
     <div
-      style={{
-        background: "var(--qc-card, #fff)",
-        border: "1px solid var(--qc-hair, #E2E2E2)",
-        borderRadius: 14,
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-      }}
+      className="rounded-[10px] p-2"
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
     >
-      {/* Header */}
-      <div style={{ padding: "18px 20px 0" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink, #0F172B)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-              INDUSTRY SIGNALS
-            </span>
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: "#555",
-                background: "#F0F0F0",
-                borderRadius: "50%",
-                width: 22,
-                height: 22,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {displayCount}
-            </span>
-          </div>
-          <Link
-            href="/screener/industry-intelligence"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontSize: 12,
-              color: "#0F172B",
-              background: "#fff",
-              border: "1px solid #E2E2E2",
-              borderRadius: 8,
-              padding: "6px 14px",
-              textDecoration: "none",
-              fontWeight: 500,
-            }}
-          >
-            Industry Terminal →
-          </Link>
+      {/* Header — matches WhoToCallToday */}
+      <div className="px-2 pt-1 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BarChart2 className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Industry Signals</MonoLabel>
+          <LimeCountPip count={displayCount} />
         </div>
-        <div style={{ fontSize: 12, color: "#888", marginBottom: 16 }}>
-          Aligned to your holdings · scored across 6 frameworks
-        </div>
+        <Link
+          href="/screener/industry-intelligence"
+          style={{
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.04em",
+            color: "var(--qc-ink-3)",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          INDUSTRY TERMINAL →
+        </Link>
       </div>
 
-      {/* Divider */}
-      <div style={{ height: 1, background: "#E2E2E2" }} />
+      {/* Subtitle */}
+      <div className="px-2 pb-2" style={{ fontSize: 12, color: "var(--qc-ink-3)", marginTop: -8 }}>
+        Aligned to your holdings · scored across 6 frameworks
+      </div>
 
-      {/* 2-column grid */}
-      <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, flex: 1 }}>
+      {/* Inner white card with 2-column grid */}
+      <div
+        className="rounded-[10px]"
+        style={{
+          background: "var(--qc-card)",
+          padding: "10px",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 10,
+        }}
+      >
         {loading
           ? Array.from({ length: displayCount }).map((_, i) => <SkeletonCard key={i} />)
           : baskets.map((basket) => <BasketCard key={basket.id} basket={basket} />)
         }
       </div>
-
     </div>
   );
 }

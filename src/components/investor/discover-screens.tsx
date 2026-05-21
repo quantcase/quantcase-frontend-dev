@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { Compass } from "lucide-react";
+import { MonoLabel } from "@/components/ds";
 
 export interface DiscoverScreen {
   id: string;
@@ -24,23 +26,21 @@ function ScreenCard({ screen }: { screen: DiscoverScreen }) {
       style={{
         display: "flex",
         flexDirection: "column",
-        background: "#fff",
-        border: "1px solid #E2E2E2",
-        borderRadius: 12,
-        padding: "20px 20px 18px",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair-2)",
+        borderRadius: 10,
+        padding: "16px 18px 14px",
         textDecoration: "none",
         flex: 1,
-        gap: 0,
-        transition: "border-color 0.15s, box-shadow 0.15s",
         cursor: "pointer",
       }}
     >
       {/* Icon + badge row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
         <div
           style={{
-            width: 38,
-            height: 38,
+            width: 36,
+            height: 36,
             border: "1px solid rgba(18,18,18,0.10)",
             borderRadius: 8,
             display: "flex",
@@ -70,12 +70,11 @@ function ScreenCard({ screen }: { screen: DiscoverScreen }) {
         )}
       </div>
 
-      {/* Title */}
       <div
         style={{
-          fontSize: 15,
+          fontSize: 14,
           fontWeight: 600,
-          color: "#0F172B",
+          color: "var(--qc-ink)",
           marginBottom: 8,
           lineHeight: 1.3,
           letterSpacing: "-0.01em",
@@ -84,26 +83,24 @@ function ScreenCard({ screen }: { screen: DiscoverScreen }) {
         {screen.title}
       </div>
 
-      {/* Description */}
-      <p style={{ fontSize: 13, color: "#888", lineHeight: 1.6, margin: "0 0 20px", flex: 1 }}>
+      <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.6, margin: "0 0 16px", flex: 1 }}>
         {screen.description}
       </p>
 
-      {/* Divider */}
-      <div style={{ height: 1, background: "#F0F0F0", marginBottom: 16 }} />
+      <div style={{ height: 1, background: "var(--qc-hair-2)", marginBottom: 14 }} />
 
-      {/* Stats row */}
       <div style={{ display: "flex", gap: 20 }}>
         {screen.stats.map((s) => (
           <div key={s.label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={{ fontSize: 20, fontWeight: 700, color: "#0F172B", lineHeight: 1 }}>
+            <span style={{ fontSize: 20, fontWeight: 700, color: "var(--qc-ink)", lineHeight: 1 }}>
               {s.value}
             </span>
             <span
               style={{
-                fontSize: 10,
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: 9,
                 fontWeight: 500,
-                color: "#aaa",
+                color: "var(--qc-ink-3)",
                 letterSpacing: "0.07em",
                 textTransform: "uppercase",
               }}
@@ -120,57 +117,45 @@ function ScreenCard({ screen }: { screen: DiscoverScreen }) {
 export function DiscoverScreens({ screens }: DiscoverScreensProps) {
   return (
     <div
-      style={{
-        background: "#F5F5F5",
-        border: "1px solid #E2E2E2",
-        borderRadius: 14,
-        padding: "18px 20px 20px",
-      }}
+      className="rounded-[10px] p-2"
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
     >
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 14,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: "#0F172B",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-            }}
-          >
-            DISCOVER · WORTH YOUR ATTENTION THIS WEEK
-          </div>
-          <div style={{ fontSize: 12, color: "#aaa" }}>
-            Curated screens · click any to see the names
-          </div>
+      {/* Header — matches WhoToCallToday */}
+      <div className="px-2 pt-1 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Compass className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Discover · Worth your attention this week</MonoLabel>
         </div>
-        <Link
-          href="/screener/home"
+        <span
           style={{
-            fontSize: 12,
-            fontWeight: 500,
-            color: "#555",
-            textDecoration: "none",
-            background: "#fff",
-            border: "1px solid #E2E2E2",
-            borderRadius: 6,
-            padding: "5px 12px",
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.04em",
+            color: "var(--qc-ink-3)",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
           }}
         >
-          All screens →
-        </Link>
+          ALL SCREENS →
+        </span>
       </div>
 
-      {/* 3-column card grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+      {/* Subtitle */}
+      <div className="px-2 pb-2" style={{ fontSize: 12, color: "var(--qc-ink-3)", marginTop: -8 }}>
+        Curated screens · click any to see the names
+      </div>
+
+      {/* 3-column card grid inside white inner card */}
+      <div
+        className="rounded-[10px]"
+        style={{
+          background: "var(--qc-card)",
+          padding: "14px",
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 10,
+        }}
+      >
         {screens.map((s) => (
           <ScreenCard key={s.id} screen={s} />
         ))}

@@ -2,11 +2,11 @@
 
 // ─── Scenario Framework ───────────────────────────────────────────────────────
 
-export interface DScenarioCase {
+interface DScenarioCase {
   points?: string[];
 }
 
-export interface ScenarioFrameworkSection {
+interface ScenarioFrameworkSection {
   meta?: { section_id?: string; title?: string };
   bear?: DScenarioCase;
   base?: DScenarioCase;
@@ -86,7 +86,7 @@ export interface HistoricalPerformanceSection {
 
 // ─── Quality of Earnings ──────────────────────────────────────────────────────
 
-export interface QualityMetric {
+interface QualityMetric {
   label: string;
   value: string;
   change: string;
@@ -132,23 +132,23 @@ export interface DetailedAnalysisSection {
 
 // ─── Overview ─────────────────────────────────────────────────────────────────
 
-export interface DealVerdict {
+interface DealVerdict {
   title?: string;
   description?: string;
 }
 
-export interface EpsEngineCard {
+interface EpsEngineCard {
   score?: number;
   drivers?: string[];
 }
 
-export interface ScenarioSummaryCase {
+interface ScenarioSummaryCase {
   label?: string;
   subtext?: string;
   headline?: string;
 }
 
-export interface DealFactorScore {
+interface DealFactorScore {
   level?: string;
   overall?: number;
   eps_engine?: number;
@@ -179,7 +179,7 @@ export interface DealIntelligenceSignal {
   details: string[];
 }
 
-export interface DealScore {
+interface DealScore {
   label: string;
   total: number;
   max_score: number;

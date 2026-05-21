@@ -18,84 +18,89 @@ function StatCell({ label, value, sublabel, sublabelColor = "muted", isRange, ra
       ? { background: "var(--qc-up-soft)", color: "var(--qc-up)" }
       : sublabelColor === "down"
       ? { background: "var(--qc-down-soft)", color: "var(--qc-down)" }
-      : { color: "var(--qc-text-muted)" };
+      : { color: "var(--qc-ink-2)" };
 
   const isDeltaChip = sublabelColor === "up" || sublabelColor === "down";
 
   return (
-    <div className="stat relative min-w-0 flex flex-col justify-between px-5 py-4">
-      {/* Vertical divider via CSS pseudo — simulated with border-left on non-first */}
-      <div
-        className="stat-k mb-2.5 flex items-center gap-1.5"
-        style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em", color: "var(--qc-text-muted)", textTransform: "uppercase" }}
-      >
-        {label}
+    <div className="stat relative min-w-0 flex flex-col gap-1.5 px-5 py-3.5">
+      {/* Top row: label + sublabel/status chip */}
+      <div className="flex items-center justify-between gap-2">
+        <div
+          className="stat-k flex items-center gap-1.5"
+          style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em", color: "var(--qc-ink-2)", textTransform: "uppercase" }}
+        >
+          {label}
+        </div>
+        {sublabel && (
+          isDeltaChip ? (
+            <div
+              style={{
+                ...sublabelStyle,
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10,
+                fontWeight: 500,
+                padding: "2px 6px",
+                borderRadius: 5,
+                letterSpacing: "0.02em",
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {sublabel}
+            </div>
+          ) : (
+            <div
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10,
+                color: "var(--qc-ink-2)",
+                letterSpacing: "0.04em",
+                whiteSpace: "nowrap",
+                background: "var(--qc-chip, #F2F1EC)",
+                border: "1px solid var(--qc-hair)",
+                padding: "2px 6px",
+                borderRadius: 5,
+                lineHeight: 1,
+              }}
+            >
+              {sublabel}
+            </div>
+          )
+        )}
       </div>
 
+      {/* Bottom row: value (+ range bar for 52W) */}
       {isRange ? (
-        /* 52W range layout */
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-[13px] font-medium" style={{ letterSpacing: "-0.005em", color: "var(--qc-text-heading)" }}>
+          <div className="flex items-center gap-2 text-[13px] font-medium" style={{ letterSpacing: "-0.005em", color: "var(--qc-ink)" }}>
             {value}
           </div>
           {rangePosition != null && (
-            <div className="relative h-[3px] rounded-full" style={{ background: "var(--qc-border-default)" }}>
+            <div className="relative h-[3px] rounded-full" style={{ background: "var(--qc-hair)" }}>
               <div
                 className="absolute top-0 bottom-0 left-0 rounded-full"
-                style={{ width: `${rangePosition}%`, background: "var(--qc-accent-primary)" }}
+                style={{ width: `${rangePosition}%`, background: "var(--qc-ink)" }}
               />
               <div
                 className="absolute top-1/2 -translate-y-1/2 w-[10px] h-[10px] rounded-full border-2"
                 style={{
                   left: `calc(${rangePosition}% - 5px)`,
-                  background: "var(--qc-accent-primary)",
-                  borderColor: "var(--qc-surface-white)",
-                  boxShadow: "0 0 0 1px var(--qc-border-default)",
+                  background: "var(--qc-ink)",
+                  borderColor: "var(--qc-card)",
+                  boxShadow: "0 0 0 1px var(--qc-hair)",
                 }}
               />
             </div>
           )}
-          {sublabel && (
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11.5, color: "var(--qc-text-muted)", letterSpacing: "0.04em" }}>
-              {sublabel}
-            </div>
-          )}
         </div>
       ) : (
-        <>
-          <div
-            className="stat-v flex items-baseline gap-2 leading-none whitespace-nowrap"
-            style={{ fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-text-heading)", fontVariantNumeric: "tabular-nums" }}
-          >
-            {value}
-          </div>
-          {sublabel && (
-            isDeltaChip ? (
-              <div
-                className="mt-2 inline-flex items-center self-start rounded"
-                style={{
-                  ...sublabelStyle,
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 11,
-                  fontWeight: 500,
-                  padding: "3px 7px",
-                  borderRadius: 6,
-                  letterSpacing: "0.02em",
-                  lineHeight: 1,
-                }}
-              >
-                {sublabel}
-              </div>
-            ) : (
-              <div
-                className="mt-2"
-                style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11.5, color: "var(--qc-text-muted)", letterSpacing: "0.04em" }}
-              >
-                {sublabel}
-              </div>
-            )
-          )}
-        </>
+        <div
+          className="stat-v flex items-baseline gap-2 leading-none whitespace-nowrap"
+          style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}
+        >
+          {value}
+        </div>
       )}
     </div>
   );
@@ -109,8 +114,6 @@ export function KeyRatioTiles({ data }: Props) {
   const qt = data.quote;
   const ps = data.perShare;
   const fin = data.financials;
-  const ks = data.keyStats;
-
   // CMP
   const priceDisplay = qt.price != null ? formatPrice(qt.price, 0) : "—";
   const priceChange = qt.changePercent;
@@ -138,15 +141,14 @@ export function KeyRatioTiles({ data }: Props) {
   // EPS CAGR 3Y
   const epsCagrRaw = fin.eps_cagr_3y;
   const epsCagrDisplay = epsCagrRaw != null
-    ? `${epsCagrRaw >= 0 ? "+" : ""}${(epsCagrRaw * 100).toFixed(1)}%`
-    : ks.earningsQuarterlyGrowth != null
-      ? `${ks.earningsQuarterlyGrowth >= 0 ? "+" : ""}${(ks.earningsQuarterlyGrowth * 100).toFixed(1)}%`
-      : "—";
+    ? `${epsCagrRaw >= 0 ? "+" : ""}${epsCagrRaw.toFixed(1)}%`
+    : "—";
   const epsCagrIsPositive = epsCagrDisplay !== "—" && !epsCagrDisplay.startsWith("-");
   const epsCagrLabel = fin.eps_cagr_3y_label ?? null;
 
   // Dividend Yield — backend sends value already in % (e.g. 0.98 means 0.98%)
-  const divYield = ps.dividendYield != null ? `${ps.dividendYield.toFixed(2)}%` : "—";
+  const divYieldRaw = ps.dividendYield;
+  const divYield = divYieldRaw != null && divYieldRaw > 0 ? `${divYieldRaw.toFixed(2)}%` : "—";
 
   return (
     <div className="px-4">
@@ -154,10 +156,10 @@ export function KeyRatioTiles({ data }: Props) {
       <div
         className="grid grid-cols-5 overflow-hidden"
         style={{
-          background: "var(--qc-surface-white)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           borderRadius: 16,
-          boxShadow: "0 1px 0 var(--qc-border-subtle)",
+          boxShadow: "0 1px 0 var(--qc-hair-2)",
         }}
       >
         {/* Each cell gets a left border except the first, simulating the dividers */}
@@ -199,7 +201,7 @@ export function KeyRatioTiles({ data }: Props) {
         ].map((cell, i) => (
           <div
             key={i}
-            style={i > 0 ? { borderLeft: "1px solid var(--qc-border-inner)" } : undefined}
+            style={i > 0 ? { borderLeft: "1px solid var(--qc-hair-2)" } : undefined}
           >
             {cell}
           </div>

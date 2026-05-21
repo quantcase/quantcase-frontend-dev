@@ -40,7 +40,7 @@ export interface BasketStock {
   [key: string]: string | number | null | undefined;
 }
 
-export interface BasketStocksPagination {
+interface BasketStocksPagination {
   page: number;
   size: number;
   total: number;
@@ -56,7 +56,7 @@ export interface BasketStocksApiResponse {
 
 // ── Watchlist types ───────────────────────────────────────────────────────────
 
-export interface WatchlistAsset {
+interface WatchlistAsset {
   id: string;
   watchlist_id: string;
   symbol: string;
@@ -84,7 +84,7 @@ export interface WatchlistApiResponse {
 
 // ── Stock types ───────────────────────────────────────────────────────────────
 
-export interface StockData {
+interface StockData {
   company: string;
   company_name: string;
   basic_industry: string;
@@ -95,17 +95,29 @@ export interface StocksApiResponse {
   data: StockData[];
 }
 
-export interface QuarterlyTrend {
+interface QuarterlyTrend {
   period: string;
   revenue: number | null;
   ebitda: number | null;
-  grossProfit: number | null;
-  operatingIncome: number | null;
+  ebitdaLabel: string | null;
   netIncome: number | null;
   eps: number | null;
+  cfo: number | null;
+  cfoProxy: number | null;
+  cfoLabel: string | null;
   totalDebt: number | null;
   totalEquity: number | null;
-  netDebt: number | null;
+  interestCoverage: number | null;
+}
+
+export interface FundamentalsTrendPoint {
+  period: string;
+  eps: number | null;
+  pe: number | null;
+  pb: number | null;
+  bookValue: number | null;
+  revenue: number | null;
+  netProfit: number | null;
 }
 
 export interface ScreenerData {
@@ -128,6 +140,7 @@ export interface ScreenerData {
     listingDate?: string | null;
     ownershipGroup?: string | null;
     mainProduct?: string | null;
+    isBfsi?: boolean;
   };
   quote: {
     price: number;
@@ -167,6 +180,14 @@ export interface ScreenerData {
     fcfGrowth: number | null;
     reserves: number | null;
     reservesGrowth: number | null;
+    dividendYieldTrend: { period: string; dividendYield: number | null }[] | null;
+    fundamentalsTrend: FundamentalsTrendPoint[] | null;
+    quarterlyTrendMeta: {
+      ebitdaLabel: "EBITDA" | "Op. Profit";
+      showInterestCoverage: boolean;
+      cfoIsEstimated: boolean;
+      cfoTooltip: string;
+    } | null;
     quarterlyTrend: QuarterlyTrend[];
   };
   valuation: {
@@ -190,6 +211,8 @@ export interface ScreenerData {
     totalCash: number;
     totalDebt: number;
     totalCashPerShare: number;
+    interestCoverage: number | null;
+    interestCoverageGrowth: number | null;
   };
   ratios: {
     roce: number | null;

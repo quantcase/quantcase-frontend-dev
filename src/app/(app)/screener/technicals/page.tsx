@@ -9,14 +9,6 @@ import { CandlestickChart, type ChartMode } from "./_components/CandlestickChart
 import { DecisionIntelligenceBanner } from "./_components/DecisionIntelligenceBanner";
 import { TechnicalsRuleEngine, type EngineTab } from "./_components/TechnicalsRuleEngine";
 import { LevelsStrip } from "./_components/LevelsStrip";
-import { PriceActionOverview } from "./_components/PriceActionOverview";
-import { SupportResistanceAnalysis } from "./_components/SupportResistanceAnalysis";
-import { SignalScorecard } from "./_components/SignalScorecard";
-import { MomentumIndicators } from "./_components/MomentumIndicators";
-import { MovingAverages } from "./_components/MovingAverages";
-import { MarketStructureSection } from "./_components/MarketStructureSection";
-import { TimeframeMatrix } from "./_components/TimeframeMatrix";
-import { VolumeAnalysis } from "./_components/VolumeAnalysis";
 import { SectionPanel } from "@/components/molecules/section-panel";
 
 const TECHNICALS_NAV = [
@@ -77,41 +69,8 @@ function TechnicalsContent() {
   const changeIsPositive = data.price.changePercent >= 0;
   const changeDisplay = `${changeIsPositive ? "+" : ""}${data.price.changePercent.toFixed(1)}%`;
 
-  const di = data.decisionIntelligence;
-  const findIndicator = (name: string) => di?.indicators.find((i) => i.name.toLowerCase().includes(name));
-
-  const insightCards = di ? (
-    <>
-      {(["momentum", "volatility", "trend"] as const).map((name) => {
-        const ind = findIndicator(name);
-        if (!ind) return null;
-        return (
-          <div
-            key={name}
-            className="rounded-[8px] border px-3 py-1.5 text-center"
-            style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
-          >
-            <p className="font-mono text-[9px] uppercase tracking-[0.14em] mb-px" style={{ color: "var(--qc-text-muted)" }}>
-              {ind.name}
-            </p>
-            <p className="text-[12px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{ind.tag}</p>
-          </div>
-        );
-      })}
-      <div
-        className="rounded-[8px] border px-3 py-1.5 text-center"
-        style={{ borderColor: "var(--qc-text-heading)", background: "var(--qc-surface-white)" }}
-      >
-        <p className="font-mono text-[9px] uppercase tracking-[0.14em] mb-px" style={{ color: "var(--qc-text-muted)" }}>
-          Tag
-        </p>
-        <p className="text-[12px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>{di.tag}</p>
-      </div>
-    </>
-  ) : null;
-
   return (
-    <ScreenerPageShell navItems={TECHNICALS_NAV} headerRight={insightCards}>
+    <ScreenerPageShell navItems={TECHNICALS_NAV}>
       <div className="mb-8 px-4 space-y-[14px] pt-4">
         <div id="section-price-levels">
           <LevelsStrip
@@ -135,7 +94,7 @@ function TechnicalsContent() {
                     <button
                       onClick={() => setChartMode("DEFAULT")}
                       className="px-2.5 py-1 rounded-[8px] font-mono text-[10px] uppercase tracking-[0.14em] border transition-colors"
-                      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)", color: "var(--qc-text-heading)" }}
+                      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)", color: "var(--qc-ink)" }}
                     >
                       Default View
                     </button>

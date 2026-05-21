@@ -1,13 +1,13 @@
 // Core type definitions for Opportunity Factor Dashboard
 
-export interface OFactorMetric {
+interface OFactorMetric {
   value?: string | null;
   label?: string;
   sublabel?: string;
   change?: string | null;
 }
 
-export interface IndustryCagrMetric {
+interface IndustryCagrMetric {
   label?: string;
   sublabel?: string;
   qoq?: string | null;
@@ -26,7 +26,7 @@ export function safeMetric(m?: OFactorMetric): { value: string; label: string; s
 
 // ─── Industry Overview ────────────────────────────────────────────────────────
 
-export interface IndustryKpiMetric {
+interface IndustryKpiMetric {
   label: string;
   value: string;
   change?: string | null;
@@ -122,7 +122,7 @@ export interface CompetitionSection {
 
 // ─── Financial Strength ───────────────────────────────────────────────────────
 
-export interface BalanceSheetSection {
+interface BalanceSheetSection {
   metrics?: {
     net_debt_ebitda?: OFactorMetric;
     debt_equity?: OFactorMetric;
@@ -228,7 +228,7 @@ export interface DolDataPoint {
   dol: number;
 }
 
-export interface FixedCostLine {
+interface FixedCostLine {
   label: string;
   current_pct: number | null;
   prior_pct: number | null;
@@ -236,7 +236,7 @@ export interface FixedCostLine {
   note?: string | null;
 }
 
-export interface OperatingLeverageMetric {
+interface OperatingLeverageMetric {
   label: string;
   value: string;
   change?: string | null;
@@ -275,7 +275,7 @@ export interface FcfConversionDataPoint {
   is_floor?: boolean;
 }
 
-export interface FcfYieldDataPoint {
+interface FcfYieldDataPoint {
   label: string;
   yield_pct: number | null;
   zone: string;
@@ -339,13 +339,13 @@ export interface FreeCashFlowSection {
 
 // ─── Working Capital ──────────────────────────────────────────────────────────
 
-export interface WcMetricRow {
+interface WcMetricRow {
   label: string;       // e.g. "DSO (days)"
   key: string;         // e.g. "dso"
   values: (number | null)[];  // one per quarter in quarters[]
 }
 
-export interface WcTrendDataPoint {
+interface WcTrendDataPoint {
   quarter: string;
   wc_pct: number;
 }
@@ -369,7 +369,7 @@ export interface WorkingCapitalSection {
 
 // ─── Capital Structure & Capex ────────────────────────────────────────────────
 
-export interface CapexIntensityMetric {
+interface CapexIntensityMetric {
   label: string;
   value: string;         // e.g. "1.8%"
   bar_pct: number;       // 0–100 for the fill bar
@@ -448,7 +448,7 @@ export interface IndustrySignalBreakdownItem {
   details: string[];
 }
 
-export interface FinalScoringSection {
+interface FinalScoringSection {
   meta?: { section_id?: string; title?: string; subtitle?: string };
   score: number;             // e.g. 6
   max_score?: number;        // e.g. 8 (may be absent when checks array is used instead)
@@ -514,20 +514,20 @@ export interface OFactorResponseWrapper {
 
 // ─── Industry Analysis (ofactor /industry endpoint) ───────────────────────────
 
-export interface IndustryScoreCardDimension {
+interface IndustryScoreCardDimension {
   max: number;
   score: number;
   status: string;
 }
 
-export interface IndustryScoreCard {
+interface IndustryScoreCard {
   total: number;
   status: string;
   status_color: string;
   dimensions: Record<string, IndustryScoreCardDimension>;
 }
 
-export interface IndustryKeyFinding {
+interface IndustryKeyFinding {
   body: string;
   color: "green" | "red" | "amber" | "blue";
   theme: string;
@@ -560,25 +560,25 @@ export interface IndustryDriverItem {
   total_companies: number;
 }
 
-export interface IndustryDemandDrivers {
+interface IndustryDemandDrivers {
   positive: IndustryDriverItem[];
   negative: IndustryDriverItem[];
   representative_quotes: string[];
 }
 
-export interface IndustrySupplyDrivers {
+interface IndustrySupplyDrivers {
   excess_indicators: IndustryDriverItem[];
   tightness_indicators: IndustryDriverItem[];
   representative_quotes: string[];
 }
 
-export interface IndustryCoherenceCheck {
+interface IndustryCoherenceCheck {
   type: "coherent" | "incoherent";
   pattern: string;
   explanation: string;
 }
 
-export interface IndustryMetricItem {
+interface IndustryMetricItem {
   label: string;
   value?: string | null;
   count?: number;
@@ -588,21 +588,21 @@ export interface IndustryMetricItem {
   vs_wacc_spread?: string;
 }
 
-export interface IndustryMetrics {
+interface IndustryMetrics {
   [key: string]: IndustryMetricItem;
 }
 
-export interface IndustryInvestmentRisk {
+interface IndustryInvestmentRisk {
   risk: string;
   evidence: string;
 }
 
-export interface IndustryPositiveSignal {
+interface IndustryPositiveSignal {
   signal: string;
   evidence: string;
 }
 
-export interface IndustryRecommendedStrategy {
+interface IndustryRecommendedStrategy {
   action: string;
   thesis: string;
   timing: string;
@@ -631,12 +631,12 @@ export interface IndustryAnalysis {
 
 // ─── Industry KPI Timeseries (from peer-data endpoint) ────────────────────────
 
-export interface IndustryKpiDataPoint {
+interface IndustryKpiDataPoint {
   period: string;
   value: string;
 }
 
-export interface IndustryKpiEntry {
+interface IndustryKpiEntry {
   kpi_abbr: string;
   quarters_present: number;
   data: IndustryKpiDataPoint[];
@@ -649,7 +649,7 @@ export interface IndustryKpiTimeseries {
 
 // ─── Peer KPI Timeseries (new structure for KPI Benchmarking) ─────────────────
 
-export interface PeerKpiCompany {
+interface PeerKpiCompany {
   ticker: string;
   company_name: string;
   is_current?: boolean;

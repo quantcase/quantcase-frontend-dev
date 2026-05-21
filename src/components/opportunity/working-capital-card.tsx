@@ -65,15 +65,15 @@ function WcTrendChartPanel({
   });
 
   return (
-    <div className="rounded-lg p-4 flex flex-col flex-1" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
+    <div className="rounded-lg p-4 flex flex-col flex-1" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
       <div className="flex items-start justify-between gap-2 mb-3">
         <div>
-          <h3 className="text-sm font-bold" style={{ color: "var(--qc-text-heading)" }}>{d.title}</h3>
-          <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>Bars = DSO / DIO / DPO (days) · Line = WC as % of Revenue</p>
+          <h3 className="text-sm font-bold" style={{ color: "var(--qc-ink)" }}>{d.title}</h3>
+          <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>Bars = DSO / DIO / DPO (days) · Line = WC as % of Revenue</p>
         </div>
         <div className="text-right shrink-0 space-y-0.5">
-          <p className="text-[10px] font-mono" style={{ color: "var(--qc-text-muted)" }}>WC % = Working Capital / Revenue</p>
-          <p className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Lower % = more asset-efficient</p>
+          <p className="text-[10px] font-mono" style={{ color: "var(--qc-ink-2)" }}>WC % = Working Capital / Revenue</p>
+          <p className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>Lower % = more asset-efficient</p>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ function WcTrendChartPanel({
         </ResponsiveContainer>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-[10px] mt-3" style={{ color: "var(--qc-text-muted)" }}>
+      <div className="flex flex-wrap items-center gap-3 text-[10px] mt-3" style={{ color: "var(--qc-ink-2)" }}>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm inline-block" style={{ background: CHART.dsoBar, opacity: 0.7 }} />
           DSO
@@ -128,7 +128,7 @@ function WcTrendChartPanel({
 
 function WcSignalsPanel({ signals, insight }: { signals?: WorkingCapitalSection["signals"]; insight?: string }) {
   return (
-    <div className="rounded-lg p-4 space-y-3 h-full" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
+    <div className="rounded-lg p-4 space-y-3 h-full" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
       {signals && signals.length > 0 && (
         <div className="flex flex-col gap-2">
           {signals.map((s, i) => (
@@ -138,7 +138,7 @@ function WcSignalsPanel({ signals, insight }: { signals?: WorkingCapitalSection[
       )}
       {insight && (
         <div className="rounded px-3 py-2.5" style={{ border: "1px solid var(--qc-blue)", background: "var(--qc-blue-soft)" }}>
-          <p className="text-xs font-light leading-relaxed" style={{ color: "var(--qc-text-muted)" }}><InsightText text={insight} /></p>
+          <p className="text-xs font-light leading-relaxed" style={{ color: "var(--qc-ink-2)" }}><InsightText text={insight} /></p>
         </div>
       )}
     </div>

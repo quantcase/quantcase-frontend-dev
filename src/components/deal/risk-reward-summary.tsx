@@ -5,22 +5,22 @@ interface RiskRewardSummaryProps {
 }
 
 function valueCssColor(value?: string): string {
-  if (!value) return "var(--qc-text-heading)";
+  if (!value) return "var(--qc-ink)";
   if (value.startsWith("+")) return "var(--qc-up)";
-  if (value.startsWith("-")) return "var(--qc-text-heading)";
+  if (value.startsWith("-")) return "var(--qc-ink)";
   return "var(--qc-up)";
 }
 
 function MetricCard({ metric }: { metric?: RiskRewardMetric }) {
   return (
-    <div className="rounded-xl p-5 space-y-3" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
-      <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>
+    <div className="rounded-xl p-5 space-y-3" style={{ background: "var(--qc-section)", border: "1px solid var(--qc-hair)" }}>
+      <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--qc-ink-2)" }}>
         {metric?.label ?? "—"}
       </p>
       <p className="text-[26px] font-normal leading-none" style={{ color: valueCssColor(metric?.value) }}>
         {metric?.value ?? "N/A"}
       </p>
-      <p className="text-xs pt-1" style={{ color: "var(--qc-text-muted)" }}>
+      <p className="text-xs pt-1" style={{ color: "var(--qc-ink-2)" }}>
         {metric?.subtitle}
       </p>
     </div>

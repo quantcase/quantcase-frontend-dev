@@ -36,9 +36,9 @@ function OutlineToggle({
             fontWeight: 500,
             padding: "4px 12px",
             borderRadius: 6,
-            border: `1px solid ${value === option ? "var(--qc-accent-primary)" : "var(--qc-border-default)"}`,
-            background: value === option ? "var(--qc-accent-primary)" : "transparent",
-            color: value === option ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
+            border: `1px solid ${value === option ? "var(--qc-ink)" : "var(--qc-hair)"}`,
+            background: value === option ? "var(--qc-ink)" : "transparent",
+            color: value === option ? "var(--qc-on-dark)" : "var(--qc-ink-2)",
             cursor: "pointer",
             whiteSpace: "nowrap",
           }}
@@ -70,8 +70,8 @@ export function TabularCard({
       className={className}
       style={{
         borderRadius: 10,
-        border: "1px solid var(--qc-border-default)",
-        background: "var(--qc-surface-panel)",
+        border: "1px solid var(--qc-hair)",
+        background: "var(--qc-section)",
         padding: 8,
       }}
     >
@@ -85,7 +85,7 @@ export function TabularCard({
             style={{
               fontSize: 14,
               fontWeight: 600,
-              color: "var(--qc-text-heading)",
+              color: "var(--qc-ink)",
               textTransform: titleCase ? "none" : "uppercase",
               letterSpacing: "0.01em",
             }}
@@ -93,7 +93,7 @@ export function TabularCard({
             {title}
           </div>
           {subtitle && (
-            <div style={{ fontSize: 12, color: "var(--qc-text-muted)", marginTop: 2 }}>{subtitle}</div>
+            <div style={{ fontSize: 12, color: "var(--qc-ink-2)", marginTop: 2 }}>{subtitle}</div>
           )}
         </div>
         <div className="flex items-center gap-3">
@@ -108,8 +108,8 @@ export function TabularCard({
       <div
         style={{
           borderRadius: 10,
-          border: "1px solid var(--qc-border-inner)",
-          background: "var(--qc-surface-white)",
+          border: "1px solid var(--qc-hair-2)",
+          background: "var(--qc-card)",
           padding: 8,
         }}
       >

@@ -80,13 +80,13 @@ export function ShareholdingTable({
               style={{
                 fontSize: 10,
                 fontWeight: 500,
-                color: "var(--qc-text-muted)",
+                color: "var(--qc-ink-2)",
                 textTransform: "uppercase",
                 letterSpacing: "0.12em",
                 padding: "8px 12px 8px 0",
                 whiteSpace: "nowrap",
                 minWidth: 200,
-                background: "var(--qc-surface-white)",
+                background: "var(--qc-card)",
                 fontFamily: "'IBM Plex Mono', monospace",
               }}
             >
@@ -98,7 +98,7 @@ export function ShareholdingTable({
                 style={{
                   fontSize: 10,
                   fontWeight: 500,
-                  color: "var(--qc-text-muted)",
+                  color: "var(--qc-ink-2)",
                   textTransform: "uppercase",
                   letterSpacing: "0.12em",
                   padding: "8px 12px",
@@ -115,17 +115,17 @@ export function ShareholdingTable({
         <tbody>
           {rows.map((row, idx) => {
             const rowBg = row.depth === 1
-              ? "var(--qc-surface-white)"
+              ? "var(--qc-card)"
               : idx % 2 === 0
-              ? "var(--qc-surface-white)"
-              : "var(--qc-surface-row-alt)";
+              ? "var(--qc-card)"
+              : "var(--qc-section)";
             return (
               <tr
                 key={row.key}
                 style={{
                   background: rowBg,
                   borderTop: row.depth === 0 && row.isParent
-                    ? "1px solid var(--qc-border-inner)"
+                    ? "1px solid var(--qc-hair-2)"
                     : "1px solid transparent",
                 }}
               >
@@ -135,7 +135,7 @@ export function ShareholdingTable({
                     background: rowBg,
                     fontSize: 13,
                     fontWeight: row.depth === 0 ? 600 : 400,
-                    color: row.depth === 0 ? "var(--qc-text-heading)" : "var(--qc-text-body)",
+                    color: row.depth === 0 ? "var(--qc-ink)" : "var(--qc-ink)",
                     padding: "8px 12px 8px 0",
                     whiteSpace: "nowrap",
                     paddingLeft: row.depth === 1 ? 20 : 0,
@@ -163,10 +163,10 @@ export function ShareholdingTable({
                           width: 16,
                           height: 16,
                           borderRadius: 4,
-                          border: "1px solid var(--qc-border-default)",
-                          background: "var(--qc-surface-panel)",
+                          border: "1px solid var(--qc-hair)",
+                          background: "var(--qc-section)",
                           fontSize: 10,
-                          color: "var(--qc-text-muted)",
+                          color: "var(--qc-ink-2)",
                           flexShrink: 0,
                           transition: "transform 0.15s",
                           transform: expanded.has(row.key) ? "rotate(90deg)" : "none",
@@ -187,8 +187,8 @@ export function ShareholdingTable({
                       fontSize: 13,
                       fontWeight: row.depth === 0 ? 600 : 400,
                       color: val === null || val === undefined
-                        ? "var(--qc-text-muted)"
-                        : "var(--qc-text-heading)",
+                        ? "var(--qc-ink-2)"
+                        : "var(--qc-ink)",
                       padding: "8px 12px",
                       textAlign: "right",
                       whiteSpace: "nowrap",

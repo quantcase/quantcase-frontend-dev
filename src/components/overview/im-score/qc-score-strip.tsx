@@ -30,8 +30,8 @@ export function QcScoreStrip({ displayScore, rating, weightedPct, weights }: QcS
       style={{
         display: "grid", gridTemplateColumns: "auto 1px 1fr",
         gap: 20,
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
         padding: "16px 20px",
         marginBottom: 12,
@@ -42,7 +42,7 @@ export function QcScoreStrip({ displayScore, rating, weightedPct, weights }: QcS
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         <div style={{ position: "relative", width: 60, height: 60, flexShrink: 0 }}>
           <svg viewBox="0 0 60 60" width="60" height="60">
-            <circle cx="30" cy="30" r="24" stroke="var(--qc-border-default)" strokeWidth="5" fill="none" />
+            <circle cx="30" cy="30" r="24" stroke="var(--qc-hair)" strokeWidth="5" fill="none" />
             <circle
               cx="30" cy="30" r="24"
               stroke={ringColor} strokeWidth="5" fill="none"
@@ -74,14 +74,14 @@ export function QcScoreStrip({ displayScore, rating, weightedPct, weights }: QcS
               {rating}
             </span>
           </div>
-          <div style={{ fontSize: 12, color: "var(--qc-text-muted)", lineHeight: 1.4 }}>
+          <div style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.4 }}>
             Weighted QC score across M · O · D framework
           </div>
         </div>
       </div>
 
       {/* Separator */}
-      <div style={{ alignSelf: "stretch", background: "var(--qc-border-inner)" }} />
+      <div style={{ alignSelf: "stretch", background: "var(--qc-hair-2)" }} />
 
       {/* Weight summary */}
       <div style={{ minWidth: 0 }}>
@@ -93,7 +93,7 @@ export function QcScoreStrip({ displayScore, rating, weightedPct, weights }: QcS
           <span
             style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              letterSpacing: "0.14em", color: "var(--qc-text-muted)", textTransform: "uppercase",
+              letterSpacing: "0.14em", color: "var(--qc-ink-2)", textTransform: "uppercase",
             }}
           >
             Current Weighting
@@ -101,7 +101,7 @@ export function QcScoreStrip({ displayScore, rating, weightedPct, weights }: QcS
           <span
             style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
-              color: "var(--qc-text-muted)", letterSpacing: "0.04em",
+              color: "var(--qc-ink-2)", letterSpacing: "0.04em",
             }}
           >
             {Object.values(weights).reduce((a, b) => a + b, 0)}% total
@@ -116,11 +116,11 @@ export function QcScoreStrip({ displayScore, rating, weightedPct, weights }: QcS
                   background: PILLAR_COLORS[key].dot, flexShrink: 0,
                 }}
               />
-              <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>{PILLAR_LABELS[key]}</span>
+              <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>{PILLAR_LABELS[key]}</span>
               <span
                 style={{
                   fontFamily: "'IBM Plex Mono', monospace", fontSize: 12,
-                  color: "var(--qc-text-heading)", fontWeight: 500,
+                  color: "var(--qc-ink)", fontWeight: 500,
                 }}
               >
                 {weights[key]}%

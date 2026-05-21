@@ -14,9 +14,9 @@ export function SegmentBadge({ segment, className }: SegmentBadgeProps) {
         className
       )}
       style={{
-        background: "var(--qc-chip-bg)",
-        border: "1px solid var(--qc-chip-border)",
-        color: "var(--qc-chip-fg)",
+        background: "var(--qc-chip)",
+        border: "1px solid var(--qc-hair)",
+        color: "var(--qc-ink-2)",
       }}
     >
       {segment}

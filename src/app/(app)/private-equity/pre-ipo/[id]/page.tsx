@@ -40,32 +40,32 @@ function HeroHeader({ insight, intel }: { insight: DrhpInsight; intel: DrhpIntel
   const ofsPct = intel.ofs_ratio_pct || quickVerdict.ofsVsFreshSplit.ofsPct;
 
   return (
-    <div className="rounded-[10px] border border-[var(--qc-border-default)] bg-white overflow-hidden">
-      <div className="px-6 py-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-[var(--qc-border-default)]">
+    <div className="rounded-[10px] border border-[var(--qc-hair)] bg-white overflow-hidden">
+      <div className="px-6 py-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-[var(--qc-hair)]">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>
+            <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}>
               IPO Filing
             </span>
             {totalIssue > 0 && (
-              <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>
+              <span className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>
                 ₹{totalIssue.toLocaleString("en-IN")} Cr Issue
               </span>
             )}
           </div>
 
-          <h1 className="text-[28px] font-medium leading-tight" style={{ color: "var(--qc-text-heading)" }}>
+          <h1 className="text-[28px] font-medium leading-tight" style={{ color: "var(--qc-ink)" }}>
             {heroHeader.companyName}
           </h1>
-          <p className="text-[13px] mt-1.5 max-w-xl leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>
+          <p className="text-[13px] mt-1.5 max-w-xl leading-relaxed" style={{ color: "var(--qc-ink-2)" }}>
             {heroHeader.companyDescription}
           </p>
 
           <div className="flex items-center gap-3 mt-4">
             <VerdictBadge verdict={quickVerdict.verdict} size="md" />
             {heroHeader.listingGainPotential && (
-              <span className="text-[12px]" style={{ color: "var(--qc-text-muted)" }}>
-                Listing Gain: <span style={{ color: "var(--qc-text-heading)" }}>{heroHeader.listingGainPotential}</span>
+              <span className="text-[12px]" style={{ color: "var(--qc-ink-2)" }}>
+                Listing Gain: <span style={{ color: "var(--qc-ink)" }}>{heroHeader.listingGainPotential}</span>
               </span>
             )}
           </div>
@@ -101,9 +101,9 @@ function HeroHeader({ insight, intel }: { insight: DrhpInsight; intel: DrhpIntel
       </div>
 
       {heroHeader.issueDate && (
-        <div className="px-6 py-2.5 flex items-center gap-4" style={{ background: "var(--qc-surface-panel)" }}>
-          <CalendarDays className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
-          <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{heroHeader.issueDate}</span>
+        <div className="px-6 py-2.5 flex items-center gap-4" style={{ background: "var(--qc-section)" }}>
+          <CalendarDays className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{heroHeader.issueDate}</span>
         </div>
       )}
     </div>
@@ -120,7 +120,7 @@ function FlagCard({ item }: { item: DrhpIntelligenceFlag }) {
       style={{ background: bg, borderColor: border }}
     >
       <Icon className="size-3.5 flex-shrink-0 mt-0.5" style={{ color }} />
-      <span className="text-[12px] leading-relaxed" style={{ color: "var(--qc-text-heading)" }}>{item.flag}</span>
+      <span className="text-[12px] leading-relaxed" style={{ color: "var(--qc-ink)" }}>{item.flag}</span>
     </div>
   );
 }
@@ -135,13 +135,13 @@ function IntelligenceVerdictSection({ intel, insight }: { intel: DrhpIntelligenc
     <SectionPanel
       title={
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>01</span>
-          <span className="text-[14px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>Quick Verdict</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}>01</span>
+          <span className="text-[14px] font-semibold" style={{ color: "var(--qc-ink)" }}>Quick Verdict</span>
         </div>
       }
     >
       {intel.quick_verdict_title && (
-        <h3 className="text-[16px] font-medium mb-4 leading-snug" style={{ color: "var(--qc-text-heading)" }}>
+        <h3 className="text-[16px] font-medium mb-4 leading-snug" style={{ color: "var(--qc-ink)" }}>
           {intel.quick_verdict_title}
         </h3>
       )}
@@ -152,12 +152,12 @@ function IntelligenceVerdictSection({ intel, insight }: { intel: DrhpIntelligenc
           <div className="flex-shrink-0 sm:w-[320px]">
             {ofsCr > 0 && (
               <div className="mb-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: "var(--qc-text-muted)" }}>Issue Split</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: "var(--qc-ink-2)" }}>Issue Split</p>
                 <OfsDonut ofsCr={ofsCr} freshIssueCr={freshCr} ofsPct={ofsPct} />
               </div>
             )}
             {intel.quick_verdict_issue_split_analysis && (
-              <p className="text-[12px] leading-relaxed" style={{ color: "var(--qc-text-muted)" }}>
+              <p className="text-[12px] leading-relaxed" style={{ color: "var(--qc-ink-2)" }}>
                 {intel.quick_verdict_issue_split_analysis}
               </p>
             )}
@@ -190,8 +190,8 @@ function VerdictTab({ insight, intel }: { insight: DrhpInsight; intel: DrhpIntel
         <SectionPanel
           title={
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>02</span>
-              <span className="text-[14px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>Selling Shareholders</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}>02</span>
+              <span className="text-[14px] font-semibold" style={{ color: "var(--qc-ink)" }}>Selling Shareholders</span>
             </div>
           }
         >
@@ -217,7 +217,7 @@ function RedFlagsTab({ risks }: { risks: DrhpRedFlagsAndRisks }) {
   };
 
   const filters: { key: RiskFilter; label: string; color: string }[] = [
-    { key: "all",      label: "All Flags",  color: "var(--qc-text-heading)" },
+    { key: "all",      label: "All Flags",  color: "var(--qc-ink)" },
     { key: "critical", label: "Critical",   color: "var(--qc-down)" },
     { key: "caution",  label: "Caution",    color: "var(--qc-warn)" },
     { key: "watch",    label: "Watch",      color: "var(--qc-warn)" },
@@ -228,20 +228,20 @@ function RedFlagsTab({ risks }: { risks: DrhpRedFlagsAndRisks }) {
       <SectionPanel
         title={
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>03</span>
-            <span className="text-[14px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>Risk Register by Severity</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}>03</span>
+            <span className="text-[14px] font-semibold" style={{ color: "var(--qc-ink)" }}>Risk Register by Severity</span>
           </div>
         }
         headerAction={
-          <div className="flex items-center gap-1 rounded-full border border-[var(--qc-border-default)] p-0.5">
+          <div className="flex items-center gap-1 rounded-full border border-[var(--qc-hair)] p-0.5">
             {filters.map(({ key, label, color }) => (
               <button
                 key={key}
                 onClick={() => setFilter(key)}
                 className="flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium transition-all"
                 style={filter === key
-                  ? { background: "var(--qc-text-heading)", color: "var(--qc-surface-white)" }
-                  : { color: "var(--qc-text-muted)" }
+                  ? { background: "var(--qc-ink)", color: "var(--qc-card)" }
+                  : { color: "var(--qc-ink-2)" }
                 }
               >
                 {filter !== key && <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: color }} />}
@@ -280,14 +280,14 @@ function PricingTab({ insight }: { insight: DrhpInsight }) {
         <SectionPanel
           title={
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>05</span>
-              <span className="text-[14px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>IPO Pricing Assessment</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}>05</span>
+              <span className="text-[14px] font-semibold" style={{ color: "var(--qc-ink)" }}>IPO Pricing Assessment</span>
             </div>
           }
         >
           <div className="flex flex-col gap-5 sm:flex-row sm:gap-8">
             <div className="flex-shrink-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: "var(--qc-text-muted)" }}>Issue Split</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: "var(--qc-ink-2)" }}>Issue Split</p>
               <OfsDonut
                 ofsCr={pricing.ofsCr || quickVerdict.ofsVsFreshSplit.ofsCr}
                 freshIssueCr={pricing.freshIssueCr || quickVerdict.ofsVsFreshSplit.freshIssueCr}
@@ -296,8 +296,8 @@ function PricingTab({ insight }: { insight: DrhpInsight }) {
             </div>
             {pricing.priceBandLower && pricing.priceBandUpper && (
               <div className="flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--qc-text-muted)" }}>Price Band</p>
-                <p className="text-[22px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--qc-ink-2)" }}>Price Band</p>
+                <p className="text-[22px] font-semibold" style={{ color: "var(--qc-ink)" }}>
                   ₹{pricing.priceBandLower} – ₹{pricing.priceBandUpper}
                 </p>
               </div>
@@ -310,8 +310,8 @@ function PricingTab({ insight }: { insight: DrhpInsight }) {
         <SectionPanel
           title={
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>05B</span>
-              <span className="text-[14px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>Use of Proceeds</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}>05B</span>
+              <span className="text-[14px] font-semibold" style={{ color: "var(--qc-ink)" }}>Use of Proceeds</span>
             </div>
           }
         >
@@ -323,16 +323,16 @@ function PricingTab({ insight }: { insight: DrhpInsight }) {
         <SectionPanel
           title={
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>05C</span>
-              <span className="text-[14px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>Proceeds Red Flags</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}>05C</span>
+              <span className="text-[14px] font-semibold" style={{ color: "var(--qc-ink)" }}>Proceeds Red Flags</span>
             </div>
           }
         >
           <ul className="flex flex-col gap-2">
             {pricing.useOfProceedsRedFlags.map((flag, i) => (
-              <li key={i} className="flex gap-2.5 items-start rounded-[6px] border border-[var(--qc-border-default)] px-3 py-2.5" style={{ background: "var(--qc-surface-base)" }}>
+              <li key={i} className="flex gap-2.5 items-start rounded-[6px] border border-[var(--qc-hair)] px-3 py-2.5" style={{ background: "var(--qc-bg)" }}>
                 <AlertCircle className="size-3.5 flex-shrink-0 mt-0.5" style={{ color: "var(--qc-warn)" }} />
-                <span className="text-[12px] leading-relaxed" style={{ color: "var(--qc-text-heading)" }}>{flag}</span>
+                <span className="text-[12px] leading-relaxed" style={{ color: "var(--qc-ink)" }}>{flag}</span>
               </li>
             ))}
           </ul>
@@ -343,12 +343,12 @@ function PricingTab({ insight }: { insight: DrhpInsight }) {
         <SectionPanel
           title={
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>05D</span>
-              <span className="text-[14px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>Anchor Investor Quality</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}>05D</span>
+              <span className="text-[14px] font-semibold" style={{ color: "var(--qc-ink)" }}>Anchor Investor Quality</span>
             </div>
           }
         >
-          <p className="text-[13px] leading-relaxed" style={{ color: "var(--qc-text-heading)" }}>{pricing.anchorInvestorQuality}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: "var(--qc-ink)" }}>{pricing.anchorInvestorQuality}</p>
         </SectionPanel>
       )}
     </div>
@@ -396,7 +396,7 @@ export default function PreIpoDetailPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="text-white text-xs font-semibold text-center py-2 px-4 sticky top-0 z-10" style={{ background: "var(--qc-accent-primary)" }}>
+      <div className="text-white text-xs font-semibold text-center py-2 px-4 sticky top-0 z-10" style={{ background: "var(--qc-ink)" }}>
         CONFIDENTIAL — For authorised use only
       </div>
 
@@ -404,7 +404,7 @@ export default function PreIpoDetailPage() {
         <button
           onClick={() => router.push("/private-equity/pre-ipo")}
           className="flex items-center gap-1.5 text-[12px] mb-6 transition-opacity hover:opacity-60"
-          style={{ color: "var(--qc-text-muted)" }}
+          style={{ color: "var(--qc-ink-2)" }}
         >
           <ArrowLeft className="size-3.5" />
           All analyses
@@ -412,7 +412,7 @@ export default function PreIpoDetailPage() {
 
         {loading && (
           <div className="flex items-center justify-center py-24">
-            <Loader2 className="size-6 animate-spin" style={{ color: "var(--qc-text-muted)" }} />
+            <Loader2 className="size-6 animate-spin" style={{ color: "var(--qc-ink-2)" }} />
           </div>
         )}
 
@@ -427,15 +427,15 @@ export default function PreIpoDetailPage() {
           <div className="flex flex-col gap-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Building2 className="size-4" style={{ color: "var(--qc-text-muted)" }} />
-                <span className="text-[13px] font-medium" style={{ color: "var(--qc-text-heading)" }}>
+                <Building2 className="size-4" style={{ color: "var(--qc-ink-2)" }} />
+                <span className="text-[13px] font-medium" style={{ color: "var(--qc-ink)" }}>
                   {companyName || "DRHP Analysis"}
                 </span>
               </div>
               <button
                 onClick={() => router.push("/private-equity/pre-ipo")}
                 className="text-[12px] transition-opacity hover:opacity-60"
-                style={{ color: "var(--qc-text-muted)" }}
+                style={{ color: "var(--qc-ink-2)" }}
               >
                 Analyse another
               </button>
@@ -455,15 +455,15 @@ export default function PreIpoDetailPage() {
               quick_verdict_issue_split_analysis: "",
             }} />
 
-            <div className="flex items-center gap-1 rounded-full border border-[var(--qc-border-default)] bg-[var(--qc-surface-panel)] p-1 self-start">
+            <div className="flex items-center gap-1 rounded-full border border-[var(--qc-hair)] bg-[var(--qc-section)] p-1 self-start">
               {TABS.map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className="px-4 py-1.5 rounded-full text-[11px] font-medium transition-all"
                   style={activeTab === tab
-                    ? { background: "var(--qc-text-heading)", color: "var(--qc-surface-white)" }
-                    : { color: "var(--qc-text-muted)" }
+                    ? { background: "var(--qc-ink)", color: "var(--qc-card)" }
+                    : { color: "var(--qc-ink-2)" }
                   }
                 >
                   {tab}

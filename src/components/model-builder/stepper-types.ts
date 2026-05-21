@@ -68,4 +68,4 @@ export interface ChildEducationState {
 }
 
 // ── Re-export SwpConfig so consumers don't need to import from two places ──────
-export type { SwpConfig };
+;

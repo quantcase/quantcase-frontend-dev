@@ -107,7 +107,7 @@ export interface DecisionIntelligenceIndicator {
   valueWatchout: string | null;
 }
 
-export interface ActionableInsight {
+interface ActionableInsight {
   action: string;
   firstShift: string;
   existingHolderAction: string;
@@ -166,22 +166,22 @@ export interface TechnicalsDerived {
 }
 
 // Rule Engine types
-export interface RuleEngineIndicator {
+interface RuleEngineIndicator {
   growthOutput: string | null;
   valueOutput: string | null;
 }
 
-export interface MarketPhaseIndicator extends RuleEngineIndicator {
+interface MarketPhaseIndicator extends RuleEngineIndicator {
   wyckoffPhase: string;
 }
 
-export interface CapitalParticipationIndicator extends RuleEngineIndicator {
+interface CapitalParticipationIndicator extends RuleEngineIndicator {
   volumeSignal: string;
   cmfSignal: string;
   cmf: number;
 }
 
-export interface PriceArchitectureIndicator extends RuleEngineIndicator {
+interface PriceArchitectureIndicator extends RuleEngineIndicator {
   zone: string | null;
 }
 
@@ -192,19 +192,19 @@ export interface DirectionalBiasIndicator extends RuleEngineIndicator {
   priceVsSMA200: string;
 }
 
-export interface TrendMaturityIndicator extends RuleEngineIndicator {
+interface TrendMaturityIndicator extends RuleEngineIndicator {
   adx: number;
   adxTrend: string;
   adxBand: string;
   condition: string;
 }
 
-export interface MomentumThrustIndicator extends RuleEngineIndicator {
+interface MomentumThrustIndicator extends RuleEngineIndicator {
   rsi: number;
   rsiZone: string;
 }
 
-export interface VolatilityRegimeIndicator extends RuleEngineIndicator {
+interface VolatilityRegimeIndicator extends RuleEngineIndicator {
   bbWidth: number;
   prevBbWidth: number;
   expanding: boolean;

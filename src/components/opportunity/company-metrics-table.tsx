@@ -38,15 +38,15 @@ function formatValue(val: CellValue): string {
 }
 
 function changeColor(val: CellValue): string {
-  if (val === null || val === undefined) return "var(--qc-text-muted)";
+  if (val === null || val === undefined) return "var(--qc-ink-2)";
   const s = String(val).trim();
   if (s.startsWith("+") || s.startsWith("▲")) return "#059669";
   if (s.startsWith("-") || s.startsWith("▼")) return "#dc2626";
-  return "var(--qc-text-muted)";
+  return "var(--qc-ink-2)";
 }
 
 function sentimentBadge(sentiment: string | null | undefined) {
-  if (!sentiment || sentiment === "—") return <span style={{ color: "var(--qc-text-muted)" }}>—</span>;
+  if (!sentiment || sentiment === "—") return <span style={{ color: "var(--qc-ink-2)" }}>—</span>;
   const s = sentiment.toLowerCase();
   const isPos = s === "positive" || s === "bullish";
   const isNeg = s === "negative" || s === "bearish";
@@ -106,7 +106,7 @@ function CellContent({ col, val }: { col: ColDef; val: CellValue }) {
           display: "block",
           whiteSpace: "pre-line",
           lineHeight: 1.45,
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           fontSize: 11,
         }}
       >
@@ -154,7 +154,7 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
           style={{
             fontSize: 11,
             fontWeight: 600,
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             textTransform: "uppercase",
             letterSpacing: "0.08em",
             whiteSpace: "nowrap",
@@ -189,7 +189,7 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                   textAlign: "left",
                   fontSize: 10,
                   fontWeight: 600,
-                  color: "var(--qc-text-muted)",
+                  color: "var(--qc-ink-2)",
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
                   whiteSpace: "nowrap",
@@ -213,7 +213,7 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                     textAlign: col.align,
                     fontSize: 10,
                     fontWeight: 600,
-                    color: "var(--qc-text-muted)",
+                    color: "var(--qc-ink-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.06em",
                     whiteSpace: "nowrap",
@@ -241,7 +241,7 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                     whiteSpace: "nowrap",
                     fontSize: 12,
                     fontWeight: row.is_current ? 600 : 400,
-                    color: row.is_current ? "var(--qc-text-heading)" : "#121212",
+                    color: row.is_current ? "var(--qc-ink)" : "#121212",
                     position: "sticky",
                     left: 0,
                     backgroundColor: row.is_current ? "rgba(15,23,43,0.03)" : "#ffffff",
@@ -253,7 +253,7 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                   {row.is_current && (
                     <span
                       className="ml-1.5 inline-block rounded-sm px-1 py-0.5 text-[9px] font-semibold"
-                      style={{ color: "var(--qc-text-heading)", backgroundColor: "rgba(15,23,43,0.08)" }}
+                      style={{ color: "var(--qc-ink)", backgroundColor: "rgba(15,23,43,0.08)" }}
                     >
                       YOU
                     </span>
@@ -285,7 +285,7 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                 key={`avg-${idx}`}
                 style={{
                   borderTop: "2px solid #E2E2E2",
-                  backgroundColor: "var(--qc-surface-panel)",
+                  backgroundColor: "var(--qc-section)",
                 }}
               >
                 <td
@@ -294,10 +294,10 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                     whiteSpace: "nowrap",
                     fontSize: 12,
                     fontWeight: 600,
-                    color: "var(--qc-text-heading)",
+                    color: "var(--qc-ink)",
                     position: "sticky",
                     left: 0,
-                    backgroundColor: "var(--qc-surface-panel)",
+                    backgroundColor: "var(--qc-section)",
                     zIndex: 1,
                     borderRight: "1px solid #E2E2E2",
                   }}

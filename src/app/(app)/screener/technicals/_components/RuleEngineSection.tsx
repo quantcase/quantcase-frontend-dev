@@ -27,11 +27,11 @@ function resolveWatchout(
 function smaPositionColor(pos: string): string {
   if (pos === "ABOVE") return "var(--qc-up)";
   if (pos === "BELOW") return "var(--qc-down)";
-  return "var(--qc-text-muted)";
+  return "var(--qc-ink-2)";
 }
 
 function engineSignalColor(signal: string | null): string {
-  if (!signal) return "var(--qc-text-muted)";
+  if (!signal) return "var(--qc-ink-2)";
   const s = signal.toUpperCase();
   if (s === "OUTPERFORMING" || s === "ABOVE_AVERAGE" || s === "POSITIVE" || s === "CONTRACTING") return "var(--qc-up)";
   if (s === "UNDERPERFORMING" || s === "BELOW_AVERAGE" || s === "NEGATIVE" || s === "EXPANDING") return "var(--qc-down)";
@@ -39,7 +39,7 @@ function engineSignalColor(signal: string | null): string {
 }
 
 function getBadgeVariant(signal: string | null): { textColor: string; bgColor: string } {
-  if (!signal || signal === "N/A") return { textColor: "var(--qc-text-muted)", bgColor: "var(--qc-surface-row-alt)" };
+  if (!signal || signal === "N/A") return { textColor: "var(--qc-ink-2)", bgColor: "var(--qc-section)" };
   const s = signal.toUpperCase();
 
   const positive = ["OUTPERFORMING", "BULLISH", "ABOVE_AVERAGE", "POSITIVE", "MARKUP_PHASE",
@@ -69,10 +69,10 @@ function MetricPill({ label, value, valueColor }: { label: string; value: string
   return (
     <span
       className="inline-flex items-center gap-1 rounded-[4px] border px-2 py-0.5"
-      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}
     >
-      <span style={{ fontSize: 10, color: "var(--qc-text-muted)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</span>
-      <span style={{ fontSize: 11, fontWeight: 600, color: valueColor ?? "var(--qc-text-heading)" }}>{value}</span>
+      <span style={{ fontSize: 10, color: "var(--qc-ink-2)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</span>
+      <span style={{ fontSize: 11, fontWeight: 600, color: valueColor ?? "var(--qc-ink)" }}>{value}</span>
     </span>
   );
 }
@@ -98,17 +98,17 @@ function EngineCard({
   return (
     <div
       className="rounded-[10px] border px-4 py-3 space-y-3"
-      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
     >
       {/* HEADER */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-baseline gap-2">
           <span
             className="font-mono text-[10px] uppercase tracking-[0.14em]"
-            style={{ color: "var(--qc-text-heading)" }}
+            style={{ color: "var(--qc-ink)" }}
           >{title}</span>
           {subtitle && (
-            <span style={{ fontSize: 11, color: "var(--qc-text-muted)", fontWeight: 400 }}>{subtitle}</span>
+            <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontWeight: 400 }}>{subtitle}</span>
           )}
         </div>
         {badgeLabel && (
@@ -127,19 +127,19 @@ function EngineCard({
       {/* INTERPRETATION */}
       <div className="space-y-1">
         <div className="flex items-center gap-1">
-          <TrendingUp className="h-3 w-3" style={{ color: "var(--qc-text-muted)" }} />
-          <span style={{ fontSize: 9, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <TrendingUp className="h-3 w-3" style={{ color: "var(--qc-ink-2)" }} />
+          <span style={{ fontSize: 9, fontWeight: 600, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Interpretation
           </span>
         </div>
         {output ? (
-          <p style={{ fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>
+          <p style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>
             {output.split("\n").map((line, i, arr) => (
               <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
             ))}
           </p>
         ) : (
-          <p style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>No data available.</p>
+          <p style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>No data available.</p>
         )}
       </div>
 
@@ -148,7 +148,7 @@ function EngineCard({
         <div className="space-y-1">
           <div className="flex items-center gap-1">
             <AlertCircle className="h-3 w-3" style={{ color: "var(--qc-warn)" }} />
-            <span style={{ fontSize: 9, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            <span style={{ fontSize: 9, fontWeight: 600, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
               Watchouts
             </span>
           </div>
@@ -190,7 +190,7 @@ function StructureEnginePanel({ engine, perspective, indicators, avgVolume20d }:
         metrics={<>
           <MetricPill label="CMF" value={cp.cmf.toFixed(4)} valueColor={cp.cmf >= 0 ? "var(--qc-up)" : "var(--qc-down)"} />
           <MetricPill label="CMF Signal" value={cp.cmfSignal} valueColor={engineSignalColor(cp.cmfSignal)} />
-          {avgVolume20d != null && <MetricPill label="Avg Vol (20D)" value={formatVolume(avgVolume20d)} valueColor="var(--qc-text-heading)" />}
+          {avgVolume20d != null && <MetricPill label="Avg Vol (20D)" value={formatVolume(avgVolume20d)} valueColor="var(--qc-ink)" />}
         </>}
         output={isGrowth ? cp.growthOutput : cp.valueOutput}
         watchout={resolveWatchout(indicators, "Capital Participation", perspective)}
@@ -254,7 +254,7 @@ function TrendEnginePanel({ engine, perspective, indicators }: { engine: TrendEn
         metrics={<>
           <MetricPill label="ADX" value={tm.adx.toFixed(2)} />
           <MetricPill label="ADX Trend" value={tm.adxTrend} valueColor={tm.adxTrend === "RISING" ? "var(--qc-up)" : "var(--qc-down)"} />
-          <MetricPill label="Band" value={tm.adxBand} valueColor="var(--qc-text-muted)" />
+          <MetricPill label="Band" value={tm.adxBand} valueColor="var(--qc-ink-2)" />
         </>}
         output={isGrowth ? tm.growthOutput : tm.valueOutput}
         watchout={resolveWatchout(indicators, "Trend Quality", perspective)}
@@ -280,7 +280,7 @@ function TimingEnginePanel({ engine, perspective, indicators }: { engine: Timing
         title="Momentum"
         subtitle="RSI (14)"
         badge={rsiLabel(mt.rsiZone)}
-        metrics={<MetricPill label="RSI" value={mt.rsi.toFixed(2)} valueColor={mt.rsiZone === "0-30" ? "var(--qc-up)" : mt.rsiZone === "70-100" ? "var(--qc-down)" : "var(--qc-text-body)"} />}
+        metrics={<MetricPill label="RSI" value={mt.rsi.toFixed(2)} valueColor={mt.rsiZone === "0-30" ? "var(--qc-up)" : mt.rsiZone === "70-100" ? "var(--qc-down)" : "var(--qc-ink)"} />}
         output={isGrowth ? mt.growthOutput : mt.valueOutput}
         watchout={resolveWatchout(indicators, "Momentum", perspective)}
       />

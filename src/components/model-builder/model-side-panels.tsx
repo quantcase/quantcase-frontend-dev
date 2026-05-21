@@ -73,10 +73,10 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
       {/* Linked clients list */}
       {linked.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-4">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--qc-surface-panel)" }}>
-            <Users className="w-4 h-4" style={{ color: "var(--qc-text-muted)" }} />
+          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--qc-section)" }}>
+            <Users className="w-4 h-4" style={{ color: "var(--qc-ink-2)" }} />
           </div>
-          <p className="text-xs text-center" style={{ color: "var(--qc-text-muted)" }}>
+          <p className="text-xs text-center" style={{ color: "var(--qc-ink-2)" }}>
             No clients linked yet.
           </p>
         </div>
@@ -86,11 +86,11 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
             <div
               key={c.id}
               className="flex items-center justify-between rounded-lg px-3 py-2"
-              style={{ background: "var(--qc-surface-panel)" }}
+              style={{ background: "var(--qc-section)" }}
             >
               <div className="min-w-0">
-                <p className="text-[13px] font-medium truncate" style={{ color: "var(--qc-text-heading)" }}>{c.name}</p>
-                <p className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{c.segment}</p>
+                <p className="text-[13px] font-medium truncate" style={{ color: "var(--qc-ink)" }}>{c.name}</p>
+                <p className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{c.segment}</p>
               </div>
               <button
                 type="button"
@@ -98,7 +98,7 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
                 className="ml-2 p-1 rounded hover:bg-red-50 transition-colors shrink-0"
                 title="Remove"
               >
-                <X className="w-3.5 h-3.5" style={{ color: "var(--qc-text-muted)" }} />
+                <X className="w-3.5 h-3.5" style={{ color: "var(--qc-ink-2)" }} />
               </button>
             </div>
           ))}
@@ -111,7 +111,7 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
           type="button"
           onClick={() => setOpen((v) => !v)}
           className="w-full flex items-center justify-between rounded-lg border border-[#E2E2E2] px-3 py-2 text-xs transition-colors hover:border-[#0F172B]"
-          style={{ color: "var(--qc-text-muted)", background: "#fff" }}
+          style={{ color: "var(--qc-ink-2)", background: "#fff" }}
         >
           <span>{linked.length > 0 ? "Link more clients…" : "Link clients…"}</span>
           <ChevronDown className="w-3.5 h-3.5 shrink-0" />
@@ -123,19 +123,19 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
             style={{ maxHeight: 240, overflow: "hidden", display: "flex", flexDirection: "column" }}
           >
             <div className="flex items-center gap-2 px-3 py-2 border-b border-[#E2E2E2]">
-              <Search className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
+              <Search className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--qc-ink-2)" }} />
               <input
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search clients…"
                 className="flex-1 text-xs bg-transparent focus:outline-none"
-                style={{ color: "var(--qc-text-heading)" }}
+                style={{ color: "var(--qc-ink)" }}
               />
             </div>
             <ul className="overflow-y-auto list-none pt-3" style={{ maxHeight: 180 }}>
               {filtered.length === 0 ? (
-                <li className="px-3 py-3 text-xs text-center" style={{ color: "var(--qc-text-muted)" }}>
+                <li className="px-3 py-3 text-xs text-center" style={{ color: "var(--qc-ink-2)" }}>
                   {allClients.length === 0 ? "Loading…" : "No results"}
                 </li>
               ) : (
@@ -152,7 +152,7 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
                           className="w-4 h-4 rounded border flex items-center justify-center shrink-0"
                           style={{
                             border: isLinked ? "none" : "1.5px solid #D1D5DB",
-                            background: isLinked ? "var(--qc-text-heading)" : "transparent",
+                            background: isLinked ? "var(--qc-ink)" : "transparent",
                           }}
                         >
                           {isLinked && (
@@ -162,8 +162,8 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
                           )}
                         </div>
                         <div>
-                          <p className="text-[13px] font-medium" style={{ color: "var(--qc-text-heading)" }}>{c.name}</p>
-                          <p className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{c.segment}</p>
+                          <p className="text-[13px] font-medium" style={{ color: "var(--qc-ink)" }}>{c.name}</p>
+                          <p className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{c.segment}</p>
                         </div>
                       </button>
                     </div>
@@ -308,10 +308,10 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
       {/* Holdings list */}
       {holdings.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-4">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--qc-surface-panel)" }}>
-            <TrendingUp className="w-4 h-4" style={{ color: "var(--qc-text-muted)" }} />
+          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--qc-section)" }}>
+            <TrendingUp className="w-4 h-4" style={{ color: "var(--qc-ink-2)" }} />
           </div>
-          <p className="text-xs text-center" style={{ color: "var(--qc-text-muted)" }}>
+          <p className="text-xs text-center" style={{ color: "var(--qc-ink-2)" }}>
             No holdings added yet.
           </p>
         </div>
@@ -322,22 +322,22 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-heading)" }}>
+                    <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-section)", color: "var(--qc-ink)" }}>
                       {h.ticker}
                     </span>
-                    <span className="text-[12px] font-medium truncate" style={{ color: "var(--qc-text-heading)" }}>{h.companyName}</span>
+                    <span className="text-[12px] font-medium truncate" style={{ color: "var(--qc-ink)" }}>{h.companyName}</span>
                   </div>
-                  <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{h.industry}</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-ink-2)" }}>{h.industry}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
-                  <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--qc-text-heading)" }}>{h.weight}%</span>
+                  <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--qc-ink)" }}>{h.weight}%</span>
                   <button
                     type="button"
                     onClick={() => removeHolding(h.ticker)}
                     className="p-1 rounded hover:bg-red-50 transition-colors"
                     title="Remove"
                   >
-                    <X className="w-3.5 h-3.5" style={{ color: "var(--qc-text-muted)" }} />
+                    <X className="w-3.5 h-3.5" style={{ color: "var(--qc-ink-2)" }} />
                   </button>
                 </div>
               </div>
@@ -349,7 +349,7 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
                 disabled={holdings.length === 1}
                 onChange={(e) => setWeight(h.ticker, Number(e.target.value))}
                 className="w-full cursor-pointer"
-                style={{ accentColor: "var(--qc-text-heading)" }}
+                style={{ accentColor: "var(--qc-ink)" }}
               />
             </li>
           ))}
@@ -377,7 +377,7 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
           type="button"
           onClick={() => setOpen((v) => !v)}
           className="w-full flex items-center justify-between rounded-lg border border-[#E2E2E2] px-3 py-2 text-xs transition-colors hover:border-[#0F172B]"
-          style={{ color: "var(--qc-text-muted)", background: "#fff" }}
+          style={{ color: "var(--qc-ink-2)", background: "#fff" }}
         >
           <span>{holdings.length > 0 ? "Add another stock…" : "Search & add stocks…"}</span>
           <ChevronDown className="w-3.5 h-3.5 shrink-0" />
@@ -389,19 +389,19 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
             style={{ maxHeight: 260, overflow: "hidden", display: "flex", flexDirection: "column" }}
           >
             <div className="flex items-center gap-2 px-3 py-2 border-b border-[#E2E2E2]">
-              <Search className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
+              <Search className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--qc-ink-2)" }} />
               <input
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name or ticker…"
                 className="flex-1 text-xs bg-transparent focus:outline-none"
-                style={{ color: "var(--qc-text-heading)" }}
+                style={{ color: "var(--qc-ink)" }}
               />
             </div>
             <ul className="overflow-y-auto list-none pt-3" style={{ maxHeight: 200 }}>
               {filtered.length === 0 ? (
-                <li className="px-3 py-3 text-xs text-center" style={{ color: "var(--qc-text-muted)" }}>
+                <li className="px-3 py-3 text-xs text-center" style={{ color: "var(--qc-ink-2)" }}>
                   {stockOptions.length === 0 ? "Loading…" : "No results"}
                 </li>
               ) : (
@@ -418,7 +418,7 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
                           className="w-4 h-4 rounded border flex items-center justify-center shrink-0"
                           style={{
                             border: isAdded ? "none" : "1.5px solid #D1D5DB",
-                            background: isAdded ? "var(--qc-text-heading)" : "transparent",
+                            background: isAdded ? "var(--qc-ink)" : "transparent",
                           }}
                         >
                           {isAdded && (
@@ -429,12 +429,12 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-sm shrink-0" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-heading)" }}>
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-sm shrink-0" style={{ background: "var(--qc-section)", color: "var(--qc-ink)" }}>
                               {s.ticker}
                             </span>
-                            <p className="text-[13px] font-medium truncate" style={{ color: "var(--qc-text-heading)" }}>{s.companyName}</p>
+                            <p className="text-[13px] font-medium truncate" style={{ color: "var(--qc-ink)" }}>{s.companyName}</p>
                           </div>
-                          <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{s.industry}</p>
+                          <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-ink-2)" }}>{s.industry}</p>
                         </div>
                       </button>
                     </div>

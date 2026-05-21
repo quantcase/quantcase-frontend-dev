@@ -23,7 +23,7 @@ const CHART_COLORS = {
   axis: "#a1a1aa",
   refLine: "#a1a1aa",
   revenueBar: "#64748b",
-  ebitBar: "var(--qc-text-heading)",   // --qc-text-heading approx
+  ebitBar: "var(--qc-ink)",   // --qc-ink approx
   dolLine: "#B4731A",   // --qc-warn approx
   dolUp: "#1F7A4A",     // --qc-up
   dolMid: "#B4731A",    // --qc-warn
@@ -50,15 +50,15 @@ const DolDot = (props: { cx?: number; cy?: number; payload?: DolDataPoint }) => 
 
 function DolChartPanel({ chartData }: { chartData: DolDataPoint[] }) {
   return (
-    <div className="rounded-lg p-4 flex flex-col h-full" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
+    <div className="rounded-lg p-4 flex flex-col h-full" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
       <div className="flex items-start justify-between gap-2 mb-3">
         <div>
-          <h3 className="text-sm font-bold" style={{ color: "var(--qc-text-heading)" }}>Degree of Operating Leverage Trend</h3>
-          <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>For every 1% revenue growth, how much does EBIT grow?</p>
+          <h3 className="text-sm font-bold" style={{ color: "var(--qc-ink)" }}>Degree of Operating Leverage Trend</h3>
+          <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>For every 1% revenue growth, how much does EBIT grow?</p>
         </div>
         <div className="text-right shrink-0 space-y-0.5">
-          <p className="text-[10px] font-mono" style={{ color: "var(--qc-text-muted)" }}>DOL = %ΔEBIT / %ΔRev</p>
-          <p className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>DOL &gt;1 = leverage · &lt;1 = dilution</p>
+          <p className="text-[10px] font-mono" style={{ color: "var(--qc-ink-2)" }}>DOL = %ΔEBIT / %ΔRev</p>
+          <p className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>DOL &gt;1 = leverage · &lt;1 = dilution</p>
         </div>
       </div>
 
@@ -70,7 +70,7 @@ function DolChartPanel({ chartData }: { chartData: DolDataPoint[] }) {
             <YAxis yAxisId="left" orientation="left" tick={{ fontSize: 9, fill: CHART_COLORS.axis }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} domain={["auto", "auto"]} />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: CHART_COLORS.dolLine }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}x`} domain={["auto", "auto"]} />
             <Tooltip
-              contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid var(--qc-border-default)", backgroundColor: "white" }}
+              contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid var(--qc-hair)", backgroundColor: "white" }}
               itemStyle={{ padding: "0px 10px" }}
               formatter={(value: number, name: string) =>
                 name === "DOL" ? [`${value}x (${dolZone(value)})`, name] : [`${value}%`, name]
@@ -85,7 +85,7 @@ function DolChartPanel({ chartData }: { chartData: DolDataPoint[] }) {
         </ResponsiveContainer>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-[10px] mt-3" style={{ color: "var(--qc-text-muted)" }}>
+      <div className="flex flex-wrap items-center gap-3 text-[10px] mt-3" style={{ color: "var(--qc-ink-2)" }}>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm inline-block" style={{ background: CHART_COLORS.revenueBar, opacity: 0.85 }} />
           Revenue Growth % YoY
@@ -113,20 +113,20 @@ function FixedCostLinesPanel({
   return (
     <>
       {fixedCostLines.length > 0 && (
-        <div className="rounded-lg p-4 space-y-3" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
+        <div className="rounded-lg p-4 space-y-3" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
           {fixedCostLines.map((line, i) => {
             const currentPct = line.current_pct ?? 0;
             const changeBps = line.change_bps ?? 0;
             const isUp = changeBps > 0;
             const barPct = Math.min((currentPct / 70) * 100, 100);
             return (
-              <div key={i} className={i > 0 ? "pt-3" : ""} style={{ borderTop: i > 0 ? "1px solid var(--qc-border-inner)" : "none" }}>
+              <div key={i} className={i > 0 ? "pt-3" : ""} style={{ borderTop: i > 0 ? "1px solid var(--qc-hair-2)" : "none" }}>
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span className="text-sm font-semibold" style={{ color: "var(--qc-text-body)" }}>{line.label} (% Revenue)</span>
-                  <span className="text-base font-bold" style={{ color: "var(--qc-text-heading)" }}>{currentPct}%</span>
+                  <span className="text-sm font-semibold" style={{ color: "var(--qc-ink)" }}>{line.label} (% Revenue)</span>
+                  <span className="text-base font-bold" style={{ color: "var(--qc-ink)" }}>{currentPct}%</span>
                 </div>
                 <SegmentedBar pct={barPct} color="bg-slate-400" />
-                <p className="text-xs mt-1" style={{ color: "var(--qc-text-muted)" }}>
+                <p className="text-xs mt-1" style={{ color: "var(--qc-ink-2)" }}>
                   Prior: {line.prior_pct ?? "N/A"}% | {isUp ? "+" : ""}{changeBps} bps {isUp ? "increase" : "improvement"}
                 </p>
               </div>
@@ -135,14 +135,14 @@ function FixedCostLinesPanel({
         </div>
       )}
       {totalFixed && (
-        <div className="rounded-lg p-4 space-y-1" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
+        <div className="rounded-lg p-4 space-y-1" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>Total Fixed Costs</p>
-              <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>was {totalFixed.prior_pct ?? "N/A"}%</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--qc-ink-2)" }}>Total Fixed Costs</p>
+              <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>was {totalFixed.prior_pct ?? "N/A"}%</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[26px] font-normal" style={{ color: "var(--qc-text-heading)" }}>{totalFixed.current_pct ?? "N/A"}%</span>
+              <span className="text-[26px] font-normal" style={{ color: "var(--qc-ink)" }}>{totalFixed.current_pct ?? "N/A"}%</span>
               {totalFixed.change_bps != null && (
                 <span className="text-xs font-semibold" style={{ color: totalFixed.change_bps > 0 ? "var(--qc-down)" : "var(--qc-up)" }}>
                   {totalFixed.change_bps > 0 ? "▲" : "▼"} {Math.abs(totalFixed.change_bps)}bps net
@@ -150,7 +150,7 @@ function FixedCostLinesPanel({
               )}
             </div>
           </div>
-          {totalFixed.note && <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>{totalFixed.note}</p>}
+          {totalFixed.note && <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>{totalFixed.note}</p>}
         </div>
       )}
     </>

@@ -74,8 +74,8 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         dataLabels: { position: "top" },
       },
     },
-    // transparent spacer, --qc-up, --qc-down, --qc-text-body (ApexCharts requires hex)
-    colors: ["transparent", "#1F7A4A", "#B23A2F", "#5A5A54"],
+    // transparent spacer, lime-edge increase, --qc-down decrease, deep-purple total
+    colors: ["transparent", "#7C9E3A", "#B23A2F", "#3D1C54"],
     dataLabels: {
       enabled: true,
       enabledOnSeries: [1, 2, 3],
@@ -87,7 +87,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         fontSize: "10px",
         fontWeight: "500",
         fontFamily: "'IBM Plex Mono', monospace",
-        colors: ["var(--qc-text-heading)"], // --qc-text-heading
+        colors: ["var(--qc-ink)"], // --qc-ink
       },
       offsetY: -4,
     },
@@ -97,7 +97,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         rotate: -45,
         style: {
           fontSize: "10px",
-          colors: "#9A9A92", // --qc-text-muted
+          colors: "#9A9A92", // --qc-ink-2
           fontFamily: "'IBM Plex Mono', monospace",
         },
       },
@@ -109,13 +109,13 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         formatter: (val: number) => `${Math.round(val).toLocaleString("en-IN")}`,
         style: {
           fontSize: "10px",
-          colors: ["#9A9A92"], // --qc-text-muted
+          colors: ["#9A9A92"], // --qc-ink-2
           fontFamily: "'IBM Plex Mono', monospace",
         },
       },
     },
     grid: {
-      borderColor: "#EFEDE7", // --qc-surface-row-alt / --qc-border-inner
+      borderColor: "var(--qc-hair-2)",
       strokeDashArray: 3,
       xaxis: { lines: { show: false } },
     },
@@ -129,7 +129,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
       markers: { size: 8 },
       onItemClick: { toggleDataSeries: false },
       formatter: (seriesName: string) => (seriesName === "spacer" ? "" : seriesName),
-      labels: { colors: "#5A5A54" }, // --qc-text-body
+      labels: { colors: "#5A5A54" }, // --qc-ink
     },
     tooltip: {
       shared: false,
@@ -148,7 +148,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         style={{
           fontFamily: "'IBM Plex Mono', monospace",
           fontSize: 10,
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           textAlign: "right",
           letterSpacing: "0.08em",
           textTransform: "uppercase",

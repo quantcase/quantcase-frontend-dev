@@ -52,7 +52,7 @@ function fmtPct(n: number | null | undefined) {
 }
 
 function returnColor(n: number | null | undefined) {
-  if (n == null) return "var(--qc-text-muted)";
+  if (n == null) return "var(--qc-ink-2)";
   return n >= 0 ? "var(--qc-up)" : "var(--qc-down)";
 }
 
@@ -60,7 +60,7 @@ function returnColor(n: number | null | undefined) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[10px] font-semibold uppercase tracking-[0.1em]" style={{ color: "var(--qc-text-muted)" }}>
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em]" style={{ color: "var(--qc-ink-2)" }}>
       {children}
     </p>
   );
@@ -80,20 +80,20 @@ function CardHeader({
   return (
     <div
       className="flex items-center justify-between px-5 py-3.5 border-b"
-      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}
     >
       <div className="flex items-center gap-2">
         {Icon && (
           <span
             className="flex items-center justify-center w-6 h-6 rounded-[6px]"
-            style={{ background: "var(--qc-accent-lime-bg)", border: "1px solid var(--qc-border-default)" }}
+            style={{ background: "var(--qc-lime)", border: "1px solid var(--qc-hair)" }}
           >
-            <Icon size={12} style={{ color: "var(--qc-text-heading)" }} />
+            <Icon size={12} style={{ color: "var(--qc-ink)" }} />
           </span>
         )}
         <span
           className="text-[11px] font-semibold uppercase tracking-[0.08em]"
-          style={{ color: "var(--qc-text-heading)" }}
+          style={{ color: "var(--qc-ink)" }}
         >
           {title}
         </span>
@@ -116,7 +116,7 @@ function Card({
   return (
     <div
       className={`rounded-[10px] border overflow-hidden ${className}`}
-      style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-white)" }}
+      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
     >
       {noPadding ? children : <div className="p-5">{children}</div>}
     </div>
@@ -132,7 +132,7 @@ function RiskBadge({ label }: { label: string }) {
     High:              { bg: "var(--qc-down-soft)",  color: "var(--qc-down)" },
     "Very High":       { bg: "var(--qc-down-soft)",  color: "var(--qc-down)" },
   };
-  const style = map[label] ?? { bg: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" };
+  const style = map[label] ?? { bg: "var(--qc-section)", color: "var(--qc-ink-2)" };
   return (
     <span
       className="inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
@@ -147,7 +147,7 @@ function StarRating({ stars }: { stars: number }) {
   return (
     <span className="flex items-center gap-0.5">
       {Array.from({ length: 5 }).map((_, i) => (
-        <Star key={i} size={12} fill={i < stars ? "var(--qc-warn)" : "none"} stroke={i < stars ? "var(--qc-warn)" : "var(--qc-border-default)"} />
+        <Star key={i} size={12} fill={i < stars ? "var(--qc-warn)" : "none"} stroke={i < stars ? "var(--qc-warn)" : "var(--qc-hair)"} />
       ))}
     </span>
   );
@@ -172,8 +172,8 @@ function HeroTile({
     <div
       className="rounded-[10px] border px-4 py-4 flex flex-col gap-1.5 relative overflow-hidden"
       style={{
-        borderColor: accent ? "var(--qc-accent-lime)" : "var(--qc-border-default)",
-        background: accent ? "var(--qc-accent-lime-bg)" : "var(--qc-surface-white)",
+        borderColor: accent ? "var(--qc-lime)" : "var(--qc-hair)",
+        background: accent ? "var(--qc-lime)" : "var(--qc-card)",
       }}
     >
       {accent && (
@@ -187,12 +187,12 @@ function HeroTile({
       <SectionLabel>{label}</SectionLabel>
       <p
         className="text-[18px] font-semibold leading-tight tabular-nums relative"
-        style={{ color: valueColor ?? "var(--qc-text-heading)" }}
+        style={{ color: valueColor ?? "var(--qc-ink)" }}
       >
         {value}
       </p>
       {sub && (
-        <p className="text-[10px] relative" style={{ color: "var(--qc-text-muted)" }}>
+        <p className="text-[10px] relative" style={{ color: "var(--qc-ink-2)" }}>
           {sub}
         </p>
       )}
@@ -218,8 +218,8 @@ function ReturnsStrip({ returns, rankTotal }: { returns: MFReturns; rankTotal: n
       className="grid gap-px"
       style={{
         gridTemplateColumns: `repeat(${periods.length}, 1fr)`,
-        background: "var(--qc-border-default)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-hair)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 10,
         overflow: "hidden",
       }}
@@ -231,7 +231,7 @@ function ReturnsStrip({ returns, rankTotal }: { returns: MFReturns; rankTotal: n
           <div
             key={label}
             className="flex flex-col items-center py-4 px-2 gap-1"
-            style={{ background: "var(--qc-surface-white)" }}
+            style={{ background: "var(--qc-card)" }}
           >
             <SectionLabel>{label}</SectionLabel>
             <span
@@ -244,8 +244,8 @@ function ReturnsStrip({ returns, rankTotal }: { returns: MFReturns; rankTotal: n
               <span
                 className="text-[9px] px-1.5 py-0.5 rounded-sm tabular-nums"
                 style={{
-                  background: isTop ? "var(--qc-accent-lime-bg)" : "var(--qc-surface-panel)",
-                  color: isTop ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+                  background: isTop ? "var(--qc-lime)" : "var(--qc-section)",
+                  color: isTop ? "var(--qc-ink)" : "var(--qc-ink-2)",
                 }}
               >
                 #{rank}/{rankTotal}
@@ -264,9 +264,9 @@ function ReturnsStrip({ returns, rankTotal }: { returns: MFReturns; rankTotal: n
 
 function AllocationBar({ equity, debt, other }: { equity: number; debt: number; other: number }) {
   const segments = [
-    { label: "Equity", pct: equity, color: "var(--qc-text-heading)" },
-    { label: "Debt",   pct: debt,   color: "var(--qc-text-muted)" },
-    { label: "Other",  pct: other,  color: "var(--qc-border-default)" },
+    { label: "Equity", pct: equity, color: "var(--qc-ink)" },
+    { label: "Debt",   pct: debt,   color: "var(--qc-ink-2)" },
+    { label: "Other",  pct: other,  color: "var(--qc-hair)" },
   ].filter(s => s.pct > 0);
 
   return (
@@ -278,9 +278,9 @@ function AllocationBar({ equity, debt, other }: { equity: number; debt: number; 
       </div>
       <div className="flex flex-wrap gap-x-5 gap-y-1">
         {segments.map(s => (
-          <span key={s.label} className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
+          <span key={s.label} className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
             <span className="inline-block w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: s.color }} />
-            {s.label} <span className="font-semibold tabular-nums" style={{ color: "var(--qc-text-heading)" }}>{fmt(s.pct, 1)}%</span>
+            {s.label} <span className="font-semibold tabular-nums" style={{ color: "var(--qc-ink)" }}>{fmt(s.pct, 1)}%</span>
           </span>
         ))}
       </div>
@@ -294,19 +294,19 @@ function SectorBar({ sector, pct, max }: { sector: string; pct: number; max: num
   const width = (pct / max) * 100;
   return (
     <div className="flex items-center gap-3">
-      <span className="w-40 text-[11px] truncate flex-shrink-0" style={{ color: "var(--qc-text-muted)" }}>
+      <span className="w-40 text-[11px] truncate flex-shrink-0" style={{ color: "var(--qc-ink-2)" }}>
         {sector}
       </span>
-      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--qc-border-default)" }}>
+      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--qc-hair)" }}>
         <div
           className="h-full rounded-full"
           style={{
             width: `${width}%`,
-            background: `linear-gradient(90deg, var(--qc-accent-lime) 0%, var(--qc-text-heading) 100%)`,
+            background: `linear-gradient(90deg, var(--qc-lime) 0%, var(--qc-ink) 100%)`,
           }}
         />
       </div>
-      <span className="w-10 text-right text-[11px] font-semibold tabular-nums" style={{ color: "var(--qc-text-heading)" }}>
+      <span className="w-10 text-right text-[11px] font-semibold tabular-nums" style={{ color: "var(--qc-ink)" }}>
         {fmt(pct, 1)}%
       </span>
     </div>
@@ -348,18 +348,18 @@ function RatioRow({ label, value, avg }: { label: string; value: string; avg?: s
   return (
     <div
       className="flex items-center justify-between py-2.5 border-b last:border-b-0"
-      style={{ borderColor: "var(--qc-border-inner)" }}
+      style={{ borderColor: "var(--qc-hair-2)" }}
     >
-      <span className="text-[12px]" style={{ color: "var(--qc-text-muted)" }}>
+      <span className="text-[12px]" style={{ color: "var(--qc-ink-2)" }}>
         {label}
       </span>
       <div className="flex items-center gap-3 text-right">
         {avg && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-surface-panel)", color: "var(--qc-text-muted)" }}>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-sm" style={{ background: "var(--qc-section)", color: "var(--qc-ink-2)" }}>
             Cat. avg: {avg}
           </span>
         )}
-        <span className="text-[13px] font-semibold tabular-nums w-14" style={{ color: "var(--qc-text-heading)" }}>
+        <span className="text-[13px] font-semibold tabular-nums w-14" style={{ color: "var(--qc-ink)" }}>
           {value}
         </span>
       </div>
@@ -385,7 +385,7 @@ function RatiosPanel({ ratios }: { ratios: MFRatios }) {
         <Card noPadding>
           <CardHeader icon={Shield} title="Risk Metrics" right={
             ratios.as_of_date && (
-              <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>{ratios.as_of_date}</span>
+              <span className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>{ratios.as_of_date}</span>
             )
           } />
           <div className="p-4">
@@ -400,7 +400,7 @@ function RatiosPanel({ ratios }: { ratios: MFRatios }) {
         <Card noPadding>
           <CardHeader icon={Activity} title="Performance Ratios" right={
             ratios.as_of_date && (
-              <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>{ratios.as_of_date}</span>
+              <span className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>{ratios.as_of_date}</span>
             )
           } />
           <div className="p-4">
@@ -415,7 +415,7 @@ function RatiosPanel({ ratios }: { ratios: MFRatios }) {
         <Card noPadding>
           <CardHeader icon={BarChart3} title="Valuation" right={
             ratios.as_of_date && (
-              <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>{ratios.as_of_date}</span>
+              <span className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>{ratios.as_of_date}</span>
             )
           } />
           <div className="p-4">
@@ -461,7 +461,7 @@ function NavChart({ navHistory }: { navHistory: MFNavHistory }) {
       <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
         <div>
           <SectionLabel>NAV History</SectionLabel>
-          <p className="text-[13px] mt-0.5 font-medium" style={{ color: "var(--qc-text-heading)" }}>5-Year Performance</p>
+          <p className="text-[13px] mt-0.5 font-medium" style={{ color: "var(--qc-ink)" }}>5-Year Performance</p>
         </div>
         {summary && (
           <div className="flex items-center gap-6">
@@ -495,18 +495,18 @@ function NavChart({ navHistory }: { navHistory: MFNavHistory }) {
       <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full" style={{ height: 140 }}>
         <defs>
           <linearGradient id="navAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={isPositive ? "var(--qc-accent-primary)" : "var(--qc-down)"} stopOpacity="0.35" />
-            <stop offset="100%" stopColor={isPositive ? "var(--qc-accent-primary)" : "var(--qc-down)"} stopOpacity="0" />
+            <stop offset="0%" stopColor={isPositive ? "var(--qc-ink)" : "var(--qc-down)"} stopOpacity="0.35" />
+            <stop offset="100%" stopColor={isPositive ? "var(--qc-ink)" : "var(--qc-down)"} stopOpacity="0" />
           </linearGradient>
           <linearGradient id="navLineGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={isPositive ? "var(--qc-accent-primary)" : "var(--qc-down)"} />
-            <stop offset="100%" stopColor={isPositive ? "var(--qc-accent-primary)" : "var(--qc-down)"} />
+            <stop offset="0%" stopColor={isPositive ? "var(--qc-ink)" : "var(--qc-down)"} />
+            <stop offset="100%" stopColor={isPositive ? "var(--qc-ink)" : "var(--qc-down)"} />
           </linearGradient>
         </defs>
         <path d={areaD} fill="url(#navAreaGrad)" />
         <path d={pathD} fill="none" stroke="url(#navLineGrad)" strokeWidth="2" />
       </svg>
-      <div className="flex justify-between mt-2 text-[10px]" style={{ color: "var(--qc-text-muted)" }}>
+      <div className="flex justify-between mt-2 text-[10px]" style={{ color: "var(--qc-ink-2)" }}>
         <span>{data[0]?.period}</span>
         <span>{data[data.length - 1]?.period}</span>
       </div>
@@ -529,7 +529,7 @@ function AumTrend({ history }: { history: { month: string; total_aum: number; st
       <div className="flex items-start justify-between mb-4">
         <div>
           <SectionLabel>AUM Trend</SectionLabel>
-          <p className="text-[13px] mt-0.5 font-medium" style={{ color: "var(--qc-text-heading)" }}>Last 12 Months</p>
+          <p className="text-[13px] mt-0.5 font-medium" style={{ color: "var(--qc-ink)" }}>Last 12 Months</p>
         </div>
         {trend !== 0 && (
           <div className="flex items-center gap-1 text-[11px] font-medium" style={{ color: trend >= 0 ? "var(--qc-up)" : "var(--qc-down)" }}>
@@ -547,11 +547,11 @@ function AumTrend({ history }: { history: { month: string; total_aum: number; st
                 className="w-full rounded-t-sm transition-opacity group-hover:opacity-80"
                 style={{
                   height: `${heightPct}%`,
-                  background: "linear-gradient(180deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
+                  background: "linear-gradient(180deg, var(--qc-ink) 0%, var(--qc-ink) 100%)",
                   minHeight: 3,
                 }}
               />
-              <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 hidden group-hover:block text-[10px] rounded px-2 py-1 whitespace-nowrap z-10 shadow-lg" style={{ background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}>
+              <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 hidden group-hover:block text-[10px] rounded px-2 py-1 whitespace-nowrap z-10 shadow-lg" style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}>
                 <p className="font-semibold">{fmtCr(total_aum)}</p>
                 <p className="opacity-60">{month}</p>
               </div>
@@ -559,7 +559,7 @@ function AumTrend({ history }: { history: { month: string; total_aum: number; st
           );
         })}
       </div>
-      <div className="flex justify-between mt-2 text-[10px]" style={{ color: "var(--qc-text-muted)" }}>
+      <div className="flex justify-between mt-2 text-[10px]" style={{ color: "var(--qc-ink-2)" }}>
         <span>{sorted[0]?.month}</span>
         <span>{sorted[sorted.length - 1]?.month}</span>
       </div>
@@ -574,36 +574,36 @@ function RelatedVariants({ variants, currentCode }: { variants: MFRelatedVariant
   return (
     <Card noPadding>
       <CardHeader icon={Layers} title="Plan Variants" right={
-        <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Direct vs Regular · Growth vs IDCW</span>
+        <span className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>Direct vs Regular · Growth vs IDCW</span>
       } />
-      <div className="divide-y" style={{ borderColor: "var(--qc-border-inner)" }}>
+      <div className="divide-y" style={{ borderColor: "var(--qc-hair-2)" }}>
         {sorted.map(v => (
           <div
             key={v.amfi_code}
             className="flex items-center justify-between px-5 py-3 transition-colors"
-            style={{ background: v.amfi_code === currentCode ? "var(--qc-accent-lime-bg)" : undefined }}
-            onMouseEnter={e => { if (v.amfi_code !== currentCode) e.currentTarget.style.background = "var(--qc-surface-hover)"; }}
+            style={{ background: v.amfi_code === currentCode ? "var(--qc-lime)" : undefined }}
+            onMouseEnter={e => { if (v.amfi_code !== currentCode) e.currentTarget.style.background = "var(--qc-section)"; }}
             onMouseLeave={e => { if (v.amfi_code !== currentCode) e.currentTarget.style.background = ""; }}
           >
             <div>
-              <p className="text-[12px] font-medium flex items-center gap-2" style={{ color: "var(--qc-text-heading)" }}>
+              <p className="text-[12px] font-medium flex items-center gap-2" style={{ color: "var(--qc-ink)" }}>
                 {v.plan_type.replace(/_/g, " ")} · {v.option_type.replace(/_/g, " ")}
                 {v.amfi_code === currentCode && (
                   <span
                     className="text-[9px] font-semibold uppercase tracking-wide rounded-sm px-1.5 py-0.5"
-                    style={{ background: "var(--qc-accent-lime)", color: "var(--qc-text-heading)" }}
+                    style={{ background: "var(--qc-lime)", color: "var(--qc-ink)" }}
                   >
                     Current
                   </span>
                 )}
               </p>
-              <p className="text-[11px] tabular-nums mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
+              <p className="text-[11px] tabular-nums mt-0.5" style={{ color: "var(--qc-ink-2)" }}>
                 NAV ₹{fmt(v.nav)} · AUM {fmtCr(v.aum)}
               </p>
             </div>
-            <p className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--qc-text-heading)" }}>
+            <p className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--qc-ink)" }}>
               {v.expense_ratio != null ? `${fmt(v.expense_ratio)}%` : "—"}
-              <span className="text-[10px] font-normal ml-1" style={{ color: "var(--qc-text-muted)" }}>ER</span>
+              <span className="text-[10px] font-normal ml-1" style={{ color: "var(--qc-ink-2)" }}>ER</span>
             </p>
           </div>
         ))}
@@ -623,17 +623,17 @@ function EquityHoldingsTable({ holdings }: { holdings: EquityHolding[] }) {
       {top10Weight > 0 && (
         <div
           className="px-5 py-2.5 border-b flex gap-6 text-[11px]"
-          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-accent-lime-bg)" }}
+          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-lime)" }}
         >
-          <span style={{ color: "var(--qc-text-muted)" }}>
+          <span style={{ color: "var(--qc-ink-2)" }}>
             Top-10 concentration:{" "}
-            <span className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>
+            <span className="font-semibold" style={{ color: "var(--qc-ink)" }}>
               {fmt(top10Weight, 1)}%
             </span>
           </span>
-          <span style={{ color: "var(--qc-text-muted)" }}>
+          <span style={{ color: "var(--qc-ink-2)" }}>
             Total holdings:{" "}
-            <span className="font-semibold" style={{ color: "var(--qc-text-heading)" }}>
+            <span className="font-semibold" style={{ color: "var(--qc-ink)" }}>
               {holdings.length}
             </span>
           </span>
@@ -642,33 +642,33 @@ function EquityHoldingsTable({ holdings }: { holdings: EquityHolding[] }) {
       <div className="overflow-x-auto">
         <table className="w-full text-[12px]">
           <thead>
-            <tr className="border-b" style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
+            <tr className="border-b" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}>
               {["#", "Stock", "Sector", "Weight", "Market Value", "Qty Δ MoM"].map(h => (
                 <th
                   key={h}
                   className="text-left py-2.5 px-3 text-[10px] uppercase tracking-wider font-medium"
-                  style={{ color: "var(--qc-text-muted)" }}
+                  style={{ color: "var(--qc-ink-2)" }}
                 >
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y" style={{ borderColor: "var(--qc-border-inner)" }}>
+          <tbody className="divide-y" style={{ borderColor: "var(--qc-hair-2)" }}>
             {top.map((h, i) => (
               <tr
                 key={i}
                 className="transition-colors"
-                onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
                 onMouseLeave={e => (e.currentTarget.style.background = "")}
               >
-                <td className="py-2.5 px-3 tabular-nums text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{i + 1}</td>
-                <td className="py-2.5 px-3 font-medium" style={{ color: "var(--qc-text-heading)" }}>{h.stock_name}</td>
-                <td className="py-2.5 px-3 text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{h.sector ?? "—"}</td>
-                <td className="py-2.5 px-3 tabular-nums font-medium" style={{ color: "var(--qc-text-heading)" }}>
+                <td className="py-2.5 px-3 tabular-nums text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{i + 1}</td>
+                <td className="py-2.5 px-3 font-medium" style={{ color: "var(--qc-ink)" }}>{h.stock_name}</td>
+                <td className="py-2.5 px-3 text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{h.sector ?? "—"}</td>
+                <td className="py-2.5 px-3 tabular-nums font-medium" style={{ color: "var(--qc-ink)" }}>
                   {fmt(h.weight_pct, 2)}%
                 </td>
-                <td className="py-2.5 px-3 tabular-nums text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
+                <td className="py-2.5 px-3 tabular-nums text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
                   {fmtCr(h.market_value)}
                 </td>
                 <td className="py-2.5 px-3 tabular-nums">
@@ -680,7 +680,7 @@ function EquityHoldingsTable({ holdings }: { holdings: EquityHolding[] }) {
                       {h.month_change_pct >= 0 ? "+" : ""}{fmt(h.month_change_pct, 1)}%
                     </span>
                   ) : (
-                    <span style={{ color: "var(--qc-text-muted)" }}>—</span>
+                    <span style={{ color: "var(--qc-ink-2)" }}>—</span>
                   )}
                 </td>
               </tr>
@@ -743,9 +743,9 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
   }
 
   const inputStyle = {
-    background: "var(--qc-surface-white)",
-    border: "1px solid var(--qc-border-default)",
-    color: "var(--qc-text-body)",
+    background: "var(--qc-card)",
+    border: "1px solid var(--qc-hair)",
+    color: "var(--qc-ink)",
     borderRadius: 6,
   };
 
@@ -753,10 +753,10 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
     <div>
       <div
         className="px-4 py-3 border-b flex flex-wrap items-center gap-3"
-        style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+        style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}
       >
         <div className="relative flex items-center">
-          <svg className="absolute left-2.5 size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--qc-text-muted)" }}>
+          <svg className="absolute left-2.5 size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--qc-ink-2)" }}>
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
           </svg>
           <input
@@ -769,25 +769,25 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
           />
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>Type</span>
+          <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--qc-ink-2)" }}>Type</span>
           <select value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1); }} className="px-2 py-1.5 text-[12px] focus:outline-none" style={inputStyle}>
             {types.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>Rating</span>
+          <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--qc-ink-2)" }}>Rating</span>
           <select value={ratingFilter} onChange={e => { setRatingFilter(e.target.value); setPage(1); }} className="px-2 py-1.5 text-[12px] focus:outline-none" style={inputStyle}>
             {ratings.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
-        <span className="ml-auto text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
+        <span className="ml-auto text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
           {sorted.length} of {holdings.length} instruments
         </span>
         {(search || typeFilter !== "All" || ratingFilter !== "All") && (
           <button
             onClick={() => { setSearch(""); setTypeFilter("All"); setRatingFilter("All"); setPage(1); }}
             className="text-[11px] px-2 py-1 rounded-md transition-opacity hover:opacity-70"
-            style={{ background: "var(--qc-surface-white)", border: "1px solid var(--qc-border-default)", color: "var(--qc-text-muted)" }}
+            style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", color: "var(--qc-ink-2)" }}
           >
             Reset
           </button>
@@ -796,7 +796,7 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
       <div className="overflow-x-auto">
         <table className="w-full text-[12px]">
           <thead>
-            <tr className="border-b" style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
+            <tr className="border-b" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}>
               {(
                 [
                   ["name", "Instrument"],
@@ -810,7 +810,7 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
                 <th
                   key={key}
                   className="text-left py-2.5 px-3 text-[10px] uppercase tracking-wider font-medium select-none cursor-pointer hover:opacity-70 transition-opacity"
-                  style={{ color: "var(--qc-text-muted)" }}
+                  style={{ color: "var(--qc-ink-2)" }}
                   onClick={() => toggleSort(key)}
                 >
                   {label} <SortIcon col={key} />
@@ -818,10 +818,10 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y" style={{ borderColor: "var(--qc-border-inner)" }}>
+          <tbody className="divide-y" style={{ borderColor: "var(--qc-hair-2)" }}>
             {pageRows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-[12px]" style={{ color: "var(--qc-text-muted)" }}>
+                <td colSpan={6} className="py-8 text-center text-[12px]" style={{ color: "var(--qc-ink-2)" }}>
                   No instruments match the current filters.
                 </td>
               </tr>
@@ -829,15 +829,15 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
               <tr
                 key={i}
                 className="transition-colors"
-                onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
                 onMouseLeave={e => (e.currentTarget.style.background = "")}
               >
-                <td className="py-2.5 px-3 font-medium" style={{ color: "var(--qc-text-heading)" }}>{h.name}</td>
-                <td className="py-2.5 px-3 text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{h.holding_type}</td>
-                <td className="py-2.5 px-3 text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{h.credit_rating ?? "—"}</td>
-                <td className="py-2.5 px-3 tabular-nums font-medium" style={{ color: "var(--qc-text-heading)" }}>{fmt(h.weight_pct, 2)}%</td>
-                <td className="py-2.5 px-3 tabular-nums text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{fmtCr(h.market_value)}</td>
-                <td className="py-2.5 px-3 text-[11px]" style={{ color: "var(--qc-text-muted)" }}>{h.maturity_date ?? "—"}</td>
+                <td className="py-2.5 px-3 font-medium" style={{ color: "var(--qc-ink)" }}>{h.name}</td>
+                <td className="py-2.5 px-3 text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{h.holding_type}</td>
+                <td className="py-2.5 px-3 text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{h.credit_rating ?? "—"}</td>
+                <td className="py-2.5 px-3 tabular-nums font-medium" style={{ color: "var(--qc-ink)" }}>{fmt(h.weight_pct, 2)}%</td>
+                <td className="py-2.5 px-3 tabular-nums text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{fmtCr(h.market_value)}</td>
+                <td className="py-2.5 px-3 text-[11px]" style={{ color: "var(--qc-ink-2)" }}>{h.maturity_date ?? "—"}</td>
               </tr>
             ))}
           </tbody>
@@ -846,9 +846,9 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
       {totalPages > 1 && (
         <div
           className="flex items-center justify-between px-4 py-3 border-t"
-          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}
         >
-          <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
+          <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
             Page {safePage} of {totalPages} · rows {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, sorted.length)}
           </span>
           <div className="flex items-center gap-1">
@@ -861,7 +861,7 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
                 disabled={btn.disabled}
                 onClick={btn.action}
                 className="px-2 py-1 rounded text-[11px] disabled:opacity-30 hover:opacity-70 transition-opacity"
-                style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)", color: "var(--qc-text-muted)" }}
+                style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)", color: "var(--qc-ink-2)" }}
               >
                 {btn.label}
               </button>
@@ -875,9 +875,9 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
                   onClick={() => setPage(p)}
                   className="px-2.5 py-1 rounded text-[11px] transition-colors"
                   style={{
-                    border: "1px solid var(--qc-border-default)",
-                    background: p === safePage ? "var(--qc-text-heading)" : "var(--qc-surface-white)",
-                    color: p === safePage ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
+                    border: "1px solid var(--qc-hair)",
+                    background: p === safePage ? "var(--qc-ink)" : "var(--qc-card)",
+                    color: p === safePage ? "var(--qc-on-dark)" : "var(--qc-ink-2)",
                   }}
                 >
                   {p}
@@ -893,7 +893,7 @@ function DebtHoldingsTable({ holdings }: { holdings: DebtHolding[] }) {
                 disabled={btn.disabled}
                 onClick={btn.action}
                 className="px-2 py-1 rounded text-[11px] disabled:opacity-30 hover:opacity-70 transition-opacity"
-                style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)", color: "var(--qc-text-muted)" }}
+                style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)", color: "var(--qc-ink-2)" }}
               >
                 {btn.label}
               </button>
@@ -934,15 +934,15 @@ export default function MutualFundDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-surface-base)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-bg)" }}>
         <div className="space-y-3 w-full max-w-4xl px-6">
-          <div className="h-24 rounded-[10px] animate-pulse" style={{ background: "var(--qc-surface-panel)" }} />
+          <div className="h-24 rounded-[10px] animate-pulse" style={{ background: "var(--qc-section)" }} />
           <div className="grid grid-cols-6 gap-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-20 rounded-[10px] animate-pulse" style={{ background: "var(--qc-surface-panel)", animationDelay: `${i * 60}ms` }} />
+              <div key={i} className="h-20 rounded-[10px] animate-pulse" style={{ background: "var(--qc-section)", animationDelay: `${i * 60}ms` }} />
             ))}
           </div>
-          <div className="h-40 rounded-[10px] animate-pulse" style={{ background: "var(--qc-surface-panel)", animationDelay: "360ms" }} />
+          <div className="h-40 rounded-[10px] animate-pulse" style={{ background: "var(--qc-section)", animationDelay: "360ms" }} />
         </div>
       </div>
     );
@@ -950,7 +950,7 @@ export default function MutualFundDetailPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-surface-base)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-bg)" }}>
         <div className="flex items-center gap-2" style={{ color: "var(--qc-down)" }}>
           <AlertCircle className="size-4" />
           <p className="text-sm">{error ?? "Fund not found"}</p>
@@ -968,34 +968,34 @@ export default function MutualFundDetailPage() {
   const dayChangePositive = data.day_change != null ? data.day_change >= 0 : null;
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--qc-surface-base)" }}>
+    <div className="min-h-screen" style={{ background: "var(--qc-bg)" }}>
 
       {/* ── Sticky topbar ── */}
       <div
         className="sticky top-0 z-20 border-b"
-        style={{ background: "var(--qc-surface-white)", borderColor: "var(--qc-border-default)" }}
+        style={{ background: "var(--qc-card)", borderColor: "var(--qc-hair)" }}
       >
         {/* Hero gradient strip */}
         <div
           className="h-1"
-          style={{ background: "linear-gradient(90deg, var(--qc-accent-primary) 0%, var(--qc-text-heading) 100%)" }}
+          style={{ background: "linear-gradient(90deg, var(--qc-ink) 0%, var(--qc-ink) 100%)" }}
         />
         <div className="px-6 py-3 flex items-center gap-4">
           <button
             onClick={() => router.back()}
             className="flex items-center gap-1.5 text-[12px] transition-opacity hover:opacity-60 flex-shrink-0"
-            style={{ color: "var(--qc-text-muted)" }}
+            style={{ color: "var(--qc-ink-2)" }}
           >
             <ArrowLeft className="size-4" />
             Back
           </button>
-          <div className="h-4 w-px flex-shrink-0" style={{ background: "var(--qc-border-default)" }} />
+          <div className="h-4 w-px flex-shrink-0" style={{ background: "var(--qc-hair)" }} />
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-semibold leading-tight truncate" style={{ color: "var(--qc-text-heading)" }}>
+            <p className="text-[14px] font-semibold leading-tight truncate" style={{ color: "var(--qc-ink)" }}>
               {data.name}
             </p>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>
+              <span className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
                 {[data.amc_name, data.category].filter(Boolean).join(" · ")}
               </span>
               {data.risk_label && <RiskBadge label={data.risk_label} />}
@@ -1004,7 +1004,7 @@ export default function MutualFundDetailPage() {
           </div>
           {data.nav != null && (
             <div className="text-right flex-shrink-0">
-              <p className="text-[22px] font-semibold tabular-nums leading-tight" style={{ color: "var(--qc-text-heading)" }}>
+              <p className="text-[22px] font-semibold tabular-nums leading-tight" style={{ color: "var(--qc-ink)" }}>
                 ₹{fmt(data.nav)}
               </p>
               <div className="flex items-center justify-end gap-2 mt-0.5">
@@ -1018,7 +1018,7 @@ export default function MutualFundDetailPage() {
                   </span>
                 )}
                 {data.nav_date && (
-                  <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>{data.nav_date}</span>
+                  <span className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>{data.nav_date}</span>
                 )}
               </div>
             </div>
@@ -1073,7 +1073,7 @@ export default function MutualFundDetailPage() {
               title="Performance"
               right={
                 returns.as_of_date && (
-                  <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>
+                  <span className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>
                     As of {returns.as_of_date}
                   </span>
                 )
@@ -1107,7 +1107,7 @@ export default function MutualFundDetailPage() {
                 title="Asset Allocation"
                 right={
                   holdings.month && (
-                    <span className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>{holdings.month}</span>
+                    <span className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>{holdings.month}</span>
                   )
                 }
               />
@@ -1153,7 +1153,7 @@ export default function MutualFundDetailPage() {
               badge={
                 <span
                   className="ml-1 text-[10px] font-semibold rounded-sm px-1.5 py-0.5 tabular-nums"
-                  style={{ background: "var(--qc-accent-lime-bg)", color: "var(--qc-text-heading)" }}
+                  style={{ background: "var(--qc-lime)", color: "var(--qc-ink)" }}
                 >
                   {holdings.equity_holdings.length}
                 </span>
@@ -1172,7 +1172,7 @@ export default function MutualFundDetailPage() {
               badge={
                 <span
                   className="ml-1 text-[10px] font-semibold rounded-sm px-1.5 py-0.5 tabular-nums"
-                  style={{ background: "var(--qc-accent-lime-bg)", color: "var(--qc-text-heading)" }}
+                  style={{ background: "var(--qc-lime)", color: "var(--qc-ink)" }}
                 >
                   {holdings.debt_holdings.length}
                 </span>
@@ -1185,7 +1185,7 @@ export default function MutualFundDetailPage() {
         {/* ── Identity footer ── */}
         <div
           className="rounded-[10px] border p-5 grid grid-cols-2 sm:grid-cols-4 gap-5"
-          style={{ borderColor: "var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}
         >
           {[
             { label: "AMFI Code", value: data.amfi_code },
@@ -1201,7 +1201,7 @@ export default function MutualFundDetailPage() {
           ].map(({ label, value }) => (
             <div key={label}>
               <SectionLabel>{label}</SectionLabel>
-              <p className="text-[13px] font-semibold mt-1" style={{ color: "var(--qc-text-heading)" }}>
+              <p className="text-[13px] font-semibold mt-1" style={{ color: "var(--qc-ink)" }}>
                 {value}
               </p>
             </div>

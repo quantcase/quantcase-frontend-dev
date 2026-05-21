@@ -13,8 +13,8 @@ import { historicalPerformanceData } from "@/components/deal/detailed-analysis-d
 const CHART = {
   grid: "#f4f4f5",
   axis: "#a1a1aa",
-  companyBar: "var(--qc-text-heading)",   // --qc-text-heading approx
-  industryLine: "#9A9A92", // --qc-text-muted approx
+  companyBar: "var(--qc-ink)",   // --qc-ink approx
+  industryLine: "#9A9A92", // --qc-ink-2 approx
 };
 
 interface HistoricalPerformanceProps {
@@ -36,34 +36,34 @@ export function HistoricalPerformance({ data, hideHeader }: HistoricalPerformanc
     <div className="space-y-5">
       {!hideHeader && (
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center flex-shrink-0" style={{ padding: 4, borderRadius: 6, border: "1px solid var(--qc-icon-box-border)", background: "var(--qc-icon-box-bg)" }}>
-            <BarChart2 className="h-4 w-4" style={{ color: "var(--qc-text-muted)" }} />
+          <div className="flex items-center justify-center flex-shrink-0" style={{ padding: 4, borderRadius: 6, border: "1px solid var(--qc-hair)", background: "var(--qc-chip)" }}>
+            <BarChart2 className="h-4 w-4" style={{ color: "var(--qc-ink-2)" }} />
           </div>
           <div>
-            <h3 className="text-[14px] font-semibold uppercase tracking-[0.01em] mb-0.5" style={{ color: "var(--qc-text-heading)" }}>{title}</h3>
-            {subtitle && <p className="text-[14px]" style={{ color: "var(--qc-text-muted)" }}>{subtitle}</p>}
+            <h3 className="text-[14px] font-semibold uppercase tracking-[0.01em] mb-0.5" style={{ color: "var(--qc-ink)" }}>{title}</h3>
+            {subtitle && <p className="text-[14px]" style={{ color: "var(--qc-ink-2)" }}>{subtitle}</p>}
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-lg p-4" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
-          <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--qc-text-muted)" }}>
+        <div className="rounded-lg p-4" style={{ background: "var(--qc-section)", border: "1px solid var(--qc-hair)" }}>
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--qc-ink-2)" }}>
             Company Earnings Growth
           </p>
-          <p className="text-[26px] font-normal" style={{ color: "var(--qc-text-heading)" }}>{fmtDealNum(companyGrowth.value)}</p>
-          <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{companyGrowth.label}</p>
+          <p className="text-[26px] font-normal" style={{ color: "var(--qc-ink)" }}>{fmtDealNum(companyGrowth.value)}</p>
+          <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>{companyGrowth.label}</p>
         </div>
-        <div className="rounded-lg p-4" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
-          <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--qc-text-muted)" }}>
+        <div className="rounded-lg p-4" style={{ background: "var(--qc-section)", border: "1px solid var(--qc-hair)" }}>
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--qc-ink-2)" }}>
             Industry Earnings Growth
           </p>
-          <p className="text-[26px] font-normal" style={{ color: "var(--qc-text-heading)" }}>{fmtDealNum(industryGrowth.value)}</p>
-          <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{industryGrowth.label}</p>
+          <p className="text-[26px] font-normal" style={{ color: "var(--qc-ink)" }}>{fmtDealNum(industryGrowth.value)}</p>
+          <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>{industryGrowth.label}</p>
         </div>
       </div>
 
-      <div className="rounded-lg p-4" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
+      <div className="rounded-lg p-4" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
         <div className="h-60">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
@@ -89,9 +89,9 @@ export function HistoricalPerformance({ data, hideHeader }: HistoricalPerformanc
 
       <div className="grid grid-cols-3 gap-3">
         {stats.map((stat, i) => (
-          <div key={i} className="rounded-lg p-3 text-center" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
-            <p className="text-[26px] font-normal" style={{ color: "var(--qc-text-heading)" }}>{fmtDealNum(stat.value)}</p>
-            <p className="text-[10px] mt-0.5" style={{ color: "var(--qc-text-muted)" }}>{stat.label}</p>
+          <div key={i} className="rounded-lg p-3 text-center" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}>
+            <p className="text-[26px] font-normal" style={{ color: "var(--qc-ink)" }}>{fmtDealNum(stat.value)}</p>
+            <p className="text-[10px] mt-0.5" style={{ color: "var(--qc-ink-2)" }}>{stat.label}</p>
           </div>
         ))}
       </div>

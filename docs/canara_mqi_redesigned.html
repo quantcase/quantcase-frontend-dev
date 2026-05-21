@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canara Bank · MQI Forensic Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FCFCFA;
+  --surface: #FFFFFF;
+  --ink: #1A1A1A;
+  --ink-2: #4A4A4A;
+  --ink-3: #8A8A8A;
+  --ink-4: #C8C8C4;
+  --rule: #EDEAE3;
+  --rule-2: #E0DCD2;
+  --critical: #C2410C;
+  --warning: #B45309;
+  --good: #15803D;
+  --info: #1E40AF;
+  --opp: #6B21A8;
+  --tint-critical: #FEF2EC;
+  --tint-warning: #FEF7E6;
+  --tint-good: #ECFDF5;
+  --tint-info: #EFF6FF;
+  --tint-opp: #F5F0FA;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+abbr, [title] { cursor: help; text-decoration: underline dotted var(--ink-3); text-underline-offset: 2px; }
+.shell { max-width: 1380px; margin: 0 auto; padding: 28px 36px 80px; }
+
+/* HEADER */
+.greeting {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  padding-bottom: 20px; border-bottom: 1px solid var(--rule); margin-bottom: 24px;
+  gap: 24px; flex-wrap: wrap;
+}
+.greeting h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 38px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.05;
+}
+.greeting h1 .comma { color: var(--ink-3); font-style: italic; }
+.greeting .sub {
+  color: var(--ink-3); font-size: 13px; margin-top: 8px;
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+}
+.greeting .sub .dot { width: 4px; height: 4px; background: var(--ink-4); border-radius: 50%; }
+.ticker {
+  font-family: var(--mono); font-size: 11.5px; color: var(--ink-2);
+  border: 1px solid var(--rule-2); border-radius: 6px; padding: 6px 10px; background: var(--surface);
+}
+
+/* HERO ROW */
+.hero-row {
+  display: grid; grid-template-columns: 1.05fr 1.4fr; gap: 16px; margin-bottom: 24px;
+}
+@media (max-width: 980px) { .hero-row { grid-template-columns: 1fr; } }
+
+/* HERO LEFT — verdict briefing (dark) */
+.briefing {
+  background: var(--ink); color: var(--bg);
+  padding: 24px 26px; border-radius: 12px;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.briefing::before {
+  content: ''; position: absolute; top: 0; right: 0; width: 240px; height: 100%;
+  background: radial-gradient(circle at top right, rgba(180,83,9,0.28), transparent 70%);
+}
+.briefing-eyebrow {
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.5); margin-bottom: 10px; position: relative;
+  display: flex; align-items: center; gap: 10px;
+}
+.briefing-eyebrow .badge {
+  background: rgba(180,83,9,0.25); color: #FCD34D;
+  padding: 2px 8px; border-radius: 4px; letter-spacing: 0.06em; font-weight: 600;
+}
+.briefing-headline {
+  font-family: 'Instrument Serif', serif;
+  font-size: 26px; line-height: 1.25; font-weight: 400; letter-spacing: -0.01em;
+  margin-bottom: 14px; position: relative;
+}
+.briefing-headline em { font-style: italic; color: #FCD34D; }
+.briefing-sub {
+  font-size: 12.5px; color: rgba(255,255,255,0.65); line-height: 1.55;
+  margin-bottom: auto; padding-bottom: 16px; position: relative;
+}
+.briefing-actions { display: flex; gap: 6px; flex-wrap: wrap; position: relative; }
+.action-chip {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  padding: 6px 10px; border-radius: 6px;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--bg); cursor: pointer;
+}
+.action-chip:hover { background: rgba(255,255,255,0.14); }
+.action-chip .dot { width: 6px; height: 6px; border-radius: 50%; }
+.action-chip .dot.alert { background: #F59E0B; }
+.action-chip .dot.opp { background: #C084FC; }
+.action-chip .dot.good { background: #34D399; }
+
+/* HERO RIGHT — MQI gauge card */
+.mqi-card {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 12px; overflow: hidden;
+  display: grid; grid-template-rows: auto auto;
+}
+.mqi-top {
+  padding: 20px 24px;
+  display: grid; grid-template-columns: 160px 1fr; gap: 28px; align-items: center;
+}
+.mqi-gauge { width: 160px; height: 160px; position: relative; }
+.mqi-gauge svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.mqi-gauge-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.mqi-gauge-center .lbl {
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 600;
+}
+.mqi-gauge-center .val {
+  font-family: 'Instrument Serif', serif;
+  font-size: 48px; font-weight: 400; line-height: 1; letter-spacing: -0.02em;
+}
+.mqi-gauge-center .max { font-family: var(--mono); font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.mqi-meta { min-width: 0; }
+.mqi-tag {
+  display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 4px 9px; border-radius: 4px;
+  background: var(--tint-warning); color: var(--warning);
+  border: 1px solid #FCD9A8; margin-bottom: 10px;
+}
+.mqi-headline {
+  font-family: 'Instrument Serif', serif; font-size: 20px; line-height: 1.3;
+  letter-spacing: -0.01em; margin-bottom: 8px;
+}
+.mqi-headline em { font-style: italic; color: var(--warning); }
+.mqi-sub { font-size: 11.5px; color: var(--ink-3); }
+
+/* MQI 3 sub-gauges */
+.mqi-bars { 
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+  border-top: 1px solid var(--rule);
+}
+.mqi-bar-cell { padding: 16px 22px; border-right: 1px solid var(--rule); }
+.mqi-bar-cell:last-child { border-right: none; }
+.mqi-bar-lbl {
+  font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 600; margin-bottom: 8px;
+}
+.mqi-bar-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.mqi-bar-val {
+  font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--ink);
+}
+.mqi-bar-val .pct { color: var(--ink-3); font-size: 11px; margin-left: 4px; }
+.mqi-bar-pill {
+  font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.mqi-bar-pill.amber { background: var(--tint-warning); color: var(--warning); }
+.mqi-bar-pill.green { background: var(--tint-good); color: var(--good); }
+.mqi-bar-track { height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.mqi-bar-fill { height: 100%; border-radius: 2px; }
+.mqi-bar-fill.amber { background: var(--warning); }
+.mqi-bar-fill.green { background: var(--good); }
+
+/* SECTION HEAD */
+.sec-head { margin: 32px 0 14px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.sec-head .label {
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 600;
+}
+.sec-head h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 24px; font-weight: 400; letter-spacing: -0.01em;
+}
+.sec-head .spacer { flex: 1; }
+.sec-head .meta { font-size: 11px; color: var(--ink-3); font-family: var(--mono); }
+
+/* 3-POINT STORY */
+.story-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px;
+}
+@media (max-width: 860px) { .story-grid { grid-template-columns: 1fr; } }
+.story-card {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; padding: 18px 20px;
+  border-top: 3px solid;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.story-card.strength { border-top-color: var(--good); }
+.story-card.risk { border-top-color: var(--critical); }
+.story-card.neutral { border-top-color: var(--info); }
+.story-eyebrow {
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  font-weight: 600; display: flex; align-items: center; gap: 8px;
+}
+.story-card.strength .story-eyebrow { color: var(--good); }
+.story-card.risk .story-eyebrow { color: var(--critical); }
+.story-card.neutral .story-eyebrow { color: var(--info); }
+.story-icon { font-size: 13px; }
+.story-headline {
+  font-family: 'Instrument Serif', serif;
+  font-size: 18px; line-height: 1.3; letter-spacing: -0.01em; font-weight: 400;
+}
+.story-stat {
+  font-family: var(--mono); font-size: 13px; color: var(--ink-2);
+  padding-top: 8px; border-top: 1px dashed var(--rule);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.story-stat strong { color: var(--ink); font-weight: 600; }
+
+/* GAUGE GRID — section verdicts */
+.gauge-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;
+}
+@media (max-width: 860px) { .gauge-grid { grid-template-columns: 1fr; } }
+.gauge-card {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; padding: 18px 20px;
+  display: grid; grid-template-columns: 90px 1fr; gap: 18px; align-items: center;
+}
+.donut-sm { width: 90px; height: 90px; position: relative; }
+.donut-sm svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.donut-sm-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.donut-sm-center .val {
+  font-family: var(--mono); font-size: 18px; font-weight: 600;
+}
+.donut-sm-center .max { font-size: 9px; color: var(--ink-3); font-family: var(--mono); }
+.gauge-meta { min-width: 0; }
+.gauge-eyebrow {
+  font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 600; margin-bottom: 4px;
+}
+.gauge-title {
+  font-size: 14px; font-weight: 600; letter-spacing: -0.005em; margin-bottom: 6px;
+}
+.gauge-tag {
+  display: inline-block; font-size: 9.5px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 2px 7px; border-radius: 3px;
+  margin-bottom: 6px;
+}
+.gauge-tag.amber { background: var(--tint-warning); color: var(--warning); }
+.gauge-tag.green { background: var(--tint-good); color: var(--good); }
+.gauge-tag.red { background: var(--tint-critical); color: var(--critical); }
+.gauge-line { font-size: 11.5px; color: var(--ink-2); line-height: 1.45; }
+
+/* CARD */
+.card {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+}
+.card-head {
+  padding: 16px 20px 12px;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.card-head h3 {
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  font-weight: 600; color: var(--ink-2);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-head .count {
+  background: var(--rule); padding: 2px 8px; border-radius: 999px;
+  font-size: 11px; color: var(--ink-2);
+  font-family: var(--mono); letter-spacing: 0; text-transform: none;
+}
+.card-head .subhead {
+  font-size: 11px; color: var(--ink-3); margin-top: 4px; font-weight: 400;
+  letter-spacing: 0; text-transform: none;
+}
+.card-head-left { min-width: 0; }
+.card-body { padding: 16px 20px 20px; }
+
+/* STAT BLOCKS — large summaries */
+.stat-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+  border-top: 1px solid var(--rule);
+}
+.stat-cell {
+  padding: 18px 22px;
+  border-right: 1px solid var(--rule);
+}
+.stat-cell:last-child { border-right: none; }
+.stat-cell.green { background: linear-gradient(180deg, var(--tint-good) 0%, var(--surface) 100%); }
+.stat-cell.amber { background: linear-gradient(180deg, var(--tint-warning) 0%, var(--surface) 100%); }
+.stat-cell.blue { background: linear-gradient(180deg, var(--tint-info) 0%, var(--surface) 100%); }
+.stat-lbl {
+  font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  font-weight: 600; margin-bottom: 8px;
+}
+.stat-cell.green .stat-lbl { color: var(--good); }
+.stat-cell.amber .stat-lbl { color: var(--warning); }
+.stat-cell.blue .stat-lbl { color: var(--info); }
+.stat-val {
+  font-family: 'Instrument Serif', serif;
+  font-size: 30px; font-weight: 400; letter-spacing: -0.02em; line-height: 1;
+  margin-bottom: 8px;
+}
+.stat-cell.green .stat-val { color: var(--good); }
+.stat-cell.amber .stat-val { color: var(--warning); }
+.stat-cell.blue .stat-val { color: var(--info); }
+.stat-desc { font-size: 11.5px; color: var(--ink-2); line-height: 1.5; }
+
+/* TIMELINE — guidance vs actuals */
+.timeline { padding: 4px 0; }
+.tl-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 110px 110px 90px auto;
+  gap: 16px; align-items: center;
+  padding: 14px 20px; border-bottom: 1px solid var(--rule);
+}
+.tl-row:last-child { border-bottom: none; }
+.tl-row:hover { background: #FAFAF7; }
+.tl-period { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+.tl-metric { font-size: 13px; font-weight: 500; color: var(--ink); }
+.tl-metric .driver { display: block; font-size: 10.5px; color: var(--ink-3); font-weight: 400; margin-top: 3px; }
+.tl-num { font-family: var(--mono); font-size: 12px; }
+.tl-num .lbl { display: block; font-size: 9px; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
+.tl-delta {
+  font-family: var(--mono); font-size: 13px; font-weight: 500; text-align: right;
+}
+.tl-delta.pos { color: var(--good); }
+.tl-delta.neg { color: var(--critical); }
+.tl-delta.flat { color: var(--ink-3); }
+.tl-sev {
+  font-size: 10px; padding: 4px 9px; border-radius: 999px;
+  font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+}
+.tl-sev.green { background: var(--tint-good); color: var(--good); }
+.tl-sev.amber { background: var(--tint-warning); color: var(--warning); }
+.tl-sev.red { background: var(--tint-critical); color: var(--critical); }
+.tl-sev.gray { background: var(--rule); color: var(--ink-2); }
+@media (max-width: 980px) {
+  .tl-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+}
+
+/* PROMOTER COMPACT TIMELINE */
+.prom-row {
+  display: grid; grid-template-columns: 110px 110px 100px 90px 1fr; gap: 14px;
+  align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--rule);
+}
+.prom-row:last-child { border-bottom: none; }
+.prom-period { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+.prom-stake { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--ink); }
+.prom-pledge { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+.prom-change { font-family: var(--mono); font-size: 12px; }
+.prom-change.flat { color: var(--ink-3); }
+.prom-change.neg { color: var(--critical); }
+.prom-signal { font-size: 11.5px; color: var(--ink-2); }
+.prom-signal .pill {
+  display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 3px;
+  font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin-right: 6px;
+}
+.prom-signal .pill.green { background: var(--tint-good); color: var(--good); }
+.prom-signal .pill.amber { background: var(--tint-warning); color: var(--warning); }
+.prom-signal .pill.gray { background: var(--rule); color: var(--ink-2); }
+
+/* MICRO-CARDS / INSIGHT GRID */
+.insight-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  padding: 16px 20px 20px;
+}
+@media (max-width: 980px) { .insight-grid { grid-template-columns: 1fr; } }
+.insight {
+  background: var(--bg); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 12px 14px;
+  border-left: 3px solid var(--ink-4);
+}
+.insight.green { border-left-color: var(--good); }
+.insight.amber { border-left-color: var(--warning); }
+.insight.red { border-left-color: var(--critical); }
+.insight.blue { border-left-color: var(--info); }
+.insight-icon { font-size: 13px; margin-right: 4px; }
+.insight-title {
+  font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 4px;
+  line-height: 1.35;
+}
+.insight-text { font-size: 11px; color: var(--ink-2); line-height: 1.5; }
+
+/* CALLOUT QUOTE */
+.callout {
+  background: var(--bg); border-left: 3px solid var(--ink);
+  border-radius: 6px; padding: 14px 18px; margin: 0 20px 16px;
+  font-family: 'Instrument Serif', serif;
+  font-size: 16px; font-style: italic; line-height: 1.45; color: var(--ink);
+}
+.callout-source {
+  margin-top: 8px; font-family: var(--mono); font-style: normal;
+  font-size: 10.5px; color: var(--ink-3); letter-spacing: 0.02em;
+}
+
+/* DIM TILE GRID — disclosure / capital tiles (no collapse) */
+.tile-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;
+}
+@media (max-width: 860px) { .tile-grid { grid-template-columns: 1fr; } }
+.tile {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.tile-top {
+  display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: flex-start;
+}
+.tile-icon-wrap {
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+}
+.tile-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  flex-shrink: 0;
+}
+.tile-icon.red { background: var(--tint-critical); color: var(--critical); }
+.tile-icon.amber { background: var(--tint-warning); color: var(--warning); }
+.tile-icon.green { background: var(--tint-good); color: var(--good); }
+.tile-name {
+  font-size: 13.5px; font-weight: 600; letter-spacing: -0.005em;
+}
+.tile-tag {
+  font-size: 9.5px; padding: 3px 8px; border-radius: 4px;
+  font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.tile-tag.red { background: var(--tint-critical); color: var(--critical); }
+.tile-tag.amber { background: var(--tint-warning); color: var(--warning); }
+.tile-tag.green { background: var(--tint-good); color: var(--good); }
+.tile-tag.gray { background: var(--rule); color: var(--ink-2); }
+.tile-score-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.tile-score-val { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink); }
+.tile-score-bar {
+  flex: 1; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden;
+}
+.tile-score-fill { height: 100%; border-radius: 2px; }
+.tile-score-fill.red { background: var(--critical); }
+.tile-score-fill.amber { background: var(--warning); }
+.tile-score-fill.green { background: var(--good); }
+.tile-points { display: flex; flex-direction: column; gap: 6px; }
+.tile-point {
+  font-size: 11.5px; line-height: 1.5; color: var(--ink-2);
+  display: grid; grid-template-columns: 16px 1fr; gap: 6px;
+}
+.tile-point .ic { color: var(--ink-3); font-size: 11px; }
+.tile-point strong { color: var(--ink); font-weight: 600; }
+.tile-flag {
+  margin-top: auto;
+  padding: 10px 12px; border-radius: 6px; font-size: 11px; line-height: 1.5;
+  display: grid; grid-template-columns: 18px 1fr; gap: 8px;
+}
+.tile-flag.red { background: var(--tint-critical); color: var(--critical); }
+.tile-flag.amber { background: var(--tint-warning); color: var(--warning); }
+.tile-flag.gray { background: var(--rule); color: var(--ink-2); }
+.tile-flag strong { font-weight: 600; display: block; margin-bottom: 2px; }
+
+/* DI BREAKDOWN (3 cols) */
+.di-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;
+}
+@media (max-width: 980px) { .di-grid { grid-template-columns: 1fr; } }
+.di-col {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; overflow: hidden;
+}
+.di-col-head {
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.di-col-head .pip {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.di-col.green .pip { background: var(--good); }
+.di-col.blue .pip { background: var(--info); }
+.di-col.red .pip { background: var(--critical); }
+.di-col-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink);
+}
+.di-col-count { margin-left: auto; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+.di-list { display: flex; flex-direction: column; }
+.di-item {
+  padding: 12px 18px; border-top: 1px solid var(--rule);
+}
+.di-item:first-child { border-top: none; }
+.di-item-title {
+  font-size: 12px; font-weight: 600; color: var(--ink);
+  margin-bottom: 4px; line-height: 1.4; display: flex; align-items: center; gap: 6px;
+}
+.di-item-text { font-size: 11px; color: var(--ink-2); line-height: 1.5; }
+.di-item-evidence {
+  font-size: 10px; color: var(--ink-3); font-family: var(--mono);
+  margin-top: 6px; letter-spacing: 0.02em;
+}
+
+/* WATCHLIST GRID 3x2 */
+.wl-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  padding: 16px 20px 20px;
+}
+@media (max-width: 980px) { .wl-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .wl-grid { grid-template-columns: 1fr; } }
+.wl-card {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: all 0.15s;
+}
+.wl-card:hover {
+  border-color: var(--ink); transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.wl-card-num {
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+  letter-spacing: 0.1em; font-weight: 600;
+}
+.wl-card-q {
+  font-size: 12.5px; font-weight: 600; line-height: 1.4; color: var(--ink);
+}
+.wl-card-signals { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.wl-sig {
+  font-size: 10.5px; line-height: 1.45; padding: 7px 9px;
+  border-radius: 6px; display: grid; grid-template-columns: 14px 1fr; gap: 6px;
+}
+.wl-sig.green { background: var(--tint-good); color: var(--good); }
+.wl-sig.red { background: var(--tint-critical); color: var(--critical); }
+.wl-sig .ic { font-size: 11px; }
+
+/* FOOTNOTE */
+.footnote {
+  margin-top: 24px; padding: 16px 20px;
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 8px; font-size: 11px; color: var(--ink-3); line-height: 1.6;
+}
+.footnote strong { color: var(--ink-2); font-weight: 600; }
+/* ===== Premium status pills (Stripe / Linear / Notion feel) ===== */
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 11px;border-radius:999px;
+  font-size:12px;font-weight:600;letter-spacing:.01em;line-height:1;
+  border:1px solid transparent;
+  font-feature-settings:"tnum" 1;
+  white-space:nowrap;
+  transition:all .15s ease;
+}
+.pill .dot{width:6px;height:6px;border-radius:999px;display:inline-block}
+.pill-amber{background:#FEF6E7;color:#8A5A00;border-color:#F4D88A;box-shadow:0 1px 0 rgba(138,90,0,.04)}
+.pill-amber .dot{background:#E0A82E}
+.pill-red{background:#FDECEC;color:#A1241D;border-color:#F2B8B5;box-shadow:0 1px 0 rgba(161,36,29,.04)}
+.pill-red .dot{background:#D93B30}
+.pill-green{background:#E8F5EE;color:#0F6B3A;border-color:#A8DABF;box-shadow:0 1px 0 rgba(15,107,58,.04)}
+.pill-green .dot{background:#16A34A}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- HEADER -->
+  <header class="greeting">
+    <div>
+      <h1>Canara Bank<span class="comma">,</span> Management Factor Analyser</h1>
+      <div class="sub">
+        <span>Forensic equity analysis</span>
+        <span class="dot"></span>
+        <span>NBFC / Bank scoring mode</span>
+        <span class="dot"></span>
+        <span>Period: Q3 FY25 → Q3 FY26</span>
+      </div>
+    </div>
+    <div class="ticker">NSE: CANBK · PSU Bank · Profitable / Mature</div>
+  </header>
+
+  <!-- HERO ROW: verdict + MQI gauge -->
+  <div class="hero-row">
+    <div class="briefing">
+      <div class="briefing-eyebrow">
+        Verdict <span class="badge">Average band</span>
+      </div>
+      <div class="briefing-headline">
+        Honest on credit, <em>defensive on margin</em>, disciplined on capital — textbook turnaround PSU.
+      </div>
+      <div class="briefing-sub">
+        Discount to fair value warranted. Asset-quality story validated by data; margin narrative selectively framed.
+      </div>
+      <div class="briefing-actions">
+        <div class="action-chip"><span class="dot alert"></span>NIM walked down 2×</div>
+        <div class="action-chip"><span class="dot good"></span>GNPA beat early</div>
+        <div class="action-chip"><span class="dot opp"></span>Smart OFS Oct '25</div>
+      </div>
+    </div>
+
+    <div class="mqi-card">
+      <div class="mqi-top">
+        <div class="mqi-gauge">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#EDEAE3" stroke-width="12"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#B45309" stroke-width="12"
+              stroke-dasharray="196 327" stroke-linecap="round"/>
+          </svg>
+          <div class="mqi-gauge-center">
+            <div class="lbl">MQI</div>
+            <div class="val">60</div>
+            <div class="max">/ 100</div>
+          </div>
+        </div>
+        <div class="mqi-meta">
+          <div class="mqi-tag">Average · Discount warranted</div>
+          <div class="mqi-headline">Delivers on asset quality &amp; growth; <em>misses on margin</em>.</div>
+          <div class="mqi-sub">NBFC/Bank mode · NIM &amp; slippage weighted 2×</div>
+        </div>
+      </div>
+      <div class="mqi-bars">
+        <div class="mqi-bar-cell">
+          <div class="mqi-bar-lbl">Guidance credibility</div>
+          <div class="mqi-bar-row">
+            <div class="mqi-bar-val">22<span class="pct">/40</span></div>
+            <span class="mqi-bar-pill amber">Mixed</span>
+          </div>
+          <div class="mqi-bar-track"><div class="mqi-bar-fill amber" style="width:55%"></div></div>
+        </div>
+        <div class="mqi-bar-cell">
+          <div class="mqi-bar-lbl">Capital allocation</div>
+          <div class="mqi-bar-row">
+            <div class="mqi-bar-val">23<span class="pct">/35</span></div>
+            <span class="mqi-bar-pill green">Strong</span>
+          </div>
+          <div class="mqi-bar-track"><div class="mqi-bar-fill green" style="width:65.7%"></div></div>
+        </div>
+        <div class="mqi-bar-cell">
+          <div class="mqi-bar-lbl">Disclosure honesty</div>
+          <div class="mqi-bar-row">
+            <div class="mqi-bar-val">15<span class="pct">/25</span></div>
+            <span class="mqi-bar-pill amber">Reactive</span>
+          </div>
+          <div class="mqi-bar-track"><div class="mqi-bar-fill amber" style="width:60%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3-POINT STORY -->
+  <div class="sec-head">
+    <span class="label">The 3-point story</span>
+    <h2>What you need to know</h2>
+  </div>
+  <div class="story-grid">
+    <div class="story-card strength">
+      <div class="story-eyebrow"><span class="story-icon">✅</span> Strength</div>
+      <div class="story-headline">Asset quality &amp; capital discipline are best-in-class for a PSU bank.</div>
+      <div class="story-stat"><span>GNPA 4.23% → <strong>2.08%</strong></span><span>PCR 94%+</span></div>
+    </div>
+    <div class="story-card risk">
+      <div class="story-eyebrow"><span class="story-icon">🔴</span> Risk</div>
+      <div class="story-headline">NIM guidance walked down twice without acknowledging the prior breach.</div>
+      <div class="story-stat"><span>2.90% → 2.80% → <strong>2.45%</strong></span><span>−45 bps</span></div>
+    </div>
+    <div class="story-card neutral">
+      <div class="story-eyebrow"><span class="story-icon">⚪</span> Neutral</div>
+      <div class="story-headline">Retail +31% YoY for two years — but no vintage cohort data published.</div>
+      <div class="story-stat"><span>Seasoning unpriced</span><span>ICRA: <strong>monitorable</strong></span></div>
+    </div>
+  </div>
+
+  <!-- SECTION VERDICT GAUGES -->
+  <div class="sec-head">
+    <span class="label">Section scores</span>
+    <h2>Three lenses on management</h2>
+  </div>
+  <div class="gauge-grid">
+    <div class="gauge-card">
+      <div class="donut-sm">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#EDEAE3" stroke-width="10"/>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#B45309" stroke-width="10"
+            stroke-dasharray="145 264" stroke-linecap="round"/>
+        </svg>
+        <div class="donut-sm-center"><div class="val">22</div><div class="max">/40</div></div>
+      </div>
+      <div class="gauge-meta">
+        <div class="gauge-eyebrow">Section 1</div>
+        <div class="gauge-title">Guidance track record</div>
+        <span class="gauge-tag amber">🟡 Mixed</span>
+        <div class="gauge-line">Credit conservative, margin aggressive — beats on NPA, misses on NIM.</div>
+      </div>
+    </div>
+    <div class="gauge-card">
+      <div class="donut-sm">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#EDEAE3" stroke-width="10"/>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#15803D" stroke-width="10"
+            stroke-dasharray="173 264" stroke-linecap="round"/>
+        </svg>
+        <div class="donut-sm-center"><div class="val">23</div><div class="max">/35</div></div>
+      </div>
+      <div class="gauge-meta">
+        <div class="gauge-eyebrow">Section 3</div>
+        <div class="gauge-title">Capital allocation</div>
+        <span class="gauge-tag green">✅ Disciplined</span>
+        <div class="gauge-line">RAM-led reinvestment, smart OFS, no value-destructive M&amp;A.</div>
+      </div>
+    </div>
+    <div class="gauge-card">
+      <div class="donut-sm">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#EDEAE3" stroke-width="10"/>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#B45309" stroke-width="10"
+            stroke-dasharray="158 264" stroke-linecap="round"/>
+        </svg>
+        <div class="donut-sm-center"><div class="val">15</div><div class="max">/25</div></div>
+      </div>
+      <div class="gauge-meta">
+        <div class="gauge-eyebrow">Section 2</div>
+        <div class="gauge-title">Disclosure honesty</div>
+        <span class="gauge-tag amber">🟡 Reactive</span>
+        <div class="gauge-line">Asset-quality strong; margin narrative selectively framed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= DECISION INTELLIGENCE ============= -->
+  <div class="sec-head">
+    <span class="label">Decision intelligence</span>
+    <h2>Strengths · Focus · Red flags</h2>
+  </div>
+
+  <div class="di-grid">
+    <div class="di-col green">
+      <div class="di-col-head">
+        <span class="pip"></span>
+        <span class="di-col-title">✅ Strengths</span>
+        <span class="di-col-count">04</span>
+      </div>
+      <div class="di-list">
+        <div class="di-item">
+          <div class="di-item-title">Asset-quality discipline</div>
+          <div class="di-item-text">GNPA 4.23% → 2.08% in 18 months. PCR 94%+; zero RBI divergence.</div>
+          <div class="di-item-evidence">Q3 FY26 disclosure</div>
+        </div>
+        <div class="di-item">
+          <div class="di-item-title">Conservative growth guidance</div>
+          <div class="di-item-text">Loan growth guided 10–11%, delivered 13.6%. Beats without compromising risk.</div>
+          <div class="di-item-evidence">FY26 vs Q4 FY25 guidance</div>
+        </div>
+        <div class="di-item">
+          <div class="di-item-title">Smart capital allocation</div>
+          <div class="di-item-text">No equity dilution since FY22. Oct '25 OFS in Canara HSBC Life &amp; Robeco unlocked CET1 at IPO multiples.</div>
+          <div class="di-item-evidence">OFS · Oct 2025</div>
+        </div>
+        <div class="di-item">
+          <div class="di-item-title">Steady ROA compounding</div>
+          <div class="di-item-text">ROA 0.82% (FY23) → 1.13% (9MFY26). Self-funded via internal accruals + AT1 / Tier-2 bonds.</div>
+          <div class="di-item-evidence">India Ratings · Feb 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="di-col blue">
+      <div class="di-col-head">
+        <span class="pip"></span>
+        <span class="di-col-title">⚪ Current focus</span>
+        <span class="di-col-count">04</span>
+      </div>
+      <div class="di-list">
+        <div class="di-item">
+          <div class="di-item-title">RAM-led mix shift</div>
+          <div class="di-item-text">Walking away from low-yield corporate. RAM +18.7% YoY; retail +31.4%, vehicle +26.2%.</div>
+          <div class="di-item-evidence">Q3 FY26 concall</div>
+        </div>
+        <div class="di-item">
+          <div class="di-item-title">Protect NIM at 2.45–2.50%</div>
+          <div class="di-item-text">"Major priority." Targeting CASA recovery + selective loan pricing.</div>
+          <div class="di-item-evidence">Post-Q3 FY26 analyst call</div>
+        </div>
+        <div class="di-item">
+          <div class="di-item-title">Deposit cost reduction</div>
+          <div class="di-item-text">Cost of deposits 5.62%; expects further cooling. Growth target moderated to 9–10%.</div>
+          <div class="di-item-evidence">Q3 FY26 commentary</div>
+        </div>
+        <div class="di-item">
+          <div class="di-item-title">CET1 buffer build</div>
+          <div class="di-item-text">CET1 12.37% (vs FY25: 12.0%). Building via internal accruals; QIP under evaluation.</div>
+          <div class="di-item-evidence">Q4 FY25 board guidance</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="di-col red">
+      <div class="di-col-head">
+        <span class="pip"></span>
+        <span class="di-col-title">🔴 Red flags</span>
+        <span class="di-col-count">04</span>
+      </div>
+      <div class="di-list">
+        <div class="di-item">
+          <div class="di-item-title">NIM guidance walked down 2×</div>
+          <div class="di-item-text">2.90–3.00% → 2.75–2.80% → 2.45–2.50% in 12 months. Each reset only after prior floor breached.</div>
+          <div class="di-item-evidence">Q3 FY25 → Q3 FY26 transcripts</div>
+        </div>
+        <div class="di-item">
+          <div class="di-item-title">Cyclical ROA flattery</div>
+          <div class="di-item-text">~52% of non-interest income is treasury (30%) + recovery (22%). Underlying operating ROA ~0.85–0.90%.</div>
+          <div class="di-item-evidence">9MFY26 income mix</div>
+        </div>
+        <div class="di-item">
+          <div class="di-item-title">No retail vintage cohort data</div>
+          <div class="di-item-text">Retail +31% YoY for 2 years. ICRA flags book seasoning as "monitorable." Biggest disclosure gap.</div>
+          <div class="di-item-evidence">ICRA · Oct 2025</div>
+        </div>
+        <div class="di-item">
+          <div class="di-item-title">Reactive corporate-stress disclosure</div>
+          <div class="di-item-text">BGR Energy ₹560 cr — surfaced only in Q&amp;A, not opening remarks.</div>
+          <div class="di-item-evidence">Q3 FY26 concall Q&amp;A</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- WATCHLIST 3x2 GRID -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <h3>Next concall watchlist · Q4 FY26</h3>
+        <div class="subhead">Each item is specific and falsifiable</div>
+      </div>
+      <span class="count">06 items</span>
+    </div>
+    <div class="wl-grid">
+      <div class="wl-card">
+        <div class="wl-card-num">01</div>
+        <div class="wl-card-q">Will revised NIM guidance of 2.45–2.50% hold for two consecutive quarters?</div>
+        <div class="wl-card-signals">
+          <div class="wl-sig green"><span class="ic">✅</span><span>Q4 NIM ≥ 2.45% + stable cost of deposits.</span></div>
+          <div class="wl-sig red"><span class="ic">🔴</span><span>Guidance reset to 2.30–2.40% or floor breached again.</span></div>
+        </div>
+      </div>
+      <div class="wl-card">
+        <div class="wl-card-num">02</div>
+        <div class="wl-card-q">Does management publish retail vintage cohort data for the 31% YoY book?</div>
+        <div class="wl-card-signals">
+          <div class="wl-sig green"><span class="ic">✅</span><span>Retail GNPA by origination vintage in IR deck.</span></div>
+          <div class="wl-sig red"><span class="ic">🔴</span><span>SMA-1/2 still described as "negligible" without numbers.</span></div>
+        </div>
+      </div>
+      <div class="wl-card">
+        <div class="wl-card-num">03</div>
+        <div class="wl-card-q">Does underlying ROA hold when stripped of treasury and recovery income?</div>
+        <div class="wl-card-signals">
+          <div class="wl-sig green"><span class="ic">✅</span><span><abbr title="Net Interest Income">NII</abbr> grows ≥10% YoY in Q4; treasury contribution ↓.</span></div>
+          <div class="wl-sig red"><span class="ic">🔴</span><span>NII flat or negative; ROA held only by trading + recovery.</span></div>
+        </div>
+      </div>
+      <div class="wl-card">
+        <div class="wl-card-num">04</div>
+        <div class="wl-card-q">Will CET1 buffer rebuild toward peer PSB range of 13–14%?</div>
+        <div class="wl-card-signals">
+          <div class="wl-sig green"><span class="ic">✅</span><span>CET1 reaches 12.6%+ via accruals; FY27 trajectory shared.</span></div>
+          <div class="wl-sig red"><span class="ic">🔴</span><span>QIP revived without strong RoE-accretive use of proceeds.</span></div>
+        </div>
+      </div>
+      <div class="wl-card">
+        <div class="wl-card-num">05</div>
+        <div class="wl-card-q">Does RAM mix-shift translate to actual yield on advances?</div>
+        <div class="wl-card-signals">
+          <div class="wl-sig green"><span class="ic">✅</span><span>Yield on advances rises QoQ from 8.34% even as repo eases.</span></div>
+          <div class="wl-sig red"><span class="ic">🔴</span><span>Yield falls below 8.20% despite RAM tilt — pricing power absent.</span></div>
+        </div>
+      </div>
+      <div class="wl-card">
+        <div class="wl-card-num">06</div>
+        <div class="wl-card-q">Does management proactively disclose corporate-stress events (BGR-type)?</div>
+        <div class="wl-card-signals">
+          <div class="wl-sig green"><span class="ic">✅</span><span>Corporate slippage flagged in opening remarks with provision plan.</span></div>
+          <div class="wl-sig red"><span class="ic">🔴</span><span>Material exposure surfaces only in Q&amp;A or post-call BSE filings.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= SECTION 1 — GUIDANCE TRACK RECORD ============= -->
+  <div class="sec-head">
+    <span class="label">Section 1 · 22/40</span>
+    <h2>Guidance track record</h2>
+    <div class="spacer"></div>
+    <span class="pill pill-amber"><span class="dot"></span>Hit rate 4 / 7</span>
+  </div>
+
+  <!-- Stat blocks -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <h3>Headline metrics</h3>
+        <div class="subhead">NIM &amp; slippage tracked at 2× weight (NBFC/Bank mode)</div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-cell green">
+        <div class="stat-lbl">✅ Hit rate</div>
+        <div class="stat-val">4 / 7</div>
+        <div class="stat-desc"><abbr title="Gross Non-Performing Assets — total bad loans as % of book">GNPA</abbr>, <abbr title="Net NPA — bad loans after provisions deducted">NNPA</abbr> &amp; loan growth: beat. <abbr title="Net Interest Margin — spread between loan yield and deposit cost">NIM</abbr> &amp; <abbr title="Current + Savings Accounts — low-cost funding source">CASA</abbr>: missed.</div>
+      </div>
+      <div class="stat-cell amber">
+        <div class="stat-lbl">🔴 Major miss</div>
+        <div class="stat-val">NIM −12%</div>
+        <div class="stat-desc">Guided 2.75–2.80%; delivered 2.45% (9MFY26). Reset down to 2.45–2.50%.</div>
+      </div>
+      <div class="stat-cell blue">
+        <div class="stat-lbl">⚪ Guidance bias</div>
+        <div class="stat-val">Mixed</div>
+        <div class="stat-desc">Conservative on credit. Aggressive on margin. NIM walked down twice in 12 months.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guidance vs Actuals — TIMELINE -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <h3>Guidance vs actuals · timeline</h3>
+        <div class="subhead">Each row: forecast → reality → delta</div>
+      </div>
+      <span class="count">7 entries</span>
+    </div>
+    <div class="timeline">
+      <div class="tl-row">
+        <div class="tl-period">Q3 FY25</div>
+        <div class="tl-metric">NIM (FY25 exit)<span class="driver">Penal interest reclassified + deposit repricing</span></div>
+        <div class="tl-num"><span class="lbl">Guided</span>2.90–3.00%</div>
+        <div class="tl-num"><span class="lbl">Actual</span>2.80%</div>
+        <div class="tl-delta neg">−3.4%</div>
+        <div class="tl-sev green">🟢 Minor</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Q4 FY25</div>
+        <div class="tl-metric">NIM (FY26)<span class="driver">44% <abbr title="External Benchmark Lending Rate — repo-linked floating rate loans">EBLR</abbr>-linked book repriced down + CASA dilution</span></div>
+        <div class="tl-num"><span class="lbl">Guided</span>2.75–2.80%</div>
+        <div class="tl-num"><span class="lbl">Actual</span>2.45% (9M)</div>
+        <div class="tl-delta neg">−10.9%</div>
+        <div class="tl-sev amber">🟡 Mediocre</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Q3 FY26</div>
+        <div class="tl-metric">NIM (revised)<span class="driver">Prior floor breach unacknowledged; guidance reset −30 bps</span></div>
+        <div class="tl-num"><span class="lbl">Guided</span>2.45–2.50%</div>
+        <div class="tl-num"><span class="lbl">Actual</span>2.45% (Q3)</div>
+        <div class="tl-delta flat">flat</div>
+        <div class="tl-sev gray">🔁 Rolled fwd</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Q4 FY25</div>
+        <div class="tl-metric">Loan growth (FY26)<span class="driver"><abbr title="Retail, Agriculture, MSME — higher-yield loan segments">RAM</abbr>-led; retail +31.4%, vehicle +26.2%, housing +17.6%</span></div>
+        <div class="tl-num"><span class="lbl">Guided</span>10–11%</div>
+        <div class="tl-num"><span class="lbl">Actual</span>13.59%</div>
+        <div class="tl-delta pos">+23.5%</div>
+        <div class="tl-sev green">✅ Beat</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Q4 FY25</div>
+        <div class="tl-metric">GNPA (FY26 exit)<span class="driver">Low slippage + recoveries; 1 quarter ahead of schedule</span></div>
+        <div class="tl-num"><span class="lbl">Guided</span>2.50%</div>
+        <div class="tl-num"><span class="lbl">Actual</span>2.08% (Q3)</div>
+        <div class="tl-delta pos">+16.8%</div>
+        <div class="tl-sev green">✅ Beat early</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Q4 FY25</div>
+        <div class="tl-metric">NNPA (FY26 exit)<span class="driver"><abbr title="Provision Coverage Ratio — loan-loss reserves as % of bad loans">PCR</abbr> 94%+; net stress shrank materially</span></div>
+        <div class="tl-num"><span class="lbl">Guided</span>0.60%</div>
+        <div class="tl-num"><span class="lbl">Actual</span>0.45% (Q3)</div>
+        <div class="tl-delta pos">+25.0%</div>
+        <div class="tl-sev green">✅ Beat early</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Q4 FY25</div>
+        <div class="tl-metric">Deposit growth (FY26)<span class="driver">Higher TD pricing → cost of deposits ↑ 5.62% → NIM miss</span></div>
+        <div class="tl-num"><span class="lbl">Guided</span>~9%</div>
+        <div class="tl-num"><span class="lbl">Actual</span>12.95%</div>
+        <div class="tl-delta pos">+43.9%</div>
+        <div class="tl-sev amber">⚠ Beat (costly)</div>
+      </div>
+    </div>
+    <div class="insight-grid">
+      <div class="insight red">
+        <div class="insight-title"><span class="insight-icon">🔴</span>Credit risk → owned</div>
+        <div class="insight-text">Asset-quality targets beaten consistently, 1 quarter early.</div>
+      </div>
+      <div class="insight amber">
+        <div class="insight-title"><span class="insight-icon">🟡</span>Margin risk → deflected</div>
+        <div class="insight-text">NIM 2.90 → 2.80 → 2.45–2.50% across 3 concalls; each reset post-breach.</div>
+      </div>
+      <div class="insight blue">
+        <div class="insight-title"><span class="insight-icon">⚪</span>Deposit beat is double-edged</div>
+        <div class="insight-text">Higher TD rates bought growth — directly caused NIM miss.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promoter / GoI -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <h3>Promoter activity · Government of India</h3>
+        <div class="subhead">No pledge applies — capital-raise discipline &amp; stake monetisation are the signals</div>
+      </div>
+    </div>
+    <div class="timeline">
+      <div class="prom-row">
+        <div class="prom-period">Mar 2026</div>
+        <div class="prom-stake">62.93%</div>
+        <div class="prom-pledge">0.00% pledge</div>
+        <div class="prom-change flat">flat</div>
+        <div class="prom-signal"><span class="pill gray">⚪</span>Stable, no encumbrance</div>
+      </div>
+      <div class="prom-row">
+        <div class="prom-period">Dec 2025</div>
+        <div class="prom-stake">62.93%</div>
+        <div class="prom-pledge">0.00% pledge</div>
+        <div class="prom-change flat">flat</div>
+        <div class="prom-signal"><span class="pill green">✅</span>Subsidiary monetisation in <abbr title="Offer for Sale — existing shares sold; no new equity issued">OFS</abbr></div>
+      </div>
+      <div class="prom-row">
+        <div class="prom-period">Sep–Jun 2025</div>
+        <div class="prom-stake">62.93%</div>
+        <div class="prom-pledge">0.00% pledge</div>
+        <div class="prom-change flat">flat</div>
+        <div class="prom-signal"><span class="pill gray">⚪</span>No new equity issued</div>
+      </div>
+      <div class="prom-row">
+        <div class="prom-period">FY21 / FY22</div>
+        <div class="prom-stake">69.33% → ~63%</div>
+        <div class="prom-pledge">—</div>
+        <div class="prom-change neg">−6 pp</div>
+        <div class="prom-signal"><span class="pill amber">🟡</span><abbr title="Qualified Institutional Placement — equity raise from institutional investors">QIP</abbr>s ₹4,500 cr — last equity dilution</div>
+      </div>
+    </div>
+    <div class="insight-grid">
+      <div class="insight green">
+        <div class="insight-title"><span class="insight-icon">✅</span>No equity dilution since FY22</div>
+        <div class="insight-text">Growth self-funded via internal accruals + AT1 / Tier-2 bonds.</div>
+      </div>
+      <div class="insight green">
+        <div class="insight-title"><span class="insight-icon">✅</span>Oct '25 OFS — smart monetisation</div>
+        <div class="insight-text">Canara HSBC Life (15.5%) + Robeco AMC (13%) sold at rich multiples → unlocked CET1.</div>
+      </div>
+      <div class="insight amber">
+        <div class="insight-title"><span class="insight-icon">🟡</span>CET1 12.37% — thinner than peers</div>
+        <div class="insight-text">Below PSB peer band of 13–14%; limits shock absorption.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= SECTION 2 — DISCLOSURE HONESTY ============= -->
+  <div class="sec-head">
+    <span class="label">Section 2 · 15/25</span>
+    <h2>Disclosure honesty</h2>
+    <div class="spacer"></div>
+    <span class="pill pill-red"><span class="dot"></span>Reactive — discloses when pressed</span>
+  </div>
+
+  <div class="tile-grid">
+    <div class="tile">
+      <div class="tile-top">
+        <div class="tile-icon-wrap">
+          <div class="tile-icon amber">BN</div>
+          <div>
+            <div class="tile-name">Bad news disclosure</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">NIM resets reactive; corporate stress only when asked</div>
+          </div>
+        </div>
+        <span class="tile-tag amber">🟡 Reactive</span>
+      </div>
+      <div class="tile-score-row">
+        <div class="tile-score-val">5/8</div>
+        <div class="tile-score-bar"><div class="tile-score-fill amber" style="width:62.5%"></div></div>
+      </div>
+      <div class="tile-points">
+        <div class="tile-point"><span class="ic">✅</span><span><strong>Asset-quality bad news</strong> — proactive &amp; quantitative.</span></div>
+        <div class="tile-point"><span class="ic">🟡</span><span><strong>NIM bad news</strong> — guidance reset only after Q1 + Q2 FY26 misses, no acknowledgement.</span></div>
+        <div class="tile-point"><span class="ic">🔴</span><span><strong>BGR Energy ₹560 cr</strong> — surfaced only in Q&amp;A.</span></div>
+      </div>
+      <div class="tile-flag amber">
+        <span>⚠</span>
+        <div><strong>Amber — reactive margin pattern</strong>Investors had to read across 3 transcripts to reconstruct full NIM trajectory.</div>
+      </div>
+    </div>
+
+    <div class="tile">
+      <div class="tile-top">
+        <div class="tile-icon-wrap">
+          <div class="tile-icon amber">NC</div>
+          <div>
+            <div class="tile-name">Narrative consistency</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">Mid-pivot from "corporate-led" to "RAM-led"</div>
+          </div>
+        </div>
+        <span class="tile-tag amber">🟡 Undisclosed pivot</span>
+      </div>
+      <div class="tile-score-row">
+        <div class="tile-score-val">4/7</div>
+        <div class="tile-score-bar"><div class="tile-score-fill amber" style="width:57%"></div></div>
+      </div>
+      <div class="tile-points">
+        <div class="tile-point"><span class="ic">✅</span><span><strong>Asset-quality + digital narrative</strong> — stable 6+ quarters.</span></div>
+        <div class="tile-point"><span class="ic">🟡</span><span><strong>Growth-mix narrative</strong> — silent pivot from ₹50–55k cr corporate target to "walking away."</span></div>
+        <div class="tile-point"><span class="ic">⚪</span><span><strong>FY27 test</strong> — watch if corporate book growth actually decelerates.</span></div>
+      </div>
+      <div class="tile-flag amber">
+        <span>⚠</span>
+        <div><strong>Amber — strategy correction framed as continuity</strong>Mix-shift is sound; lack of acknowledgement is the concern.</div>
+      </div>
+    </div>
+
+    <div class="tile">
+      <div class="tile-top">
+        <div class="tile-icon-wrap">
+          <div class="tile-icon red">TD</div>
+          <div>
+            <div class="tile-name">Transparency depth</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">No vintage cohort data on 31% YoY retail growth</div>
+          </div>
+        </div>
+        <span class="tile-tag red">🔴 Biggest gap</span>
+      </div>
+      <div class="tile-score-row">
+        <div class="tile-score-val">2/5</div>
+        <div class="tile-score-bar"><div class="tile-score-fill red" style="width:40%"></div></div>
+      </div>
+      <div class="tile-points">
+        <div class="tile-point"><span class="ic">✅</span><span><strong>Segment splits &amp; yield</strong> — disclosed quarterly.</span></div>
+        <div class="tile-point"><span class="ic">🔴</span><span><strong>Vintage cohort data</strong> — absent. Retail +31.4% YoY; ICRA flagged seasoning as "monitorable."</span></div>
+        <div class="tile-point"><span class="ic">🟡</span><span><strong><abbr title="Special Mention Account — early stress, 1–90 days overdue">SMA</abbr>-1/2 + restructured</strong> — described as "negligible," not quantified.</span></div>
+        <div class="tile-point"><span class="ic">🟡</span><span><strong>Stage 2/3 <abbr title="Expected Credit Loss — forward-looking provisioning">ECL</abbr></strong> — regulatory minimum only.</span></div>
+      </div>
+      <div class="tile-flag red">
+        <span>🔴</span>
+        <div><strong>Red — vintage data gap on fastest-growing book</strong>Market cannot price seasoning risk on retail +31% for 2 years.</div>
+      </div>
+    </div>
+
+    <div class="tile">
+      <div class="tile-top">
+        <div class="tile-icon-wrap">
+          <div class="tile-icon green">GV</div>
+          <div>
+            <div class="tile-name">Governance signals</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">Clean audit, zero pledge, no RBI divergence</div>
+          </div>
+        </div>
+        <span class="tile-tag green">✅ Clean</span>
+      </div>
+      <div class="tile-score-row">
+        <div class="tile-score-val">4/5</div>
+        <div class="tile-score-bar"><div class="tile-score-fill green" style="width:80%"></div></div>
+      </div>
+      <div class="tile-points">
+        <div class="tile-point"><span class="ic">✅</span><span><strong>No RBI divergence</strong> on asset classification across the period.</span></div>
+        <div class="tile-point"><span class="ic">✅</span><span><strong>GoI 62.93% with zero encumbrance</strong> — no RPT concerns.</span></div>
+        <div class="tile-point"><span class="ic">✅</span><span><strong>Concalls within SEBI 48-hr <abbr title="Listing Obligations and Disclosure Requirements">LODR</abbr> window</strong>; transcripts self-published.</span></div>
+        <div class="tile-point"><span class="ic">⚪</span><span><strong>CET1 12.37%</strong> — adequate but below peer PSBs.</span></div>
+      </div>
+      <div class="tile-flag gray">
+        <span>⚪</span>
+        <div><strong>Gray watch — CET1 thinner than peers</strong>Not a credibility issue; constrains downturn optionality.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quote callout -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <h3>Disclosure evidence · in their own words</h3>
+        <div class="subhead">Q3 FY25 concall · MD &amp; CEO K. Satyanarayana Raju</div>
+      </div>
+    </div>
+    <div style="padding-top:16px"></div>
+    <div class="callout">
+      "There is a pressure. Last time also I shared… we are expecting NIM will be between 2.9 to 3.0. But we are trying our best…"
+      <div class="callout-source">— Q3 FY25 concall · FY25 NIM ultimately printed 2.80%</div>
+    </div>
+    <div class="insight-grid" style="padding-top:0">
+      <div class="insight green">
+        <div class="insight-title"><span class="insight-icon">✅</span>Asset-quality story</div>
+        <div class="insight-text">Honestly told, data validates. Weight remarks at face value.</div>
+      </div>
+      <div class="insight amber">
+        <div class="insight-title"><span class="insight-icon">🟡</span>Margin story</div>
+        <div class="insight-text">Defensive, quiet guidance resets. Weight Q&amp;A over opening remarks.</div>
+      </div>
+      <div class="insight red">
+        <div class="insight-title"><span class="insight-icon">🔴</span>Retail book disclosure</div>
+        <div class="insight-text">Demand vintage cohort data before extrapolating GNPA trends forward.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= SECTION 3 — CAPITAL ALLOCATION ============= -->
+  <div class="sec-head">
+    <span class="label">Section 3 · 23/35</span>
+    <h2>Capital allocation</h2>
+    <div class="spacer"></div>
+    <span class="pill pill-green"><span class="dot"></span>Reinvestment in core business · No M&amp;A</span>
+  </div>
+
+  <div class="tile-grid">
+    <div class="tile">
+      <div class="tile-top">
+        <div class="tile-icon-wrap">
+          <div class="tile-icon green">RQ</div>
+          <div>
+            <div class="tile-name">Reinvestment quality</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">RAM-led; walking away from low-yield corporate</div>
+          </div>
+        </div>
+        <span class="tile-tag amber">🟡 Retail concentration</span>
+      </div>
+      <div class="tile-score-row">
+        <div class="tile-score-val">7/10</div>
+        <div class="tile-score-bar"><div class="tile-score-fill green" style="width:70%"></div></div>
+      </div>
+      <div class="tile-points">
+        <div class="tile-point"><span class="ic">✅</span><span><strong>Direction correct</strong> — RAM +18.7% YoY; retail +31.4%, vehicle +26.2%, housing +17.6%.</span></div>
+        <div class="tile-point"><span class="ic">✅</span><span><strong>Low-yield corporate</strong> — actively exited.</span></div>
+        <div class="tile-point"><span class="ic">🟡</span><span><strong>Execution risk</strong> — retail doubled in 2 years; credit cost won't surface for 6–8 quarters.</span></div>
+      </div>
+      <div class="tile-flag amber">
+        <span>⚠</span>
+        <div><strong>Amber — retail concentration without vintage disclosure</strong>Market takes credit-cost trajectory on faith.</div>
+      </div>
+    </div>
+
+    <div class="tile">
+      <div class="tile-top">
+        <div class="tile-icon-wrap">
+          <div class="tile-icon amber">SR</div>
+          <div>
+            <div class="tile-name">Shareholder returns logic</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">Steady ~20% payout; consistent but not FCF-linked</div>
+          </div>
+        </div>
+        <span class="tile-tag gray">⚪ No FCF rule</span>
+      </div>
+      <div class="tile-score-row">
+        <div class="tile-score-val">3/5</div>
+        <div class="tile-score-bar"><div class="tile-score-fill amber" style="width:60%"></div></div>
+      </div>
+      <div class="tile-points">
+        <div class="tile-point"><span class="ic">✅</span><span><strong>Payout policy 20–21% of <abbr title="Profit After Tax">PAT</abbr></strong> — explicit, predictable across cycles.</span></div>
+        <div class="tile-point"><span class="ic">⚪</span><span><strong>Anchored to PSU norms</strong>, not <abbr title="Capital to Risk-weighted Assets Ratio">CRAR</abbr> trajectory or FCF coverage.</span></div>
+        <div class="tile-point"><span class="ic">🟡</span><span><strong>No buyback optionality</strong> — excess capital cannot be returned.</span></div>
+      </div>
+      <div class="tile-flag gray">
+        <span>⚪</span>
+        <div><strong>Gray watch — no capital-trigger framework</strong>Caps return upside in years where ROA surprises positively.</div>
+      </div>
+    </div>
+
+    <div class="tile">
+      <div class="tile-top">
+        <div class="tile-icon-wrap">
+          <div class="tile-icon green">MA</div>
+          <div>
+            <div class="tile-name">M&amp;A discipline</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">Syndicate digested; smart subsidiary OFS at peak</div>
+          </div>
+        </div>
+        <span class="tile-tag green">✅ Disciplined</span>
+      </div>
+      <div class="tile-score-row">
+        <div class="tile-score-val">8/10</div>
+        <div class="tile-score-bar"><div class="tile-score-fill green" style="width:80%"></div></div>
+      </div>
+      <div class="tile-points">
+        <div class="tile-point"><span class="ic">✅</span><span><strong>No greenfield M&amp;A</strong> — Syndicate Bank merger fully integrated, no goodwill impairment.</span></div>
+        <div class="tile-point"><span class="ic">✅</span><span><strong>Oct '25 textbook monetisation</strong> — Canara HSBC Life (15.5%) + Robeco AMC (13%) at IPO multiples.</span></div>
+        <div class="tile-point"><span class="ic">⚪</span><span><strong>Subsidiaries → associates</strong> reclassified; no common equity dilution.</span></div>
+      </div>
+      <div class="tile-flag gray">
+        <span>⚪</span>
+        <div><strong>Gray watch — one-time gains in Q3 PAT</strong>Cleaner reporting would separate stake-sale gains from operating ROA.</div>
+      </div>
+    </div>
+
+    <div class="tile">
+      <div class="tile-top">
+        <div class="tile-icon-wrap">
+          <div class="tile-icon amber">CE</div>
+          <div>
+            <div class="tile-name">Capital efficiency trend</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">ROA ↑ 0.82% → 1.13%; partly cyclical</div>
+          </div>
+        </div>
+        <span class="tile-tag amber">🟡 Cyclical flattery</span>
+      </div>
+      <div class="tile-score-row">
+        <div class="tile-score-val">5/10</div>
+        <div class="tile-score-bar"><div class="tile-score-fill amber" style="width:50%"></div></div>
+      </div>
+      <div class="tile-points">
+        <div class="tile-point"><span class="ic">✅</span><span><strong>ROA trajectory up every year</strong> — 0.82 → 1.00 → 1.10 → 1.13%.</span></div>
+        <div class="tile-point"><span class="ic">✅</span><span><strong>ROE ~17%</strong> — best-in-class for PSU bank.</span></div>
+        <div class="tile-point"><span class="ic">🟡</span><span><strong>~52% of non-interest income is cyclical</strong> — treasury 30% + recovery 22%.</span></div>
+        <div class="tile-point"><span class="ic">🔴</span><span><strong>Underlying operating ROA ~0.85–0.90%</strong> when stripped of cyclicals.</span></div>
+      </div>
+      <div class="tile-flag amber">
+        <span>⚠</span>
+        <div><strong>Amber — cyclical flattery on ROA</strong>Treasury gains compress when rate cycle reverses.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Capital allocation quote -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <h3>Capital allocation · in their own words</h3>
+        <div class="subhead">Post-Q3 FY26 analyst call · Jan 2026</div>
+      </div>
+    </div>
+    <div style="padding-top:16px"></div>
+    <div class="callout">
+      "See no reason to entertain low-yielding advances. Aim for deposits to grow at 9–10% going ahead."
+      <div class="callout-source">— Management · post-Q3 FY26 analyst call</div>
+    </div>
+    <div class="insight-grid" style="padding-top:0">
+      <div class="insight green">
+        <div class="insight-title"><span class="insight-icon">✅</span>Cleanest capital allocation</div>
+        <div class="insight-text">No M&amp;A, no equity dilution since FY22, smart subsidiary monetisation.</div>
+      </div>
+      <div class="insight amber">
+        <div class="insight-title"><span class="insight-icon">🟡</span>Quality caveat</div>
+        <div class="insight-text">Treasury + recovery flatter headline ROA. Spread engine structurally squeezed.</div>
+      </div>
+      <div class="insight blue">
+        <div class="insight-title"><span class="insight-icon">⚪</span>Net read</div>
+        <div class="insight-text">Allocating well; addressable profit pool shrinking on the margin side.</div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="footnote">
+    <strong>Sources.</strong> Canara Bank Q3 FY25 / Q4 FY25 / Q3 FY26 concall transcripts; Q3 FY26 results press release (Jan 2026); India Ratings (Feb 2026); ICRA (Oct 2025); BSE/NSE filings (Mar 2026); Canara HSBC Life &amp; Canara Robeco AMC OFS filings (Oct 2025). <strong>Scoring.</strong> MFA NBFC/Bank mode — NIM &amp; slippage 2× weight; Stage 2/3 disclosure quality emphasised; CRAR trajectory weighted above dividends.
+  </div>
+</div>
+</body>
+</html>

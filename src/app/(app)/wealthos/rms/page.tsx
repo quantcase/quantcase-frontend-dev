@@ -41,7 +41,7 @@ function RMRow({
       className="group flex items-center gap-4 cursor-pointer transition-all duration-150"
       style={{
         padding: "10px 16px",
-        borderBottom: "1px solid var(--qc-border-default)",
+        borderBottom: "1px solid var(--qc-hair)",
         background: isSelected ? "rgba(200,245,105,0.07)" : "transparent",
         borderLeft: isSelected ? "2px solid #a8e63d" : "2px solid transparent",
       }}
@@ -51,7 +51,7 @@ function RMRow({
         style={{
           fontSize: 10,
           fontFamily: "var(--font-ibm-plex-mono, monospace)",
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           width: 20,
           flexShrink: 0,
           textAlign: "right",
@@ -68,12 +68,12 @@ function RMRow({
           height: 32,
           borderRadius: "50%",
           background: isSelected
-            ? "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)"
-            : "var(--qc-surface-panel)",
-          border: "1px solid var(--qc-border-default)",
+            ? "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)"
+            : "var(--qc-section)",
+          border: "1px solid var(--qc-hair)",
           fontSize: 11,
           fontWeight: 700,
-          color: isSelected ? "rgba(255,255,255,0.95)" : "var(--qc-text-heading)",
+          color: isSelected ? "rgba(255,255,255,0.95)" : "var(--qc-ink)",
           letterSpacing: "0.02em",
         }}
       >
@@ -89,14 +89,14 @@ function RMRow({
       <div className="flex-1 min-w-0">
         <div
           className="truncate"
-          style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}
+          style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}
         >
           {rm.name}
         </div>
         {rm.team && (
           <div
             className="truncate"
-            style={{ fontSize: 10, color: "var(--qc-text-muted)", marginTop: 1 }}
+            style={{ fontSize: 10, color: "var(--qc-ink-2)", marginTop: 1 }}
           >
             {rm.team}
           </div>
@@ -110,12 +110,12 @@ function RMRow({
             fontSize: 13,
             fontWeight: 700,
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
-            color: "var(--qc-text-heading)",
+            color: "var(--qc-ink)",
           }}
         >
           {clientCount}
         </span>
-        <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase" }}>
           clients
         </span>
       </div>
@@ -132,7 +132,7 @@ function RMRow({
         >
           {score.toFixed(1)}
         </span>
-        <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase" }}>
           score
         </span>
       </div>
@@ -141,7 +141,7 @@ function RMRow({
       <ChevronRight
         className="size-3.5 transition-opacity shrink-0"
         style={{
-          color: isSelected ? "#a8e63d" : "var(--qc-text-muted)",
+          color: isSelected ? "#a8e63d" : "var(--qc-ink-2)",
           opacity: isSelected ? 1 : 0,
         }}
       />
@@ -163,14 +163,14 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
       className="group flex items-center gap-3 transition-all duration-150 cursor-pointer"
       style={{
         padding: "8px 16px",
-        borderBottom: "1px solid var(--qc-border-default)",
+        borderBottom: "1px solid var(--qc-hair)",
       }}
     >
       <span
         style={{
           fontSize: 10,
           fontFamily: "var(--font-ibm-plex-mono, monospace)",
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           width: 18,
           flexShrink: 0,
           textAlign: "right",
@@ -185,11 +185,11 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
           width: 26,
           height: 26,
           borderRadius: "50%",
-          background: "var(--qc-surface-panel)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-section)",
+          border: "1px solid var(--qc-hair)",
           fontSize: 9,
           fontWeight: 700,
-          color: "var(--qc-text-heading)",
+          color: "var(--qc-ink)",
         }}
       >
         {client.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
@@ -199,13 +199,13 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
         <div className="flex items-center gap-1.5">
           <span
             className="truncate"
-            style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}
+            style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}
           >
             {client.name}
           </span>
           <SegmentBadge segment={client.segment} />
         </div>
-        <div style={{ fontSize: 10, color: "var(--qc-text-muted)", marginTop: 1 }}>
+        <div style={{ fontSize: 10, color: "var(--qc-ink-2)", marginTop: 1 }}>
           {client.risk_profile}
         </div>
       </div>
@@ -221,7 +221,7 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
         >
           {(client.churn_probability * 100).toFixed(0)}%
         </span>
-        <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase" }}>
           churn
         </span>
       </div>
@@ -232,19 +232,19 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
             fontSize: 12,
             fontWeight: 700,
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
-            color: "var(--qc-text-heading)",
+            color: "var(--qc-ink)",
           }}
         >
           {client.engagement_score}
         </span>
-        <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase" }}>
           eng
         </span>
       </div>
 
       <ArrowRight
         className="size-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-        style={{ color: "var(--qc-text-muted)" }}
+        style={{ color: "var(--qc-ink-2)" }}
       />
     </div>
   );
@@ -266,8 +266,8 @@ function StatPill({
       style={{
         padding: "10px 14px",
         borderRadius: 10,
-        background: "var(--qc-surface-panel)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-section)",
+        border: "1px solid var(--qc-hair)",
         flex: 1,
         minWidth: 0,
       }}
@@ -275,7 +275,7 @@ function StatPill({
       <span
         style={{
           fontSize: 9,
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           textTransform: "uppercase",
           letterSpacing: "0.06em",
         }}
@@ -287,7 +287,7 @@ function StatPill({
           fontSize: 16,
           fontWeight: 700,
           fontFamily: "var(--font-ibm-plex-mono, monospace)",
-          color: color ?? "var(--qc-text-heading)",
+          color: color ?? "var(--qc-ink)",
           letterSpacing: "-0.02em",
         }}
       >
@@ -322,7 +322,7 @@ function RightPanel({
       <div
         className="rounded-[14px] overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
+          background: "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)",
           padding: "20px 18px 16px",
         }}
       >
@@ -387,15 +387,15 @@ function RightPanel({
         <div
           className="rounded-[14px]"
           style={{
-            background: "var(--qc-surface-card)",
-            border: "1px solid var(--qc-border-default)",
+            background: "var(--qc-card)",
+            border: "1px solid var(--qc-hair)",
             padding: "14px 16px",
           }}
         >
           <p
             style={{
               fontSize: 9,
-              color: "var(--qc-text-muted)",
+              color: "var(--qc-ink-2)",
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               marginBottom: 10,
@@ -410,7 +410,7 @@ function RightPanel({
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
+                background: "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)",
                 fontSize: 12,
                 fontWeight: 700,
                 color: "rgba(255,255,255,0.95)",
@@ -424,11 +424,11 @@ function RightPanel({
                 .toUpperCase()}
             </div>
             <div>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>
                 {topRM.name}
               </p>
               {topRM.team && (
-                <p style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>{topRM.team}</p>
+                <p style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{topRM.team}</p>
               )}
             </div>
           </div>
@@ -448,15 +448,15 @@ function RightPanel({
         <div
           className="rounded-[14px]"
           style={{
-            background: "var(--qc-surface-card)",
-            border: "1px solid var(--qc-border-default)",
+            background: "var(--qc-card)",
+            border: "1px solid var(--qc-hair)",
             padding: "14px 16px",
           }}
         >
           <p
             style={{
               fontSize: 9,
-              color: "var(--qc-text-muted)",
+              color: "var(--qc-ink-2)",
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               marginBottom: 10,
@@ -470,7 +470,7 @@ function RightPanel({
                 <div
                   key={i}
                   className="h-12 rounded-[10px] animate-pulse"
-                  style={{ background: "var(--qc-surface-panel)" }}
+                  style={{ background: "var(--qc-section)" }}
                 />
               ))}
             </div>
@@ -491,7 +491,7 @@ function RightPanel({
                 <StatPill
                   label="Avg Eng"
                   value={analytics.avg_engagement_score.toFixed(1)}
-                  color="var(--qc-text-heading)"
+                  color="var(--qc-ink)"
                 />
               </div>
               <div className="flex gap-2">
@@ -522,15 +522,15 @@ function RightPanel({
       <div
         className="rounded-[14px]"
         style={{
-          background: "var(--qc-surface-card)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           padding: "14px 16px",
         }}
       >
         <p
           style={{
             fontSize: 9,
-            color: "var(--qc-text-muted)",
+            color: "var(--qc-ink-2)",
             textTransform: "uppercase",
             letterSpacing: "0.08em",
             marginBottom: 10,
@@ -550,13 +550,13 @@ function RightPanel({
               className="flex flex-col items-center gap-1.5 rounded-[10px] transition-all"
               style={{
                 padding: "10px 8px",
-                background: "var(--qc-surface-panel)",
-                border: "1px solid var(--qc-border-default)",
+                background: "var(--qc-section)",
+                border: "1px solid var(--qc-hair)",
                 cursor: "pointer",
               }}
             >
-              <Icon className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
-              <span style={{ fontSize: 9, color: "var(--qc-text-muted)", textAlign: "center", lineHeight: 1.3 }}>
+              <Icon className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+              <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textAlign: "center", lineHeight: 1.3 }}>
                 {label}
               </span>
             </button>
@@ -586,7 +586,7 @@ function RMPageContent() {
   return (
     <div
       style={{
-        background: "var(--qc-surface-base)",
+        background: "var(--qc-bg)",
         minHeight: "100vh",
         padding: "20px 24px",
       }}
@@ -600,7 +600,7 @@ function RMPageContent() {
               fontFamily: "var(--font-ibm-plex-mono, monospace)",
               fontWeight: 700,
               letterSpacing: "0.14em",
-              color: "var(--qc-text-muted)",
+              color: "var(--qc-ink-2)",
               textTransform: "uppercase",
               marginBottom: 4,
             }}
@@ -611,7 +611,7 @@ function RMPageContent() {
             style={{
               fontSize: 24,
               fontWeight: 700,
-              color: "var(--qc-text-heading)",
+              color: "var(--qc-ink)",
               letterSpacing: "-0.02em",
               lineHeight: 1.1,
             }}
@@ -622,7 +622,7 @@ function RMPageContent() {
                 style={{
                   fontSize: 14,
                   fontWeight: 400,
-                  color: "var(--qc-text-muted)",
+                  color: "var(--qc-ink-2)",
                   fontFamily: "var(--font-ibm-plex-mono, monospace)",
                   letterSpacing: 0,
                 }}
@@ -638,9 +638,9 @@ function RMPageContent() {
           style={{
             padding: "8px 14px",
             borderRadius: 8,
-            background: showForm ? "var(--qc-surface-panel)" : "var(--qc-accent-primary)",
-            color: showForm ? "var(--qc-text-heading)" : "var(--qc-accent-primary-fg)",
-            border: showForm ? "1px solid var(--qc-border-default)" : "none",
+            background: showForm ? "var(--qc-section)" : "var(--qc-ink)",
+            color: showForm ? "var(--qc-ink)" : "var(--qc-on-dark)",
+            border: showForm ? "1px solid var(--qc-hair)" : "none",
             fontSize: 12,
             fontWeight: 600,
             cursor: "pointer",
@@ -666,8 +666,8 @@ function RMPageContent() {
           <div
             className="rounded-[14px] overflow-hidden"
             style={{
-              background: "var(--qc-surface-card)",
-              border: "1px solid var(--qc-border-default)",
+              background: "var(--qc-card)",
+              border: "1px solid var(--qc-hair)",
             }}
           >
             {/* Table header */}
@@ -675,8 +675,8 @@ function RMPageContent() {
               className="flex items-center gap-4"
               style={{
                 padding: "8px 16px",
-                borderBottom: "1px solid var(--qc-border-default)",
-                background: "var(--qc-surface-panel)",
+                borderBottom: "1px solid var(--qc-hair)",
+                background: "var(--qc-section)",
               }}
             >
               <span style={{ width: 20, flexShrink: 0 }} />
@@ -685,7 +685,7 @@ function RMPageContent() {
                 className="flex-1"
                 style={{
                   fontSize: 9,
-                  color: "var(--qc-text-muted)",
+                  color: "var(--qc-ink-2)",
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
                 }}
@@ -695,7 +695,7 @@ function RMPageContent() {
               <span
                 style={{
                   fontSize: 9,
-                  color: "var(--qc-text-muted)",
+                  color: "var(--qc-ink-2)",
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
                   minWidth: 40,
@@ -707,7 +707,7 @@ function RMPageContent() {
               <span
                 style={{
                   fontSize: 9,
-                  color: "var(--qc-text-muted)",
+                  color: "var(--qc-ink-2)",
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
                   minWidth: 44,
@@ -725,7 +725,7 @@ function RMPageContent() {
                   <div
                     key={i}
                     className="h-12 rounded-xl animate-pulse"
-                    style={{ background: "var(--qc-surface-panel)" }}
+                    style={{ background: "var(--qc-section)" }}
                   />
                 ))}
               </div>
@@ -740,7 +740,7 @@ function RMPageContent() {
             {!loading && rms.length === 0 && (
               <p
                 className="py-10 text-center"
-                style={{ fontSize: 13, color: "var(--qc-text-muted)" }}
+                style={{ fontSize: 13, color: "var(--qc-ink-2)" }}
               >
                 No RMs found. Create one to get started.
               </p>
@@ -762,16 +762,16 @@ function RMPageContent() {
             <div
               className="rounded-[14px] overflow-hidden"
               style={{
-                background: "var(--qc-surface-card)",
-                border: "1px solid var(--qc-border-default)",
+                background: "var(--qc-card)",
+                border: "1px solid var(--qc-hair)",
               }}
             >
               {/* Section header */}
               <div
                 style={{
                   padding: "12px 16px",
-                  borderBottom: "1px solid var(--qc-border-default)",
-                  background: "var(--qc-surface-panel)",
+                  borderBottom: "1px solid var(--qc-hair)",
+                  background: "var(--qc-section)",
                 }}
               >
                 <div className="flex items-center justify-between">
@@ -779,7 +779,7 @@ function RMPageContent() {
                     <p
                       style={{
                         fontSize: 9,
-                        color: "var(--qc-text-muted)",
+                        color: "var(--qc-ink-2)",
                         textTransform: "uppercase",
                         letterSpacing: "0.08em",
                         marginBottom: 2,
@@ -787,7 +787,7 @@ function RMPageContent() {
                     >
                       Assigned Clients
                     </p>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>
                       {selectedRM?.name ?? "Loading…"}
                     </p>
                   </div>
@@ -796,7 +796,7 @@ function RMPageContent() {
                       style={{
                         fontSize: 11,
                         fontFamily: "var(--font-ibm-plex-mono, monospace)",
-                        color: "var(--qc-text-muted)",
+                        color: "var(--qc-ink-2)",
                       }}
                     >
                       {selectedRM.clients.length} clients
@@ -811,7 +811,7 @@ function RMPageContent() {
                   className="flex items-center gap-3"
                   style={{
                     padding: "6px 16px",
-                    borderBottom: "1px solid var(--qc-border-default)",
+                    borderBottom: "1px solid var(--qc-hair)",
                     background: "rgba(0,0,0,0.015)",
                   }}
                 >
@@ -821,7 +821,7 @@ function RMPageContent() {
                     className="flex-1"
                     style={{
                       fontSize: 9,
-                      color: "var(--qc-text-muted)",
+                      color: "var(--qc-ink-2)",
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
                     }}
@@ -831,7 +831,7 @@ function RMPageContent() {
                   <span
                     style={{
                       fontSize: 9,
-                      color: "var(--qc-text-muted)",
+                      color: "var(--qc-ink-2)",
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
                       minWidth: 44,
@@ -843,7 +843,7 @@ function RMPageContent() {
                   <span
                     style={{
                       fontSize: 9,
-                      color: "var(--qc-text-muted)",
+                      color: "var(--qc-ink-2)",
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
                       minWidth: 32,
@@ -862,7 +862,7 @@ function RMPageContent() {
                     <div
                       key={i}
                       className="h-10 rounded-xl animate-pulse"
-                      style={{ background: "var(--qc-surface-panel)" }}
+                      style={{ background: "var(--qc-section)" }}
                     />
                   ))}
                 </div>
@@ -871,7 +871,7 @@ function RMPageContent() {
               {!rmLoading && (!selectedRM?.clients || selectedRM.clients.length === 0) && (
                 <p
                   className="py-8 text-center"
-                  style={{ fontSize: 13, color: "var(--qc-text-muted)" }}
+                  style={{ fontSize: 13, color: "var(--qc-ink-2)" }}
                 >
                   No clients assigned to this RM
                 </p>
@@ -901,7 +901,7 @@ export default function WealthOSRMPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-6 text-sm" style={{ color: "var(--qc-text-muted)" }}>
+        <div className="p-6 text-sm" style={{ color: "var(--qc-ink-2)" }}>
           Loading…
         </div>
       }

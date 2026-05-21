@@ -20,7 +20,7 @@ function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
       type="button"
       onClick={onClick}
       className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0"
-      style={{ background: on ? "#475569" : "var(--qc-border-default)" }}
+      style={{ background: on ? "#475569" : "var(--qc-hair)" }}
     >
       <span
         className="inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform"
@@ -145,22 +145,22 @@ export function AssetClassForm({ capital, items, onChange }: AssetClassFormProps
               <div className="flex items-center gap-3">
                 <Toggle on={item.enabled} onClick={() => toggle(idx)} />
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: item.enabled ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}>
+                  <p className="text-sm font-semibold" style={{ color: item.enabled ? "var(--qc-ink)" : "var(--qc-ink-2)" }}>
                     {def?.label ?? item.key}
                   </p>
                   {def && (
-                    <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>{def.description}</p>
+                    <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>{def.description}</p>
                   )}
                 </div>
               </div>
               <div className="text-right shrink-0 ml-4">
                 {item.enabled ? (
                   <>
-                    <p className="text-sm font-semibold" style={{ color: "var(--qc-text-heading)" }}>{item.pct}</p>
-                    <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>{formatCapital(amount)}</p>
+                    <p className="text-sm font-semibold" style={{ color: "var(--qc-ink)" }}>{item.pct}</p>
+                    <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>{formatCapital(amount)}</p>
                   </>
                 ) : (
-                  <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>Off</p>
+                  <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>Off</p>
                 )}
               </div>
             </div>
@@ -248,8 +248,8 @@ function SubClassSection({
     <div className="border-b border-[#E2E2E2] last:border-0">
       <div className="flex items-center justify-between py-3">
         <div>
-          <p className="text-sm font-semibold" style={{ color: "var(--qc-text-heading)" }}>{assetLabel}</p>
-          <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>
+          <p className="text-sm font-semibold" style={{ color: "var(--qc-ink)" }}>{assetLabel}</p>
+          <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>
             {assetPct}% of portfolio · {formatCapital(classCap)}
           </p>
         </div>
@@ -257,7 +257,7 @@ function SubClassSection({
           type="button"
           onClick={() => setExpanded((v) => !v)}
           className="flex items-center gap-1.5 rounded-full border border-[#E2E2E2] px-3 py-1 text-xs font-medium hover:border-zinc-300 transition-colors"
-          style={{ color: "var(--qc-text-heading)" }}
+          style={{ color: "var(--qc-ink)" }}
         >
           {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           sub-classes
@@ -274,22 +274,22 @@ function SubClassSection({
                   <div className="flex items-center gap-3">
                     <Toggle on={sub.enabled} onClick={() => toggle(i)} />
                     <div>
-                      <p className="text-sm font-semibold" style={{ color: sub.enabled ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}>
+                      <p className="text-sm font-semibold" style={{ color: sub.enabled ? "var(--qc-ink)" : "var(--qc-ink-2)" }}>
                         {sub.label}
                       </p>
                       {sub.description && (
-                        <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>{sub.description}</p>
+                        <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>{sub.description}</p>
                       )}
                     </div>
                   </div>
                   <div className="text-right shrink-0 ml-4">
                     {sub.enabled ? (
                       <>
-                        <p className="text-sm font-semibold" style={{ color: "var(--qc-text-heading)" }}>{sub.pct}</p>
-                        <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>{formatCapital(subAmount)}</p>
+                        <p className="text-sm font-semibold" style={{ color: "var(--qc-ink)" }}>{sub.pct}</p>
+                        <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>{formatCapital(subAmount)}</p>
                       </>
                     ) : (
-                      <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>Off</p>
+                      <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>Off</p>
                     )}
                   </div>
                 </div>

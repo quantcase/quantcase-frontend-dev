@@ -14,7 +14,7 @@ export function directionColor(direction: string): string {
 export function rsiZoneColor(zone: string): string {
   if (zone === "OVERSOLD") return "var(--qc-up)";
   if (zone === "OVERBOUGHT") return "var(--qc-down)";
-  return "var(--qc-text-muted)";
+  return "var(--qc-ink-2)";
 }
 
 export function booleanColor(val: boolean, positiveIsTrue = true): string {

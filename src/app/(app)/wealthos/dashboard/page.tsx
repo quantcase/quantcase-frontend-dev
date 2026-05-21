@@ -62,25 +62,25 @@ function MetricsStrip() {
       className="grid grid-cols-4"
       style={{
         borderRadius: 10,
-        border: "1px solid var(--qc-border-default)",
-        background: "var(--qc-surface-card)",
+        border: "1px solid var(--qc-hair)",
+        background: "var(--qc-card)",
         overflow: "hidden",
       }}
     >
       {RM_METRICS.map(({ label, value, icon: Icon, delta, deltaPositive }) => (
-        <div key={label} className="flex items-center gap-3 px-4 py-3" style={{ borderRight: "1px solid var(--qc-border-default)" }}>
+        <div key={label} className="flex items-center gap-3 px-4 py-3" style={{ borderRight: "1px solid var(--qc-hair)" }}>
           <div
             className="flex items-center justify-center size-7 rounded-[7px] shrink-0"
-            style={{ background: "var(--qc-accent-primary)" }}
+            style={{ background: "var(--qc-ink)" }}
           >
-            <Icon className="size-3.5" style={{ color: "var(--qc-accent-primary-fg)" }} />
+            <Icon className="size-3.5" style={{ color: "var(--qc-on-dark)" }} />
           </div>
           <div className="min-w-0">
-            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--qc-text-muted)", marginBottom: 1 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--qc-ink-2)", marginBottom: 1 }}>
               {label}
             </p>
             <div className="flex items-baseline gap-1.5">
-              <span style={{ fontSize: 18, fontWeight: 600, color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+              <span style={{ fontSize: 18, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
                 {value}
               </span>
               {delta && (
@@ -120,7 +120,7 @@ function ClientRow({ item, rank }: { item: PriorityListItem; rank: number }) {
     >
       {/* Rank + dot */}
       <div className="flex flex-col items-center gap-1 w-5 shrink-0">
-        <span style={{ fontSize: 10, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)", fontWeight: 600 }}>
+        <span style={{ fontSize: 10, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)", fontWeight: 600 }}>
           {String(rank).padStart(2, "0")}
         </span>
         <div className="size-1.5 rounded-full" style={{ background: priorityDot }} />
@@ -130,11 +130,11 @@ function ClientRow({ item, rank }: { item: PriorityListItem; rank: number }) {
       <div
         className="size-8 rounded-full flex items-center justify-center shrink-0"
         style={{
-          background: "var(--qc-surface-panel)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-section)",
+          border: "1px solid var(--qc-hair)",
           fontSize: 11,
           fontWeight: 700,
-          color: "var(--qc-text-heading)",
+          color: "var(--qc-ink)",
           letterSpacing: "-0.02em",
         }}
       >
@@ -144,12 +144,12 @@ function ClientRow({ item, rank }: { item: PriorityListItem; rank: number }) {
       {/* Name + suggested action */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }} className="truncate">
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }} className="truncate">
             {item.client.name}
           </span>
           <SegmentBadge segment={item.client.segment} />
         </div>
-        <p style={{ fontSize: 11, color: "var(--qc-text-muted)" }} className="truncate">
+        <p style={{ fontSize: 11, color: "var(--qc-ink-2)" }} className="truncate">
           {item.suggested_action}
         </p>
       </div>
@@ -157,14 +157,14 @@ function ClientRow({ item, rank }: { item: PriorityListItem; rank: number }) {
       {/* Stats */}
       <div className="flex items-center gap-5 shrink-0">
         <div className="text-right">
-          <p style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>Churn</p>
+          <p style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>Churn</p>
           <p style={{ fontSize: 13, fontWeight: 700, color: churnColor, fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{churnPct}%</p>
         </div>
         <div className="text-right">
-          <p style={{ fontSize: 9, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>Score</p>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{score}</p>
+          <p style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>Score</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{score}</p>
         </div>
-        <ChevronRight className="size-4 opacity-0 group-hover:opacity-60 transition-opacity" style={{ color: "var(--qc-text-muted)" }} />
+        <ChevronRight className="size-4 opacity-0 group-hover:opacity-60 transition-opacity" style={{ color: "var(--qc-ink-2)" }} />
       </div>
     </div>
   );
@@ -191,7 +191,7 @@ function RightPanel({
         className="relative overflow-hidden"
         style={{
           borderRadius: 14,
-          background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)",
+          background: "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)",
           padding: "22px 22px 18px",
           minHeight: 210,
         }}
@@ -244,51 +244,51 @@ function RightPanel({
       </div>
 
       {/* Portfolio urgency */}
-      <div style={{ borderRadius: 12, border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)", padding: "15px 16px" }}>
+      <div style={{ borderRadius: 12, border: "1px solid var(--qc-hair)", background: "var(--qc-card)", padding: "15px 16px" }}>
         <div className="flex items-start justify-between mb-2.5">
           <div>
-            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-text-muted)", marginBottom: 3 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-2)", marginBottom: 3 }}>
               Portfolio Urgency
             </p>
             <div className="flex items-end gap-1">
-              <span style={{ fontSize: 26, fontWeight: 500, lineHeight: 1, color: "var(--qc-text-heading)", letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
+              <span style={{ fontSize: 26, fontWeight: 500, lineHeight: 1, color: "var(--qc-ink)", letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
                 {urgencyScore.toFixed(1)}
               </span>
-              <span style={{ fontSize: 11, color: "var(--qc-text-muted)", marginBottom: 3 }}>/10</span>
+              <span style={{ fontSize: 11, color: "var(--qc-ink-2)", marginBottom: 3 }}>/10</span>
             </div>
           </div>
-          <BarChart3 className="size-4 mt-1" style={{ color: "var(--qc-text-muted)", opacity: 0.4 }} />
+          <BarChart3 className="size-4 mt-1" style={{ color: "var(--qc-ink-2)", opacity: 0.4 }} />
         </div>
-        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--qc-surface-panel)" }}>
+        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--qc-section)" }}>
           <div
             className="h-full rounded-full"
             style={{
               width: `${Math.min(urgencyScore * 10, 100)}%`,
-              background: urgencyScore > 6 ? "var(--qc-down)" : urgencyScore > 3 ? "var(--qc-warn)" : "var(--qc-accent-primary)",
+              background: urgencyScore > 6 ? "var(--qc-down)" : urgencyScore > 3 ? "var(--qc-warn)" : "var(--qc-ink)",
             }}
           />
         </div>
-        <p style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 6 }}>
+        <p style={{ fontSize: 11, color: "var(--qc-ink-2)", marginTop: 6 }}>
           {urgencyScore > 6 ? "High urgency — prioritize outreach" : urgencyScore > 3 ? "Moderate — review medium clients" : "Portfolio is stable today"}
         </p>
       </div>
 
       {/* Top priority client */}
       {topItem && (
-        <div style={{ borderRadius: 12, border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)", padding: "15px 16px" }}>
-          <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-text-muted)", marginBottom: 10 }}>
+        <div style={{ borderRadius: 12, border: "1px solid var(--qc-hair)", background: "var(--qc-card)", padding: "15px 16px" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-2)", marginBottom: 10 }}>
             Top Priority Client
           </p>
           <div className="flex items-center gap-2.5 mb-3">
             <div
               className="size-9 rounded-full flex items-center justify-center shrink-0"
-              style={{ background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)", fontSize: 12, fontWeight: 700, color: "var(--qc-accent-primary-fg)" }}
+              style={{ background: "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)", fontSize: 12, fontWeight: 700, color: "var(--qc-on-dark)" }}
             >
               {topItem.client.name.split(" ").map(w => w[0]).slice(0, 2).join("")}
             </div>
             <div>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>{topItem.client.name}</p>
-              <p style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{topItem.client.name}</p>
+              <p style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
                 Churn{" "}
                 <span style={{ fontWeight: 700, color: "var(--qc-down)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
                   {Math.round(topItem.client.churn_probability * 100)}%
@@ -301,8 +301,8 @@ function RightPanel({
       )}
 
       {/* Quick actions */}
-      <div style={{ borderRadius: 12, border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)", padding: "15px 16px" }}>
-        <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-text-muted)", marginBottom: 10 }}>
+      <div style={{ borderRadius: 12, border: "1px solid var(--qc-hair)", background: "var(--qc-card)", padding: "15px 16px" }}>
+        <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-2)", marginBottom: 10 }}>
           Quick Actions
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -310,13 +310,13 @@ function RightPanel({
             <button
               key={label}
               className="flex flex-col gap-1.5 rounded-[9px] p-3 text-left hover:bg-[rgba(0,0,0,0.03)] transition-colors cursor-pointer"
-              style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+              style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
             >
-              <div className="flex items-center justify-center size-6 rounded-[6px]" style={{ background: "var(--qc-accent-primary)" }}>
-                <Icon className="size-3.5" style={{ color: "var(--qc-accent-primary-fg)" }} />
+              <div className="flex items-center justify-center size-6 rounded-[6px]" style={{ background: "var(--qc-ink)" }}>
+                <Icon className="size-3.5" style={{ color: "var(--qc-on-dark)" }} />
               </div>
-              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}>{label}</span>
-              <span style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>{desc}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
+              <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{desc}</span>
             </button>
           ))}
         </div>
@@ -329,15 +329,15 @@ function RightPanel({
 
 function PortfolioAlerts() {
   return (
-    <div style={{ borderRadius: 12, border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)", overflow: "hidden" }}>
-      <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}>
+    <div style={{ borderRadius: 12, border: "1px solid var(--qc-hair)", background: "var(--qc-card)", overflow: "hidden" }}>
+      <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}>
         <div className="flex items-center gap-2">
           <AlertCircle className="size-3" style={{ color: "var(--qc-warn)" }} />
-          <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--qc-text-heading)" }}>
+          <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--qc-ink)" }}>
             Portfolio Alerts
           </span>
         </div>
-        <span style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>3 active</span>
+        <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>3 active</span>
       </div>
       {PORTFOLIO_ALERTS.map((alert, i) => {
         const barColor = alert.severity === "high" ? "var(--qc-down)" : alert.severity === "medium" ? "var(--qc-warn)" : "var(--qc-up)";
@@ -345,14 +345,14 @@ function PortfolioAlerts() {
           <div
             key={i}
             className="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-[rgba(0,0,0,0.02)] transition-colors"
-            style={{ borderBottom: i < PORTFOLIO_ALERTS.length - 1 ? "1px solid var(--qc-border-default)" : undefined }}
+            style={{ borderBottom: i < PORTFOLIO_ALERTS.length - 1 ? "1px solid var(--qc-hair)" : undefined }}
           >
             <div className="w-[3px] self-stretch rounded-full shrink-0" style={{ background: barColor }} />
             <div className="flex-1 min-w-0">
-              <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-text-heading)" }}>{alert.label}</p>
-              <p style={{ fontSize: 11, color: "var(--qc-text-muted)", marginTop: 1 }}>{alert.detail}</p>
+              <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>{alert.label}</p>
+              <p style={{ fontSize: 11, color: "var(--qc-ink-2)", marginTop: 1 }}>{alert.detail}</p>
             </div>
-            <ArrowRight className="size-3.5 shrink-0 mt-0.5" style={{ color: "var(--qc-text-muted)", opacity: 0.35 }} />
+            <ArrowRight className="size-3.5 shrink-0 mt-0.5" style={{ color: "var(--qc-ink-2)", opacity: 0.35 }} />
           </div>
         );
       })}
@@ -398,23 +398,23 @@ function DashboardContent() {
   const topItem = priorityList[0];
 
   return (
-    <div className="min-h-screen pb-16" style={{ background: "var(--qc-surface-base)" }}>
+    <div className="min-h-screen pb-16" style={{ background: "var(--qc-bg)" }}>
 
       {/* Header */}
-      <div style={{ borderBottom: "1px solid var(--qc-border-default)", background: "var(--qc-surface-base)", padding: "18px 24px 16px" }}>
+      <div style={{ borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-bg)", padding: "18px 24px 16px" }}>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--qc-text-muted)", marginBottom: 3, fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--qc-ink-2)", marginBottom: 3, fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
               Relationship Manager · Priority Dashboard
             </p>
-            <h1 style={{ fontSize: 24, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.15 }}>
+            <h1 style={{ fontSize: 24, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.15 }}>
               {selectedRm ? `${selectedRm.name}'s Dashboard` : "RM Dashboard"}
             </h1>
           </div>
           <div className="flex items-center gap-3">
             {genError && <span style={{ fontSize: 12, color: "var(--qc-down)" }}>{genError}</span>}
             <div className="flex items-center gap-2">
-              <span style={{ fontSize: 10, color: "var(--qc-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+              <span style={{ fontSize: 10, color: "var(--qc-ink-2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
                 Viewing as
               </span>
               <div className="relative">
@@ -424,9 +424,9 @@ function DashboardContent() {
                   className="appearance-none cursor-pointer"
                   style={{
                     borderRadius: 7,
-                    border: "1px solid var(--qc-border-default)",
-                    background: "var(--qc-surface-card)",
-                    color: "var(--qc-text-heading)",
+                    border: "1px solid var(--qc-hair)",
+                    background: "var(--qc-card)",
+                    color: "var(--qc-ink)",
                     fontSize: 13,
                     fontWeight: 500,
                     padding: "6px 30px 6px 11px",
@@ -436,7 +436,7 @@ function DashboardContent() {
                   <option value="">— Select RM —</option>
                   {rms.map(rm => <option key={rm.id} value={rm.id}>{rm.name}</option>)}
                 </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 pointer-events-none" style={{ color: "var(--qc-text-muted)" }} />
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 pointer-events-none" style={{ color: "var(--qc-ink-2)" }} />
               </div>
             </div>
             <button
@@ -446,8 +446,8 @@ function DashboardContent() {
               style={{
                 borderRadius: 7,
                 border: "none",
-                background: "var(--qc-accent-primary)",
-                color: "var(--qc-accent-primary-fg)",
+                background: "var(--qc-ink)",
+                color: "var(--qc-on-dark)",
                 fontSize: 12,
                 fontWeight: 600,
                 padding: "7px 14px",
@@ -472,28 +472,28 @@ function DashboardContent() {
             <MetricsStrip />
 
             {/* Priority clients panel */}
-            <div style={{ borderRadius: 12, border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)", overflow: "hidden" }}>
+            <div style={{ borderRadius: 12, border: "1px solid var(--qc-hair)", background: "var(--qc-card)", overflow: "hidden" }}>
               {/* Panel header */}
               <div
                 className="flex items-center justify-between px-4 py-2.5"
-                style={{ borderBottom: "1px solid var(--qc-border-default)", background: "var(--qc-surface-panel)" }}
+                style={{ borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
               >
                 <div className="flex items-center gap-2">
-                  <Users className="size-3.5" style={{ color: "var(--qc-text-muted)" }} />
-                  <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--qc-text-heading)" }}>
+                  <Users className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+                  <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--qc-ink)" }}>
                     Today&apos;s Priority Clients
                   </span>
                   {dashboard && (
                     <span
                       className="rounded-full px-2 py-0.5"
-                      style={{ fontSize: 10, fontWeight: 700, background: "var(--qc-accent-primary)", color: "var(--qc-accent-primary-fg)" }}
+                      style={{ fontSize: 10, fontWeight: 700, background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}
                     >
                       {priorityList.length}
                     </span>
                   )}
                 </div>
                 {dashboard && (
-                  <span style={{ fontSize: 11, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+                  <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
                     {dashboard.date}
                   </span>
                 )}
@@ -501,10 +501,10 @@ function DashboardContent() {
 
               {/* AI progress */}
               {isPolling && (
-                <div className="px-4 pt-3 pb-2" style={{ borderBottom: "1px solid var(--qc-border-default)" }}>
+                <div className="px-4 pt-3 pb-2" style={{ borderBottom: "1px solid var(--qc-hair)" }}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span style={{ fontSize: 12, color: "var(--qc-text-heading)", fontWeight: 500 }}>AI generating suggestions…</span>
-                    <span style={{ fontSize: 11, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{progress}%</span>
+                    <span style={{ fontSize: 12, color: "var(--qc-ink)", fontWeight: 500 }}>AI generating suggestions…</span>
+                    <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>{progress}%</span>
                   </div>
                   <Progress value={progress} className="h-1" />
                 </div>
@@ -513,14 +513,14 @@ function DashboardContent() {
               {/* Empty / loading states */}
               {!selectedRmId && (
                 <div className="flex flex-col items-center justify-center py-16 gap-2">
-                  <TrendingUp className="size-7 mb-1" style={{ color: "var(--qc-text-muted)", opacity: 0.3 }} />
-                  <p style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>Select an RM above to view priority clients</p>
+                  <TrendingUp className="size-7 mb-1" style={{ color: "var(--qc-ink-2)", opacity: 0.3 }} />
+                  <p style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>Select an RM above to view priority clients</p>
                 </div>
               )}
               {selectedRmId && loading && (
                 <div className="p-4 space-y-2">
                   {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="h-12 rounded-[9px] animate-pulse" style={{ background: "var(--qc-surface-panel)" }} />
+                    <div key={i} className="h-12 rounded-[9px] animate-pulse" style={{ background: "var(--qc-section)" }} />
                   ))}
                 </div>
               )}
@@ -532,9 +532,9 @@ function DashboardContent() {
               )}
               {selectedRmId && !loading && !error && priorityList.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 gap-2">
-                  <CheckCircle2 className="size-7 mb-1" style={{ color: "var(--qc-accent-primary)", opacity: 0.7 }} />
-                  <p style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>All clear today.</p>
-                  <p style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>Generate suggestions to refresh the list.</p>
+                  <CheckCircle2 className="size-7 mb-1" style={{ color: "var(--qc-ink)", opacity: 0.7 }} />
+                  <p style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>All clear today.</p>
+                  <p style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>Generate suggestions to refresh the list.</p>
                 </div>
               )}
 
@@ -556,13 +556,13 @@ function DashboardContent() {
                       <div key={priority}>
                         <div
                           className="flex items-center gap-2 px-4 py-1.5"
-                          style={{ borderTop: priority !== "HIGH" ? "1px solid var(--qc-border-default)" : undefined }}
+                          style={{ borderTop: priority !== "HIGH" ? "1px solid var(--qc-hair)" : undefined }}
                         >
                           <div className="size-1.5 rounded-full" style={{ background: meta.color }} />
                           <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: meta.color, fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
                             {meta.label}
                           </span>
-                          <span style={{ fontSize: 10, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+                          <span style={{ fontSize: 10, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
                             · {group.length}
                           </span>
                         </div>
@@ -588,8 +588,8 @@ function DashboardContent() {
               <RightPanel counts={counts} date={dashboard.date} total={priorityList.length} topItem={topItem} />
             ) : (
               <>
-                <div style={{ borderRadius: 14, background: "linear-gradient(135deg, var(--qc-accent-primary) 0%, var(--qc-border-active) 100%)", minHeight: 210, opacity: 0.3 }} />
-                <div style={{ borderRadius: 12, border: "1px solid var(--qc-border-default)", height: 72, background: "var(--qc-surface-card)", opacity: 0.5 }} />
+                <div style={{ borderRadius: 14, background: "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)", minHeight: 210, opacity: 0.3 }} />
+                <div style={{ borderRadius: 12, border: "1px solid var(--qc-hair)", height: 72, background: "var(--qc-card)", opacity: 0.5 }} />
               </>
             )}
           </div>
@@ -601,7 +601,7 @@ function DashboardContent() {
 
 export default function WealthOSDashboardPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-text-muted)" }}>Loading…</div>}>
+    <Suspense fallback={<div className="p-6 text-sm" style={{ color: "var(--qc-ink-2)" }}>Loading…</div>}>
       <DashboardContent />
     </Suspense>
   );

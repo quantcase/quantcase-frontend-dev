@@ -9,28 +9,28 @@ function PositionRow({ pos, rank }: { pos: PortfolioData["positions"][0]; rank: 
       className="grid items-center gap-3 py-3 border-b border-[#E2E2E2] last:border-0"
       style={{ gridTemplateColumns: "24px 1fr 68px 70px 54px" }}
     >
-      <span style={{ fontSize: 11, color: "var(--qc-text-muted)", fontVariantNumeric: "tabular-nums" }}>{rank}</span>
+      <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontVariantNumeric: "tabular-nums" }}>{rank}</span>
       <div className="min-w-0">
-        <div style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.3 }} className="truncate">
+        <div style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.3 }} className="truncate">
           {pos.company}
         </div>
-        <div style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>{pos.ticker}</div>
+        <div style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>{pos.ticker}</div>
       </div>
       <span
         className="rounded-sm px-1.5 py-0.5 text-center"
-        style={{ fontSize: 10, color: "var(--qc-text-muted)", background: "var(--qc-surface-panel)", textTransform: "uppercase", letterSpacing: "0.04em" }}
+        style={{ fontSize: 10, color: "var(--qc-ink-2)", background: "var(--qc-section)", textTransform: "uppercase", letterSpacing: "0.04em" }}
       >
         {pos.subClass.replace(/_/g, "-")}
       </span>
       <div className="flex items-center justify-end gap-1.5">
         <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: scoreColor }} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", fontVariantNumeric: "tabular-nums" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>
           {pos.score}
         </span>
       </div>
       <span
         className="text-right"
-        style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)", fontVariantNumeric: "tabular-nums" }}
+        style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}
       >
         {pos.allocation}%
       </span>
@@ -46,9 +46,9 @@ export function PositionsTableCard({ portfolio }: { portfolio: PortfolioData }) 
     <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
       <div className="rounded-[10px] bg-white p-4">
         <div className="flex items-center justify-between mb-4">
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)" }}>Equity Positions</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)" }}>Equity Positions</span>
           <div className="flex items-center gap-2">
-            <span style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>
+            <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>
               {portfolio.positions.length} holdings · {totalWeight}% allocated
             </span>
             <Target className="size-4 text-zinc-400" />
@@ -63,7 +63,7 @@ export function PositionsTableCard({ portfolio }: { portfolio: PortfolioData }) 
             <span
               key={h}
               className={h === "IC Score" || h === "Alloc" ? "text-right" : ""}
-              style={{ fontSize: 10, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}
+              style={{ fontSize: 10, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em" }}
             >
               {h}
             </span>
@@ -73,7 +73,7 @@ export function PositionsTableCard({ portfolio }: { portfolio: PortfolioData }) 
         {sorted.map((pos, i) => <PositionRow key={pos.id} pos={pos} rank={i + 1} />)}
 
         {sorted.length === 0 && (
-          <div className="py-8 text-center" style={{ color: "var(--qc-text-muted)", fontSize: 13 }}>
+          <div className="py-8 text-center" style={{ color: "var(--qc-ink-2)", fontSize: 13 }}>
             No positions in this portfolio.
           </div>
         )}

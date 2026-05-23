@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Info } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
+import { renderMd } from "@/lib/render-md";
+
 
 export interface SignalTileMetric {
   name: string;
@@ -47,30 +48,45 @@ function metricAssessmentVars(assessment: SignalTileMetric["assessment"]) {
 
 export function SignalTile({ label, value, sentiment, detail, metrics = [] }: SignalTileProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [alignRight, setAlignRight] = useState(false);
+  const tileRef = useRef<HTMLDivElement>(null);
   const resolved = sentiment ?? inferSentiment(value);
   const sc = sentimentStyles(resolved);
 
   const hasPopup = metrics.length > 0 || !!detail;
 
+  const handleMouseEnter = useCallback(() => {
+    if (!hasPopup) return;
+    if (tileRef.current) {
+      const rect = tileRef.current.getBoundingClientRect();
+      setAlignRight(rect.left > window.innerWidth / 2);
+    }
+    setShowTooltip(true);
+  }, [hasPopup]);
+
   return (
     <div
+      ref={tileRef}
       className="relative rounded-[8px] border px-3 py-2.5 cursor-default"
       style={{ borderColor: sc.border, background: sc.bg }}
-      onMouseEnter={() => hasPopup && setShowTooltip(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setShowTooltip(false)}
     >
       <div className="flex items-center justify-between mb-1">
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] truncate" style={{ color: "var(--qc-ink-2)" }}>
           {label}
         </p>
-        {hasPopup && <Info className="h-3 w-3 flex-shrink-0" style={{ color: "var(--qc-ink-2)" }} />}
       </div>
       <p className="text-[12px] font-semibold" style={{ color: sc.color }}>{value}</p>
 
       {showTooltip && hasPopup && (
         <div
-          className="absolute bottom-full left-0 mb-1.5 z-50 w-64 rounded-[10px] border shadow-lg overflow-hidden"
-          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
+          className="absolute bottom-full mb-1.5 z-50 w-64 rounded-[10px] border shadow-lg overflow-hidden"
+          style={{
+            borderColor: "var(--qc-hair)",
+            background: "var(--qc-card)",
+            ...(alignRight ? { right: 0 } : { left: 0 }),
+          }}
         >
           <div style={{
             padding: "8px 12px",
@@ -92,13 +108,13 @@ export function SignalTile({ label, value, sentiment, detail, metrics = [] }: Si
                         <span style={{ fontSize: 11, fontWeight: 600, color: mc.color }}>{m.value}</span>
                       </div>
                       {m.comment && (
-                        <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink)", lineHeight: 1.5 }}>{m.comment}</p>
+                        <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink)", lineHeight: 1.5 }}>{renderMd(m.comment)}</p>
                       )}
                     </div>
                   );
                 })
               : detail && (
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink)", lineHeight: 1.5 }}>{detail}</p>
+                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink)", lineHeight: 1.5 }}>{renderMd(detail)}</p>
                 )}
           </div>
         </div>

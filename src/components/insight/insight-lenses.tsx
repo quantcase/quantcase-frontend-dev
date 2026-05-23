@@ -1,8 +1,30 @@
 "use client";
 
 import { motion } from "framer-motion";
+import {
+  Target, Eye, TrendingUp, BarChart2,
+  Factory, Swords, Shield, Users,
+  Zap, RefreshCw, Award, DollarSign,
+  type LucideIcon,
+} from "lucide-react";
 import type { InsightLens } from "@/types/analysis";
 import { renderMd } from "@/lib/render-md";
+
+const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
+  "guidance-credibility": Target,
+  "disclosure-honesty": Eye,
+  "capital-allocation": TrendingUp,
+  "promoter-activity": BarChart2,
+  "industry-analysis": Factory,
+  "competition": Swords,
+  "financial-strength": Shield,
+  "customer-distribution": Users,
+  "eps-engine": Zap,
+  "earnings-forecast": Zap,
+  "pe-rerating-potential": RefreshCw,
+  "earning-quality": Award,
+  "target-price-matrix": DollarSign,
+};
 
 interface InsightLensesProps {
   lenses: InsightLens[];
@@ -22,12 +44,6 @@ function lensAccentColor(pct: number): string {
   return "var(--qc-down)";
 }
 
-function lensStatusEmoji(pct: number, status: string) {
-  const s = (status ?? "").toUpperCase();
-  if (s === "STRONG" || pct >= 70) return "✅";
-  return "🟡";
-}
-
 function ExpandIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -41,22 +57,23 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
 
   return (
     <div>
-      {/* Section header */}
-      <div style={{ marginBottom: 16 }}>
-        <h3 style={{ fontSize: 28, fontWeight: 400, color: "var(--qc-ink)", margin: 0, fontFamily: "var(--qc-font-serif, Georgia, serif)" }}>
-          {heading}
-        </h3>
-      </div>
+      {heading && (
+        <div style={{ marginBottom: 16 }}>
+          <h3 style={{ fontSize: 28, fontWeight: 400, color: "var(--qc-ink)", margin: 0, fontFamily: "var(--qc-font-serif, Georgia, serif)" }}>
+            {heading}
+          </h3>
+        </div>
+      )}
 
       {/* 2×2 grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        {lenses.map((lens, i) => {
+        {lenses.map((lens) => {
           const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
           const { color: statusColor, bg: statusBg } = lensStatusColor(pct);
           const accentColor = lensAccentColor(pct);
           const statusLabel = (lens.status || (pct >= 70 ? "STRONG" : pct >= 40 ? "MODERATE" : "NEUTRAL")).toUpperCase();
-          const statusIcon = lensStatusEmoji(pct, lens.status);
           const isClickable = !!onLensClick;
+          const Icon = LENS_ICON_CONFIG[lens.slug];
 
           return (
             <motion.div
@@ -85,54 +102,63 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
                 cursor: isClickable ? "pointer" : "default",
               }}
             >
-              {/* Number badge + status pill */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              {/* Header: step+icon stacked left | title+subtitle center | status pill right */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+
+                {/* Icon */}
+                {Icon && (
+                  <div style={{
+                    flexShrink: 0,
+                    width: 42, height: 42, borderRadius: 10,
+                    background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "var(--qc-ink-2)",
+                  }}>
+                    <Icon size={20} strokeWidth={1.5} />
+                  </div>
+                )}
+
+                {/* Title + subtitle */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h4 style={{
+                    fontSize: 15, fontWeight: 600, lineHeight: 1.2, margin: 0,
+                    color: "var(--qc-ink)",
+                  }}>
+                    {lens.name}
+                  </h4>
+                  {lens.subtitle && (
+                    <p style={{
+                      fontSize: 10, fontWeight: 600, textTransform: "uppercase",
+                      letterSpacing: "0.10em", color: accentColor,
+                      margin: "3px 0 0",
+                    }}>
+                      {lens.subtitle}
+                    </p>
+                  )}
+                </div>
+
+                {/* Status pill */}
                 <span style={{
-                  fontSize: 11, fontWeight: 500, color: "var(--qc-ink-3)",
-                  background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
-                  borderRadius: 6, padding: "2px 8px", fontVariantNumeric: "tabular-nums",
-                  letterSpacing: "0.04em",
-                }}>
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span style={{
+                  flexShrink: 0,
                   display: "inline-flex", alignItems: "center", gap: 5,
                   fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
                   color: statusColor, background: statusBg,
                   borderRadius: 4, padding: "3px 8px", textTransform: "uppercase",
                 }}>
-                  {statusIcon} {statusLabel}
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, flexShrink: 0 }} />
+                  {statusLabel}
                 </span>
               </div>
-
-              {/* Lens name */}
-              <h4 style={{
-                fontSize: 22, fontWeight: 400, lineHeight: 1.25, margin: "0 0 6px",
-                color: "var(--qc-ink)", fontFamily: "var(--qc-font-serif, Georgia, serif)",
-              }}>
-                {lens.name}
-              </h4>
-
-              {/* Subtitle (italic, accent color) */}
-              {lens.subtitle && (
-                <p style={{
-                  fontSize: 11, fontWeight: 600, textTransform: "uppercase",
-                  letterSpacing: "0.10em", color: accentColor,
-                  margin: "0 0 12px",
-                }}>
-                  {lens.subtitle}
-                </p>
-              )}
 
               {/* Divider */}
               <div style={{ margin: "0 0 12px", borderStyle: "dashed", borderWidth: "1px 0 0", borderColor: "var(--qc-hair)" }} />
 
               {/* Description */}
-              <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.6, margin: 0, flex: 1 }}>
+              <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.6, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                 {renderMd(lens.description)}
               </p>
 
-              {/* Hover expand icon — shown via CSS group-hover */}
+              {/* Hover expand icon */}
               {isClickable && (
                 <motion.div
                   variants={{ rest: { opacity: 0, scale: 0.75 }, hover: { opacity: 1, scale: 1 } }}

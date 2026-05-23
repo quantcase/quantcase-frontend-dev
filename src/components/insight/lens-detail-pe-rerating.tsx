@@ -432,7 +432,7 @@ function SummaryFooter({ lens }: { lens: LensDetail }) {
   return (
     <LensDrawerSummaryCard
       title="Moderate re-rating potential exists."
-      body={lens.subtitle ?? lens.description}
+      body={lens.description}
       metrics={PE_RERATING_METRICS}
     />
   );

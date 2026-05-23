@@ -187,7 +187,6 @@ function TopBarInner() {
       { label: "Overview",     href: "/screener/overview",                icon: <Eye size={13} strokeWidth={1.8} /> },
       { label: "Technicals",   href: "/screener/technicals",              icon: <CandlestickChart size={13} strokeWidth={1.8} /> },
       { label: "Fundamentals", href: "/screener/fundamentals",            icon: <BookOpen size={13} strokeWidth={1.8} /> },
-      { label: "Industry",     href: "/screener/industry-intelligence",   icon: <LineChart size={13} strokeWidth={1.8} /> },
     ];
 
     const showFactorItems = isFactorActive || factorOpen;

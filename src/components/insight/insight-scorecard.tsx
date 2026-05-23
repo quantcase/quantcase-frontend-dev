@@ -96,7 +96,7 @@ interface SVGRadarProps {
   overallScore: number;
   insightType: string;
   hoveredIndex: number | null;
-  onHoverVertex: (i: number | null) => void;
+  onHoverVertex: (i: number | null, pctX?: number, pctY?: number) => void;
 }
 
 function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex }: SVGRadarProps) {
@@ -259,7 +259,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
           <g
             key={i}
             style={{ cursor: "pointer" }}
-            onMouseEnter={() => onHoverVertex(i)}
+            onMouseEnter={() => onHoverVertex(i, lp.x / SIZE, lp.y / SIZE)}
             onMouseLeave={() => onHoverVertex(null)}
           >
             {words.map((word, wi) => (
@@ -297,7 +297,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.5 + i * 0.07, duration: 0.3, ease: "backOut" }}
-            onMouseEnter={() => onHoverVertex(i)}
+            onMouseEnter={() => onHoverVertex(i, pt.x / SIZE, pt.y / SIZE)}
             onMouseLeave={() => onHoverVertex(null)}
             style={{
               cursor: "pointer",
@@ -342,7 +342,12 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
 
 // ─── Hover tooltip for a vertex ────────────────────────────────────────────────
 
-function VertexTooltip({ lens, visible }: { lens: InsightLens | null; visible: boolean }) {
+function VertexTooltip({ lens, visible, pctX, pctY }: { lens: InsightLens | null; visible: boolean; pctX: number; pctY: number }) {
+  // Convert 0–1 SVG fractions to CSS % within the radar container.
+  // Nudge tooltip above the vertex by 28px; clamp x so it doesn't overflow.
+  const leftPct = pctX * 100;
+  const topPct  = pctY * 100;
+
   return (
     <AnimatePresence>
       {visible && lens && (
@@ -353,9 +358,9 @@ function VertexTooltip({ lens, visible }: { lens: InsightLens | null; visible: b
           transition={{ duration: 0.18 }}
           style={{
             position: "absolute",
-            bottom: "calc(100% + 8px)",
-            left: "50%",
-            transform: "translateX(-50%)",
+            left: `${leftPct}%`,
+            top: `${topPct}%`,
+            transform: "translate(-50%, calc(-100% - 10px))",
             zIndex: 20,
             background: "#1C1C20",
             border: "1px solid rgba(255,255,255,0.10)",
@@ -409,6 +414,7 @@ interface InsightScorecardProps {
 
 export function InsightScorecard({ insight, verdictLabel, onLensClick }: InsightScorecardProps) {
   const [hoveredVertex, setHoveredVertex] = useState<number | null>(null);
+  const [tooltipPos, setTooltipPos] = useState({ pctX: 0.5, pctY: 0 });
 
   const bandColor = verdictBandColor(insight.verdict_band ?? insight.verdict);
   const bandBg = verdictBandBg(insight.verdict_band ?? insight.verdict);
@@ -509,15 +515,22 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
           <div style={{ display: "flex", alignItems: "center", flex: 1, padding: "8px 0 0" }}>
 
             {/* Radar */}
-            <div style={{ flex: "0 0 52%", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", padding: "16px 0 16px 16px" }}>
-              <VertexTooltip lens={hoveredLens} visible={hoveredVertex !== null} />
-              <SVGRadar
-                data={radarData}
-                overallScore={overallScore}
-                insightType={insight.type}
-                hoveredIndex={hoveredVertex}
-                onHoverVertex={setHoveredVertex}
-              />
+            <div style={{ flex: "0 0 52%", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px 0 16px 16px" }}>
+              <div style={{ position: "relative", width: 260, height: 260 }}>
+                <VertexTooltip lens={hoveredLens} visible={hoveredVertex !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
+                <SVGRadar
+                  data={radarData}
+                  overallScore={overallScore}
+                  insightType={insight.type}
+                  hoveredIndex={hoveredVertex}
+                  onHoverVertex={(i, pctX, pctY) => {
+                    setHoveredVertex(i);
+                    if (i !== null && pctX !== undefined && pctY !== undefined) {
+                      setTooltipPos({ pctX, pctY });
+                    }
+                  }}
+                />
+              </div>
             </div>
 
             {/* Right of radar: band pill + thesis */}

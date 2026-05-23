@@ -2,6 +2,7 @@
 
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
 import type { Signal } from "@/hooks/useSignals";
+import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
   lens: LensDetail;
@@ -215,37 +216,16 @@ export function LensDetailGuidance({ lens, signals }: Props) {
         </div>
       )}
 
-      {/* Insight summary cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-        {lens.highlights.slice(0, 2).map((h, i) => (
-          <div key={i} style={{
-            padding: "12px 14px",
-            background: "rgba(31,122,74,0.06)",
-            border: "1px solid rgba(31,122,74,0.20)",
-            borderLeft: "3px solid var(--qc-up)",
-            borderRadius: 8,
-          }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--qc-up)", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              {i === 0 ? "Strength" : "Track Record"}
-            </p>
-            <p style={{ fontSize: 12, color: "var(--qc-ink)", margin: 0, lineHeight: 1.5 }}>{h}</p>
-          </div>
-        ))}
-        {lens.risks.slice(0, 2).map((r, i) => (
-          <div key={i} style={{
-            padding: "12px 14px",
-            background: "rgba(180,115,26,0.06)",
-            border: "1px solid rgba(180,115,26,0.20)",
-            borderLeft: "3px solid var(--qc-warn)",
-            borderRadius: 8,
-          }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--qc-warn)", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Watch
-            </p>
-            <p style={{ fontSize: 12, color: "var(--qc-ink)", margin: 0, lineHeight: 1.5 }}>{r}</p>
-          </div>
-        ))}
-      </div>
+      {/* Summary footer */}
+      <LensDrawerSummaryCard
+        title="Credible guidance with quantitative commitments."
+        body={lens.takeaway}
+        metrics={[
+          { label: "Signal Count", value: hitRate ?? String(lens.signal_count), sub: "Governance signals" },
+          { label: "Guidance Bias", value: bias, sub: ci ? `CI ${ci}` : "Confidence index" },
+          { label: "CAPEX Plan", value: lens.key_metrics["CAPEX_PLAN_FY2026"] ?? "₹220 Cr", sub: "FY2026 deployment" },
+        ]}
+      />
     </div>
   );
 }

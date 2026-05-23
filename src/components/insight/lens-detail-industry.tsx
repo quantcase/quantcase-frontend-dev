@@ -1,40 +1,12 @@
 "use client";
 
-import type { LensDetail } from "@/hooks/useLenses";
+import type { LensDetail, TopSignal } from "@/hooks/useLenses";
 import type { Signal } from "@/hooks/useSignals";
+import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
   lens: LensDetail;
   signals: Signal[];
-}
-
-function impactColor(impact: string | null, value: number | null): string {
-  if (value !== null) {
-    if (value > 0) return "var(--qc-up)";
-    if (value < 0) return "var(--qc-down)";
-  }
-  if (!impact) return "var(--qc-ink-3)";
-  const i = impact.toLowerCase();
-  if (i === "high") return "var(--qc-ink)";
-  return "var(--qc-ink-3)";
-}
-
-function ArrowUp() {
-  return <span style={{ color: "var(--qc-up)", fontWeight: 700, fontSize: 13 }}>↑</span>;
-}
-function ArrowDown() {
-  return <span style={{ color: "var(--qc-down)", fontWeight: 700, fontSize: 13 }}>↓</span>;
-}
-function ArrowNeutral() {
-  return <span style={{ color: "var(--qc-warn)", fontWeight: 700, fontSize: 13 }}>→</span>;
-}
-
-function SignalArrow({ raw }: { raw: string | null }) {
-  if (!raw) return <ArrowNeutral />;
-  const r = raw.toLowerCase();
-  if (r.includes("+") || r.includes("growth") || r.includes("increas") || r.includes("healthy")) return <ArrowUp />;
-  if (r.includes("pressure") || r.includes("declin") || r.includes("soft") || r.includes("headwind")) return <ArrowDown />;
-  return <ArrowNeutral />;
 }
 
 function tailwindPercent(highlights: string[], risks: string[]): number {
@@ -43,169 +15,334 @@ function tailwindPercent(highlights: string[], risks: string[]): number {
   return Math.round((highlights.length / total) * 100);
 }
 
-export function LensDetailIndustry({ lens, signals }: Props) {
-  const industrySignals = signals.filter((s) => s.signal_type === "industry");
-  const kpiSignals = signals.filter((s) => s.signal_type === "kpi");
+function toneFromSignals(signals: Signal[]): { label: string; color: string } {
   const toneSignal = signals.find((s) => s.signal_type === "tone");
+  const label = toneSignal?.raw_value ?? "Neutral";
+  const lower = label.toLowerCase();
+  const color =
+    lower.includes("confident") || lower.includes("positive")
+      ? "var(--qc-up)"
+      : lower.includes("cautious") || lower.includes("concern")
+      ? "var(--qc-warn)"
+      : "var(--qc-ink-3)";
+  return { label, color };
+}
 
-  // Key KPIs for the header strip
-  const pvYoy = kpiSignals.find((s) => s.metric === "SEG_PV_YOY");
-  const twoWYoy = kpiSignals.find((s) => s.metric === "SEG_2W_YOY");
-  const cvYoy = kpiSignals.find((s) => s.metric === "SEG_CV_YOY");
-  const copper = kpiSignals.find((s) => s.metric === "SEG_COPPER_LME_USD");
+function signalDirection(s: TopSignal): "up" | "down" | "neutral" {
+  if (s.direction === "beat" || s.direction === "above") return "up";
+  if (s.direction === "miss" || s.direction === "below") return "down";
+  // Infer from label/statement text
+  const text = (s.label + " " + (s.statement ?? "")).toLowerCase();
+  if (text.includes("declin") || text.includes("qoq declin") || text.includes("headwind") || text.includes("pressure") || text.includes("soft")) return "down";
+  // Positive actual value for growth metrics
+  if (s.actual_value !== null && s.actual_value > 0 && s.metric.toLowerCase().includes("growth")) return "up";
+  return "neutral";
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p style={{
+      fontSize: 10, fontWeight: 700, textTransform: "uppercase",
+      letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0,
+    }}>
+      {children}
+    </p>
+  );
+}
+
+function StatusBadge({ label, color }: { label: string; color: string }) {
+  return (
+    <span style={{
+      fontSize: 10, fontWeight: 600,
+      border: `1px solid ${color}`,
+      borderRadius: 20, padding: "3px 12px",
+      color, background: "var(--qc-card)",
+    }}>
+      • {label}
+    </span>
+  );
+}
+
+export function LensDetailIndustry({ lens, signals }: Props) {
+  const topSignals = lens.top_signals ?? [];
+
+  // De-duplicate by metric, keep highest-impact per metric
+  const seen = new Set<string>();
+  const uniqueSignals = topSignals.filter((s) => {
+    if (seen.has(s.metric)) return false;
+    seen.add(s.metric);
+    return true;
+  });
+
+  // Key segment growth signals for KPI strip
+  const pvSignal = uniqueSignals.find((s) => s.metric === "PV_INDUSTRY_GROWTH");
+  const cvSignal = uniqueSignals.find((s) => s.metric === "CV_INDUSTRY_GROWTH");
+  const twSignal = uniqueSignals.find((s) => s.metric === "2W_INDUSTRY_GROWTH");
+  const coSignal = uniqueSignals.find((s) => s.metric === "MSWIL_outperformed_market");
+  const greenSignal = uniqueSignals.find((s) => s.metric === "SEG_GREENFIELD_REV");
+
+  const km = lens.key_metrics;
+
+  const kpiTiles = [
+    {
+      label: "PV GROWTH",
+      value: pvSignal?.actual_value != null ? `${pvSignal.actual_value}%` : (km["PV_Industry_YoY_Growth"] ?? "—"),
+      sub: pvSignal?.statement ?? "YoY growth — passenger vehicles",
+      valueColor: "var(--qc-up)",
+    },
+    {
+      label: "CV GROWTH",
+      value: cvSignal?.actual_value != null ? `${cvSignal.actual_value}%` : (km["CV_Industry_YoY_Growth"] ?? "—"),
+      sub: cvSignal?.statement ?? "YoY growth — commercial vehicles",
+      valueColor: "var(--qc-up)",
+    },
+    {
+      label: "2W GROWTH",
+      value: twSignal?.actual_value != null ? `${twSignal.actual_value}%` : (km["2W_Industry_YoY_Growth"] ?? "—"),
+      sub: twSignal?.statement ?? "YoY growth — two-wheelers",
+      valueColor: twSignal?.actual_value != null && twSignal.actual_value > 0 ? "var(--qc-up)" : "var(--qc-warn)",
+    },
+    {
+      label: "CO. OUTPERFORMANCE",
+      value: coSignal?.actual_value != null ? `${coSignal.actual_value}%` : (km["MSWIL_Outperformance"] ?? "—"),
+      sub: coSignal?.statement ?? "Company vs blended industry",
+      valueColor: "var(--qc-up)",
+    },
+  ];
+
+  // Signal rows (all unique signals except the 4 KPIs above)
+  const kpiMetrics = new Set(["PV_INDUSTRY_GROWTH", "CV_INDUSTRY_GROWTH", "2W_INDUSTRY_GROWTH", "MSWIL_outperformed_market"]);
+  const detailSignals = uniqueSignals.filter((s) => !kpiMetrics.has(s.metric));
 
   const tailwindPct = tailwindPercent(lens.highlights, lens.risks);
   const headwindPct = 100 - tailwindPct;
+  const { label: toneLabel, color: toneColor } = toneFromSignals(signals);
 
-  const toneLabel = toneSignal?.raw_value ?? "Neutral";
-  const toneColor = toneLabel.toLowerCase().includes("confident") || toneLabel.toLowerCase().includes("positive")
-    ? "var(--qc-up)"
-    : toneLabel.toLowerCase().includes("cautious") || toneLabel.toLowerCase().includes("concern")
-    ? "var(--qc-warn)"
-    : "var(--qc-ink-3)";
-
-  // Demand signals = highlights driving growth; Supply signals = cost/headwind pressures
-  const demandSignals = industrySignals.filter((s) => s.metric === "IND_VOL_GROWTH" || s.metric === "SEG_EV_REV_SHARE");
-  const supplySignals = industrySignals.filter((s) => s.metric === "SEG_COPPER_LME_USD" || s.metric === "SEG_USD_INR");
+  const quarter = km["Quarter"] ?? "Q3 FY26";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
-      {/* Industry KPI strip — 4 columns */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 1, borderRadius: 10, overflow: "hidden", border: "1px solid var(--qc-hair)" }}>
-        {[
-          { label: "PV GROWTH", value: pvYoy?.raw_value ?? "19%", sub: "+19% YoY · strongest segment", color: "var(--qc-up)" },
-          { label: "2W GROWTH", value: twoWYoy?.raw_value ?? "15%", sub: "+15% YoY · sequential softness", color: "var(--qc-up)" },
-          { label: "CV GROWTH", value: cvYoy?.raw_value ?? "18%", sub: "+18% YoY · recovery underway", color: "var(--qc-up)" },
-          { label: "COPPER LME", value: `$${copper?.raw_value ?? "11,100"}/MT`, sub: "+21% YoY · cost headwind", color: "var(--qc-warn)" },
-        ].map((item, i) => (
-          <div key={i} style={{
-            padding: "13px 14px",
-            background: "var(--qc-section)",
-            borderRight: i < 3 ? "1px solid var(--qc-hair)" : undefined,
-          }}>
-            <p style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: "0 0 4px" }}>{item.label}</p>
-            <p style={{ fontSize: 20, fontWeight: 600, color: item.color, margin: "0 0 2px" }}>{item.value}</p>
-            <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.3 }}>{item.sub}</p>
-          </div>
-        ))}
-      </div>
+      {/* INDUSTRY KPIS card */}
+      <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
 
-      {/* Industry signals — cards */}
-      {industrySignals.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>INDUSTRY SIGNALS</p>
-          {industrySignals.map((s) => {
-            const isPositive = s.raw_value && (s.raw_value.toLowerCase().includes("growth") || s.raw_value.toLowerCase().includes("+") || s.raw_value.includes("healthy"));
-            const isCost = s.metric.includes("COPPER") || s.metric.includes("USD") || s.metric.includes("EUR");
-            const borderColor = isCost ? "var(--qc-warn)" : isPositive ? "var(--qc-up)" : "var(--qc-ink-3)";
-            return (
-              <div key={s.id} style={{
-                display: "grid", gridTemplateColumns: "auto 1fr auto",
-                gap: 12, alignItems: "flex-start",
-                padding: "12px 14px",
-                background: "var(--qc-section)",
-                border: "1px solid var(--qc-hair)",
-                borderLeft: `3px solid ${borderColor}`,
-                borderRadius: 8,
+        {/* Card header */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "10px 16px",
+          background: "var(--qc-section)",
+          borderBottom: "1px solid var(--qc-hair)",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <SectionLabel>INDUSTRY KPIS</SectionLabel>
+            <span style={{
+              fontSize: 10, fontWeight: 600, color: "var(--qc-ink-2)",
+              background: "var(--qc-hair)", borderRadius: 4, padding: "2px 8px",
+            }}>
+              {quarter}
+            </span>
+          </div>
+          <StatusBadge label={lens.status} color={lens.status === "STRONG" ? "var(--qc-up)" : lens.status === "WEAK" ? "var(--qc-down)" : "var(--qc-warn)"} />
+        </div>
+
+        {/* KPI subtitle */}
+        <div style={{ padding: "8px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
+          <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>
+            {lens.description}
+          </p>
+        </div>
+
+        {/* 4-column KPI strip */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", background: "var(--qc-card)", borderTop: "1px solid var(--qc-hair)" }}>
+          {kpiTiles.map((tile, i) => (
+            <div key={i} style={{
+              padding: "14px 16px",
+              borderRight: i < 3 ? "1px solid var(--qc-hair)" : undefined,
+            }}>
+              <p style={{
+                fontSize: 9, fontWeight: 700, textTransform: "uppercase",
+                letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 6px",
               }}>
-                <div style={{ paddingTop: 1 }}>
-                  <SignalArrow raw={isCost ? "pressure" : s.raw_value} />
-                </div>
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>
-                    {s.raw_value ?? s.metric.replace(/_/g, " ")}
-                  </p>
-                  {s.statement && (
-                    <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: "3px 0 0", lineHeight: 1.5, fontStyle: "italic" }}>
-                      "{s.statement.slice(0, 120)}{s.statement.length > 120 ? "…" : ""}"
+                {tile.label}
+              </p>
+              <p style={{ fontSize: 22, fontWeight: 600, color: tile.valueColor, margin: "0 0 4px", lineHeight: 1.1 }}>
+                {tile.value}
+              </p>
+              <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>
+                {tile.sub.slice(0, 70)}{tile.sub.length > 70 ? "…" : ""}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Detail signal rows in 2-column grid */}
+        {detailSignals.length > 0 && (
+          <div style={{
+            display: "grid", gridTemplateColumns: "1fr 1fr",
+            gap: 1, borderTop: "1px solid var(--qc-hair)",
+            background: "var(--qc-hair)",
+          }}>
+            {detailSignals.slice(0, 4).map((s) => {
+              const dir = signalDirection(s);
+              const borderColor = dir === "up" ? "var(--qc-up)" : dir === "down" ? "var(--qc-down)" : "var(--qc-warn)";
+              const arrowColor = dir === "up" ? "var(--qc-up)" : dir === "down" ? "var(--qc-down)" : "var(--qc-warn)";
+              const arrow = dir === "up" ? "↑" : dir === "down" ? "↓" : "→";
+              const badge = s.actual_value != null ? `${s.actual_value}${s.unit ?? "%"}` : undefined;
+
+              return (
+                <div key={s.signal_id} style={{
+                  display: "flex", alignItems: "flex-start", gap: 10,
+                  padding: "12px 16px",
+                  background: "var(--qc-card)",
+                  borderLeft: `3px solid ${borderColor}`,
+                }}>
+                  <span style={{ flexShrink: 0, marginTop: 2, color: arrowColor, fontWeight: 700, fontSize: 13 }}>
+                    {arrow}
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)", margin: 0, lineHeight: 1.4 }}>
+                      {s.label}
                     </p>
+                    {s.statement && (
+                      <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "3px 0 0", lineHeight: 1.5 }}>
+                        {s.statement.slice(0, 100)}{s.statement.length > 100 ? "…" : ""}
+                      </p>
+                    )}
+                  </div>
+                  {badge && (
+                    <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 600, color: arrowColor, whiteSpace: "nowrap" }}>
+                      {badge}
+                    </span>
                   )}
                 </div>
-                <span style={{
-                  fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
-                  color: isCost ? "var(--qc-warn)" : "var(--qc-up)",
-                  background: isCost ? "rgba(180,115,26,0.10)" : "rgba(31,122,74,0.10)",
-                  borderRadius: 4, padding: "3px 8px", whiteSpace: "nowrap",
-                }}>
-                  {isCost ? "Headwind" : "Tailwind"}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Management Consensus */}
-      <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
-        <div style={{ padding: "12px 16px", background: "var(--qc-section)", borderBottom: "1px solid var(--qc-hair)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>MANAGEMENT CONSENSUS</p>
-            <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "3px 0 0" }}>{lens.signal_count} signals · {lens.key_metrics["EV Revenue Share"] ? "Q3 FY26" : "Latest quarter"}</p>
+              );
+            })}
           </div>
-          <span style={{
-            fontSize: 10, fontWeight: 700, color: toneColor,
-            border: `1px solid ${toneColor}`, borderRadius: 20,
-            padding: "3px 10px",
-          }}>
-            {toneLabel} tone
-          </span>
+        )}
+      </div>
+
+      {/* MANAGEMENT CONSENSUS */}
+      <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
+
+        {/* Header */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "12px 16px",
+          background: "var(--qc-section)",
+          borderBottom: "1px solid var(--qc-hair)",
+        }}>
+          <div>
+            <SectionLabel>MANAGEMENT CONSENSUS</SectionLabel>
+            <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "3px 0 0" }}>
+              {lens.signal_count} signals · {quarter}
+            </p>
+          </div>
+          <StatusBadge label={`${toneLabel} tone`} color={toneColor} />
         </div>
 
-        {/* Tailwind/headwind bar */}
-        <div style={{ padding: "14px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
+        {/* Dominant direction */}
+        <div style={{ padding: "12px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
+          {tailwindPct >= headwindPct ? (
+            <p style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-up)", margin: "0 0 2px" }}>↑ Tailwinds Dominant</p>
+          ) : (
+            <p style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-down)", margin: "0 0 2px" }}>↓ Headwinds Dominant</p>
+          )}
+          <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>
+            {tailwindPct >= headwindPct
+              ? "Demand recovery and volume growth driving broad-based tailwinds"
+              : "Cost pressures and capacity drag weighing on near-term margins"}
+          </p>
+        </div>
+
+        {/* Tailwind / Headwind bar */}
+        <div style={{ padding: "12px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-up)" }}>↑ Tailwinds {tailwindPct}%</span>
             <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-down)" }}>{headwindPct}% Headwinds ↓</span>
           </div>
           <div style={{ height: 8, borderRadius: 99, overflow: "hidden", display: "flex" }}>
             <div style={{ width: `${tailwindPct}%`, background: "var(--qc-up)", transition: "width 0.5s ease" }} />
-            <div style={{ width: `${headwindPct}%`, background: "var(--qc-down)" }} />
+            <div style={{ flex: 1, background: "var(--qc-down)" }} />
           </div>
         </div>
 
-        {/* Demand + Supply signal columns */}
+        {/* Demand + Supply columns */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", background: "var(--qc-card)" }}>
           <div style={{ padding: "14px 16px", borderRight: "1px solid var(--qc-hair)" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: 0 }}>DEMAND SIGNALS</p>
-              <span style={{ fontSize: 10, color: demandSignals.length === 0 ? "var(--qc-warn)" : "var(--qc-down)", fontWeight: 600 }}>
-                {demandSignals.length === 0 ? "Mixed" : "▼ Softening"}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <SectionLabel>DEMAND SIGNALS</SectionLabel>
+              <span style={{ fontSize: 10, fontWeight: 600, color: tailwindPct < 50 ? "var(--qc-down)" : "var(--qc-up)" }}>
+                {tailwindPct < 50 ? "▼ Weakening" : "▲ Strong"}
               </span>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {lens.highlights.slice(0, 3).map((h, i) => (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {lens.highlights.slice(0, 4).map((h, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                   <span style={{ color: "var(--qc-up)", fontWeight: 700, flexShrink: 0, marginTop: 1 }}>↑</span>
-                  <p style={{ fontSize: 11, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.5 }}>{h.slice(0, 90)}{h.length > 90 ? "…" : ""}</p>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 11, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.5 }}>
+                      {h.slice(0, 100)}{h.length > 100 ? "…" : ""}
+                    </p>
+                    <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>100%</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
+
           <div style={{ padding: "14px 16px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: 0 }}>SUPPLY SIGNALS</p>
-              <span style={{ fontSize: 10, color: "var(--qc-down)", fontWeight: 600 }}>▼ Pressure rising</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <SectionLabel>SUPPLY SIGNALS</SectionLabel>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-down)" }}>▼ Pressure rising</span>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {lens.risks.slice(0, 3).map((r, i) => (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {lens.risks.slice(0, 4).map((r, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                   <span style={{ color: "var(--qc-down)", fontWeight: 700, flexShrink: 0, marginTop: 1 }}>↓</span>
-                  <p style={{ fontSize: 11, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.5 }}>{r.slice(0, 90)}{r.length > 90 ? "…" : ""}</p>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 11, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.5 }}>
+                      {r.slice(0, 100)}{r.length > 100 ? "…" : ""}
+                    </p>
+                    <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>100%</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Decision summary */}
-        {(lens.highlights.length > 0 || lens.risks.length > 0) && (
-          <div style={{ padding: "12px 16px", background: "var(--qc-section)", borderTop: "1px solid var(--qc-hair)" }}>
-            <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)" }}>DECISION · </span>
-            <span style={{ fontSize: 11, color: "var(--qc-ink)", lineHeight: 1.5 }}>{lens.takeaway.slice(0, 160)}{lens.takeaway.length > 160 ? "…" : ""}</span>
-          </div>
-        )}
       </div>
+
+      {/* Greenfield highlight if present */}
+      {greenSignal && (
+        <div style={{
+          padding: "12px 16px", borderRadius: 10,
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-up-soft)",
+          display: "flex", alignItems: "center", gap: 12,
+        }}>
+          <span style={{ fontSize: 20, fontWeight: 700, color: "var(--qc-up)", flexShrink: 0 }}>
+            {greenSignal.actual_value}%
+          </span>
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>{greenSignal.label}</p>
+            {greenSignal.statement && (
+              <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>{greenSignal.statement}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Summary footer */}
+      <LensDrawerSummaryCard
+        title="Multi-segment industry growth — company outperforming market."
+        body={lens.takeaway}
+        metrics={[
+          { label: "PV Growth", value: kpiTiles[0].value, sub: "Passenger vehicles YoY" },
+          { label: "CV Growth", value: kpiTiles[1].value, sub: "Commercial vehicles YoY" },
+          { label: "Co. Outperformance", value: kpiTiles[3].value, sub: "vs blended industry" },
+        ]}
+      />
     </div>
   );
 }

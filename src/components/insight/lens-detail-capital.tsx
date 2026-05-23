@@ -1,254 +1,288 @@
 "use client";
 
-import type { LensDetail } from "@/hooks/useLenses";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, ReferenceLine, LabelList,
+} from "recharts";
+import type { LensDetail, TopSignal } from "@/hooks/useLenses";
 import type { Signal } from "@/hooks/useSignals";
+import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
+
+const C_REV = "#1F7A4A";
+const C_EBITDA = "#B4731A";
+const C_HAIR = "#E9E7E1";
 
 interface Props {
   lens: LensDetail;
   signals: Signal[];
 }
 
-const SUB_LENS_DEFS = [
-  { key: "reinvestment", label: "Reinvestment quality", abbr: "RQ", description: "Capital deployed into core vs low-yield assets" },
-  { key: "shareholder_returns", label: "Shareholder returns logic", abbr: "SR", description: "Dividend policy, buybacks, FCF linkage" },
-  { key: "ma_discipline", label: "M&A discipline", abbr: "MA", description: "Acquisition quality, integration, goodwill" },
-  { key: "capital_efficiency", label: "Capital efficiency trend", abbr: "CE", description: "ROA / ROE trajectory, cyclical adjustments" },
-];
-
-type SubLensData = {
+interface MetricRow {
   key: string;
   label: string;
-  abbr: string;
-  description: string;
-  signals: Signal[];
-  statusLabel: string;
-  statusColor: string;
-  statusBg: string;
-  score: number;
-  max: number;
-};
-
-function buildSubLenses(signals: Signal[], keyMetrics: Record<string, string>): SubLensData[] {
-  const kpiSignals = signals.filter((s) => s.signal_type === "kpi");
-  const finSignals = signals.filter((s) => s.signal_type === "financial_health");
-  const govSignals = signals.filter((s) => s.signal_type === "governance");
-  const milestones = signals.filter((s) => s.signal_type === "milestone");
-
-  // Capex, debt, revenue KPIs → reinvestment
-  const reinvestmentSigs = [
-    ...kpiSignals.filter((s) => ["CAPEX", "SEG_CAPEX_INCURRED", "SEG_EXT_DEBT", "SEG_NET_DEBT", "SEG_GF_UTIL", "SEG_GF_EBITDA_NET"].includes(s.metric)),
-    ...finSignals.filter((s) => s.metric === "debt_trajectory" || s.metric === "working_capital_trend"),
-  ];
-
-  // EPS, dividends, equity → shareholder returns
-  const shareholderSigs = kpiSignals.filter((s) => ["EPS_BASIC", "EPS_DILUTED", "EQ_SHARE_CAP", "PAT"].includes(s.metric));
-
-  // Governance / capital allocation clarity → M&A discipline
-  const maSigs = govSignals.filter((s) => s.metric === "capital_allocation_clarity" || s.metric === "guidance_given");
-
-  // ROA-related: EBITDA, revenue, margin → capital efficiency
-  const efficiencySigs = [
-    ...kpiSignals.filter((s) => ["EBITDA", "REV_OP", "SEG_EXGF_EBITDA_MARGIN", "SEG_EXGF_EBITDA", "SEG_WH_REV_GROWTH"].includes(s.metric)),
-    ...finSignals.filter((s) => s.metric === "margin_expansion_drivers" || s.metric === "operating_leverage"),
-    ...milestones.filter((s) => s.metric === "EBITDA_MARGIN"),
-  ];
-
-  const sigMap: Record<string, Signal[]> = {
-    reinvestment: reinvestmentSigs,
-    shareholder_returns: shareholderSigs,
-    ma_discipline: maSigs,
-    capital_efficiency: efficiencySigs,
-  };
-
-  // Use key metrics as fallback scores if available
-  const capexVal = parseFloat(keyMetrics["YoY Revenue Growth"] ?? "0") || 0;
-  const ebitdaMargin = parseFloat(keyMetrics["Ex-Greenfields EBITDA Margin"] ?? "0") || 0;
-  const extDebt = parseFloat(keyMetrics["External Debt"]?.replace(/[^\d.]/g, "") ?? "999") || 999;
-
-  const heuristics: Record<string, number> = {
-    reinvestment: extDebt < 50 ? 8 : extDebt < 200 ? 6 : 4,
-    shareholder_returns: 6,
-    ma_discipline: 8,
-    capital_efficiency: ebitdaMargin >= 10 ? 8 : ebitdaMargin >= 6 ? 6 : 4,
-  };
-
-  return SUB_LENS_DEFS.map((def) => {
-    const sigs = sigMap[def.key] ?? [];
-    const rawScore = heuristics[def.key] ?? 5;
-    const max = 10;
-    const pct = (rawScore / max) * 100;
-
-    let statusLabel: string;
-    let statusColor: string;
-    let statusBg: string;
-    if (pct >= 70) {
-      statusLabel = "DISCIPLINED"; statusColor = "var(--qc-up)"; statusBg = "rgba(31,122,74,0.10)";
-    } else if (pct >= 40) {
-      statusLabel = "MODERATE"; statusColor = "var(--qc-warn)"; statusBg = "rgba(180,115,26,0.10)";
-    } else {
-      statusLabel = "WEAK"; statusColor = "var(--qc-down)"; statusBg = "rgba(220,38,38,0.10)";
-    }
-
-    return { ...def, signals: sigs, score: rawScore, max, statusLabel, statusColor, statusBg };
-  });
+  value: string;
+  delta: string | null;
+  deltaColor: string;
+  borderColor: string;
+  positive: boolean;
 }
 
-function SubLensCard({ sub }: { sub: SubLensData }) {
-  const pct = (sub.score / sub.max) * 100;
+function buildMetricRows(topSignals: TopSignal[], km: Record<string, string>): MetricRow[] {
+  const rows: MetricRow[] = [];
+
+  const revYoY = topSignals.find((s) => s.metric === "MSWIL_REV" && s.label.includes("Year-on-Year"));
+  const revAbs = topSignals.find((s) => s.metric === "MSWIL_REV" && s.label.includes("Absolute"));
+  const gfRev = topSignals.find((s) => s.metric === "SEG_GREENFIELD_REV" && s.label.includes("Q3"));
+  const gfRevYtd = topSignals.find((s) => s.metric === "SEG_GREENFIELD_REV" && s.label.includes("YTD"));
+  const ebitdaAbs = topSignals.find((s) => s.metric === "MSWIL_EBITDA" && s.label.includes("Absolute"));
+  const ebitdaYoY = topSignals.find((s) => s.metric === "MSWIL_EBITDA" && s.label.includes("Year-on-Year"));
+  const ebitdaMargin = topSignals.find((s) => s.metric === "EBITDA_MARGIN_REP");
+  const pat = topSignals.find((s) => s.metric === "MSWIL_PAT");
+  const gfEbitda = topSignals.find((s) => s.metric === "SEG_GREENFIELD_EBITDA" && s.label.includes("YTD"));
+  const gfEbitdaQ3 = topSignals.find((s) => s.metric === "SEG_GREENFIELD_EBITDA" && s.label.includes("Q3"));
+
+  if (revAbs) {
+    rows.push({
+      key: "rev", label: "MSWIL Revenue", value: `₹${revAbs.actual_value?.toLocaleString("en-IN") ?? km["MSWIL_REV_Q3"] ?? "2,887"} Cr`,
+      delta: revYoY ? `+${revYoY.actual_value}% YoY` : "+25.5% YoY",
+      deltaColor: "var(--qc-up)", borderColor: "var(--qc-up)", positive: true,
+    });
+  }
+  if (ebitdaAbs) {
+    rows.push({
+      key: "ebitda", label: "EBITDA", value: `₹${ebitdaAbs.actual_value} Cr`,
+      delta: ebitdaYoY ? `+${ebitdaYoY.actual_value}% YoY` : "+10.5% YoY",
+      deltaColor: "var(--qc-up)", borderColor: "var(--qc-up)", positive: true,
+    });
+  }
+  if (ebitdaMargin) {
+    rows.push({
+      key: "margin", label: "Reported EBITDA Margin", value: `${ebitdaMargin.actual_value}%`,
+      delta: km["Reported_EBITDA_Margin_Q3"] ? null : "Q3 FY26",
+      deltaColor: "var(--qc-ink-3)", borderColor: "var(--qc-warn)", positive: true,
+    });
+  }
+  if (pat) {
+    rows.push({
+      key: "pat", label: "Profit After Tax", value: `₹${pat.actual_value} Cr`,
+      delta: "Q3 FY26", deltaColor: "var(--qc-ink-3)", borderColor: "var(--qc-ink-3)", positive: true,
+    });
+  }
+  if (gfRev) {
+    rows.push({
+      key: "gf_rev", label: "Greenfield Revenue Growth", value: `+${gfRev.actual_value}%`,
+      delta: gfRevYtd ? `+${gfRevYtd.actual_value}% YTD` : "+13.1% YTD",
+      deltaColor: "var(--qc-up)", borderColor: "var(--qc-up)", positive: true,
+    });
+  }
+  if (gfEbitda) {
+    rows.push({
+      key: "gf_ebitda", label: "Greenfield EBITDA Growth", value: `+${gfEbitda.actual_value}%`,
+      delta: gfEbitdaQ3 ? `+${gfEbitdaQ3.actual_value}% Q3` : "+7.6% Q3",
+      deltaColor: (gfEbitda.actual_value ?? 0) > (gfEbitdaQ3?.actual_value ?? 0) ? "var(--qc-up)" : "var(--qc-warn)",
+      borderColor: "var(--qc-warn)", positive: true,
+    });
+  }
+
+  return rows;
+}
+
+export function LensDetailCapital({ lens }: Props) {
+  const topSignals: TopSignal[] = lens.top_signals ?? [];
+
+  const km = lens.key_metrics;
+  const rows = buildMetricRows(topSignals, km);
+
+  const statusColor =
+    lens.status.toUpperCase() === "STRONG"
+      ? "var(--qc-up)"
+      : lens.status.toUpperCase() === "WEAK"
+        ? "var(--qc-down)"
+        : "var(--qc-warn)";
+
+  const revYoY = topSignals.find((s) => s.metric === "MSWIL_REV" && s.label.includes("Year-on-Year"))?.actual_value ?? 25.5;
+  const ebitdaYoY = topSignals.find((s) => s.metric === "MSWIL_EBITDA" && s.label.includes("Year-on-Year"))?.actual_value ?? 10.5;
+  const margin = topSignals.find((s) => s.metric === "EBITDA_MARGIN_REP")?.actual_value ?? 12.5;
+  const gfRev = topSignals.find((s) => s.metric === "SEG_GREENFIELD_REV" && s.label.includes("Q3"))?.actual_value ?? 18.8;
 
   return (
-    <div style={{
-      background: "var(--qc-card)",
-      border: "1px solid var(--qc-hair)",
-      borderRadius: 10,
-      padding: "16px 16px 14px",
-      display: "flex",
-      flexDirection: "column",
-      gap: 10,
-    }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{
-            width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-            background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 10, fontWeight: 700, color: "var(--qc-ink-3)", letterSpacing: "0.04em",
-          }}>
-            {sub.abbr}
-          </span>
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", margin: 0, lineHeight: 1.2 }}>{sub.label}</p>
-            <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0", lineHeight: 1.3 }}>{sub.description}</p>
-          </div>
-        </div>
-        <span style={{
-          flexShrink: 0, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em",
-          color: sub.statusColor, background: sub.statusBg,
-          borderRadius: 4, padding: "3px 8px", textTransform: "uppercase", whiteSpace: "nowrap",
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+      {/* Header strip */}
+      <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
+        <div style={{
+          padding: "10px 16px", background: "var(--qc-card)",
+          borderBottom: "1px solid var(--qc-hair)",
+          display: "flex", alignItems: "center", gap: 10,
         }}>
-          {sub.statusLabel}
-        </span>
-      </div>
-
-      {/* Score bar */}
-      <div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-          <span style={{ fontSize: 18, fontWeight: 600, color: "var(--qc-ink)" }}>{sub.score}</span>
-          <span style={{ fontSize: 11, color: "var(--qc-ink-3)", alignSelf: "flex-end", marginBottom: 2 }}>/{sub.max}</span>
+          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)" }}>
+            CAPITAL ALLOCATION
+          </span>
+          <span style={{
+            fontSize: 9, fontWeight: 600, letterSpacing: "0.06em",
+            color: "var(--qc-ink-3)", background: "var(--qc-section)",
+            border: "1px solid var(--qc-hair)", borderRadius: 4, padding: "2px 7px",
+          }}>
+            Q3 FY26
+          </span>
+          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 600, color: statusColor, display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, display: "inline-block" }} />
+            {lens.status.charAt(0).toUpperCase() + lens.status.slice(1).toLowerCase()}
+          </span>
         </div>
-        <div style={{ height: 4, borderRadius: 99, background: "var(--qc-hair)", overflow: "hidden" }}>
-          <div style={{ height: "100%", width: `${pct}%`, background: sub.statusColor, borderRadius: 99, transition: "width 0.4s ease" }} />
+
+        {/* Subtitle */}
+        <div style={{ padding: "8px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
+          <p style={{ fontSize: 12, color: "var(--qc-ink-2)", margin: 0 }}>
+            Greenfield-led organic growth with margin discipline — EBITDA growth lagging revenue signals ramp-up absorption
+          </p>
         </div>
-      </div>
 
-      {/* Key signal bullets */}
-      {sub.signals.slice(0, 4).map((s) => {
-        const val = s.value;
-        const dotColor = val !== null && val > 0 ? "var(--qc-up)" : val !== null && val < 0 ? "var(--qc-down)" : "var(--qc-ink-3)";
-        const label = s.raw_value ?? s.metric.replace(/_/g, " ");
-        return (
-          <div key={s.id} style={{ display: "flex", gap: 7, alignItems: "flex-start" }}>
-            <span style={{ flexShrink: 0, marginTop: 4, width: 6, height: 6, borderRadius: "50%", background: dotColor }} />
-            <p style={{ fontSize: 11, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.45 }}>
-              <strong style={{ color: "var(--qc-ink)", fontWeight: 600 }}>{s.metric.replace(/_/g, " ").replace(/^SEG /, "")}</strong>
-              {label !== s.metric.replace(/_/g, " ") ? ` — ${label}` : ""}
-            </p>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// Find a quote-worthy governance signal
-function findQuote(signals: Signal[]): Signal | null {
-  const candidates = signals.filter((s) => s.signal_type === "governance" && s.statement && s.statement.length > 40);
-  return candidates[0] ?? null;
-}
-
-export function LensDetailCapital({ lens, signals }: Props) {
-  const subLenses = buildSubLenses(signals, lens.key_metrics);
-  const quote = findQuote(signals);
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-
-      {/* Key metrics grid */}
-      {Object.keys(lens.key_metrics).length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, borderRadius: 10, overflow: "hidden", border: "1px solid var(--qc-hair)" }}>
-          {Object.entries(lens.key_metrics).map(([k, v], i, arr) => (
-            <div key={k} style={{
-              padding: "12px 14px",
-              background: "var(--qc-section)",
-              borderRight: i % 2 === 0 ? "1px solid var(--qc-hair)" : undefined,
-              borderBottom: i < arr.length - 2 ? "1px solid var(--qc-hair)" : undefined,
+        {/* 4-column KPI tiles */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 0 }}>
+          {[
+            { label: "REV YoY GROWTH", value: `+${revYoY}%`, sub: "MSWIL Q3 FY26 revenue expansion", color: "var(--qc-up)" },
+            { label: "EBITDA YoY GROWTH", value: `+${ebitdaYoY}%`, sub: "Controlled margin expansion", color: "var(--qc-up)" },
+            { label: "EBITDA MARGIN", value: `${margin}%`, sub: "Reported Q3 FY26 EBITDA margin", color: "var(--qc-warn)" },
+            { label: "GREENFIELD REV", value: `+${gfRev}%`, sub: "Q3 organic growth from new capacity", color: "var(--qc-up)" },
+          ].map((tile, i, arr) => (
+            <div key={i} style={{
+              padding: "14px 14px", background: "var(--qc-card)",
+              borderRight: i < arr.length - 1 ? "1px solid var(--qc-hair)" : undefined,
+              borderTop: "1px solid var(--qc-hair)",
+              display: "flex", flexDirection: "column", gap: 4,
             }}>
-              <p style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: "0 0 3px" }}>{k}</p>
-              <p style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>{v}</p>
+              <p style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: tile.color, margin: 0 }}>
+                {tile.label}
+              </p>
+              <p style={{ fontSize: 24, fontWeight: 600, color: tile.color, margin: "2px 0", lineHeight: 1 }}>
+                {tile.value}
+              </p>
+              <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.35 }}>
+                {tile.sub}
+              </p>
             </div>
           ))}
         </div>
-      )}
-
-      {/* Sub-lens 2×2 grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {subLenses.map((sub) => <SubLensCard key={sub.key} sub={sub} />)}
       </div>
 
-      {/* "In Their Own Words" quote */}
-      {quote && (
-        <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
-          <div style={{ padding: "10px 14px", background: "var(--qc-section)", borderBottom: "1px solid var(--qc-hair)" }}>
-            <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>
-              CAPITAL ALLOCATION · IN THEIR OWN WORDS
-            </p>
-            <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>{quote.call_date} · {quote.quarter} {quote.fiscal_year} analyst call</p>
-          </div>
-          <div style={{ padding: "16px 20px", background: "var(--qc-card)" }}>
-            <div style={{ borderLeft: "3px solid var(--qc-ink-3)", paddingLeft: 14 }}>
-              <p style={{ fontSize: 14, fontStyle: "italic", color: "var(--qc-ink)", margin: 0, lineHeight: 1.7, fontFamily: "var(--qc-font-serif, Georgia, serif)" }}>
-                "{quote.statement}"
-              </p>
-              <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "8px 0 0" }}>
-                — Management · {quote.call_date}
-              </p>
-            </div>
+      {/* Blockquote */}
+      <div style={{ borderLeft: "3px solid var(--qc-ink)", paddingLeft: 16, paddingTop: 4, paddingBottom: 4, margin: "0 2px" }}>
+        <p style={{
+          fontSize: 13, fontStyle: "italic", color: "var(--qc-ink)", margin: "0 0 6px",
+          lineHeight: 1.65, fontFamily: "var(--qc-font-serif, Georgia, serif)",
+        }}>
+          25.5% revenue growth with controlled EBITDA expansion signals capital deployed productively — but margin discipline will be tested as greenfield capacity matures into steady-state operations.
+        </p>
+        <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, letterSpacing: "0.04em" }}>
+          Quantcase capital analysis · Q3 FY26
+        </p>
+      </div>
+
+      {/* Growth comparison chart */}
+      <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
+        <div style={{
+          padding: "10px 16px", background: "var(--qc-section)",
+          borderBottom: "1px solid var(--qc-hair)", display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)" }}>
+            REVENUE vs EBITDA GROWTH · YoY %
+          </span>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 12, alignItems: "center" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: "var(--qc-ink-3)" }}>
+              <span style={{ width: 8, height: 8, borderRadius: 2, background: C_REV, display: "inline-block" }} /> Revenue
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: "var(--qc-ink-3)" }}>
+              <span style={{ width: 8, height: 8, borderRadius: 2, background: C_EBITDA, display: "inline-block" }} /> EBITDA
+            </span>
           </div>
         </div>
-      )}
+        <div style={{ padding: "16px 8px 8px", background: "var(--qc-card)" }}>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart
+              data={[
+                { name: "Consolidated", rev: revYoY, ebitda: ebitdaYoY },
+                { name: "Greenfield Q3", rev: gfRev, ebitda: topSignals.find((s) => s.metric === "SEG_GREENFIELD_EBITDA" && s.label.includes("Q3"))?.actual_value ?? 7.6 },
+                { name: "Greenfield YTD", rev: topSignals.find((s) => s.metric === "SEG_GREENFIELD_REV" && s.label.includes("YTD"))?.actual_value ?? 13.1, ebitda: topSignals.find((s) => s.metric === "SEG_GREENFIELD_EBITDA" && s.label.includes("YTD"))?.actual_value ?? 9.6 },
+              ]}
+              barCategoryGap="30%"
+              barGap={3}
+              margin={{ top: 4, right: 16, left: -16, bottom: 0 }}
+            >
+              <CartesianGrid vertical={false} stroke={C_HAIR} strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#9A9A92" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 9, fill: "#9A9A92" }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} domain={[0, 30]} />
+              <Tooltip
+                cursor={{ fill: "rgba(0,0,0,0.03)" }}
+                contentStyle={{ fontSize: 11, border: `1px solid ${C_HAIR}`, borderRadius: 6, background: "#fff" }}
+                formatter={(v: number, name: string) => [`${v}%`, name === "rev" ? "Revenue" : "EBITDA"]}
+              />
+              <ReferenceLine y={0} stroke={C_HAIR} />
+              <Bar dataKey="rev" fill={C_REV} radius={[3, 3, 0, 0]}>
+                <LabelList dataKey="rev" position="top" formatter={(v: number) => `${v}%`} style={{ fontSize: 9, fill: C_REV, fontWeight: 600 }} />
+              </Bar>
+              <Bar dataKey="ebitda" fill={C_EBITDA} radius={[3, 3, 0, 0]}>
+                <LabelList dataKey="ebitda" position="top" formatter={(v: number) => `${v}%`} style={{ fontSize: 9, fill: C_EBITDA, fontWeight: 600 }} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+          <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "4px 16px 0", lineHeight: 1.4 }}>
+            Gap between revenue and EBITDA bars = margin compression from greenfield ramp-up absorption
+          </p>
+        </div>
+      </div>
 
-      {/* Summary cards: highlights + risks */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-        {lens.highlights.map((h, i) => (
-          <div key={i} style={{
-            padding: "12px 13px",
-            background: "rgba(31,122,74,0.05)",
-            border: "1px solid rgba(31,122,74,0.18)",
-            borderLeft: "3px solid var(--qc-up)",
-            borderRadius: 8,
+      {/* Signal table */}
+      <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
+        <div style={{
+          padding: "10px 16px", background: "var(--qc-section)",
+          borderBottom: "1px solid var(--qc-hair)", display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)" }}>
+            CAPITAL SIGNAL BREAKDOWN
+          </span>
+          <span style={{ fontSize: 9, color: "var(--qc-ink-3)", marginLeft: "auto" }}>
+            {topSignals.length} signals
+          </span>
+        </div>
+        {rows.map((row, i) => (
+          <div key={row.key} style={{
+            padding: "11px 16px",
+            background: "var(--qc-card)",
+            borderBottom: i < rows.length - 1 ? "1px solid var(--qc-hair)" : undefined,
+            borderLeft: `3px solid ${row.borderColor}`,
+            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
           }}>
-            <p style={{ fontSize: 9, fontWeight: 700, color: "var(--qc-up)", margin: "0 0 5px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Strength {i + 1}
-            </p>
-            <p style={{ fontSize: 11, color: "var(--qc-ink)", margin: 0, lineHeight: 1.5 }}>{h}</p>
-          </div>
-        ))}
-        {lens.risks.map((r, i) => (
-          <div key={i} style={{
-            padding: "12px 13px",
-            background: "rgba(180,115,26,0.05)",
-            border: "1px solid rgba(180,115,26,0.18)",
-            borderLeft: "3px solid var(--qc-warn)",
-            borderRadius: 8,
-          }}>
-            <p style={{ fontSize: 9, fontWeight: 700, color: "var(--qc-warn)", margin: "0 0 5px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Watch {i + 1}
-            </p>
-            <p style={{ fontSize: 11, color: "var(--qc-ink)", margin: 0, lineHeight: 1.5 }}>{r}</p>
+            <div>
+              <p style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: 0 }}>
+                {row.label}
+              </p>
+              <p style={{ fontSize: 16, fontWeight: 600, color: "var(--qc-ink)", margin: "2px 0 0", lineHeight: 1 }}>
+                {row.value}
+              </p>
+            </div>
+            {row.delta && (
+              <span style={{
+                fontSize: 10, fontWeight: 700, color: row.deltaColor,
+                border: `1px solid ${row.deltaColor}40`, borderRadius: 4, padding: "3px 8px", whiteSpace: "nowrap",
+              }}>
+                {row.delta}
+              </span>
+            )}
           </div>
         ))}
       </div>
+
+      {/* Summary footer */}
+      <LensDrawerSummaryCard
+        title="Robust capital allocation with greenfield-led organic growth."
+        body={lens.takeaway}
+        metrics={[
+          { label: "Rev YoY Growth", value: `+${revYoY}%`, sub: "MSWIL Q3 FY26" },
+          { label: "EBITDA YoY", value: `+${ebitdaYoY}%`, sub: "Margin absorption phase" },
+          { label: "Greenfield Rev", value: `+${gfRev}%`, sub: "Q3 organic growth" },
+        ]}
+      />
     </div>
   );
 }

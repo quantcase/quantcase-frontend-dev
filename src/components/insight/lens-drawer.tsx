@@ -14,6 +14,8 @@ import { LensDetailFinancial } from "@/components/insight/lens-detail-financial"
 import { LensDetailCustomer } from "@/components/insight/lens-detail-customer";
 import { LensDetailEps } from "@/components/insight/lens-detail-eps";
 import { LensDetailPeRerating } from "@/components/insight/lens-detail-pe-rerating";
+import { LensDetailEarningQuality } from "@/components/insight/lens-detail-earning-quality";
+import { LensDetailTargetPriceMatrix } from "@/components/insight/lens-detail-target-price-matrix";
 
 interface LensDrawerProps {
   lens: LensDetail | null;
@@ -35,23 +37,6 @@ function statusBg(status: string) {
   return "rgba(180,115,26,0.12)";
 }
 
-function ScoreGauge({ score, max = 100 }: { score: number; max?: number }) {
-  const pct = Math.min(100, Math.round((score / max) * 100));
-  const color = pct >= 70 ? "var(--qc-up)" : pct >= 40 ? "var(--qc-warn)" : "var(--qc-down)";
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-      <div style={{ flex: 1, height: 4, borderRadius: 99, background: "var(--qc-hair)", overflow: "hidden" }}>
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          style={{ height: "100%", background: color, borderRadius: 99 }}
-        />
-      </div>
-      <span style={{ fontSize: 13, fontWeight: 600, color, minWidth: 36, textAlign: "right" }}>{pct}</span>
-    </div>
-  );
-}
 
 function LensDetailView({ lens, signals }: { lens: LensDetail; signals: Signal[] }) {
   switch (lens.slug) {
@@ -72,9 +57,14 @@ function LensDetailView({ lens, signals }: { lens: LensDetail; signals: Signal[]
     case "customer-distribution":
       return <LensDetailCustomer lens={lens} signals={signals} />;
     case "eps-engine":
+    case "earnings-forecast":
       return <LensDetailEps lens={lens} signals={signals} />;
     case "pe-rerating-potential":
       return <LensDetailPeRerating lens={lens} signals={signals} />;
+    case "earning-quality":
+      return <LensDetailEarningQuality lens={lens} signals={signals} />;
+    case "target-price-matrix":
+      return <LensDetailTargetPriceMatrix lens={lens} signals={signals} />;
     default:
       return null;
   }
@@ -175,32 +165,11 @@ export function LensDrawer({ lens, signals, onClose }: LensDrawerProps) {
             {/* Body */}
             <div style={{ flex: 1, padding: "20px 24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
 
-              {/* Score gauge — always shown */}
-              <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>
-                    Score
-                  </span>
-                  <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>
-                    {lens.signal_count} signals · z={lens.z_score.toFixed(2)}
-                  </span>
-                </div>
-                <ScoreGauge score={lens.score} />
-              </div>
-
-              {/* Takeaway — always shown */}
-              <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
-                <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
-                  Takeaway
-                </p>
-                <p style={{ fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.65, margin: 0 }}>{lens.takeaway}</p>
-              </div>
-
               {/* Lens-specific rich view — or fall back to generic */}
               <LensDetailView lens={lens} signals={signals} />
 
               {/* Generic fallback: key metrics, highlights, risks */}
-              {!["guidance-credibility", "promoter-activity", "disclosure-honesty", "capital-allocation", "industry-analysis", "competition", "financial-strength", "customer-distribution", "eps-engine", "pe-rerating-potential"].includes(lens.slug) && (
+              {!["guidance-credibility", "promoter-activity", "disclosure-honesty", "capital-allocation", "industry-analysis", "competition", "financial-strength", "customer-distribution", "eps-engine", "earnings-forecast", "pe-rerating-potential", "earning-quality", "target-price-matrix"].includes(lens.slug) && (
                 <>
                   {Object.keys(lens.key_metrics).length > 0 && (
                     <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>

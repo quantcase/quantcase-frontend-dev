@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
 import type { Signal } from "@/hooks/useSignals";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
+import { BACKEND_URL } from "@/lib/constants";
 
 interface Props {
   lens: LensDetail;
@@ -55,12 +56,6 @@ function dedup(signals: TopSignal[]): TopSignal[] {
   });
 }
 
-function signalDir(s: TopSignal): "up" | "down" | "neutral" {
-  const text = (s.label + " " + (s.statement ?? "")).toLowerCase();
-  if (text.includes("declin") || text.includes("moderat") || text.includes("slow") || text.includes("headwind") || text.includes("pressure")) return "down";
-  if (s.actual_value !== null && s.actual_value > 0) return "up";
-  return "neutral";
-}
 
 // ── sub-components ────────────────────────────────────────────────────────────
 
@@ -133,35 +128,7 @@ function SignalCard({ icon, headline, sub, badge, badgeColor }: SignalCardProps)
   );
 }
 
-interface PeerCellProps {
-  index: number;
-}
-
-function PeerCell({ index }: PeerCellProps) {
-  return (
-    <div style={{
-      padding: "40px 20px",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      gap: 10, background: "var(--qc-section)",
-      borderRight: index % 2 === 0 ? "1px solid var(--qc-hair)" : undefined,
-      borderTop: index >= 2 ? "1px solid var(--qc-hair)" : undefined,
-      minHeight: 160,
-    }}>
-      <span style={{ fontSize: 22, color: "var(--qc-hair)", lineHeight: 1 }}>⊕</span>
-      <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: 0 }}>
-        SELECT PEER {index + 1}
-      </p>
-    </div>
-  );
-}
-
 // ── Peer company card ─────────────────────────────────────────────────────────
-
-interface MODFramework {
-  management: { label: string; color: string };
-  opportunity: { label: string; color: string };
-  deal: { label: string; color: string };
-}
 
 function ratingColor(r: string) {
   const l = r.toLowerCase();
@@ -191,28 +158,37 @@ function RatingChip({ label, value }: RatingChipProps) {
   );
 }
 
-function PrimaryPeerCard({ lens }: { lens: LensDetail }) {
-  const km = lens.key_metrics;
-  const statusCol = statusColor(lens.status);
+interface PeerCardData {
+  ticker: string;
+  callId: string;
+  competitionLens: LensDetail | null;
+  managementScore: number | null;
+  opportunityScore: number | null;
+  dealScore: number | null;
+}
 
-  const mod: MODFramework = {
-    management: { label: "Management", color: "var(--qc-up)" },
-    opportunity: { label: "Opportunity", color: "var(--qc-warn)" },
-    deal: { label: "Deal", color: "var(--qc-ink-3)" },
-  };
 
-  // Derive approximate labels from key_metrics / score
-  const companyGrowth = km["Company PV Growth (Q3)"] ?? "+25%";
-  const pvGrowth = km["PV Industry Growth (Q3)"] ?? "+19%";
-  const gfEbitdaQ3 = km["Greenfield EBITDA Growth (Q3)"] ?? "+7.6%";
-  const outperf = km["Outperformance vs PV Market"] ?? "+6pp";
+function scoreLabel(score: number | null): string {
+  if (score === null) return "N/A";
+  if (score >= 70) return "Strong";
+  if (score >= 40) return "Moderate";
+  return "Weak";
+}
 
-  // MOD ratings derived from lens
-  const modManagement = lens.score >= 70 ? "Strong" : lens.score >= 40 ? "Moderate" : "Weak";
-  const modOpportunity = "Moderate";
-  const modDeal = "Fair";
+function CompetitionPeerCard({ ticker, data }: { ticker: string; data: PeerCardData }) {
+  const competitionLens = data.competitionLens;
+  const km = competitionLens?.key_metrics ?? {};
+  const statusCol = competitionLens ? statusColor(competitionLens.status) : "var(--qc-ink-3)";
 
-  // Fundamentals
+  const companyGrowth = km["Company PV Growth (Q3)"] ?? km["Revenue Growth (Q3)"] ?? "—";
+  const pvGrowth = km["PV Industry Growth (Q3)"] ?? "—";
+  const gfEbitdaQ3 = km["Greenfield EBITDA Growth (Q3)"] ?? km["EBITDA Growth (Q3)"] ?? "—";
+  const outperf = km["Outperformance vs PV Market"] ?? "—";
+
+  const mgmt = scoreLabel(data.managementScore);
+  const opp = scoreLabel(data.opportunityScore);
+  const deal = scoreLabel(data.dealScore);
+
   const fundamentals = [
     { label: "GROWTH", value: companyGrowth },
     { label: "OUTPERF.", value: outperf },
@@ -221,42 +197,32 @@ function PrimaryPeerCard({ lens }: { lens: LensDetail }) {
   ];
 
   return (
-    <div style={{ padding: "18px 20px", background: "var(--qc-card)", display: "flex", flexDirection: "column", gap: 14 }}>
-      {/* Name + status */}
+    <div style={{ padding: "18px 20px", background: "var(--qc-card)", display: "flex", flexDirection: "column", gap: 14, height: "100%" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
-          <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>
-            {/* Ticker from lens or static */}
-            MSUMI
-          </p>
-          <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>NSE: MSUMI · Auto Ancillaries</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>{ticker}</p>
+          <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>NSE: {ticker} · Auto Ancillaries</p>
         </div>
-        <span style={{ fontSize: 10, fontWeight: 700, color: statusCol, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-          {lens.status}
-        </span>
+        {competitionLens && (
+          <span style={{ fontSize: 10, fontWeight: 700, color: statusCol, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            {competitionLens.status}
+          </span>
+        )}
       </div>
 
-      {/* M.O.D. Framework */}
       <div>
-        <p style={{
-          fontSize: 9, fontWeight: 700, textTransform: "uppercase",
-          letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px",
-        }}>
+        <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
           M.O.D. FRAMEWORK
         </p>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          <RatingChip label="MANAGEMENT" value={modManagement} />
-          <RatingChip label="OPPORTUNITY" value={modOpportunity} />
-          <RatingChip label="DEAL" value={modDeal} />
+          <RatingChip label="MANAGEMENT" value={mgmt} />
+          <RatingChip label="OPPORTUNITY" value={opp} />
+          <RatingChip label="DEAL" value={deal} />
         </div>
       </div>
 
-      {/* Fundamentals */}
       <div>
-        <p style={{
-          fontSize: 9, fontWeight: 700, textTransform: "uppercase",
-          letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px",
-        }}>
+        <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
           KEY METRICS
         </p>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -269,13 +235,203 @@ function PrimaryPeerCard({ lens }: { lens: LensDetail }) {
   );
 }
 
+// ── Primary card (always MSUMI) ────────────────────────────────────────────────
+
+function PrimaryPeerCard({ ticker, lens }: { ticker: string; lens: LensDetail }) {
+  const km = lens.key_metrics;
+  const statusCol = statusColor(lens.status);
+
+  const companyGrowth = km["Company PV Growth (Q3)"] ?? "+25%";
+  const pvGrowth = km["PV Industry Growth (Q3)"] ?? "+19%";
+  const gfEbitdaQ3 = km["Greenfield EBITDA Growth (Q3)"] ?? "+7.6%";
+  const outperf = km["Outperformance vs PV Market"] ?? "+6pp";
+
+  const modManagement = lens.score >= 70 ? "Strong" : lens.score >= 40 ? "Moderate" : "Weak";
+
+  const fundamentals = [
+    { label: "GROWTH", value: companyGrowth },
+    { label: "OUTPERF.", value: outperf },
+    { label: "GF EBITDA", value: gfEbitdaQ3 },
+    { label: "PV INDUSTRY", value: pvGrowth },
+  ];
+
+  return (
+    <div style={{ padding: "18px 20px", background: "var(--qc-card)", display: "flex", flexDirection: "column", gap: 14, height: "100%" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <div>
+          <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>{ticker}</p>
+          <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>NSE: {ticker} · Auto Ancillaries</p>
+        </div>
+        <span style={{ fontSize: 10, fontWeight: 700, color: statusCol, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          {lens.status}
+        </span>
+      </div>
+
+      <div>
+        <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
+          M.O.D. FRAMEWORK
+        </p>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <RatingChip label="MANAGEMENT" value={modManagement} />
+          <RatingChip label="OPPORTUNITY" value="Moderate" />
+          <RatingChip label="DEAL" value="Fair" />
+        </div>
+      </div>
+
+      <div>
+        <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
+          KEY METRICS
+        </p>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {fundamentals.map((f) => (
+            <RatingChip key={f.label} label={f.label} value={f.value} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Peer slot: fetches lenses for a ticker and renders the appropriate state ──
+
+interface PeerSlotProps {
+  ticker: string;
+  index: number; // 1, 2, or 3
+  onDeselect: () => void;
+}
+
+interface LensesApiResponse {
+  callId: string;
+  categories: Record<string, LensDetail[]>;
+}
+
+function PeerSlot({ ticker, index, onDeselect }: PeerSlotProps) {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<PeerCardData | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setData(null);
+    const callId = `${ticker}_FY2026_Q3`;
+    fetch(`${BACKEND_URL}/api/lenses?callId=${callId}`)
+      .then((r) => r.json())
+      .then((res: LensesApiResponse) => {
+        const cats = res.categories ?? {};
+        const competitionLens = cats.opportunity?.find((l) => l.slug === "competition" && l.computed) ?? null;
+
+        const mgmtScores = (cats.management ?? []).map((l) => l.score).filter((s): s is number => s !== null);
+        const oppScores = (cats.opportunity ?? []).map((l) => l.score).filter((s): s is number => s !== null);
+        const dealScores = (cats.deal ?? []).map((l) => l.score).filter((s): s is number => s !== null);
+
+        setData({
+          ticker,
+          callId,
+          competitionLens,
+          managementScore: mgmtScores.length ? mgmtScores.reduce((a, b) => a + b, 0) / mgmtScores.length : null,
+          opportunityScore: oppScores.length ? oppScores.reduce((a, b) => a + b, 0) / oppScores.length : null,
+          dealScore: dealScores.length ? dealScores.reduce((a, b) => a + b, 0) / dealScores.length : null,
+        });
+      })
+      .catch(() => setData(null))
+      .finally(() => setLoading(false));
+  }, [ticker]);
+
+  const cellStyle: React.CSSProperties = {
+    background: "var(--qc-section)",
+    display: "flex",
+    flexDirection: "column",
+    position: "relative",
+  };
+
+  const closeBtn = (
+    <button
+      onClick={onDeselect}
+      style={{
+        position: "absolute", top: 8, right: 8,
+        background: "var(--qc-card)", border: "1px solid var(--qc-hair)",
+        borderRadius: 6, width: 22, height: 22,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        cursor: "pointer", color: "var(--qc-ink-3)", fontSize: 12, lineHeight: 1,
+        zIndex: 1,
+      }}
+      aria-label={`Remove ${ticker}`}
+    >
+      ×
+    </button>
+  );
+
+  if (loading) {
+    return (
+      <div style={{ ...cellStyle, alignItems: "center", justifyContent: "center", gap: 8, padding: "40px 20px", minHeight: 160 }}>
+        {closeBtn}
+        <div style={{
+          width: 16, height: 16, border: "2px solid var(--qc-hair)",
+          borderTopColor: "var(--qc-ink-3)", borderRadius: "50%",
+          animation: "spin 0.7s linear infinite",
+        }} />
+        <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: 0 }}>
+          {ticker}
+        </p>
+      </div>
+    );
+  }
+
+  const hasData = data && (data.competitionLens !== null || data.managementScore !== null);
+
+  if (!hasData) {
+    return (
+      <div style={{ ...cellStyle, alignItems: "center", justifyContent: "center", gap: 8, padding: "40px 20px", minHeight: 160 }}>
+        {closeBtn}
+        <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>{ticker}</p>
+        <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: 0 }}>
+          Analysis not yet computed
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ ...cellStyle, flex: 1 }}>
+      {closeBtn}
+      <CompetitionPeerCard ticker={ticker} data={data} />
+    </div>
+  );
+}
+
+// ── Empty peer slot placeholder ────────────────────────────────────────────────
+
+function PeerCell({ index }: { index: number }) {
+  return (
+    <div style={{
+      padding: "40px 20px",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      gap: 10, background: "var(--qc-section)",
+      minHeight: 160,
+    }}>
+      <span style={{ fontSize: 22, color: "var(--qc-hair)", lineHeight: 1 }}>⊕</span>
+      <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: 0 }}>
+        SELECT PEER {index}
+      </p>
+    </div>
+  );
+}
+
 // ── main export ───────────────────────────────────────────────────────────────
 
-const PEER_TICKERS = ["MSUMI", "MOTHERSON", "BOSCHLTD", "SCHAEFFLER", "BHARATFORG", "SUMITOMO ELEC", "MINDA CORP", "LUMAX INDS", "YAZAKI INDIA"];
+const PRIMARY_TICKER = "MSUMI";
+const PEER_TICKERS = ["MOTHERSON", "BOSCHLTD", "SCHAEFFLER", "BHARATFORG", "SUMITOMO ELEC", "MINDA CORP", "LUMAX INDS", "YAZAKI INDIA"];
 
-export function LensDetailCompetition({ lens, signals }: Props) {
-  const [peerExpanded, setPeerExpanded] = useState(false);
+export function LensDetailCompetition({ lens, signals: _signals }: Props) {
+  const [selectedPeers, setSelectedPeers] = useState<string[]>([]);
   const [swotExpanded, setSwotExpanded] = useState(false);
+
+  function togglePeer(ticker: string) {
+    setSelectedPeers((prev) => {
+      if (prev.includes(ticker)) return prev.filter((t) => t !== ticker);
+      if (prev.length >= 3) return prev;
+      return [...prev, ticker];
+    });
+  }
 
   const km = lens.key_metrics;
   const topSignals = dedup(lens.top_signals ?? []);
@@ -530,34 +686,57 @@ export function LensDetailCompetition({ lens, signals }: Props) {
             <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", marginRight: 4 }}>
               PEER SET
             </span>
-            {PEER_TICKERS.map((t) => (
-              <Chip key={t} active={t === "MSUMI"}>{t}{t === "MSUMI" ? " ✓" : ""}</Chip>
-            ))}
+            {/* Primary ticker — always active, not clickable */}
+            <Chip active>{PRIMARY_TICKER} ✓</Chip>
+            {PEER_TICKERS.map((t) => {
+              const isActive = selectedPeers.includes(t);
+              const isDisabled = !isActive && selectedPeers.length >= 3;
+              return (
+                <span
+                  key={t}
+                  onClick={() => !isDisabled && togglePeer(t)}
+                  style={{ cursor: isDisabled ? "not-allowed" : "pointer", opacity: isDisabled ? 0.45 : 1 }}
+                >
+                  <Chip active={isActive}>{t}{isActive ? " ✓" : ""}</Chip>
+                </span>
+              );
+            })}
           </div>
         </div>
 
-        {/* 2×2 peer grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", background: "var(--qc-hair)" }}>
-          {/* Primary peer — always MSUMI */}
-          <div style={{
-            background: "var(--qc-card)",
-            borderRight: "1px solid var(--qc-hair)",
-          }}>
-            <PrimaryPeerCard lens={lens} />
+        {/* 2×2 peer grid — equal-height rows via CSS grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gridTemplateRows: "1fr 1fr",
+          gap: 1,
+          background: "var(--qc-hair)",
+        }}>
+          {/* Primary — always top-left */}
+          <div style={{ background: "var(--qc-card)", display: "flex", flexDirection: "column" }}>
+            <PrimaryPeerCard ticker={PRIMARY_TICKER} lens={lens} />
           </div>
 
-          {/* Peer 1 placeholder */}
-          <PeerCell index={0} />
-
-          {/* Peer 2 placeholder */}
-          <div style={{ borderTop: "1px solid var(--qc-hair)", borderRight: "1px solid var(--qc-hair)" }}>
+          {/* Peer slot 1 — top-right */}
+          {selectedPeers[0] ? (
+            <PeerSlot ticker={selectedPeers[0]} index={1} onDeselect={() => togglePeer(selectedPeers[0])} />
+          ) : (
             <PeerCell index={1} />
-          </div>
+          )}
 
-          {/* Peer 3 placeholder */}
-          <div style={{ borderTop: "1px solid var(--qc-hair)" }}>
+          {/* Peer slot 2 — bottom-left */}
+          {selectedPeers[1] ? (
+            <PeerSlot ticker={selectedPeers[1]} index={2} onDeselect={() => togglePeer(selectedPeers[1])} />
+          ) : (
             <PeerCell index={2} />
-          </div>
+          )}
+
+          {/* Peer slot 3 — bottom-right */}
+          {selectedPeers[2] ? (
+            <PeerSlot ticker={selectedPeers[2]} index={3} onDeselect={() => togglePeer(selectedPeers[2])} />
+          ) : (
+            <PeerCell index={3} />
+          )}
         </div>
       </div>
     </div>

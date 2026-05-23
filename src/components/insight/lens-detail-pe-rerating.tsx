@@ -1,13 +1,13 @@
 "use client";
 
+import { useState, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import type { LensDetail } from "@/hooks/useLenses";
-import type { Signal } from "@/hooks/useSignals";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
   lens: LensDetail;
-  signals: Signal[];
+  signals: unknown[];
 }
 
 // ─── Scenario data derived from lens ─────────────────────────────────────────
@@ -269,17 +269,37 @@ function ScenarioEnginePanel({ lens }: { lens: LensDetail }) {
 // ─── Right panel: What changes market perception ──────────────────────────────
 
 function CatalystItem({ icon, label, sublabel, positive }: { icon: string; label: string; sublabel: string; positive: boolean }) {
+  const [showPopup, setShowPopup] = useState(false);
+  const [alignRight, setAlignRight] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   const color = positive ? "var(--qc-up)" : "var(--qc-down)";
   const bg = positive ? "rgba(31,122,74,0.07)" : "rgba(220,38,38,0.06)";
   const border = positive ? "rgba(31,122,74,0.18)" : "rgba(220,38,38,0.15)";
+  const popupBg = positive ? "rgba(31,122,74,0.06)" : "rgba(220,38,38,0.05)";
+
+  const handleMouseEnter = useCallback(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setAlignRight(rect.left > window.innerWidth / 2);
+    }
+    setShowPopup(true);
+  }, []);
+
   return (
-    <div style={{
-      display: "flex", gap: 10, alignItems: "flex-start",
-      padding: "10px 12px",
-      background: bg,
-      border: `1px solid ${border}`,
-      borderRadius: 7,
-    }}>
+    <div
+      ref={ref}
+      style={{
+        display: "flex", gap: 10, alignItems: "center",
+        padding: "8px 12px",
+        background: bg,
+        border: `1px solid ${border}`,
+        borderRadius: 7,
+        cursor: "default",
+        position: "relative",
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={() => setShowPopup(false)}
+    >
       <div style={{
         width: 28, height: 28, borderRadius: 6, flexShrink: 0,
         background: positive ? "rgba(31,122,74,0.12)" : "rgba(220,38,38,0.10)",
@@ -287,10 +307,37 @@ function CatalystItem({ icon, label, sublabel, positive }: { icon: string; label
       }}>
         {icon}
       </div>
-      <div>
-        <p style={{ fontSize: 12, fontWeight: 700, color: "var(--qc-ink)", margin: "0 0 3px" }}>{label}</p>
-        <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>{sublabel}</p>
-      </div>
+      <p style={{ fontSize: 12, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>{label}</p>
+
+      {showPopup && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: "calc(100% + 6px)",
+            ...(alignRight ? { right: 0 } : { left: 0 }),
+            zIndex: 50,
+            width: 240,
+            borderRadius: 10,
+            border: `1px solid ${border}`,
+            background: "var(--qc-card)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{
+            padding: "8px 12px",
+            borderBottom: `1px solid ${border}`,
+            background: popupBg,
+            display: "flex", alignItems: "center", gap: 8,
+          }}>
+            <span style={{ fontSize: 13 }}>{icon}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--qc-ink)" }}>{label}</span>
+          </div>
+          <div style={{ padding: "10px 12px" }}>
+            <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink-3)", lineHeight: 1.6 }}>{sublabel}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

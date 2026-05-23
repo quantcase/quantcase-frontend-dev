@@ -58,7 +58,7 @@ function LensDetailView({ lens, signals }: { lens: LensDetail; signals: Signal[]
       return <LensDetailCustomer lens={lens} signals={signals} />;
     case "eps-engine":
     case "earnings-forecast":
-      return <LensDetailEps lens={lens} signals={signals} />;
+      return <LensDetailEps lens={lens} />;
     case "pe-rerating-potential":
       return <LensDetailPeRerating lens={lens} signals={signals} />;
     case "earning-quality":

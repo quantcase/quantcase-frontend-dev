@@ -14,6 +14,8 @@ interface MODSynopsisCardProps {
   subScores: SubScore[];
   draggingSymbols: string[];
   onOpenBreakdown?: () => void;
+  isShadow?: boolean;
+  onUploadPortfolio?: () => void;
 }
 
 const ratingColor: Record<SubScore["rating"], string> = {
@@ -71,7 +73,7 @@ function ScoreTile({ label, score, rating }: SubScore) {
   );
 }
 
-export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBreakdown }: MODSynopsisCardProps) {
+export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBreakdown, isShadow, onUploadPortfolio }: MODSynopsisCardProps) {
   return (
     <div
       style={{
@@ -87,8 +89,30 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
       }}
     >
       {/* Header */}
-      <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.35)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-        YOUR PORTFOLIO · MOD SYNOPSIS
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.35)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+          {isShadow ? "SHADOW PORTFOLIO · MOD SYNOPSIS" : "YOUR PORTFOLIO · MOD SYNOPSIS"}
+        </div>
+        {isShadow && onUploadPortfolio && (
+          <button
+            onClick={onUploadPortfolio}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 5,
+              fontSize: 11, fontWeight: 500, color: "#0F172B",
+              background: "#fff", border: "none",
+              borderRadius: 6, padding: "4px 10px",
+              cursor: "pointer", whiteSpace: "nowrap",
+              letterSpacing: "0.01em",
+            }}
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Upload portfolio
+          </button>
+        )}
       </div>
 
       {/* Headline */}

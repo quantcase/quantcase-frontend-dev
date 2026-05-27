@@ -13,11 +13,10 @@ import { EventsMovingMarket } from "@/components/investor/events-moving-market";
 import type { MacroRegime } from "@/components/investor/events-moving-market";
 import { ShadowPortfolio } from "@/components/investor/shadow-portfolio";
 import type { ShadowStock } from "@/components/investor/shadow-portfolio";
-import { CommunityDiscussionRow } from "@/components/investor/community-discussion-row";
-import type { CommunityThread, IpoDiscussion } from "@/components/investor/community-discussion-row";
 import { DiscoverScreens } from "@/components/investor/discover-screens";
 import type { DiscoverScreen } from "@/components/investor/discover-screens";
 import { ResearchLibraryBanner } from "@/components/investor/research-library-banner";
+import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
 import { useShadowPortfolio } from "@/hooks/useShadowPortfolio";
 import { useUserPortfolio } from "@/hooks/useUserPortfolio";
 
@@ -150,35 +149,6 @@ const SHADOW_STOCKS: ShadowStock[] = [
   { symbol: "POWERGRID",  name: "Power Grid Corp",       ltp: "₹318.40",   change1d: "+0.6%", changePositive: true,  qcScore: 73, thesisTags: ["MANAGEMENT"],  whyInvested: "Regulated Asset Base",  conviction: "POSITIVE", href: "/screener/management?symbol=POWERGRID"  },
 ];
 
-const COMMUNITY_THREAD: CommunityThread = {
-  kind: "community",
-  label: "HOT IN COMMUNITY · LAST 24H",
-  liveTag: true,
-  titleHtml: `Is <span style="color:#7c3aed;font-style:italic">Hindustan Unilever</span> staging a rural comeback?`,
-  body: "187 comments · Volume recovery pace, pricing power, and rural distribution trends picking up. Top thread by Sandeep Tekwani (badge: 4.6★).",
-  stats: [
-    { value: 187, label: "comments" },
-    { value: 42,  label: "users"    },
-    { value: 3,   label: "top contributors" },
-  ],
-  cta: "Join discussion →",
-  href: "/screener/home",
-};
-
-const IPO_DISCUSSION: IpoDiscussion = {
-  kind: "ipo",
-  label: "UPCOMING IPO DISCUSSION",
-  opensTag: "12 MAY",
-  titleHtml: `<span style="color:#7c3aed;font-style:italic">Aditya Birla Capital</span> — DRHP filed, GMP at ₹185`,
-  body: "94 users in the room. DRHP analysis posted by Quantcase research team · Subscribe / Subscribe on dips / Avoid verdict in 48 hrs.",
-  stats: [
-    { value: 94, label: "in room"              },
-    { value: 12, label: "independent verdicts" },
-  ],
-  cta: "Open room →",
-  href: "/screener/home",
-};
-
 const DISCOVER_SCREENS: DiscoverScreen[] = [
   {
     id: "promoter-buying",
@@ -242,6 +212,7 @@ export default function InvestorDashboardPage() {
   const greeting = getGreeting();
   const todayMeta = getTodayMeta();
   const [modDrawerOpen, setModDrawerOpen] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
   const { holdings: shadowHoldings, loading: shadowLoading, notFound: shadowNotFound } = useShadowPortfolio();
   const { data: userPortfolio, loading: portfolioLoading } = useUserPortfolio();
@@ -286,6 +257,7 @@ export default function InvestorDashboardPage() {
 
   // User portfolio — derive stock count for HoldingsPanel
   const userStockCount = portfolioLoading ? 12 : userPortfolio?.holdings.length ?? 12;
+  const isUserPortfolioMissing = !portfolioLoading && !userPortfolio;
 
   return (
     <div style={{ background: "var(--qc-bg, #F5F5F5)", minHeight: "100vh" }}>
@@ -359,6 +331,8 @@ export default function InvestorDashboardPage() {
             ]}
             draggingSymbols={["ACC", "HFCL"]}
             onOpenBreakdown={() => setModDrawerOpen(true)}
+            isShadow={isUserPortfolioMissing}
+            onUploadPortfolio={() => setUploadModalOpen(true)}
           />
 
           <HoldingsPanel
@@ -380,6 +354,8 @@ export default function InvestorDashboardPage() {
               { label: "Healthcare",  value: "₹8.5 L",  count: 2, pct: 15, color: "#0891b2" },
               { label: "FMCG",        value: "₹8.5 L",  count: 2, pct: 15, color: "#71717a" },
             ]}
+            isShadow={isUserPortfolioMissing}
+            onUploadPortfolio={() => setUploadModalOpen(true)}
           />
         </section>
 
@@ -437,13 +413,6 @@ export default function InvestorDashboardPage() {
         </section>
 
         {/* ════════════════════════════════════════════════════════════
-            ROW 5 — Community Discussion (left) + IPO Discussion (right)
-        ═══════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 14 }}>
-          <CommunityDiscussionRow thread={COMMUNITY_THREAD} ipo={IPO_DISCUSSION} />
-        </section>
-
-        {/* ════════════════════════════════════════════════════════════
             ROW 6 — Discover Screens (full width)
         ═══════════════════════════════════════════════════════════════ */}
         <section style={{ marginBottom: 14 }}>
@@ -467,6 +436,12 @@ export default function InvestorDashboardPage() {
         open={modDrawerOpen}
         stocks={[]}
         onClose={() => setModDrawerOpen(false)}
+      />
+
+      <UploadPortfolioModal
+        open={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        onSuccess={() => { setUploadModalOpen(false); window.location.reload(); }}
       />
     </div>
   );

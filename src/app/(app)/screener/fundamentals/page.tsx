@@ -161,7 +161,7 @@ function FinancialsContent() {
   }
 
   const { standardized } = data;
-  const { metrics, quarterly, annual, balanceSheet, cashFlow, cashFlowQuarterly } = standardized;
+  const { metrics, quarterly, annual, balanceSheet, cashFlow } = standardized;
 
   const fi = data.fundamentalsIntelligence;
 
@@ -272,19 +272,13 @@ function FinancialsContent() {
           <TabularCard
             title="Balance Sheet"
             subtitle="All values in INR Crores"
-            tabs={balanceSheetView === "table" && balanceSheet.quarterly ? ["Quarterly", "Annual"] : undefined}
-            defaultTab="Annual"
             headerAction={<ViewToggle view={balanceSheetView} onChange={setBalanceSheetView} />}
           >
-            {(activeTab) =>
-              balanceSheetView === "chart" ? (
-                <BalanceSheetTreemap table={balanceSheet.annual} />
-              ) : (
-                <FinancialDataTable
-                  table={activeTab === "Quarterly" && balanceSheet.quarterly ? balanceSheet.quarterly : balanceSheet.annual}
-                />
-              )
-            }
+            {balanceSheetView === "chart" ? (
+              <BalanceSheetTreemap table={balanceSheet.annual} />
+            ) : (
+              <FinancialDataTable table={balanceSheet.annual} />
+            )}
           </TabularCard>
         </div>
 
@@ -293,20 +287,13 @@ function FinancialsContent() {
           <TabularCard
             title="Cash Flow"
             subtitle="All values in INR Crores"
-            tabs={cashFlowView === "table" && cashFlowQuarterly ? ["Quarterly", "Annual"] : undefined}
-            defaultTab="Annual"
             headerAction={<ViewToggle view={cashFlowView} onChange={setCashFlowView} />}
           >
-            {(activeTab) =>
-              cashFlowView === "chart" ? (
-                <CashFlowWaterfall table={cashFlow} />
-              ) : (
-                <FinancialDataTable
-                  table={activeTab === "Quarterly" && cashFlowQuarterly ? cashFlowQuarterly : cashFlow}
-                  cashFlowMode
-                />
-              )
-            }
+            {cashFlowView === "chart" ? (
+              <CashFlowWaterfall table={cashFlow} />
+            ) : (
+              <FinancialDataTable table={cashFlow} cashFlowMode />
+            )}
           </TabularCard>
         </div>
 
@@ -343,29 +330,26 @@ function FinancialsContent() {
             <TabularCard
               title="Shareholding Pattern"
               subtitle="Numbers in percentages"
-              tabs={shareholdingView === "table" ? ["Quarterly", "Annual"] : undefined}
               headerAction={<ViewToggle view={shareholdingView} onChange={setShareholdingView} />}
             >
-              {(activeTab) =>
-                shareholdingLoading ? (
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 0" }}>
-                    <div
-                      style={{
-                        width: 20,
-                        height: 20,
-                        borderRadius: "50%",
-                        border: "2px solid var(--qc-hair)",
-                        borderTopColor: "var(--qc-ink)",
-                        animation: "spin 0.7s linear infinite",
-                      }}
-                    />
-                  </div>
-                ) : shareholdingView === "chart" ? (
-                  <ShareholdingCharts sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} />
-                ) : (
-                  <ShareholdingTable sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} mode={activeTab} />
-                )
-              }
+              {shareholdingLoading ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 0" }}>
+                  <div
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: "50%",
+                      border: "2px solid var(--qc-hair)",
+                      borderTopColor: "var(--qc-ink)",
+                      animation: "spin 0.7s linear infinite",
+                    }}
+                  />
+                </div>
+              ) : shareholdingView === "chart" ? (
+                <ShareholdingCharts sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} />
+              ) : (
+                <ShareholdingTable sections={shareholdingData!.sections} quarters={shareholdingData!.quarters} />
+              )}
             </TabularCard>
           </div>
         )}

@@ -10,6 +10,7 @@ import { PluginChainTab } from "./_components/PluginChainTab";
 import { SkillsLibraryTab } from "./_components/SkillsLibraryTab";
 import { SkillDrawer } from "./_components/SkillDrawer";
 import { NewSkillDialog } from "./_components/NewSkillDialog";
+import { DataSanityTab } from "./_components/DataSanityTab";
 
 export default function PipelinesPage() {
   // ── Data state ────────────────────────────────────────────────────────────
@@ -19,7 +20,7 @@ export default function PipelinesPage() {
   const [allSkills, setAllSkills] = useState<Skill[]>([]);
 
   // ── UI state ──────────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<"plugin" | "skills">("plugin");
+  const [activeTab, setActiveTab] = useState<"plugin" | "skills" | "sanity">("plugin");
   const [loading, setLoading] = useState({ plugins: false, chain: false, skills: false });
   const [mutationError, setMutationError] = useState<string | null>(null);
 
@@ -222,10 +223,10 @@ export default function PipelinesPage() {
         )}
 
         {/* Tab card: tabs + content unified */}
-        <div className="rounded-[10px] border border-[var(--qc-hair)] bg-[var(--qc-section)] overflow-hidden">
+        <div className="rounded-[10px] border border-[var(--qc-border-default)] bg-[var(--qc-surface-panel)]">
           {/* Tab strip */}
-          <div className="flex border-b border-[var(--qc-hair)] bg-white px-4">
-            {(["plugin", "skills"] as const).map((tab) => (
+          <div className="flex border-b border-[var(--qc-border-default)] bg-white px-4 rounded-t-[10px] overflow-hidden">
+            {(["plugin", "skills", "sanity"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -235,7 +236,7 @@ export default function PipelinesPage() {
                     : "border-transparent text-[var(--qc-ink-2)] hover:text-[var(--qc-ink)]"
                 }`}
               >
-                {tab === "plugin" ? "Plugin Chain" : "Skills Library"}
+                {tab === "plugin" ? "Plugin Chain" : tab === "skills" ? "Skills Library" : "Data Sanity"}
               </button>
             ))}
           </div>
@@ -266,6 +267,8 @@ export default function PipelinesPage() {
                 onNewSkillFormOpen={() => { setShowNewSkillForm(true); setMutationError(null); }}
               />
             )}
+
+            {activeTab === "sanity" && <DataSanityTab />}
           </div>
         </div>
       </main>

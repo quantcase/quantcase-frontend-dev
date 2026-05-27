@@ -1,0 +1,55 @@
+export interface HoldingNote {
+  id: string;
+  holding_id: string;
+  note_text: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HoldingMarketData {
+  ltp: number | null;
+  change: number | null;
+  change_percent: number | null;
+  qc_score: number | null;
+  conviction: "POSITIVE" | "NEUTRAL" | "WATCH" | null;
+  thesis_tags: string[];
+}
+
+export interface Holding {
+  id: string;
+  ticker: string;
+  amount_invested: number;
+  invested_at: string;
+  created_at: string;
+  updated_at: string;
+  user_portfolio_id: string | null;
+  shadow_portfolio_id: string | null;
+  notes: HoldingNote[];
+  market_data?: HoldingMarketData | null;
+}
+
+export interface UserPortfolio {
+  id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  holdings: Holding[];
+}
+
+export interface ShadowPortfolioData {
+  id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  holdings: Holding[];
+}
+
+export interface AddShadowHoldingPayload {
+  ticker: string;
+}
+
+export interface UpdateHoldingPayload {
+  ticker?: string;
+  amount_invested?: number;
+  invested_at?: string;
+}

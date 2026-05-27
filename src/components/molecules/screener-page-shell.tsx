@@ -68,7 +68,7 @@ function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps)
       )}
 
       {/* Page content */}
-      <div className="mb-8">{children}</div>
+      <div className="pb-8">{children}</div>
     </div>
   );
 }

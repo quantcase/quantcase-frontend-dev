@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { MODSynopsisCard } from "@/components/investor/mod-synopsis-card";
 import { MODBreakdownDrawer } from "@/components/investor/mod-breakdown-drawer";
 import { HoldingsPanel } from "@/components/investor/holdings-panel";
@@ -18,6 +18,8 @@ import type { CommunityThread, IpoDiscussion } from "@/components/investor/commu
 import { DiscoverScreens } from "@/components/investor/discover-screens";
 import type { DiscoverScreen } from "@/components/investor/discover-screens";
 import { ResearchLibraryBanner } from "@/components/investor/research-library-banner";
+import { useShadowPortfolio } from "@/hooks/useShadowPortfolio";
+import { useUserPortfolio } from "@/hooks/useUserPortfolio";
 
 // ── Static placeholder data ───────────────────────────────────────────────────
 
@@ -241,6 +243,50 @@ export default function InvestorDashboardPage() {
   const todayMeta = getTodayMeta();
   const [modDrawerOpen, setModDrawerOpen] = useState(false);
 
+  const { holdings: shadowHoldings, loading: shadowLoading, notFound: shadowNotFound } = useShadowPortfolio();
+  const { data: userPortfolio, loading: portfolioLoading } = useUserPortfolio();
+
+  const apiShadowStocks: ShadowStock[] = useMemo(
+    () =>
+      shadowHoldings.map((h) => {
+        const md = h.market_data;
+        const ltp = md?.ltp != null ? `₹${md.ltp.toLocaleString("en-IN")}` : "—";
+        const changePct = md?.change_percent;
+        const change1d = changePct != null
+          ? `${changePct >= 0 ? "+" : ""}${changePct.toFixed(2)}%`
+          : "—";
+        return {
+          symbol: h.ticker,
+          name: h.ticker,
+          ltp,
+          change1d,
+          changePositive: (changePct ?? 0) >= 0,
+          qcScore: md?.qc_score ?? 0,
+          thesisTags: (md?.thesis_tags ?? []) as ShadowStock["thesisTags"],
+          whyInvested: `₹${h.amount_invested.toLocaleString("en-IN")} invested`,
+          conviction: (md?.conviction ?? "NEUTRAL") as ShadowStock["conviction"],
+          href: `/screener/management?symbol=${h.ticker}`,
+        };
+      }),
+    [shadowHoldings]
+  );
+
+  // Use real holdings if available, otherwise fall back to static sample
+  const shadowStocksToShow = shadowLoading
+    ? []
+    : shadowNotFound || apiShadowStocks.length === 0
+    ? SHADOW_STOCKS
+    : apiShadowStocks;
+
+  const shadowCount = shadowLoading
+    ? 5
+    : shadowNotFound || apiShadowStocks.length === 0
+    ? SHADOW_STOCKS.length
+    : apiShadowStocks.length;
+
+  // User portfolio — derive stock count for HoldingsPanel
+  const userStockCount = portfolioLoading ? 12 : userPortfolio?.holdings.length ?? 12;
+
   return (
     <div style={{ background: "var(--qc-bg, #F5F5F5)", minHeight: "100vh" }}>
       <main
@@ -316,7 +362,7 @@ export default function InvestorDashboardPage() {
           />
 
           <HoldingsPanel
-            stockCount={12}
+            stockCount={userStockCount}
             fundCount={5}
             syncedAgo="2 min ago"
             equityValue="₹56.8 L"
@@ -384,9 +430,9 @@ export default function InvestorDashboardPage() {
         ═══════════════════════════════════════════════════════════════ */}
         <section style={{ marginBottom: 14 }}>
           <ShadowPortfolio
-            count={5}
-            stocks={SHADOW_STOCKS}
-            thesisDriftCount={1}
+            count={shadowCount}
+            stocks={shadowStocksToShow}
+            thesisDriftCount={shadowStocksToShow.filter((s) => s.thesisDrift).length}
           />
         </section>
 

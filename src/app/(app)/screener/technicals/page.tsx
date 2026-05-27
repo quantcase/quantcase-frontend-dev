@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
+import { AssetActionBar } from "@/components/molecules/asset-action-bar";
 import { useTechnicals } from "@/hooks/useTechnicals";
 import { usePrices } from "@/hooks/usePrices";
 import { CandlestickChart, type ChartMode } from "./_components/CandlestickChart";
@@ -70,6 +71,7 @@ function TechnicalsContent() {
   const changeDisplay = `${changeIsPositive ? "+" : ""}${data.price.changePercent.toFixed(1)}%`;
 
   return (
+    <>
     <ScreenerPageShell navItems={TECHNICALS_NAV}>
       <div className="mb-8 px-4 space-y-[14px] pt-4">
         <div id="section-price-levels">
@@ -187,6 +189,8 @@ function TechnicalsContent() {
         )} */}
       </div>
     </ScreenerPageShell>
+    <AssetActionBar ticker={symbol} />
+    </>
   );
 }
 

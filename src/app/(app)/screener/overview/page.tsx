@@ -3,6 +3,7 @@
 import { Suspense, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
+import { AssetActionBar } from "@/components/molecules/asset-action-bar";
 import { IMScoreCard } from "@/components/overview/im-score-card";
 import { FundamentalOverviewCard } from "@/components/overview/fundamental-overview-card";
 import { TechnicalsCard, PriceLevelsSection } from "@/components/overview/technicals-card";
@@ -73,6 +74,7 @@ function OverviewContent() {
   const rating = partialCount > 0 ? getRating((partialSum / partialCount) / 100) : null;
 
   return (
+    <>
     <ScreenerPageShell
       navItems={OVERVIEW_NAV}
       headerRight={
@@ -195,6 +197,8 @@ function OverviewContent() {
         </div>
       </div>
     </ScreenerPageShell>
+    <AssetActionBar ticker={symbol} />
+    </>
   );
 }
 

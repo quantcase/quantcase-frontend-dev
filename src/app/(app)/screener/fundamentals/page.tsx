@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { TabularCard } from "@/components/molecules/tabular-card";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
+import { AssetActionBar } from "@/components/molecules/asset-action-bar";
 import { useFinancials } from "@/hooks/useFinancials";
 import { useFinancialsCharts } from "@/hooks/useFinancialsCharts";
 import { useScreenerPeers } from "@/hooks/useScreenerPeers";
@@ -165,6 +166,7 @@ function FinancialsContent() {
   const fi = data.fundamentalsIntelligence;
 
   return (
+    <>
     <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
       <div className="px-4 pt-6 pb-8 space-y-6">
 
@@ -370,6 +372,8 @@ function FinancialsContent() {
 
       </div>
     </ScreenerPageShell>
+    <AssetActionBar ticker={symbol} />
+    </>
   );
 }
 

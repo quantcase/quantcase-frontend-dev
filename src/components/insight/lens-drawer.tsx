@@ -23,14 +23,16 @@ interface LensDrawerProps {
   onClose: () => void;
 }
 
-function statusColor(status: string) {
+function statusColor(status: string | null | undefined) {
+  if (!status) return "var(--qc-warn)";
   const s = status.toUpperCase();
   if (s === "STRONG") return "var(--qc-up)";
   if (s === "WEAK") return "var(--qc-down)";
   return "var(--qc-warn)";
 }
 
-function statusBg(status: string) {
+function statusBg(status: string | null | undefined) {
+  if (!status) return "rgba(180,115,26,0.12)";
   const s = status.toUpperCase();
   if (s === "STRONG") return "rgba(31,122,74,0.12)";
   if (s === "WEAK") return "rgba(220,38,38,0.12)";
@@ -41,7 +43,7 @@ function statusBg(status: string) {
 function LensDetailView({ lens, signals }: { lens: LensDetail; signals: Signal[] }) {
   switch (lens.slug) {
     case "guidance-credibility":
-      return <LensDetailGuidance lens={lens} signals={signals} />;
+      return <LensDetailGuidance lens={lens} />;
     case "promoter-activity":
       return <LensDetailPromoter lens={lens} signals={signals} />;
     case "disclosure-honesty":
@@ -93,7 +95,7 @@ export function LensDrawer({ lens, signals, onClose }: LensDrawerProps) {
             transition={{ duration: 0.2 }}
             onClick={onClose}
             style={{
-              position: "fixed", inset: 0, zIndex: 40,
+              position: "fixed", inset: 0, zIndex: 60,
               background: "rgba(0,0,0,0.30)", backdropFilter: "blur(2px)",
             }}
           />
@@ -105,7 +107,7 @@ export function LensDrawer({ lens, signals, onClose }: LensDrawerProps) {
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
             style={{
-              position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 50,
+              position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 70,
               width: "min(70vw, 1100px)",
               background: "var(--qc-card)",
               borderLeft: "1px solid var(--qc-hair)",
@@ -223,7 +225,7 @@ export function LensDrawer({ lens, signals, onClose }: LensDrawerProps) {
 
               {/* Footer meta */}
               <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, textAlign: "right" }}>
-                Computed {new Date(lens.computed_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                {lens.computed_at && <>Computed {new Date(lens.computed_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</>}
               </p>
             </div>
           </motion.div>

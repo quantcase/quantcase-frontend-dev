@@ -79,10 +79,11 @@ export function LensDetailPromoter({ lens }: Props) {
   const topSignals: TopSignal[] = lens.top_signals ?? [];
 
   const rows = buildSignalRows(topSignals);
+  const st = lens.status ?? "";
   const statusColor =
-    lens.status.toUpperCase() === "STRONG"
+    st.toUpperCase() === "STRONG"
       ? "var(--qc-up)"
-      : lens.status.toUpperCase() === "WEAK"
+      : st.toUpperCase() === "WEAK"
         ? "var(--qc-down)"
         : "var(--qc-warn)";
 
@@ -115,7 +116,7 @@ export function LensDetailPromoter({ lens }: Props) {
           </span>
           <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 600, color: statusColor, display: "flex", alignItems: "center", gap: 5 }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, display: "inline-block" }} />
-            {lens.status.charAt(0).toUpperCase() + lens.status.slice(1).toLowerCase()}
+            {st.charAt(0).toUpperCase() + st.slice(1).toLowerCase()}
           </span>
         </div>
 

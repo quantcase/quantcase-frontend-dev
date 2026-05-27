@@ -24,14 +24,14 @@ export interface LensDetail {
   category: string;
   computed: boolean;
   score: number;
-  status: string;
-  takeaway: string;
+  status: string | null;
+  takeaway: string | null;
   key_metrics: Record<string, string>;
   highlights: string[];
   risks: string[];
-  z_score: number;
+  z_score: number | null;
   signal_count: number;
-  computed_at: string;
+  computed_at: string | null;
   top_signals?: TopSignal[];
 }
 

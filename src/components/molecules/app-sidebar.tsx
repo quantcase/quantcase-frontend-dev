@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, LogOut, BarChart2 } from "lucide-react";
@@ -34,6 +35,8 @@ export function AppSidebar() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const { accountType } = useUser();
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
 
   function handleLogout() {
     localStorage.clear();
@@ -42,7 +45,7 @@ export function AppSidebar() {
 
   if (pathname === "/signin") return null;
   const isDark = theme === "dark-purple";
-  const navItems = accountType === "investor" ? investorNavItems : managerNavItems;
+  const navItems = mounted && accountType === "investor" ? investorNavItems : managerNavItems;
 
   return (
     <aside

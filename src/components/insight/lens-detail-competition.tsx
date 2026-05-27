@@ -40,8 +40,8 @@ function Chip({ children, active }: { children: React.ReactNode; active?: boolea
   );
 }
 
-function statusColor(s: string) {
-  const u = s.toUpperCase();
+function statusColor(s: string | null | undefined) {
+  const u = (s ?? "").toUpperCase();
   if (u === "STRONG") return "var(--qc-up)";
   if (u === "WEAK") return "var(--qc-down)";
   return "var(--qc-warn)";

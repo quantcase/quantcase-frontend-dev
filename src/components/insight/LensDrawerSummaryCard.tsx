@@ -11,7 +11,7 @@ export interface LensDrawerSummaryMetric {
 
 interface LensDrawerSummaryCardProps {
   title: string;
-  body: string;
+  body: string | null | undefined;
   metrics: LensDrawerSummaryMetric[];
 }
 

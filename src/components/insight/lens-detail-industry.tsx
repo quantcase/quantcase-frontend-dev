@@ -50,7 +50,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function StatusBadge({ label, color }: { label: string; color: string }) {
+function StatusBadge({ label, color }: { label: string | null | undefined; color: string }) {
   return (
     <span style={{
       fontSize: 10, fontWeight: 600,

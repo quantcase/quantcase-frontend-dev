@@ -34,25 +34,25 @@ export function RiskCard({ item, tier }: RiskCardProps) {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-medium leading-snug" style={{ color: "var(--qc-text-heading)" }}>{item.flag}</p>
+          <p className="text-[13px] font-medium leading-snug" style={{ color: "var(--qc-ink)" }}>{item.flag}</p>
           {!open && (
-            <p className="text-[12px] mt-0.5 line-clamp-1" style={{ color: "var(--qc-text-muted)" }}>{item.implication}</p>
+            <p className="text-[12px] mt-0.5 line-clamp-1" style={{ color: "var(--qc-ink-2)" }}>{item.implication}</p>
           )}
         </div>
 
         <div className="flex-shrink-0 ml-2">
-          {open ? <ChevronUp className="size-3.5 mt-0.5" style={{ color: "var(--qc-text-muted)" }} /> : <ChevronDown className="size-3.5 mt-0.5" style={{ color: "var(--qc-text-muted)" }} />}
+          {open ? <ChevronUp className="size-3.5 mt-0.5" style={{ color: "var(--qc-ink-2)" }} /> : <ChevronDown className="size-3.5 mt-0.5" style={{ color: "var(--qc-ink-2)" }} />}
         </div>
       </button>
 
       {open && (
         <div className="px-4 py-3 border-t border-[#E2E2E2] space-y-2" style={{ background: "#FAFAFA" }}>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--qc-text-muted)" }}>Evidence</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--qc-ink-2)" }}>Evidence</p>
             <p className="text-[12px] leading-relaxed" style={{ color: "#121212" }}>{item.evidence}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--qc-text-muted)" }}>Implication</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--qc-ink-2)" }}>Implication</p>
             <p className="text-[12px] leading-relaxed" style={{ color: "#121212" }}>{item.implication}</p>
           </div>
         </div>

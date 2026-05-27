@@ -1,77 +1,70 @@
-import Link from "next/link";
+import { Avatar, ActionButton, MonoLabel, GoldenCard } from "@/components/ds";
+
+const AGENDA = [
+  <><strong>Infra holding</strong> pending review (flagged 2w ago)</>,
+  <>She asked about <strong>NPS allocation</strong> last call — never followed up</>,
+  <><strong>Birthday next week</strong> · personal note worth sending</>,
+];
+
+const RAIL = (
+  <>
+    <MonoLabel size={10} tracking="0.14em" color="var(--qc-ink)" style={{ display: "block", marginBottom: 6 }}>
+      NEXT MEETING · IN 47 MIN
+    </MonoLabel>
+    <div style={{ fontSize: 36, fontWeight: 500, letterSpacing: "-0.025em", lineHeight: 1.05, color: "var(--qc-lime-ink)", fontFamily: "var(--qc-font-sans)" }}>
+      11:30
+    </div>
+    <MonoLabel size={10.5} tracking="0.08em" color="var(--qc-ink)" style={{ display: "block", marginTop: 4 }}>
+      Zoom · 30 min
+    </MonoLabel>
+  </>
+);
+
+const ENTITY = (
+  <>
+    <Avatar initials="PV" size={32} />
+    <div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, fontSize: 14, fontWeight: 500, color: "var(--qc-lime-ink)" }}>
+        Priya Venkat{" "}
+        <MonoLabel size={11.5} tracking="0.02em" color="var(--qc-ink)" style={{ fontWeight: 400 }}>₹4.6 Cr</MonoLabel>
+      </div>
+      <div style={{ fontSize: 11.5, color: "var(--qc-ink)", marginTop: 4 }}>
+        Client since Mar 2022 · last met 11 Apr
+      </div>
+    </div>
+  </>
+);
+
+const CONTENT = (
+  <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+    {AGENDA.map((item, i) => (
+      <li key={i} style={{ fontSize: 12.5, color: "var(--qc-ink)", display: "flex", gap: 6, lineHeight: 1.5 }}>
+        <span style={{ color: "var(--qc-ink)", flexShrink: 0 }}>→</span>
+        <span>{item}</span>
+      </li>
+    ))}
+  </ul>
+);
+
+const ACTIONS = (
+  <>
+    <ActionButton style={{ borderRadius: 10, textAlign: "center", background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.7)", color: "var(--qc-lime-ink)" }}>
+      Brief me
+    </ActionButton>
+    <ActionButton variant="primary" style={{ borderRadius: 10, textAlign: "center" }}>
+      Open file
+    </ActionButton>
+  </>
+);
 
 export function NextMeetingPrep() {
   return (
-    <div
-      className="grid gap-7 items-center px-6 py-4 rounded-xl relative overflow-hidden"
-      style={{
-        gridTemplateColumns: "auto 1fr 2fr auto",
-        background: "linear-gradient(135deg, #FFFBF0 0%, #FEF7E6 100%)",
-        border: "1px solid #F0E2BB",
-      }}
-    >
-      {/* Left accent bar */}
-      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: "#B45309" }} />
-
-      {/* Time rail */}
-      <div className="flex flex-col gap-0.5 pr-6 min-w-[110px]" style={{ borderRight: "1px solid rgba(180,83,9,0.18)" }}>
-        <p className="text-[9px] font-semibold uppercase tracking-[0.14em]" style={{ color: "#B45309" }}>Next meeting · in 47 min</p>
-        <p className="text-[32px] font-normal leading-none tracking-[-0.02em]" style={{ fontFamily: "var(--font-ibm-plex-sans, sans-serif)", color: "var(--qc-text-heading)" }}>
-          11:30
-        </p>
-        <p className="text-[10px]" style={{ color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>Zoom · 30 min</p>
-      </div>
-
-      {/* Client info */}
-      <div className="flex gap-3 items-center">
-        <div
-          className="size-11 rounded-full flex items-center justify-center text-[13px] font-semibold flex-shrink-0"
-          style={{ background: "var(--qc-text-heading)", color: "#FCFCFA" }}
-        >
-          PV
-        </div>
-        <div>
-          <p className="text-[15px] font-semibold" style={{ color: "var(--qc-text-heading)" }}>
-            Priya Venkat{" "}
-            <span className="text-[12px] font-normal ml-1.5" style={{ color: "var(--qc-text-body)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>₹4.6 Cr</span>
-          </p>
-          <p className="text-[11px]" style={{ color: "var(--qc-text-muted)" }}>Client since Mar 2022 · last met 11 Apr</p>
-        </div>
-      </div>
-
-      {/* What to bring up */}
-      <div className="pl-6" style={{ borderLeft: "1px solid rgba(180,83,9,0.18)" }}>
-        <p className="text-[9px] font-semibold uppercase tracking-[0.14em] mb-2" style={{ color: "var(--qc-text-muted)" }}>What to bring up</p>
-        <div className="flex flex-col gap-1">
-          {[
-            "Infra holding pending review (flagged 2w ago)",
-            "She asked about NPS allocation last call — never followed up",
-            "Birthday next week · personal note worth sending",
-          ].map((point) => (
-            <p key={point} className="text-[12px] leading-[1.45] relative pl-3.5" style={{ color: "var(--qc-text-heading)" }}>
-              <span className="absolute left-0 font-semibold" style={{ color: "#B45309" }}>→</span>
-              {point}
-            </p>
-          ))}
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex flex-col gap-2">
-        <Link
-          href="/brief/priya-venkat"
-          className="text-[11px] font-medium px-3.5 py-1.5 rounded-md whitespace-nowrap"
-          style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-card)", color: "var(--qc-text-body)", textDecoration: "none" }}
-        >
-          Brief me →
-        </Link>
-        <button
-          className="text-[12px] font-medium px-3.5 py-1.5 rounded-md whitespace-nowrap"
-          style={{ background: "var(--qc-text-heading)", color: "#FCFCFA" }}
-        >
-          Open file
-        </button>
-      </div>
-    </div>
+    <GoldenCard
+      rail={RAIL}
+      entity={ENTITY}
+      sectionLabel="What to bring up"
+      content={CONTENT}
+      actions={ACTIONS}
+    />
   );
 }

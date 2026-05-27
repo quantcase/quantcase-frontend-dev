@@ -20,10 +20,10 @@ function sentimentVars(sentiment: IntelligenceSignalItem["sentiment"]) {
 function labelVars(label: string) {
   const l = label.toLowerCase();
   if (l === "high" || l === "strong" || l === "good")
-    return { tagBg: "rgba(0,0,0,0.14)", tagFg: "var(--qc-text-heading)", accent: "var(--qc-up)" };
+    return { tagBg: "rgba(0,0,0,0.14)", tagFg: "var(--qc-ink)", accent: "var(--qc-up)" };
   if (l === "low" || l === "poor" || l === "weak")
-    return { tagBg: "rgba(0,0,0,0.14)", tagFg: "var(--qc-text-heading)", accent: "var(--qc-down)" };
-  return { tagBg: "rgba(0,0,0,0.14)", tagFg: "var(--qc-text-heading)", accent: "var(--qc-warn)" };
+    return { tagBg: "rgba(0,0,0,0.14)", tagFg: "var(--qc-ink)", accent: "var(--qc-down)" };
+  return { tagBg: "rgba(0,0,0,0.14)", tagFg: "var(--qc-ink)", accent: "var(--qc-warn)" };
 }
 
 // ─── Signal Row ───────────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ function SignalRow({ item }: { item: IntelligenceSignalItem }) {
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", cursor: "default" }}>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: sv.color, flexShrink: 0 }} />
-        <span style={{ fontSize: 12, color: "var(--qc-text-body)", width: 120, flexShrink: 0, lineHeight: 1.2 }}>{dimLabel}</span>
+        <span style={{ fontSize: 12, color: "var(--qc-ink)", width: 120, flexShrink: 0, lineHeight: 1.2 }}>{dimLabel}</span>
         <div style={{ flex: 1, height: 4, borderRadius: 999, background: "rgba(0,0,0,0.10)", overflow: "hidden" }}>
           <div style={{ height: "100%", borderRadius: 999, width: `${pct}%`, background: sv.color, transition: "width .4s" }} />
         </div>
@@ -60,23 +60,23 @@ function SignalRow({ item }: { item: IntelligenceSignalItem }) {
         <div style={{
           position: "absolute", right: 0, top: "100%", marginTop: 4,
           zIndex: 50, width: 280, borderRadius: 14,
-          border: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-card, #FFFFFF)",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-card, #FFFFFF)",
           boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
         }}>
           <div style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "10px 14px", borderBottom: "1px solid var(--qc-border-default)",
+            padding: "10px 14px", borderBottom: "1px solid var(--qc-hair)",
             background: sv.bg, borderRadius: "14px 14px 0 0",
           }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>{dimLabel}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{dimLabel}</span>
             <span style={{ fontSize: 12, fontWeight: 600, color: sv.color }}>{item.score}/{item.max_score}</span>
           </div>
           <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
             {item.details.map((d, i) => (
               <div key={i} style={{ display: "flex", gap: 8 }}>
                 <span style={{ width: 5, height: 5, borderRadius: "50%", background: sv.color, flexShrink: 0, marginTop: 5 }} />
-                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>{d}</p>
+                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>{d}</p>
               </div>
             ))}
           </div>
@@ -104,22 +104,22 @@ function StrategyRow({ label, body, dot, Icon }: { label: string; body: string; 
         <div style={{
           width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 2,
           display: "grid", placeItems: "center",
-          background: "var(--qc-icon-box-bg)",
-          border: "1px solid var(--qc-icon-box-border)",
+          background: "var(--qc-chip)",
+          border: "1px solid var(--qc-hair)",
         }}>
           <Icon style={{ width: 10, height: 10, color: dot }} />
         </div>
         <div style={{ minWidth: 0 }}>
           <span style={{
             fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-            color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+            color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             letterSpacing: ".1em", display: "block", marginBottom: 2,
           }}>
             {label}
           </span>
           <p style={{
             margin: 0, fontSize: 12, fontWeight: 500,
-            color: "var(--qc-text-heading)", lineHeight: 1.4,
+            color: "var(--qc-ink)", lineHeight: 1.4,
             display: "-webkit-box", WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical", overflow: "hidden",
           }}>
@@ -132,19 +132,19 @@ function StrategyRow({ label, body, dot, Icon }: { label: string; body: string; 
         <div style={{
           position: "absolute", left: 0, top: "100%", marginTop: 2,
           zIndex: 50, width: 300, borderRadius: 12,
-          border: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-card, var(--qc-surface-white))",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-card, var(--qc-card))",
           boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
         }}>
           <div style={{
-            padding: "8px 12px", borderBottom: "1px solid var(--qc-border-default)",
+            padding: "8px 12px", borderBottom: "1px solid var(--qc-hair)",
             display: "flex", alignItems: "center", gap: 6,
           }}>
             <Icon style={{ width: 10, height: 10, color: dot, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-heading)" }}>{label}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
           </div>
           <div style={{ padding: "10px 12px" }}>
-            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>{body}</p>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
           </div>
         </div>
       )}
@@ -159,8 +159,8 @@ function RecommendedStrategyCard({ strategy }: { strategy: IntelligenceRecommend
 
   return (
     <div style={{
-      background: "var(--qc-surface-white)",
-      border: "1px solid var(--qc-border-default)",
+      background: "var(--qc-card)",
+      border: "1px solid var(--qc-hair)",
       borderRadius: 14,
       padding: "14px 16px",
       display: "flex",
@@ -170,28 +170,28 @@ function RecommendedStrategyCard({ strategy }: { strategy: IntelligenceRecommend
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <div style={{
           padding: 5, borderRadius: 6,
-          border: "1px solid var(--qc-icon-box-border)",
-          background: "var(--qc-icon-box-bg)",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-chip)",
           display: "grid", placeItems: "center", flexShrink: 0,
         }}>
-          <Target style={{ width: 10, height: 10, color: "var(--qc-text-body)" }} />
+          <Target style={{ width: 10, height: 10, color: "var(--qc-ink)" }} />
         </div>
         <div style={{
           fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-          letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+          letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
         }}>
           Recommended Strategy
         </div>
       </div>
 
-      <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.4, letterSpacing: "-0.01em" }}>
+      <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.4, letterSpacing: "-0.01em" }}>
         {strategy.action}
       </p>
 
       {rows.length > 0 && (
-        <div style={{ borderTop: "1px solid var(--qc-border-default)", display: "flex", flexDirection: "column" }}>
+        <div style={{ borderTop: "1px solid var(--qc-hair)", display: "flex", flexDirection: "column" }}>
           {rows.map((r, i) => (
-            <div key={r.key} style={{ borderBottom: i < rows.length - 1 ? "1px solid var(--qc-border-default)" : "none" }}>
+            <div key={r.key} style={{ borderBottom: i < rows.length - 1 ? "1px solid var(--qc-hair)" : "none" }}>
               <StrategyRow label={r.label} body={r.body!} dot={r.dot} Icon={r.Icon} />
             </div>
           ))}
@@ -210,10 +210,10 @@ function WatchoutsList({ items }: { items: string[] }) {
         <div key={i} style={{
           display: "flex", alignItems: "flex-start", gap: 8,
           padding: "6px 0",
-          borderBottom: i < items.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+          borderBottom: i < items.length - 1 ? "1px solid var(--qc-hair)" : "none",
         }}>
-          <span style={{ fontSize: 12, color: "var(--qc-text-muted)", flexShrink: 0, lineHeight: 1.5, userSelect: "none" }}>–</span>
-          <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.5 }}>{point}</p>
+          <span style={{ fontSize: 12, color: "var(--qc-ink-2)", flexShrink: 0, lineHeight: 1.5, userSelect: "none" }}>–</span>
+          <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.5 }}>{point}</p>
         </div>
       ))}
     </div>
@@ -234,8 +234,8 @@ export function ManagementIntelligenceCard({ intelligence, mqiScore }: Props) {
   return (
     /* ── Outer section card ── */
     <div style={{
-      background: "var(--qc-surface-row-alt)",
-      border: "1px solid var(--qc-border-default)",
+      background: "var(--qc-section)",
+      border: "1px solid var(--qc-hair)",
       borderRadius: 18,
       padding: 8,
       display: "flex",
@@ -247,20 +247,20 @@ export function ManagementIntelligenceCard({ intelligence, mqiScore }: Props) {
       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 6px 2px" }}>
         <div style={{
           padding: 6, borderRadius: 8, display: "grid", placeItems: "center",
-          border: "1px solid var(--qc-icon-box-border)",
-          background: "var(--qc-icon-box-bg)",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-chip)",
         }}>
-          <Brain style={{ width: 14, height: 14, color: "var(--qc-text-body)" }} />
+          <Brain style={{ width: 14, height: 14, color: "var(--qc-ink)" }} />
         </div>
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
           Decision Intelligence
         </span>
       </div>
 
       {/* ── 1. Score + Signal Breakdown — white bg + lime gradient overlay ── */}
       <div style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
         overflow: "hidden",
         position: "relative",
@@ -268,7 +268,7 @@ export function ManagementIntelligenceCard({ intelligence, mqiScore }: Props) {
         {/* lime gradient overlay at bottom */}
         <div style={{
           position: "absolute", inset: "auto 0 0 0", height: "50%",
-          background: "linear-gradient(180deg, transparent 0%, var(--qc-accent-lime-bg) 100%)",
+          background: "linear-gradient(180deg, transparent 0%, var(--qc-lime) 100%)",
           zIndex: 0, pointerEvents: "none",
         }} />
 
@@ -279,20 +279,20 @@ export function ManagementIntelligenceCard({ intelligence, mqiScore }: Props) {
             <div>
               <div style={{
                 fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const, marginBottom: 6,
+                letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const, marginBottom: 6,
               }}>
                 Credibility Score
               </div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
                 <span style={{
                   fontSize: 44, fontWeight: 500, letterSpacing: "-0.03em",
-                  color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
+                  color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
                 }}>
                   {mqiScore.total}
                 </span>
                 <span style={{
                   fontFamily: "'IBM Plex Mono', monospace", fontSize: 15,
-                  color: "var(--qc-text-muted)", fontWeight: 400,
+                  color: "var(--qc-ink-2)", fontWeight: 400,
                 }}>
                   /100
                 </span>
@@ -309,13 +309,13 @@ export function ManagementIntelligenceCard({ intelligence, mqiScore }: Props) {
           </div>
 
           {/* Separator */}
-          <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+          <div style={{ height: 1, background: "var(--qc-hair)" }} />
 
           {/* Signal Breakdown rows */}
           <div>
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const, marginBottom: 8,
+              letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const, marginBottom: 8,
             }}>
               Signal Breakdown · hover for details
             </div>
@@ -329,21 +329,21 @@ export function ManagementIntelligenceCard({ intelligence, mqiScore }: Props) {
           {/* Key Takeaway inside lime card */}
           {key_takeaways.length > 0 && (
             <>
-              <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+              <div style={{ height: 1, background: "var(--qc-hair)" }} />
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <div style={{
                   fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-                  letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+                  letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
                 }}>
                   Key Takeaway
                 </div>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
                   {key_takeaways[0]}
                 </p>
                 {key_takeaways.slice(1).map((t, i) => (
                   <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                    <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--qc-border-default)", flexShrink: 0, marginTop: 7 }} />
-                    <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>{t}</p>
+                    <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--qc-hair)", flexShrink: 0, marginTop: 7 }} />
+                    <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>{t}</p>
                   </div>
                 ))}
               </div>
@@ -361,8 +361,8 @@ export function ManagementIntelligenceCard({ intelligence, mqiScore }: Props) {
       {/* ── 3. Watch Outs ── */}
       {watchouts.length > 0 && (
         <div style={{
-          background: "var(--qc-surface-white)",
-          border: "1px solid var(--qc-border-default)",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           borderRadius: 14,
           padding: "14px 16px",
           display: "flex",
@@ -370,10 +370,10 @@ export function ManagementIntelligenceCard({ intelligence, mqiScore }: Props) {
           gap: 8,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <AlertTriangle style={{ width: 11, height: 11, color: "var(--qc-text-muted)" }} />
+            <AlertTriangle style={{ width: 11, height: 11, color: "var(--qc-ink-2)" }} />
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+              letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             }}>
               Watch Outs
             </div>

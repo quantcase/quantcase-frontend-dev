@@ -10,7 +10,7 @@ function DriftRow({ item }: { item: ReturnType<typeof getDriftItems>[0] }) {
     <div className="flex items-center gap-3 rounded-[8px] bg-white p-3 border-l-4" style={{ borderLeftColor: borderColor }}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1.5">
-          <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>{item.assetClass}</span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>{item.assetClass}</span>
           <span
             style={{
               fontSize: 12,
@@ -26,7 +26,7 @@ function DriftRow({ item }: { item: ReturnType<typeof getDriftItems>[0] }) {
           <div className="flex-1 h-1 bg-zinc-100 rounded-full overflow-hidden">
             <div className="h-full rounded-full" style={{ width: `${absWidth}%`, background: borderColor }} />
           </div>
-          <span style={{ fontSize: 11, color: "var(--qc-text-muted)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
             {item.currentAllocation}% → {item.targetAllocation}%
           </span>
         </div>
@@ -44,7 +44,7 @@ export function DriftMonitorCard({ portfolio }: { portfolio: PortfolioData }) {
     <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
       <div className="rounded-[10px] bg-white p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-text-heading)" }}>Allocation Drift</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)" }}>Allocation Drift</span>
           <div className="flex items-center gap-2">
             {critical > 0 && (
               <span className="rounded-sm px-2 py-0.5" style={{ fontSize: 11, background: "#fef2f2", color: "#dc2626", fontWeight: 600 }}>
@@ -69,14 +69,14 @@ export function DriftMonitorCard({ portfolio }: { portfolio: PortfolioData }) {
         </div>
 
         <div className="pt-3 border-t border-[#E2E2E2]">
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
             Portfolio Rationale
           </div>
           <ul className="space-y-2">
             {portfolio.whyThisPortfolio.map((reason, i) => (
               <li key={i} className="flex items-start gap-2">
                 <div className="w-1 h-1 rounded-full bg-zinc-400 mt-2 flex-shrink-0" />
-                <span style={{ fontSize: 12, color: "var(--qc-text-muted)", lineHeight: 1.6 }}>{reason}</span>
+                <span style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.6 }}>{reason}</span>
               </li>
             ))}
           </ul>

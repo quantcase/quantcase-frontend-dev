@@ -80,7 +80,34 @@ export function SignInForm() {
 
       localStorage.setItem("qc_at", data.access_token);
       localStorage.setItem("qc_rt", data.refresh_token);
-      router.push("/dashboard");
+
+      const acctType: string | undefined = data?.accountType ?? data?.account_type;
+
+      // Persist so AuthGuard and UserContext can read it synchronously on the next page
+      if (acctType) localStorage.setItem("qc_account_type", acctType);
+
+      if (acctType === "investor") {
+        router.push("/investor/dashboard");
+      } else if (acctType === "manager") {
+        router.push("/dashboard");
+      } else {
+        // accountType missing from signin response — fetch /api/auth/me to determine
+        const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${data.access_token}` },
+        });
+        if (meRes.ok) {
+          const me = await meRes.json();
+          const resolvedType: string | undefined = me?.accountType ?? me?.account_type;
+          if (resolvedType) localStorage.setItem("qc_account_type", resolvedType);
+          if (resolvedType === "investor") {
+            router.push("/investor/dashboard");
+          } else {
+            router.push("/dashboard");
+          }
+        } else {
+          router.push("/dashboard");
+        }
+      }
     } catch {
       setError("Unable to reach server. Please try again.");
     } finally {

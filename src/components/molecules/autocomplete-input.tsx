@@ -145,8 +145,8 @@ export function AutocompleteInput({
         <div
           className="absolute z-[100] w-full mt-1 rounded-xl shadow-lg overflow-y-auto"
           style={{
-            background: "var(--qc-surface-white)",
-            border: "1px solid var(--qc-border-default)",
+            background: "var(--qc-card)",
+            border: "1px solid var(--qc-hair)",
             maxHeight: "360px",
           }}
         >
@@ -160,24 +160,24 @@ export function AutocompleteInput({
                 selectedIndex === index ? "opacity-100" : ""
               )}
               style={{
-                borderColor: "var(--qc-border-inner)",
-                background: selectedIndex === index ? "var(--qc-surface-hover)" : undefined,
+                borderColor: "var(--qc-hair-2)",
+                background: selectedIndex === index ? "var(--qc-section)" : undefined,
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-surface-hover)")}
-              onMouseLeave={e => (e.currentTarget.style.background = selectedIndex === index ? "var(--qc-surface-hover)" : "")}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
+              onMouseLeave={e => (e.currentTarget.style.background = selectedIndex === index ? "var(--qc-section)" : "")}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate" style={{ color: "var(--qc-text-heading)" }}>
+                  <div className="text-sm font-medium truncate" style={{ color: "var(--qc-ink)" }}>
                     {option.label}
                   </div>
                   {option.subtitle && (
-                    <div className="text-xs truncate mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
+                    <div className="text-xs truncate mt-0.5" style={{ color: "var(--qc-ink-2)" }}>
                       {option.subtitle}
                     </div>
                   )}
                 </div>
-                <div className="ml-3 text-xs font-medium mono" style={{ color: "var(--qc-text-muted)" }}>
+                <div className="ml-3 text-xs font-medium mono" style={{ color: "var(--qc-ink-2)" }}>
                   {option.value}
                 </div>
               </div>

@@ -37,7 +37,7 @@ export function MAPositionChart({
   // Design token hex values — resolved for purple theme (mirrored from --qc-* CSS vars for SVG use)
   const QC_UP = "#15803D";
   const QC_DOWN = "#B91C1C";
-  const QC_HEADING = "var(--qc-text-heading)";
+  const QC_HEADING = "var(--qc-ink)";
   const QC_GRID = "#EDE8F5";
   const QC_BORDER = "#E4DCF0";
   const QC_MUTED = "#7C6998";
@@ -183,7 +183,7 @@ export function MAPositionChart({
               >
                 {ma.label}
               </span>
-              <span style={{ fontSize: 11, color: "var(--qc-text-heading)", fontWeight: 600 }}>
+              <span style={{ fontSize: 11, color: "var(--qc-ink)", fontWeight: 600 }}>
                 ₹{ma.value.toFixed(2)}
               </span>
             </div>
@@ -201,23 +201,23 @@ export function MAPositionChart({
             pointerEvents: "none",
           }}
         >
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: "var(--qc-text-heading)" }}>CMP</span>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: "var(--qc-ink)" }}>CMP</span>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-6 mt-2 pt-3" style={{ borderTop: "1px solid var(--qc-border-inner)" }}>
+      <div className="flex items-center gap-6 mt-2 pt-3" style={{ borderTop: "1px solid var(--qc-hair-2)" }}>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-0.5 rounded-full" style={{ background: "var(--qc-up)" }} />
-          <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Price above MA</span>
+          <span className="font-mono text-[10px]" style={{ color: "var(--qc-ink-2)" }}>Price above MA</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-0.5 rounded-full" style={{ background: "var(--qc-down)" }} />
-          <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Price below MA</span>
+          <span className="font-mono text-[10px]" style={{ color: "var(--qc-ink-2)" }}>Price below MA</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full border-2 border-white shadow-sm" style={{ background: "var(--qc-text-heading)" }} />
-          <span className="font-mono text-[10px]" style={{ color: "var(--qc-text-muted)" }}>Current price</span>
+          <div className="w-3 h-3 rounded-full border-2 border-white shadow-sm" style={{ background: "var(--qc-ink)" }} />
+          <span className="font-mono text-[10px]" style={{ color: "var(--qc-ink-2)" }}>Current price</span>
         </div>
       </div>
     </div>

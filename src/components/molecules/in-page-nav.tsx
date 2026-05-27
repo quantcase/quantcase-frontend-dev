@@ -12,10 +12,17 @@ export interface InPageNavItem {
 interface InPageNavProps {
   items: InPageNavItem[];
   className?: string;
+  /** When provided, the nav operates as a controlled tab switcher (no scroll-spy). */
+  activeTab?: string;
+  onTabChange?: (id: string) => void;
 }
 
-export function InPageNav({ items, className }: InPageNavProps) {
-  const [activeId, setActiveId] = useState<string>(items[0]?.id ?? "");
+export function InPageNav({ items, className, activeTab, onTabChange }: InPageNavProps) {
+  const tabMode = activeTab !== undefined && onTabChange !== undefined;
+
+  const [scrollActiveId, setScrollActiveId] = useState<string>(items[0]?.id ?? "");
+  const activeId = tabMode ? activeTab : scrollActiveId;
+
   const navRef = useRef<HTMLDivElement | null>(null);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const indicatorStyle = useRef<{ left: number; width: number }>({ left: 0, width: 0 });
@@ -38,7 +45,10 @@ export function InPageNav({ items, className }: InPageNavProps) {
     }
   }
 
+  // Scroll-spy — only active when not in tab mode
   useEffect(() => {
+    if (tabMode) return;
+
     function onScroll() {
       if (isScrollingRef.current) return;
 
@@ -58,8 +68,8 @@ export function InPageNav({ items, className }: InPageNavProps) {
         }
       }
 
-      if (closestId !== activeId) {
-        setActiveId(closestId);
+      if (closestId !== scrollActiveId) {
+        setScrollActiveId(closestId);
         moveIndicator(closestId);
       }
     }
@@ -67,7 +77,7 @@ export function InPageNav({ items, className }: InPageNavProps) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, activeId]);
+  }, [items, scrollActiveId, tabMode]);
 
   useEffect(() => {
     moveIndicator(activeId);
@@ -81,10 +91,16 @@ export function InPageNav({ items, className }: InPageNavProps) {
   }, []);
 
   function handleClick(id: string) {
+    if (tabMode) {
+      onTabChange(id);
+      moveIndicator(id);
+      return;
+    }
+
     const el = document.getElementById(id);
     if (!el) return;
 
-    setActiveId(id);
+    setScrollActiveId(id);
     moveIndicator(id);
 
     isScrollingRef.current = true;
@@ -103,7 +119,7 @@ export function InPageNav({ items, className }: InPageNavProps) {
   return (
     <div
       className={cn("sticky z-20", className)}
-      style={{ top: 56, background: "var(--qc-surface-white)", borderBottom: "1px solid var(--qc-border-default)" }}
+      style={{ top: 60, background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}
     >
       <nav
         ref={navRef}
@@ -119,9 +135,9 @@ export function InPageNav({ items, className }: InPageNavProps) {
               onClick={() => handleClick(item.id)}
               className="relative flex h-full items-center text-[13px] whitespace-nowrap transition-colors duration-150 focus:outline-none"
               style={{
-                color: isActive ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+                color: isActive ? "var(--qc-ink)" : "var(--qc-ink-2)",
                 fontWeight: isActive ? 500 : 400,
-                borderBottom: `1.5px solid ${isActive ? "var(--qc-border-active)" : "transparent"}`,
+                borderBottom: `1.5px solid ${isActive ? "var(--qc-ink)" : "transparent"}`,
                 marginBottom: -1,
                 padding: "10px 0",
               }}
@@ -138,7 +154,7 @@ export function InPageNav({ items, className }: InPageNavProps) {
           layout
           transition={{ type: "spring", stiffness: 380, damping: 34 }}
           className="pointer-events-none absolute bottom-0 h-[1.5px] opacity-0"
-          style={{ left: indicatorStyle.current.left, width: indicatorStyle.current.width, background: "var(--qc-border-active)" }}
+          style={{ left: indicatorStyle.current.left, width: indicatorStyle.current.width, background: "var(--qc-ink)" }}
         />
       </nav>
     </div>

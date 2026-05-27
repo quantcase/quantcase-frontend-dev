@@ -79,15 +79,15 @@ function FcfChartPanel({
   const rangeData = conversion;
 
   return (
-    <div className="rounded-lg p-4 flex flex-col h-full" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
+    <div className="rounded-lg p-4 flex flex-col h-full" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
       <div className="flex items-start justify-between gap-2 mb-3">
         <div>
-          <h3 className="text-sm font-bold" style={{ color: "var(--qc-text-heading)" }}>FCF vs PAT Comparison</h3>
-          <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>Bars = absolute values · Line = FCF/PAT conversion %</p>
+          <h3 className="text-sm font-bold" style={{ color: "var(--qc-ink)" }}>FCF vs PAT Comparison</h3>
+          <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>Bars = absolute values · Line = FCF/PAT conversion %</p>
         </div>
         <div className="text-right shrink-0 space-y-0.5">
-          <p className="text-[10px] font-mono" style={{ color: "var(--qc-text-muted)" }}>FCF / PAT %</p>
-          <p className="text-[10px]" style={{ color: "var(--qc-text-muted)" }}>&gt;{threshold}% = healthy · &lt;{threshold}% = compressed</p>
+          <p className="text-[10px] font-mono" style={{ color: "var(--qc-ink-2)" }}>FCF / PAT %</p>
+          <p className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>&gt;{threshold}% = healthy · &lt;{threshold}% = compressed</p>
         </div>
       </div>
 
@@ -115,7 +115,7 @@ function FcfChartPanel({
         </ResponsiveContainer>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-[10px] mt-3" style={{ color: "var(--qc-text-muted)" }}>
+      <div className="flex flex-wrap items-center gap-3 text-[10px] mt-3" style={{ color: "var(--qc-ink-2)" }}>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm inline-block" style={{ background: CHART.fcfPos, opacity: 0.85 }} />
           Free Cash Flow
@@ -131,21 +131,21 @@ function FcfChartPanel({
       </div>
 
       {rangeData && (
-        <div className="grid grid-cols-3 gap-2 pt-3 mt-3" style={{ borderTop: "1px solid var(--qc-border-default)" }}>
+        <div className="grid grid-cols-3 gap-2 pt-3 mt-3" style={{ borderTop: "1px solid var(--qc-hair)" }}>
           <div>
-            <p className="text-[10px] uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>10Q Range</p>
-            <p className="text-sm font-bold" style={{ color: "var(--qc-text-heading)" }}>
+            <p className="text-[10px] uppercase tracking-wider" style={{ color: "var(--qc-ink-2)" }}>10Q Range</p>
+            <p className="text-sm font-bold" style={{ color: "var(--qc-ink)" }}>
               {rangeData.range_low != null ? `${rangeData.range_low}%` : "—"} – {rangeData.range_high != null ? `${rangeData.range_high}%` : "—"}
             </p>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>Floor</p>
+            <p className="text-[10px] uppercase tracking-wider" style={{ color: "var(--qc-ink-2)" }}>Floor</p>
             <p className="text-sm font-bold" style={{ color: "var(--qc-warn)" }}>{rangeData.floor_pct != null ? `${rangeData.floor_pct}%` : "—"}</p>
             <p className="text-[10px] font-semibold" style={{ color: "var(--qc-warn)" }}>{rangeData.floor_quarter}</p>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider" style={{ color: "var(--qc-text-muted)" }}>All 10Q above</p>
-            <p className="text-sm font-bold" style={{ color: "var(--qc-text-heading)" }}>
+            <p className="text-[10px] uppercase tracking-wider" style={{ color: "var(--qc-ink-2)" }}>All 10Q above</p>
+            <p className="text-sm font-bold" style={{ color: "var(--qc-ink)" }}>
               {rangeData.healthy_threshold_pct}%{" "}
               <span className="font-bold" style={{ color: "var(--qc-up)" }}>threshold</span>
             </p>
@@ -159,7 +159,7 @@ function FcfChartPanel({
       )}
 
       {growth.insight_body && (
-        <p className="text-xs leading-relaxed mt-3" style={{ color: "var(--qc-text-muted)" }}>
+        <p className="text-xs leading-relaxed mt-3" style={{ color: "var(--qc-ink-2)" }}>
           <InsightText text={growth.insight_body} />
         </p>
       )}
@@ -175,7 +175,7 @@ function FcfInsightCardsPanel({
   growth?: FreeCashFlowSection["growth_trajectory"];
 }) {
   return (
-    <div className="rounded-lg p-4 space-y-3 h-full flex flex-col" style={{ border: "1px solid var(--qc-border-default)", background: "var(--qc-surface-white)" }}>
+    <div className="rounded-lg p-4 space-y-3 h-full flex flex-col" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
       {/* OCF — positive */}
       <div className="rounded-lg p-3 space-y-1" style={{ background: "var(--qc-up-soft)", border: "1px solid var(--qc-up)" }}>
         <div className="flex items-center gap-2">
@@ -199,12 +199,12 @@ function FcfInsightCardsPanel({
           </p>
         </div>
       ) : (
-        <div className="rounded-lg p-3 space-y-1" style={{ background: "var(--qc-surface-panel)", border: "1px solid var(--qc-border-default)" }}>
+        <div className="rounded-lg p-3 space-y-1" style={{ background: "var(--qc-section)", border: "1px solid var(--qc-hair)" }}>
           <div className="flex items-center gap-2">
-            <Info className="h-4 w-4 shrink-0" style={{ color: "var(--qc-text-muted)" }} />
-            <p className="text-sm font-semibold" style={{ color: "var(--qc-text-muted)" }}>Capex Not Disclosed</p>
+            <Info className="h-4 w-4 shrink-0" style={{ color: "var(--qc-ink-2)" }} />
+            <p className="text-sm font-semibold" style={{ color: "var(--qc-ink-2)" }}>Capex Not Disclosed</p>
           </div>
-          <p className="text-xs leading-relaxed pl-6" style={{ color: "var(--qc-text-muted)" }}>
+          <p className="text-xs leading-relaxed pl-6" style={{ color: "var(--qc-ink-2)" }}>
             Capex figures not available — FCF cannot be computed from reported data
           </p>
         </div>
@@ -223,16 +223,16 @@ function FcfInsightCardsPanel({
         </div>
       )}
 
-      <div className="pt-3 space-y-1 mt-auto" style={{ borderTop: "1px solid var(--qc-border-inner)" }}>
+      <div className="pt-3 space-y-1 mt-auto" style={{ borderTop: "1px solid var(--qc-hair-2)" }}>
         {growth?.pat_cagr_pct != null && (
-          <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>
             <span className="font-semibold">PAT Growth:</span> +{growth.pat_cagr_pct}% YoY
           </p>
         )}
-        <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>
+        <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>
           <span className="font-semibold">FCF/Revenue:</span> {ocf.capex_revenue_pct > 0 ? (100 - ocf.capex_revenue_pct).toFixed(1) : "—"}%
         </p>
-        <p className="text-xs" style={{ color: "var(--qc-text-muted)" }}>
+        <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>
           <span className="font-semibold">Capex/OCF:</span> {ocf.capex_ocf_pct}%
         </p>
       </div>

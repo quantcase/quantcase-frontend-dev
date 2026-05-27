@@ -4,105 +4,155 @@ interface Segment {
   label: string;
   pct: number | null;
   color: string;
+  qoq?: number | null;
 }
 
 interface ShareholdingPanelProps {
   segments: Segment[];
+  quarter?: string | null;
 }
 
-export function ShareholdingPanel({ segments }: ShareholdingPanelProps) {
+export function ShareholdingPanel({ segments, quarter }: ShareholdingPanelProps) {
   const total = segments.reduce((s, seg) => s + (seg.pct ?? 0), 0);
   const hasData = total > 0;
+  const visible = segments.filter((s) => s.pct != null && s.pct > 0);
 
   return (
     <div
       style={{
-        background: "var(--qc-surface-white)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
-        padding: "16px 18px",
+        overflow: "hidden",
       }}
     >
+      {/* Header */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "baseline",
-          marginBottom: 10,
+          alignItems: "center",
+          padding: "10px 18px",
+          borderBottom: "1px solid var(--qc-hair)",
         }}
       >
-        <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>Shareholding</h4>
         <span
           style={{
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10.5, color: "var(--qc-text-muted)",
-            letterSpacing: ".06em", textTransform: "uppercase",
+            fontSize: 9.5,
+            letterSpacing: ".14em",
+            textTransform: "uppercase",
+            color: "var(--qc-ink-2)",
           }}
         >
-          Latest disclosure
+          Shareholding Pattern
+        </span>
+        <span
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 9.5,
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+            color: "var(--qc-ink-2)",
+          }}
+        >
+          Latest Disclosure{quarter ? ` · ${quarter}` : ""}
         </span>
       </div>
 
       {/* Stacked bar */}
-      <div
-        style={{
-          display: "flex", height: 28, borderRadius: 8,
-          overflow: "hidden", gap: 2, marginBottom: 10,
-        }}
-      >
+      <div style={{ display: "flex", height: 36, gap: 1, margin: "10px 18px", borderRadius: 6, overflow: "hidden" }}>
         {hasData ? (
-          segments
-            .filter((s) => s.pct != null && s.pct > 0)
-            .map(({ label, pct: p, color }) => (
-              <div
-                key={label}
-                style={{
-                  flex: p ?? 0,
-                  display: "flex", alignItems: "center", justifyContent: "flex-start",
-                  padding: "0 10px", color: "#fff",
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 11, fontWeight: 500,
-                  overflow: "hidden", whiteSpace: "nowrap",
-                  background: color, minWidth: 0,
-                }}
-              >
-                {(p ?? 0) > 10 ? `${p?.toFixed(1)}%` : ""}
-              </div>
-            ))
+          visible.map(({ label, pct: p, color }) => (
+            <div
+              key={label}
+              style={{
+                flex: p ?? 0,
+                background: color,
+                display: "flex",
+                alignItems: "center",
+                paddingLeft: 10,
+                minWidth: 0,
+                overflow: "hidden",
+              }}
+            >
+              {(p ?? 0) >= 7 && (
+                <span
+                  style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "#fff",
+                    whiteSpace: "nowrap",
+                    letterSpacing: ".02em",
+                  }}
+                >
+                  {p?.toFixed(1)}%
+                </span>
+              )}
+            </div>
+          ))
         ) : (
           <div
             style={{
-              flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-start",
-              padding: "0 10px", color: "var(--qc-text-muted)",
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, fontWeight: 500,
+              flex: 1,
               background: "repeating-linear-gradient(45deg,#F2F1EC,#F2F1EC 6px,#EAE9E2 6px,#EAE9E2 12px)",
+              display: "flex",
+              alignItems: "center",
+              paddingLeft: 14,
             }}
           >
-            Awaiting disclosure
+            <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}>
+              Awaiting disclosure
+            </span>
           </div>
         )}
       </div>
 
-      {/* Legend */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>
-        {segments.map(({ label, pct: p, color }) => (
+      {/* Legend — flex items sized to match bar proportions */}
+      <div
+        style={{
+          display: "flex",
+          borderTop: "1px solid var(--qc-hair)",
+          padding: "10px 18px",
+        }}
+      >
+        {visible.map(({ label, pct: p, color }, i) => (
           <div
             key={label}
             style={{
-              display: "flex", flexDirection: "column", gap: 2,
-              paddingLeft: 10, borderLeft: `2px solid ${color}`,
+              flex: p ?? 0,
+              minWidth: 0,
+              paddingLeft: i === 0 ? 0 : 12,
+              paddingRight: i === visible.length - 1 ? 0 : 12,
+              borderRight: i < visible.length - 1 ? "1px solid var(--qc-hair)" : "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
             }}
           >
-            <span style={{ fontSize: 11, color: "var(--qc-text-muted)", letterSpacing: ".02em" }}>
-              {label}
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: color,
+                  flexShrink: 0,
+                }}
+              />
+              <span style={{ fontSize: 10.5, color: "var(--qc-ink-2)", letterSpacing: ".01em" }}>
+                {label}
+              </span>
+            </div>
             <span
               style={{
-                fontSize: 14,
-                fontWeight: p != null ? 500 : 400,
-                color: p != null ? "var(--qc-text-heading)" : "var(--qc-text-muted)",
+                fontSize: 18,
+                fontWeight: 500,
+                letterSpacing: "-0.02em",
+                color: p != null ? "var(--qc-ink)" : "var(--qc-ink-2)",
                 fontVariantNumeric: "tabular-nums",
-                letterSpacing: "-0.005em",
+                lineHeight: 1,
               }}
             >
               {p != null ? `${p.toFixed(1)}%` : "—"}

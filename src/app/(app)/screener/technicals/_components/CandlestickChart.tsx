@@ -198,7 +198,7 @@ export function CandlestickChart({
 
     const chart = createChart(containerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: "#FFFFFF" }, // --qc-surface-white
+        background: { type: ColorType.Solid, color: "#FFFFFF" }, // --qc-card
         textColor: QC_MUTED,
         fontFamily: "IBM Plex Mono, monospace",
         fontSize: 11,
@@ -635,7 +635,7 @@ export function CandlestickChart({
     <div className="relative w-full">
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center z-10" style={{ background: "rgba(255,255,255,0.85)" }}>
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-muted)" }}>Loading prices...</span>
+          <span className="font-mono text-[11px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>Loading prices...</span>
         </div>
       )}
       {error && (
@@ -665,7 +665,7 @@ export function CandlestickChart({
           {volumeSignal && (
             <span
               className="font-mono text-[10px] uppercase tracking-[0.12em] px-2 py-0.5 rounded-[4px] backdrop-blur-sm"
-              style={{ color: "var(--qc-text-muted)", background: "var(--qc-surface-row-alt)" }}
+              style={{ color: "var(--qc-ink-2)", background: "var(--qc-section)" }}
             >
               Vol: {volumeSignal}
             </span>
@@ -698,7 +698,7 @@ export function CandlestickChart({
               )}
               <span
                 className="font-mono text-[10px] uppercase tracking-[0.12em] transition-colors"
-                style={{ color: item.visible ? item.color : "var(--qc-text-muted)" }}
+                style={{ color: item.visible ? item.color : "var(--qc-ink-2)" }}
               >
                 {item.title}
               </span>
@@ -710,7 +710,7 @@ export function CandlestickChart({
       <div
         ref={tooltipRef}
         className="pointer-events-none absolute z-20 hidden rounded-[8px] border px-3 py-2 shadow-md backdrop-blur-sm"
-        style={{ background: "rgba(255,255,255,0.92)", borderColor: "var(--qc-border-default)", minWidth: 160 }}
+        style={{ background: "rgba(255,255,255,0.92)", borderColor: "var(--qc-hair)", minWidth: 160 }}
       />
     </div>
   );

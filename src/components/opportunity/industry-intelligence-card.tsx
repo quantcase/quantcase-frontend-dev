@@ -42,7 +42,7 @@ function KeyFindingRow({ theme, body, color }: { theme: string; body: string; co
           {category && (
             <span style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+              color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
               letterSpacing: ".1em", display: "block", marginBottom: 2,
             }}>
               {category}
@@ -50,7 +50,7 @@ function KeyFindingRow({ theme, body, color }: { theme: string; body: string; co
           )}
           <p style={{
             margin: 0, fontSize: 12, fontWeight: 500,
-            color: "var(--qc-text-heading)", lineHeight: 1.4,
+            color: "var(--qc-ink)", lineHeight: 1.4,
             display: "-webkit-box", WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
@@ -64,19 +64,19 @@ function KeyFindingRow({ theme, body, color }: { theme: string; body: string; co
         <div style={{
           position: "absolute", left: 0, top: "100%", marginTop: 2,
           zIndex: 50, width: 300, borderRadius: 12,
-          border: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-card, var(--qc-surface-white))",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-card, var(--qc-card))",
           boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
         }}>
           <div style={{
-            padding: "8px 12px", borderBottom: "1px solid var(--qc-border-default)",
+            padding: "8px 12px", borderBottom: "1px solid var(--qc-hair)",
             display: "flex", alignItems: "center", gap: 6,
           }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-heading)", lineHeight: 1.3 }}>{headline}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.3 }}>{headline}</span>
           </div>
           <div style={{ padding: "10px 12px" }}>
-            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>{body}</p>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
           </div>
         </div>
       )}
@@ -104,17 +104,17 @@ function DimensionRows({ dimensions }: { dimensions: IndustryAnalysis["score_car
 
         return (
           <div key={key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 12, color: "var(--qc-text-body)", width: 120, flexShrink: 0, lineHeight: 1.2 }}>{label}</span>
+            <span style={{ fontSize: 12, color: "var(--qc-ink)", width: 120, flexShrink: 0, lineHeight: 1.2 }}>{label}</span>
             <div style={{ width: 100, flexShrink: 0, height: 4, borderRadius: 999, background: "rgba(0,0,0,0.10)", overflow: "hidden" }}>
               <div style={{ height: "100%", borderRadius: 999, width: `${pct}%`, background: barColor, transition: "width .4s" }} />
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, flex: 1 }}>
               <span style={{ fontSize: 11, fontWeight: 600, color: barColor, fontVariantNumeric: "tabular-nums" }}>
                 {dim.score}
-                <span style={{ color: "var(--qc-text-dimmed)", fontWeight: 400 }}>/{dim.max}</span>
+                <span style={{ color: "var(--qc-ink-3)", fontWeight: 400 }}>/{dim.max}</span>
               </span>
               <span style={{
-                fontSize: 9, fontWeight: 500, color: "var(--qc-text-muted)",
+                fontSize: 9, fontWeight: 500, color: "var(--qc-ink-2)",
                 fontFamily: "'IBM Plex Mono', monospace",
                 textTransform: "uppercase" as const, letterSpacing: ".06em",
                 marginLeft: "auto",
@@ -153,7 +153,7 @@ export function IndustryIntelligenceCard({ data, investmentImplications }: Props
   return (
     <IntelligenceCardShell>
       <IntelligenceCardHeader
-        icon={<Factory style={{ width: 14, height: 14, color: "var(--qc-text-body)" }} />}
+        icon={<Factory style={{ width: 14, height: 14, color: "var(--qc-ink)" }} />}
         title="Industry Intelligence"
         badge={data.sector ?? undefined}
       />
@@ -171,7 +171,7 @@ export function IndustryIntelligenceCard({ data, investmentImplications }: Props
 
       {dimensions && Object.keys(dimensions).length > 0 && (
         <IntelligenceSubCard
-          icon={<Layers style={{ width: 10, height: 10, color: "var(--qc-text-body)" }} />}
+          icon={<Layers style={{ width: 10, height: 10, color: "var(--qc-ink)" }} />}
           eyebrow="Industry Dimensions"
         >
           <DimensionRows dimensions={dimensions} />
@@ -182,7 +182,7 @@ export function IndustryIntelligenceCard({ data, investmentImplications }: Props
         <IntelligenceSubCard eyebrow="Key Findings">
           <div style={{ display: "flex", flexDirection: "column" }}>
             {keyFindings.map((f, i) => (
-              <div key={i} style={{ borderBottom: i < keyFindings.length - 1 ? "1px solid var(--qc-border-default)" : "none" }}>
+              <div key={i} style={{ borderBottom: i < keyFindings.length - 1 ? "1px solid var(--qc-hair)" : "none" }}>
                 <KeyFindingRow theme={f.theme} body={f.body} color={f.color} />
               </div>
             ))}
@@ -191,7 +191,7 @@ export function IndustryIntelligenceCard({ data, investmentImplications }: Props
       )}
 
       {data.period && (
-        <p style={{ margin: 0, fontSize: 10, color: "var(--qc-text-muted)", textAlign: "right", padding: "0 4px" }}>
+        <p style={{ margin: 0, fontSize: 10, color: "var(--qc-ink-2)", textAlign: "right", padding: "0 4px" }}>
           {data.period}
         </p>
       )}

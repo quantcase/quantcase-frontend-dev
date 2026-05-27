@@ -13,8 +13,8 @@ export function ViewToggle({
         display: "inline-flex",
         alignItems: "center",
         gap: 2,
-        background: "var(--qc-surface-panel)",
-        border: "1px solid var(--qc-border-default)",
+        background: "var(--qc-section)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 10,
         padding: 3,
       }}
@@ -33,8 +33,8 @@ export function ViewToggle({
               height: 28,
               borderRadius: 8,
               border: "none",
-              background: active ? "var(--qc-accent-primary)" : "transparent",
-              color: active ? "var(--qc-accent-primary-fg)" : "var(--qc-text-muted)",
+              background: active ? "var(--qc-ink)" : "transparent",
+              color: active ? "var(--qc-on-dark)" : "var(--qc-ink-2)",
               cursor: "pointer",
             }}
           >

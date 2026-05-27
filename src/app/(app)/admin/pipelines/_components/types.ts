@@ -1,4 +1,4 @@
-export interface SkillUsage {
+interface SkillUsage {
   plugin: { id: string; name: string; category: string };
 }
 
@@ -25,7 +25,7 @@ interface PluginSkill {
   skill: Skill;
 }
 
-export type PluginCategory = "management" | "deal" | "opportunity" | "wealthos" | "technicals";
+type PluginCategory = "management" | "deal" | "opportunity" | "wealthos" | "technicals";
 
 export interface Plugin {
   id: string;

@@ -61,18 +61,18 @@ export function VolumeAnalysis({ volume }: VolumeAnalysisProps) {
       </div>
       <div
         className="flex items-center justify-between py-2.5 px-2"
-        style={{ borderTop: "1px solid var(--qc-border-inner)" }}
+        style={{ borderTop: "1px solid var(--qc-hair-2)" }}
       >
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-text-heading)" }}>Volume Trend</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink)" }}>Volume Trend</p>
         <TrendBadge label={volume.trend} color={volumeTrendColor} />
       </div>
       {SIGNAL_ROWS.map(({ label, key, positiveIsTrue }) => (
         <div
           key={key}
           className="flex items-center justify-between py-2.5 px-2"
-          style={{ borderTop: "1px solid var(--qc-border-inner)" }}
+          style={{ borderTop: "1px solid var(--qc-hair-2)" }}
         >
-          <p className="text-[12px]" style={{ color: "var(--qc-text-body)" }}>{label}</p>
+          <p className="text-[12px]" style={{ color: "var(--qc-ink)" }}>{label}</p>
           <span
             className="font-mono text-[11px] font-semibold"
             style={{ color: booleanColor(volume.signals[key], positiveIsTrue) }}

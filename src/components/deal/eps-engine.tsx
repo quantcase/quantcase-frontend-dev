@@ -40,7 +40,7 @@ function MetricRow({ label, scenarios, field, isLast }: MetricRowProps) {
   return (
     <>
       <div className="grid grid-cols-[180px_1fr_1fr_1fr] items-start gap-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wider pt-3" style={{ color: "var(--qc-text-muted)" }}>
+        <p className="text-[11px] font-semibold uppercase tracking-wider pt-3" style={{ color: "var(--qc-ink-2)" }}>
           {label}
         </p>
         {scenarioOrder.map((key) => {
@@ -54,15 +54,15 @@ function MetricRow({ label, scenarios, field, isLast }: MetricRowProps) {
               key={key}
               className="rounded-lg px-4 py-3"
               style={{
-                background: isEps ? `${cssVar}12` : "var(--qc-surface-panel)",
-                border: `1px solid ${isEps ? cssVar : "var(--qc-border-default)"}`,
-                borderColor: isEps ? `${cssVar}40` : "var(--qc-border-default)",
+                background: isEps ? `${cssVar}12` : "var(--qc-section)",
+                border: `1px solid ${isEps ? cssVar : "var(--qc-hair)"}`,
+                borderColor: isEps ? `${cssVar}40` : "var(--qc-hair)",
               }}
             >
               <p className="text-lg font-semibold" style={{ color: cssVar }}>
                 {fmtDealNum(metric?.value)}
               </p>
-              <p className="text-xs mt-0.5" style={{ color: "var(--qc-text-muted)" }}>
+              <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>
                 {"note" in (metric || {}) ? (metric as { note?: string })?.note : ""}
                 {"subtitle" in (metric || {}) ? (metric as { subtitle?: string })?.subtitle : ""}
               </p>
@@ -75,7 +75,7 @@ function MetricRow({ label, scenarios, field, isLast }: MetricRowProps) {
           <div />
           {scenarioOrder.map((key) => (
             <div key={key} className="flex justify-center py-1">
-              <ArrowDown className="h-4 w-4" style={{ color: "var(--qc-text-muted)" }} />
+              <ArrowDown className="h-4 w-4" style={{ color: "var(--qc-ink-2)" }} />
             </div>
           ))}
         </div>
@@ -105,7 +105,7 @@ export function EpsEngine({ data }: EpsEngineProps) {
             <span
               key={key}
               className="text-xs font-medium px-3 py-1.5 rounded-full"
-              style={{ border: `1px solid ${cssVar}60`, color: "var(--qc-text-body)" }}
+              style={{ border: `1px solid ${cssVar}60`, color: "var(--qc-ink)" }}
             >
               {label}
             </span>
@@ -137,7 +137,7 @@ export function EpsEngine({ data }: EpsEngineProps) {
               <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--qc-up)" }}>
                 Top Upside Lever
               </p>
-              <p className="text-base font-medium" style={{ color: "var(--qc-text-heading)" }}>{topUpsideLever}</p>
+              <p className="text-base font-medium" style={{ color: "var(--qc-ink)" }}>{topUpsideLever}</p>
             </div>
           )}
           {primaryRiskFactor && (
@@ -145,7 +145,7 @@ export function EpsEngine({ data }: EpsEngineProps) {
               <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--qc-down)" }}>
                 Primary Risk Factor
               </p>
-              <p className="text-base font-medium" style={{ color: "var(--qc-text-heading)" }}>{primaryRiskFactor}</p>
+              <p className="text-base font-medium" style={{ color: "var(--qc-ink)" }}>{primaryRiskFactor}</p>
             </div>
           )}
         </div>

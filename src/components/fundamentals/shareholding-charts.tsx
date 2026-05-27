@@ -5,7 +5,8 @@ import ApexChart from "@/components/molecules/apex-chart";
 import type { ShareholdingSection, ShareholdingChild } from "@/hooks/useShareholding";
 import { MonoEyebrow } from "@/components/overview/primitives";
 
-const SHAREHOLDING_COLORS = ["#1A0A2E", "#3D2460", "#6B21A8", "#9333EA", "#C084FC", "#D8B4FE", "#EDE8F5"];
+// Purple-ink ramp → lime accent, derived from qc-* tokens
+const SHAREHOLDING_COLORS = ["#210B2C", "#3D1C54", "#6B2FA0", "#9A60C8", "#C6DC8A", "#FFEB99", "#F3F2EE"];
 
 // Non-promoter child IDs bucketed into DII / FII / Retail
 const DII_IDS = new Set([
@@ -107,7 +108,7 @@ function makeDonutOptions(labels: string[], groupLabel: string): ApexCharts.Apex
               label: groupLabel,
               fontSize: "11px",
               fontFamily: "'IBM Plex Mono', monospace",
-              color: "#7C6998",
+              color: "#5A5A54", // --qc-ink-2
               formatter: (w) => {
                 const total = w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0);
                 return `${total.toFixed(1)}%`;
@@ -170,7 +171,7 @@ export function ShareholdingCharts({
                   style={{
                     fontSize: 12,
                     fontWeight: isSelected ? 700 : 500,
-                    color: isSelected ? "var(--qc-text-heading)" : "var(--qc-text-body)",
+                    color: isSelected ? "var(--qc-ink)" : "var(--qc-ink)",
                     marginBottom: 6,
                     display: "flex",
                     alignItems: "center",
@@ -179,7 +180,7 @@ export function ShareholdingCharts({
                 >
                   {group.label}
                   {isSelected && (
-                    <span style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", color: "var(--qc-text-muted)", letterSpacing: "0.05em" }}>
+                    <span style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", color: "var(--qc-ink-2)", letterSpacing: "0.05em" }}>
                       ← breakdown
                     </span>
                   )}
@@ -189,17 +190,17 @@ export function ShareholdingCharts({
                     style={{
                       flex: 1,
                       height: 24,
-                      background: "var(--qc-surface-panel)",
+                      background: "var(--qc-section)",
                       borderRadius: 6,
                       overflow: "hidden",
-                      border: isSelected ? "1px solid var(--qc-text-heading)" : "1px solid var(--qc-border-inner)",
+                      border: isSelected ? "1px solid var(--qc-ink)" : "1px solid var(--qc-hair-2)",
                     }}
                   >
                     <div
                       style={{
                         width: `${(group.value / maxValue) * 100}%`,
                         height: "100%",
-                        background: "var(--qc-text-heading)",
+                        background: "var(--qc-ink)",
                         opacity: isSelected ? 1 : 0.45,
                         borderRadius: 6,
                         transition: "width 0.4s ease, opacity 0.2s ease",
@@ -210,7 +211,7 @@ export function ShareholdingCharts({
                     style={{
                       fontSize: 13,
                       fontWeight: 600,
-                      color: "var(--qc-text-heading)",
+                      color: "var(--qc-ink)",
                       fontFamily: "'IBM Plex Mono', monospace",
                       letterSpacing: "0.02em",
                       minWidth: 52,
@@ -262,12 +263,12 @@ export function ShareholdingCharts({
                   <span
                     style={{
                       fontSize: 11,
-                      color: "var(--qc-text-body)",
+                      color: "var(--qc-ink)",
                       fontFamily: "'IBM Plex Mono', monospace",
                     }}
                   >
                     {child.label}:{" "}
-                    <strong style={{ color: "var(--qc-text-heading)" }}>
+                    <strong style={{ color: "var(--qc-ink)" }}>
                       {child.value.toFixed(1)}
                     </strong>
                   </span>
@@ -276,7 +277,7 @@ export function ShareholdingCharts({
             </div>
           </>
         ) : (
-          <div style={{ fontSize: 12, color: "var(--qc-text-muted)", padding: "40px 0", textAlign: "center" }}>
+          <div style={{ fontSize: 12, color: "var(--qc-ink-2)", padding: "40px 0", textAlign: "center" }}>
             No breakdown available
           </div>
         )}

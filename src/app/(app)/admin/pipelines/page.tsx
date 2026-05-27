@@ -204,11 +204,11 @@ export default function PipelinesPage() {
         onSelect={setSelectedPluginId}
       />
 
-      <main className="flex-1 overflow-y-auto p-6 space-y-4 bg-[var(--qc-surface-panel)]">
+      <main className="flex-1 overflow-y-auto p-6 space-y-4 bg-[var(--qc-section)]">
         {/* Page header */}
         <div>
-          <h1 className="text-[22px] font-[400] text-[var(--qc-text-heading)]">AI Pipelines</h1>
-          <p className="text-[14px] text-[var(--qc-text-muted)] mt-0.5">Manage skills and plugin configurations</p>
+          <h1 className="text-[22px] font-[400] text-[var(--qc-ink)]">AI Pipelines</h1>
+          <p className="text-[14px] text-[var(--qc-ink-2)] mt-0.5">Manage skills and plugin configurations</p>
         </div>
 
         {/* Error banner */}
@@ -232,8 +232,8 @@ export default function PipelinesPage() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
                   activeTab === tab
-                    ? "border-[var(--qc-border-active)] text-[var(--qc-text-heading)]"
-                    : "border-transparent text-[var(--qc-text-muted)] hover:text-[var(--qc-text-heading)]"
+                    ? "border-[var(--qc-ink)] text-[var(--qc-ink)]"
+                    : "border-transparent text-[var(--qc-ink-2)] hover:text-[var(--qc-ink)]"
                 }`}
               >
                 {tab === "plugin" ? "Plugin Chain" : tab === "skills" ? "Skills Library" : "Data Sanity"}

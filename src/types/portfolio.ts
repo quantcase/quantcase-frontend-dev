@@ -2,9 +2,9 @@ export type RiskProfileType = "conservative" | "balanced" | "aggressive" | "goal
 
 // ── New asset-class schema (matches backend) ────────────────────────────────
 
-export type AssetClassKey = "equity" | "debt" | "cash" | "commodities" | "alternatives";
+type AssetClassKey = "equity" | "debt" | "cash" | "commodities" | "alternatives";
 
-export interface SubClassEntry {
+interface SubClassEntry {
   key: string;
   label: string;
   pct: number;
@@ -21,7 +21,7 @@ export interface AssetClassEntry {
 
 // ── Client context ──────────────────────────────────────────────────────────
 
-export interface ClientContext {
+interface ClientContext {
   clientName: string;
   aum: string;
   latestUpdate: string;
@@ -50,9 +50,9 @@ export type GoalType =
   | "home_purchase"
   | "retirement_income";
 
-export type SwpGoalType = "child_education" | "passive_income" | "retirement_income";
+type SwpGoalType = "child_education" | "passive_income" | "retirement_income";
 
-export interface SwpPassiveIncome {
+interface SwpPassiveIncome {
   goal_type: "passive_income";
   corpus: number;
   start_date: string;
@@ -67,7 +67,7 @@ export interface SwpPassiveIncome {
   status: "active" | "paused" | "closed";
 }
 
-export interface SwpRetirementIncome {
+interface SwpRetirementIncome {
   goal_type: "retirement_income";
   client_dob: string;
   retirement_age: number;
@@ -84,13 +84,13 @@ export interface SwpRetirementIncome {
   status: "active" | "paused" | "pending_approval" | "closed";
 }
 
-export interface SwpMilestone {
+interface SwpMilestone {
   id: "school" | "ug" | "pg" | "pro";
   active: boolean;
   trigger_age: number;
 }
 
-export interface SwpChildEducation {
+interface SwpChildEducation {
   goal_type: "child_education";
   child_dob: string;
   corpus: number;
@@ -124,7 +124,7 @@ export interface StoredModel extends PortfolioData {
 
 // ── Equity positions (within the equity asset class) ────────────────────────
 
-export interface EquityPosition {
+interface EquityPosition {
   id: string;
   company: string;
   ticker: string;

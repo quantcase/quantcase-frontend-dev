@@ -7,12 +7,12 @@ import { CreateClientForm } from "@/components/wealthos/create-client-form";
 
 export default function NewClientPage() {
   return (
-    <div className="p-6 max-w-3xl space-y-5" style={{ background: "var(--qc-surface-base)", minHeight: "100vh" }}>
+    <div className="p-6 max-w-3xl space-y-5" style={{ background: "var(--qc-bg)", minHeight: "100vh" }}>
       <div className="flex items-center gap-2">
         <Link
           href="/wealthos/clients"
           className="flex items-center gap-1 transition-opacity hover:opacity-70"
-          style={{ fontSize: 13, color: "var(--qc-text-muted)" }}
+          style={{ fontSize: 13, color: "var(--qc-ink-2)" }}
         >
           <ChevronLeft className="size-4" /> Back to Clients
         </Link>

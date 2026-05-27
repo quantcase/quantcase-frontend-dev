@@ -24,7 +24,7 @@ function formatCurrency(value: number): string {
 const thStyle: React.CSSProperties = {
   fontSize: 10,
   fontFamily: "var(--font-ibm-plex-mono, monospace)",
-  color: "var(--qc-text-muted)",
+  color: "var(--qc-ink-2)",
   textTransform: "uppercase",
   letterSpacing: "0.08em",
 };
@@ -34,27 +34,27 @@ export function PortfolioHoldingsTable({ portfolio }: PortfolioHoldingsTableProp
     <div className="space-y-4">
       <div className="flex flex-wrap gap-6">
         <div>
-          <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Total Value
           </p>
-          <p style={{ fontSize: 16, fontWeight: 500, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+          <p style={{ fontSize: 16, fontWeight: 500, color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
             {formatCurrency(portfolio.total_value)}
           </p>
         </div>
         <div>
-          <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Risk Score
           </p>
-          <p style={{ fontSize: 16, fontWeight: 500, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+          <p style={{ fontSize: 16, fontWeight: 500, color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
             {portfolio.risk_score.toFixed(1)}
           </p>
         </div>
         {portfolio.last_rebalance_date && (
           <div>
-            <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            <p style={{ fontSize: 10, fontFamily: "var(--font-ibm-plex-mono, monospace)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
               Last Rebalanced
             </p>
-            <p style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}>
+            <p style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>
               {formatDate(portfolio.last_rebalance_date)}
             </p>
           </div>
@@ -73,13 +73,13 @@ export function PortfolioHoldingsTable({ portfolio }: PortfolioHoldingsTableProp
           <TableBody>
             {(portfolio.holdings ?? []).map((holding, idx) => (
               <TableRow key={`${holding.symbol}-${idx}`}>
-                <TableCell style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+                <TableCell style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
                   {holding.symbol}
                 </TableCell>
-                <TableCell className="text-right" style={{ fontSize: 12, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+                <TableCell className="text-right" style={{ fontSize: 12, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
                   {(holding.weight * 100).toFixed(2)}%
                 </TableCell>
-                <TableCell className="text-right" style={{ fontSize: 12, color: "var(--qc-text-muted)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+                <TableCell className="text-right" style={{ fontSize: 12, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
                   {holding.qty}
                 </TableCell>
               </TableRow>
@@ -87,7 +87,7 @@ export function PortfolioHoldingsTable({ portfolio }: PortfolioHoldingsTableProp
           </TableBody>
         </Table>
       ) : (
-        <p className="py-4 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
+        <p className="py-4 text-center" style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>
           No holdings recorded
         </p>
       )}

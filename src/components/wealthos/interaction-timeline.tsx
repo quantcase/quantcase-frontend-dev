@@ -18,16 +18,16 @@ const sentimentStyles: Record<string, React.CSSProperties> = {
     color: "var(--qc-down)",
   },
   neutral: {
-    background: "var(--qc-chip-bg)",
-    border: "1px solid var(--qc-chip-border)",
-    color: "var(--qc-chip-fg)",
+    background: "var(--qc-chip)",
+    border: "1px solid var(--qc-hair)",
+    color: "var(--qc-ink-2)",
   },
 };
 
 export function InteractionTimeline({ interactions }: InteractionTimelineProps) {
   if (!interactions?.length) {
     return (
-      <p className="py-6 text-center" style={{ fontSize: 13, color: "var(--qc-text-muted)" }}>
+      <p className="py-6 text-center" style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>
         No interactions recorded
       </p>
     );
@@ -41,23 +41,23 @@ export function InteractionTimeline({ interactions }: InteractionTimelineProps) 
             <div
               className="flex size-8 items-center justify-center rounded-full shrink-0"
               style={{
-                border: "1px solid var(--qc-border-default)",
-                background: "var(--qc-surface-card)",
+                border: "1px solid var(--qc-hair)",
+                background: "var(--qc-card)",
               }}
             >
               <InteractionIcon type={interaction.type} />
             </div>
-            <div className="w-px flex-1 mt-1" style={{ background: "var(--qc-border-inner)" }} />
+            <div className="w-px flex-1 mt-1" style={{ background: "var(--qc-hair-2)" }} />
           </div>
           <div className="flex-1 pb-4">
             <div className="flex items-center gap-2 mb-1">
               <span
                 className="capitalize"
-                style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-text-heading)" }}
+                style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}
               >
                 {interaction.type}
               </span>
-              <span style={{ fontSize: 11, color: "var(--qc-text-muted)" }}>
+              <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
                 {formatDate(interaction.timestamp)}
               </span>
               {interaction.sentiment && (
@@ -74,7 +74,7 @@ export function InteractionTimeline({ interactions }: InteractionTimelineProps) 
               )}
             </div>
             {interaction.summary && (
-              <p style={{ fontSize: 12, color: "var(--qc-text-muted)" }}>{interaction.summary}</p>
+              <p style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>{interaction.summary}</p>
             )}
           </div>
         </div>

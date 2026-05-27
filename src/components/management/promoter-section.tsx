@@ -31,7 +31,7 @@ function verdictStyle(verdict: string): { bg: string; text: string; border: stri
 }
 
 function formatChange(change: number | null): { text: string; color: string } {
-  if (change === null || change === 0) return { text: "—", color: "var(--qc-text-muted)" };
+  if (change === null || change === 0) return { text: "—", color: "var(--qc-ink-2)" };
   if (change > 0) return { text: `+${change}%`, color: "var(--qc-up)" };
   return { text: `${change}%`, color: "var(--qc-down)" };
 }
@@ -51,16 +51,16 @@ function MqiDonut({ score, label }: { score: number; label: string }) {
         style={{
           fontSize: 10,
           fontWeight: 600,
-          color: "var(--qc-text-muted)",
+          color: "var(--qc-ink-2)",
           textTransform: "uppercase",
           letterSpacing: "0.1em",
         }}
       >
-        MQI Score
+        M-Score
       </span>
 
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <circle cx={center} cy={center} r={radius} fill="none" stroke="var(--qc-border-default)" strokeWidth={strokeWidth} />
+        <circle cx={center} cy={center} r={radius} fill="none" stroke="var(--qc-hair)" strokeWidth={strokeWidth} />
         <circle
           cx={center}
           cy={center}
@@ -72,16 +72,16 @@ function MqiDonut({ score, label }: { score: number; label: string }) {
           strokeLinecap="round"
           transform={`rotate(-90 ${center} ${center})`}
         />
-        <text x={center} y={center - 5} textAnchor="middle" fontSize="26" fontWeight="700" fill="var(--qc-text-heading)">
+        <text x={center} y={center - 5} textAnchor="middle" fontSize="26" fontWeight="700" fill="var(--qc-ink)">
           {score}
         </text>
-        <text x={center} y={center + 14} textAnchor="middle" fontSize="11" fill="var(--qc-text-muted)">
+        <text x={center} y={center + 14} textAnchor="middle" fontSize="11" fill="var(--qc-ink-2)">
           /100
         </text>
       </svg>
 
-      <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-text-heading)", textTransform: "uppercase", textAlign: "center", lineHeight: 1.3 }}>
-        {label} <span style={{ color: "var(--qc-text-muted)", fontWeight: 400 }}>| {score} / 100</span>
+      <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-ink)", textTransform: "uppercase", textAlign: "center", lineHeight: 1.3 }}>
+        {label} <span style={{ color: "var(--qc-ink-2)", fontWeight: 400 }}>| {score} / 100</span>
       </p>
     </div>
   );
@@ -102,13 +102,13 @@ function DimensionBars({ dimensions }: { dimensions: MqiScore["dimensions"] }) {
         const color = scoreCssColor(item.score, item.max);
         return (
           <div key={item.label} className="flex items-center gap-3">
-            <span style={{ fontSize: 12, color: "var(--qc-text-body)", width: 140, flexShrink: 0 }}>
+            <span style={{ fontSize: 12, color: "var(--qc-ink)", width: 140, flexShrink: 0 }}>
               {item.label}
             </span>
-            <div style={{ flex: 1, height: 8, borderRadius: 4, background: "var(--qc-surface-panel)", overflow: "hidden" }}>
+            <div style={{ flex: 1, height: 8, borderRadius: 4, background: "var(--qc-section)", overflow: "hidden" }}>
               <div style={{ width: `${pct * 100}%`, height: "100%", borderRadius: 4, background: color }} />
             </div>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-heading)", width: 36, textAlign: "right", flexShrink: 0 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", width: 36, textAlign: "right", flexShrink: 0 }}>
               {item.score}/{item.max}
             </span>
           </div>
@@ -153,12 +153,12 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
               <col style={{ width: "34%" }} />
             </colgroup>
             <TableHeader>
-              <TableRow style={{ borderColor: "var(--qc-border-default)" }}>
+              <TableRow style={{ borderColor: "var(--qc-hair)" }}>
                 {["Quarter", "Promoter %", "Pledge %", "Change", "Signal"].map((h) => (
                   <TableHead
                     key={h}
                     className="text-[10px] font-medium uppercase tracking-wider"
-                    style={{ color: "var(--qc-text-muted)" }}
+                    style={{ color: "var(--qc-ink-2)" }}
                   >
                     {h}
                   </TableHead>
@@ -169,20 +169,20 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
               {shareholding.map((row, i) => {
                 const change = formatChange(row.change);
                 return (
-                  <TableRow key={i} style={{ borderColor: "var(--qc-border-inner)" }}>
-                    <TableCell className="text-xs font-medium" style={{ color: "var(--qc-text-body)" }}>
+                  <TableRow key={i} style={{ borderColor: "var(--qc-hair-2)" }}>
+                    <TableCell className="text-xs font-medium" style={{ color: "var(--qc-ink)" }}>
                       {row.quarter}
                     </TableCell>
-                    <TableCell className="text-xs" style={{ color: "var(--qc-text-body)" }}>
+                    <TableCell className="text-xs" style={{ color: "var(--qc-ink)" }}>
                       {row.promoter_pct != null ? `${row.promoter_pct.toFixed(1)}%` : "—"}
                     </TableCell>
-                    <TableCell className="text-xs" style={{ color: "var(--qc-text-body)" }}>
+                    <TableCell className="text-xs" style={{ color: "var(--qc-ink)" }}>
                       {row.pledge_pct != null ? `${row.pledge_pct.toFixed(1)}%` : "—"}
                     </TableCell>
                     <TableCell className="text-xs font-medium" style={{ color: change.color }}>
                       {change.text}
                     </TableCell>
-                    <TableCell className="text-xs break-words whitespace-normal" style={{ color: "var(--qc-text-muted)" }}>
+                    <TableCell className="text-xs break-words whitespace-normal" style={{ color: "var(--qc-ink-2)" }}>
                       {row.signal}
                     </TableCell>
                   </TableRow>
@@ -194,7 +194,7 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
 
         <div
           className="flex gap-6 items-center shrink-0"
-          style={{ borderLeft: "1px solid var(--qc-border-default)", paddingLeft: 24, minWidth: 380 }}
+          style={{ borderLeft: "1px solid var(--qc-hair)", paddingLeft: 24, minWidth: 380 }}
         >
           <MqiDonut score={mqiScore.total} label={mqiScore.label} />
           <div className="flex-1">
@@ -204,22 +204,22 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
       </div>
 
       {(promoter_note || verdict_rationale || mqi_rationale) && (
-        <div className="flex flex-col gap-2 mt-4 pt-4" style={{ borderTop: "1px solid var(--qc-border-default)" }}>
+        <div className="flex flex-col gap-2 mt-4 pt-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
           {promoter_note && (
-            <p style={{ fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>
               <span style={{ fontWeight: 600 }}>Promoter note: </span>
               {promoter_note}
             </p>
           )}
           {verdict_rationale && (
-            <p style={{ fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>
               <span style={{ fontWeight: 600 }}>Verdict rationale: </span>
               {verdict_rationale}
             </p>
           )}
           {mqi_rationale && (
-            <p style={{ fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>
-              <span style={{ fontWeight: 600 }}>MQI impact: </span>
+            <p style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>
+              <span style={{ fontWeight: 600 }}>M-Score impact: </span>
               {mqi_rationale}
             </p>
           )}

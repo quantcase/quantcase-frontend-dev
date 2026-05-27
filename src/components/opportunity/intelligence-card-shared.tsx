@@ -6,7 +6,7 @@ import type { IndustrySignalBreakdownItem } from "@/types/opportunity";
 
 // ─── CSS-var–based sentiment helpers ─────────────────────────────────────────
 
-export function sentimentVars(sentiment: IndustrySignalBreakdownItem["sentiment"]) {
+function sentimentVars(sentiment: IndustrySignalBreakdownItem["sentiment"]) {
   if (sentiment === "positive")
     return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "#BBD9C6" };
   if (sentiment === "negative")
@@ -14,14 +14,14 @@ export function sentimentVars(sentiment: IndustrySignalBreakdownItem["sentiment"
   return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "#E8D4A0" };
 }
 
-export function scoreColor(score: number, maxScore: number): string {
+function scoreColor(score: number, maxScore: number): string {
   const pct = maxScore > 0 ? score / maxScore : 0;
   if (pct >= 0.7) return "var(--qc-up)";
   if (pct >= 0.4) return "var(--qc-warn)";
   return "var(--qc-down)";
 }
 
-export function statusVars(status: string, color?: string) {
+function statusVars(status: string, color?: string) {
   const c = (color ?? status ?? "").toLowerCase();
   if (c === "green" || c === "high" || c === "favorable" || c === "strong")
     return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", tagBg: "var(--qc-up)" };
@@ -32,7 +32,7 @@ export function statusVars(status: string, color?: string) {
 
 // ─── Shared SignalRow (horizontal bar, same as management card) ───────────────
 
-export function SignalRow({ item }: { item: IndustrySignalBreakdownItem }) {
+function SignalRow({ item }: { item: IndustrySignalBreakdownItem }) {
   const [open, setOpen] = useState(false);
   const sv = sentimentVars(item.sentiment);
   const pct = item.max_score > 0 ? (item.score / item.max_score) * 100 : 0;
@@ -42,16 +42,16 @@ export function SignalRow({ item }: { item: IndustrySignalBreakdownItem }) {
     <div style={{ position: "relative" }} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", cursor: "default" }}>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: sv.color, flexShrink: 0 }} />
-        <span style={{ fontSize: 12, color: "var(--qc-text-body)", width: 130, flexShrink: 0, lineHeight: 1.2 }}>{label}</span>
+        <span style={{ fontSize: 12, color: "var(--qc-ink)", width: 130, flexShrink: 0, lineHeight: 1.2 }}>{label}</span>
         <div style={{ flex: 1, height: 4, borderRadius: 999, background: "rgba(0,0,0,0.10)", overflow: "hidden" }}>
           <div style={{ height: "100%", borderRadius: 999, width: `${pct}%`, background: sv.color, transition: "width .4s" }} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4, width: 46, justifyContent: "flex-end", flexShrink: 0 }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: sv.color, fontVariantNumeric: "tabular-nums" }}>
             {item.score}
-            <span style={{ color: "var(--qc-text-dimmed)", fontWeight: 400 }}>/{item.max_score}</span>
+            <span style={{ color: "var(--qc-ink-3)", fontWeight: 400 }}>/{item.max_score}</span>
           </span>
-          <Info style={{ width: 10, height: 10, color: "var(--qc-text-muted)", flexShrink: 0 }} />
+          <Info style={{ width: 10, height: 10, color: "var(--qc-ink-2)", flexShrink: 0 }} />
         </div>
       </div>
 
@@ -59,23 +59,23 @@ export function SignalRow({ item }: { item: IndustrySignalBreakdownItem }) {
         <div style={{
           position: "absolute", right: 0, top: "100%", marginTop: 4, zIndex: 50,
           width: 280, borderRadius: 14,
-          border: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-card, var(--qc-surface-white))",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-card, var(--qc-card))",
           boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
         }}>
           <div style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "10px 14px", borderBottom: "1px solid var(--qc-border-default)",
+            padding: "10px 14px", borderBottom: "1px solid var(--qc-hair)",
             background: sv.bg, borderRadius: "14px 14px 0 0",
           }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)" }}>{label}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
             <span style={{ fontSize: 12, fontWeight: 600, color: sv.color }}>{item.score}/{item.max_score}</span>
           </div>
           <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
             {item.details.map((d, i) => (
               <div key={i} style={{ display: "flex", gap: 8 }}>
                 <span style={{ width: 5, height: 5, borderRadius: "50%", background: sv.color, flexShrink: 0, marginTop: 5 }} />
-                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.55 }}>{d}</p>
+                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>{d}</p>
               </div>
             ))}
           </div>
@@ -91,8 +91,8 @@ export function SignalRow({ item }: { item: IndustrySignalBreakdownItem }) {
 export function IntelligenceCardShell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
-      background: "var(--qc-surface-row-alt)",
-      border: "1px solid var(--qc-border-default)",
+      background: "var(--qc-section)",
+      border: "1px solid var(--qc-hair)",
       borderRadius: 18,
       padding: 8,
       display: "flex",
@@ -115,19 +115,19 @@ export function IntelligenceCardHeader({ icon, title, badge }: {
     <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 6px 2px" }}>
       <div style={{
         padding: 6, borderRadius: 8, display: "grid", placeItems: "center",
-        border: "1px solid var(--qc-icon-box-border)",
-        background: "var(--qc-icon-box-bg)",
+        border: "1px solid var(--qc-hair)",
+        background: "var(--qc-chip)",
       }}>
         {icon}
       </div>
-      <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-text-heading)", letterSpacing: "0.01em" }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
         {title}
       </span>
       {badge && (
         <span style={{
           marginLeft: "auto", fontSize: 10, fontWeight: 500,
-          color: "var(--qc-text-muted)",
-          background: "var(--qc-chip-bg)", border: "1px solid var(--qc-chip-border)",
+          color: "var(--qc-ink-2)",
+          background: "var(--qc-chip)", border: "1px solid var(--qc-hair)",
           borderRadius: 4, padding: "2px 8px",
         }}>
           {badge}
@@ -160,8 +160,8 @@ export function ScoreSignalsCard({
 
   return (
     <div style={{
-      background: "var(--qc-surface-white)",
-      border: "1px solid var(--qc-border-default)",
+      background: "var(--qc-card)",
+      border: "1px solid var(--qc-hair)",
       borderRadius: 14,
       overflow: "hidden",
       position: "relative",
@@ -169,7 +169,7 @@ export function ScoreSignalsCard({
       {/* lime gradient overlay */}
       <div style={{
         position: "absolute", inset: "auto 0 0 0", height: "50%",
-        background: "linear-gradient(180deg, transparent 0%, var(--qc-accent-lime-bg) 100%)",
+        background: "linear-gradient(180deg, transparent 0%, var(--qc-lime) 100%)",
         zIndex: 0, pointerEvents: "none",
       }} />
 
@@ -180,16 +180,16 @@ export function ScoreSignalsCard({
           <div>
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              letterSpacing: ".16em", color: "var(--qc-text-muted)",
+              letterSpacing: ".16em", color: "var(--qc-ink-2)",
               textTransform: "uppercase" as const, marginBottom: 6,
             }}>
               {eyebrow}
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
-              <span style={{ fontSize: 44, fontWeight: 500, letterSpacing: "-0.03em", color: "var(--qc-text-heading)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+              <span style={{ fontSize: 44, fontWeight: 500, letterSpacing: "-0.03em", color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
                 {score}
               </span>
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 15, color: "var(--qc-text-muted)", fontWeight: 400 }}>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 15, color: "var(--qc-ink-2)", fontWeight: 400 }}>
                 /{maxScore}
               </span>
             </div>
@@ -207,25 +207,25 @@ export function ScoreSignalsCard({
 
         {/* Score bar */}
         <div>
-          <div style={{ height: 5, background: "var(--qc-border-default)", borderRadius: 999, overflow: "hidden", marginBottom: 4 }}>
+          <div style={{ height: 5, background: "var(--qc-hair)", borderRadius: 999, overflow: "hidden", marginBottom: 4 }}>
             <div style={{ height: "100%", borderRadius: 999, width: `${Math.min(pct, 100)}%`, background: barColor, transition: "width .4s" }} />
           </div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             {subLabels.map((l) => (
-              <span key={l} style={{ fontSize: 10, color: "var(--qc-text-muted)" }}>{l}</span>
+              <span key={l} style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{l}</span>
             ))}
           </div>
         </div>
 
         {/* Separator */}
-        <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+        <div style={{ height: 1, background: "var(--qc-hair)" }} />
 
         {/* Signal rows */}
         {signals.length > 0 && (
           <div>
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              letterSpacing: ".16em", color: "var(--qc-text-muted)",
+              letterSpacing: ".16em", color: "var(--qc-ink-2)",
               textTransform: "uppercase" as const, marginBottom: 8,
             }}>
               Signal Breakdown · hover for details
@@ -241,15 +241,15 @@ export function ScoreSignalsCard({
         {/* Key Takeaway */}
         {takeaway && (
           <>
-            <div style={{ height: 1, background: "var(--qc-border-default)" }} />
+            <div style={{ height: 1, background: "var(--qc-hair)" }} />
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{
                 fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-                letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+                letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
               }}>
                 Key Takeaway
               </div>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-text-heading)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
                 {takeaway}
               </p>
             </div>
@@ -272,8 +272,8 @@ export function IntelligenceSubCard({ icon, eyebrow, badge, badgeColor, badgeBg,
 }) {
   return (
     <div style={{
-      background: "var(--qc-surface-white)",
-      border: "1px solid var(--qc-border-default)",
+      background: "var(--qc-card)",
+      border: "1px solid var(--qc-hair)",
       borderRadius: 14,
       padding: "14px 16px",
       display: "flex",
@@ -284,8 +284,8 @@ export function IntelligenceSubCard({ icon, eyebrow, badge, badgeColor, badgeBg,
         {icon && (
           <div style={{
             padding: 5, borderRadius: 6,
-            border: "1px solid var(--qc-icon-box-border)",
-            background: "var(--qc-icon-box-bg)",
+            border: "1px solid var(--qc-hair)",
+            background: "var(--qc-chip)",
             display: "grid", placeItems: "center", flexShrink: 0,
           }}>
             {icon}
@@ -293,7 +293,7 @@ export function IntelligenceSubCard({ icon, eyebrow, badge, badgeColor, badgeBg,
         )}
         <div style={{
           fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-          letterSpacing: ".16em", color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+          letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
         }}>
           {eyebrow}
         </div>
@@ -302,12 +302,12 @@ export function IntelligenceSubCard({ icon, eyebrow, badge, badgeColor, badgeBg,
             marginLeft: "auto",
             display: "inline-flex", alignItems: "center", gap: 5,
             padding: "3px 9px", borderRadius: 999,
-            background: badgeBg ?? "var(--qc-chip-bg)",
-            border: `1px solid ${badgeColor ? `${badgeColor}30` : "var(--qc-chip-border)"}`,
+            background: badgeBg ?? "var(--qc-chip)",
+            border: `1px solid ${badgeColor ? `${badgeColor}30` : "var(--qc-hair)"}`,
             fontSize: 10, fontWeight: 600,
-            color: badgeColor ?? "var(--qc-text-muted)",
+            color: badgeColor ?? "var(--qc-ink-2)",
           }}>
-            <span style={{ width: 4, height: 4, borderRadius: "50%", background: badgeColor ?? "var(--qc-text-muted)", flexShrink: 0 }} />
+            <span style={{ width: 4, height: 4, borderRadius: "50%", background: badgeColor ?? "var(--qc-ink-2)", flexShrink: 0 }} />
             {badge}
           </span>
         )}
@@ -324,7 +324,7 @@ function ClampedText({ text, clamp = 2 }: { text: string; clamp?: number }) {
   return (
     <div style={{ position: "relative", minWidth: 0 }} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <p style={{
-        margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.5,
+        margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.5,
         display: "-webkit-box", WebkitLineClamp: clamp,
         WebkitBoxOrient: "vertical" as React.CSSProperties["WebkitBoxOrient"],
         overflow: "hidden",
@@ -336,12 +336,12 @@ function ClampedText({ text, clamp = 2 }: { text: string; clamp?: number }) {
         <div style={{
           position: "absolute", left: 0, top: "100%", marginTop: 4,
           zIndex: 50, width: 300, borderRadius: 12,
-          border: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-card, var(--qc-surface-white))",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-card, var(--qc-card))",
           boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
           padding: "10px 12px",
         }}>
-          <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>{text}</p>
+          <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{text}</p>
         </div>
       )}
     </div>
@@ -350,14 +350,14 @@ function ClampedText({ text, clamp = 2 }: { text: string; clamp?: number }) {
 
 // ─── Shared strategy rows (vertically stacked label+value, clamped) ──────────
 
-export function StrategyRows({ rows }: { rows: { label: string; value: string }[] }) {
+function StrategyRows({ rows }: { rows: { label: string; value: string }[] }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {rows.map((r) => (
         <div key={r.label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <span style={{
             fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-            color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+            color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             letterSpacing: ".12em",
           }}>
             {r.label}
@@ -371,16 +371,16 @@ export function StrategyRows({ rows }: { rows: { label: string; value: string }[
 
 // ─── Shared watch-out / bullet list (clamped) ────────────────────────────────
 
-export function BulletList({ items }: { items: string[] }) {
+function BulletList({ items }: { items: string[] }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       {items.map((point, i) => (
         <div key={i} style={{
           display: "flex", alignItems: "flex-start", gap: 8,
           padding: "6px 0",
-          borderBottom: i < items.length - 1 ? "1px solid var(--qc-border-default)" : "none",
+          borderBottom: i < items.length - 1 ? "1px solid var(--qc-hair)" : "none",
         }}>
-          <span style={{ fontSize: 12, color: "var(--qc-text-muted)", flexShrink: 0, lineHeight: 1.5, userSelect: "none" }}>–</span>
+          <span style={{ fontSize: 12, color: "var(--qc-ink-2)", flexShrink: 0, lineHeight: 1.5, userSelect: "none" }}>–</span>
           <ClampedText text={point} clamp={2} />
         </div>
       ))}

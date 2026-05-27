@@ -27,14 +27,14 @@ function AcqRow({ label, body, dot }: { label: string; body: string; dot: string
         <div style={{ minWidth: 0 }}>
           <span style={{
             fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-            color: "var(--qc-text-muted)", textTransform: "uppercase" as const,
+            color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             letterSpacing: ".1em", display: "block", marginBottom: 2,
           }}>
             {label}
           </span>
           <p style={{
             margin: 0, fontSize: 12, fontWeight: 500,
-            color: "var(--qc-text-heading)", lineHeight: 1.4,
+            color: "var(--qc-ink)", lineHeight: 1.4,
             display: "-webkit-box", WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical", overflow: "hidden",
           }}>
@@ -47,19 +47,19 @@ function AcqRow({ label, body, dot }: { label: string; body: string; dot: string
         <div style={{
           position: "absolute", left: 0, top: "100%", marginTop: 2,
           zIndex: 50, width: 300, borderRadius: 12,
-          border: "1px solid var(--qc-border-default)",
-          background: "var(--qc-surface-card, var(--qc-surface-white))",
+          border: "1px solid var(--qc-hair)",
+          background: "var(--qc-card, var(--qc-card))",
           boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
         }}>
           <div style={{
-            padding: "8px 12px", borderBottom: "1px solid var(--qc-border-default)",
+            padding: "8px 12px", borderBottom: "1px solid var(--qc-hair)",
             display: "flex", alignItems: "center", gap: 6,
           }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-text-heading)" }}>{label}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
           </div>
           <div style={{ padding: "10px 12px" }}>
-            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-text-body)", lineHeight: 1.6 }}>{body}</p>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
           </div>
         </div>
       )}
@@ -88,7 +88,7 @@ export function CustomerIntelligenceCard({ data }: Props) {
   return (
     <IntelligenceCardShell>
       <IntelligenceCardHeader
-        icon={<Users style={{ width: 14, height: 14, color: "var(--qc-text-body)" }} />}
+        icon={<Users style={{ width: 14, height: 14, color: "var(--qc-ink)" }} />}
         title="Customer Intelligence"
       />
 
@@ -105,12 +105,12 @@ export function CustomerIntelligenceCard({ data }: Props) {
 
       {acqRows.length > 0 && (
         <IntelligenceSubCard
-          icon={<TrendingUp style={{ width: 10, height: 10, color: "var(--qc-text-body)" }} />}
+          icon={<TrendingUp style={{ width: 10, height: 10, color: "var(--qc-ink)" }} />}
           eyebrow="Customer Acquisition Dynamics"
         >
           <div style={{ display: "flex", flexDirection: "column" }}>
             {acqRows.map((r, i) => (
-              <div key={i} style={{ borderBottom: i < acqRows.length - 1 ? "1px solid var(--qc-border-default)" : "none" }}>
+              <div key={i} style={{ borderBottom: i < acqRows.length - 1 ? "1px solid var(--qc-hair)" : "none" }}>
                 <AcqRow label={r.label} body={r.body} dot={r.dot} />
               </div>
             ))}

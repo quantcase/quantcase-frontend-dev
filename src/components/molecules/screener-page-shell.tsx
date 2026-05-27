@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { InPageNav } from "@/components/molecules/in-page-nav";
 import { useScreenerInfo } from "@/hooks/useScreenerInfo";
+import { SimilarStocks } from "@/components/molecules/similar-stocks";
 import type { InPageNavItem } from "@/components/molecules/in-page-nav";
 
 interface ScreenerPageShellProps {
@@ -68,7 +69,10 @@ function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps)
       )}
 
       {/* Page content */}
-      <div className="mb-8">{children}</div>
+      <div className="pb-8">{children}</div>
+
+      {/* Similar stocks strip */}
+      {symbol && <SimilarStocks symbol={symbol} />}
     </div>
   );
 }

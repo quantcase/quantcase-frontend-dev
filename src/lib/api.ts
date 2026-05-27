@@ -5,6 +5,100 @@ interface ApiCallbacks<T> {
   onComplete?: () => void;
 }
 
+function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("qc_at");
+}
+
+function authHeaders(extra?: Record<string, string>): Record<string, string> {
+  const token = getAuthToken();
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
+/** GET with Bearer token — expects { success, data } envelope */
+export function apiAuthGet<T>(url: string, callbacks: ApiCallbacks<T>): void {
+  const { onStart, onSuccess, onError, onComplete } = callbacks;
+  onStart?.();
+  fetch(url, { headers: authHeaders() })
+    .then(async (res) => {
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
+      if (!json?.success) throw new Error(json?.error ?? "Unexpected response");
+      onSuccess(json);
+    })
+    .catch((err) => onError(err.message ?? "Failed to load data"))
+    .finally(() => onComplete?.());
+}
+
+/** POST with Bearer token — expects { success } envelope */
+export function apiAuthPost<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknown): void {
+  const { onStart, onSuccess, onError, onComplete } = callbacks;
+  onStart?.();
+  fetch(url, { method: "POST", headers: authHeaders(), body: body ? JSON.stringify(body) : undefined })
+    .then(async (res) => {
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
+      if (!json?.success) throw new Error(json?.error ?? "Unexpected response");
+      onSuccess(json);
+    })
+    .catch((err) => onError(err.message ?? "Failed to complete request"))
+    .finally(() => onComplete?.());
+}
+
+/** PATCH with Bearer token */
+export function apiAuthPatch<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknown): void {
+  const { onStart, onSuccess, onError, onComplete } = callbacks;
+  onStart?.();
+  fetch(url, { method: "PATCH", headers: authHeaders(), body: body ? JSON.stringify(body) : undefined })
+    .then(async (res) => {
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
+      if (!json?.success) throw new Error(json?.error ?? "Unexpected response");
+      onSuccess(json);
+    })
+    .catch((err) => onError(err.message ?? "Failed to update"))
+    .finally(() => onComplete?.());
+}
+
+/** DELETE with Bearer token */
+export function apiAuthDelete<T>(url: string, callbacks: ApiCallbacks<T>): void {
+  const { onStart, onSuccess, onError, onComplete } = callbacks;
+  onStart?.();
+  fetch(url, { method: "DELETE", headers: authHeaders() })
+    .then(async (res) => {
+      if (res.status === 204) { onSuccess({ success: true } as T); return; }
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
+      onSuccess(json);
+    })
+    .catch((err) => onError(err.message ?? "Failed to delete"))
+    .finally(() => onComplete?.());
+}
+
+/** Multipart file upload with Bearer token */
+export function apiAuthUpload<T>(url: string, callbacks: ApiCallbacks<T>, formData: FormData): void {
+  const { onStart, onSuccess, onError, onComplete } = callbacks;
+  const token = getAuthToken();
+  onStart?.();
+  fetch(url, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  })
+    .then(async (res) => {
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
+      if (!json?.success) throw new Error(json?.error ?? "Upload failed");
+      onSuccess(json);
+    })
+    .catch((err) => onError(err.message ?? "Upload failed"))
+    .finally(() => onComplete?.());
+}
+
 /**
  * Simple network utility for API calls with callbacks
  * @param url - The API endpoint URL

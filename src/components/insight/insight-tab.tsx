@@ -9,6 +9,7 @@ import { useLenses } from "@/hooks/useLenses";
 import { useSignals } from "@/hooks/useSignals";
 
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
+import { AssetActionBar } from "@/components/molecules/asset-action-bar";
 import { ReanalyzeButton } from "@/components/management/reanalyze-button";
 import { InsightScorecard } from "@/components/insight/insight-scorecard";
 import { InsightLenses } from "@/components/insight/insight-lenses";
@@ -233,20 +234,23 @@ function InsightTabContent({ type }: { type: InsightType }) {
   }
 
   return (
-    <ScreenerPageShell
-      headerRight={
-        <ReanalyzeButton
-          isAnalyzing={isAnalyzing}
-          aggregateStatus={aggregateStatus}
-          progress={progress}
-          analyzedAt={insight.analyzed_at ?? null}
-          analyzeError={analyzeError}
-          onClick={trigger}
-        />
-      }
-    >
-      <InsightDashboard insight={insight} type={type} callId={firstCallId} />
-    </ScreenerPageShell>
+    <>
+      <ScreenerPageShell
+        headerRight={
+          <ReanalyzeButton
+            isAnalyzing={isAnalyzing}
+            aggregateStatus={aggregateStatus}
+            progress={progress}
+            analyzedAt={insight.analyzed_at ?? null}
+            analyzeError={analyzeError}
+            onClick={trigger}
+          />
+        }
+      >
+        <InsightDashboard insight={insight} type={type} callId={firstCallId} />
+      </ScreenerPageShell>
+      <AssetActionBar ticker={symbol} />
+    </>
   );
 }
 

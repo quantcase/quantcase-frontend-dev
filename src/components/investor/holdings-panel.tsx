@@ -19,6 +19,8 @@ interface HoldingsPanelProps {
   ytdChange: string;
   capSegments: Segment[];
   industrySegments: Segment[];
+  isShadow?: boolean;
+  onUploadPortfolio?: () => void;
 }
 
 function MiniSparkline() {
@@ -57,6 +59,8 @@ export function HoldingsPanel({
   ytdChange,
   capSegments,
   industrySegments,
+  isShadow,
+  onUploadPortfolio,
 }: HoldingsPanelProps) {
   const [activeTab, setActiveTab] = useState<"cap" | "industry">("cap");
   const segments = activeTab === "cap" ? capSegments : industrySegments;
@@ -77,31 +81,53 @@ export function HoldingsPanel({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <div style={{ fontSize: 10, fontWeight: 600, color: "#888", letterSpacing: "0.10em", textTransform: "uppercase", marginBottom: 2 }}>
-            YOUR HOLDINGS
+            {isShadow ? "SHADOW HOLDINGS" : "YOUR HOLDINGS"}
           </div>
           <div style={{ fontSize: 12, color: "#888" }}>
             {stockCount} stocks · {fundCount} mutual funds · synced {syncedAgo}
           </div>
         </div>
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 5,
-            fontSize: 11,
-            fontWeight: 500,
-            color: "#22c55e",
-            background: "rgba(34,197,94,0.10)",
-            border: "1px solid rgba(34,197,94,0.20)",
-            borderRadius: 20,
-            padding: "3px 10px",
-          }}
-        >
+        {isShadow ? (
+          onUploadPortfolio && (
+            <button
+              onClick={onUploadPortfolio}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                fontSize: 11, fontWeight: 500, color: "#0F172B",
+                background: "#F5F5F5", border: "1px solid #E2E2E2",
+                borderRadius: 6, padding: "5px 12px",
+                cursor: "pointer", whiteSpace: "nowrap",
+              }}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Upload portfolio
+            </button>
+          )
+        ) : (
           <span
-            style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "inline-block" }}
-          />
-          Demat-linked
-        </span>
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              fontSize: 11,
+              fontWeight: 500,
+              color: "#22c55e",
+              background: "rgba(34,197,94,0.10)",
+              border: "1px solid rgba(34,197,94,0.20)",
+              borderRadius: 20,
+              padding: "3px 10px",
+            }}
+          >
+            <span
+              style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "inline-block" }}
+            />
+            Demat-linked
+          </span>
+        )}
       </div>
 
       {/* Equity value + sparkline */}

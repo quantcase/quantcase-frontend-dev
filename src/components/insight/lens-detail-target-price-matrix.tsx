@@ -10,6 +10,48 @@ interface Props {
   signals: Signal[];
 }
 
+// ─── Parse helpers ────────────────────────────────────────────────────────────
+
+// highlights[] follow the convention: "Bull: ...", "Base: ...", "Bear: ..."
+// Return the text after the prefix, or "" if not found.
+function highlightForScenario(highlights: string[], prefix: "Bull" | "Base" | "Bear"): string {
+  const re = new RegExp(`^${prefix}[:\s]`, "i");
+  const hit = highlights.find((h) => re.test(h));
+  if (hit) return hit.replace(/^(Bull|Base|Bear)[:\s]+/i, "").trim();
+  // Positional fallback: Bull=0, Base=1, Bear=2
+  const idx = prefix === "Bull" ? 0 : prefix === "Base" ? 1 : 2;
+  return highlights[idx] ?? "";
+}
+
+// Parse a number from a string like "18%" → 18, "₹3,850–₹4,380" → 3850
+function parseNum(s: string): number | null {
+  if (!s) return null;
+  const cleaned = s.replace(/[₹,]/g, "");
+  const m = cleaned.match(/-?\d+(\.\d+)?/);
+  return m ? parseFloat(m[0]) : null;
+}
+
+// Extract EPS CAGR from a highlight string like "Base: 18% PAT CAGR..."
+function extractCagrFromText(text: string): string {
+  const m = text.match(/(\d+(?:\.\d+)?)\s*%\s*(PAT|EPS|revenue|AUM|PAT\s*CAGR|CAGR)/i);
+  if (m) return `${m[1]}%`;
+  const m2 = text.match(/(\d+(?:\.\d+)?)\s*%/);
+  if (m2) return `${m2[1]}%`;
+  return "—";
+}
+
+// Extract risk/reward from text like "1.8x risk/reward"
+function extractRR(text: string): number {
+  const m = text.match(/(\d+(?:\.\d+)?)\s*x\s*risk/i);
+  return m ? parseFloat(m[1]) : 0;
+}
+
+// Extract probability from text like "25% Bull upside"
+function extractBullProb(text: string): string {
+  const m = text.match(/(\d+)\s*%\s*Bull/i);
+  return m ? `${m[1]}% Probability` : "25% Probability";
+}
+
 // ─── Scenario definitions ─────────────────────────────────────────────────────
 
 interface ScenarioDef {
@@ -20,7 +62,7 @@ interface ScenarioDef {
   isMostLikely: boolean;
   epsCagr: string;
   exitPe: string;
-  fyEps: string;
+  targetRange: string;
   sectionLabel: string;
   sectionLabelColor: string;
   narrative: string;
@@ -31,46 +73,31 @@ interface ScenarioDef {
 }
 
 function buildScenarios(lens: LensDetail): ScenarioDef[] {
-  const km = lens.key_metrics ?? {};
+  const highlights = lens.highlights ?? [];
+  const takeaway = lens.takeaway ?? "";
   const sig = lens.top_signals ?? [];
 
-  // Pull best available growth metrics from signals
-  const growthSignal = sig.find(
-    (s) => (s.metric?.includes("GROWTH") || s.metric?.includes("growth")) && s.actual_value != null
-  );
-  const guidanceSignal = sig.find((s) => s.direction === "tracking" && s.guided_value != null);
-  const profitSignal = sig.find(
-    (s) => (s.metric === "PAT" || s.metric === "NET_PROFIT" || s.metric?.includes("PAT")) && s.actual_value != null
-  );
-  const roaSignal = sig.find((s) => s.metric === "ROA" && s.actual_value != null);
-  const roeSignal = sig.find(
-    (s) => (s.metric === "ROE" || s.metric?.includes("EQUITY")) && s.actual_value != null
-  );
+  const bullText = highlightForScenario(highlights, "Bull");
+  const baseText = highlightForScenario(highlights, "Base");
+  const bearText = highlightForScenario(highlights, "Bear");
 
-  const baseGrowth = growthSignal?.actual_value ?? 0;
-  const guidedGrowth = guidanceSignal?.guided_value ?? baseGrowth * 1.1;
+  // When highlights[] is empty (target-price-matrix lens), parse CAGR from takeaway directly
+  const bullCagr = extractCagrFromText(bullText) !== "—" ? extractCagrFromText(bullText) : extractCagrFromText(takeaway);
+  const baseCagr = extractCagrFromText(baseText);
+  const bearCagr = extractCagrFromText(bearText);
 
-  // Derive EPS CAGR approximations from growth signals
-  const baseEpsCagr = baseGrowth > 0 ? `${baseGrowth.toFixed(1)}%` : "—";
-  const bullEpsCagr = guidedGrowth > 0 ? `${(guidedGrowth * 1.3).toFixed(1)}%` : "—";
-  const bearEpsCagr = baseGrowth > 0 ? `${(baseGrowth * 0.55).toFixed(1)}%` : "—";
+  // Try to parse price ranges from takeaway — backend now emits bull, base, bear in order
+  const allRanges = [...(takeaway.matchAll(/₹([\d,]+)\s*[–\-~to]+\s*₹([\d,]+)/gi))].map((m) => `₹${m[1]}–₹${m[2]}`);
+  const bullRange = allRanges[0] ?? "—";
+  const baseRange = allRanges[1] ?? "—";
+  const bearRange = allRanges[2] ?? "—";
 
-  // FY EPS — use EPS signal or PAT as proxy
-  const epsSignal = sig.find((s) => s.metric === "EPS_DILUTED" && s.actual_value != null);
-  const baseFyEps = epsSignal?.actual_value != null
-    ? `₹${epsSignal.actual_value}`
-    : profitSignal?.unit === "Cr" && profitSignal.actual_value != null
-    ? `₹${profitSignal.actual_value} Cr`
-    : Object.entries(km).find(([k]) => k.toLowerCase().includes("eps"))?.[1] ?? "—";
+  const bullProb = extractBullProb(takeaway);
 
-  // ROA/ROE for narrative
-  const roa = roaSignal?.actual_value != null ? `${roaSignal.actual_value}%` : km["ROA"] ?? km["roa"] ?? "";
-  const roe = roeSignal?.actual_value != null ? `${roeSignal.actual_value}%` : km["ROE"] ?? km["roe"] ?? "";
-
-  // Highlights/risks for narrative text
-  const bullNarrative = lens.highlights?.[0] ?? "Strong execution and favourable tailwinds drive premium re-rating.";
-  const baseNarrative = lens.highlights?.[1] ?? lens.takeaway?.split(".")[0] ?? "Management guidance on-track with stable margins and steady growth.";
-  const bearNarrative = lens.risks?.[0] ?? "Macro headwinds and execution challenges compress margins and multiples.";
+  // Narrative fallback to risks for bear
+  const bearNarrative = (lens.risks ?? [])[0] ?? bearText;
+  const baseNarrative = baseText || lens.takeaway?.split(".")[0] || "Management guidance on-track with stable margins and steady growth.";
+  const bullNarrative = bullText || (lens.highlights ?? [])[0] || "Strong execution and favourable tailwinds drive premium re-rating.";
 
   return [
     {
@@ -79,9 +106,9 @@ function buildScenarios(lens: LensDetail): ScenarioDef[] {
       icon: "🐻",
       probability: "25% Probability",
       isMostLikely: false,
-      epsCagr: bearEpsCagr,
+      epsCagr: bearCagr,
       exitPe: "14–18x",
-      fyEps: baseFyEps,
+      targetRange: bearRange,
       sectionLabel: "WHAT CAN GO WRONG",
       sectionLabelColor: "var(--qc-down)",
       narrative: bearNarrative,
@@ -96,12 +123,12 @@ function buildScenarios(lens: LensDetail): ScenarioDef[] {
       icon: "🎯",
       probability: "50% Probability",
       isMostLikely: true,
-      epsCagr: baseEpsCagr,
+      epsCagr: baseCagr,
       exitPe: "20–26x",
-      fyEps: baseFyEps,
+      targetRange: baseRange,
       sectionLabel: "WHAT DRIVES THIS OUTCOME",
       sectionLabelColor: "var(--qc-blue)",
-      narrative: `${baseNarrative}${roa ? ` ROA at ${roa}` : ""}${roe ? `, ROE at ${roe}` : ""}.`.replace(/\.\./, "."),
+      narrative: baseNarrative,
       narrativeIcon: "📈",
       color: "var(--qc-blue)",
       bg: "rgba(59,130,246,0.04)",
@@ -111,11 +138,11 @@ function buildScenarios(lens: LensDetail): ScenarioDef[] {
       key: "bull",
       label: "Bull Case",
       icon: "🐂",
-      probability: "25% Probability",
+      probability: bullProb,
       isMostLikely: false,
-      epsCagr: bullEpsCagr,
+      epsCagr: bullCagr,
       exitPe: "28–35x",
-      fyEps: baseFyEps,
+      targetRange: bullRange,
       sectionLabel: "WHAT CAN ACCELERATE UPSIDE",
       sectionLabelColor: "var(--qc-up)",
       narrative: bullNarrative,
@@ -130,9 +157,6 @@ function buildScenarios(lens: LensDetail): ScenarioDef[] {
 // ─── Scenario card ─────────────────────────────────────────────────────────────
 
 function ScenarioCard({ s }: { s: ScenarioDef }) {
-  const epsCagrNum = parseFloat(s.epsCagr);
-  const epsCagrPositive = !isNaN(epsCagrNum) ? epsCagrNum >= 0 : s.key !== "bear";
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -186,12 +210,12 @@ function ScenarioCard({ s }: { s: ScenarioDef }) {
         </div>
       </div>
 
-      {/* EPS/PE/FY metrics */}
+      {/* EPS CAGR / Exit P/E / Target range metrics */}
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {[
-          { label: "EPS CAGR", value: s.epsCagr, color: epsCagrPositive ? s.color : "var(--qc-down)" },
+          { label: "EPS CAGR", value: s.epsCagr, color: s.epsCagr !== "—" ? s.color : "var(--qc-ink-3)" },
           { label: "Exit P/E", value: s.exitPe, color: "var(--qc-ink)" },
-          { label: "FY EPS", value: s.fyEps, color: "var(--qc-ink)" },
+          { label: "Target Range", value: s.targetRange, color: "var(--qc-ink)" },
         ].map(({ label, value, color }) => (
           <div key={label} style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -273,29 +297,24 @@ function RiskRewardGauge({ ratio }: { ratio: number }) {
 
 // ─── Probability weighted footer ──────────────────────────────────────────────
 
-function WeightedOutcomeBar({ lens }: { lens: LensDetail }) {
-  const km = lens.key_metrics ?? {};
-  const sig = lens.top_signals ?? [];
+function WeightedOutcomeBar({ lens, scenarios }: { lens: LensDetail; scenarios: ScenarioDef[] }) {
+  const takeaway = lens.takeaway ?? "";
 
-  // Weighted CAGR label: derive from growth signal
-  const growthSignal = sig.find(
-    (s) => s.metric?.includes("GROWTH") && s.actual_value != null
-  );
-  const baseGrowth = growthSignal?.actual_value ?? 0;
-  const weightedCagrLo = (baseGrowth * 0.6).toFixed(0);
-  const weightedCagrHi = (baseGrowth * 0.9).toFixed(0);
-  const weightedCagrText = baseGrowth > 0 ? `+${weightedCagrLo}% to +${weightedCagrHi}%` : "—";
+  // Use parsed EPS CAGR from base and bull for CAGR label
+  const base = scenarios.find((s) => s.key === "base")!;
+  const bull = scenarios.find((s) => s.key === "bull")!;
+  const baseCagrNum = parseNum(base.epsCagr);
+  const bullCagrNum = parseNum(bull.epsCagr);
 
-  // Weighted range — use any absolute value metric as rough proxy
-  const absSignal = sig.find(
-    (s) => s.unit === "Cr" && s.actual_value != null && s.actual_value > 100
-  );
-  const rangeText = absSignal?.actual_value != null
-    ? `₹${(absSignal.actual_value * 0.85).toFixed(0)}–₹${(absSignal.actual_value * 1.1).toFixed(0)} Cr`
-    : Object.entries(km).find(([k]) => k.toLowerCase().includes("aum") || k.toLowerCase().includes("revenue"))?.[1] ?? "—";
+  const weightedCagrText = baseCagrNum != null && bullCagrNum != null
+    ? `+${Math.round(baseCagrNum * 0.5 + bullCagrNum * 0.25)}% to +${Math.round(bullCagrNum * 0.75)}%`
+    : base.epsCagr !== "—" ? base.epsCagr : "—";
 
-  // Risk/reward ratio from score
-  const rrRatio = lens.score >= 70 ? 1.6 : lens.score >= 55 ? 1.2 : 0.9;
+  // Weighted target range — base range from parsed scenarios
+  const rangeText = base.targetRange !== "—" ? base.targetRange : "—";
+
+  // Risk/reward from takeaway text, fallback to score
+  const rrRatio = extractRR(takeaway) || (lens.score >= 70 ? 1.6 : lens.score >= 55 ? 1.2 : 0.9);
   const rrLabel = rrRatio >= 1.5 ? "Attractive" : rrRatio >= 1.1 ? "Moderate" : "Cautious";
 
   const tiles = [
@@ -398,14 +417,11 @@ function WeightedOutcomeBar({ lens }: { lens: LensDetail }) {
 // ─── Sub-header ───────────────────────────────────────────────────────────────
 
 function SubHeader({ lens }: { lens: LensDetail }) {
-  const km = lens.key_metrics ?? {};
   const sig = lens.top_signals ?? [];
-
-  // Try to find any revenue/AUM/business metric for the sub-header context line
   const contextMetric = sig.find((s) => s.unit === "Cr" && s.actual_value != null && s.actual_value > 100);
   const contextValue = contextMetric
     ? `${contextMetric.label}: ₹${contextMetric.actual_value} Cr`
-    : Object.entries(km).slice(0, 1).map(([k, v]) => `${k}: ${v}`)[0] ?? "";
+    : "";
 
   return (
     <div style={{
@@ -444,7 +460,7 @@ function buildFooterMetrics(lens: LensDetail, scenarios: ScenarioDef[]) {
   const base = scenarios.find((s) => s.key === "base")!;
   const bull = scenarios.find((s) => s.key === "bull")!;
   const bear = scenarios.find((s) => s.key === "bear")!;
-  const rrRatio = lens.score >= 70 ? 1.6 : lens.score >= 55 ? 1.2 : 0.9;
+  const rrRatio = extractRR(lens.takeaway ?? "") || (lens.score >= 70 ? 1.6 : lens.score >= 55 ? 1.2 : 0.9);
 
   return [
     { label: "Base EPS CAGR", value: base.epsCagr, sub: "Most likely outcome" },
@@ -471,7 +487,7 @@ export function LensDetailTargetPriceMatrix({ lens }: Props) {
       </div>
 
       {/* Probability-weighted outcome row */}
-      <WeightedOutcomeBar lens={lens} />
+      <WeightedOutcomeBar lens={lens} scenarios={scenarios} />
 
       {/* Summary footer */}
       <LensDrawerSummaryCard

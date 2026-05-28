@@ -17,15 +17,15 @@ interface UseAnalysisResult {
   error: string | null;
 }
 
-export function useAnalysis(callId: string): UseAnalysisResult {
+export function useAnalysis(ticker: string): UseAnalysisResult {
   const [insights, setInsights] = useState<InsightData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!callId.trim()) return;
+    if (!ticker.trim()) return;
 
-    const url = `${BACKEND_URL}/api/analysis?callId=${callId}`;
+    const url = `${BACKEND_URL}/api/analysis?ticker=${ticker}`;
 
     apiCall<AnalysisApiResponse>(url, {
       onStart: () => {
@@ -43,7 +43,7 @@ export function useAnalysis(callId: string): UseAnalysisResult {
         setLoading(false);
       },
     });
-  }, [callId]);
+  }, [ticker]);
 
   const getInsight = (type: InsightType): InsightData | null =>
     insights.find((i) => i.type === type && i.available) ?? null;

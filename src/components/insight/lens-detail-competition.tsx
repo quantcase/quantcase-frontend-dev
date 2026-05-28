@@ -9,7 +9,7 @@ import { BACKEND_URL } from "@/lib/constants";
 interface Props {
   lens: LensDetail;
   signals: Signal[];
-  callId?: string;
+  ticker?: string;
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -308,6 +308,7 @@ function PrimaryPeerCard({ ticker, lens }: { ticker: string; lens: LensDetail })
 // ── Peer slot ─────────────────────────────────────────────────────────────────
 
 interface LensesApiResponse {
+  ticker: string;
   callId: string;
   categories: Record<string, LensDetail[]>;
 }
@@ -319,8 +320,7 @@ function PeerSlot({ ticker, onDeselect }: { ticker: string; onDeselect: () => vo
   useEffect(() => {
     setLoading(true);
     setData(null);
-    const callId = `${ticker}_FY2026_Q3`;
-    fetch(`${BACKEND_URL}/api/lenses?callId=${callId}`)
+    fetch(`${BACKEND_URL}/api/lenses?ticker=${ticker}`)
       .then((r) => r.json())
       .then((res: LensesApiResponse) => {
         const cats = res.categories ?? {};
@@ -331,7 +331,7 @@ function PeerSlot({ ticker, onDeselect }: { ticker: string; onDeselect: () => vo
         };
         setData({
           ticker,
-          callId,
+          callId: res.callId,
           competitionLens,
           managementScore: avg(cats.management ?? []),
           opportunityScore: avg(cats.opportunity ?? []),
@@ -541,7 +541,7 @@ const FALLBACK_PEERS = ["HDFCBANK", "ICICIBANK", "KOTAKBANK", "AXISBANK", "SBIN"
 
 // ── main export ───────────────────────────────────────────────────────────────
 
-export function LensDetailCompetition({ lens, signals: _signals, callId }: Props) {
+export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props) {
   const [selectedPeers, setSelectedPeers] = useState<string[]>([]);
   const [swotExpanded, setSwotExpanded] = useState(false);
 
@@ -549,7 +549,7 @@ export function LensDetailCompetition({ lens, signals: _signals, callId }: Props
   const km = lens.key_metrics;
   const statusCol = statusColor(lens.status);
 
-  const primaryTicker = tickerFromCallId(callId);
+  const primaryTicker = ticker ?? "COMPANY";
 
   // Derive peer suggestions from key_metrics keys mentioning other companies, else fall back
   const peerTickers = FALLBACK_PEERS.filter((t) => t !== primaryTicker).slice(0, 8);

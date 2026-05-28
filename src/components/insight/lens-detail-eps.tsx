@@ -26,6 +26,44 @@ const SCENARIO_ICON: Record<ScenarioKey, React.ElementType> = {
   bear: TrendingDown,
 };
 
+// ─── Parse helpers ────────────────────────────────────────────────────────────
+
+// highlights[] follow "Bull: ...", "Base: ...", "Bear: ..." convention
+function highlightForScenario(highlights: string[], prefix: "Bull" | "Base" | "Bear"): string {
+  const re = new RegExp(`^${prefix}[:\\s]`, "i");
+  const hit = highlights.find((h) => re.test(h));
+  if (hit) return hit.replace(/^(Bull|Base|Bear)[:\s]+/i, "").trim();
+  const idx = prefix === "Bull" ? 0 : prefix === "Base" ? 1 : 2;
+  return highlights[idx] ?? "";
+}
+
+// Extract a % CAGR from a narrative string, e.g. "18.5% EPS CAGR" or "22% PAT CAGR"
+function extractCagrFromText(text: string): string {
+  const m = text.match(/(\d+(?:\.\d+)?)\s*%\s*(PAT|EPS|revenue|AUM|disbursement)?\s*CAGR/i);
+  if (m) return `${m[1]}%`;
+  const m2 = text.match(/(\d+(?:\.\d+)?)\s*%\s*(PAT|EPS|profit)/i);
+  if (m2) return `${m2[1]}%`;
+  const m3 = text.match(/(\d+(?:\.\d+)?)\s*%/);
+  if (m3) return `${m3[1]}%`;
+  return "—";
+}
+
+// Extract revenue/growth % from a narrative ("26% revenue CAGR", "21% AUM growth")
+function extractRevenueGrowthFromText(text: string): string {
+  const m = text.match(/(\d+(?:\.\d+)?)\s*%\s*(revenue|AUM|disbursement|loan|advance)\s*(CAGR|growth)?/i);
+  if (m) return `${m[1]}%`;
+  return "—";
+}
+
+// Extract margin mention from narrative (e.g. "26.1% EBITDA margin", "150bps margin expansion")
+function extractMarginFromText(text: string): string {
+  const m1 = text.match(/([+-]?\d+)\s*bps\s*margin/i);
+  if (m1) return `${parseInt(m1[1]) > 0 ? "+" : ""}${m1[1]}bps`;
+  const m2 = text.match(/(\d+(?:\.\d+)?)\s*%\s*(EBITDA|NIM|PBT|ROA|ROE|margin)/i);
+  if (m2) return `${m2[1]}%`;
+  return "—";
+}
+
 // ─── Build scenarios from lens data ──────────────────────────────────────────
 
 interface ScenarioRow {
@@ -36,86 +74,51 @@ interface ScenarioRow {
 }
 
 function buildScenariosFromLens(lens: LensDetail): Record<ScenarioKey, ScenarioRow> {
-  const km = lens.key_metrics ?? {};
+  const highlights = lens.highlights ?? [];
   const sig = lens.top_signals ?? [];
 
-  // Try to find guidance signals for each metric
-  const findActual = (metric: string) => sig.find((s) => s.metric === metric && s.actual_value != null);
-  const findGuided = (metric: string) => sig.find((s) => s.metric === metric && s.guided_value != null);
+  const bullText = highlightForScenario(highlights, "Bull");
+  const baseText = highlightForScenario(highlights, "Base");
+  const bearText = highlightForScenario(highlights, "Bear");
 
-  // Infer growth/guidance values from key_metrics with broad key matching
-  const getKm = (...keys: string[]): string => {
-    for (const k of keys) {
-      const found = Object.entries(km).find(([key]) => key.toLowerCase().includes(k.toLowerCase()));
-      if (found) return found[1];
-    }
-    return "—";
-  };
+  const bullCagr = extractCagrFromText(bullText);
+  const baseCagr = extractCagrFromText(baseText);
+  const bearCagr = extractCagrFromText(bearText);
 
-  // Revenue / growth metric for base case
-  const revGrowthActual = findActual("NET_PROFIT_GROWTH_YOY") ?? findActual("AUM_GROWTH") ?? findActual("DISBURSEMENT_GROWTH");
-  const revGrowthGuided = findGuided("AUM_GROWTH_GUIDANCE") ?? findGuided("DISBURSEMENT_GROWTH_GUIDANCE");
+  const bullRev = extractRevenueGrowthFromText(bullText);
+  const baseRev = extractRevenueGrowthFromText(baseText);
+  const bearRev = extractRevenueGrowthFromText(bearText);
 
-  const baseRev = revGrowthActual?.actual_value != null
-    ? `${revGrowthActual.actual_value}%`
-    : getKm("growth", "cagr", "revenue");
+  const bullMargin = extractMarginFromText(bullText);
+  const baseMargin = extractMarginFromText(baseText);
+  const bearMargin = extractMarginFromText(bearText);
 
-  const guidedRev = revGrowthGuided?.guided_value != null
-    ? `${revGrowthGuided.guided_value}%`
-    : baseRev;
+  // Industry growth from a signal with direction "tracking" or from PAT signal context
+  const industrySignal = sig.find((s) => s.metric?.toLowerCase().includes("industry") || s.metric?.toLowerCase().includes("sector"));
+  const industryBase = industrySignal?.actual_value != null ? `${industrySignal.actual_value}%` : "Moderate";
 
-  // Margin / profitability metric
-  const roaActual = findActual("ROA");
-  const roeActual = findActual("ROE") ?? findActual("RETURN_ON_EQUITY_GROWTH_YOY");
-  const marginBase = roaActual?.actual_value != null
-    ? `${roaActual.actual_value}%`
-    : roeActual?.actual_value != null
-    ? `${roeActual.actual_value}%`
-    : getKm("ROA", "ROE", "margin");
-
-  // EPS / PAT as proxy for EPS CAGR
-  const epsActual = findActual("EPS_DILUTED") ?? findActual("PAT");
-  const patGrowth = findActual("NET_PROFIT_GROWTH_YOY");
-  const baseEpsCagr = patGrowth?.actual_value != null
-    ? `${patGrowth.actual_value}%`
-    : epsActual?.actual_value != null
-    ? `${epsActual.actual_value}`
-    : getKm("pat_growth", "eps", "profit_growth");
-
-  // Industry growth — look for any industry signal or derive from context
-  const industryBase = getKm("industry", "sector_growth") !== "—"
-    ? getKm("industry", "sector_growth")
-    : "Moderate";
-
-  // Parse numeric for scenario scaling
-  const baseRevNum = parseFloat(baseRev) || 0;
-  const guidedRevNum = parseFloat(guidedRev) || 0;
-  const baseEpsNum = parseFloat(baseEpsCagr) || 0;
-
-  const bullMult = 1.3;
-  const bearMult = 0.6;
-
-  const fmt = (n: number, suffix = "%") => `${n >= 0 ? "" : ""}${n.toFixed(1)}${suffix}`;
-  const fmtBps = (bps: number) => bps >= 0 ? `+${bps}bps` : `${bps}bps`;
+  // Fallback: derive numeric multipliers from base CAGR if text parsing yields "—"
+  const baseCagrNum = parseFloat(baseCagr) || 0;
+  const fmt = (n: number) => n > 0 ? `${n.toFixed(1)}%` : "—";
 
   return {
     bull: {
-      industryCagr: { value: industryBase !== "—" ? industryBase : "Strong", note: "Sector tailwinds" },
-      revenueGrowth: { value: fmt(baseRevNum * bullMult), note: "Beat guidance" },
-      marginTrajectory: { value: fmtBps(150), note: "Operating leverage" },
-      expectedEpsCagr: { value: fmt(baseEpsNum * bullMult), subtitle: "Accelerated growth" },
+      industryCagr: { value: industryBase, note: "Sector tailwinds" },
+      revenueGrowth: { value: bullRev !== "—" ? bullRev : baseCagrNum > 0 ? fmt(baseCagrNum * 1.3) : "—", note: "Beat guidance" },
+      marginTrajectory: { value: bullMargin !== "—" ? bullMargin : "+150bps", note: "Operating leverage" },
+      expectedEpsCagr: { value: bullCagr !== "—" ? bullCagr : baseCagrNum > 0 ? fmt(baseCagrNum * 1.3) : "—", subtitle: "Accelerated growth" },
     },
     base: {
-      industryCagr: { value: industryBase !== "—" ? industryBase : "Steady", note: "Steady growth" },
-      revenueGrowth: { value: guidedRevNum ? fmt(guidedRevNum) : baseRev, note: "On-track execution" },
-      marginTrajectory: { value: fmtBps(50), note: "Stable improvement" },
-      expectedEpsCagr: { value: baseEpsCagr !== "—" ? (baseEpsCagr.includes("%") ? baseEpsCagr : `${baseEpsCagr}%`) : "—", subtitle: "Solid growth + margin tailwind" },
+      industryCagr: { value: industryBase, note: "Steady growth" },
+      revenueGrowth: { value: baseRev !== "—" ? baseRev : baseCagr, note: "On-track execution" },
+      marginTrajectory: { value: baseMargin !== "—" ? baseMargin : "+50bps", note: "Stable improvement" },
+      expectedEpsCagr: { value: baseCagr !== "—" ? baseCagr : "—", subtitle: "Solid growth + margin tailwind" },
     },
     bear: {
-      industryCagr: { value: industryBase !== "—" ? industryBase : "Slowing", note: "Sector headwinds" },
-      revenueGrowth: { value: fmt(baseRevNum * bearMult), note: "Competitive pressure" },
-      marginTrajectory: { value: fmtBps(-100), note: "Margin compression" },
-      expectedEpsCagr: { value: fmt(baseEpsNum * bearMult), subtitle: "Below industry standard" },
+      industryCagr: { value: industryBase, note: "Sector headwinds" },
+      revenueGrowth: { value: bearRev !== "—" ? bearRev : baseCagrNum > 0 ? fmt(baseCagrNum * 0.5) : "—", note: "Competitive pressure" },
+      marginTrajectory: { value: bearMargin !== "—" ? bearMargin : "-100bps", note: "Margin compression" },
+      expectedEpsCagr: { value: bearCagr !== "—" ? bearCagr : baseCagrNum > 0 ? fmt(baseCagrNum * 0.5) : "—", subtitle: "Below industry standard" },
     },
   };
 }
@@ -284,26 +287,27 @@ function ScenarioTable({ scenarios }: { scenarios: Record<ScenarioKey, ScenarioR
   );
 }
 
-// ─── Summary metrics from key_metrics ────────────────────────────────────────
+// ─── Summary metrics from top_signals ────────────────────────────────────────
 
 function buildSummaryMetrics(lens: LensDetail, scenarios: Record<ScenarioKey, ScenarioRow>) {
-  const km = lens.key_metrics ?? {};
   const sig = lens.top_signals ?? [];
 
-  // Revenue/growth label — pick the most meaningful available metric
-  const revSignal = sig.find((s) => s.metric?.includes("GROWTH") && s.actual_value != null);
-  const revLabel = revSignal ? revSignal.label.replace(/\(.*\)/, "").trim() : "Revenue Growth";
-  const revValue = revSignal?.actual_value != null ? `${revSignal.actual_value}%` : "—";
+  // Revenue/growth label — pick the most meaningful growth signal
+  const revSignal = sig.find((s) => s.actual_value != null && s.unit === "%" &&
+    (s.metric?.includes("GROWTH") || s.metric?.includes("growth") || s.metric?.includes("CAGR")));
+  const revLabel = revSignal ? revSignal.label.replace(/\(.*\)/, "").trim().slice(0, 20) : "Growth";
+  const revValue = revSignal ? `${revSignal.actual_value}%` : scenarios.base.revenueGrowth.value;
   const revSub = revSignal?.actual_date ? revSignal.actual_date.slice(0, 7) : "YoY";
 
-  // PAT/profit metric
-  const patSignal = sig.find((s) => (s.metric === "PAT" || s.metric === "NET_PROFIT") && s.actual_value != null);
-  const patLabel = patSignal ? patSignal.label.replace(/\(.*\)/, "").trim() : "PAT";
+  // PAT/profit metric — prefer a Cr value over a % for the summary
+  const patSignal = sig.find((s) => s.actual_value != null &&
+    (s.metric === "PAT" || s.metric === "NET_PROFIT" || s.metric?.includes("PAT")));
+  const patLabel = patSignal ? patSignal.label.replace(/\(.*\)/, "").trim().slice(0, 20) : "Profitability";
   const patValue = patSignal?.unit === "Cr"
     ? `₹${patSignal.actual_value} Cr`
     : patSignal?.actual_value != null
     ? `${patSignal.actual_value}%`
-    : Object.entries(km).find(([k]) => k.toLowerCase().includes("pat"))?.[1] ?? "—";
+    : "—";
   const patSub = patSignal?.actual_date ? patSignal.actual_date.slice(0, 7) : "Latest";
 
   return [

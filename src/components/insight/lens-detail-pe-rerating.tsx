@@ -10,16 +10,6 @@ interface Props {
   signals: unknown[];
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function getKm(km: Record<string, string>, ...fragments: string[]): string {
-  for (const frag of fragments) {
-    const found = Object.entries(km).find(([k]) => k.toLowerCase().includes(frag.toLowerCase()));
-    if (found) return found[1];
-  }
-  return "—";
-}
-
 // ─── Scenario data derived from lens ─────────────────────────────────────────
 
 interface Scenario {
@@ -38,32 +28,52 @@ interface Scenario {
   pillColor: string;
 }
 
+function formatPeRange(lo: number | null | undefined, hi: number | null | undefined): string {
+  if (lo == null && hi == null) return "—";
+  if (lo != null && hi != null) return `${lo}–${hi}x`;
+  if (lo != null) return `${lo}x`;
+  return `${hi}x`;
+}
+
+function formatReturnRange(lo: number | null | undefined, hi: number | null | undefined): string {
+  if (lo == null && hi == null) return "—";
+  const fmt = (n: number) => `${n >= 0 ? "+" : ""}${n}%`;
+  if (lo != null && hi != null) return `${fmt(lo)} to ${fmt(hi)}`;
+  if (lo != null) return fmt(lo);
+  return fmt(hi!);
+}
+
 function buildScenarios(lens: LensDetail): Scenario[] {
-  const km = lens.key_metrics ?? {};
+  const sig = lens.top_signals ?? [];
 
-  // Pick representative growth/profitability metrics from key_metrics
-  const revGrowth = getKm(km, "growth", "cagr", "revenue_yoy");
-  const profitGrowth = getKm(km, "pat_growth", "profit_growth", "net_profit_growth");
-  const roa = getKm(km, "roa", "return_on_asset");
-  const roe = getKm(km, "roe", "return_on_equity");
-  const guidance = getKm(km, "guidance", "target", "milestone");
+  const findSig = (metric: string) => sig.find((s) => s.metric === metric);
 
-  const bullNarrative = lens.highlights?.[0]
-    ?? `Strong execution on guidance targets accelerates growth.${roa !== "—" ? ` ROA at ${roa}` : ""}${roe !== "—" ? `, ROE at ${roe}` : ""}. Premium re-rating on sustained delivery.`;
+  // Dynamic P/E ranges: actual_value = range low, guided_value = range high
+  const bearPe   = findSig("SCENARIO_BEAR_PE_RANGE");
+  const basePe   = findSig("SCENARIO_BASE_PE_RANGE");
+  const bullPe   = findSig("SCENARIO_BULL_PE_RANGE");
+  const bearRet  = findSig("SCENARIO_BEAR_RETURN");
+  const baseRet  = findSig("SCENARIO_BASE_RETURN");
+  const bullRet  = findSig("SCENARIO_BULL_RETURN");
 
-  const baseNarrative = lens.highlights?.[1]
-    ?? `${revGrowth !== "—" ? `Growth of ${revGrowth}` : "Steady growth"} sustains with ${profitGrowth !== "—" ? `${profitGrowth} profit improvement` : "stable profitability"}. Market re-rates on execution visibility.`;
+  const bearPeRange  = formatPeRange(bearPe?.actual_value, bearPe?.guided_value);
+  const basePeRange  = formatPeRange(basePe?.actual_value, basePe?.guided_value);
+  const bullPeRange  = formatPeRange(bullPe?.actual_value, bullPe?.guided_value);
+  const bearRetRange = formatReturnRange(bearRet?.actual_value, bearRet?.guided_value);
+  const baseRetRange = formatReturnRange(baseRet?.actual_value, baseRet?.guided_value);
+  const bullRetRange = formatReturnRange(bullRet?.actual_value, bullRet?.guided_value);
 
-  const bearNarrative = lens.risks?.[0]
-    ?? `Growth decelerates below guidance.${guidance !== "—" ? ` ${guidance} target at risk.` : ""} Market de-rates on earnings quality concerns.`;
+  const bullNarrative = lens.highlights?.[0] ?? "Strong execution on guidance targets accelerates growth. Premium re-rating on sustained delivery.";
+  const baseNarrative = lens.highlights?.[1] ?? "Steady growth sustains with stable profitability. Market re-rates on execution visibility.";
+  const bearNarrative = lens.risks?.[0] ?? "Growth decelerates below guidance. Market de-rates on earnings quality concerns.";
 
   return [
     {
       key: "bear",
       label: "Bear Case",
       icon: "🐻",
-      peRange: "14–18x",
-      returnRange: "-10% to -25%",
+      peRange: bearPeRange,
+      returnRange: bearRetRange,
       returnPositive: false,
       vsText: "vs current multiples",
       narrative: bearNarrative,
@@ -77,9 +87,9 @@ function buildScenarios(lens: LensDetail): Scenario[] {
       key: "base",
       label: "Base Case",
       icon: "⊙",
-      peRange: "20–26x",
-      returnRange: "+5% to +20%",
-      returnPositive: true,
+      peRange: basePeRange,
+      returnRange: baseRetRange,
+      returnPositive: (baseRet?.actual_value ?? 0) >= 0,
       vsText: "vs current multiples",
       narrative: baseNarrative,
       color: "var(--qc-blue)",
@@ -92,8 +102,8 @@ function buildScenarios(lens: LensDetail): Scenario[] {
       key: "bull",
       label: "Bull Case",
       icon: "🐂",
-      peRange: "28–35x",
-      returnRange: "+25% to +50%",
+      peRange: bullPeRange,
+      returnRange: bullRetRange,
       returnPositive: true,
       vsText: "vs current multiples",
       narrative: bullNarrative,
@@ -109,29 +119,36 @@ function buildScenarios(lens: LensDetail): Scenario[] {
 // ─── Left panel: Current Market Perception ────────────────────────────────────
 
 function MarketPerceptionPanel({ lens }: { lens: LensDetail }) {
-  const km = lens.key_metrics ?? {};
   const sig = lens.top_signals ?? [];
 
-  // Pick top 4 metrics from key_metrics for the mini grid
-  const kmEntries = Object.entries(km).slice(0, 4);
-  const metricGrid = kmEntries.length > 0
-    ? kmEntries.map(([k, v]) => ({
-        label: k.replace(/_/g, " ").replace(/([A-Z])/g, " $1").trim().toUpperCase().slice(0, 18),
-        value: v,
-        positive: v.startsWith("+") || (!v.startsWith("-") && parseFloat(v) > 0),
-      }))
-    : sig.slice(0, 4).map((s) => ({
-        label: s.label.slice(0, 18).toUpperCase(),
-        value: s.actual_value != null ? `${s.actual_value}${s.unit ? ` ${s.unit}` : ""}` : "—",
-        positive: (s.actual_value ?? 0) > 0,
-      }));
+  // key_metrics is always empty for deal lenses — use top 4 high-impact signals
+  const metricGrid = sig
+    .filter((s) => s.actual_value != null && s.impact === "high")
+    .slice(0, 4)
+    .map((s) => {
+      const val = s.unit === "Cr"
+        ? `₹${s.actual_value} Cr`
+        : s.unit === "%"
+        ? `${s.actual_value}%`
+        : s.unit
+        ? `${s.actual_value} ${s.unit}`
+        : `${s.actual_value}`;
+      return {
+        label: s.label.replace(/\(.*?\)/, "").trim().toUpperCase().slice(0, 18),
+        value: val,
+        positive: (s.direction === "beat" || s.direction === "tracking") || (s.actual_value ?? 0) > 0,
+      };
+    });
 
   // Score-derived P/E zone marker
   const markerPct = Math.min(95, Math.max(5, (lens.score / 100) * 100));
   const peZone = lens.score >= 70 ? "Fair–Premium" : lens.score >= 50 ? "Fair" : "Discount";
 
-  // Headline derived from takeaway or highlights
-  const headline = lens.takeaway?.split(".")[0] ?? lens.highlights?.[0] ?? lens.description;
+  // Headline — first sentence of takeaway is now a short 2-4 word phrase per backend guidelines
+  const headlineSentence = lens.takeaway?.split(".")[0]?.trim() ?? "";
+  const headline = headlineSentence.length > 0 && headlineSentence.length <= 60
+    ? headlineSentence
+    : (lens.highlights?.[0] ?? lens.description);
 
   return (
     <div style={{
@@ -342,7 +359,7 @@ function CatalystItem({ icon, label, sublabel, positive }: { icon: string; label
       }}>
         {icon}
       </div>
-      <p style={{ fontSize: 12, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>{label}</p>
+      <p style={{ fontSize: 12, fontWeight: 700, color, margin: 0 }}>{label}</p>
 
       {showPopup && (
         <div
@@ -513,13 +530,25 @@ function NarrativeStrip({ lens }: { lens: LensDetail }) {
 
 // ─── Summary footer metrics ───────────────────────────────────────────────────
 
-const PE_RERATING_METRICS = [
-  { label: "Base Case Exit P/E", value: "20–26x", sub: "Most Probable" },
-  { label: "Implied Upside", value: "+5% to +20%", sub: "vs current multiples" },
-  { label: "Time Horizon", value: "2–3 Years", sub: "Investment View" },
-];
-
 function SummaryFooter({ lens }: { lens: LensDetail }) {
+  const sig = lens.top_signals ?? [];
+  const basePe  = sig.find((s) => s.metric === "SCENARIO_BASE_PE_RANGE");
+  const baseRet = sig.find((s) => s.metric === "SCENARIO_BASE_RETURN");
+
+  const metrics = [
+    {
+      label: "Base Case Exit P/E",
+      value: formatPeRange(basePe?.actual_value, basePe?.guided_value),
+      sub: "Most Probable",
+    },
+    {
+      label: "Implied Upside",
+      value: formatReturnRange(baseRet?.actual_value, baseRet?.guided_value),
+      sub: "vs current multiples",
+    },
+    { label: "Time Horizon", value: "2–3 Years", sub: "Investment View" },
+  ];
+
   const title = lens.score >= 70
     ? "Solid re-rating potential with positive momentum."
     : lens.score >= 50
@@ -530,7 +559,7 @@ function SummaryFooter({ lens }: { lens: LensDetail }) {
     <LensDrawerSummaryCard
       title={title}
       body={lens.takeaway ?? lens.description}
-      metrics={PE_RERATING_METRICS}
+      metrics={metrics}
     />
   );
 }

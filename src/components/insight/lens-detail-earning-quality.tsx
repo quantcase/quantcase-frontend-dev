@@ -29,79 +29,28 @@ interface TileDef {
   note: string;
 }
 
+// Fixed 4-tile layout using the standardised metric names from the backend
+const TILE_METRICS = [
+  { metric: "EPS_CAGR_COMPANY",           label: "Company EPS CAGR" },
+  { metric: "EPS_CAGR_INDUSTRY",          label: "Industry EPS CAGR" },
+  { metric: "EPS_RELATIVE_OUTPERFORMANCE", label: "Relative Outperf." },
+  { metric: "EPS_GROWTH_ESTIMATE",        label: "EPS Growth (Est.)" },
+];
+
 function buildTiles(lens: LensDetail): TileDef[] {
-  const km = lens.key_metrics ?? {};
   const sig = lens.top_signals ?? [];
 
-  const tiles: TileDef[] = [];
-
-  // Try to find the most meaningful metrics in order of preference
-  const growthSignal = sig.find(
-    (s) => s.actual_value != null && s.unit === "%" &&
-      (s.metric?.includes("GROWTH") || s.metric?.includes("growth"))
-  );
-  const profitSignal = sig.find(
-    (s) => s.actual_value != null && (s.metric === "PAT" || s.metric?.includes("NET_PROFIT"))
-  );
-  const roaSignal = sig.find((s) => s.actual_value != null && s.metric === "ROA");
-  const roeSignal = sig.find(
-    (s) => s.actual_value != null && (s.metric === "ROE" || s.metric?.includes("EQUITY"))
-  );
-
-  if (growthSignal) {
-    tiles.push({
-      label: growthSignal.label.replace(/\(.*?\)/, "").trim().slice(0, 22),
-      value: `${growthSignal.actual_value}${growthSignal.unit ?? "%"}`,
-      note: growthSignal.statement?.slice(0, 40) ?? "Core growth momentum",
-    });
-  }
-
-  if (roaSignal) {
-    tiles.push({
-      label: "Return on Assets",
-      value: `${roaSignal.actual_value}%`,
-      note: roaSignal.statement?.slice(0, 40) ?? "Asset productivity",
-    });
-  } else {
-    const kmRoa = Object.entries(km).find(([k]) => k.toLowerCase().includes("roa"));
-    if (kmRoa) tiles.push({ label: "Return on Assets", value: kmRoa[1], note: "Asset productivity" });
-  }
-
-  if (profitSignal) {
-    const val = profitSignal.unit === "Cr"
-      ? `₹${profitSignal.actual_value} Cr`
-      : `${profitSignal.actual_value}%`;
-    tiles.push({
-      label: profitSignal.label.replace(/\(.*?\)/, "").trim().slice(0, 22),
-      value: val,
-      note: "Earnings vs growth check",
-    });
-  }
-
-  if (roeSignal) {
-    tiles.push({
-      label: "Return on Equity",
-      value: `${roeSignal.actual_value}%`,
-      note: roeSignal.statement?.slice(0, 40) ?? "Capital returns",
-    });
-  } else {
-    const kmRoe = Object.entries(km).find(([k]) => k.toLowerCase().includes("roe"));
-    if (kmRoe) tiles.push({ label: "Return on Equity", value: kmRoe[1], note: "Capital returns" });
-  }
-
-  // Fill remaining slots from key_metrics if we have fewer than 4
-  if (tiles.length < 4) {
-    const used = new Set(tiles.map((t) => t.label.toLowerCase()));
-    for (const [k, v] of Object.entries(km)) {
-      if (tiles.length >= 4) break;
-      const label = k.replace(/_/g, " ").slice(0, 22);
-      if (!used.has(label.toLowerCase())) {
-        tiles.push({ label, value: v, note: "" });
-      }
+  return TILE_METRICS.map(({ metric, label }) => {
+    const s = sig.find((s) => s.metric === metric);
+    if (s?.actual_value != null) {
+      return {
+        label,
+        value: `${s.actual_value}%`,
+        note: s.statement?.slice(0, 50) ?? "",
+      };
     }
-  }
-
-  return tiles.slice(0, 4);
+    return { label, value: "—", note: "" };
+  });
 }
 
 // ─── MetricTile ───────────────────────────────────────────────────────────────
@@ -288,41 +237,80 @@ function InsightCard({
 function buildChartData(lens: LensDetail): { data: BarDatum[]; unit: string } {
   const sig = lens.top_signals ?? [];
 
-  // Find up to 4 numeric signals with actual values for chart bars
-  const numericSigs = sig
-    .filter((s) => s.actual_value != null && s.unit === "%")
-    .slice(0, 4);
+  // Primary: PAT_GROWTH_YOY time-series signals, sorted chronologically
+  const growthSigs = sig
+    .filter((s) => s.metric === "PAT_GROWTH_YOY" && s.actual_value != null)
+    .sort((a, b) => (a.actual_date ?? "").localeCompare(b.actual_date ?? ""))
+    .slice(0, 5);
 
-  if (numericSigs.length === 0) {
-    // Fall back to showing score breakdown
+  if (growthSigs.length >= 2) {
     return {
-      data: [{ label: "Score", primary: lens.score, secondary: null }],
-      unit: "",
+      data: growthSigs.map((s) => ({
+        label: s.label.slice(0, 10),
+        primary: s.actual_value,
+        secondary: s.guided_value ?? null,
+      })),
+      unit: "%",
     };
   }
 
-  const data: BarDatum[] = numericSigs.map((s) => ({
-    label: s.label.split(" ").slice(0, 2).join(" ").slice(0, 12),
-    primary: s.actual_value,
-    secondary: s.guided_value,
-  }));
+  // Fallback: any % signals
+  const percentSigs = sig.filter((s) => s.actual_value != null && s.unit === "%").slice(0, 4);
+  if (percentSigs.length >= 2) {
+    return {
+      data: percentSigs.map((s) => ({
+        label: s.label.split(" ").slice(0, 2).join(" ").slice(0, 12),
+        primary: s.actual_value,
+        secondary: s.guided_value ?? null,
+      })),
+      unit: "%",
+    };
+  }
 
-  return { data, unit: "%" };
+  // Last resort: any numeric signal
+  const anySigs = sig.filter((s) => s.actual_value != null).slice(0, 4);
+  if (anySigs.length > 0) {
+    return {
+      data: anySigs.map((s) => ({
+        label: s.label.split(" ").slice(0, 2).join(" ").slice(0, 12),
+        primary: s.actual_value,
+        secondary: s.guided_value ?? null,
+      })),
+      unit: anySigs.every((s) => s.unit === "Cr") ? " Cr" : "",
+    };
+  }
+
+  return { data: [{ label: "Score", primary: lens.score, secondary: null }], unit: "" };
 }
 
 // ─── Build summary metrics for footer ────────────────────────────────────────
 
 function buildFooterMetrics(lens: LensDetail) {
   const sig = lens.top_signals ?? [];
-  const km = lens.key_metrics ?? {};
 
-  const growthSig = sig.find((s) => s.actual_value != null && s.unit === "%" && s.metric?.includes("GROWTH"));
-  const profitSig = sig.find((s) => s.actual_value != null && (s.metric === "PAT" || s.metric?.includes("NET_PROFIT")));
-  const qualitySig = sig.find((s) => s.actual_value != null && (s.metric === "ROA" || s.metric === "ROE"));
+  // Broad growth signal
+  const growthSig = sig.find((s) => s.actual_value != null && s.unit === "%" && (
+    s.metric?.toUpperCase().includes("GROWTH") ||
+    s.metric?.toUpperCase().includes("AUM") ||
+    s.metric?.toUpperCase().includes("CAGR")
+  ));
+
+  // PAT or large profit metric
+  const profitSig = sig.find((s) => s.actual_value != null && (
+    s.metric === "PAT" || s.metric === "NET_PROFIT" || s.metric?.toUpperCase().includes("PAT")
+  ));
+
+  // Quality metric — ROA, ROE, CRAR, capital adequacy
+  const qualitySig = sig.find((s) => s.actual_value != null && (
+    s.metric === "ROA" || s.metric === "ROE" ||
+    s.metric?.toUpperCase().includes("CAPITAL_ADEQUACY") ||
+    s.metric?.toUpperCase().includes("CRAR") ||
+    s.metric?.toUpperCase().includes("TIER")
+  ));
 
   const m1 = {
     label: growthSig ? growthSig.label.replace(/\(.*?\)/, "").trim().slice(0, 18) : "Growth",
-    value: growthSig ? `${growthSig.actual_value}%` : Object.values(km)[0] ?? "—",
+    value: growthSig ? `${growthSig.actual_value}%` : "—",
     sub: growthSig ? "Core segment YoY" : "",
   };
 
@@ -330,14 +318,16 @@ function buildFooterMetrics(lens: LensDetail) {
     label: profitSig ? profitSig.label.replace(/\(.*?\)/, "").trim().slice(0, 18) : "Profitability",
     value: profitSig
       ? profitSig.unit === "Cr" ? `₹${profitSig.actual_value} Cr` : `${profitSig.actual_value}%`
-      : Object.values(km)[1] ?? "—",
+      : "—",
     sub: profitSig ? "Earnings quality" : "",
   };
 
   const m3 = {
     label: qualitySig ? qualitySig.label.replace(/\(.*?\)/, "").trim().slice(0, 18) : "Quality Score",
-    value: qualitySig ? `${qualitySig.actual_value}%` : `${lens.score}/100`,
-    sub: qualitySig ? "Return metric" : "Composite score",
+    value: qualitySig
+      ? qualitySig.unit ? `${qualitySig.actual_value}${qualitySig.unit}` : `${qualitySig.actual_value}%`
+      : `${lens.score}/100`,
+    sub: qualitySig ? "Return / capital metric" : "Composite score",
   };
 
   return [m1, m2, m3];

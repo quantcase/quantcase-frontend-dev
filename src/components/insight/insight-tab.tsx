@@ -150,15 +150,15 @@ function CenteredMessage({ children, error }: { children: React.ReactNode; error
 function InsightDashboard({
   insight,
   type,
-  callId,
+  ticker,
 }: {
   insight: import("@/types/analysis").InsightData;
   type: InsightType;
-  callId: string;
+  ticker: string;
 }) {
   const [activeLensSlug, setActiveLensSlug] = useState<string | null>(null);
-  const { lenses: lensDetails } = useLenses(callId);
-  const { signals } = useSignals(callId);
+  const { lenses: lensDetails } = useLenses(ticker);
+  const { signals } = useSignals(ticker);
 
   const handleLensClick = useCallback((slug: string) => {
     setActiveLensSlug(slug);
@@ -192,7 +192,7 @@ function InsightDashboard({
         </div>
       </div>
 
-      <LensDrawer lens={activeLens} signals={signals} onClose={() => setActiveLensSlug(null)} callId={callId} />
+      <LensDrawer lens={activeLens} signals={signals} onClose={() => setActiveLensSlug(null)} ticker={ticker} />
     </>
   );
 }
@@ -205,7 +205,7 @@ function InsightTabContent({ type }: { type: InsightType }) {
 
   const { data: transcriptCalls, loading: callsLoading, error: callsError } = useTranscriptCalls(symbol);
   const firstCallId = transcriptCalls[0]?.id ?? "";
-  const { getInsight, loading: insightLoading } = useAnalysis(firstCallId);
+  const { getInsight, loading: insightLoading } = useAnalysis(symbol);
   const insight = getInsight(type);
 
   const { isAnalyzing, analyzeError, aggregateStatus, progress, trigger } = useAnalyzeTrigger({
@@ -247,7 +247,7 @@ function InsightTabContent({ type }: { type: InsightType }) {
           />
         }
       >
-        <InsightDashboard insight={insight} type={type} callId={firstCallId} />
+        <InsightDashboard insight={insight} type={type} ticker={symbol} />
       </ScreenerPageShell>
       <AssetActionBar ticker={symbol} />
     </>

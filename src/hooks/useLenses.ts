@@ -38,6 +38,7 @@ export interface LensDetail {
 export type LensCategory = "management" | "opportunity" | "deal";
 
 interface LensesApiResponse {
+  ticker: string;
   callId: string;
   categories: Record<LensCategory, LensDetail[]>;
 }
@@ -48,17 +49,17 @@ interface UseLensesResult {
   error: string | null;
 }
 
-export function useLenses(callId: string): UseLensesResult {
+export function useLenses(ticker: string): UseLensesResult {
   const [lenses, setLenses] = useState<Record<LensCategory, LensDetail[]>>({ management: [], opportunity: [], deal: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!callId.trim()) return;
+    if (!ticker.trim()) return;
     setLoading(true);
     setError(null);
 
-    fetch(`${BACKEND_URL}/api/lenses?callId=${callId}`)
+    fetch(`${BACKEND_URL}/api/lenses?ticker=${ticker}`)
       .then((r) => r.json())
       .then((data: LensesApiResponse) => {
         setLenses(data.categories ?? { management: [], opportunity: [], deal: [] });
@@ -68,7 +69,7 @@ export function useLenses(callId: string): UseLensesResult {
         setError(String(e));
         setLoading(false);
       });
-  }, [callId]);
+  }, [ticker]);
 
   return { lenses, loading, error };
 }

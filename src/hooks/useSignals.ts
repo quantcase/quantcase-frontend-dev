@@ -28,6 +28,8 @@ export interface Signal {
 }
 
 interface SignalsApiResponse {
+  ticker: string;
+  callId: string;
   count: number;
   signals: Signal[];
 }
@@ -38,17 +40,17 @@ interface UseSignalsResult {
   error: string | null;
 }
 
-export function useSignals(callId: string): UseSignalsResult {
+export function useSignals(ticker: string): UseSignalsResult {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!callId.trim()) return;
+    if (!ticker.trim()) return;
     setLoading(true);
     setError(null);
 
-    fetch(`${BACKEND_URL}/api/signals?callId=${callId}`)
+    fetch(`${BACKEND_URL}/api/signals?ticker=${ticker}`)
       .then((r) => r.json())
       .then((data: SignalsApiResponse) => {
         setSignals(data.signals ?? []);
@@ -58,7 +60,7 @@ export function useSignals(callId: string): UseSignalsResult {
         setError(String(e));
         setLoading(false);
       });
-  }, [callId]);
+  }, [ticker]);
 
   return { signals, loading, error };
 }

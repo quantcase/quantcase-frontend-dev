@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantcase · Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F5F0;
+  --surface: #FFFFFF;
+  --ink: #1C1917;
+  --ink-2: #44403C;
+  --ink-3: #78716C;
+  --ink-4: #A8A29E;
+  --rule: #E7E4DC;
+  --rule-2: #D6D0C4;
+  --mgmt: #166534; --mgmt-bg: #DCFCE7; --mgmt-mid: #16A34A;
+  --opp: #1D4ED8; --opp-bg: #DBEAFE; --opp-mid: #2563EB;
+  --deal: #7C3AED; --deal-bg: #EDE9FE; --deal-mid: #7C3AED;
+  --good: #15803D; --good-bg: #F0FDF4;
+  --warn: #B45309; --warn-bg: #FFFBEB;
+  --bad: #B91C1C; --bad-bg: #FEF2F2;
+  --neutral-bg: #F5F4F0;
+  --gold: #D97706;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+.serif{font-family:'Instrument Serif',serif}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:56px 1fr;min-height:100vh}
+.sidebar{border-right:1px solid var(--rule);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:4px;background:var(--surface)}
+.sidebar .logo{width:28px;height:28px;background:var(--ink);color:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-style:italic;font-size:17px;margin-bottom:14px}
+.s-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink-3);cursor:pointer}
+.s-icon:hover{background:var(--bg);color:var(--ink)}
+.s-icon.active{background:var(--ink);color:#fff}
+.s-icon svg{width:17px;height:17px}
+.s-space{flex:1}
+
+.main{padding:28px 36px 80px;max-width:1400px}
+
+/* PAGE HEADER */
+.phead{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:20px;border-bottom:1px solid var(--rule);margin-bottom:24px}
+.phead h1{font-family:'Instrument Serif',serif;font-size:36px;font-weight:400;letter-spacing:-0.02em;line-height:1}
+.phead .meta{font-size:12px;color:var(--ink-3);margin-top:6px;display:flex;gap:10px;align-items:center}
+.demat-pill{font-size:10px;background:var(--ink);color:#fff;padding:3px 8px;border-radius:999px;font-weight:500;letter-spacing:0.04em}
+.head-right{display:flex;gap:8px}
+.btn{background:var(--surface);color:var(--ink-2);border:1px solid var(--rule-2);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
+.btn:hover{background:var(--bg)}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.primary:hover{background:#2C2820}
+.btn-xs{background:transparent;border:1px solid var(--rule-2);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--ink-2);cursor:pointer;font-family:inherit}
+.btn-xs:hover{background:var(--bg)}
+
+/* GAMIFICATION STREAK */
+.streak-banner{background:linear-gradient(135deg,#1C1917 0%,#2C2820 100%);border-radius:12px;padding:14px 20px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;position:relative;overflow:hidden}
+.streak-banner::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(217,119,6,0.18),transparent 60%)}
+.streak-left{display:flex;gap:14px;align-items:center}
+.streak-fire{font-size:28px;line-height:1}
+.streak-text .title{font-family:'Instrument Serif',serif;font-size:18px;font-weight:400;color:#fff;line-height:1.2}
+.streak-text .sub{font-size:12px;color:rgba(255,255,255,0.55);margin-top:3px}
+.streak-text .sub strong{color:rgba(255,255,255,0.8)}
+.streak-progress{display:flex;gap:6px;align-items:center}
+.s-dot{width:28px;height:6px;border-radius:3px}
+.s-dot.done{background:#D97706}
+.s-dot.active{background:#D97706;opacity:0.5}
+.s-dot.empty{background:rgba(255,255,255,0.12)}
+.streak-cta{font-size:11px;color:#FCD34D;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer}
+
+/* SUMMARY STATS */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px}
+.stat-card{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
+.stat-card.s-total::after{background:linear-gradient(90deg,var(--ink),#44403C)}
+.stat-card.s-equity::after{background:linear-gradient(90deg,var(--good),#4ADE80)}
+.stat-card.s-pnl::after{background:linear-gradient(90deg,var(--opp-mid),#60A5FA)}
+.stat-card.s-mf::after{background:linear-gradient(90deg,var(--deal),#A78BFA)}
+.stat-card.s-mod::after{background:linear-gradient(90deg,var(--gold),#F59E0B)}
+.stat-lbl{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:6px}
+.stat-val{font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;letter-spacing:-0.025em;line-height:1}
+.stat-val .unit{font-size:14px;color:var(--ink-3);font-family:'DM Sans',sans-serif}
+.stat-sub{font-size:11px;color:var(--ink-3);margin-top:4px;font-family:'JetBrains Mono',monospace}
+.stat-sub.pos{color:var(--good)}
+.stat-sub.neg{color:var(--bad)}
+
+/* ALERT BAND */
+.alert-band{background:linear-gradient(135deg,#FEF3C7,#FEF9EE);border:1px solid #FCD34D;border-radius:10px;padding:14px 18px;margin-bottom:22px}
+.ab-head{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;color:var(--warn);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ab-rows{display:flex;flex-direction:column;gap:6px}
+.ab-row{display:grid;grid-template-columns:auto auto 1fr auto;gap:12px;align-items:center;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #FDE68A}
+.ab-ticker{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:0.02em}
+.ab-tag{font-size:9px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px}
+.ab-tag.fair{background:#FEF3C7;color:#92400E}
+.ab-tag.stretched{background:#FEE2E2;color:#991B1B}
+.ab-reason{font-size:12px;color:var(--ink-2)}
+.ab-btn{font-size:11px;color:var(--warn);font-weight:600;text-decoration:underline;cursor:pointer;white-space:nowrap}
+
+/* MAIN GRID */
+.grid-2{display:grid;grid-template-columns:1fr 360px;gap:16px;margin-bottom:22px}
+
+/* HOLDINGS CARD */
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.card-head{padding:16px 20px 12px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center}
+.card-head h3{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:600;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.card-head .count{background:var(--bg);padding:2px 8px;border-radius:999px;font-size:11px;color:var(--ink-2);font-family:'JetBrains Mono',monospace;letter-spacing:0;text-transform:none}
+.card-head-right{display:flex;gap:8px;align-items:center}
+
+/* FILTER PILLS */
+.filter-row{display:flex;gap:6px;padding:12px 20px;border-bottom:1px solid var(--rule);overflow-x:auto}
+.fpill{font-size:11px;font-weight:500;padding:5px 12px;border-radius:999px;border:1px solid var(--rule-2);background:var(--surface);color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.fpill:hover{background:var(--bg)}
+.fpill.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fpill.warn-pill{border-color:#FCD34D;background:#FEF3C7;color:#92400E}
+.fpill.warn-pill.active{background:#92400E;color:#fff}
+
+/* HOLDING ROW */
+.holding{border-bottom:1px solid var(--rule);cursor:pointer;transition:background 0.12s}
+.holding:last-child{border-bottom:none}
+.holding:hover{background:#FAFAF8}
+.holding.expanded{background:#FAFAF8}
+.h-main{display:grid;grid-template-columns:auto 1fr auto auto auto auto auto;gap:14px;align-items:center;padding:14px 20px}
+.h-expand-icon{width:18px;height:18px;border-radius:50%;border:1px solid var(--rule-2);display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:10px;flex-shrink:0;transition:transform 0.2s}
+.holding.expanded .h-expand-icon{transform:rotate(180deg);background:var(--ink);color:#fff;border-color:var(--ink)}
+.h-stock{min-width:0}
+.h-ticker{font-size:15px;font-weight:700;letter-spacing:0.01em;color:var(--ink);display:flex;align-items:center;gap:6px}
+.h-alert-dot{width:6px;height:6px;border-radius:50%;background:var(--bad);flex-shrink:0}
+.h-name{font-size:11px;color:var(--ink-3);margin-top:1px}
+.h-badge{font-size:9px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-top:4px;display:inline-block}
+.h-badge.large{background:#E7E4DC;color:#57534E}
+.h-badge.mid{background:#F5F0FF;color:#6D28D9}
+.h-badge.small{background:#FFF7ED;color:#C2410C}
+
+.h-thesis-chip{display:flex;align-items:center;gap:5px}
+.thesis-dot{width:7px;height:7px;border-radius:50%}
+.thesis-dot.intact{background:var(--good)}
+.thesis-dot.partial{background:var(--gold)}
+.thesis-dot.broken{background:var(--bad)}
+.thesis-label{font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase}
+.thesis-label.intact{color:var(--good)}
+.thesis-label.partial{color:var(--gold)}
+.thesis-label.broken{color:var(--bad)}
+
+.h-qty{text-align:right}
+.h-qty .shares{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--ink-3)}
+.h-qty .cost{font-size:10px;color:var(--ink-4);margin-top:1px}
+.h-val{text-align:right;min-width:70px}
+.h-val .curr{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600}
+.h-val .pnl{font-size:10px;margin-top:2px;font-family:'JetBrains Mono',monospace}
+.h-val .pnl.pos{color:var(--good)}
+.h-val .pnl.neg{color:var(--bad)}
+
+/* MOD mini score */
+.mod-mini-score{display:flex;flex-direction:column;gap:5px;min-width:80px}
+.mod-mini-score .overall{display:flex;align-items:baseline;gap:4px}
+.mod-mini-score .overall .num{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;letter-spacing:-0.02em;line-height:1}
+.mod-mini-score .overall .denom{font-size:11px;color:var(--ink-3)}
+.mod-bars{display:flex;gap:3px}
+.mod-bar{height:3px;width:18px;border-radius:2px}
+
+/* MOD TREND */
+.mod-trend{display:flex;flex-direction:column;gap:3px;min-width:70px}
+.trend-lbl{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-4);font-weight:600}
+.trend-quarters{display:flex;gap:3px;align-items:flex-end}
+.tq{width:12px;border-radius:2px 2px 0 0}
+
+/* EXPANDED PANEL */
+.h-detail{padding:0 20px 20px;border-top:1px solid var(--rule);display:none;animation:slideDown 0.25s ease}
+.holding.expanded .h-detail{display:block}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+.detail-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding-top:16px}
+
+.detail-block{background:var(--bg);border-radius:10px;padding:14px 16px}
+.detail-block-head{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+
+/* MOD sub-scores */
+.mod-sub-list{display:flex;flex-direction:column;gap:10px}
+.mod-sub-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+.mod-sub-lbl{font-size:12px;color:var(--ink-2)}
+.mod-sub-track{width:60px;height:4px;background:var(--rule);border-radius:2px;overflow:hidden}
+.mod-sub-fill{height:100%;border-radius:2px}
+.mod-sub-val{font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:600;min-width:24px;text-align:right}
+
+/* JOURNAL */
+.journal-block{position:relative}
+.thesis-health{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px}
+.thesis-health.intact{background:var(--good-bg);color:var(--good)}
+.thesis-health.partial{background:var(--warn-bg);color:var(--warn)}
+.thesis-health.broken{background:var(--bad-bg);color:var(--bad)}
+.thesis-text{font-family:'Instrument Serif',serif;font-size:14px;font-style:italic;color:var(--ink-2);line-height:1.5;margin-bottom:10px;min-height:36px;position:relative}
+.thesis-text.empty::before{content:'Tap to add your investment thesis...';font-style:italic;color:var(--ink-4);font-family:'DM Sans',sans-serif;font-size:12px}
+.conviction-row{display:flex;gap:3px;margin-bottom:10px}
+.conv-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink-4);cursor:pointer;transition:all 0.15s}
+.conv-dot.filled{background:var(--gold);border-color:var(--gold)}
+.ai-nudge{background:linear-gradient(135deg,#EDE9FE,#F5F3FF);border:1px solid #DDD6FE;border-radius:8px;padding:10px 12px;font-size:12px;color:#4C1D95;line-height:1.5}
+.ai-nudge .nudge-head{font-weight:600;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+
+/* QUARTER TREND */
+.q-trend{display:flex;gap:10px}
+.q-col{display:flex;flex-direction:column;align-items:center;gap:6px}
+.q-label{font-size:9px;color:var(--ink-4);font-family:'JetBrains Mono',monospace;letter-spacing:0.04em}
+.q-bars{display:flex;gap:2px;align-items:flex-end}
+.q-bar{width:10px;border-radius:2px 2px 0 0}
+.q-total{font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ink)}
+.q-delta{font-size:10px;font-weight:600}
+.q-delta.pos{color:var(--good)}
+.q-delta.neg{color:var(--bad)}
+.q-delta.flat{color:var(--ink-3)}
+
+/* SECTOR PANEL */
+.sector-panel{}
+.sector-row{padding:12px 20px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:background 0.12s}
+.sector-row:last-child{border-bottom:none}
+.sector-row:hover{background:#FAFAF8}
+.sector-head-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center}
+.sector-name{font-size:13px;font-weight:600;color:var(--ink)}
+.sector-mod-badge{font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;padding:2px 8px;border-radius:999px;min-width:32px;text-align:center}
+.sector-pct{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace}
+.sector-bar-wrap{display:flex;align-items:center;gap:8px}
+.sector-track{flex:1;height:5px;background:var(--rule);border-radius:3px;overflow:hidden}
+.sector-fill{height:100%;border-radius:3px;transition:width 0.8s ease}
+.sector-alert{font-size:10px;color:var(--bad);font-weight:500}
+.s-mod-strong{background:var(--good-bg);color:var(--good)}
+.s-mod-fair{background:#FFF7ED;color:#92400E}
+.s-mod-stretched{background:var(--bad-bg);color:var(--bad)}
+
+.mod-quality-split{padding:14px 20px;border-top:1px solid var(--rule);background:var(--bg)}
+.mqs-head{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:10px}
+.mqs-bar-stack{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;margin-bottom:10px}
+.mqs-seg{height:100%}
+.mqs-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mqs-item{display:flex;flex-direction:column;gap:2px}
+.mqs-item .mqs-lbl{font-size:10px;color:var(--ink-3);font-weight:500}
+.mqs-item .mqs-val{font-family:'Instrument Serif',serif;font-size:18px;font-weight:400;letter-spacing:-0.01em;line-height:1}
+.mqs-item .mqs-sub{font-size:10px;color:var(--ink-3)}
+
+/* NEWS FEED */
+.news-feed-full{background:var(--surface);border:1px solid var(--rule);border-radius:12px;margin-bottom:22px}
+.news-item{padding:14px 20px;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:1fr auto;gap:12px;cursor:pointer;transition:background 0.12s}
+.news-item:last-child{border-bottom:none}
+.news-item:hover{background:#FAFAF8}
+.news-head{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px}
+.news-ticker{font-size:10px;font-weight:700;letter-spacing:0.08em;background:var(--ink);color:#fff;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.news-title{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3}
+.news-body{font-size:12px;color:var(--ink-2);line-height:1.5;margin-bottom:8px}
+.news-meta{display:flex;gap:10px;align-items:center;font-size:10px;color:var(--ink-4);font-family:'JetBrains Mono',monospace}
+.news-meta .source{font-weight:500;color:var(--ink-3)}
+.mod-impact-row{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;min-width:120px}
+.impact-lbl{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600;text-align:right}
+.impact-chips{display:flex;flex-direction:column;gap:4px}
+.impact-chip{display:flex;align-items:center;gap:5px;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap}
+.impact-chip.neg{background:var(--bad-bg);color:var(--bad)}
+.impact-chip.neu{background:var(--bg);color:var(--ink-2);border:1px solid var(--rule)}
+.impact-chip.pos{background:var(--good-bg);color:var(--good)}
+.impact-chip .ic-letter{font-family:'Instrument Serif',serif;font-size:14px;font-style:italic}
+
+/* MF TABLE */
+.mf-table{width:100%;border-collapse:collapse}
+.mf-table thead th{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:10px 20px;text-align:left;border-bottom:1px solid var(--rule);background:var(--bg)}
+.mf-table thead th:not(:first-child){text-align:right}
+.mf-table tbody td{padding:14px 20px;border-bottom:1px solid var(--rule);vertical-align:middle}
+.mf-table tbody td:not(:first-child){text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px}
+.mf-table tbody tr:last-child td{border-bottom:none}
+.mf-table tbody tr:hover{background:#FAFAF8;cursor:pointer}
+.mf-name{font-size:13px;font-weight:600;color:var(--ink)}
+.mf-type{font-size:10px;color:var(--ink-3);margin-top:2px;font-weight:500}
+.mf-xirr{font-size:11px;font-weight:600}
+.xirr-pos{color:var(--good)}
+.xirr-neg{color:var(--bad)}
+.day-pos{color:var(--good);font-size:11px}
+.day-neg{color:var(--bad);font-size:11px}
+
+/* TABS */
+.page-tabs{display:flex;gap:0;border-bottom:1px solid var(--rule);margin-bottom:22px}
+.ptab{padding:10px 18px;font-size:12px;font-weight:500;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.15s;display:flex;align-items:center;gap:6px}
+.ptab:hover{color:var(--ink-2)}
+.ptab.active{color:var(--ink);border-bottom-color:var(--ink)}
+.ptab .badge{font-size:10px;background:var(--bad-bg);color:var(--bad);padding:1px 6px;border-radius:3px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">Q</div>
+  <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9"/><path d="M5 10v10h14V10"/></svg></div>
+  <div class="s-icon active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16v4H4zM4 14h16v6H4z"/></svg></div>
+  <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+  <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M16 16l4 4"/></svg></div>
+  <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v18l7-5 7 5V3z"/></svg></div>
+  <div class="s-space"></div>
+  <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19 12c0 .5 0 1-.1 1.5l2 1.5-2 3.5-2.4-.8c-.7.6-1.6 1-2.5 1.3l-.4 2.5h-4l-.4-2.5c-.9-.3-1.8-.7-2.5-1.3L4.3 18.5l-2-3.5 2-1.5C4 13 4 12.5 4 12s0-1 .1-1.5l-2-1.5 2-3.5 2.4.8c.7-.6 1.6-1 2.5-1.3L9.5 2.5h4l.4 2.5c.9.3 1.8.7 2.5 1.3l2.4-.8 2 3.5-2 1.5c.1.5.1 1 .1 1.5z"/></svg></div>
+</aside>
+
+<main class="main">
+
+<!-- HEADER -->
+<div class="phead">
+  <div>
+    <div style="font-size:11px;color:var(--ink-3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">← Back to Dashboard</div>
+    <h1>Portfolio</h1>
+    <div class="meta">
+      <span>12 stocks · 5 mutual funds · synced 2 min ago</span>
+      <span class="demat-pill">Demat-linked</span>
+    </div>
+  </div>
+  <div class="head-right">
+    <button class="btn">Export PDF</button>
+    <button class="btn primary">+ Add holding</button>
+  </div>
+</div>
+
+<!-- GAMIFICATION STREAK -->
+<div class="streak-banner">
+  <div class="streak-left">
+    <div class="streak-fire">🔥</div>
+    <div class="streak-text">
+      <div class="title">Journal progress — 8 of 12 holdings</div>
+      <div class="sub">Add thesis for <strong>RELIANCE, TATASTEEL, KPIGREEN, SBIN</strong> to complete your book</div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+    <div class="streak-progress">
+      <div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div>
+      <div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div>
+      <div class="s-dot done"></div><div class="s-dot done"></div>
+      <div class="s-dot active"></div><div class="s-dot empty"></div>
+      <div class="s-dot empty"></div><div class="s-dot empty"></div>
+    </div>
+    <div class="streak-cta">Complete journal →</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card s-total">
+    <div class="stat-lbl">Total portfolio</div>
+    <div class="stat-val">₹3.6<span class="unit"> L</span></div>
+    <div class="stat-sub">Equity + Mutual Funds</div>
+  </div>
+  <div class="stat-card s-equity">
+    <div class="stat-lbl">Equity value</div>
+    <div class="stat-val">₹2.5<span class="unit"> L</span></div>
+    <div class="stat-sub neg">₹−81 today</div>
+  </div>
+  <div class="stat-card s-pnl">
+    <div class="stat-lbl">Total P&L</div>
+    <div class="stat-val">+₹13.1<span class="unit"> K</span></div>
+    <div class="stat-sub pos">+5.5% on ₹2.4L invested</div>
+  </div>
+  <div class="stat-card s-mf">
+    <div class="stat-lbl">Mutual funds</div>
+    <div class="stat-val">₹1.0<span class="unit"> L</span></div>
+    <div class="stat-sub pos">+₹12.2K gain</div>
+  </div>
+  <div class="stat-card s-mod">
+    <div class="stat-lbl">Avg portfolio MOD</div>
+    <div class="stat-val" style="color:var(--gold)">73<span class="unit">/100</span></div>
+    <div class="stat-sub">Weighted mgmt quality</div>
+  </div>
+</div>
+
+<!-- ALERTS -->
+<div class="alert-band">
+  <div class="ab-head">⚠ Portfolio alerts · 3 holdings need attention</div>
+  <div class="ab-rows">
+    <div class="ab-row">
+      <span class="ab-ticker">HINDUNILVR</span>
+      <span class="ab-tag fair">Fair</span>
+      <span class="ab-reason">Margin compression flagged in Q4 — Management sub-score down 8pts</span>
+      <span class="ab-btn" onclick="expandHolding('HINDUNILVR')">Review →</span>
+    </div>
+    <div class="ab-row">
+      <span class="ab-ticker">ASIANPAINT</span>
+      <span class="ab-tag stretched">Stretched</span>
+      <span class="ab-reason">Score downgraded 62→54 · guidance cut · your thesis is flagged <strong>Broken</strong></span>
+      <span class="ab-btn" onclick="expandHolding('ASIANPAINT')">Review →</span>
+    </div>
+    <div class="ab-row">
+      <span class="ab-ticker">DIVISLAB</span>
+      <span class="ab-tag fair">Fair</span>
+      <span class="ab-reason">FDA inspection delay at Kakinada — Opportunity sub-score under pressure</span>
+      <span class="ab-btn" onclick="expandHolding('DIVISLAB')">Review →</span>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE TABS -->
+<div class="page-tabs">
+  <div class="ptab active" onclick="showTab('holdings',this)">Equity Holdings</div>
+  <div class="ptab" onclick="showTab('mf',this)">Mutual Funds</div>
+  <div class="ptab" onclick="showTab('news',this)">News & MOD Impact <span class="badge">3 new</span></div>
+  <div class="ptab" onclick="showTab('sector',this)">Sector Overlay</div>
+  <div class="ptab" onclick="showTab('journal',this)">📓 Investment Journal <span class="badge" style="background:#EDE9FE;color:#6D28D9">8/12</span></div>
+</div>
+
+<!-- ===== EQUITY HOLDINGS TAB ===== -->
+<div id="tab-holdings">
+<div class="grid-2">
+
+  <!-- HOLDINGS TABLE -->
+  <div class="card">
+    <div class="card-head">
+      <h3>Equity holdings <span class="count">12</span></h3>
+      <div class="card-head-right">
+        <button class="btn-xs">Sort by MOD</button>
+        <button class="btn-xs">Sort by value</button>
+      </div>
+    </div>
+    <div class="filter-row">
+      <div class="fpill active" onclick="filterHoldings('all',this)">All 12</div>
+      <div class="fpill warn-pill" onclick="filterHoldings('alerts',this)">⚠ Alerts (3)</div>
+      <div class="fpill" onclick="showWinnersLosers('winners',this)">🏆 Winners</div>
+      <div class="fpill" onclick="showWinnersLosers('losers',this)">📉 Losers</div>
+      <div class="fpill" onclick="filterHoldings('broken',this)">Thesis broken</div>
+      <div class="fpill" onclick="filterHoldings('journal',this)">No journal</div>
+    </div>
+
+    <!-- Holdings list -->
+    <div id="holdings-list">
+      <!-- HDFCBANK -->
+      <div class="holding" id="h-HDFCBANK" onclick="toggleHolding('HDFCBANK')">
+        <div class="h-main">
+          <div class="h-expand-icon">▾</div>
+          <div class="h-stock">
+            <div class="h-ticker">HDFCBANK</div>
+            <div class="h-name">HDFC Bank · Private Banks</div>
+            <div class="h-badge large">Large Cap</div>
+          </div>
+          <div class="h-thesis-chip">
+            <div class="thesis-dot intact"></div>
+            <div class="thesis-label intact">Intact</div>
+          </div>
+          <div class="h-qty">
+            <div class="shares">22 shares</div>
+            <div class="cost">@ ₹1,540</div>
+          </div>
+          <div class="h-val">
+            <div class="curr">₹38.0K</div>
+            <div class="pnl pos">+₹4.1K (+12.4%)</div>
+          </div>
+          <div class="mod-mini-score">
+            <div class="overall"><span class="num">82</span><span class="denom">/100</span></div>
+            <div class="mod-bars">
+              <div class="mod-bar" style="background:var(--mgmt-mid);height:3px"></div>
+              <div class="mod-bar" style="background:var(--opp-mid);height:3px"></div>
+              <div class="mod-bar" style="background:var(--deal);height:2px"></div>
+            </div>
+          </div>
+          <div class="mod-trend">
+            <div class="trend-lbl">4Q trend</div>
+            <div class="trend-quarters">
+              <div class="tq" style="height:12px;background:var(--mgmt-bg);border:1px solid var(--mgmt)"></div>
+              <div class="tq" style="height:14px;background:var(--mgmt-bg);border:1px solid var(--mgmt)"></div>
+              <div class="tq" style="height:16px;background:var(--mgmt-mid);"></div>
+              <div class="tq" style="height:18px;background:var(--mgmt-mid);"></div>
+            </div>
+          </div>
+        </div>
+        <div class="h-detail">
+          <div class="detail-grid">
+            <!-- MOD Sub-scores -->
+            <div class="detail-block">
+              <div class="detail-block-head">MOD Sub-scores <span style="font-size:11px;font-weight:700;color:var(--gold)">82/100</span></div>
+              <div class="mod-sub-list">
+                <div class="mod-sub-row">
+                  <div class="mod-sub-lbl" style="color:var(--mgmt)">Guidance Accuracy</div>
+                  <div class="mod-sub-track"><div class="mod-sub-fill" style="width:88%;background:var(--mgmt-mid)"></div></div>
+                  <div class="mod-sub-val">88</div>
+                </div>
+                <div class="mod-sub-row">
+                  <div class="mod-sub-lbl" style="color:var(--mgmt)">Capital Allocation</div>
+                  <div class="mod-sub-track"><div class="mod-sub-fill" style="width:84%;background:var(--mgmt-mid)"></div></div>
+                  <div class="mod-sub-val">84</div>
+                </div>
+                <div class="mod-sub-row">
+                  <div class="mod-sub-lbl" style="color:var(--mgmt)">Promoter Quality</div>
+                  <div class="mod-sub-track"><div class="mod-sub-fill" style="width:79%;background:var(--mgmt-mid)"></div></div>
+                  <div class="mod-sub-val">79</div>
+                </div>
+                <div class="mod-sub-row">
+                  <div class="mod-sub-lbl" style="color:var(--opp-mid)">Industry Tailwind</div>
+                  <div class="mod-sub-track"><div class="mod-sub-fill" style="width:81%;background:var(--opp-mid)"></div></div>
+                  <div class="mod-sub-val">81</div>
+                </div>
+                <div class="mod-sub-row">
+                  <div class="mod-sub-lbl" style="color:var(--deal)">Valuation (Deal)</div>
+                  <div class="mod-sub-track"><div class="mod-sub-fill" style="width:68%;background:var(--deal)"></div></div>
+                  <div class="mod-sub-val">68</div>
+                </div>
+              </div>
+            </div>
+            <!-- MOD Quarter Trend -->
+            <div class="detail-block">
+              <div class="detail-block-head">4-Quarter MOD Trend</div>
+              <div class="q-trend">
+                <div class="q-col">
+                  <div class="q-label">Q1</div>
+                  <div class="q-bars">
+                    <div class="q-bar" style="height:28px;background:var(--mgmt-mid)"></div>
+                    <div class="q-bar" style="height:22px;background:var(--opp-mid)"></div>
+                    <div class="q-bar" style="height:18px;background:var(--deal)"></div>
+                  </div>
+                  <div class="q-total">74</div>
+                  <div class="q-delta flat">—</div>
+                </div>
+                <div class="q-col">
+                  <div class="q-label">Q2</div>
+                  <div class="q-bars">
+                    <div class="q-bar" style="height:30px;background:var(--mgmt-mid)"></div>
+                    <div class="q-bar" style="height:24px;background:var(--opp-mid)"></div>
+                    <div class="q-bar" style="height:18px;background:var(--deal)"></div>
+                  </div>
+                  <div class="q-total">76</div>
+                  <div class="q-delta pos">+2</div>
+                </div>
+                <div class="q-col">
+                  <div class="q-label">Q3</div>
+                  <div class="q-bars">
+                    <div class="q-bar" style="height:32px;background:var(--mgmt-mid)"></div>
+                    <div class="q-bar" style="height:26px;background:var(--opp-mid)"></div>
+                    <div class="q-bar" style="height:20px;background:var(--deal)"></div>
+                  </div>
+                  <div class="q-total">79</div>
+                  <div class="q-delta pos">+3</div>
+                </div>
+                <div class="q-col">
+                  <div class="q-label">Q4</div>
+                  <div class="q-bars">
+                    <div class="q-bar" style="height:34px;background:var(--mgmt-mid)"></div>
+                    <div class="q-bar" style="height:28px;background:var(--opp-mid)"></div>
+                    <div class="q-bar" style="height:20px;background:var(--deal)"></div>
+                  </div>
+                  <div class="q-total">82</div>
+                  <div class="q-delta pos">+3</div>
+                </div>
+              </div>
+            </div>
+            <!-- JOURNAL -->
+            <div class="detail-block journal-block">
+              <div class="detail-block-head">Investment Journal
+                <button class="btn-xs" onclick="event.stopPropagation()">Edit</button>
+              </div>
+              <div class="thesis-health intact">● Thesis Intact</div>
+              <div class="thesis-text">"Buying for deposit franchise recovery and ROA expansion. The merger integration is messy but temporary. Management has consistently delivered on medium-term guidance."</div>
+              <div style="font-size:10px;color:var(--ink-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:600">Conviction</div>
+              <div class="conviction-row" id="conv-HDFCBANK">
+                <div class="conv-dot filled" onclick="setConviction('HDFCBANK',1,event)"></div>
+                <div class="conv-dot filled" onclick="setConviction('HDFCBANK',2,event)"></div>
+                <div class="conv-dot filled" onclick="setConviction('HDFCBANK',3,event)"></div>
+                <div class="conv-dot filled" onclick="setConviction('HDFCBANK',4,event)"></div>
+                <div class="conv-dot" onclick="setConviction('HDFCBANK',5,event)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ASIANPAINT - BROKEN -->
+      <div class="holding" id="h-ASIANPAINT" onclick="toggleHolding('ASIANPAINT')">
+        <div class="h-main">
+          <div class="h-expand-icon">▾</div>
+          <div class="h-stock">
+            <div class="h-ticker"><div class="h-alert-dot"></div>ASIANPAINT</div>
+            <div class="h-name">Asian Paints · Paints</div>
+            <div class="h-badge large">Large Cap</div>
+          </div>
+          <div class="h-thesis-chip">
+            <div class="thesis-dot broken"></div>
+            <div class="thesis-label broken">Broken</div>
+          </div>
+          <div class="h-qty">
+            <div class="shares">8 shares</div>
+            <div class="cost">@ ₹2,980</div>
+          </div>
+          <div class="h-val">
+            <div class="curr">₹19.3K</div>
+            <div class="pnl neg">−₹4.4K (−18.5%)</div>
+          </div>
+          <div class="mod-mini-score">
+            <div class="overall"><span class="num" style="color:var(--bad)">54</span><span class="denom">/100</span></div>
+            <div class="mod-bars">
+              <div class="mod-bar" style="background:var(--mgmt-mid);height:3px"></div>
+              <div class="mod-bar" style="background:var(--gold);height:2px"></div>
+              <div class="mod-bar" style="background:var(--bad);height:2px"></div>
+            </div>
+          </div>
+          <div class="mod-trend">
+            <div class="trend-lbl">4Q trend ↓</div>
+            <div class="trend-quarters">
+              <div class="tq" style="height:18px;background:var(--gold)"></div>
+              <div class="tq" style="height:16px;background:var(--gold)"></div>
+              <div class="tq" style="height:14px;background:var(--warn)"></div>
+              <div class="tq" style="height:10px;background:var(--bad)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="h-detail">
+          <div class="detail-grid">
+            <div class="detail-block">
+              <div class="detail-block-head">MOD Sub-scores <span style="font-size:11px;font-weight:700;color:var(--bad)">54/100 ↓</span></div>
+              <div class="mod-sub-list">
+                <div class="mod-sub-row">
+                  <div class="mod-sub-lbl" style="color:var(--mgmt)">Guidance Accuracy</div>
+                  <div class="mod-sub-track"><div class="mod-sub-fill" style="width:42%;background:var(--warn)"></div></div>
+                  <div class="mod-sub-val" style="color:var(--warn)">42</div>
+                </div>
+                <div class="mod-sub-row">
+                  <div class="mod-sub-lbl" style="color:var(--mgmt)">Capital Allocation</div>
+                  <div class="mod-sub-track"><div class="mod-sub-fill" style="width:68%;background:var(--mgmt-mid)"></div></div>
+                  <div class="mod-sub-val">68</div>
+                </div>
+                <div class="mod-sub-row">
+                  <div class="mod-sub-lbl" style="color:var(--opp-mid)">Industry Tailwind</div>
+                  <div class="mod-sub-track"><div class="mod-sub-fill" style="width:55%;background:var(--gold)"></div></div>
+                  <div class="mod-sub-val" style="color:var(--gold)">55</div>
+                </div>
+                <div class="mod-sub-row">
+                  <div class="mod-sub-lbl" style="color:var(--opp-mid)">Competitive Edge</div>
+                  <div class="mod-sub-track"><div class="mod-sub-fill" style="width:62%;background:var(--opp-mid)"></div></div>
+                  <div class="mod-sub-val">62</div>
+                </div>
+                <div class="mod-sub-row">
+                  <div class="mod-sub-lbl" style="color:var(--deal)">P/E Re-rating</div>
+                  <div class="mod-sub-track"><div class="mod-sub-fill" style="width:28%;background:var(--bad)"></div></div>
+                  <div class="mod-sub-val" style="color:var(--bad)">28</div>
+                </div>
+              </div>
+            </div>
+            <div class="detail-block">
+              <div class="detail-block-head">4-Quarter MOD Trend</div>
+              <div class="q-trend">
+                <div class="q-col">
+                  <div class="q-label">Q1</div>
+                  <div class="q-bars">
+                    <div class="q-bar" style="height:26px;background:var(--mgmt-mid)"></div>
+                    <div class="q-bar" style="height:22px;background:var(--gold)"></div>
+                    <div class="q-bar" style="height:18px;background:var(--gold)"></div>
+                  </div>
+                  <div class="q-total">68</div>
+                  <div class="q-delta flat">—</div>
+                </div>
+                <div class="q-col">
+                  <div class="q-label">Q2</div>
+                  <div class="q-bars">
+                    <div class="q-bar" style="height:24px;background:var(--mgmt-mid)"></div>
+                    <div class="q-bar" style="height:20px;background:var(--gold)"></div>
+                    <div class="q-bar" style="height:16px;background:var(--warn)"></div>
+                  </div>
+                  <div class="q-total">64</div>
+                  <div class="q-delta neg">−4</div>
+                </div>
+                <div class="q-col">
+                  <div class="q-label">Q3</div>
+                  <div class="q-bars">
+                    <div class="q-bar" style="height:22px;background:var(--mgmt-mid)"></div>
+                    <div class="q-bar" style="height:18px;background:var(--warn)"></div>
+                    <div class="q-bar" style="height:12px;background:var(--bad)"></div>
+                  </div>
+                  <div class="q-total">62</div>
+                  <div class="q-delta neg">−2</div>
+                </div>
+                <div class="q-col">
+                  <div class="q-label">Q4</div>
+                  <div class="q-bars">
+                    <div class="q-bar" style="height:18px;background:var(--gold)"></div>
+                    <div class="q-bar" style="height:14px;background:var(--warn)"></div>
+                    <div class="q-bar" style="height:8px;background:var(--bad)"></div>
+                  </div>
+                  <div class="q-total" style="color:var(--bad)">54</div>
+                  <div class="q-delta neg">−8</div>
+                </div>
+              </div>
+            </div>
+            <div class="detail-block journal-block">
+              <div class="detail-block-head">Investment Journal
+                <button class="btn-xs" onclick="event.stopPropagation()">Edit</button>
+              </div>
+              <div class="thesis-health broken">✕ Thesis Broken</div>
+              <div class="thesis-text">"Premium consumer brand with pricing power and strong distribution. Margin expansion story on commodity cost normalization."</div>
+              <div style="font-size:10px;color:var(--ink-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:600">Conviction</div>
+              <div class="conviction-row" id="conv-ASIANPAINT">
+                <div class="conv-dot filled" onclick="setConviction('ASIANPAINT',1,event)"></div>
+                <div class="conv-dot filled" onclick="setConviction('ASIANPAINT',2,event)"></div>
+                <div class="conv-dot" onclick="setConviction('ASIANPAINT',3,event)"></div>
+                <div class="conv-dot" onclick="setConviction('ASIANPAINT',4,event)"></div>
+                <div class="conv-dot" onclick="setConviction('ASIANPAINT',5,event)"></div>
+              </div>
+              <div class="ai-nudge" style="margin-top:10px">
+                <div class="nudge-head">🤖 AI Thesis Check</div>
+                Tier-2 demand has been weak for 3 consecutive quarters. Management guided margin recovery in Q2 FY24 — it never materialized. Your "pricing power" thesis is now contradicted by a guidance accuracy score of 42. <strong>Consider whether the original thesis still holds.</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HINDUNILVR - PARTIAL -->
+      <div class="holding" id="h-HINDUNILVR" onclick="toggleHolding('HINDUNILVR')">
+        <div class="h-main">
+          <div class="h-expand-icon">▾</div>
+          <div class="h-stock">
+            <div class="h-ticker"><div class="h-alert-dot"></div>HINDUNILVR</div>
+            <div class="h-name">Hindustan Unilever · FMCG</div>
+            <div class="h-badge large">Large Cap</div>
+          </div>
+          <div class="h-thesis-chip">
+            <div class="thesis-dot partial"></div>
+            <div class="thesis-label partial">Partial</div>
+          </div>
+          <div class="h-qty"><div class="shares">8 shares</div><div class="cost">@ ₹2,480</div></div>
+          <div class="h-val">
+            <div class="curr">₹18.3K</div>
+            <div class="pnl neg">−₹1.5K (−7.6%)</div>
+          </div>
+          <div class="mod-mini-score">
+            <div class="overall"><span class="num" style="color:var(--gold)">72</span><span class="denom">/100</span></div>
+            <div class="mod-bars">
+              <div class="mod-bar" style="background:var(--mgmt-mid);height:3px"></div>
+              <div class="mod-bar" style="background:var(--gold);height:2px"></div>
+              <div class="mod-bar" style="background:var(--gold);height:2px"></div>
+            </div>
+          </div>
+          <div class="mod-trend">
+            <div class="trend-lbl">4Q trend ↘</div>
+            <div class="trend-quarters">
+              <div class="tq" style="height:18px;background:var(--mgmt-mid)"></div>
+              <div class="tq" style="height:17px;background:var(--gold)"></div>
+              <div class="tq" style="height:15px;background:var(--gold)"></div>
+              <div class="tq" style="height:14px;background:var(--gold)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="h-detail">
+          <div class="detail-grid">
+            <div class="detail-block">
+              <div class="detail-block-head">MOD Sub-scores <span style="font-size:11px;font-weight:700;color:var(--gold)">72/100</span></div>
+              <div class="mod-sub-list">
+                <div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--mgmt)">Guidance Accuracy</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:76%;background:var(--mgmt-mid)"></div></div><div class="mod-sub-val">76</div></div>
+                <div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--mgmt)">Capital Allocation</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:78%;background:var(--mgmt-mid)"></div></div><div class="mod-sub-val">78</div></div>
+                <div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--opp-mid)">Industry Tailwind</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:65%;background:var(--gold)"></div></div><div class="mod-sub-val" style="color:var(--gold)">65</div></div>
+                <div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--opp-mid)">Distribution Strength</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:82%;background:var(--mgmt-mid)"></div></div><div class="mod-sub-val">82</div></div>
+                <div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--deal)">P/E Re-rating</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:58%;background:var(--gold)"></div></div><div class="mod-sub-val" style="color:var(--gold)">58</div></div>
+              </div>
+            </div>
+            <div class="detail-block">
+              <div class="detail-block-head">4-Quarter MOD Trend</div>
+              <div class="q-trend">
+                <div class="q-col"><div class="q-label">Q1</div><div class="q-bars"><div class="q-bar" style="height:28px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:22px;background:var(--gold)"></div><div class="q-bar" style="height:18px;background:var(--gold)"></div></div><div class="q-total">78</div><div class="q-delta flat">—</div></div>
+                <div class="q-col"><div class="q-label">Q2</div><div class="q-bars"><div class="q-bar" style="height:27px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:21px;background:var(--gold)"></div><div class="q-bar" style="height:17px;background:var(--gold)"></div></div><div class="q-total">76</div><div class="q-delta neg">−2</div></div>
+                <div class="q-col"><div class="q-label">Q3</div><div class="q-bars"><div class="q-bar" style="height:26px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:20px;background:var(--gold)"></div><div class="q-bar" style="height:16px;background:var(--gold)"></div></div><div class="q-total">74</div><div class="q-delta neg">−2</div></div>
+                <div class="q-col"><div class="q-label">Q4</div><div class="q-bars"><div class="q-bar" style="height:25px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:18px;background:var(--gold)"></div><div class="q-bar" style="height:14px;background:var(--gold)"></div></div><div class="q-total">72</div><div class="q-delta neg">−2</div></div>
+              </div>
+            </div>
+            <div class="detail-block journal-block">
+              <div class="detail-block-head">Investment Journal <button class="btn-xs" onclick="event.stopPropagation()">Edit</button></div>
+              <div class="thesis-health partial">⚡ Thesis Partial</div>
+              <div class="thesis-text">"FMCG defensive play — strong distribution moat, rural recovery story, volume-led growth as urban slows."</div>
+              <div style="font-size:10px;color:var(--ink-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:600">Conviction</div>
+              <div class="conviction-row" id="conv-HINDUNILVR">
+                <div class="conv-dot filled" onclick="setConviction('HINDUNILVR',1,event)"></div>
+                <div class="conv-dot filled" onclick="setConviction('HINDUNILVR',2,event)"></div>
+                <div class="conv-dot filled" onclick="setConviction('HINDUNILVR',3,event)"></div>
+                <div class="conv-dot" onclick="setConviction('HINDUNILVR',4,event)"></div>
+                <div class="conv-dot" onclick="setConviction('HINDUNILVR',5,event)"></div>
+              </div>
+              <div class="ai-nudge" style="margin-top:10px">
+                <div class="nudge-head">🤖 AI Thesis Check</div>
+                Distribution moat thesis still holds — Distribution Strength scores 82. However, margin compression in Q4 is partially contradicting the rural recovery story. <strong>Volume growth needed in Q1 to validate the thesis.</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POLYCAB - compact -->
+      <div class="holding" id="h-POLYCAB" onclick="toggleHolding('POLYCAB')">
+        <div class="h-main">
+          <div class="h-expand-icon">▾</div>
+          <div class="h-stock">
+            <div class="h-ticker">POLYCAB</div>
+            <div class="h-name">Polycab India · Capital Goods</div>
+            <div class="h-badge mid">Mid Cap</div>
+          </div>
+          <div class="h-thesis-chip"><div class="thesis-dot intact"></div><div class="thesis-label intact">Intact</div></div>
+          <div class="h-qty"><div class="shares">5 shares</div><div class="cost">@ ₹5,400</div></div>
+          <div class="h-val"><div class="curr">₹30.6K</div><div class="pnl pos">+₹3.6K (+13.3%)</div></div>
+          <div class="mod-mini-score">
+            <div class="overall"><span class="num">80</span><span class="denom">/100</span></div>
+            <div class="mod-bars"><div class="mod-bar" style="background:var(--mgmt-mid);height:3px"></div><div class="mod-bar" style="background:var(--opp-mid);height:3px"></div><div class="mod-bar" style="background:var(--deal);height:2px"></div></div>
+          </div>
+          <div class="mod-trend"><div class="trend-lbl">4Q trend ↑</div><div class="trend-quarters"><div class="tq" style="height:12px;background:var(--opp-mid)"></div><div class="tq" style="height:14px;background:var(--opp-mid)"></div><div class="tq" style="height:16px;background:var(--mgmt-mid)"></div><div class="tq" style="height:18px;background:var(--mgmt-mid)"></div></div></div>
+        </div>
+        <div class="h-detail">
+          <div class="detail-grid">
+            <div class="detail-block">
+              <div class="detail-block-head">MOD Sub-scores <span style="font-size:11px;font-weight:700;color:var(--good)">80/100</span></div>
+              <div class="mod-sub-list">
+                <div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--mgmt)">Guidance Accuracy</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:82%;background:var(--mgmt-mid)"></div></div><div class="mod-sub-val">82</div></div>
+                <div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--opp-mid)">Industry Tailwind</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:84%;background:var(--opp-mid)"></div></div><div class="mod-sub-val">84</div></div>
+                <div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--opp-mid)">Competitive Edge</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:78%;background:var(--opp-mid)"></div></div><div class="mod-sub-val">78</div></div>
+                <div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--deal)">Earnings Growth</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:76%;background:var(--deal)"></div></div><div class="mod-sub-val">76</div></div>
+                <div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--deal)">P/E Re-rating</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:72%;background:var(--deal)"></div></div><div class="mod-sub-val">72</div></div>
+              </div>
+            </div>
+            <div class="detail-block">
+              <div class="detail-block-head">4-Quarter MOD Trend</div>
+              <div class="q-trend">
+                <div class="q-col"><div class="q-label">Q1</div><div class="q-bars"><div class="q-bar" style="height:22px;background:var(--opp-mid)"></div><div class="q-bar" style="height:18px;background:var(--opp-mid)"></div><div class="q-bar" style="height:16px;background:var(--deal)"></div></div><div class="q-total">72</div><div class="q-delta flat">—</div></div>
+                <div class="q-col"><div class="q-label">Q2</div><div class="q-bars"><div class="q-bar" style="height:24px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:20px;background:var(--opp-mid)"></div><div class="q-bar" style="height:16px;background:var(--deal)"></div></div><div class="q-total">74</div><div class="q-delta pos">+2</div></div>
+                <div class="q-col"><div class="q-label">Q3</div><div class="q-bars"><div class="q-bar" style="height:26px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:22px;background:var(--opp-mid)"></div><div class="q-bar" style="height:18px;background:var(--deal)"></div></div><div class="q-total">77</div><div class="q-delta pos">+3</div></div>
+                <div class="q-col"><div class="q-label">Q4</div><div class="q-bars"><div class="q-bar" style="height:28px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:24px;background:var(--opp-mid)"></div><div class="q-bar" style="height:20px;background:var(--deal)"></div></div><div class="q-total">80</div><div class="q-delta pos">+3</div></div>
+              </div>
+            </div>
+            <div class="detail-block journal-block">
+              <div class="detail-block-head">Investment Journal <button class="btn-xs" onclick="event.stopPropagation()">Edit</button></div>
+              <div class="thesis-health intact">● Thesis Intact</div>
+              <div class="thesis-text">"Infrastructure supercycle play. Capex electrification in India creates multi-year tailwind. Strong execution track record."</div>
+              <div style="font-size:10px;color:var(--ink-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:600">Conviction</div>
+              <div class="conviction-row" id="conv-POLYCAB">
+                <div class="conv-dot filled" onclick="setConviction('POLYCAB',1,event)"></div>
+                <div class="conv-dot filled" onclick="setConviction('POLYCAB',2,event)"></div>
+                <div class="conv-dot filled" onclick="setConviction('POLYCAB',3,event)"></div>
+                <div class="conv-dot filled" onclick="setConviction('POLYCAB',4,event)"></div>
+                <div class="conv-dot filled" onclick="setConviction('POLYCAB',5,event)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- remaining compact rows -->
+      <div class="holding" id="h-RELIANCE" onclick="toggleHolding('RELIANCE')">
+        <div class="h-main">
+          <div class="h-expand-icon">▾</div>
+          <div class="h-stock"><div class="h-ticker">RELIANCE</div><div class="h-name">Reliance Industries · Energy</div><div class="h-badge large">Large Cap</div></div>
+          <div class="h-thesis-chip"><div class="thesis-dot" style="background:var(--ink-4)"></div><div class="thesis-label" style="color:var(--ink-3)">No thesis</div></div>
+          <div class="h-qty"><div class="shares">10 shares</div><div class="cost">@ ₹2,480</div></div>
+          <div class="h-val"><div class="curr">₹28.9K</div><div class="pnl pos">+₹4.1K (+16.5%)</div></div>
+          <div class="mod-mini-score"><div class="overall"><span class="num">78</span><span class="denom">/100</span></div><div class="mod-bars"><div class="mod-bar" style="background:var(--mgmt-mid);height:3px"></div><div class="mod-bar" style="background:var(--opp-mid);height:3px"></div><div class="mod-bar" style="background:var(--deal);height:2px"></div></div></div>
+          <div class="mod-trend"><div class="trend-lbl">4Q →</div><div class="trend-quarters"><div class="tq" style="height:15px;background:var(--mgmt-mid)"></div><div class="tq" style="height:15px;background:var(--mgmt-mid)"></div><div class="tq" style="height:14px;background:var(--mgmt-mid)"></div><div class="tq" style="height:15px;background:var(--mgmt-mid)"></div></div></div>
+        </div>
+        <div class="h-detail">
+          <div class="detail-grid">
+            <div class="detail-block"><div class="detail-block-head">MOD Sub-scores</div><div class="mod-sub-list"><div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--mgmt)">Guidance Accuracy</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:74%;background:var(--mgmt-mid)"></div></div><div class="mod-sub-val">74</div></div><div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--opp-mid)">Industry Tailwind</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:80%;background:var(--opp-mid)"></div></div><div class="mod-sub-val">80</div></div><div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--opp-mid)">Competitive Edge</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:82%;background:var(--mgmt-mid)"></div></div><div class="mod-sub-val">82</div></div><div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--deal)">Earnings Growth</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:72%;background:var(--deal)"></div></div><div class="mod-sub-val">72</div></div></div></div>
+            <div class="detail-block"><div class="detail-block-head">4Q Trend</div><div class="q-trend"><div class="q-col"><div class="q-label">Q1</div><div class="q-bars"><div class="q-bar" style="height:24px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:20px;background:var(--opp-mid)"></div><div class="q-bar" style="height:16px;background:var(--deal)"></div></div><div class="q-total">76</div><div class="q-delta flat">—</div></div><div class="q-col"><div class="q-label">Q2</div><div class="q-bars"><div class="q-bar" style="height:24px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:20px;background:var(--opp-mid)"></div><div class="q-bar" style="height:16px;background:var(--deal)"></div></div><div class="q-total">77</div><div class="q-delta pos">+1</div></div><div class="q-col"><div class="q-label">Q3</div><div class="q-bars"><div class="q-bar" style="height:24px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:20px;background:var(--opp-mid)"></div><div class="q-bar" style="height:16px;background:var(--deal)"></div></div><div class="q-total">78</div><div class="q-delta pos">+1</div></div><div class="q-col"><div class="q-label">Q4</div><div class="q-bars"><div class="q-bar" style="height:24px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:20px;background:var(--opp-mid)"></div><div class="q-bar" style="height:16px;background:var(--deal)"></div></div><div class="q-total">78</div><div class="q-delta flat">—</div></div></div></div>
+            <div class="detail-block journal-block">
+              <div class="detail-block-head">Investment Journal <button class="btn-xs" onclick="event.stopPropagation()">Edit</button></div>
+              <div style="background:#F7F5F0;border:1.5px dashed var(--rule-2);border-radius:8px;padding:16px;text-align:center;cursor:pointer" onclick="event.stopPropagation()">
+                <div style="font-size:13px;color:var(--ink-3);font-style:italic;margin-bottom:8px">No thesis added yet</div>
+                <div style="font-size:11px;font-weight:600;color:var(--deal);cursor:pointer">+ Add investment thesis</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIVISLAB -->
+      <div class="holding" id="h-DIVISLAB" onclick="toggleHolding('DIVISLAB')">
+        <div class="h-main">
+          <div class="h-expand-icon">▾</div>
+          <div class="h-stock"><div class="h-ticker"><div class="h-alert-dot"></div>DIVISLAB</div><div class="h-name">Divi's Laboratories · Pharma</div><div class="h-badge large">Large Cap</div></div>
+          <div class="h-thesis-chip"><div class="thesis-dot partial"></div><div class="thesis-label partial">Partial</div></div>
+          <div class="h-qty"><div class="shares">3 shares</div><div class="cost">@ ₹5,100</div></div>
+          <div class="h-val"><div class="curr">₹16.3K</div><div class="pnl pos">+₹1.0K (+6.0%)</div></div>
+          <div class="mod-mini-score"><div class="overall"><span class="num" style="color:var(--gold)">69</span><span class="denom">/100</span></div><div class="mod-bars"><div class="mod-bar" style="background:var(--mgmt-mid);height:3px"></div><div class="mod-bar" style="background:var(--gold);height:2px"></div><div class="mod-bar" style="background:var(--gold);height:2px"></div></div></div>
+          <div class="mod-trend"><div class="trend-lbl">4Q ↘</div><div class="trend-quarters"><div class="tq" style="height:18px;background:var(--mgmt-mid)"></div><div class="tq" style="height:16px;background:var(--gold)"></div><div class="tq" style="height:15px;background:var(--gold)"></div><div class="tq" style="height:13px;background:var(--gold)"></div></div></div>
+        </div>
+        <div class="h-detail">
+          <div class="detail-grid">
+            <div class="detail-block"><div class="detail-block-head">MOD Sub-scores <span style="font-size:11px;font-weight:700;color:var(--gold)">69/100</span></div><div class="mod-sub-list"><div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--mgmt)">Guidance Accuracy</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:74%;background:var(--mgmt-mid)"></div></div><div class="mod-sub-val">74</div></div><div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--mgmt)">Disclosure Honesty</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:78%;background:var(--mgmt-mid)"></div></div><div class="mod-sub-val">78</div></div><div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--opp-mid)">Industry Tailwind</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:62%;background:var(--gold)"></div></div><div class="mod-sub-val" style="color:var(--gold)">62</div></div><div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--opp-mid)">Distribution Strength</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:58%;background:var(--gold)"></div></div><div class="mod-sub-val" style="color:var(--gold)">58</div></div><div class="mod-sub-row"><div class="mod-sub-lbl" style="color:var(--deal)">Risk-Reward</div><div class="mod-sub-track"><div class="mod-sub-fill" style="width:52%;background:var(--warn)"></div></div><div class="mod-sub-val" style="color:var(--warn)">52</div></div></div></div>
+            <div class="detail-block"><div class="detail-block-head">4Q Trend</div><div class="q-trend"><div class="q-col"><div class="q-label">Q1</div><div class="q-bars"><div class="q-bar" style="height:26px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:20px;background:var(--opp-mid)"></div><div class="q-bar" style="height:16px;background:var(--gold)"></div></div><div class="q-total">74</div><div class="q-delta flat">—</div></div><div class="q-col"><div class="q-label">Q2</div><div class="q-bars"><div class="q-bar" style="height:25px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:18px;background:var(--gold)"></div><div class="q-bar" style="height:14px;background:var(--gold)"></div></div><div class="q-total">72</div><div class="q-delta neg">−2</div></div><div class="q-col"><div class="q-label">Q3</div><div class="q-bars"><div class="q-bar" style="height:24px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:17px;background:var(--gold)"></div><div class="q-bar" style="height:12px;background:var(--gold)"></div></div><div class="q-total">70</div><div class="q-delta neg">−2</div></div><div class="q-col"><div class="q-label">Q4</div><div class="q-bars"><div class="q-bar" style="height:24px;background:var(--mgmt-mid)"></div><div class="q-bar" style="height:15px;background:var(--gold)"></div><div class="q-bar" style="height:10px;background:var(--warn)"></div></div><div class="q-total">69</div><div class="q-delta neg">−1</div></div></div></div>
+            <div class="detail-block journal-block">
+              <div class="detail-block-head">Investment Journal <button class="btn-xs" onclick="event.stopPropagation()">Edit</button></div>
+              <div class="thesis-health partial">⚡ Thesis Partial</div>
+              <div class="thesis-text">"CDMO opportunity + API dominance. FDA relationship management is a known headwind but management has navigated it before."</div>
+              <div style="font-size:10px;color:var(--ink-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:600">Conviction</div>
+              <div class="conviction-row" id="conv-DIVISLAB"><div class="conv-dot filled" onclick="setConviction('DIVISLAB',1,event)"></div><div class="conv-dot filled" onclick="setConviction('DIVISLAB',2,event)"></div><div class="conv-dot filled" onclick="setConviction('DIVISLAB',3,event)"></div><div class="conv-dot" onclick="setConviction('DIVISLAB',4,event)"></div><div class="conv-dot" onclick="setConviction('DIVISLAB',5,event)"></div></div>
+              <div class="ai-nudge" style="margin-top:10px"><div class="nudge-head">🤖 AI Thesis Check</div>FDA Kakinada delay is the 2nd inspection issue in 18 months. Your thesis acknowledges this risk — the question is duration. Risk-Reward sub-score has dropped to 52. <strong>Set a 6-month review trigger.</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remaining compact rows (INFY, ICICI, SBIN, TITAN, KPIGREEN, TATASTEEL) -->
+      <div class="holding" id="h-INFY" onclick="toggleHolding('INFY')">
+        <div class="h-main">
+          <div class="h-expand-icon">▾</div>
+          <div class="h-stock"><div class="h-ticker">INFY</div><div class="h-name">Infosys · IT Services</div><div class="h-badge large">Large Cap</div></div>
+          <div class="h-thesis-chip"><div class="thesis-dot partial"></div><div class="thesis-label partial">Partial</div></div>
+          <div class="h-qty"><div class="shares">15 shares</div><div class="cost">@ ₹1,580</div></div>
+          <div class="h-val"><div class="curr">₹24.2K</div><div class="pnl pos">+₹484 (+2.1%)</div></div>
+          <div class="mod-mini-score"><div class="overall"><span class="num">74</span><span class="denom">/100</span></div><div class="mod-bars"><div class="mod-bar" style="background:var(--mgmt-mid);height:3px"></div><div class="mod-bar" style="background:var(--gold);height:2px"></div><div class="mod-bar" style="background:var(--gold);height:2px"></div></div></div>
+          <div class="mod-trend"><div class="trend-lbl">4Q →</div><div class="trend-quarters"><div class="tq" style="height:14px;background:var(--gold)"></div><div class="tq" style="height:14px;background:var(--gold)"></div><div class="tq" style="height:15px;background:var(--gold)"></div><div class="tq" style="height:14px;background:var(--gold)"></div></div></div>
+        </div>
+        <div class="h-detail"><div style="padding:12px 0;font-size:12px;color:var(--ink-3);font-style:italic">Click to expand full MOD detail...</div></div>
+      </div>
+
+      <div class="holding" id="h-ICICIBANK" onclick="toggleHolding('ICICIBANK')">
+        <div class="h-main">
+          <div class="h-expand-icon">▾</div>
+          <div class="h-stock"><div class="h-ticker">ICICIBANK</div><div class="h-name">ICICI Bank · Private Banks</div><div class="h-badge large">Large Cap</div></div>
+          <div class="h-thesis-chip"><div class="thesis-dot intact"></div><div class="thesis-label intact">Intact</div></div>
+          <div class="h-qty"><div class="shares">18 shares</div><div class="cost">@ ₹980</div></div>
+          <div class="h-val"><div class="curr">₹21.3K</div><div class="pnl pos">+₹3.7K (+21.0%)</div></div>
+          <div class="mod-mini-score"><div class="overall"><span class="num">84</span><span class="denom">/100</span></div><div class="mod-bars"><div class="mod-bar" style="background:var(--mgmt-mid);height:3px"></div><div class="mod-bar" style="background:var(--mgmt-mid);height:3px"></div><div class="mod-bar" style="background:var(--opp-mid);height:3px"></div></div></div>
+          <div class="mod-trend"><div class="trend-lbl">4Q ↑</div><div class="trend-quarters"><div class="tq" style="height:14px;background:var(--mgmt-mid)"></div><div class="tq" style="height:16px;background:var(--mgmt-mid)"></div><div class="tq" style="height:17px;background:var(--mgmt-mid)"></div><div class="tq" style="height:18px;background:var(--mgmt-mid)"></div></div></div>
+        </div>
+        <div class="h-detail"><div style="padding:12px 0;font-size:12px;color:var(--ink-3);font-style:italic">Click to expand full MOD detail...</div></div>
+      </div>
+
+      <div class="holding" id="h-SBIN" onclick="toggleHolding('SBIN')">
+        <div class="h-main">
+          <div class="h-expand-icon">▾</div>
+          <div class="h-stock"><div class="h-ticker">SBIN</div><div class="h-name">State Bank · PSU Banks</div><div class="h-badge large">Large Cap</div></div>
+          <div class="h-thesis-chip"><div class="thesis-dot" style="background:var(--ink-4)"></div><div class="thesis-label" style="color:var(--ink-3)">No thesis</div></div>
+          <div class="h-qty"><div class="shares">25 shares</div><div class="cost">@ ₹720</div></div>
+          <div class="h-val"><div class="curr">₹20.3K</div><div class="pnl pos">+₹2.3K (+12.8%)</div></div>
+          <div class="mod-mini-score"><div class="overall"><span class="num">76</span><span class="denom">/100</span></div><div class="mod-bars"><div class="mod-bar" style="background:var(--mgmt-mid);height:3px"></div><div class="mod-bar" style="background:var(--opp-mid);height:3px"></div><div class="mod-bar" style="background:var(--gold);height:2px"></div></div></div>
+          <div class="mod-trend"><div class="trend-lbl">4Q ↑</div><div class="trend-quarters"><div class="tq" style="height:13px;background:var(--opp-mid)"></div><div class="tq" style="height:15px;background:var(--opp-mid)"></div><div class="tq" style="height:16px;background:var(--mgmt-mid)"></div><div class="tq" style="height:18px;background:var(--mgmt-mid)"></div></div></div>
+        </div>
+        <div class="h-detail"><div style="padding:12px 0;font-size:12px;color:var(--ink-3);font-style:italic">Click to expand full MOD detail...</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTOR PANEL -->
+  <div style="display:flex;flex-direction:column;gap:0">
+    <div class="card" style="border-radius:12px 12px 0 0">
+      <div class="card-head">
+        <h3>Sector MOD Overlay</h3>
+        <span style="font-size:10px;color:var(--ink-3)">Colour = avg MOD</span>
+      </div>
+      <div class="sector-row">
+        <div class="sector-head-row"><div class="sector-name">Private Banks</div><div class="sector-mod-badge s-mod-strong">83</div><div class="sector-pct">23.4%</div></div>
+        <div class="sector-bar-wrap"><div class="sector-track"><div class="sector-fill" style="width:23.4%;background:var(--good)"></div></div></div>
+      </div>
+      <div class="sector-row">
+        <div class="sector-head-row"><div class="sector-name">Capital Goods</div><div class="sector-mod-badge s-mod-strong">80</div><div class="sector-pct">12.1%</div></div>
+        <div class="sector-bar-wrap"><div class="sector-track"><div class="sector-fill" style="width:12.1%;background:var(--good)"></div></div></div>
+      </div>
+      <div class="sector-row">
+        <div class="sector-head-row"><div class="sector-name">Energy</div><div class="sector-mod-badge s-mod-strong">78</div><div class="sector-pct">11.4%</div></div>
+        <div class="sector-bar-wrap"><div class="sector-track"><div class="sector-fill" style="width:11.4%;background:var(--good)"></div></div></div>
+      </div>
+      <div class="sector-row">
+        <div class="sector-head-row"><div class="sector-name">IT Services</div><div class="sector-mod-badge s-mod-fair">74</div><div class="sector-pct">9.5%</div></div>
+        <div class="sector-bar-wrap"><div class="sector-track"><div class="sector-fill" style="width:9.5%;background:var(--gold)"></div></div></div>
+      </div>
+      <div class="sector-row">
+        <div class="sector-head-row"><div class="sector-name">PSU Banks</div><div class="sector-mod-badge s-mod-fair">76</div><div class="sector-pct">8.0%</div></div>
+        <div class="sector-bar-wrap"><div class="sector-track"><div class="sector-fill" style="width:8.0%;background:var(--gold)"></div></div></div>
+      </div>
+      <div class="sector-row">
+        <div class="sector-head-row"><div class="sector-name">Consumer</div><div class="sector-mod-badge s-mod-strong">81</div><div class="sector-pct">7.8%</div></div>
+        <div class="sector-bar-wrap"><div class="sector-track"><div class="sector-fill" style="width:7.8%;background:var(--good)"></div></div></div>
+      </div>
+      <div class="sector-row" style="background:#FFF5F5">
+        <div class="sector-head-row"><div class="sector-name">Paints</div><div class="sector-mod-badge s-mod-stretched">54</div><div class="sector-pct">7.6%</div></div>
+        <div class="sector-bar-wrap"><div class="sector-track"><div class="sector-fill" style="width:7.6%;background:var(--bad)"></div></div></div>
+        <div class="sector-alert">⚠ ASIANPAINT dragging score down</div>
+      </div>
+      <div class="sector-row">
+        <div class="sector-head-row"><div class="sector-name">FMCG</div><div class="sector-mod-badge s-mod-fair">72</div><div class="sector-pct">7.2%</div></div>
+        <div class="sector-bar-wrap"><div class="sector-track"><div class="sector-fill" style="width:7.2%;background:var(--gold)"></div></div></div>
+      </div>
+      <div class="sector-row">
+        <div class="sector-head-row"><div class="sector-name">Pharma</div><div class="sector-mod-badge s-mod-fair">69</div><div class="sector-pct">6.4%</div></div>
+        <div class="sector-bar-wrap"><div class="sector-track"><div class="sector-fill" style="width:6.4%;background:var(--gold)"></div></div></div>
+      </div>
+      <div class="sector-row">
+        <div class="sector-head-row"><div class="sector-name">Renewable</div><div class="sector-mod-badge s-mod-fair">62</div><div class="sector-pct">4.7%</div></div>
+        <div class="sector-bar-wrap"><div class="sector-track"><div class="sector-fill" style="width:4.7%;background:var(--gold)"></div></div></div>
+      </div>
+    </div>
+    <div class="mod-quality-split" style="border-radius:0 0 12px 12px;border:1px solid var(--rule);border-top:none">
+      <div class="mqs-head">MOD Quality Split</div>
+      <div class="mqs-bar-stack">
+        <div class="mqs-seg" style="width:43%;background:var(--good)"></div>
+        <div class="mqs-seg" style="width:49%;background:var(--gold)"></div>
+        <div class="mqs-seg" style="width:8%;background:var(--bad)"></div>
+      </div>
+      <div class="mqs-legend">
+        <div class="mqs-item"><div class="mqs-lbl" style="color:var(--good)">Strong 80+</div><div class="mqs-val" style="color:var(--good)">43%</div><div class="mqs-sub">4 stocks</div></div>
+        <div class="mqs-item"><div class="mqs-lbl" style="color:var(--gold)">Fair 60–79</div><div class="mqs-val" style="color:var(--gold)">49%</div><div class="mqs-sub">7 stocks</div></div>
+        <div class="mqs-item"><div class="mqs-lbl" style="color:var(--bad)">Stretched &lt;60</div><div class="mqs-val" style="color:var(--bad)">8%</div><div class="mqs-sub">1 stock</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- end holdings tab -->
+
+<!-- ===== NEWS & MOD IMPACT TAB ===== -->
+<div id="tab-news" style="display:none">
+<div class="news-feed-full">
+  <div class="card-head" style="background:var(--bg)">
+    <h3>News & MOD Impact <span class="count">3 new today</span></h3>
+    <span style="font-size:11px;color:var(--ink-3)">Filtered to your holdings · scored against MOD framework</span>
+  </div>
+
+  <div class="news-item">
+    <div>
+      <div class="news-head"><span class="news-ticker">ASIANPAINT</span><div class="news-title">Asian Paints Q4 concall: Management guides volume growth of 6–8% for FY26 — below analyst estimates of 10–12%</div></div>
+      <div class="news-body">Management walked back earlier optimism on tier-2/3 demand recovery, citing prolonged urban slowdown. Capex guidance for FY26 also reduced from ₹1,800 Cr to ₹1,400 Cr. MD flagged raw material tailwinds but offered no margin guidance.</div>
+      <div class="news-meta"><span class="source">Economic Times</span><span>2 hours ago</span></div>
+    </div>
+    <div class="mod-impact-row">
+      <div class="impact-lbl">MOD Impact</div>
+      <div class="impact-chips">
+        <div class="impact-chip neg"><span class="ic-letter">M</span> Guidance −12pts</div>
+        <div class="impact-chip neg"><span class="ic-letter">O</span> Tailwind −8pts</div>
+        <div class="impact-chip neg"><span class="ic-letter">D</span> Earnings −6pts</div>
+      </div>
+      <div style="font-size:10px;color:var(--bad);font-weight:600;text-align:right;margin-top:6px">Score: 62 → 54</div>
+    </div>
+  </div>
+
+  <div class="news-item">
+    <div>
+      <div class="news-head"><span class="news-ticker">DIVISLAB</span><div class="news-title">Divi's Laboratories: USFDA issues Form 483 for Kakinada facility — 4 observations listed</div></div>
+      <div class="news-body">The USFDA inspection of Divi's Kakinada API manufacturing facility resulted in 4 observations under 21 CFR Part 211. Management says observations are procedural and expects resolution within 60 days. No import alert issued.</div>
+      <div class="news-meta"><span class="source">CNBCTV18</span><span>Yesterday</span></div>
+    </div>
+    <div class="mod-impact-row">
+      <div class="impact-lbl">MOD Impact</div>
+      <div class="impact-chips">
+        <div class="impact-chip neg"><span class="ic-letter">O</span> Distribution −6pts</div>
+        <div class="impact-chip neu"><span class="ic-letter">M</span> Discl. Neutral</div>
+        <div class="impact-chip neg"><span class="ic-letter">D</span> Risk-Reward −4pts</div>
+      </div>
+      <div style="font-size:10px;color:var(--warn);font-weight:600;text-align:right;margin-top:6px">Under review · watch 60d</div>
+    </div>
+  </div>
+
+  <div class="news-item">
+    <div>
+      <div class="news-head"><span class="news-ticker">HDFCBANK</span><div class="news-title">HDFC Bank Q4: Net interest margin expands 6bps QoQ to 3.52% — deposit growth outpaces credit growth for first time post-merger</div></div>
+      <div class="news-body">HDFC Bank delivered a clean Q4 with NIM expansion and deposits growing 18% YoY vs credit growth of 14% YoY — a key concern since the merger that management has now addressed. Provisions were within guided range. Management reiterated 15%+ ROA target.</div>
+      <div class="news-meta"><span class="source">Mint</span><span>2 days ago</span></div>
+    </div>
+    <div class="mod-impact-row">
+      <div class="impact-lbl">MOD Impact</div>
+      <div class="impact-chips">
+        <div class="impact-chip pos"><span class="ic-letter">M</span> Guidance +6pts</div>
+        <div class="impact-chip pos"><span class="ic-letter">O</span> Tailwind +4pts</div>
+        <div class="impact-chip neu"><span class="ic-letter">D</span> Neutral</div>
+      </div>
+      <div style="font-size:10px;color:var(--good);font-weight:600;text-align:right;margin-top:6px">Score: 78 → 82 ↑</div>
+    </div>
+  </div>
+
+  <div class="news-item">
+    <div>
+      <div class="news-head"><span class="news-ticker">POLYCAB</span><div class="news-title">Polycab India wins ₹800 Cr government contract for railway electrification — largest order in company history</div></div>
+      <div class="news-body">Polycab's wires & cables segment secured a major railway electrification contract from Indian Railways, adding visibility to order book through FY27. Management says order backlog now stands at 2.1× annual revenue.</div>
+      <div class="news-meta"><span class="source">Business Standard</span><span>3 days ago</span></div>
+    </div>
+    <div class="mod-impact-row">
+      <div class="impact-lbl">MOD Impact</div>
+      <div class="impact-chips">
+        <div class="impact-chip pos"><span class="ic-letter">O</span> Tailwind +5pts</div>
+        <div class="impact-chip pos"><span class="ic-letter">D</span> Earnings +4pts</div>
+        <div class="impact-chip neu"><span class="ic-letter">M</span> Neutral</div>
+      </div>
+      <div style="font-size:10px;color:var(--good);font-weight:600;text-align:right;margin-top:6px">Score: 77 → 80 ↑</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== MF TAB ===== -->
+<div id="tab-mf" style="display:none">
+<div class="card">
+  <div class="card-head">
+    <h3>Mutual Funds <span class="count">5</span></h3>
+    <span style="font-size:11px;color:var(--ink-3)">5 funds · folio-linked</span>
+  </div>
+  <table class="mf-table">
+    <thead>
+      <tr><th>Fund</th><th>Units · NAV</th><th>Current Value</th><th>P&L</th><th>XIRR</th><th>Day</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><div class="mf-name">Mirae Asset Large Cap Fund</div><div class="mf-type">Large Cap</div></td><td>312.4 @ ₹108.2</td><td>₹33.8K</td><td class="xirr-pos">+₹3.8K<br><span style="font-size:10px">+12.7%</span></td><td><span class="mf-xirr xirr-pos">14.2%</span></td><td class="day-pos">+0.4%</td></tr>
+      <tr><td><div class="mf-name">Axis Midcap Fund</div><div class="mf-type">Mid Cap</div></td><td>180.6 @ ₹92.4</td><td>₹16.7K</td><td class="xirr-pos">+₹2.7K<br><span style="font-size:10px">+19.2%</span></td><td><span class="mf-xirr xirr-pos">17.8%</span></td><td class="day-pos">+0.6%</td></tr>
+      <tr><td><div class="mf-name">Parag Parikh Flexi Cap</div><div class="mf-type">Flexi Cap</div></td><td>240.1 @ ₹78.6</td><td>₹18.9K</td><td class="xirr-pos">+₹1.9K<br><span style="font-size:10px">+11.0%</span></td><td><span class="mf-xirr xirr-pos">13.1%</span></td><td class="day-pos">+0.3%</td></tr>
+      <tr><td><div class="mf-name">SBI Small Cap Fund</div><div class="mf-type">Small Cap</div></td><td>95.8 @ ₹148.5</td><td>₹14.2K</td><td class="xirr-pos">+₹2.2K<br><span style="font-size:10px">+18.5%</span></td><td><span class="mf-xirr xirr-pos">16.4%</span></td><td class="day-neg">−0.8%</td></tr>
+      <tr><td><div class="mf-name">HDFC Nifty 50 Index Fund</div><div class="mf-type">Index</div></td><td>880.2 @ ₹22.8</td><td>₹20.1K</td><td class="xirr-pos">+₹1.6K<br><span style="font-size:10px">+8.5%</span></td><td><span class="mf-xirr xirr-pos">9.8%</span></td><td class="day-pos">+0.4%</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- ===== SECTOR TAB ===== -->
+<div id="tab-sector" style="display:none">
+<div style="max-width:700px">
+  <div class="card">
+    <div class="card-head"><h3>Sector MOD Overlay — full view</h3><span style="font-size:11px;color:var(--ink-3)">Sorted by portfolio weight</span></div>
+    <div class="sector-row"><div class="sector-head-row"><div class="sector-name">Private Banks</div><div class="sector-mod-badge s-mod-strong">83</div><div class="sector-pct">23.4%</div></div><div class="sector-bar-wrap"><div class="sector-track" style="height:8px"><div class="sector-fill" style="width:23.4%;background:var(--good);height:8px"></div></div></div><div style="font-size:11px;color:var(--good);margin-top:4px">HDFCBANK 82 · ICICIBANK 84 — both strong</div></div>
+    <div class="sector-row"><div class="sector-head-row"><div class="sector-name">Capital Goods</div><div class="sector-mod-badge s-mod-strong">80</div><div class="sector-pct">12.1%</div></div><div class="sector-bar-wrap"><div class="sector-track" style="height:8px"><div class="sector-fill" style="width:12.1%;background:var(--good);height:8px"></div></div></div><div style="font-size:11px;color:var(--good);margin-top:4px">POLYCAB 80 — thesis intact, MOD improving</div></div>
+    <div class="sector-row" style="background:#FFF5F5"><div class="sector-head-row"><div class="sector-name">Paints</div><div class="sector-mod-badge s-mod-stretched">54</div><div class="sector-pct">7.6%</div></div><div class="sector-bar-wrap"><div class="sector-track" style="height:8px"><div class="sector-fill" style="width:7.6%;background:var(--bad);height:8px"></div></div></div><div style="font-size:11px;color:var(--bad);margin-top:4px;font-weight:600">⚠ ASIANPAINT 54 — only holding, thesis broken, dragging sector red</div></div>
+    <div class="sector-row"><div class="sector-head-row"><div class="sector-name">FMCG</div><div class="sector-mod-badge s-mod-fair">72</div><div class="sector-pct">7.2%</div></div><div class="sector-bar-wrap"><div class="sector-track" style="height:8px"><div class="sector-fill" style="width:7.2%;background:var(--gold);height:8px"></div></div></div><div style="font-size:11px;color:var(--warn);margin-top:4px">HINDUNILVR 72 — thesis partial, margin watch</div></div>
+    <div class="sector-row"><div class="sector-head-row"><div class="sector-name">Pharma</div><div class="sector-mod-badge s-mod-fair">69</div><div class="sector-pct">6.4%</div></div><div class="sector-bar-wrap"><div class="sector-track" style="height:8px"><div class="sector-fill" style="width:6.4%;background:var(--gold);height:8px"></div></div></div><div style="font-size:11px;color:var(--warn);margin-top:4px">DIVISLAB 69 — FDA watch, MOD declining</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ===== WINNERS / LOSERS OVERLAY ===== -->
+<div id="wl-overlay" style="display:none;position:fixed;inset:0;background:rgba(28,25,23,0.55);z-index:100;backdrop-filter:blur(2px)" onclick="closeWL()">
+  <div id="wl-panel" onclick="event.stopPropagation()" style="position:absolute;top:0;right:0;width:520px;height:100%;background:#fff;overflow-y:auto;box-shadow:-4px 0 32px rgba(0,0,0,0.14);display:flex;flex-direction:column">
+
+    <!-- Panel header -->
+    <div id="wl-head" style="padding:22px 24px 14px;border-bottom:1px solid var(--rule);position:sticky;top:0;background:#fff;z-index:2">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div id="wl-eyebrow" style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;font-weight:600;margin-bottom:6px"></div>
+          <div id="wl-title" style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;letter-spacing:-0.02em;line-height:1"></div>
+          <div id="wl-sub" style="font-size:12px;color:var(--ink-3);margin-top:5px"></div>
+        </div>
+        <button onclick="closeWL()" style="background:var(--bg);border:1px solid var(--rule-2);width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink-2)">✕</button>
+      </div>
+      <!-- Sort row -->
+      <div style="display:flex;gap:6px;margin-top:14px">
+        <div id="sort-return" class="fpill active" style="font-size:11px" onclick="sortWL('return',this)">Sort: Return %</div>
+        <div id="sort-mod" class="fpill" style="font-size:11px" onclick="sortWL('mod',this)">Sort: MOD Score</div>
+        <div id="sort-value" class="fpill" style="font-size:11px" onclick="sortWL('value',this)">Sort: Value</div>
+      </div>
+    </div>
+
+    <!-- Summary bar -->
+    <div id="wl-summary" style="padding:14px 24px;border-bottom:1px solid var(--rule);background:var(--bg);display:grid;grid-template-columns:repeat(3,1fr);gap:0"></div>
+
+    <!-- Holding cards -->
+    <div id="wl-cards" style="padding:16px 24px;display:flex;flex-direction:column;gap:10px;flex:1"></div>
+
+  </div>
+</div>
+
+<!-- ===== JOURNAL TAB ===== -->
+<div id="tab-journal" style="display:none">
+
+  <!-- Journal header -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px">
+    <div>
+      <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:6px">Investment Journal</div>
+      <div style="font-family:'Instrument Serif',serif;font-size:30px;font-weight:400;letter-spacing:-0.02em;line-height:1">Your investment diary</div>
+      <div style="font-size:13px;color:var(--ink-3);margin-top:6px">8 of 12 holdings have thesis entries · <span style="color:var(--deal);font-weight:600;cursor:pointer">Complete the remaining 4 →</span></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn">Filter by thesis health</button>
+      <button class="btn primary">Export journal PDF</button>
+    </div>
+  </div>
+
+  <!-- Summary chips -->
+  <div style="display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap">
+    <div style="background:var(--good-bg);border:1px solid #86EFAC;border-radius:8px;padding:10px 16px;display:flex;gap:12px;align-items:center">
+      <div style="font-size:22px;font-family:'Instrument Serif',serif;font-weight:400;color:var(--good)">4</div>
+      <div><div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--good);font-weight:700">Intact</div><div style="font-size:11px;color:var(--ink-3)">Thesis holding</div></div>
+    </div>
+    <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:10px 16px;display:flex;gap:12px;align-items:center">
+      <div style="font-size:22px;font-family:'Instrument Serif',serif;font-weight:400;color:var(--gold)">3</div>
+      <div><div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);font-weight:700">Partial</div><div style="font-size:11px;color:var(--ink-3)">Needs review</div></div>
+    </div>
+    <div style="background:var(--bad-bg);border:1px solid #FCA5A5;border-radius:8px;padding:10px 16px;display:flex;gap:12px;align-items:center">
+      <div style="font-size:22px;font-family:'Instrument Serif',serif;font-weight:400;color:var(--bad)">1</div>
+      <div><div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--bad);font-weight:700">Broken</div><div style="font-size:11px;color:var(--ink-3)">Act required</div></div>
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--rule-2);border-radius:8px;padding:10px 16px;display:flex;gap:12px;align-items:center">
+      <div style="font-size:22px;font-family:'Instrument Serif',serif;font-weight:400;color:var(--ink-3)">4</div>
+      <div><div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700">No thesis</div><div style="font-size:11px;color:var(--ink-3)">Add entry</div></div>
+    </div>
+  </div>
+
+  <!-- Journal entries -->
+  <div style="display:flex;flex-direction:column;gap:12px">
+
+    <!-- BROKEN first - ASIANPAINT -->
+    <div style="background:#fff;border:1px solid #FCA5A5;border-radius:12px;overflow:hidden">
+      <div style="background:#FEF2F2;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #FCA5A5">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="font-size:14px;font-weight:700;letter-spacing:0.02em">ASIANPAINT</div>
+          <div style="font-size:10px;color:var(--ink-3)">Asian Paints · Paints · Large Cap</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="thesis-health broken">✕ Thesis Broken</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--bad)">MOD 54↓</div>
+        </div>
+      </div>
+      <div style="padding:18px 20px">
+        <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start">
+          <div>
+            <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:8px">Your thesis</div>
+            <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:16px;line-height:1.5;color:var(--ink-2);margin-bottom:12px">"Premium consumer brand with pricing power and strong distribution. Margin expansion story on commodity cost normalization."</div>
+            <div style="background:var(--bad-bg);border:1px solid #FCA5A5;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--bad);line-height:1.55">
+              <div style="font-weight:700;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px">🤖 Why this thesis is broken</div>
+              Management guided margin recovery 3 times since FY24 — none materialized. Tier-2 demand weak for 3 consecutive quarters. Guidance accuracy sub-score: <strong>42/100</strong>. Your "pricing power" thesis requires consistent delivery — the data contradicts it.
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;min-width:120px">
+            <div style="text-align:right">
+              <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:3px">Conviction</div>
+              <div style="display:flex;gap:3px">
+                <div style="width:13px;height:13px;border-radius:50%;background:var(--gold);border:1.5px solid var(--gold)"></div>
+                <div style="width:13px;height:13px;border-radius:50%;background:var(--gold);border:1.5px solid var(--gold)"></div>
+                <div style="width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink-4)"></div>
+                <div style="width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink-4)"></div>
+                <div style="width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink-4)"></div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:3px">P&L</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--bad)">−18.5%</div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:4px">
+              <button class="btn-xs" style="color:var(--bad);border-color:#FCA5A5">Revise</button>
+              <button class="btn-xs">Open →</button>
+            </div>
+          </div>
+        </div>
+        <!-- MOD sub-scores compact -->
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="background:var(--bg);border-radius:6px;padding:8px 10px">
+            <div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mgmt);font-weight:600;margin-bottom:3px">Mgmt</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--warn)">42 <span style="font-size:10px;font-weight:400;color:var(--ink-3)">Guidance</span></div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:8px 10px">
+            <div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--opp);font-weight:600;margin-bottom:3px">Opp</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--gold)">55 <span style="font-size:10px;font-weight:400;color:var(--ink-3)">Tailwind</span></div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:8px 10px">
+            <div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--deal);font-weight:600;margin-bottom:3px">Deal</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--bad)">28 <span style="font-size:10px;font-weight:400;color:var(--ink-3)">P/E</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PARTIAL - HINDUNILVR -->
+    <div style="background:#fff;border:1px solid #FCD34D;border-radius:12px;overflow:hidden">
+      <div style="background:#FFFBEB;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #FCD34D">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="font-size:14px;font-weight:700;letter-spacing:0.02em">HINDUNILVR</div>
+          <div style="font-size:10px;color:var(--ink-3)">Hindustan Unilever · FMCG · Large Cap</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="thesis-health partial">⚡ Thesis Partial</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--gold)">MOD 72↘</div>
+        </div>
+      </div>
+      <div style="padding:18px 20px">
+        <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start">
+          <div>
+            <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:8px">Your thesis</div>
+            <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:16px;line-height:1.5;color:var(--ink-2);margin-bottom:12px">"FMCG defensive play — strong distribution moat, rural recovery story, volume-led growth as urban slows."</div>
+            <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400E;line-height:1.55">
+              <div style="font-weight:700;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px">🤖 What's still intact vs what's drifting</div>
+              <span style="color:var(--good);font-weight:600">✓ Still intact:</span> Distribution moat (score 82) — this is the strongest part of your thesis and hasn't budged.<br>
+              <span style="color:var(--warn);font-weight:600;margin-top:4px;display:block">⚡ Drifting:</span> Margin compression in Q4 is partially contradicting the volume-led growth narrative. Watch Q1 volumes.
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;min-width:120px">
+            <div style="text-align:right">
+              <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:3px">Conviction</div>
+              <div style="display:flex;gap:3px">
+                <div style="width:13px;height:13px;border-radius:50%;background:var(--gold)"></div>
+                <div style="width:13px;height:13px;border-radius:50%;background:var(--gold)"></div>
+                <div style="width:13px;height:13px;border-radius:50%;background:var(--gold)"></div>
+                <div style="width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink-4)"></div>
+                <div style="width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink-4)"></div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:3px">P&L</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--bad)">−7.6%</div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:4px">
+              <button class="btn-xs">Revise</button>
+              <button class="btn-xs">Open →</button>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="background:var(--bg);border-radius:6px;padding:8px 10px"><div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mgmt);font-weight:600;margin-bottom:3px">Mgmt</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--good)">76</div></div>
+          <div style="background:var(--bg);border-radius:6px;padding:8px 10px"><div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--opp);font-weight:600;margin-bottom:3px">Opp</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--gold)">65</div></div>
+          <div style="background:var(--bg);border-radius:6px;padding:8px 10px"><div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--deal);font-weight:600;margin-bottom:3px">Deal</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--gold)">58</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PARTIAL - DIVISLAB -->
+    <div style="background:#fff;border:1px solid #FCD34D;border-radius:12px;overflow:hidden">
+      <div style="background:#FFFBEB;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #FCD34D">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="font-size:14px;font-weight:700;letter-spacing:0.02em">DIVISLAB</div>
+          <div style="font-size:10px;color:var(--ink-3)">Divi's Laboratories · Pharma · Large Cap</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="thesis-health partial">⚡ Thesis Partial</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--gold)">MOD 69↘</div>
+        </div>
+      </div>
+      <div style="padding:18px 20px">
+        <div style="display:grid;grid-template-columns:1fr auto;gap:20px">
+          <div>
+            <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:8px">Your thesis</div>
+            <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:16px;line-height:1.5;color:var(--ink-2);margin-bottom:12px">"CDMO opportunity + API dominance. FDA relationship management is a known headwind but management has navigated it before."</div>
+            <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400E;line-height:1.55">
+              <div style="font-weight:700;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px">🤖 AI Check</div>
+              FDA Kakinada delay is the 2nd in 18 months. Your thesis acknowledges the FDA risk — but Risk-Reward dropped to 52. <strong>Set a 6-month review trigger for Q1 FY26 outcomes.</strong>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;min-width:120px">
+            <div style="text-align:right"><div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:3px">Conviction</div><div style="display:flex;gap:3px"><div style="width:13px;height:13px;border-radius:50%;background:var(--gold)"></div><div style="width:13px;height:13px;border-radius:50%;background:var(--gold)"></div><div style="width:13px;height:13px;border-radius:50%;background:var(--gold)"></div><div style="width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink-4)"></div><div style="width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink-4)"></div></div></div>
+            <div style="text-align:right"><div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:3px">P&L</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--good)">+6.0%</div></div>
+            <div style="display:flex;gap:6px;margin-top:4px"><button class="btn-xs">Revise</button><button class="btn-xs">Open →</button></div>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="background:var(--bg);border-radius:6px;padding:8px 10px"><div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mgmt);font-weight:600;margin-bottom:3px">Mgmt</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--good)">74</div></div>
+          <div style="background:var(--bg);border-radius:6px;padding:8px 10px"><div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--opp);font-weight:600;margin-bottom:3px">Opp</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--gold)">62</div></div>
+          <div style="background:var(--bg);border-radius:6px;padding:8px 10px"><div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--deal);font-weight:600;margin-bottom:3px">Deal</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--warn)">52</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTACT entries (collapsed style) -->
+    <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;font-weight:600;color:var(--good);padding:8px 0 6px;margin-top:4px">● Intact theses — 4 holdings</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+      <div style="background:#fff;border:1px solid #86EFAC;border-radius:12px;padding:16px 18px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div><div style="font-size:14px;font-weight:700">HDFCBANK</div><div style="font-size:10px;color:var(--ink-3)">Private Banks · MOD 82↑</div></div>
+          <div style="display:flex;gap:3px"><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ink-4)"></div></div>
+        </div>
+        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:13px;line-height:1.45;color:var(--ink-2);margin-bottom:10px">"Deposit franchise recovery and ROA expansion. Merger integration messy but temporary."</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="thesis-health intact" style="font-size:9px;padding:2px 8px">● Intact</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--good)">+12.4%</div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #86EFAC;border-radius:12px;padding:16px 18px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div><div style="font-size:14px;font-weight:700">POLYCAB</div><div style="font-size:10px;color:var(--ink-3)">Capital Goods · MOD 80↑</div></div>
+          <div style="display:flex;gap:3px"><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div></div>
+        </div>
+        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:13px;line-height:1.45;color:var(--ink-2);margin-bottom:10px">"Infrastructure supercycle + capex electrification. Multi-year tailwind."</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="thesis-health intact" style="font-size:9px;padding:2px 8px">● Intact</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--good)">+13.3%</div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #86EFAC;border-radius:12px;padding:16px 18px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div><div style="font-size:14px;font-weight:700">ICICIBANK</div><div style="font-size:10px;color:var(--ink-3)">Private Banks · MOD 84↑</div></div>
+          <div style="display:flex;gap:3px"><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ink-4)"></div></div>
+        </div>
+        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:13px;line-height:1.45;color:var(--ink-2);margin-bottom:10px">"Retail banking transformation. Capital allocation discipline restored. ROE trajectory clear."</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="thesis-health intact" style="font-size:9px;padding:2px 8px">● Intact</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--good)">+21.0%</div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #86EFAC;border-radius:12px;padding:16px 18px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div><div style="font-size:14px;font-weight:700">TITAN</div><div style="font-size:10px;color:var(--ink-3)">Consumer · MOD 81→</div></div>
+          <div style="display:flex;gap:3px"><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;background:var(--gold)"></div><div style="width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ink-4)"></div><div style="width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ink-4)"></div></div>
+        </div>
+        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:13px;line-height:1.45;color:var(--ink-2);margin-bottom:10px">"Jewellery formalisation and premiumisation. Retail expansion with category-leading brand."</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="thesis-health intact" style="font-size:9px;padding:2px 8px">● Intact</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--good)">+6.4%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NO THESIS -->
+    <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;font-weight:600;color:var(--ink-3);padding:8px 0 6px;margin-top:8px">○ No thesis yet — 4 holdings</div>
+
+    <div style="background:#fff;border:1.5px dashed var(--rule-2);border-radius:12px;padding:18px 20px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:12px;background:var(--bg);border-radius:8px">
+          <div style="font-size:13px;font-weight:700">RELIANCE</div>
+          <div style="font-size:10px;color:var(--ink-3)">Energy · MOD 78</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--good)">+16.5%</div>
+          <button class="btn-xs" style="width:100%;text-align:center;color:var(--deal);border-color:#DDD6FE">+ Add thesis</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:12px;background:var(--bg);border-radius:8px">
+          <div style="font-size:13px;font-weight:700">SBIN</div>
+          <div style="font-size:10px;color:var(--ink-3)">PSU Banks · MOD 76</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--good)">+12.8%</div>
+          <button class="btn-xs" style="width:100%;text-align:center;color:var(--deal);border-color:#DDD6FE">+ Add thesis</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:12px;background:var(--bg);border-radius:8px">
+          <div style="font-size:13px;font-weight:700">KPIGREEN</div>
+          <div style="font-size:10px;color:var(--ink-3)">Renewable · MOD 62</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--bad)">−12.6%</div>
+          <button class="btn-xs" style="width:100%;text-align:center;color:var(--deal);border-color:#DDD6FE">+ Add thesis</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:12px;background:var(--bg);border-radius:8px">
+          <div style="font-size:13px;font-weight:700">TATASTEEL</div>
+          <div style="font-size:10px;color:var(--ink-3)">Metals · MOD 68</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--good)">+9.7%</div>
+          <button class="btn-xs" style="width:100%;text-align:center;color:var(--deal);border-color:#DDD6FE">+ Add thesis</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</main>
+
+<script>
+/* ──────── HOLDINGS DATA ──────── */
+const holdingsData = [
+  { id:'HDFCBANK', name:'HDFC Bank', sector:'Private Banks', cap:'Large', qty:22, avgCost:1540, currPrice:1728.40, mod:82, modTrend:'up', thesis:'intact', pnlPct:12.4, pnlAmt:4140, value:38020 },
+  { id:'POLYCAB',  name:'Polycab India', sector:'Capital Goods', cap:'Mid', qty:5, avgCost:5400, currPrice:6124, mod:80, modTrend:'up', thesis:'intact', pnlPct:13.3, pnlAmt:3620, value:30620 },
+  { id:'RELIANCE', name:'Reliance Inds', sector:'Energy', cap:'Large', qty:10, avgCost:2480, currPrice:2891, mod:78, modTrend:'flat', thesis:'none', pnlPct:16.5, pnlAmt:4110, value:28910 },
+  { id:'INFY',     name:'Infosys', sector:'IT Services', cap:'Large', qty:15, avgCost:1580, currPrice:1612.30, mod:74, modTrend:'flat', thesis:'partial', pnlPct:2.1, pnlAmt:485, value:24185 },
+  { id:'ICICIBANK',name:'ICICI Bank', sector:'Private Banks', cap:'Large', qty:18, avgCost:980, currPrice:1184.20, mod:84, modTrend:'up', thesis:'intact', pnlPct:21.0, pnlAmt:3675, value:21316 },
+  { id:'SBIN',     name:'SBI', sector:'PSU Banks', cap:'Large', qty:25, avgCost:720, currPrice:812.40, mod:76, modTrend:'up', thesis:'none', pnlPct:12.8, pnlAmt:2310, value:20310 },
+  { id:'TITAN',    name:'Titan Company', sector:'Consumer', cap:'Large', qty:6, avgCost:3100, currPrice:3298, mod:81, modTrend:'flat', thesis:'intact', pnlPct:6.4, pnlAmt:1188, value:19788 },
+  { id:'ASIANPAINT',name:'Asian Paints', sector:'Paints', cap:'Large', qty:8, avgCost:2980, currPrice:2418.10, mod:54, modTrend:'down', thesis:'broken', pnlPct:-18.5, pnlAmt:-4495, value:19345 },
+  { id:'HINDUNILVR',name:'HUL', sector:'FMCG', cap:'Large', qty:8, avgCost:2480, currPrice:2284.60, mod:72, modTrend:'down', thesis:'partial', pnlPct:-7.6, pnlAmt:-1524, value:18277 },
+  { id:'DIVISLAB', name:"Divi's Labs", sector:'Pharma', cap:'Large', qty:3, avgCost:5100, currPrice:5418, mod:69, modTrend:'down', thesis:'partial', pnlPct:6.0, pnlAmt:954, value:16254 },
+  { id:'KPIGREEN', name:'KPI Green Energy', sector:'Renewable', cap:'Small', qty:20, avgCost:680, currPrice:594.20, mod:62, modTrend:'down', thesis:'none', pnlPct:-12.6, pnlAmt:-1716, value:11884 },
+  { id:'TATASTEEL',name:'Tata Steel', sector:'Metals', cap:'Large', qty:30, avgCost:148, currPrice:162.40, mod:68, modTrend:'up', thesis:'none', pnlPct:9.7, pnlAmt:432, value:4872 },
+];
+
+let wlMode = 'winners';
+let wlSort = 'return';
+
+/* ──────── TABS ──────── */
+function showTab(tab, el) {
+  ['holdings','mf','news','sector','journal'].forEach(t => {
+    const el2 = document.getElementById('tab-' + t);
+    if(el2) el2.style.display = (t === tab) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.ptab').forEach(p => p.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+/* ──────── HOLDINGS FILTER ──────── */
+function filterHoldings(type, el) {
+  document.querySelectorAll('.fpill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.holding').forEach(h => {
+    const id = h.id.replace('h-','');
+    const d = holdingsData.find(x => x.id === id);
+    if(!d){ h.style.display='none'; return; }
+    if(type === 'all')     h.style.display = '';
+    else if(type === 'alerts')  h.style.display = (h.querySelector('.h-alert-dot') ? '' : 'none');
+    else if(type === 'winners') h.style.display = (d.pnlPct > 0 ? '' : 'none');
+    else if(type === 'losers')  h.style.display = (d.pnlPct < 0 ? '' : 'none');
+    else if(type === 'broken')  h.style.display = (d.thesis === 'broken' ? '' : 'none');
+    else if(type === 'journal') h.style.display = (d.thesis === 'none' ? '' : 'none');
+  });
+}
+
+/* ──────── EXPAND HOLDING ──────── */
+function toggleHolding(id) {
+  const el = document.getElementById('h-' + id);
+  el.classList.toggle('expanded');
+}
+function expandHolding(id) {
+  const el = document.getElementById('h-' + id);
+  el.classList.add('expanded');
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+/* ──────── CONVICTION DOTS ──────── */
+function setConviction(id, level, e) {
+  e.stopPropagation();
+  const row = document.getElementById('conv-' + id);
+  if(!row) return;
+  row.querySelectorAll('.conv-dot').forEach((d, i) => {
+    if(i < level) d.classList.add('filled');
+    else d.classList.remove('filled');
+  });
+}
+
+/* ──────── WINNERS / LOSERS OVERLAY ──────── */
+function showWinnersLosers(mode, pillEl) {
+  document.querySelectorAll('.fpill').forEach(p => p.classList.remove('active'));
+  if(pillEl) pillEl.classList.add('active');
+  wlMode = mode;
+  wlSort = 'return';
+  renderWLPanel();
+  document.getElementById('wl-overlay').style.display = 'block';
+}
+
+function closeWL() {
+  document.getElementById('wl-overlay').style.display = 'none';
+  document.querySelectorAll('.fpill').forEach(p => p.classList.remove('active'));
+  document.querySelector('.fpill').classList.add('active'); // reset to All
+}
+
+function sortWL(sortBy, el) {
+  document.querySelectorAll('#wl-panel .fpill').forEach(p => p.classList.remove('active'));
+  if(el) el.classList.add('active');
+  wlSort = sortBy;
+  renderWLPanel();
+}
+
+function renderWLPanel() {
+  const isWinners = wlMode === 'winners';
+  const data = holdingsData.filter(d => isWinners ? d.pnlPct > 0 : d.pnlPct < 0);
+
+  // Sort
+  data.sort((a,b) => {
+    if(wlSort === 'return')  return isWinners ? b.pnlPct - a.pnlPct : a.pnlPct - b.pnlPct;
+    if(wlSort === 'mod')     return b.mod - a.mod;
+    if(wlSort === 'value')   return b.value - a.value;
+  });
+
+  // Header
+  const trendIcon = t => t === 'up' ? '↑' : t === 'down' ? '↓' : '→';
+  const trendCol = t => t === 'up' ? 'var(--good)' : t === 'down' ? 'var(--bad)' : 'var(--ink-3)';
+
+  document.getElementById('wl-eyebrow').textContent = isWinners ? '🏆 Portfolio Winners' : '📉 Portfolio Losers';
+  document.getElementById('wl-eyebrow').style.color = isWinners ? 'var(--good)' : 'var(--bad)';
+  document.getElementById('wl-title').textContent = isWinners
+    ? `${data.length} holdings in positive territory`
+    : `${data.length} holdings underwater`;
+  document.getElementById('wl-sub').textContent = isWinners
+    ? `Sorted by return · see which thesis factors are driving gains`
+    : `Sorted by loss · see where thesis pressure is highest`;
+
+  // Summary bar
+  const avgReturn = data.reduce((s,d) => s + d.pnlPct, 0) / data.length;
+  const avgMod = Math.round(data.reduce((s,d) => s + d.mod, 0) / data.length);
+  const bestPnl = isWinners ? Math.max(...data.map(d=>d.pnlPct)) : Math.min(...data.map(d=>d.pnlPct));
+  const best = data.find(d => d.pnlPct === bestPnl);
+  document.getElementById('wl-summary').innerHTML = `
+    <div style="padding:12px 0;border-right:1px solid var(--rule)">
+      <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:4px">${isWinners ? 'Avg gain' : 'Avg loss'}</div>
+      <div style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;letter-spacing:-0.02em;color:${isWinners ? 'var(--good)' : 'var(--bad)'}">${avgReturn > 0 ? '+' : ''}${avgReturn.toFixed(1)}%</div>
+    </div>
+    <div style="padding:12px 14px;border-right:1px solid var(--rule)">
+      <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:4px">Avg MOD</div>
+      <div style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;letter-spacing:-0.02em;color:${avgMod>=75?'var(--good)':avgMod>=60?'var(--gold)':'var(--bad)'}">${avgMod}<span style="font-size:12px;color:var(--ink-3)">/100</span></div>
+    </div>
+    <div style="padding:12px 14px">
+      <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:4px">${isWinners ? 'Top performer' : 'Most underwater'}</div>
+      <div style="font-size:14px;font-weight:700;color:var(--ink)">${best ? best.id : '—'}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:${isWinners ? 'var(--good)' : 'var(--bad)'};">${best ? (best.pnlPct > 0 ? '+' : '') + best.pnlPct.toFixed(1) + '%' : ''}</div>
+    </div>`;
+
+  // Cards
+  const thesisColor = t => t==='intact'?'var(--good)':t==='broken'?'var(--bad)':t==='partial'?'var(--gold)':'var(--ink-4)';
+  const thesisLabel = t => t==='intact'?'● Intact':t==='broken'?'✕ Broken':t==='partial'?'⚡ Partial':'○ No thesis';
+  const modBarW = v => Math.round(v);
+
+  document.getElementById('wl-cards').innerHTML = data.map((d, i) => `
+    <div style="background:#fff;border:1px solid var(--rule);border-radius:12px;overflow:hidden;cursor:pointer" onclick="closeWL();expandHolding('${d.id}')">
+
+      <!-- card header -->
+      <div style="padding:12px 18px;background:var(--bg);border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700;background:var(--ink);color:#fff;padding:2px 7px;border-radius:4px">#${i+1}</div>
+          <div style="font-size:15px;font-weight:700;letter-spacing:0.01em">${d.id}</div>
+          <div style="font-size:11px;color:var(--ink-3)">${d.name} · ${d.sector}</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:${d.pnlPct > 0 ? 'var(--good)' : 'var(--bad)'}">
+          ${d.pnlPct > 0 ? '+' : ''}${d.pnlPct.toFixed(1)}%
+        </div>
+      </div>
+
+      <!-- card body -->
+      <div style="padding:14px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start">
+
+        <!-- P&L detail -->
+        <div>
+          <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:6px">P&L Detail</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;justify-content:space-between;font-size:12px">
+              <span style="color:var(--ink-3)">Invested</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:500">₹${(d.qty * d.avgCost).toLocaleString('en-IN')}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px">
+              <span style="color:var(--ink-3)">Current</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:500">₹${Math.round(d.value).toLocaleString('en-IN')}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding-top:4px;border-top:1px solid var(--rule);margin-top:2px">
+              <span style="color:var(--ink-2);font-weight:500">Gain/Loss</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${d.pnlAmt>0?'var(--good)':'var(--bad)'}">₹${d.pnlAmt > 0 ? '+' : ''}${d.pnlAmt.toLocaleString('en-IN')}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MOD health -->
+        <div>
+          <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:6px">MOD Health</div>
+          <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:8px">
+            <div style="font-family:'Instrument Serif',serif;font-size:26px;font-weight:400;letter-spacing:-0.02em;color:${d.mod>=75?'var(--good)':d.mod>=60?'var(--gold)':'var(--bad)'}">${d.mod}</div>
+            <div style="font-size:11px;color:var(--ink-3)">/100</div>
+            <div style="font-size:14px;color:${trendCol(d.modTrend)};font-weight:700">${trendIcon(d.modTrend)}</div>
+          </div>
+          <div style="height:4px;background:var(--rule);border-radius:2px;overflow:hidden">
+            <div style="height:100%;width:${modBarW(d.mod)}%;background:${d.mod>=75?'var(--good)':d.mod>=60?'var(--gold)':'var(--bad)'};border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:var(--ink-3);margin-top:4px">
+            ${d.modTrend === 'up' ? '↑ MOD improving — thesis strengthening' : d.modTrend === 'down' ? '↓ MOD declining — review thesis' : '→ MOD stable'}
+          </div>
+        </div>
+
+        <!-- Thesis link -->
+        <div>
+          <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:6px">Thesis</div>
+          <div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;background:${d.thesis==='intact'?'var(--good-bg)':d.thesis==='broken'?'var(--bad-bg)':d.thesis==='partial'?'#FFFBEB':'var(--bg)'};color:${thesisColor(d.thesis)}">${thesisLabel(d.thesis)}</div>
+          <div style="font-size:11px;color:var(--ink-2);line-height:1.4">
+            ${d.thesis === 'intact' ? 'MOD confirms original thesis.' :
+              d.thesis === 'broken' ? 'Thesis contradicted by data.' :
+              d.thesis === 'partial' ? 'Parts of thesis under pressure.' :
+              'No thesis recorded.'}
+          </div>
+          <div style="font-size:10px;color:var(--deal);font-weight:600;margin-top:8px;cursor:pointer">Open full analysis →</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>

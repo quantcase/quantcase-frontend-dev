@@ -168,8 +168,7 @@ function InsightDashboard({
     ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug) ?? null
     : null;
 
-  const lensCount = insight.lenses.length;
-  const lensHeading = `${lensCount === 4 ? "Four" : lensCount === 3 ? "Three" : lensCount === 2 ? "Two" : lensCount === 5 ? "Five" : String(lensCount)} lenses on ${TYPE_LABELS[type].toLowerCase()}`;
+  const lensHeading = `${TYPE_LABELS[type]} lenses`;
 
   return (
     <>
@@ -178,14 +177,14 @@ function InsightDashboard({
           <InsightScorecard insight={insight} verdictLabel={TYPE_VERDICT_LABELS[type]} onLensClick={handleLensClick} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 24, alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 24, alignItems: "stretch" }}>
           {insight.lenses.length > 0 && (
-            <div id="section-lenses">
+            <div id="section-lenses" style={{ display: "flex", flexDirection: "column" }}>
               <InsightLenses lenses={insight.lenses} heading={lensHeading} onLensClick={handleLensClick} />
             </div>
           )}
           {insight.signal_map.length > 0 && (
-            <div id="section-signal-map">
+            <div id="section-signal-map" style={{ display: "flex", flexDirection: "column" }}>
               <InsightSignalMap signals={insight.signal_map} heading="Signals" />
             </div>
           )}

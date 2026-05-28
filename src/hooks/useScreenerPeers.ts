@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/constants";
 
-const DEFAULT_INDICATORS = [
-  "cmp", "pe", "marketCap", "divYld", "npQtr",
-  "qtrProfitVar", "salesQtr", "qtrSalesVar", "roce",
-];
+interface ScoreVerdict {
+  score: number;
+  verdict: string;
+}
 
 export interface PeerRow {
   symbol: string;
@@ -19,15 +19,17 @@ export interface PeerRow {
   salesQtrCr: number | null;
   qtrSalesVar: number | null;
   roce: number | null;
+  management: ScoreVerdict;
+  opportunity: ScoreVerdict;
+  deal: ScoreVerdict;
 }
 
-interface ScreenerPeersResponse {
+export interface ScreenerPeersResponse {
   symbol: string;
   basicIndustry: string;
   industryGroup: string;
   latestQuarter: string;
   yearAgoQuarter: string;
-  indicators: string[];
   count: number;
   peers: PeerRow[];
 }
@@ -44,11 +46,7 @@ export function useScreenerPeers(symbol: string) {
     setError(null);
     setData(null);
 
-    fetch(`${BACKEND_URL}/api/screener/${symbol}/peers`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ indicators: DEFAULT_INDICATORS }),
-    })
+    fetch(`${BACKEND_URL}/api/screener/${symbol}/peers`)
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to fetch peers: ${res.status}`);
         return res.json() as Promise<ScreenerPeersResponse>;

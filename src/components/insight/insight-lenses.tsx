@@ -5,10 +5,12 @@ import {
   Target, Eye, TrendingUp, BarChart2,
   Factory, Swords, Shield, Users,
   Zap, RefreshCw, Award, DollarSign,
+  Layers,
   type LucideIcon,
 } from "lucide-react";
 import type { InsightLens } from "@/types/analysis";
 import { renderMd } from "@/lib/render-md";
+import { MonoLabel, LimeCountPip } from "@/components/ds";
 
 const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
   "guidance-credibility": Target,
@@ -56,24 +58,39 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
   if (!lenses.length) return null;
 
   return (
-    <div>
-      {heading && (
-        <div style={{ marginBottom: 16 }}>
-          <h3 style={{ fontSize: 28, fontWeight: 400, color: "var(--qc-ink)", margin: 0, fontFamily: "var(--qc-font-serif, Georgia, serif)" }}>
-            {heading}
-          </h3>
-        </div>
-      )}
+    <div
+      className="rounded-[10px] p-2"
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", display: "flex", flexDirection: "column", flex: 1 }}
+    >
+      {/* Header */}
+      <div className="px-2 pt-1 pb-3 flex items-center gap-2">
+        <Layers className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+        <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">
+          {heading ?? "Lenses"}
+        </MonoLabel>
+        <LimeCountPip count={lenses.length} />
+      </div>
 
-      {/* 2×2 grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        {lenses.map((lens) => {
+      {/* Single inner card — 2-col CSS grid, interior dividers only */}
+      <div
+        className="rounded-[10px] overflow-hidden"
+        style={{
+          background: "var(--qc-card)",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          flex: 1,
+        }}
+      >
+        {lenses.map((lens, idx) => {
           const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
           const { color: statusColor, bg: statusBg } = lensStatusColor(pct);
           const accentColor = lensAccentColor(pct);
           const statusLabel = (lens.status || (pct >= 70 ? "STRONG" : pct >= 40 ? "MODERATE" : "NEUTRAL")).toUpperCase();
           const isClickable = !!onLensClick;
           const Icon = LENS_ICON_CONFIG[lens.slug];
+          const isLeft = idx % 2 === 0;
+          const rowCount = Math.ceil(lenses.length / 2);
+          const isTop = idx < rowCount * 2 - 2;
 
           return (
             <motion.div
@@ -84,74 +101,58 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
               whileHover={isClickable ? "hover" : undefined}
               animate="rest"
               variants={isClickable ? {
-                rest: { y: 0, boxShadow: "0 0px 0px rgba(0,0,0,0)" },
-                hover: { y: -2, boxShadow: "0 6px 20px rgba(0,0,0,0.09)" },
+                rest: { backgroundColor: "#FFFFFF" },
+                hover: { backgroundColor: "#F3F2EE" },
               } : undefined}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
               style={{
-                background: "var(--qc-card)",
-                border: "1px solid var(--qc-hair)",
-                borderLeft: `3px solid ${accentColor}`,
-                borderRadius: 10,
-                padding: "20px 20px 18px",
                 display: "flex",
                 flexDirection: "column",
-                gap: 0,
-                position: "relative",
-                overflow: "hidden",
+                padding: "18px 18px 18px",
                 cursor: isClickable ? "pointer" : "default",
+                position: "relative",
+                borderRight: isLeft ? "1px solid var(--qc-hair)" : "none",
+                borderBottom: isTop ? "1px solid var(--qc-hair)" : "none",
+                borderLeft: `3px solid ${accentColor}`,
               }}
             >
-              {/* Header: step+icon stacked left | title+subtitle center | status pill right */}
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-
-                {/* Icon */}
+              {/* Header */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
                 {Icon && (
                   <div style={{
                     flexShrink: 0,
-                    width: 42, height: 42, borderRadius: 10,
+                    width: 36, height: 36, borderRadius: 8,
                     background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "var(--qc-ink-2)",
                   }}>
-                    <Icon size={20} strokeWidth={1.5} />
+                    <Icon size={16} strokeWidth={1.5} />
                   </div>
                 )}
-
-                {/* Title + subtitle */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h4 style={{
-                    fontSize: 15, fontWeight: 600, lineHeight: 1.2, margin: 0,
-                    color: "var(--qc-ink)",
-                  }}>
+                  <h4 style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.2, margin: 0, color: "var(--qc-ink)" }}>
                     {lens.name}
                   </h4>
                   {lens.subtitle && (
-                    <p style={{
-                      fontSize: 10, fontWeight: 600, textTransform: "uppercase",
-                      letterSpacing: "0.10em", color: accentColor,
-                      margin: "3px 0 0",
-                    }}>
+                    <p style={{ fontSize: 9.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: accentColor, margin: "2px 0 0" }}>
                       {lens.subtitle}
                     </p>
                   )}
                 </div>
-
-                {/* Status pill */}
                 <span style={{
                   flexShrink: 0,
-                  display: "inline-flex", alignItems: "center", gap: 5,
+                  display: "inline-flex", alignItems: "center", gap: 4,
                   fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
                   color: statusColor, background: statusBg,
-                  borderRadius: 4, padding: "3px 8px", textTransform: "uppercase",
+                  borderRadius: 4, padding: "3px 7px", textTransform: "uppercase",
                 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, flexShrink: 0 }} />
+                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: statusColor, flexShrink: 0 }} />
                   {statusLabel}
                 </span>
               </div>
 
               {/* Divider */}
-              <div style={{ margin: "0 0 12px", borderStyle: "dashed", borderWidth: "1px 0 0", borderColor: "var(--qc-hair)" }} />
+              <div style={{ marginBottom: 18, borderTop: "1px dashed var(--qc-hair)" }} />
 
               {/* Description */}
               <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.6, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
@@ -162,23 +163,12 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
               {isClickable && (
                 <motion.div
                   variants={{ rest: { opacity: 0, scale: 0.75 }, hover: { opacity: 1, scale: 1 } }}
-                  transition={{ duration: 0.15 }}
-                  style={{
-                    position: "absolute", bottom: 14, right: 16,
-                    color: "var(--qc-ink-3)",
-                  }}
+                  transition={{ duration: 0.12 }}
+                  style={{ position: "absolute", bottom: 12, right: 14, color: "var(--qc-ink-3)" }}
                 >
                   <ExpandIcon />
                 </motion.div>
               )}
-
-              {/* Decorative blob */}
-              <div style={{
-                position: "absolute", top: -20, right: -20,
-                width: 80, height: 80, borderRadius: "50%",
-                background: `${statusColor}14`,
-                pointerEvents: "none",
-              }} />
             </motion.div>
           );
         })}

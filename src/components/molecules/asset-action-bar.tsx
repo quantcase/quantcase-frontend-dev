@@ -173,7 +173,7 @@ function NotesPanel({
   ticker: string;
   onClose: () => void;
 }) {
-  const { getHolding, isInShadowPortfolio, addHolding, addNote, editNote, deleteNote, mutating } = useShadowPortfolio();
+  const { getHolding, isInShadowPortfolio, addHolding, addNote, editNote, deleteNote, mutating, loading } = useShadowPortfolio();
   const [draft, setDraft] = useState("");
   const [noteErr, setNoteErr] = useState<string | null>(null);
   const inPortfolio = isInShadowPortfolio(ticker);
@@ -187,7 +187,6 @@ function NotesPanel({
     const noteText = draft.trim();
 
     if (!holding) {
-      // Auto-add to shadow portfolio first, then attach the note
       addHolding(
         { ticker },
         (newHolding) => {
@@ -208,113 +207,199 @@ function NotesPanel({
       style={{
         position: "fixed", inset: 0, zIndex: 200,
         display: "flex", alignItems: "flex-end", justifyContent: "center",
+        paddingBottom: 64,
+        paddingLeft: 16,
+        paddingRight: 16,
         background: "rgba(0,0,0,0.35)",
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
+      {/* Outer panel — matches InsightSignalMap section shell */}
       <div
         style={{
-          background: "var(--qc-card, #fff)",
-          borderRadius: "12px 12px 0 0",
-          padding: "24px 24px 36px",
           width: "100%",
           maxWidth: 520,
-          boxShadow: "0 -4px 24px rgba(0,0,0,0.10)",
-          maxHeight: "80vh",
-          overflowY: "auto",
+          borderRadius: 10,
+          border: "1px solid var(--qc-hair, #E2E2E2)",
+          background: "var(--qc-section, #F5F5F5)",
+          padding: 8,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.14)",
+          maxHeight: "calc(100vh - 128px)",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <div>
-            <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", marginBottom: 2 }}>
+        {/* Card header — matches InsightSignalMap header style */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "4px 8px 12px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <StickyNote size={14} style={{ color: "var(--qc-ink-2, #888)" }} />
+            <span
+              style={{
+                fontFamily: "var(--font-ibm-plex-mono, monospace)",
+                fontSize: 11,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: "var(--qc-ink, #0F172B)",
+                fontWeight: 500,
+              }}
+            >
               Research Notes
-            </p>
-            <h3 style={{ fontSize: 18, fontWeight: 500, color: "var(--qc-ink)", margin: 0 }}>
-              {ticker}
-            </h3>
+            </span>
+            {notes.length > 0 && (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: "#84cc16",
+                  background: "rgba(132,204,22,0.12)",
+                  borderRadius: 999,
+                  padding: "1px 7px",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                {notes.length}
+              </span>
+            )}
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--qc-ink-3)", padding: 4 }}>
-            <X size={18} />
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--qc-ink-3, #888)",
+              padding: 4,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <X size={16} />
           </button>
         </div>
 
-        {/* existing notes */}
-        {notes.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
-            {notes.map((note) => (
-              <div
-                key={note.id}
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: 8,
-                  border: "1px solid var(--qc-hair, #E2E2E2)",
-                  background: "var(--qc-bg, #F5F5F5)",
-                }}
-              >
-                <NoteItem
-                  note={note}
-                  holdingId={holding!.id}
-                  onEdit={(noteId, hId, text) => editNote(noteId, hId, text)}
-                  onDelete={(noteId, hId) => deleteNote(noteId, hId)}
-                />
-                <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "6px 0 0", letterSpacing: "0.03em" }}>
-                  {new Date(note.updated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {notes.length === 0 && (
-          <p style={{ fontSize: 13, color: "var(--qc-ink-3)", marginBottom: 16 }}>
-            {inPortfolio ? "No notes yet. Add your first observation below." : "Write a note — the stock will be added to your Shadow Portfolio automatically."}
+        {/* Inner white card */}
+        <div
+          style={{
+            borderRadius: 10,
+            border: "1px solid rgba(226,226,226,0.10)",
+            background: "var(--qc-card, #fff)",
+            padding: 16,
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+          }}
+        >
+          {/* Ticker label */}
+          <p style={{ fontSize: 16, fontWeight: 500, color: "var(--qc-ink, #0F172B)", margin: 0 }}>
+            {ticker}
           </p>
-        )}
 
-        {/* new note form — always shown */}
-        <form onSubmit={submitNote} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Add a research note…"
-            rows={3}
-            style={{
-              width: "100%",
-              padding: "9px 12px",
-              borderRadius: 8,
-              border: "1px solid var(--qc-hair, #E2E2E2)",
-              fontSize: 13,
-              color: "var(--qc-ink)",
-              resize: "none",
-              background: "var(--qc-bg, #F5F5F5)",
-              outline: "none",
-              boxSizing: "border-box",
-            }}
-          />
-          {noteErr && <p style={{ fontSize: 12, color: "var(--qc-down, #dc2626)", margin: 0 }}>{noteErr}</p>}
-          <button
-            type="submit"
-            disabled={mutating || !draft.trim()}
-            style={{
-              alignSelf: "flex-end",
-              background: "var(--qc-ink, #0F172B)",
-              color: "#fff",
-              border: "none",
-              borderRadius: 7,
-              padding: "8px 16px",
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: mutating || !draft.trim() ? "not-allowed" : "pointer",
-              opacity: mutating || !draft.trim() ? 0.5 : 1,
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-            }}
-          >
-            {mutating ? <Loader2 size={12} className="animate-spin" /> : null}
-            Save note
-          </button>
-        </form>
+          {/* Loading skeleton */}
+          {loading && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {[80, 60, 90].map((w, i) => (
+                <div
+                  key={i}
+                  style={{
+                    height: 56,
+                    borderRadius: 8,
+                    background: "linear-gradient(90deg, var(--qc-section,#F5F5F5) 25%, #ebebeb 50%, var(--qc-section,#F5F5F5) 75%)",
+                    backgroundSize: "200% 100%",
+                    animation: "qc-shimmer 1.4s ease-in-out infinite",
+                    opacity: 1 - i * 0.15,
+                  }}
+                />
+              ))}
+              <style>{`@keyframes qc-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
+            </div>
+          )}
+
+          {/* Existing notes */}
+          {!loading && notes.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {notes.map((note) => (
+                <div
+                  key={note.id}
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    border: "1px solid var(--qc-hair, #E2E2E2)",
+                    background: "var(--qc-section, #F5F5F5)",
+                  }}
+                >
+                  <NoteItem
+                    note={note}
+                    holdingId={holding!.id}
+                    onEdit={(noteId, hId, text) => editNote(noteId, hId, text)}
+                    onDelete={(noteId, hId) => deleteNote(noteId, hId)}
+                  />
+                  <p style={{ fontSize: 10, color: "var(--qc-ink-3, #888)", margin: "6px 0 0", letterSpacing: "0.03em" }}>
+                    {new Date(note.updated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!loading && notes.length === 0 && (
+            <p style={{ fontSize: 13, color: "var(--qc-ink-3, #888)", margin: 0 }}>
+              {inPortfolio ? "No notes yet. Add your first observation below." : "Write a note — the stock will be added to your Shadow Portfolio automatically."}
+            </p>
+          )}
+
+          {/* New note form */}
+          {!loading && <form onSubmit={submitNote} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Add a research note…"
+              rows={3}
+              style={{
+                width: "100%",
+                padding: "9px 12px",
+                borderRadius: 8,
+                border: "1px solid var(--qc-hair, #E2E2E2)",
+                fontSize: 13,
+                color: "var(--qc-ink, #0F172B)",
+                resize: "none",
+                background: "var(--qc-section, #F5F5F5)",
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+            {noteErr && <p style={{ fontSize: 12, color: "var(--qc-down, #dc2626)", margin: 0 }}>{noteErr}</p>}
+            <button
+              type="submit"
+              disabled={mutating || !draft.trim()}
+              style={{
+                alignSelf: "flex-end",
+                background: "var(--qc-ink, #0F172B)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 7,
+                padding: "8px 16px",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: mutating || !draft.trim() ? "not-allowed" : "pointer",
+                opacity: mutating || !draft.trim() ? 0.5 : 1,
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              {mutating ? <Loader2 size={12} className="animate-spin" /> : null}
+              Save note
+            </button>
+          </form>}
+        </div>
       </div>
     </div>
   );

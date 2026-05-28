@@ -10,15 +10,15 @@ function WxSlider({
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-        <span style={{ fontSize: 12.5, fontWeight: 500, color: "rgba(255,255,255,0.85)" }}>{label}</span>
+        <span style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", color: "rgba(255,255,255,0.85)", fontFamily: "var(--qc-font-sans)" }}>{label}</span>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 13,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-13)",
             color: "rgba(255,255,255,0.9)", letterSpacing: 0,
           }}
         >
           {value}
-          <span style={{ color: "rgba(200,180,255,0.6)", fontSize: 10.5, marginLeft: 1 }}>%</span>
+          <span style={{ color: "rgba(200,180,255,0.6)", fontSize: "var(--qc-fz-10)", marginLeft: 1 }}>%</span>
         </span>
       </div>
       <div style={{ position: "relative", height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 999 }}>
@@ -114,7 +114,7 @@ export function WeightingPanel({
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
             letterSpacing: "0.16em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase",
           }}
         >
@@ -146,11 +146,11 @@ export function WeightingPanel({
 
       <h3
         style={{
-          margin: "2px 0 14px", fontSize: 17, fontWeight: 500, lineHeight: 1.4,
-          letterSpacing: "-0.01em", color: "rgba(255,255,255,0.9)", paddingRight: 20,
+          margin: "2px 0 14px", fontSize: "var(--qc-fz-16)", fontWeight: "var(--qc-w-medium)", lineHeight: 1.4,
+          letterSpacing: "-0.01em", color: "rgba(255,255,255,0.9)", paddingRight: 20, fontFamily: "var(--qc-font-sans)",
         }}
       >
-        Weights must total <span style={{ color: "rgba(200,180,255,1)", fontWeight: 600 }}>100%</span> — drag to rebalance.
+        Weights must total <span style={{ color: "rgba(200,180,255,1)", fontWeight: "var(--qc-w-semi)" }}>100%</span> — drag to rebalance.
       </h3>
 
       {/* Stacked weight bar */}
@@ -165,10 +165,10 @@ export function WeightingPanel({
               padding: "0 12px", minWidth: 0,
             }}
           >
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 500, lineHeight: 1, color: "#fff" }}>
+            <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", lineHeight: 1, color: "#fff" }}>
               {weights[key]}%
             </span>
-            <span style={{ fontSize: 10.5, color: "rgba(255,255,255,0.65)", marginTop: 3, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+            <span style={{ fontSize: "var(--qc-fz-10)", color: "rgba(255,255,255,0.65)", marginTop: 3, letterSpacing: "0.04em", textTransform: "uppercase", fontFamily: "var(--qc-font-sans)" }}>
               {label}
             </span>
           </div>
@@ -199,15 +199,15 @@ export function WeightingPanel({
         <div>
           <div
             style={{
-              fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em",
-              color: "rgba(255,255,255,0.9)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
+              fontSize: "var(--qc-fz-26)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.02em",
+              color: "rgba(255,255,255,0.9)", lineHeight: 1, fontVariantNumeric: "tabular-nums", fontFamily: "var(--qc-font-mono)",
             }}
           >
-            100<span style={{ fontSize: 16, marginLeft: 1, color: "rgba(200,180,255,0.7)" }}>%</span>
+            100<span style={{ fontSize: "var(--qc-fz-16)", marginLeft: 1, color: "rgba(200,180,255,0.7)" }}>%</span>
           </div>
           <div
             style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+              fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
               color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 6,
             }}
           >
@@ -232,16 +232,16 @@ export function WeightingPanel({
         <div style={{ textAlign: "right" }}>
           <div
             style={{
-              fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em",
-              color: "rgba(255,255,255,0.9)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
+              fontSize: "var(--qc-fz-26)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.02em",
+              color: "rgba(255,255,255,0.9)", lineHeight: 1, fontVariantNumeric: "tabular-nums", fontFamily: "var(--qc-font-mono)",
             }}
           >
             {displayScore != null ? displayScore : "—"}
-            <span style={{ fontSize: 16, marginLeft: 1, color: "rgba(200,180,255,0.7)" }}>/100</span>
+            <span style={{ fontSize: "var(--qc-fz-16)", marginLeft: 1, color: "rgba(200,180,255,0.7)" }}>/100</span>
           </div>
           <div
             style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+              fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
               color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase",
               marginTop: 6, textAlign: "right",
             }}

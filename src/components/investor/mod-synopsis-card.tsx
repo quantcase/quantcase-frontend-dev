@@ -45,12 +45,13 @@ function ScoreTile({ label, score, rating }: SubScore) {
       <MonoLabel size={9} tracking="0.12em" color="rgba(255,255,255,0.40)">
         {label}
       </MonoLabel>
-      <div style={{ fontSize: 28, fontWeight: 500, color: "var(--qc-on-dark,#fff)", lineHeight: 1, margin: "6px 0 6px" }}>
+      <div style={{ fontSize: "var(--qc-fz-26)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-on-dark)", lineHeight: 1, margin: "6px 0 6px" }}>
         {score}
       </div>
       <span style={{
         display: "inline-block",
-        fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+        fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-bold)", letterSpacing: "var(--qc-track-eyebrow)", textTransform: "uppercase",
+        fontFamily: "var(--qc-font-sans)",
         color: meta.color, background: meta.bg, border: `1px solid ${meta.border}`,
         borderRadius: 4, padding: "2px 7px", whiteSpace: "nowrap", alignSelf: "flex-start",
       }}>
@@ -77,11 +78,12 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
             onClick={onUploadPortfolio}
             style={{
               display: "inline-flex", alignItems: "center", gap: 5,
-              fontSize: 11, fontWeight: 500, color: "#0F172B",
+              fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)",
+              fontFamily: "var(--qc-font-sans)",
               background: "#fff", border: "none",
               borderRadius: 6, padding: "4px 10px",
               cursor: "pointer", whiteSpace: "nowrap",
-              letterSpacing: "0.01em",
+              letterSpacing: "var(--qc-track-pill)",
             }}
           >
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -97,10 +99,10 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
       {/* Headline — serif, matches management verdict card */}
       <p
         style={{
-          fontSize: 20, fontWeight: 400, lineHeight: 1.4,
-          color: "var(--qc-on-dark,#fff)", margin: 0,
-          fontFamily: "var(--qc-font-serif, Georgia, serif)",
-          letterSpacing: "-0.01em",
+          fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-regular)", lineHeight: 1.4,
+          color: "var(--qc-on-dark)", margin: 0,
+          fontFamily: "var(--qc-font-serif)",
+          letterSpacing: "var(--qc-track-display)",
         }}
         dangerouslySetInnerHTML={{ __html: headline }}
       />
@@ -126,7 +128,7 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
       >
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           {draggingSymbols.length > 0 && (
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.40)" }}>
+            <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "rgba(255,255,255,0.40)" }}>
               Dragging Deal score:
             </span>
           )}
@@ -140,7 +142,8 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
                 display: "inline-flex", alignItems: "center", gap: 6,
                 background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.14)",
                 borderRadius: 999, padding: "4px 10px",
-                fontSize: 11, color: "rgba(255,255,255,0.85)",
+                fontSize: "var(--qc-fz-11)", color: "rgba(255,255,255,0.85)",
+                fontFamily: "var(--qc-font-sans)",
                 textDecoration: "none",
               }}
             >
@@ -152,9 +155,10 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
         <button
           onClick={onOpenBreakdown}
           style={{
-            fontSize: 11, color: "rgba(139,180,248,0.9)", background: "none",
+            fontSize: "var(--qc-fz-11)", color: "rgba(139,180,248,0.9)", background: "none",
+            fontFamily: "var(--qc-font-sans)",
             border: "none", cursor: "pointer", padding: 0, whiteSpace: "nowrap",
-            letterSpacing: "0.01em",
+            letterSpacing: "var(--qc-track-pill)",
           }}
         >
           Open MOD breakdown →

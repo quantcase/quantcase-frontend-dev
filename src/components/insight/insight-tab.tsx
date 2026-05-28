@@ -62,31 +62,31 @@ function AnalyzePromptCard({
       <div className="w-full max-w-lg space-y-4">
         {/* Call info card */}
         <div className="rounded-[10px] p-5" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}>
-          <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", marginBottom: 4 }}>
+          <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)", marginBottom: 4 }}>
             {TYPE_LABELS[type]} Analysis
           </p>
-          <h2 style={{ fontSize: 20, fontWeight: 400, color: "var(--qc-ink)", margin: "0 0 2px" }}>{transcriptCall.company_name}</h2>
+          <h2 style={{ fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-regular)", color: "var(--qc-ink)", margin: "0 0 2px", fontFamily: "var(--qc-font-serif)" }}>{transcriptCall.company_name}</h2>
           {transcriptCall.basic_industry && (
-            <p style={{ fontSize: 13, color: "var(--qc-ink-3)" }}>{transcriptCall.basic_industry}</p>
+            <p style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-3)" }}>{transcriptCall.basic_industry}</p>
           )}
           <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-4 pt-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
             {transcriptCall.company && (
               <div>
-                <p style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)" }}>Ticker</p>
-                <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{transcriptCall.company}</p>
+                <p style={{ fontSize: "var(--qc-fz-10)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)" }}>Ticker</p>
+                <p style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{transcriptCall.company}</p>
               </div>
             )}
             <div>
-              <p style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)" }}>Quarter</p>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
+              <p style={{ fontSize: "var(--qc-fz-10)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)" }}>Quarter</p>
+              <p style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
             </div>
             <div>
-              <p style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)" }}>Call Date</p>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{transcriptCall.call_date}</p>
+              <p style={{ fontSize: "var(--qc-fz-10)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)" }}>Call Date</p>
+              <p style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{transcriptCall.call_date}</p>
             </div>
             <div>
-              <p style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)" }}>Call ID</p>
-              <p style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 600, color: "var(--qc-ink)" }}>{transcriptCall.id}</p>
+              <p style={{ fontSize: "var(--qc-fz-10)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)" }}>Call ID</p>
+              <p style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-mono)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", letterSpacing: "var(--qc-track-mono)" }}>{transcriptCall.id}</p>
             </div>
           </div>
         </div>
@@ -94,16 +94,16 @@ function AnalyzePromptCard({
         {/* Action card */}
         <div className="rounded-[10px] p-5 space-y-4" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}>
           {!isAnalyzing && !analyzeError && (
-            <p style={{ fontSize: 13, color: "var(--qc-ink-3)" }}>No {TYPE_LABELS[type].toLowerCase()} analysis available yet.</p>
+            <p style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-3)" }}>No {TYPE_LABELS[type].toLowerCase()} analysis available yet.</p>
           )}
           {analyzeError && (
-            <p style={{ fontSize: 12, color: "var(--qc-down)" }}>{analyzeError}</p>
+            <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-down)" }}>{analyzeError}</p>
           )}
           {aggregateStatus === "processing" && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p style={{ fontSize: 13, color: "var(--qc-blue)" }}>Analyzing transcripts...</p>
-                <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-blue)" }}>{progress}%</p>
+                <p style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-blue)" }}>Analyzing transcripts...</p>
+                <p style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-blue)" }}>{progress}%</p>
               </div>
               <div className="w-full rounded-full h-2 overflow-hidden" style={{ background: "var(--qc-blue-soft)" }}>
                 <div className="h-full transition-all duration-300 ease-linear" style={{ width: `${progress}%`, background: "var(--qc-blue)" }} />
@@ -114,7 +114,7 @@ function AnalyzePromptCard({
             onClick={onAnalyze}
             disabled={isAnalyzing}
             className="w-full font-semibold py-3 px-4 rounded-[8px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)", fontSize: 13 }}
+            style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)", fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)" }}
           >
             {buttonLabel}
           </button>
@@ -124,7 +124,7 @@ function AnalyzePromptCard({
               target="_blank"
               rel="noopener noreferrer"
               className="block text-center hover:underline transition-colors"
-              style={{ fontSize: 12, color: "var(--qc-ink-3)" }}
+              style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-3)" }}
             >
               View Presentation →
             </a>
@@ -140,7 +140,7 @@ function AnalyzePromptCard({
 function CenteredMessage({ children, error }: { children: React.ReactNode; error?: boolean }) {
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--qc-bg)" }}>
-      <p style={{ fontSize: 13, color: error ? "var(--qc-down)" : "var(--qc-ink-3)" }}>{children}</p>
+      <p style={{ fontSize: "var(--qc-fz-13)", color: error ? "var(--qc-down)" : "var(--qc-ink-3)" }}>{children}</p>
     </div>
   );
 }

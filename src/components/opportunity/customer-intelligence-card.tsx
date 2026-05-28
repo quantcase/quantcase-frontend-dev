@@ -26,14 +26,14 @@ function AcqRow({ label, body, dot }: { label: string; body: string; dot: string
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot, flexShrink: 0, marginTop: 4 }} />
         <div style={{ minWidth: 0 }}>
           <span style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
             color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             letterSpacing: ".1em", display: "block", marginBottom: 2,
           }}>
             {label}
           </span>
           <p style={{
-            margin: 0, fontSize: 12, fontWeight: 500,
+            margin: 0, fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink)", lineHeight: 1.4,
             display: "-webkit-box", WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical", overflow: "hidden",
@@ -56,10 +56,10 @@ function AcqRow({ label, body, dot }: { label: string; body: string; dot: string
             display: "flex", alignItems: "center", gap: 6,
           }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
+            <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{label}</span>
           </div>
           <div style={{ padding: "10px 12px" }}>
-            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
+            <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
           </div>
         </div>
       )}

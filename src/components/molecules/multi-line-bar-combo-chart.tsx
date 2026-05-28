@@ -109,7 +109,7 @@ function LegendItem({
         </svg>
       )}
 
-      <span style={{ fontSize: 11, color: "var(--qc-ink)", fontFamily: "'IBM Plex Mono', monospace", whiteSpace: "nowrap" }}>{name}</span>
+      <span style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)", whiteSpace: "nowrap" }}>{name}</span>
     </button>
   );
 }
@@ -121,11 +121,11 @@ function GroupButton({ label, active, onClick }: { label: string; active: boolea
     <button
       onClick={onClick}
       style={{
-        fontSize: 11,
-        fontWeight: 500,
+        fontSize: "var(--qc-fz-11)",
+        fontWeight: "var(--qc-w-medium)",
         padding: "4px 12px",
         borderRadius: 6,
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontFamily: "var(--qc-font-mono)",
         letterSpacing: "0.06em",
         border: `1px solid ${active ? "var(--qc-ink)" : "var(--qc-hair)"}`,
         background: active ? "var(--qc-ink)" : "transparent",
@@ -259,12 +259,12 @@ export function MultiLineBarComboChart({
 
           <Tooltip
             contentStyle={{
-              fontSize: 11,
+              fontSize: "var(--qc-fz-11)",
               border: "1px solid var(--qc-hair)",
               borderRadius: 10,
               background: "var(--qc-card)",
               boxShadow: "0 4px 16px rgba(14,14,12,0.08)",
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "var(--qc-font-mono)",
             }}
             labelStyle={{ fontWeight: 600, color: "var(--qc-ink)", marginBottom: 4 }}
             itemStyle={{ color: "var(--qc-ink)" }}
@@ -345,9 +345,9 @@ export function MultiLineBarComboChart({
           <div>
             <div
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 11,
-                fontWeight: 500,
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: "var(--qc-fz-11)",
+                fontWeight: "var(--qc-w-medium)",
                 color: "var(--qc-ink)",
                 textTransform: "uppercase",
                 letterSpacing: "0.12em",
@@ -356,7 +356,7 @@ export function MultiLineBarComboChart({
               {title}
             </div>
             {subtitle && (
-              <div style={{ fontSize: 11, color: "var(--qc-ink-2)", marginTop: 2, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.04em" }}>
+              <div style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", marginTop: 2, fontFamily: "var(--qc-font-mono)", letterSpacing: "var(--qc-track-pill)" }}>
                 {subtitle}
               </div>
             )}

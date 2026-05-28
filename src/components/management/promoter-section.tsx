@@ -49,8 +49,9 @@ function MqiDonut({ score, label }: { score: number; label: string }) {
     <div className="flex flex-col items-center gap-2">
       <span
         style={{
-          fontSize: 10,
-          fontWeight: 600,
+          fontSize: "var(--qc-fz-10)",
+          fontWeight: "var(--qc-w-semi)",
+          fontFamily: "var(--qc-font-sans)",
           color: "var(--qc-ink-2)",
           textTransform: "uppercase",
           letterSpacing: "0.1em",
@@ -80,8 +81,8 @@ function MqiDonut({ score, label }: { score: number; label: string }) {
         </text>
       </svg>
 
-      <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-ink)", textTransform: "uppercase", textAlign: "center", lineHeight: 1.3 }}>
-        {label} <span style={{ color: "var(--qc-ink-2)", fontWeight: 400 }}>| {score} / 100</span>
+      <p style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-bold)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", textTransform: "uppercase", textAlign: "center", lineHeight: 1.3 }}>
+        {label} <span style={{ color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-regular)" }}>| {score} / 100</span>
       </p>
     </div>
   );
@@ -102,13 +103,13 @@ function DimensionBars({ dimensions }: { dimensions: MqiScore["dimensions"] }) {
         const color = scoreCssColor(item.score, item.max);
         return (
           <div key={item.label} className="flex items-center gap-3">
-            <span style={{ fontSize: 12, color: "var(--qc-ink)", width: 140, flexShrink: 0 }}>
+            <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", width: 140, flexShrink: 0 }}>
               {item.label}
             </span>
             <div style={{ flex: 1, height: 8, borderRadius: 4, background: "var(--qc-section)", overflow: "hidden" }}>
               <div style={{ width: `${pct * 100}%`, height: "100%", borderRadius: 4, background: color }} />
             </div>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", width: 36, textAlign: "right", flexShrink: 0 }}>
+            <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink)", width: 36, textAlign: "right", flexShrink: 0 }}>
               {item.score}/{item.max}
             </span>
           </div>
@@ -125,15 +126,16 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
   const headerAction = (
     <div
       style={{
-        fontSize: 11,
-        fontWeight: 600,
+        fontSize: "var(--qc-fz-11)",
+        fontWeight: "var(--qc-w-semi)",
+        fontFamily: "var(--qc-font-sans)",
         color: vStyle.text,
         background: vStyle.bg,
         border: `1px solid ${vStyle.border}`,
         borderRadius: 4,
         padding: "3px 10px",
         textTransform: "uppercase",
-        letterSpacing: "0.05em",
+        letterSpacing: "var(--qc-track-pill)",
       }}
     >
       {verdict}
@@ -206,20 +208,20 @@ export function PromoterSection({ promoterActivity, mqiScore }: PromoterSectionP
       {(promoter_note || verdict_rationale || mqi_rationale) && (
         <div className="flex flex-col gap-2 mt-4 pt-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
           {promoter_note && (
-            <p style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>
-              <span style={{ fontWeight: 600 }}>Promoter note: </span>
+            <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>
+              <span style={{ fontWeight: "var(--qc-w-semi)" }}>Promoter note: </span>
               {promoter_note}
             </p>
           )}
           {verdict_rationale && (
-            <p style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>
-              <span style={{ fontWeight: 600 }}>Verdict rationale: </span>
+            <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>
+              <span style={{ fontWeight: "var(--qc-w-semi)" }}>Verdict rationale: </span>
               {verdict_rationale}
             </p>
           )}
           {mqi_rationale && (
-            <p style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>
-              <span style={{ fontWeight: 600 }}>M-Score impact: </span>
+            <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>
+              <span style={{ fontWeight: "var(--qc-w-semi)" }}>M-Score impact: </span>
               {mqi_rationale}
             </p>
           )}

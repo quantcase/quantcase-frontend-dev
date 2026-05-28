@@ -34,8 +34,9 @@ function verdictColor(verdict: string): string {
 }
 
 const COL_HEADER: React.CSSProperties = {
-  fontSize: 9,
-  fontWeight: 600,
+  fontSize: "var(--qc-fz-9)",
+  fontWeight: "var(--qc-w-semi)",
+  fontFamily: "var(--qc-font-mono)",
   textTransform: "uppercase",
   letterSpacing: "0.10em",
   color: "var(--qc-ink-3)",
@@ -46,12 +47,12 @@ const COL_HEADER: React.CSSProperties = {
 };
 
 const COL_CELL: React.CSSProperties = {
-  fontSize: 11,
+  fontSize: "var(--qc-fz-11)",
   color: "var(--qc-ink-2)",
   padding: "8px 10px",
   textAlign: "right",
   whiteSpace: "nowrap",
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: "var(--qc-font-mono)",
   borderBottom: "1px solid var(--qc-hair)",
 };
 
@@ -77,7 +78,7 @@ function ScoreChip({ score, verdict }: { score: number; verdict: string }) {
       onMouseLeave={() => setShow(false)}
     >
       <span style={{ width: 5, height: 5, borderRadius: "50%", background: color, flexShrink: 0 }} />
-      <span style={{ fontSize: 11, fontWeight: 700, color, fontFamily: "'IBM Plex Mono', monospace" }}>
+      <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-bold)", color, fontFamily: "var(--qc-font-mono)" }}>
         {score}
       </span>
 
@@ -97,7 +98,7 @@ function ScoreChip({ score, verdict }: { score: number; verdict: string }) {
             pointerEvents: "none",
           }}
         >
-          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color }}>
+          <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-bold)", fontFamily: "var(--qc-font-mono)", letterSpacing: "0.08em", textTransform: "uppercase", color }}>
             {verdict}
           </span>
         </span>
@@ -135,11 +136,11 @@ function PeerTableRow({
       onClick={onClick}
     >
       <td style={{ ...textCellStyle, paddingLeft: 14, background: "inherit" }}>
-        <span style={{ fontWeight: peer.isSubject ? 700 : 500, color: "var(--qc-ink)", fontSize: 11 }}>
+        <span style={{ fontWeight: peer.isSubject ? "var(--qc-w-bold)" : "var(--qc-w-medium)", color: "var(--qc-ink)", fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-mono)" }}>
           {peer.symbol}
         </span>
         <br />
-        <span style={{ fontSize: 9.5, color: "var(--qc-ink-3)", fontWeight: 400 }}>{peer.name}</span>
+        <span style={{ fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-3)", fontWeight: "var(--qc-w-regular)", fontFamily: "var(--qc-font-sans)" }}>{peer.name}</span>
       </td>
       <td style={{ ...cellStyle, color: "var(--qc-ink)", fontWeight: peer.isSubject ? 600 : 400 }}>
         {peer.cmp !== null ? `₹${peer.cmp.toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "—"}
@@ -206,15 +207,16 @@ export function SimilarStocks({ symbol }: SimilarStocksProps) {
           <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">
             Similar Stocks
           </MonoLabel>
-          <span style={{ fontSize: 10, color: "var(--qc-ink-3)", marginLeft: 2 }}>{data.basicIndustry}</span>
+          <span style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginLeft: 2 }}>{data.basicIndustry}</span>
           <LimeCountPip count={allPeers.length} />
           {hasMore && (
             <button
               onClick={() => setShowAll((v) => !v)}
               style={{
                 marginLeft: "auto",
-                fontSize: 10,
-                fontWeight: 600,
+                fontSize: "var(--qc-fz-10)",
+                fontWeight: "var(--qc-w-semi)",
+                fontFamily: "var(--qc-font-mono)",
                 letterSpacing: "0.06em",
                 color: "var(--qc-ink-2)",
                 background: "var(--qc-card)",

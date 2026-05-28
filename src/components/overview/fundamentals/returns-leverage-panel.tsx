@@ -29,8 +29,8 @@ function MetricRow({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10,
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-10)",
             letterSpacing: ".1em",
             textTransform: "uppercase",
             color: "var(--qc-ink-2)",
@@ -40,9 +40,9 @@ function MetricRow({
         </span>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 15,
-            fontWeight: 500,
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-14)",
+            fontWeight: "var(--qc-w-medium)",
             letterSpacing: "-0.01em",
             color: "var(--qc-ink)",
             fontVariantNumeric: "tabular-nums",
@@ -88,9 +88,9 @@ function MetricRow({
       {/* Note */}
       <span
         style={{
-          fontSize: 10.5,
+          fontSize: "var(--qc-fz-10)",
           color: "var(--qc-ink-2)",
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "var(--qc-font-mono)",
           letterSpacing: ".02em",
         }}
       >
@@ -122,9 +122,9 @@ export function ReturnsLeveragePanel({ roce, roe, debtToEquity, roce3yAvg, roe3y
       {/* Eyebrow */}
       <div
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 9.5,
-          letterSpacing: ".14em",
+          fontFamily: "var(--qc-font-mono)",
+          fontSize: "var(--qc-fz-9)",
+          letterSpacing: "var(--qc-track-eyebrow)",
           textTransform: "uppercase",
           color: "var(--qc-ink-2)",
           paddingTop: 12,

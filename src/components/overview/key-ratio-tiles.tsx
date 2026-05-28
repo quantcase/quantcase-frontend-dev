@@ -28,7 +28,7 @@ function StatCell({ label, value, sublabel, sublabelColor = "muted", isRange, ra
       <div className="flex items-center justify-between gap-2">
         <div
           className="stat-k flex items-center gap-1.5"
-          style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em", color: "var(--qc-ink-2)", textTransform: "uppercase" }}
+          style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-2)", textTransform: "uppercase" }}
         >
           {label}
         </div>
@@ -37,9 +37,9 @@ function StatCell({ label, value, sublabel, sublabelColor = "muted", isRange, ra
             <div
               style={{
                 ...sublabelStyle,
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 10,
-                fontWeight: 500,
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: "var(--qc-fz-10)",
+                fontWeight: "var(--qc-w-medium)",
                 padding: "2px 6px",
                 borderRadius: 5,
                 letterSpacing: "0.02em",
@@ -52,10 +52,10 @@ function StatCell({ label, value, sublabel, sublabelColor = "muted", isRange, ra
           ) : (
             <div
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 10,
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: "var(--qc-fz-10)",
                 color: "var(--qc-ink-2)",
-                letterSpacing: "0.04em",
+                letterSpacing: "var(--qc-track-pill)",
                 whiteSpace: "nowrap",
                 background: "var(--qc-chip, #F2F1EC)",
                 border: "1px solid var(--qc-hair)",
@@ -97,7 +97,7 @@ function StatCell({ label, value, sublabel, sublabelColor = "muted", isRange, ra
       ) : (
         <div
           className="stat-v flex items-baseline gap-2 leading-none whitespace-nowrap"
-          style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}
+          style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.02em", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}
         >
           {value}
         </div>

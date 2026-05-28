@@ -42,14 +42,14 @@ function SignalRow({ item }: { item: IndustrySignalBreakdownItem }) {
     <div style={{ position: "relative" }} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", cursor: "default" }}>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: sv.color, flexShrink: 0 }} />
-        <span style={{ fontSize: 12, color: "var(--qc-ink)", width: 130, flexShrink: 0, lineHeight: 1.2 }}>{label}</span>
+        <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", width: 130, flexShrink: 0, lineHeight: 1.2 }}>{label}</span>
         <div style={{ flex: 1, height: 4, borderRadius: 999, background: "rgba(0,0,0,0.10)", overflow: "hidden" }}>
           <div style={{ height: "100%", borderRadius: 999, width: `${pct}%`, background: sv.color, transition: "width .4s" }} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4, width: 46, justifyContent: "flex-end", flexShrink: 0 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: sv.color, fontVariantNumeric: "tabular-nums" }}>
+          <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-mono)", color: sv.color, fontVariantNumeric: "tabular-nums" }}>
             {item.score}
-            <span style={{ color: "var(--qc-ink-3)", fontWeight: 400 }}>/{item.max_score}</span>
+            <span style={{ color: "var(--qc-ink-3)", fontWeight: "var(--qc-w-regular)" }}>/{item.max_score}</span>
           </span>
           <Info style={{ width: 10, height: 10, color: "var(--qc-ink-2)", flexShrink: 0 }} />
         </div>
@@ -68,14 +68,14 @@ function SignalRow({ item }: { item: IndustrySignalBreakdownItem }) {
             padding: "10px 14px", borderBottom: "1px solid var(--qc-hair)",
             background: sv.bg, borderRadius: "14px 14px 0 0",
           }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: sv.color }}>{item.score}/{item.max_score}</span>
+            <span style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{label}</span>
+            <span style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-mono)", color: sv.color }}>{item.score}/{item.max_score}</span>
           </div>
           <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
             {item.details.map((d, i) => (
               <div key={i} style={{ display: "flex", gap: 8 }}>
                 <span style={{ width: 5, height: 5, borderRadius: "50%", background: sv.color, flexShrink: 0, marginTop: 5 }} />
-                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>{d}</p>
+                <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.55 }}>{d}</p>
               </div>
             ))}
           </div>
@@ -120,13 +120,13 @@ export function IntelligenceCardHeader({ icon, title, badge }: {
       }}>
         {icon}
       </div>
-      <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
+      <span style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
         {title}
       </span>
       {badge && (
         <span style={{
-          marginLeft: "auto", fontSize: 10, fontWeight: 500,
-          color: "var(--qc-ink-2)",
+          marginLeft: "auto", fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)",
+          fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)",
           background: "var(--qc-chip)", border: "1px solid var(--qc-hair)",
           borderRadius: 4, padding: "2px 8px",
         }}>
@@ -179,24 +179,24 @@ export function ScoreSignalsCard({
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+              fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
               letterSpacing: ".16em", color: "var(--qc-ink-2)",
               textTransform: "uppercase" as const, marginBottom: 6,
             }}>
               {eyebrow}
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
-              <span style={{ fontSize: 44, fontWeight: 500, letterSpacing: "-0.03em", color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+              <span style={{ fontSize: "var(--qc-fz-44)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.03em", color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums", fontFamily: "var(--qc-font-mono)" }}>
                 {score}
               </span>
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 15, color: "var(--qc-ink-2)", fontWeight: 400 }}>
+              <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-14)", color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-regular)" }}>
                 /{maxScore}
               </span>
             </div>
           </div>
           <span style={{
             display: "inline-block", borderRadius: 999,
-            padding: "4px 11px", fontSize: 11, fontWeight: 600,
+            padding: "4px 11px", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)",
             background: theme.bg, color: theme.color,
             border: `1px solid ${theme.color}30`,
             marginTop: 2,
@@ -212,7 +212,7 @@ export function ScoreSignalsCard({
           </div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             {subLabels.map((l) => (
-              <span key={l} style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{l}</span>
+              <span key={l} style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>{l}</span>
             ))}
           </div>
         </div>
@@ -224,7 +224,7 @@ export function ScoreSignalsCard({
         {signals.length > 0 && (
           <div>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+              fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
               letterSpacing: ".16em", color: "var(--qc-ink-2)",
               textTransform: "uppercase" as const, marginBottom: 8,
             }}>
@@ -244,12 +244,12 @@ export function ScoreSignalsCard({
             <div style={{ height: 1, background: "var(--qc-hair)" }} />
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+                fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
                 letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
               }}>
                 Key Takeaway
               </div>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
+              <p style={{ margin: 0, fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
                 {takeaway}
               </p>
             </div>
@@ -292,7 +292,7 @@ export function IntelligenceSubCard({ icon, eyebrow, badge, badgeColor, badgeBg,
           </div>
         )}
         <div style={{
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+          fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
           letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
         }}>
           {eyebrow}
@@ -304,7 +304,7 @@ export function IntelligenceSubCard({ icon, eyebrow, badge, badgeColor, badgeBg,
             padding: "3px 9px", borderRadius: 999,
             background: badgeBg ?? "var(--qc-chip)",
             border: `1px solid ${badgeColor ? `${badgeColor}30` : "var(--qc-hair)"}`,
-            fontSize: 10, fontWeight: 600,
+            fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)",
             color: badgeColor ?? "var(--qc-ink-2)",
           }}>
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: badgeColor ?? "var(--qc-ink-2)", flexShrink: 0 }} />
@@ -324,7 +324,7 @@ function ClampedText({ text, clamp = 2 }: { text: string; clamp?: number }) {
   return (
     <div style={{ position: "relative", minWidth: 0 }} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <p style={{
-        margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.5,
+        margin: 0, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.5,
         display: "-webkit-box", WebkitLineClamp: clamp,
         WebkitBoxOrient: "vertical" as React.CSSProperties["WebkitBoxOrient"],
         overflow: "hidden",
@@ -341,7 +341,7 @@ function ClampedText({ text, clamp = 2 }: { text: string; clamp?: number }) {
           boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
           padding: "10px 12px",
         }}>
-          <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{text}</p>
+          <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>{text}</p>
         </div>
       )}
     </div>
@@ -356,7 +356,7 @@ function StrategyRows({ rows }: { rows: { label: string; value: string }[] }) {
       {rows.map((r) => (
         <div key={r.label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <span style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
             color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             letterSpacing: ".12em",
           }}>
@@ -380,7 +380,7 @@ function BulletList({ items }: { items: string[] }) {
           padding: "6px 0",
           borderBottom: i < items.length - 1 ? "1px solid var(--qc-hair)" : "none",
         }}>
-          <span style={{ fontSize: 12, color: "var(--qc-ink-2)", flexShrink: 0, lineHeight: 1.5, userSelect: "none" }}>–</span>
+          <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", flexShrink: 0, lineHeight: 1.5, userSelect: "none" }}>–</span>
           <ClampedText text={point} clamp={2} />
         </div>
       ))}

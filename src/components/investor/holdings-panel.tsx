@@ -80,10 +80,10 @@ export function HoldingsPanel({
       {/* Header row */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "#888", letterSpacing: "0.10em", textTransform: "uppercase", marginBottom: 2 }}>
+          <div style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", letterSpacing: "var(--qc-track-eyebrow-l)", textTransform: "uppercase", marginBottom: 2 }}>
             {isShadow ? "SHADOW HOLDINGS" : "YOUR HOLDINGS"}
           </div>
-          <div style={{ fontSize: 12, color: "#888" }}>
+          <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)" }}>
             {stockCount} stocks · {fundCount} mutual funds · synced {syncedAgo}
           </div>
         </div>
@@ -93,8 +93,9 @@ export function HoldingsPanel({
               onClick={onUploadPortfolio}
               style={{
                 display: "inline-flex", alignItems: "center", gap: 5,
-                fontSize: 11, fontWeight: 500, color: "#0F172B",
-                background: "#F5F5F5", border: "1px solid #E2E2E2",
+                fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)",
+                fontFamily: "var(--qc-font-sans)",
+                background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
                 borderRadius: 6, padding: "5px 12px",
                 cursor: "pointer", whiteSpace: "nowrap",
               }}
@@ -113,17 +114,18 @@ export function HoldingsPanel({
               display: "inline-flex",
               alignItems: "center",
               gap: 5,
-              fontSize: 11,
-              fontWeight: 500,
-              color: "#22c55e",
-              background: "rgba(34,197,94,0.10)",
-              border: "1px solid rgba(34,197,94,0.20)",
+              fontSize: "var(--qc-fz-11)",
+              fontWeight: "var(--qc-w-medium)",
+              fontFamily: "var(--qc-font-sans)",
+              color: "var(--qc-up)",
+              background: "var(--qc-up-soft)",
+              border: "1px solid rgba(31,122,74,0.20)",
               borderRadius: 20,
               padding: "3px 10px",
             }}
           >
             <span
-              style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "inline-block" }}
+              style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--qc-up)", display: "inline-block" }}
             />
             Demat-linked
           </span>
@@ -133,16 +135,16 @@ export function HoldingsPanel({
       {/* Equity value + sparkline */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "#888", letterSpacing: "0.10em", textTransform: "uppercase", marginBottom: 4 }}>
+          <div style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", letterSpacing: "var(--qc-track-eyebrow-l)", textTransform: "uppercase", marginBottom: 4 }}>
             EQUITY VALUE
           </div>
-          <div style={{ fontSize: 34, fontWeight: 500, color: "var(--qc-ink, #0F172B)", letterSpacing: "-0.02em", lineHeight: 1 }}>
+          <div style={{ fontSize: "var(--qc-fz-30)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink)", letterSpacing: "var(--qc-track-display)", lineHeight: 1 }}>
             {equityValue}
           </div>
-          <div style={{ fontSize: 12, color: "#22c55e", marginTop: 4 }}>
+          <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-up)", marginTop: 4 }}>
             {todayChange} today
-            <span style={{ color: "#888", margin: "0 6px" }}>·</span>
-            <span style={{ color: "#22c55e" }}>{ytdChange} YTD</span>
+            <span style={{ color: "var(--qc-ink-3)", margin: "0 6px" }}>·</span>
+            <span style={{ color: "var(--qc-up)" }}>{ytdChange} YTD</span>
           </div>
         </div>
         <MiniSparkline />
@@ -154,13 +156,14 @@ export function HoldingsPanel({
           <button
             onClick={() => setActiveTab("cap")}
             style={{
-              fontSize: 12,
-              fontWeight: activeTab === "cap" ? 500 : 400,
-              color: activeTab === "cap" ? "var(--qc-ink, #0F172B)" : "#888",
+              fontSize: "var(--qc-fz-12)",
+              fontFamily: "var(--qc-font-sans)",
+              fontWeight: activeTab === "cap" ? "var(--qc-w-medium)" : "var(--qc-w-regular)",
+              color: activeTab === "cap" ? "var(--qc-ink)" : "var(--qc-ink-3)",
               background: "none",
               border: "none",
               padding: "0 0 8px",
-              borderBottom: activeTab === "cap" ? "2px solid var(--qc-ink, #0F172B)" : "2px solid transparent",
+              borderBottom: activeTab === "cap" ? "2px solid var(--qc-ink)" : "2px solid transparent",
               cursor: "pointer",
             }}
           >
@@ -169,13 +172,14 @@ export function HoldingsPanel({
           <button
             onClick={() => setActiveTab("industry")}
             style={{
-              fontSize: 12,
-              fontWeight: activeTab === "industry" ? 500 : 400,
-              color: activeTab === "industry" ? "var(--qc-ink, #0F172B)" : "#888",
+              fontSize: "var(--qc-fz-12)",
+              fontFamily: "var(--qc-font-sans)",
+              fontWeight: activeTab === "industry" ? "var(--qc-w-medium)" : "var(--qc-w-regular)",
+              color: activeTab === "industry" ? "var(--qc-ink)" : "var(--qc-ink-3)",
               background: "none",
               border: "none",
               padding: "0 0 8px",
-              borderBottom: activeTab === "industry" ? "2px solid var(--qc-ink, #0F172B)" : "2px solid transparent",
+              borderBottom: activeTab === "industry" ? "2px solid var(--qc-ink)" : "2px solid transparent",
               cursor: "pointer",
             }}
           >
@@ -195,9 +199,9 @@ export function HoldingsPanel({
           <div style={{ display: "flex", gap: 2 }}>
             {segments.map((seg) => (
               <div key={seg.label} style={{ flex: seg.pct, minWidth: 0 }}>
-                <div style={{ fontSize: 11, color: "#888", whiteSpace: "nowrap" }}>{seg.label}</div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink, #0F172B)" }}>{seg.value}</div>
-                <div style={{ fontSize: 11, color: "#888" }}>{seg.count} stocks · {seg.pct}%</div>
+                <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", whiteSpace: "nowrap" }}>{seg.label}</div>
+                <div style={{ fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink)" }}>{seg.value}</div>
+                <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)" }}>{seg.count} stocks · {seg.pct}%</div>
               </div>
             ))}
           </div>

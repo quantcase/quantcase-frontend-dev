@@ -38,8 +38,8 @@ export function ShareholdingPanel({ segments, quarter }: ShareholdingPanelProps)
       >
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9.5,
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-9)",
             letterSpacing: ".14em",
             textTransform: "uppercase",
             color: "var(--qc-ink-2)",
@@ -49,8 +49,8 @@ export function ShareholdingPanel({ segments, quarter }: ShareholdingPanelProps)
         </span>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9.5,
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-9)",
             letterSpacing: ".08em",
             textTransform: "uppercase",
             color: "var(--qc-ink-2)",
@@ -79,9 +79,9 @@ export function ShareholdingPanel({ segments, quarter }: ShareholdingPanelProps)
               {(p ?? 0) >= 7 && (
                 <span
                   style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 11,
-                    fontWeight: 500,
+                    fontFamily: "var(--qc-font-mono)",
+                    fontSize: "var(--qc-fz-11)",
+                    fontWeight: "var(--qc-w-medium)",
                     color: "#fff",
                     whiteSpace: "nowrap",
                     letterSpacing: ".02em",
@@ -102,7 +102,7 @@ export function ShareholdingPanel({ segments, quarter }: ShareholdingPanelProps)
               paddingLeft: 14,
             }}
           >
-            <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}>
+            <span style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)" }}>
               Awaiting disclosure
             </span>
           </div>
@@ -141,18 +141,19 @@ export function ShareholdingPanel({ segments, quarter }: ShareholdingPanelProps)
                   flexShrink: 0,
                 }}
               />
-              <span style={{ fontSize: 10.5, color: "var(--qc-ink-2)", letterSpacing: ".01em" }}>
+              <span style={{ fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)", letterSpacing: ".01em", fontFamily: "var(--qc-font-sans)" }}>
                 {label}
               </span>
             </div>
             <span
               style={{
-                fontSize: 18,
-                fontWeight: 500,
+                fontSize: "var(--qc-fz-18)",
+                fontWeight: "var(--qc-w-medium)",
                 letterSpacing: "-0.02em",
                 color: p != null ? "var(--qc-ink)" : "var(--qc-ink-2)",
                 fontVariantNumeric: "tabular-nums",
                 lineHeight: 1,
+                fontFamily: "var(--qc-font-mono)",
               }}
             >
               {p != null ? `${p.toFixed(1)}%` : "—"}

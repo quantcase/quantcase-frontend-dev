@@ -27,7 +27,7 @@ function DriverRow({ item, sentiment }: DriverRowProps) {
         {mentionLabel}
       </div>
       {/* Driver text */}
-      <p style={{ fontSize: 13, color: "#121212", lineHeight: 1.6 }}>{text}</p>
+      <p style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>{text}</p>
     </div>
   );
 }
@@ -94,7 +94,7 @@ function TranscriptDriversSection({
     <div className="space-y-3">
       {/* Section label */}
       <div className="flex items-center gap-2">
-        <p style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+        <p style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
           {title}
         </p>
         <div className="flex-1 h-px bg-[#E2E2E2]" />

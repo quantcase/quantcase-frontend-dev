@@ -44,12 +44,12 @@ export function CompetitionCard({ data }: CompetitionCardProps) {
                     {items.map((point, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <ArrowRight className="h-3 w-3 shrink-0 mt-[3px]" style={{ color: "var(--qc-ink-2)" }} />
-                        <span style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{point}</span>
+                        <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>{point}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>—</p>
+                  <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>—</p>
                 )}
               </div>
             );

@@ -4,10 +4,44 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* IBM Plex Mono for numeric/data labels */
+/* Mono utility — numeric/data labels */
 .mono {
-  font-family: 'IBM Plex Mono', var(--font-ibm-plex-sans), monospace;
-  letter-spacing: 0.02em;
+  font-family: var(--qc-font-mono);
+  letter-spacing: var(--qc-track-mono);
+}
+
+/* Serif utility — display headings */
+.serif {
+  font-family: var(--qc-font-serif);
+  letter-spacing: var(--qc-track-display);
+}
+
+/* Eyebrow label — uppercase mono, small caps style */
+.eyebrow {
+  font-family: var(--qc-font-sans);
+  font-size: var(--qc-fz-10);
+  font-weight: var(--qc-w-semi);
+  text-transform: uppercase;
+  letter-spacing: var(--qc-track-eyebrow);
+  color: var(--qc-ink-3);
+}
+
+/* Body copy */
+.body-sm {
+  font-family: var(--qc-font-sans);
+  font-size: var(--qc-fz-13);
+  font-weight: var(--qc-w-regular);
+  line-height: 1.6;
+  color: var(--qc-ink-2);
+}
+
+/* Status badge text */
+.status-label {
+  font-family: var(--qc-font-sans);
+  font-size: var(--qc-fz-10);
+  font-weight: var(--qc-w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--qc-track-eyebrow);
 }
 
 /* Scrollbar hidden utility */
@@ -21,7 +55,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-ibm-plex-sans);
+  --font-sans: var(--qc-font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -138,8 +172,9 @@
     --qc-brand-pill-edge: var(--qc-lime-edge);
     --qc-brand-chip:      #E86854;
 
-    --qc-font-sans: 'DM Sans', 'Inter', system-ui, -apple-system, Segoe UI, sans-serif;
-    --qc-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --qc-font-sans:  var(--font-ibm-plex-sans, 'IBM Plex Sans'), system-ui, -apple-system, sans-serif;
+    --qc-font-serif: var(--font-ibm-plex-serif, 'IBM Plex Serif'), Georgia, serif;
+    --qc-font-mono:  var(--font-ibm-plex-mono, 'IBM Plex Mono'), ui-monospace, Menlo, monospace;
 
     --qc-w-light:   300;
     --qc-w-regular: 400;

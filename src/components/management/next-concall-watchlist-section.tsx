@@ -23,8 +23,9 @@ function WatchlistCard({ item }: { item: InvestmentThesis["next_concall_watchlis
         <p
           style={{
             margin: "0 0 8px",
-            fontSize: 10,
-            fontWeight: 600,
+            fontSize: "var(--qc-fz-10)",
+            fontWeight: "var(--qc-w-semi)",
+            fontFamily: "var(--qc-font-mono)",
             color: "var(--qc-ink-3)",
             letterSpacing: "0.1em",
           }}
@@ -34,8 +35,9 @@ function WatchlistCard({ item }: { item: InvestmentThesis["next_concall_watchlis
         <p
           style={{
             margin: 0,
-            fontSize: 13,
-            fontWeight: 600,
+            fontSize: "var(--qc-fz-13)",
+            fontWeight: "var(--qc-w-semi)",
+            fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink)",
             lineHeight: 1.5,
           }}
@@ -55,8 +57,8 @@ function WatchlistCard({ item }: { item: InvestmentThesis["next_concall_watchlis
           borderTop: "1px solid var(--qc-hair)",
         }}
       >
-        <span style={{ fontSize: 11, color: "var(--qc-up)", flexShrink: 0, marginTop: 1 }}>✓</span>
-        <p style={{ margin: 0, fontSize: 12, color: "var(--qc-up)", lineHeight: 1.55 }}>
+        <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-up)", flexShrink: 0, marginTop: 1 }}>✓</span>
+        <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-up)", lineHeight: 1.55 }}>
           {item.green_signal}
         </p>
       </div>
@@ -72,8 +74,8 @@ function WatchlistCard({ item }: { item: InvestmentThesis["next_concall_watchlis
           borderTop: "1px solid var(--qc-hair)",
         }}
       >
-        <span style={{ fontSize: 11, color: "var(--qc-down)", flexShrink: 0, marginTop: 1 }}>●</span>
-        <p style={{ margin: 0, fontSize: 12, color: "var(--qc-down)", lineHeight: 1.55 }}>
+        <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down)", flexShrink: 0, marginTop: 1 }}>●</span>
+        <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down)", lineHeight: 1.55 }}>
           {item.red_signal}
         </p>
       </div>
@@ -89,8 +91,9 @@ export function NextConcallWatchlistSection({ watchlist, period }: NextConcallWa
   const headerAction = (
     <div
       style={{
-        fontSize: 11,
-        fontWeight: 600,
+        fontSize: "var(--qc-fz-11)",
+        fontWeight: "var(--qc-w-semi)",
+        fontFamily: "var(--qc-font-sans)",
         color: "var(--qc-ink-2)",
         background: "var(--qc-section)",
         border: "1px solid var(--qc-hair)",

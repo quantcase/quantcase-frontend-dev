@@ -272,39 +272,40 @@ export default function InvestorDashboardPage() {
         <header style={{ marginBottom: 22 }}>
           <h1
             style={{
-              fontSize: 34,
-              fontWeight: 500,
-              letterSpacing: "-0.02em",
+              fontSize: "var(--qc-fz-30)",
+              fontWeight: "var(--qc-w-medium)",
+              letterSpacing: "var(--qc-track-display)",
               margin: 0,
               lineHeight: 1.15,
-              color: "var(--qc-ink, #0F172B)",
+              color: "var(--qc-ink)",
               fontFamily: "var(--qc-font-sans)",
             }}
           >
-            {greeting}, <span style={{ fontWeight: 500 }}>Raj</span>
+            {greeting}, <span style={{ fontWeight: "var(--qc-w-medium)" }}>Raj</span>
           </h1>
           <div
             style={{
               marginTop: 6,
-              fontSize: 12,
-              color: "var(--qc-ink-3, #888)",
+              fontSize: "var(--qc-fz-12)",
+              fontFamily: "var(--qc-font-sans)",
+              color: "var(--qc-ink-3)",
               display: "flex",
               alignItems: "center",
               gap: 8,
             }}
           >
             <span>{todayMeta}</span>
-            <span style={{ color: "var(--qc-ink-3, #888)" }}>·</span>
+            <span style={{ color: "var(--qc-ink-3)" }}>·</span>
             <span>
               NIFTY{" "}
-              <span style={{ color: "#22c55e", fontWeight: 500 }}>24,318</span>
-              <span style={{ color: "#22c55e" }}> +0.42%</span>
+              <span style={{ color: "var(--qc-up)", fontWeight: "var(--qc-w-medium)" }}>24,318</span>
+              <span style={{ color: "var(--qc-up)" }}> +0.42%</span>
             </span>
-            <span style={{ color: "var(--qc-ink-3, #888)" }}>·</span>
+            <span style={{ color: "var(--qc-ink-3)" }}>·</span>
             <span>
               SENSEX{" "}
-              <span style={{ color: "#22c55e", fontWeight: 500 }}>79,712</span>
-              <span style={{ color: "#22c55e" }}> +0.38%</span>
+              <span style={{ color: "var(--qc-up)", fontWeight: "var(--qc-w-medium)" }}>79,712</span>
+              <span style={{ color: "var(--qc-up)" }}> +0.38%</span>
             </span>
           </div>
         </header>

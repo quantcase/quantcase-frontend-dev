@@ -31,14 +31,15 @@ function ThesisChip({ tag }: { tag: ThesisTag }) {
   return (
     <span
       style={{
-        fontSize: 10,
-        fontWeight: 500,
-        background: "#F5F5F5",
+        fontSize: "var(--qc-fz-10)",
+        fontWeight: "var(--qc-w-medium)",
+        fontFamily: "var(--qc-font-sans)",
+        background: "var(--qc-section)",
         color: "var(--qc-ink-2)",
         border: "1px solid var(--qc-hair)",
         borderRadius: 3,
         padding: "1px 6px",
-        letterSpacing: "0.04em",
+        letterSpacing: "var(--qc-track-mono)",
         textTransform: "uppercase",
       }}
     >
@@ -68,8 +69,8 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
           <button
             style={{
               fontFamily: "var(--qc-font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.04em",
+              fontSize: "var(--qc-fz-11)",
+              letterSpacing: "var(--qc-track-mono)",
               color: "var(--qc-ink-3)",
               background: "none",
               border: "none",
@@ -83,8 +84,8 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
           <span
             style={{
               fontFamily: "var(--qc-font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.04em",
+              fontSize: "var(--qc-fz-11)",
+              letterSpacing: "var(--qc-track-mono)",
               color: "var(--qc-ink-3)",
               cursor: "pointer",
               whiteSpace: "nowrap",
@@ -96,7 +97,7 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
       </div>
 
       {/* Subtitle */}
-      <div className="px-2 pb-2" style={{ fontSize: 12, color: "var(--qc-ink-3)", marginTop: -8 }}>
+      <div className="px-2 pb-2" style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: -8 }}>
         Stocks you&apos;re tracking · tagged by your investment thesis (MOD)
       </div>
 
@@ -108,10 +109,10 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
             display: "grid",
             gridTemplateColumns: "2fr 1fr 0.6fr 0.6fr 3fr 1.1fr 0.7fr",
             padding: "7px 18px",
-            fontSize: 10,
-            fontWeight: 500,
+            fontSize: "var(--qc-fz-10)",
+            fontWeight: "var(--qc-w-medium)",
             color: "var(--qc-ink-3)",
-            letterSpacing: "0.08em",
+            letterSpacing: "var(--qc-track-eyebrow)",
             textTransform: "uppercase",
             borderBottom: "1px solid var(--qc-hair-2)",
             fontFamily: "var(--qc-font-mono)",
@@ -140,25 +141,26 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
               }}
             >
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{s.symbol}</div>
-                <div style={{ fontSize: 11, color: "var(--qc-ink-3)", marginTop: 1 }}>{s.name}</div>
+                <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{s.symbol}</div>
+                <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: 1 }}>{s.name}</div>
               </div>
 
-              <div style={{ fontSize: 12, fontWeight: 500, color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.ltp}</div>
+              <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.ltp}</div>
 
-              <div style={{ fontSize: 12, fontWeight: 500, color: s.changePositive ? "var(--qc-up)" : "var(--qc-down)", fontFamily: "var(--qc-font-mono)" }}>
+              <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: s.changePositive ? "var(--qc-up)" : "var(--qc-down)", fontFamily: "var(--qc-font-mono)" }}>
                 {s.change1d}
               </div>
 
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.qcScore}</div>
+              <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.qcScore}</div>
 
               <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
                 {s.thesisTags.map(tag => <ThesisChip key={tag} tag={tag} />)}
                 <button
                   style={{
-                    fontSize: 10,
+                    fontSize: "var(--qc-fz-10)",
+                    fontFamily: "var(--qc-font-sans)",
                     color: "var(--qc-ink-2)",
-                    background: "#F5F5F5",
+                    background: "var(--qc-section)",
                     border: "1px solid var(--qc-hair)",
                     borderRadius: 3,
                     padding: "1px 6px",
@@ -170,14 +172,15 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
                 {s.thesisDrift && (
                   <span
                     style={{
-                      fontSize: 10,
-                      fontWeight: 500,
+                      fontSize: "var(--qc-fz-10)",
+                      fontWeight: "var(--qc-w-medium)",
+                      fontFamily: "var(--qc-font-sans)",
                       color: "#92400e",
                       background: "#fef3c7",
                       border: "1px solid #fde68a",
                       borderRadius: 3,
                       padding: "1px 6px",
-                      letterSpacing: "0.03em",
+                      letterSpacing: "var(--qc-track-mono)",
                       textTransform: "uppercase",
                     }}
                   >
@@ -186,7 +189,7 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
                 )}
               </div>
 
-              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink-2)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+              <div style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
                 {s.conviction}
               </div>
 
@@ -200,12 +203,12 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
         {/* Footer */}
         <div style={{ height: 1, background: "var(--qc-hair-2)" }} />
         <div style={{ padding: "10px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
-            <span style={{ fontWeight: 600, color: "var(--qc-ink-2)" }}>{mgmtCount} on Management</span>
+          <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>
+            <span style={{ fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)" }}>{mgmtCount} on Management</span>
             <span style={{ color: "var(--qc-hair)", margin: "0 5px" }}>·</span>
-            <span style={{ fontWeight: 600, color: "var(--qc-ink-2)" }}>{oppCount} on Opportunity</span>
+            <span style={{ fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)" }}>{oppCount} on Opportunity</span>
             <span style={{ color: "var(--qc-hair)", margin: "0 5px" }}>·</span>
-            <span style={{ fontWeight: 600, color: "var(--qc-ink-2)" }}>{dealCount} on Deal</span>
+            <span style={{ fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)" }}>{dealCount} on Deal</span>
             {thesisDriftCount > 0 && (
               <>
                 <span style={{ color: "var(--qc-hair)", margin: "0 5px" }}>·</span>

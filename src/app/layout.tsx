@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, Inter } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Serif, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex-sans",
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const ibmPlexSerif = IBM_Plex_Serif({
+  variable: "--font-ibm-plex-serif",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -40,7 +47,7 @@ export default function RootLayout({
       <head>
         <ThemeScript />
       </head>
-      <body className={`${ibmPlexSans.variable} ${inter.variable}`} style={{ fontFamily: "var(--font-inter), system-ui, sans-serif", WebkitFontSmoothing: "antialiased" }}>
+      <body className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable}`} style={{ fontFamily: "var(--qc-font-sans)", WebkitFontSmoothing: "antialiased" }}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

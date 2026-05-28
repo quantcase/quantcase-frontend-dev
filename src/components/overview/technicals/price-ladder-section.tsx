@@ -72,11 +72,12 @@ function LadderRow({
       <div style={{ textAlign: "right", paddingRight: 12 }}>
         <div
           style={{
-            fontSize: 11,
+            fontSize: "var(--qc-fz-11)",
             color: isCurrent ? "var(--qc-ink)" : "var(--qc-ink-2)",
             letterSpacing: ".02em",
             lineHeight: 1.1,
-            fontWeight: isCurrent ? 500 : 400,
+            fontWeight: isCurrent ? "var(--qc-w-medium)" : "var(--qc-w-regular)",
+            fontFamily: "var(--qc-font-sans)",
           }}
         >
           {labelK}
@@ -84,9 +85,9 @@ function LadderRow({
         <span
           style={{
             display: "inline-block",
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9,
-            fontWeight: 500,
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-9)",
+            fontWeight: "var(--qc-w-medium)",
             letterSpacing: ".08em",
             padding: "2px 5px",
             borderRadius: 4,
@@ -103,14 +104,15 @@ function LadderRow({
       <div
         style={{
           paddingLeft: 10,
-          fontSize: isCurrent ? 14 : 12,
-          fontWeight: isCurrent ? 500 : 400,
+          fontSize: isCurrent ? "var(--qc-fz-14)" : "var(--qc-fz-12)",
+          fontWeight: isCurrent ? "var(--qc-w-medium)" : "var(--qc-w-regular)",
           color: "var(--qc-ink)",
+          fontFamily: "var(--qc-font-mono)",
         }}
       >
         {value}
         {pct !== "—" && (
-          <span style={{ fontSize: 10.5, color: pctColor, marginLeft: 6, letterSpacing: ".02em" }}>
+          <span style={{ fontSize: "var(--qc-fz-10)", color: pctColor, marginLeft: 6, letterSpacing: ".02em", fontFamily: "var(--qc-font-mono)" }}>
             {pct}
           </span>
         )}
@@ -165,8 +167,8 @@ export function PriceLadderSection({
       >
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10,
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-10)",
             letterSpacing: ".16em",
             color: "var(--qc-ink-2)",
             textTransform: "uppercase",
@@ -261,15 +263,15 @@ export function PriceLadderSection({
                 marginBottom: 6,
               }}
             >
-              <span style={{ fontSize: 12, color: "var(--qc-ink)" }}>
+              <span style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>
                 52-week range position
               </span>
               <span
                 style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 11,
+                  fontFamily: "var(--qc-font-mono)",
+                  fontSize: "var(--qc-fz-11)",
                   color: "var(--qc-ink)",
-                  fontWeight: 500,
+                  fontWeight: "var(--qc-w-medium)",
                 }}
               >
                 {rangePct}th percentile
@@ -311,10 +313,10 @@ export function PriceLadderSection({
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 10,
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: "var(--qc-fz-10)",
                 color: "var(--qc-ink-2)",
-                letterSpacing: ".04em",
+                letterSpacing: "var(--qc-track-pill)",
                 marginTop: 3,
               }}
             >

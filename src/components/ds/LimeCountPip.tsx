@@ -15,8 +15,8 @@ export function LimeCountPip({ count }: LimeCountPipProps) {
         background: "var(--qc-lime)",
         color: "var(--qc-ink)",
         fontFamily: "var(--qc-font-mono)",
-        fontSize: 10,
-        fontWeight: 500,
+        fontSize: "var(--qc-fz-10)",
+        fontWeight: "var(--qc-w-medium)",
       }}
     >
       {count}

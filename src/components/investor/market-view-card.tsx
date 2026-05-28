@@ -34,8 +34,8 @@ export function MarketViewCard({ score, sentiment, metrics, updatedTime }: Marke
         <span
           style={{
             fontFamily: "var(--qc-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.04em",
+            fontSize: "var(--qc-fz-11)",
+            letterSpacing: "var(--qc-track-mono)",
             color: "var(--qc-ink-3)",
             whiteSpace: "nowrap",
           }}
@@ -49,19 +49,20 @@ export function MarketViewCard({ score, sentiment, metrics, updatedTime }: Marke
         {/* Gauge area */}
         <div style={{ padding: "16px 18px 14px", borderBottom: "1px solid var(--qc-hair-2)" }}>
           <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 22 }}>
-            <div style={{ fontSize: 44, fontWeight: 400, lineHeight: 1, color: "var(--qc-ink)" }}>
+            <div style={{ fontSize: "var(--qc-fz-44)", fontWeight: "var(--qc-w-regular)", fontFamily: "var(--qc-font-mono)", lineHeight: 1, color: "var(--qc-ink)" }}>
               {score}
-              <span style={{ fontSize: 20, color: "var(--qc-ink-3)", fontWeight: 400 }}>/100</span>
+              <span style={{ fontSize: "var(--qc-fz-18)", color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)", fontWeight: "var(--qc-w-regular)" }}>/100</span>
             </div>
             <span
               style={{
-                fontSize: 11,
-                fontWeight: 700,
-                background: "#dcfce7",
-                color: "#15803d",
+                fontSize: "var(--qc-fz-11)",
+                fontWeight: "var(--qc-w-bold)",
+                fontFamily: "var(--qc-font-sans)",
+                background: "var(--qc-up-soft)",
+                color: "var(--qc-up)",
                 borderRadius: 5,
                 padding: "3px 9px",
-                letterSpacing: "0.06em",
+                letterSpacing: "var(--qc-track-mono)",
                 marginBottom: 4,
               }}
             >
@@ -95,7 +96,7 @@ export function MarketViewCard({ score, sentiment, metrics, updatedTime }: Marke
                 }}
               />
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--qc-ink-3)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", fontWeight: "var(--qc-w-semi)", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)" }}>
               <span>FEAR</span>
               <span>NEUTRAL</span>
               <span>GREED</span>
@@ -107,12 +108,12 @@ export function MarketViewCard({ score, sentiment, metrics, updatedTime }: Marke
         <div style={{ padding: "10px 18px 14px", display: "flex", flexDirection: "column", gap: 6 }}>
           {metrics.map((m) => (
             <div key={m.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>{m.label}</span>
-              <span style={{ fontSize: 12, textAlign: "right" }}>
+              <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>{m.label}</span>
+              <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)", textAlign: "right" }}>
                 <span style={{ color: m.annotationPositive === false ? "var(--qc-down)" : m.annotationPositive ? "var(--qc-up)" : "var(--qc-ink-3)", marginRight: 4 }}>
                   {m.value}
                 </span>
-                <span style={{ color: m.annotationPositive === false ? "var(--qc-down)" : m.annotationPositive ? "var(--qc-up)" : "var(--qc-ink-3)", fontWeight: 500 }}>
+                <span style={{ color: m.annotationPositive === false ? "var(--qc-down)" : m.annotationPositive ? "var(--qc-up)" : "var(--qc-ink-3)", fontWeight: "var(--qc-w-medium)" }}>
                   {m.annotation}
                 </span>
               </span>

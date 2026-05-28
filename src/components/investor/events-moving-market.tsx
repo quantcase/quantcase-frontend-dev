@@ -36,8 +36,8 @@ export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime,
         <span
           style={{
             fontFamily: "var(--qc-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.04em",
+            fontSize: "var(--qc-fz-11)",
+            letterSpacing: "var(--qc-track-mono)",
             color: "var(--qc-ink-3)",
             cursor: "pointer",
             whiteSpace: "nowrap",
@@ -48,7 +48,7 @@ export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime,
       </div>
 
       {/* Subtitle */}
-      <div className="px-2 pb-2" style={{ fontSize: 12, color: "var(--qc-ink-3)", marginTop: -8 }}>
+      <div className="px-2 pb-2" style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: -8 }}>
         Macro regime signals · sector-level impact map
       </div>
 
@@ -65,13 +65,13 @@ export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime,
                 paddingLeft: i > 0 ? 20 : 0,
               }}
             >
-              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink-3)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+              <div style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", letterSpacing: "var(--qc-track-eyebrow)", textTransform: "uppercase", marginBottom: 4 }}>
                 {regime.category}
               </div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2, display: "flex", alignItems: "baseline", gap: 4, flexWrap: "nowrap", whiteSpace: "nowrap", overflow: "hidden" }}>
+              <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", marginBottom: 2, display: "flex", alignItems: "baseline", gap: 4, flexWrap: "nowrap", whiteSpace: "nowrap", overflow: "hidden" }}>
                 <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{regime.title}</span>
                 <span style={{ color: "var(--qc-ink-2)", flexShrink: 0 }}>{regime.arrow}</span>
-                <span style={{ fontWeight: 400, color: "var(--qc-ink-2)", flexShrink: 0 }}>{regime.subtitle}</span>
+                <span style={{ fontWeight: "var(--qc-w-regular)", color: "var(--qc-ink-2)", flexShrink: 0 }}>{regime.subtitle}</span>
               </div>
 
               <div style={{ height: 1, background: "var(--qc-hair-2)", margin: "10px 0" }} />
@@ -79,8 +79,8 @@ export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime,
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {regime.sectors.map((sec) => (
                   <div key={sec.name}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>{sec.name}</div>
-                    <div style={{ fontSize: 11, color: arrowColor(sec.direction) }}>
+                    <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{sec.name}</div>
+                    <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: arrowColor(sec.direction) }}>
                       {arrowChar(sec.direction)} {sec.metric}
                     </div>
                   </div>
@@ -93,10 +93,10 @@ export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime,
         {/* Footer */}
         <div style={{ height: 1, background: "var(--qc-hair-2)" }} />
         <div style={{ padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>
+          <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>
             {regimes.length} active macro regimes · {totalSectorSignals} sector signals mapped
           </div>
-          <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: 11, letterSpacing: "0.04em", color: "var(--qc-ink-3)" }}>
+          <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-11)", letterSpacing: "var(--qc-track-mono)", color: "var(--qc-ink-3)" }}>
             Refreshed {refreshedTime} · {refreshedDate}
           </div>
         </div>

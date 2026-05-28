@@ -50,8 +50,8 @@ export function GoldenCard({
             <div
               style={{
                 fontFamily: "var(--qc-font-mono)",
-                fontSize: 10,
-                letterSpacing: "0.14em",
+                fontSize: "var(--qc-fz-10)",
+                letterSpacing: "var(--qc-track-eyebrow)",
                 textTransform: "uppercase",
                 color: "var(--qc-lime-ink-2)",
                 marginBottom: 8,

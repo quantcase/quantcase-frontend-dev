@@ -64,21 +64,22 @@ export function ResearchLibraryBanner({
         <div style={{ minWidth: 0 }}>
           <div
             style={{
-              fontSize: 14,
-              fontWeight: 600,
+              fontSize: "var(--qc-fz-14)",
+              fontWeight: "var(--qc-w-semi)",
+              fontFamily: "var(--qc-font-sans)",
               color: "#fff",
               marginBottom: 5,
-              letterSpacing: "-0.01em",
+              letterSpacing: "var(--qc-track-display)",
             }}
           >
             Research Library
           </div>
-          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", display: "flex", flexWrap: "wrap", gap: "0 6px" }}>
-            <span style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>
+          <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "rgba(255,255,255,0.5)", display: "flex", flexWrap: "wrap", gap: "0 6px" }}>
+            <span style={{ color: "rgba(255,255,255,0.85)", fontWeight: "var(--qc-w-semi)" }}>
               {newIcNotes} new IC notes
             </span>
             <span style={{ color: "rgba(255,255,255,0.25)" }}>·</span>
-            <span style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>
+            <span style={{ color: "rgba(255,255,255,0.85)", fontWeight: "var(--qc-w-semi)" }}>
               {catalystsNext30Days} catalysts in next 30 days
             </span>
             <span style={{ color: "rgba(255,255,255,0.25)" }}>·</span>
@@ -97,28 +98,30 @@ export function ResearchLibraryBanner({
         >
           <span
             style={{
-              fontSize: 11,
-              fontWeight: 600,
+              fontSize: "var(--qc-fz-11)",
+              fontWeight: "var(--qc-w-semi)",
+              fontFamily: "var(--qc-font-sans)",
               color: "rgba(255,255,255,0.7)",
               background: "rgba(255,255,255,0.08)",
               border: "1px solid rgba(255,255,255,0.12)",
               borderRadius: 20,
               padding: "4px 12px",
-              letterSpacing: "0.03em",
+              letterSpacing: "var(--qc-track-mono)",
             }}
           >
             {newIcNotes} IC Notes
           </span>
           <span
             style={{
-              fontSize: 11,
-              fontWeight: 600,
+              fontSize: "var(--qc-fz-11)",
+              fontWeight: "var(--qc-w-semi)",
+              fontFamily: "var(--qc-font-sans)",
               color: "rgba(255,255,255,0.7)",
               background: "rgba(255,255,255,0.08)",
               border: "1px solid rgba(255,255,255,0.12)",
               borderRadius: 20,
               padding: "4px 12px",
-              letterSpacing: "0.03em",
+              letterSpacing: "var(--qc-track-mono)",
             }}
           >
             {catalystsNext30Days} Catalysts
@@ -127,14 +130,15 @@ export function ResearchLibraryBanner({
 
         <div
           style={{
-            fontSize: 12,
-            fontWeight: 600,
-            color: "#0F172B",
+            fontSize: "var(--qc-fz-12)",
+            fontWeight: "var(--qc-w-semi)",
+            fontFamily: "var(--qc-font-sans)",
+            color: "var(--qc-ink)",
             background: "#fff",
             borderRadius: 8,
             padding: "8px 18px",
             whiteSpace: "nowrap",
-            letterSpacing: "0.02em",
+            letterSpacing: "var(--qc-track-pill)",
           }}
         >
           Open library →

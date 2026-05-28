@@ -10,7 +10,7 @@ export function InlineMd({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         p.startsWith("**") && p.endsWith("**") ? (
-          <strong key={i} style={{ color: "var(--qc-ink)", fontWeight: 600 }}>{p.slice(2, -2)}</strong>
+          <strong key={i} style={{ color: "var(--qc-ink)", fontWeight: "var(--qc-w-semi)" }}>{p.slice(2, -2)}</strong>
         ) : (
           <span key={i}>{p}</span>
         )
@@ -41,9 +41,9 @@ export function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
-        fontFamily: "'IBM Plex Mono', monospace",
-        fontSize: 11,
-        letterSpacing: ".12em",
+        fontFamily: "var(--qc-font-mono)",
+        fontSize: "var(--qc-fz-11)",
+        letterSpacing: "var(--qc-track-eyebrow-l)",
         color: "var(--qc-ink)",
         textTransform: "uppercase",
         marginBottom: 14,
@@ -66,8 +66,8 @@ export function MonoEyebrow({
   return (
     <div
       style={{
-        fontFamily: "'IBM Plex Mono', monospace",
-        fontSize: 10,
+        fontFamily: "var(--qc-font-mono)",
+        fontSize: "var(--qc-fz-10)",
         letterSpacing: ".16em",
         color: "var(--qc-ink-2)",
         textTransform: "uppercase",
@@ -118,9 +118,10 @@ export function SentimentPill({
         background: bg,
         border: `1px solid ${border}`,
         color,
-        fontSize: 11,
-        fontWeight: 600,
-        letterSpacing: ".04em",
+        fontSize: "var(--qc-fz-11)",
+        fontFamily: "var(--qc-font-sans)",
+        fontWeight: "var(--qc-w-semi)",
+        letterSpacing: "var(--qc-track-pill)",
         textTransform: "uppercase",
       }}
     >
@@ -151,9 +152,10 @@ function DotChip({ label, dotColor }: { label: string; dotColor: string }) {
         borderRadius: 999,
         background: "var(--qc-card)",
         border: "1px solid var(--qc-hair)",
-        fontSize: 11.5,
+        fontSize: "var(--qc-fz-12)",
+        fontFamily: "var(--qc-font-sans)",
         color: "var(--qc-ink)",
-        fontWeight: 500,
+        fontWeight: "var(--qc-w-medium)",
       }}
     >
       <span
@@ -217,8 +219,9 @@ export function NarrativeSidebar({ eyebrow, headline, body, tags }: NarrativeSid
         <MonoEyebrow>{eyebrow}</MonoEyebrow>
         <div
           style={{
-            fontSize: 16,
-            fontWeight: 500,
+            fontSize: "var(--qc-fz-16)",
+            fontFamily: "var(--qc-font-sans)",
+            fontWeight: "var(--qc-w-medium)",
             letterSpacing: "-0.01em",
             lineHeight: 1.3,
             color: "var(--qc-ink)",
@@ -226,7 +229,7 @@ export function NarrativeSidebar({ eyebrow, headline, body, tags }: NarrativeSid
         >
           <InlineMd text={headline} />
         </div>
-        <p style={{ fontSize: 12.5, lineHeight: 1.6, color: "var(--qc-ink)", margin: 0 }}>
+        <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", lineHeight: 1.6, color: "var(--qc-ink)", margin: 0 }}>
           <InlineMd text={body} />
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: "auto" }}>
@@ -272,13 +275,14 @@ export function MetricBar({
           marginBottom: 6,
         }}
       >
-        <span style={{ fontSize: 12, color: "var(--qc-ink)", fontWeight: 500 }}>
+        <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", fontWeight: "var(--qc-w-medium)" }}>
           {label}
         </span>
         <span
           style={{
-            fontSize: 17,
-            fontWeight: 500,
+            fontSize: "var(--qc-fz-16)",
+            fontFamily: "var(--qc-font-mono)",
+            fontWeight: "var(--qc-w-medium)",
             letterSpacing: "-0.015em",
             color: "var(--qc-ink)",
             fontVariantNumeric: "tabular-nums",
@@ -321,7 +325,8 @@ export function MetricBar({
       </div>
       <div
         style={{
-          fontSize: 11,
+          fontSize: "var(--qc-fz-11)",
+          fontFamily: "var(--qc-font-sans)",
           color: "var(--qc-ink-2)",
           display: "flex",
           justifyContent: "space-between",
@@ -331,8 +336,8 @@ export function MetricBar({
         <b
           style={{
             color: "var(--qc-ink)",
-            fontWeight: 500,
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontWeight: "var(--qc-w-medium)",
+            fontFamily: "var(--qc-font-mono)",
           }}
         >
           {subRight}
@@ -373,7 +378,8 @@ export function StatTile({
     >
       <div
         style={{
-          fontSize: 11,
+          fontSize: "var(--qc-fz-11)",
+          fontFamily: "var(--qc-font-sans)",
           color: "var(--qc-ink-2)",
           letterSpacing: ".02em",
           marginBottom: 2,
@@ -383,8 +389,9 @@ export function StatTile({
       </div>
       <div
         style={{
-          fontSize: 17,
-          fontWeight: 500,
+          fontSize: "var(--qc-fz-16)",
+          fontFamily: "var(--qc-font-mono)",
+          fontWeight: "var(--qc-w-medium)",
           letterSpacing: "-0.01em",
           color: "var(--qc-ink)",
           fontVariantNumeric: "tabular-nums",
@@ -394,17 +401,18 @@ export function StatTile({
         {unit && (
           <span
             style={{
-              fontSize: 11,
+              fontSize: "var(--qc-fz-11)",
+              fontFamily: "var(--qc-font-sans)",
               color: "var(--qc-ink-2)",
               marginLeft: 2,
-              fontWeight: 400,
+              fontWeight: "var(--qc-w-regular)",
             }}
           >
             {unit}
           </span>
         )}
       </div>
-      <div style={{ fontSize: 11, color: subColor, marginTop: 2 }}>{sub}</div>
+      <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: subColor, marginTop: 2 }}>{sub}</div>
     </div>
   );
 }
@@ -450,15 +458,16 @@ export function SidebarPanelLayout({
         <h4
           style={{
             margin: "0 0 4px",
-            fontSize: 15,
-            fontWeight: 500,
+            fontSize: "var(--qc-fz-14)",
+            fontFamily: "var(--qc-font-sans)",
+            fontWeight: "var(--qc-w-medium)",
             letterSpacing: "-0.005em",
             color: "var(--qc-ink)",
           }}
         >
           {heading}
         </h4>
-        <p style={{ margin: 0, fontSize: 11.5, color: "var(--qc-ink)", lineHeight: 1.45 }}>
+        <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.45 }}>
           {description}
         </p>
       </div>

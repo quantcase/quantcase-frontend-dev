@@ -41,7 +41,7 @@ function StateCard({
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 11.5, color: "var(--qc-ink)", letterSpacing: ".01em" }}>
+        <span style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", letterSpacing: ".01em", fontFamily: "var(--qc-font-sans)" }}>
           {label}
         </span>
         <div
@@ -64,13 +64,13 @@ function StateCard({
       </div>
       <div
         style={{
-          fontSize: 18, fontWeight: 500, letterSpacing: "-0.01em",
-          color: valueColor, lineHeight: 1.2, marginTop: 2,
+          fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.01em",
+          color: valueColor, lineHeight: 1.2, marginTop: 2, fontFamily: "var(--qc-font-mono)",
         }}
       >
         {value}
       </div>
-      <div style={{ fontSize: 11.5, color: "var(--qc-ink-2)", marginTop: "auto", lineHeight: 1.35 }}>
+      <div style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", marginTop: "auto", lineHeight: 1.35, fontFamily: "var(--qc-font-sans)" }}>
         {sub}
       </div>
     </div>

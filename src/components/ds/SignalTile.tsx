@@ -73,11 +73,11 @@ export function SignalTile({ label, value, sentiment, detail, metrics = [] }: Si
       onMouseLeave={() => setShowTooltip(false)}
     >
       <div className="flex items-center justify-between mb-1">
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em] truncate" style={{ color: "var(--qc-ink-2)" }}>
+        <p className="truncate" style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-2)" }}>
           {label}
         </p>
       </div>
-      <p className="text-[12px] font-semibold" style={{ color: sc.color }}>{value}</p>
+      <p style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: sc.color }}>{value}</p>
 
       {showTooltip && hasPopup && (
         <div
@@ -94,8 +94,8 @@ export function SignalTile({ label, value, sentiment, detail, metrics = [] }: Si
             background: sc.bg,
             display: "flex", alignItems: "center", justifyContent: "space-between",
           }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: sc.color }}>{value}</span>
+            <span style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>{label}</span>
+            <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: sc.color, fontFamily: "var(--qc-font-sans)" }}>{value}</span>
           </div>
           <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
             {metrics.length > 0
@@ -104,17 +104,17 @@ export function SignalTile({ label, value, sentiment, detail, metrics = [] }: Si
                   return (
                     <div key={m.name}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)" }}>{m.name}</span>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: mc.color }}>{m.value}</span>
+                        <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>{m.name}</span>
+                        <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: mc.color, fontFamily: "var(--qc-font-sans)" }}>{m.value}</span>
                       </div>
                       {m.comment && (
-                        <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink)", lineHeight: 1.5 }}>{renderMd(m.comment)}</p>
+                        <p style={{ margin: 0, fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", lineHeight: 1.5, fontFamily: "var(--qc-font-sans)" }}>{renderMd(m.comment)}</p>
                       )}
                     </div>
                   );
                 })
               : detail && (
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink)", lineHeight: 1.5 }}>{renderMd(detail)}</p>
+                  <p style={{ margin: 0, fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", lineHeight: 1.5, fontFamily: "var(--qc-font-sans)" }}>{renderMd(detail)}</p>
                 )}
           </div>
         </div>

@@ -148,8 +148,9 @@ export function SupportResistanceAnalysis({
                           <span
                             className="relative z-10 pl-2 font-semibold"
                             style={{
-                              fontSize: 11,
+                              fontSize: "var(--qc-fz-11)",
                               color: isCurrent ? "var(--qc-on-dark)" : "var(--qc-ink)",
+                              fontFamily: "var(--qc-font-sans)",
                             }}
                           >
                             ₹{level.toFixed(2)}

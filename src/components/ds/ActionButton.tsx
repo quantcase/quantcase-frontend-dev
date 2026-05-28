@@ -10,8 +10,8 @@ interface ActionButtonProps {
 }
 
 const SIZE: Record<"sm" | "md", CSSProperties> = {
-  sm: { fontSize: 11.5, padding: "5px 12px", borderRadius: 999 },
-  md: { fontSize: 12,   padding: "7px 14px",  borderRadius: 8   },
+  sm: { fontSize: "var(--qc-fz-12)", padding: "5px 12px", borderRadius: 999 },
+  md: { fontSize: "var(--qc-fz-12)", padding: "7px 14px",  borderRadius: 8  },
 };
 
 export function ActionButton({

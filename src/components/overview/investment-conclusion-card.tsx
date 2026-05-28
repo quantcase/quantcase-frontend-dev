@@ -137,10 +137,10 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
     <SectionShell>
       {/* Section header row: title + timestamp on same line */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: ".12em", color: "var(--qc-ink)", textTransform: "uppercase" }}>
+        <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-11)", letterSpacing: "var(--qc-track-eyebrow-l)", color: "var(--qc-ink)", textTransform: "uppercase" }}>
           Investment Conclusion
         </div>
-        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: ".06em", whiteSpace: "nowrap", flexShrink: 0 }}>
+        <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)", letterSpacing: ".06em", whiteSpace: "nowrap", flexShrink: 0 }}>
           As of today · Valid 5 trading days
         </span>
       </div>
@@ -148,7 +148,7 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
       {/* Thesis */}
       {investThesis && (
         <div style={{ marginBottom: 14 }}>
-          <p style={{ margin: 0, fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>
+          <p style={{ margin: 0, fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>
             <InlineMd text={investThesis} />
           </p>
         </div>
@@ -180,7 +180,7 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
           />
           <div style={{ position: "relative", zIndex: 1 }}>
             <MonoEyebrow style={{ marginBottom: 14 }}>Overall Verdict</MonoEyebrow>
-            <div style={{ fontSize: 36, fontWeight: 500, letterSpacing: "-0.02em", color: verdictColor, lineHeight: 1 }}>
+            <div style={{ fontSize: "var(--qc-fz-30)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", letterSpacing: "-0.02em", color: verdictColor, lineHeight: 1 }}>
               {effectiveRating ?? "Hold"}
             </div>
             <div style={{ marginTop: 8 }}>
@@ -190,7 +190,7 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
                   padding: "4px 10px", borderRadius: 999,
                   background: rKey === "buy" || rKey === "strong-buy" ? "var(--qc-up-soft, #EAF4EE)" : rKey === "sell" || rKey === "underperform" ? "var(--qc-down-soft, #FDECEA)" : "var(--qc-warn-soft, #FEF3E2)",
                   color: verdictColor,
-                  fontSize: 11, fontWeight: 600, letterSpacing: ".04em", textTransform: "uppercase",
+                  fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", fontWeight: "var(--qc-w-semi)", letterSpacing: "var(--qc-track-pill)", textTransform: "uppercase",
                 }}
               >
                 <span style={{ width: 5, height: 5, borderRadius: "50%", background: verdictColor, display: "inline-block" }} />
@@ -206,12 +206,12 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
                   background: verdictColor,
                 }} />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)" }}>
                 <span>Low</span>
                 <span>Moderate</span>
                 <span>High</span>
               </div>
-              <div style={{ fontSize: 11, color: "var(--qc-ink-2)", marginTop: 4 }}>
+              <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", marginTop: 4 }}>
                 {conviction === "High" ? "Add aggressively on conviction" : conviction === "Low" ? "Build position carefully" : "Accumulate on dips carefully"}
               </div>
             </div>
@@ -233,17 +233,17 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
             {icMetrics.map((m) => (
               <div key={m.category}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-ink-2)", marginBottom: 6 }}>
+                <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-ink-2)", marginBottom: 6 }}>
                   {m.title}
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 500, color: icValueColor(m.status), marginBottom: 6, letterSpacing: "-0.01em" }}>
+                <div style={{ fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-mono)", color: icValueColor(m.status), marginBottom: 6, letterSpacing: "-0.01em" }}>
                   {m.value}
                 </div>
                 <div style={{ height: 4, background: "var(--qc-chip, #F2F1EC)", borderRadius: 999, overflow: "hidden", marginBottom: 8 }}>
                   <span style={{ display: "block", height: "100%", width: `${icBarFill(m.status, m.category)}%`, borderRadius: 999, background: icBarColor(m.status) }} />
                 </div>
                 {m.description && (
-                  <div style={{ fontSize: 11.5, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
+                  <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
                     <InlineMd text={m.description} />
                   </div>
                 )}
@@ -278,7 +278,7 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
               >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                   <MonoEyebrow>{heading}</MonoEyebrow>
-                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: ".06em" }}>
+                  <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)", letterSpacing: ".06em" }}>
                     {items.length} {count}
                   </span>
                 </div>
@@ -292,9 +292,9 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
                       <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                         <div style={{ flexShrink: 0, marginTop: 5, width: 6, height: 6, borderRadius: 2, background: color }} />
                         <div>
-                          <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.4 }}>{first}</div>
+                          <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", lineHeight: 1.4 }}>{first}</div>
                           {more.length > 0 && (
-                            <div style={{ fontSize: 11.5, color: "var(--qc-ink-2)", marginTop: 2, lineHeight: 1.45 }}>{more.join(". ")}</div>
+                            <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", marginTop: 2, lineHeight: 1.45 }}>{more.join(". ")}</div>
                           )}
                         </div>
                       </div>
@@ -319,11 +319,11 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
                 }}
               >
                 <MonoEyebrow style={{ marginBottom: 6 }}>{act.eyebrow}</MonoEyebrow>
-                <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 4, display: "flex", gap: 6 }}>
+                <div style={{ fontSize: "var(--qc-fz-14)", fontFamily: "var(--qc-font-sans)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", marginBottom: 4, display: "flex", gap: 6 }}>
                   <span style={{ color: verdictColor }}>→</span>
                   {act.title}
                 </div>
-                <div style={{ fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.5 }}>{act.sub}</div>
+                <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.5 }}>{act.sub}</div>
               </div>
             ))}
           </div>

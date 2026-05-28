@@ -45,13 +45,13 @@ function BasketCard({ basket }: { basket: IndustryBasket }) {
         textDecoration: "none",
       }}
     >
-      <div style={{ fontSize: 10, fontWeight: 700, color: rs.labelColor, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>
+      <div style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-bold)", fontFamily: "var(--qc-font-sans)", color: rs.labelColor, letterSpacing: "var(--qc-track-eyebrow)", textTransform: "uppercase", marginBottom: 6 }}>
         {basket.signal}
       </div>
-      <div style={{ fontSize: 16, fontWeight: 400, color: rs.sectorColor, marginBottom: 8, fontFamily: "Georgia, serif" }}>
+      <div style={{ fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-regular)", color: rs.sectorColor, marginBottom: 8, fontFamily: "var(--qc-font-serif)" }}>
         {basket.title}
       </div>
-      <div style={{ fontSize: 11, fontWeight: 600, color: rs.etfColor, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+      <div style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: rs.etfColor, letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
         → {basket.etfTicker}
       </div>
     </Link>
@@ -95,8 +95,8 @@ export function IndustrySignalsGrid({ count: countProp }: IndustrySignalsGridPro
           href="/screener/industry-intelligence"
           style={{
             fontFamily: "var(--qc-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.04em",
+            fontSize: "var(--qc-fz-11)",
+            letterSpacing: "var(--qc-track-mono)",
             color: "var(--qc-ink-3)",
             textDecoration: "none",
             whiteSpace: "nowrap",
@@ -107,7 +107,7 @@ export function IndustrySignalsGrid({ count: countProp }: IndustrySignalsGridPro
       </div>
 
       {/* Subtitle */}
-      <div className="px-2 pb-2" style={{ fontSize: 12, color: "var(--qc-ink-3)", marginTop: -8 }}>
+      <div className="px-2 pb-2" style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: -8 }}>
         Aligned to your holdings · scored across 6 frameworks
       </div>
 

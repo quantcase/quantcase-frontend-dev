@@ -44,15 +44,15 @@ export function PillarPills({ activePillar, onSelect, scores, labels }: PillarPi
             />
             <span
               style={{
-                fontSize: 13, fontWeight: 500, flex: 1,
-                color: isOn ? "#fff" : "var(--qc-ink)",
+                fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", flex: 1,
+                color: isOn ? "#fff" : "var(--qc-ink)", fontFamily: "var(--qc-font-sans)",
               }}
             >
               {labels[key]}
             </span>
             <span
               style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 13,
+                fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-13)",
                 color: isOn ? "#fff" : score == null ? "var(--qc-ink-2)" : "var(--qc-ink)",
                 letterSpacing: "-0.01em",
               }}
@@ -60,7 +60,7 @@ export function PillarPills({ activePillar, onSelect, scores, labels }: PillarPi
               {score != null ? Math.round(score) : "—"}
               <span
                 style={{
-                  fontSize: 10.5,
+                  fontSize: "var(--qc-fz-10)",
                   color: isOn ? "rgba(255,255,255,0.55)" : "var(--qc-ink-2)",
                   marginLeft: 1,
                 }}

@@ -41,10 +41,10 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
           marginBottom: 12,
         }}
       >
-        <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>
+        <h4 style={{ margin: 0, fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)" }}>
           Moving Averages · vs CMP {fp(cmp)}
         </h4>
-        <div style={{ fontSize: 11.5, color: "var(--qc-ink-2)" }}>{summaryText}</div>
+        <div style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-sans)" }}>{summaryText}</div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
         {smas.map((sma) => {
@@ -54,21 +54,23 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
             <div key={sma.label}>
               <div
                 style={{
-                  fontSize: 11.5,
+                  fontSize: "var(--qc-fz-12)",
                   color: "var(--qc-ink-2)",
                   letterSpacing: ".02em",
                   marginBottom: 4,
+                  fontFamily: "var(--qc-font-sans)",
                 }}
               >
                 {sma.label}
               </div>
               <div
                 style={{
-                  fontSize: 15,
-                  fontWeight: 500,
+                  fontSize: "var(--qc-fz-14)",
+                  fontWeight: "var(--qc-w-medium)",
                   letterSpacing: "-0.01em",
                   color: "var(--qc-ink)",
                   marginBottom: 6,
+                  fontFamily: "var(--qc-font-mono)",
                 }}
               >
                 {fp(sma.val)}
@@ -109,20 +111,20 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                 <span
                   style={{
-                    fontSize: 10.5,
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: "var(--qc-fz-10)",
+                    fontFamily: "var(--qc-font-mono)",
                     letterSpacing: ".06em",
                     textTransform: "uppercase",
                     color: sma.above ? "var(--qc-up)" : "var(--qc-down)",
-                    fontWeight: 500,
+                    fontWeight: "var(--qc-w-medium)",
                   }}
                 >
                   {sma.above ? "Above" : "Below"}
                 </span>
                 <span
                   style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 11,
+                    fontFamily: "var(--qc-font-mono)",
+                    fontSize: "var(--qc-fz-11)",
                     color: "var(--qc-ink)",
                     letterSpacing: ".02em",
                   }}

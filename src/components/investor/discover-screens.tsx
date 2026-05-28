@@ -54,14 +54,15 @@ function ScreenCard({ screen }: { screen: DiscoverScreen }) {
         {screen.badgeLabel && (
           <span
             style={{
-              fontSize: 10,
-              fontWeight: 700,
+              fontSize: "var(--qc-fz-10)",
+              fontWeight: "var(--qc-w-bold)",
+              fontFamily: "var(--qc-font-sans)",
               color: screen.badgeColor ?? "#7c3aed",
               background: screen.badgeColor ? `${screen.badgeColor}15` : "#f3f0ff",
               border: `1px solid ${screen.badgeColor ?? "#7c3aed"}30`,
               borderRadius: 20,
               padding: "3px 10px",
-              letterSpacing: "0.07em",
+              letterSpacing: "var(--qc-track-eyebrow)",
               textTransform: "uppercase",
             }}
           >
@@ -72,18 +73,19 @@ function ScreenCard({ screen }: { screen: DiscoverScreen }) {
 
       <div
         style={{
-          fontSize: 14,
-          fontWeight: 600,
+          fontSize: "var(--qc-fz-14)",
+          fontWeight: "var(--qc-w-semi)",
+          fontFamily: "var(--qc-font-sans)",
           color: "var(--qc-ink)",
           marginBottom: 8,
           lineHeight: 1.3,
-          letterSpacing: "-0.01em",
+          letterSpacing: "var(--qc-track-display)",
         }}
       >
         {screen.title}
       </div>
 
-      <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.6, margin: "0 0 16px", flex: 1 }}>
+      <p style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.6, margin: "0 0 16px", flex: 1 }}>
         {screen.description}
       </p>
 
@@ -92,16 +94,16 @@ function ScreenCard({ screen }: { screen: DiscoverScreen }) {
       <div style={{ display: "flex", gap: 20 }}>
         {screen.stats.map((s) => (
           <div key={s.label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={{ fontSize: 20, fontWeight: 700, color: "var(--qc-ink)", lineHeight: 1 }}>
+            <span style={{ fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-bold)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink)", lineHeight: 1 }}>
               {s.value}
             </span>
             <span
               style={{
                 fontFamily: "var(--qc-font-mono)",
-                fontSize: 9,
-                fontWeight: 500,
+                fontSize: "var(--qc-fz-9)",
+                fontWeight: "var(--qc-w-medium)",
                 color: "var(--qc-ink-3)",
-                letterSpacing: "0.07em",
+                letterSpacing: "var(--qc-track-eyebrow)",
                 textTransform: "uppercase",
               }}
             >
@@ -129,8 +131,8 @@ export function DiscoverScreens({ screens }: DiscoverScreensProps) {
         <span
           style={{
             fontFamily: "var(--qc-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.04em",
+            fontSize: "var(--qc-fz-11)",
+            letterSpacing: "var(--qc-track-mono)",
             color: "var(--qc-ink-3)",
             cursor: "pointer",
             whiteSpace: "nowrap",
@@ -141,7 +143,7 @@ export function DiscoverScreens({ screens }: DiscoverScreensProps) {
       </div>
 
       {/* Subtitle */}
-      <div className="px-2 pb-2" style={{ fontSize: 12, color: "var(--qc-ink-3)", marginTop: -8 }}>
+      <div className="px-2 pb-2" style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: -8 }}>
         Curated screens · click any to see the names
       </div>
 

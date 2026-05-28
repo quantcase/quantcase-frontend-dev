@@ -42,7 +42,7 @@ export function GuidanceFilterControls({ state }: { state: GuidanceFilterState }
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
           style={{
-            fontSize: 12, paddingLeft: 26, paddingRight: 10, paddingTop: 5, paddingBottom: 5,
+            fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", paddingLeft: 26, paddingRight: 10, paddingTop: 5, paddingBottom: 5,
             border: "1px solid var(--qc-hair)", borderRadius: 6, width: 180,
             outline: "none", color: "var(--qc-ink)", background: "var(--qc-card)",
           }}
@@ -158,7 +158,7 @@ function SeverityDropdown({
         onClick={() => setOpen(v => !v)}
         style={{
           display: "inline-flex", alignItems: "center", gap: 6,
-          fontSize: 12, fontWeight: 500,
+          fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)",
           color: selected.size > 0 ? "var(--qc-ink)" : "var(--qc-ink-2)",
           border: `1px solid ${selected.size > 0 ? "var(--qc-ink)" : "var(--qc-hair)"}`,
           borderRadius: 6, padding: "5px 10px",
@@ -178,8 +178,8 @@ function SeverityDropdown({
             onClick={() => onChange(new Set())}
             style={{
               width: "100%", textAlign: "left", padding: "6px 12px",
-              fontSize: 11, color: selected.size === 0 ? "var(--qc-ink)" : "var(--qc-ink-2)",
-              fontWeight: selected.size === 0 ? 600 : 400,
+              fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: selected.size === 0 ? "var(--qc-ink)" : "var(--qc-ink-2)",
+              fontWeight: selected.size === 0 ? "var(--qc-w-semi)" : "var(--qc-w-regular)",
               background: "none", border: "none", cursor: "pointer",
               borderBottom: "1px solid var(--qc-section)",
             }}
@@ -192,7 +192,7 @@ function SeverityDropdown({
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "6px 12px", cursor: "pointer",
-                fontSize: 12, color: "var(--qc-ink)",
+                fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)",
               }}
             >
               <input
@@ -330,7 +330,7 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
                     onClick={header.column.getToggleSortingHandler()}
                     style={{
                       padding: "6px 8px", textAlign: "left",
-                      fontSize: 10, fontWeight: 500, color: "var(--qc-ink-2)",
+                      fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)",
                       textTransform: "uppercase", letterSpacing: "0.08em",
                       cursor: header.column.getCanSort() ? "pointer" : "default",
                       userSelect: "none", whiteSpace: "nowrap",
@@ -356,10 +356,10 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
                     key={row.id}
                     style={{ borderBottom: "1px solid var(--qc-hair-2)", borderLeft: config.borderLeft }}
                   >
-                    <td style={{ padding: "8px 8px", fontSize: 12, color: "var(--qc-ink)", wordBreak: "break-word" }}>{row.original.period}</td>
+                    <td style={{ padding: "8px 8px", fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", wordBreak: "break-word" }}>{row.original.period}</td>
                     <td style={{ padding: "8px 8px" }}>{flexRender(columns[1].cell, row.getVisibleCells()[1].getContext())}</td>
-                    <td style={{ padding: "8px 8px", fontSize: 12, color: "var(--qc-ink)", wordBreak: "break-word" }}>{row.original.metric}</td>
-                    <td style={{ padding: "8px 8px", fontSize: 12, color: "var(--qc-ink)", wordBreak: "break-word" }}>{row.original.guidance}</td>
+                    <td style={{ padding: "8px 8px", fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", wordBreak: "break-word" }}>{row.original.metric}</td>
+                    <td style={{ padding: "8px 8px", fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", wordBreak: "break-word" }}>{row.original.guidance}</td>
                     <td style={{ padding: "8px 8px" }}>{flexRender(columns[4].cell, row.getVisibleCells()[4].getContext())}</td>
                     <td style={{ padding: "8px 8px" }}>{flexRender(columns[5].cell, row.getVisibleCells()[5].getContext())}</td>
                   </tr>
@@ -378,7 +378,7 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
             </TooltipProvider>
             {table.getRowModel().rows.length === 0 && (
               <tr>
-                <td colSpan={6} style={{ padding: "24px 8px", textAlign: "center", fontSize: 12, color: "var(--qc-ink-2)" }}>
+                <td colSpan={6} style={{ padding: "24px 8px", textAlign: "center", fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>
                   No results match your filter.
                 </td>
               </tr>
@@ -389,7 +389,7 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
 
       {/* Pagination */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, paddingTop: 4 }}>
-        <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
+        <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>
           {table.getFilteredRowModel().rows.length} rows
           {table.getPageCount() > 1 && ` · page ${table.getState().pagination.pageIndex + 1} of ${table.getPageCount()}`}
         </span>
@@ -397,7 +397,7 @@ export function GuidanceTrackTable({ rows, filterState }: GuidanceTrackTableProp
           <select
             value={table.getState().pagination.pageSize}
             onChange={e => table.setPageSize(Number(e.target.value))}
-            style={{ fontSize: 11, border: "1px solid var(--qc-hair)", borderRadius: 6, padding: "3px 6px", color: "var(--qc-ink)", background: "var(--qc-card)", cursor: "pointer" }}
+            style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", border: "1px solid var(--qc-hair)", borderRadius: 6, padding: "3px 6px", color: "var(--qc-ink)", background: "var(--qc-card)", cursor: "pointer" }}
           >
             {[5, 10, 20, 50].map(sz => <option key={sz} value={sz}>{sz} / page</option>)}
           </select>

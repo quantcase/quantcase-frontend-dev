@@ -44,19 +44,19 @@ export function SRRangeBar({
       <div className="relative mt-3" style={{ height: 20 }}>
         <span
           className="absolute left-0 font-semibold"
-          style={{ fontSize: 13, color: "var(--qc-ink)" }}
+          style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}
         >
           ₹{support.toLocaleString("en-IN")}
         </span>
         <span
           className="absolute -translate-x-1/2 font-semibold"
-          style={{ left: `${clampedPos}%`, fontSize: 13, color: "var(--qc-ink)" }}
+          style={{ left: `${clampedPos}%`, fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}
         >
           ₹{cmp.toLocaleString("en-IN")}
         </span>
         <span
           className="absolute right-0 font-semibold"
-          style={{ fontSize: 13, color: "var(--qc-ink)" }}
+          style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}
         >
           ₹{resistance.toLocaleString("en-IN")}
         </span>
@@ -66,7 +66,7 @@ export function SRRangeBar({
       <div className="mt-6 text-center">
         <span className="font-mono text-[11px]" style={{ color: "var(--qc-ink)" }}>
           CMP is{" "}
-          <span style={{ fontWeight: 600, color: "var(--qc-ink)" }}>
+          <span style={{ fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>
             {positionInRange.toFixed(1)}%
           </span>{" "}
           from support

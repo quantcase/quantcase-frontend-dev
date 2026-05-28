@@ -19,14 +19,14 @@ interface Column {
 function ColumnCard({ item, accentColor }: { item: Column["items"][0]; accentColor: string }) {
   return (
     <div style={{ paddingBottom: 18, borderBottom: "1px solid var(--qc-hair)" }}>
-      <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.4 }}>
+      <p style={{ margin: "0 0 4px", fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.4 }}>
         {item.title}
       </p>
-      <p style={{ margin: "0 0 6px", fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.6 }}>
+      <p style={{ margin: "0 0 6px", fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.6 }}>
         {item.body}
       </p>
       {item.source && (
-        <span style={{ fontSize: 10, color: "var(--qc-ink-3)", fontStyle: "italic" }}>{item.source}</span>
+        <span style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", fontStyle: "italic" }}>{item.source}</span>
       )}
     </div>
   );
@@ -63,8 +63,9 @@ function IntelligenceColumn({ column }: { column: Column }) {
         />
         <span
           style={{
-            fontSize: 10,
-            fontWeight: 600,
+            fontSize: "var(--qc-fz-10)",
+            fontWeight: "var(--qc-w-semi)",
+            fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink-2)",
             textTransform: "uppercase",
             letterSpacing: "0.1em",
@@ -75,10 +76,11 @@ function IntelligenceColumn({ column }: { column: Column }) {
         <span
           style={{
             marginLeft: "auto",
-            fontSize: 10,
-            fontWeight: 600,
+            fontSize: "var(--qc-fz-10)",
+            fontWeight: "var(--qc-w-semi)",
+            fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink-3)",
-            letterSpacing: "0.05em",
+            letterSpacing: "var(--qc-track-pill)",
           }}
         >
           {String(column.items.length).padStart(2, "0")}
@@ -125,10 +127,10 @@ export function DecisionIntelligenceSection({ thesis, redFlags }: DecisionIntell
 
   const title = (
     <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <span style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink-3)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+      <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", letterSpacing: "var(--qc-track-eyebrow-l)", textTransform: "uppercase" }}>
         Decision Intelligence
       </span>
-      <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
+      <span style={{ fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
         Strengths · Focus · Red flags
       </span>
     </div>

@@ -10,7 +10,7 @@ function InlineMarkdown({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         p.startsWith("**") && p.endsWith("**") ? (
-          <strong key={i} style={{ color: "var(--qc-ink)", fontWeight: 600 }}>
+          <strong key={i} style={{ color: "var(--qc-ink)", fontWeight: "var(--qc-w-semi)" }}>
             {p.slice(2, -2)}
           </strong>
         ) : (
@@ -47,8 +47,8 @@ export function CompanyProfileCard({ data, overviewData }: Props) {
       >
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10,
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-10)",
             letterSpacing: "0.16em",
             color: "var(--qc-ink-2)",
             textTransform: "uppercase",
@@ -57,7 +57,7 @@ export function CompanyProfileCard({ data, overviewData }: Props) {
           About
         </span>
 
-        <p style={{ fontSize: 13, lineHeight: 1.7, color: "var(--qc-ink)", margin: 0 }}>
+        <p style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", lineHeight: 1.7, color: "var(--qc-ink)", margin: 0 }}>
           {overviewData?.snapshot ? <InlineMarkdown text={overviewData.snapshot} /> : description}
         </p>
       </section>

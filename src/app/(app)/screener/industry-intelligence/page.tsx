@@ -61,19 +61,21 @@ function StatTile({
     >
       <span
         style={{
-          fontSize: 10,
-          fontWeight: 600,
+          fontSize: "var(--qc-fz-10)",
+          fontWeight: "var(--qc-w-semi)",
+          fontFamily: "var(--qc-font-sans)",
           textTransform: "uppercase",
           letterSpacing: "0.08em",
-          color: "var(--qc-text-muted, #888)",
+          color: "var(--qc-ink-3)",
         }}
       >
         {label}
       </span>
       <span
         style={{
-          fontSize: 20,
-          fontWeight: 500,
+          fontSize: "var(--qc-fz-22)",
+          fontWeight: "var(--qc-w-medium)",
+          fontFamily: "var(--qc-font-mono)",
           color: "var(--qc-text-heading, #0F172B)",
           lineHeight: 1.2,
           letterSpacing: "-0.01em",
@@ -84,16 +86,17 @@ function StatTile({
       {change && (
         <span
           style={{
-            fontSize: 11,
-            fontWeight: 500,
-            color: changePositive === true ? "var(--qc-up, #16a34a)" : changePositive === false ? "var(--qc-down, #dc2626)" : "var(--qc-text-muted, #888)",
+            fontSize: "var(--qc-fz-11)",
+            fontWeight: "var(--qc-w-medium)",
+            fontFamily: "var(--qc-font-mono)",
+            color: changePositive === true ? "var(--qc-up, #16a34a)" : changePositive === false ? "var(--qc-down, #dc2626)" : "var(--qc-ink-3)",
           }}
         >
           {change}
         </span>
       )}
       {sublabel && !change && (
-        <span style={{ fontSize: 11, color: "var(--qc-text-muted, #888)" }}>{sublabel}</span>
+        <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)" }}>{sublabel}</span>
       )}
     </div>
   );
@@ -128,8 +131,8 @@ function IndustryIntelligenceInner() {
           <div>
             <h1
               style={{
-                fontSize: 34,
-                fontWeight: 500,
+                fontSize: "var(--qc-fz-30)",
+                fontWeight: "var(--qc-w-medium)",
                 letterSpacing: "-0.02em",
                 margin: 0,
                 lineHeight: 1.15,
@@ -141,8 +144,9 @@ function IndustryIntelligenceInner() {
             <div
               style={{
                 marginTop: 6,
-                fontSize: 12,
-                color: "var(--qc-text-muted, #888)",
+                fontSize: "var(--qc-fz-12)",
+                fontFamily: "var(--qc-font-sans)",
+                color: "var(--qc-ink-3)",
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
@@ -162,8 +166,9 @@ function IndustryIntelligenceInner() {
                       background: regimeBg,
                       border: `1px solid ${regimeBorder}`,
                       color: regimeColor,
-                      fontSize: 11,
-                      fontWeight: 600,
+                      fontSize: "var(--qc-fz-11)",
+                      fontWeight: "var(--qc-w-semi)",
+                      fontFamily: "var(--qc-font-sans)",
                     }}
                   >
                     <RegimeIcon style={{ width: 11, height: 11 }} />
@@ -178,13 +183,14 @@ function IndustryIntelligenceInner() {
           {meta && (
             <span
               style={{
-                fontSize: 10,
-                fontWeight: 500,
+                fontSize: "var(--qc-fz-10)",
+                fontWeight: "var(--qc-w-medium)",
+                fontFamily: "var(--qc-font-sans)",
                 padding: "3px 8px",
                 borderRadius: 6,
                 background: "var(--qc-surface-card, #fff)",
                 border: "1px solid var(--qc-border-default, #E2E2E2)",
-                color: "var(--qc-text-muted, #888)",
+                color: "var(--qc-ink-3)",
                 marginTop: 4,
                 alignSelf: "flex-start",
               }}

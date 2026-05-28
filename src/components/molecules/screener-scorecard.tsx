@@ -121,8 +121,8 @@ export function ScreenerScorecard({
         {bandLabel && (
           <span
             style={{
-              fontSize: 10,
-              fontWeight: 700,
+              fontSize: "var(--qc-fz-10)",
+              fontWeight: "var(--qc-w-bold)",
               color: levelColor,
               background: levelBg,
               border: `1px solid ${levelColor}`,
@@ -142,8 +142,8 @@ export function ScreenerScorecard({
       {/* Verdict headline */}
       <h2
         style={{
-          fontSize: 22,
-          fontWeight: 400,
+          fontSize: "var(--qc-fz-22)",
+          fontWeight: "var(--qc-w-regular)",
           lineHeight: 1.4,
           letterSpacing: "-0.01em",
           margin: 0,
@@ -161,8 +161,8 @@ export function ScreenerScorecard({
         <p
           style={{
             marginTop: 12,
-            fontSize: 14,
-            fontWeight: 400,
+            fontSize: "var(--qc-fz-14)",
+            fontWeight: "var(--qc-w-regular)",
             color: "rgba(255,255,255,0.55)",
             lineHeight: 1.5,
             maxWidth: "80%",
@@ -216,7 +216,7 @@ export function ScreenerScorecard({
                 />
                 {item.label}
                 {item.descriptor && (
-                  <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>
+                  <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)" }}>
                     — {item.descriptor}
                   </span>
                 )}

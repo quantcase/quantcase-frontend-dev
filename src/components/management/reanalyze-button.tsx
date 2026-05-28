@@ -44,8 +44,9 @@ export function ReanalyzeButton({ isAnalyzing, aggregateStatus, progress, analyz
         onClick={onClick}
         disabled={isAnalyzing}
         style={{
-          fontSize: 12,
-          fontWeight: 600,
+          fontSize: "var(--qc-fz-12)",
+          fontWeight: "var(--qc-w-semi)",
+          fontFamily: "var(--qc-font-sans)",
           color: isAnalyzing ? "var(--qc-ink-2)" : "var(--qc-on-dark)",
           background: isAnalyzing ? "var(--qc-section)" : "var(--qc-ink)",
           border: "1px solid var(--qc-hair)",
@@ -59,12 +60,12 @@ export function ReanalyzeButton({ isAnalyzing, aggregateStatus, progress, analyz
         {label}
       </button>
       {analyzedAt && !isAnalyzing && (
-        <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
+        <span style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>
           Updated {formatRelativeTime(analyzedAt)}
         </span>
       )}
       {analyzeError && (
-        <span style={{ fontSize: 10, color: "var(--qc-down)" }}>{analyzeError}</span>
+        <span style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down)" }}>{analyzeError}</span>
       )}
     </div>
   );

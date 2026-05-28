@@ -227,7 +227,7 @@ function ChartView({
               angle: -90,
               position: "insideLeft",
               offset: -36,
-              style: { fontSize: 10, fill: "var(--qc-text-muted)", textAnchor: "middle" },
+              style: { fontSize: "var(--qc-fz-10)", fill: "var(--qc-text-muted)", textAnchor: "middle" },
             }}
           />
           <Tooltip
@@ -235,14 +235,14 @@ function ChartView({
               background: "var(--qc-surface-card)",
               border: "1px solid var(--qc-border-default)",
               borderRadius: 8,
-              fontSize: 12,
+              fontSize: "var(--qc-fz-12)",
               color: "var(--qc-text-heading)",
               boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
               maxHeight: 260,
               overflowY: "auto",
             }}
             formatter={(value: number, name: string) => [`#${value}`, name]}
-            labelStyle={{ color: "var(--qc-text-muted)", fontWeight: 600, marginBottom: 4 }}
+            labelStyle={{ color: "var(--qc-text-muted)", fontWeight: "var(--qc-w-semi)", marginBottom: 4 }}
             itemStyle={{ padding: "1px 0" }}
           />
           <ReferenceLine y={step + 0.5}      stroke="var(--qc-border-default)" strokeDasharray="5 4" strokeOpacity={0.9} />

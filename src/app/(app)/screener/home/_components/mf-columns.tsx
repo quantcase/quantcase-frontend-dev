@@ -30,10 +30,10 @@ export const MF_COLUMNS: ColDef[] = [
     sortKey: "name",
     render: (s) => (
       <div className="flex flex-col gap-0.5 min-w-0">
-        <span className="truncate max-w-[300px] block" style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>
+        <span className="truncate max-w-[300px] block" style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>
           {s.name}
         </span>
-        <span className="truncate max-w-[300px] block" style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
+        <span className="truncate max-w-[300px] block" style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>
           {[s.amc_name, s.category].filter(Boolean).join(" · ")}
         </span>
       </div>
@@ -56,7 +56,7 @@ export const MF_COLUMNS: ColDef[] = [
     key: "risk_label",
     label: "Risk",
     align: "left",
-    render: (s) => <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>{s.risk_label ?? "—"}</span>,
+    render: (s) => <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>{s.risk_label ?? "—"}</span>,
   },
   {
     key: "morningstar",
@@ -65,10 +65,10 @@ export const MF_COLUMNS: ColDef[] = [
     sortKey: "morningstar",
     render: (s) =>
       s.morningstar == null ? (
-        <span style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>—</span>
+        <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)" }}>—</span>
       ) : (
         <span className="flex items-center justify-end gap-0.5">
-          <span style={{ color: "var(--qc-warn)", fontSize: 11, letterSpacing: 1 }}>{"★".repeat(s.morningstar)}</span>
+          <span style={{ color: "var(--qc-warn)", fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", letterSpacing: 1 }}>{"★".repeat(s.morningstar)}</span>
         </span>
       ),
   },
@@ -77,14 +77,14 @@ export const MF_COLUMNS: ColDef[] = [
     label: "AUM",
     align: "right",
     sortKey: "aum",
-    render: (s) => <span style={{ fontSize: 12, fontWeight: 500, color: "var(--qc-ink)" }}>{cr(s.aum)}</span>,
+    render: (s) => <span style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink)" }}>{cr(s.aum)}</span>,
   },
   {
     key: "expense_ratio",
     label: "Exp. Ratio",
     align: "right",
     sortKey: "expense_ratio",
-    render: (s) => <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>{pct(s.expense_ratio)}</span>,
+    render: (s) => <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-2)" }}>{pct(s.expense_ratio)}</span>,
   },
   {
     key: "nav",
@@ -92,7 +92,7 @@ export const MF_COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "nav",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "var(--qc-ink)", fontWeight: 500 }}>
+      <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink)", fontWeight: "var(--qc-w-medium)" }}>
         {s.nav == null ? <span style={{ color: "var(--qc-ink-3)" }}>—</span> : `₹${s.nav.toFixed(2)}`}
       </span>
     ),

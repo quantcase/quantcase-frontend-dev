@@ -50,10 +50,10 @@ function AddShadowDialog({
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", marginBottom: 2 }}>
+            <p style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", marginBottom: 2 }}>
               Shadow Portfolio
             </p>
-            <h3 style={{ fontSize: 18, fontWeight: 500, color: "var(--qc-ink)", margin: 0 }}>
+            <h3 style={{ fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", margin: 0 }}>
               Add {ticker}
             </h3>
           </div>
@@ -63,11 +63,11 @@ function AddShadowDialog({
         </div>
 
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <p style={{ fontSize: 13, color: "var(--qc-ink-3)", margin: 0 }}>
+          <p style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", margin: 0 }}>
             Add <strong style={{ color: "var(--qc-ink)" }}>{ticker}</strong> to your Shadow Portfolio to track it alongside your research.
           </p>
 
-          {err && <p style={{ fontSize: 12, color: "var(--qc-down, #dc2626)", margin: 0 }}>{err}</p>}
+          {err && <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down, #dc2626)", margin: 0 }}>{err}</p>}
 
           <button
             type="submit"
@@ -78,8 +78,9 @@ function AddShadowDialog({
               border: "none",
               borderRadius: 8,
               padding: "11px 0",
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: "var(--qc-fz-13)",
+              fontWeight: "var(--qc-w-semi)",
+              fontFamily: "var(--qc-font-sans)",
               cursor: mutating ? "not-allowed" : "pointer",
               opacity: mutating ? 0.7 : 1,
               display: "flex",
@@ -125,7 +126,8 @@ function NoteItem({
             padding: "8px 10px",
             borderRadius: 7,
             border: "1px solid var(--qc-hair, #E2E2E2)",
-            fontSize: 13,
+            fontSize: "var(--qc-fz-13)",
+            fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink)",
             resize: "none",
             background: "var(--qc-bg, #F5F5F5)",
@@ -136,13 +138,13 @@ function NoteItem({
         <div style={{ display: "flex", gap: 8 }}>
           <button
             onClick={() => { onEdit(note.id, holdingId, draft); setEditing(false); }}
-            style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", background: "none", border: "none", cursor: "pointer" }}
+            style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", background: "none", border: "none", cursor: "pointer" }}
           >
             Save
           </button>
           <button
             onClick={() => { setDraft(note.note_text); setEditing(false); }}
-            style={{ fontSize: 11, color: "var(--qc-ink-3)", background: "none", border: "none", cursor: "pointer" }}
+            style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", background: "none", border: "none", cursor: "pointer" }}
           >
             Cancel
           </button>
@@ -153,7 +155,7 @@ function NoteItem({
 
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-      <p style={{ fontSize: 13, color: "var(--qc-ink)", margin: 0, lineHeight: 1.5, flex: 1 }}>{note.note_text}</p>
+      <p style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", margin: 0, lineHeight: 1.5, flex: 1 }}>{note.note_text}</p>
       <div style={{ display: "flex", gap: 4, flexShrink: 0, marginTop: 2 }}>
         <button onClick={() => setEditing(true)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--qc-ink-3)", padding: 2 }}>
           <Pencil size={13} />
@@ -242,12 +244,12 @@ function NotesPanel({
             <StickyNote size={14} style={{ color: "var(--qc-ink-2, #888)" }} />
             <span
               style={{
-                fontFamily: "var(--font-ibm-plex-mono, monospace)",
-                fontSize: 11,
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: "var(--qc-fz-11)",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "var(--qc-ink, #0F172B)",
-                fontWeight: 500,
+                fontWeight: "var(--qc-w-medium)",
               }}
             >
               Research Notes
@@ -255,13 +257,14 @@ function NotesPanel({
             {notes.length > 0 && (
               <span
                 style={{
-                  fontSize: 10,
-                  fontWeight: 700,
+                  fontSize: "var(--qc-fz-10)",
+                  fontWeight: "var(--qc-w-bold)",
+                  fontFamily: "var(--qc-font-mono)",
                   color: "#84cc16",
                   background: "rgba(132,204,22,0.12)",
                   borderRadius: 999,
                   padding: "1px 7px",
-                  letterSpacing: "0.04em",
+                  letterSpacing: "var(--qc-track-pill)",
                 }}
               >
                 {notes.length}
@@ -298,7 +301,7 @@ function NotesPanel({
           }}
         >
           {/* Ticker label */}
-          <p style={{ fontSize: 16, fontWeight: 500, color: "var(--qc-ink, #0F172B)", margin: 0 }}>
+          <p style={{ fontSize: "var(--qc-fz-16)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink, #0F172B)", margin: 0 }}>
             {ticker}
           </p>
 
@@ -341,7 +344,7 @@ function NotesPanel({
                     onEdit={(noteId, hId, text) => editNote(noteId, hId, text)}
                     onDelete={(noteId, hId) => deleteNote(noteId, hId)}
                   />
-                  <p style={{ fontSize: 10, color: "var(--qc-ink-3, #888)", margin: "6px 0 0", letterSpacing: "0.03em" }}>
+                  <p style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-3, #888)", margin: "6px 0 0", letterSpacing: "0.03em" }}>
                     {new Date(note.updated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                   </p>
                 </div>
@@ -350,7 +353,7 @@ function NotesPanel({
           )}
 
           {!loading && notes.length === 0 && (
-            <p style={{ fontSize: 13, color: "var(--qc-ink-3, #888)", margin: 0 }}>
+            <p style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3, #888)", margin: 0 }}>
               {inPortfolio ? "No notes yet. Add your first observation below." : "Write a note — the stock will be added to your Shadow Portfolio automatically."}
             </p>
           )}
@@ -367,7 +370,8 @@ function NotesPanel({
                 padding: "9px 12px",
                 borderRadius: 8,
                 border: "1px solid var(--qc-hair, #E2E2E2)",
-                fontSize: 13,
+                fontSize: "var(--qc-fz-13)",
+                fontFamily: "var(--qc-font-sans)",
                 color: "var(--qc-ink, #0F172B)",
                 resize: "none",
                 background: "var(--qc-section, #F5F5F5)",
@@ -375,7 +379,7 @@ function NotesPanel({
                 boxSizing: "border-box",
               }}
             />
-            {noteErr && <p style={{ fontSize: 12, color: "var(--qc-down, #dc2626)", margin: 0 }}>{noteErr}</p>}
+            {noteErr && <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down, #dc2626)", margin: 0 }}>{noteErr}</p>}
             <button
               type="submit"
               disabled={mutating || !draft.trim()}
@@ -386,8 +390,9 @@ function NotesPanel({
                 border: "none",
                 borderRadius: 7,
                 padding: "8px 16px",
-                fontSize: 12,
-                fontWeight: 600,
+                fontSize: "var(--qc-fz-12)",
+                fontWeight: "var(--qc-w-semi)",
+                fontFamily: "var(--qc-font-sans)",
                 cursor: mutating || !draft.trim() ? "not-allowed" : "pointer",
                 opacity: mutating || !draft.trim() ? 0.5 : 1,
                 display: "flex",
@@ -466,8 +471,9 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
               borderRadius: 8,
               border: "1px solid var(--qc-up-soft, #bbf7d0)",
               background: "var(--qc-up-bg, #f0fdf4)",
-              fontSize: 12,
-              fontWeight: 500,
+              fontSize: "var(--qc-fz-12)",
+              fontWeight: "var(--qc-w-medium)",
+              fontFamily: "var(--qc-font-sans)",
               color: "var(--qc-up, #16a34a)",
             }}
           >
@@ -486,8 +492,9 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
               borderRadius: 8,
               border: "1px solid var(--qc-hair, #E2E2E2)",
               background: justAdded ? "var(--qc-up-bg, #f0fdf4)" : "var(--qc-card, #fff)",
-              fontSize: 12,
-              fontWeight: 500,
+              fontSize: "var(--qc-fz-12)",
+              fontWeight: "var(--qc-w-medium)",
+              fontFamily: "var(--qc-font-sans)",
               color: justAdded ? "var(--qc-up, #16a34a)" : "var(--qc-ink, #0F172B)",
               cursor: loading ? "default" : "pointer",
               opacity: loading ? 0.5 : 1,
@@ -510,8 +517,9 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
             borderRadius: 8,
             border: "1px solid var(--qc-hair, #E2E2E2)",
             background: "var(--qc-card, #fff)",
-            fontSize: 12,
-            fontWeight: 500,
+            fontSize: "var(--qc-fz-12)",
+            fontWeight: "var(--qc-w-medium)",
+            fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink, #0F172B)",
             cursor: "pointer",
           }}

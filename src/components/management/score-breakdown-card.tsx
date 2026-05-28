@@ -94,7 +94,7 @@ export function ScoreBreakdownCard({ mqiScore, signals, action, rationale }: Sco
         <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
           <span style={{
             display: "inline-block",
-            fontSize: 10, fontWeight: 700,
+            fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-bold)", fontFamily: "var(--qc-font-sans)",
             color, background: bg,
             border: `1px solid ${color}`,
             borderRadius: 4, padding: "2px 8px",
@@ -103,10 +103,10 @@ export function ScoreBreakdownCard({ mqiScore, signals, action, rationale }: Sco
           }}>
             {band} · Discount Warranted
           </span>
-          <p style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.01em" }}>
+          <p style={{ margin: "0 0 8px", fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "var(--qc-track-display)" }}>
             {action}
           </p>
-          <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
+          <p style={{ margin: 0, fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
             {rationale}
           </p>
         </div>
@@ -130,15 +130,15 @@ export function ScoreBreakdownCard({ mqiScore, signals, action, rationale }: Sco
                 padding: "14px 14px 10px",
                 borderRight: !isLast ? "1px solid var(--qc-hair)" : "none",
               }}>
-                <p style={{ margin: "0 0 8px", fontSize: 9, fontWeight: 500, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                <p style={{ margin: "0 0 8px", fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
                   {dimLabel}
                 </p>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 8 }}>
-                  <span style={{ fontSize: 22, fontWeight: 500, color: "var(--qc-ink)", letterSpacing: "-0.02em", lineHeight: 1 }}>
+                  <span style={{ fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink)", letterSpacing: "-0.02em", lineHeight: 1 }}>
                     {item.score}
                   </span>
-                  <span style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>/{item.max_score}</span>
-                  <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 600, color: sc, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-3)" }}>/{item.max_score}</span>
+                  <span style={{ marginLeft: "auto", fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: sc, textTransform: "uppercase", letterSpacing: "var(--qc-track-pill)" }}>
                     {rating}
                   </span>
                 </div>

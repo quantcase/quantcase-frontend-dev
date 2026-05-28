@@ -12,7 +12,7 @@ function BullBearSplit({ bullCase, bearCase }: { bullCase: string[]; bearCase: s
       {/* Bull */}
       <div className="flex-1 min-w-0" style={{ borderRight: "1px solid var(--qc-hair)" }}>
         <div style={{ background: "var(--qc-up-soft)", borderLeft: "4px solid var(--qc-up)", padding: "10px 14px" }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-up)" }}>
+          <span style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-up)" }}>
             Bull Case (Management Lens)
           </span>
         </div>
@@ -20,8 +20,8 @@ function BullBearSplit({ bullCase, bearCase }: { bullCase: string[]; bearCase: s
           <ul className="space-y-2">
             {bullCase.map((point, i) => (
               <li key={i} className="flex gap-2">
-                <span style={{ color: "var(--qc-up)", flexShrink: 0, marginTop: 2, fontSize: 10 }}>●</span>
-                <span style={{ fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>{point}</span>
+                <span style={{ color: "var(--qc-up)", flexShrink: 0, marginTop: 2, fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)" }}>●</span>
+                <span style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>{point}</span>
               </li>
             ))}
           </ul>
@@ -31,7 +31,7 @@ function BullBearSplit({ bullCase, bearCase }: { bullCase: string[]; bearCase: s
       {/* Bear */}
       <div className="flex-1 min-w-0">
         <div style={{ background: "var(--qc-down-soft)", borderLeft: "4px solid var(--qc-down)", padding: "10px 14px" }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-down)" }}>
+          <span style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down)" }}>
             Bear Case (Management Lens)
           </span>
         </div>
@@ -39,8 +39,8 @@ function BullBearSplit({ bullCase, bearCase }: { bullCase: string[]; bearCase: s
           <ul className="space-y-2">
             {bearCase.map((point, i) => (
               <li key={i} className="flex gap-2">
-                <span style={{ color: "var(--qc-down)", flexShrink: 0, marginTop: 2, fontSize: 10 }}>●</span>
-                <span style={{ fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>{point}</span>
+                <span style={{ color: "var(--qc-down)", flexShrink: 0, marginTop: 2, fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)" }}>●</span>
+                <span style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>{point}</span>
               </li>
             ))}
           </ul>
@@ -107,14 +107,15 @@ export function InvestmentThesisSection({ thesis }: InvestmentThesisSectionProps
   const headerAction = next_concall_watchlist.length > 0 ? (
     <div
       style={{
-        fontSize: 11,
-        fontWeight: 600,
+        fontSize: "var(--qc-fz-11)",
+        fontWeight: "var(--qc-w-semi)",
+        fontFamily: "var(--qc-font-sans)",
         color: "var(--qc-ink)",
         background: "var(--qc-section)",
         border: "1px solid var(--qc-hair)",
         borderRadius: 4,
         padding: "3px 10px",
-        letterSpacing: "0.05em",
+        letterSpacing: "var(--qc-track-pill)",
       }}
     >
       {next_concall_watchlist.length} Watchlist Items

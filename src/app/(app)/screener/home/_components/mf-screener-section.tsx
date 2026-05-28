@@ -158,7 +158,7 @@ function RatingFilter({ value, onChange }: { value: number | undefined; onChange
                 style={{ color: "var(--qc-ink)", fontWeight: value === n ? 600 : 400 }}
               >
                 <span style={{ color: "var(--qc-warn)", letterSpacing: 1 }}>{"★".repeat(n)}</span>
-                <span style={{ color: "var(--qc-ink-2)", fontSize: 11 }}>{n}+</span>
+                <span style={{ color: "var(--qc-ink-2)", fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)" }}>{n}+</span>
               </button>
             ))}
           </div>
@@ -304,7 +304,7 @@ function MfTable({
         <table className="w-full" style={{ borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "var(--qc-bg)", borderBottom: "2px solid var(--qc-hair)" }}>
-              <th className="px-4 py-3 text-left" style={{ width: 48, color: "var(--qc-ink-2)", fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em" }}>#</th>
+              <th className="px-4 py-3 text-left" style={{ width: 48, color: "var(--qc-ink-2)", fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", textTransform: "uppercase", letterSpacing: "0.08em" }}>#</th>
               {MF_COLUMNS.map((col) => (
                 <th
                   key={col.key}
@@ -363,7 +363,7 @@ function MfTable({
                   onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                 >
                   <td className="px-4 py-3.5" style={{ width: 48 }}>
-                    <span className="tabular-nums" style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>
+                    <span className="tabular-nums" style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-2)" }}>
                       {(page - 1) * PAGE_SIZE + i + 1}
                     </span>
                   </td>

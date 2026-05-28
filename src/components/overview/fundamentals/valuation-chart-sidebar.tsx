@@ -62,14 +62,14 @@ function CustomTooltip({ active, payload, label, format }: CustomTooltipProps) {
         color: "#fff",
         borderRadius: 8,
         padding: "6px 10px",
-        fontSize: 11,
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: "var(--qc-fz-11)",
+        fontFamily: "var(--qc-font-mono)",
         letterSpacing: ".02em",
         pointerEvents: "none",
       }}
     >
       <div style={{ opacity: 0.6, marginBottom: 2 }}>{label}</div>
-      <div style={{ fontWeight: 600 }}>{format(payload[0].value)}</div>
+      <div style={{ fontWeight: "var(--qc-w-semi)" }}>{format(payload[0].value)}</div>
     </div>
   );
 }
@@ -185,7 +185,7 @@ export function ValuationChartSidebar({ trend, dividendYieldTrend, fundamentalsT
           {selectedLabel ? selectedLabel : "Select a metric"}
         </MonoEyebrow>
         {hasData && firstPeriod && lastPeriod && (
-          <span style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", color: "var(--qc-ink-2)", letterSpacing: ".06em" }}>
+          <span style={{ fontSize: "var(--qc-fz-9)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-2)", letterSpacing: ".06em" }}>
             {firstPeriod} – {lastPeriod}
           </span>
         )}
@@ -194,15 +194,15 @@ export function ValuationChartSidebar({ trend, dividendYieldTrend, fundamentalsT
       {/* Stat strip: latest value + QoQ delta */}
       {hasData && latestValue != null ? (
         <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
-          <span style={{ fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+          <span style={{ fontSize: "var(--qc-fz-26)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.02em", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
             {chartFormat(latestValue)}
           </span>
           {delta != null && (
             <span
               style={{
-                fontSize: 10,
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontWeight: 500,
+                fontSize: "var(--qc-fz-10)",
+                fontFamily: "var(--qc-font-mono)",
+                fontWeight: "var(--qc-w-medium)",
                 padding: "2px 7px",
                 borderRadius: 5,
                 letterSpacing: ".02em",
@@ -216,7 +216,7 @@ export function ValuationChartSidebar({ trend, dividendYieldTrend, fundamentalsT
         </div>
       ) : !selectedMetric ? (
         <div style={{ position: "relative", zIndex: 1, marginBottom: 14 }}>
-          <span style={{ fontSize: 12, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: ".04em" }}>
+          <span style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)", letterSpacing: "var(--qc-track-pill)" }}>
             Click any metric to chart it
           </span>
         </div>
@@ -250,10 +250,10 @@ export function ValuationChartSidebar({ trend, dividendYieldTrend, fundamentalsT
                 gap: 2,
               }}
             >
-              <span style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: ".1em", color, textTransform: "uppercase" as const }}>
+              <span style={{ fontSize: "var(--qc-fz-9)", fontFamily: "var(--qc-font-mono)", letterSpacing: ".1em", color, textTransform: "uppercase" as const }}>
                 {label}{period ? ` · ${period}` : ""}
               </span>
-              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>
+              <span style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>
                 {chartFormat(value)}
               </span>
             </div>
@@ -296,7 +296,7 @@ export function ValuationChartSidebar({ trend, dividendYieldTrend, fundamentalsT
                 fill="none"
               />
             </svg>
-            <span style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: ".06em", textTransform: "uppercase" as const, opacity: 0.5 }}>
+            <span style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-mono)", letterSpacing: ".06em", textTransform: "uppercase" as const, opacity: 0.5 }}>
               No data
             </span>
           </div>

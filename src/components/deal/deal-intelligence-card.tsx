@@ -36,14 +36,14 @@ function SignalRow({ item }: { item: DealIntelligenceSignal }) {
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", cursor: "default" }}>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: sv.color, flexShrink: 0 }} />
-        <span style={{ fontSize: 12, color: "var(--qc-ink)", width: 130, flexShrink: 0, lineHeight: 1.2 }}>{item.label}</span>
+        <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", width: 130, flexShrink: 0, lineHeight: 1.2 }}>{item.label}</span>
         <div style={{ flex: 1, height: 4, borderRadius: 999, background: "rgba(0,0,0,0.10)", overflow: "hidden" }}>
           <div style={{ height: "100%", borderRadius: 999, width: `${pct}%`, background: sv.color, transition: "width .4s" }} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4, width: 56, justifyContent: "flex-end", flexShrink: 0 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: sv.color, fontVariantNumeric: "tabular-nums" }}>
+          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: sv.color, fontVariantNumeric: "tabular-nums" }}>
             {item.score}
-            <span style={{ color: "rgba(58,58,46,0.45)", fontWeight: 400 }}>/{item.max_score}</span>
+            <span style={{ color: "rgba(58,58,46,0.45)", fontWeight: "var(--qc-w-regular)" }}>/{item.max_score}</span>
           </span>
           <Info style={{ width: 10, height: 10, color: "rgba(58,58,46,0.35)", flexShrink: 0 }} />
         </div>
@@ -62,14 +62,14 @@ function SignalRow({ item }: { item: DealIntelligenceSignal }) {
             padding: "10px 14px", borderBottom: "1px solid var(--qc-hair)",
             background: sv.bg, borderRadius: "14px 14px 0 0",
           }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{item.label}</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: sv.color }}>{item.score}/{item.max_score}</span>
+            <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{item.label}</span>
+            <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: sv.color }}>{item.score}/{item.max_score}</span>
           </div>
           <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
             {item.details.map((d, i) => (
               <div key={i} style={{ display: "flex", gap: 8 }}>
                 <span style={{ width: 5, height: 5, borderRadius: "50%", background: sv.color, flexShrink: 0, marginTop: 5 }} />
-                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>{d}</p>
+                <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.55 }}>{d}</p>
               </div>
             ))}
           </div>
@@ -104,14 +104,14 @@ function StrategyRow({ label, body, dot, Icon }: { label: string; body: string; 
         </div>
         <div style={{ minWidth: 0 }}>
           <span style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
             color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             letterSpacing: ".1em", display: "block", marginBottom: 2,
           }}>
             {label}
           </span>
           <p style={{
-            margin: 0, fontSize: 12, fontWeight: 500,
+            margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)",
             color: "var(--qc-ink)", lineHeight: 1.4,
             display: "-webkit-box", WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical", overflow: "hidden",
@@ -134,10 +134,10 @@ function StrategyRow({ label, body, dot, Icon }: { label: string; body: string; 
             display: "flex", alignItems: "center", gap: 6,
           }}>
             <Icon style={{ width: 10, height: 10, color: dot, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)" }}>{label}</span>
+            <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{label}</span>
           </div>
           <div style={{ padding: "10px 12px" }}>
-            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
+            <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
           </div>
         </div>
       )}
@@ -170,14 +170,14 @@ function RecommendedStrategyCard({ strategy }: { strategy: DealRecommendedStrate
           <Target style={{ width: 10, height: 10, color: "var(--qc-ink)" }} />
         </div>
         <div style={{
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+          fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
           letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
         }}>
           Recommended Strategy
         </div>
       </div>
 
-      <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.4, letterSpacing: "-0.01em" }}>
+      <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", lineHeight: 1.4, letterSpacing: "-0.01em" }}>
         {strategy.action}
       </p>
 
@@ -210,10 +210,10 @@ function WatchoutsList({ items }: { items: DealWatchout[] }) {
             background: "var(--qc-down)", flexShrink: 0, marginTop: 5,
           }} />
           <div style={{ minWidth: 0 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.4, display: "block" }}>
+            <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", lineHeight: 1.4, display: "block" }}>
               {item.title}
             </span>
-            <p style={{ margin: "2px 0 0", fontSize: 11, color: "var(--qc-ink)", lineHeight: 1.5 }}>
+            <p style={{ margin: "2px 0 0", fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink)", lineHeight: 1.5 }}>
               {item.description}
             </p>
           </div>
@@ -249,7 +249,7 @@ export function DealIntelligenceCard({ intelligence }: { intelligence: DealIntel
         }}>
           <Brain style={{ width: 14, height: 14, color: "var(--qc-ink)" }} />
         </div>
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
+        <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
           Decision Intelligence
         </span>
       </div>
@@ -275,21 +275,21 @@ export function DealIntelligenceCard({ intelligence }: { intelligence: DealIntel
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
             <div>
               <div style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+                fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
                 letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const, marginBottom: 6,
               }}>
                 Deal Score
               </div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
                 <span style={{
-                  fontSize: 44, fontWeight: 500, letterSpacing: "-0.03em",
+                  fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-44)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.03em",
                   color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums",
                 }}>
                   {Math.round(deal_score.total)}
                 </span>
                 <span style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 15,
-                  color: "var(--qc-ink-2)", fontWeight: 400,
+                  fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-14)",
+                  color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-regular)",
                 }}>
                   /100
                 </span>
@@ -297,7 +297,7 @@ export function DealIntelligenceCard({ intelligence }: { intelligence: DealIntel
             </div>
             <span style={{
               display: "inline-block", borderRadius: 999,
-              padding: "4px 11px", fontSize: 11, fontWeight: 600,
+              padding: "4px 11px", fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)",
               background: theme.tagBg, color: theme.tagFg,
               marginTop: 2,
             }}>
@@ -311,7 +311,7 @@ export function DealIntelligenceCard({ intelligence }: { intelligence: DealIntel
           {/* Signal Breakdown rows */}
           <div>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+              fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
               letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const, marginBottom: 8,
             }}>
               Signal Breakdown · hover for details
@@ -329,12 +329,12 @@ export function DealIntelligenceCard({ intelligence }: { intelligence: DealIntel
               <div style={{ height: 1, background: "var(--qc-hair)" }} />
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+                  fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
                   letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
                 }}>
                   Key Takeaway
                 </div>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
+                <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
                   {key_takeaways[0]}
                 </p>
               </div>
@@ -361,7 +361,7 @@ export function DealIntelligenceCard({ intelligence }: { intelligence: DealIntel
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <AlertTriangle style={{ width: 11, height: 11, color: "var(--qc-ink-2)" }} />
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+              fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
               letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             }}>
               Watch Outs

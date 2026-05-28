@@ -75,9 +75,9 @@ function LensRow({ lens }: { lens: InsightLens }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9,
-            letterSpacing: ".12em",
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-9)",
+            letterSpacing: "var(--qc-track-eyebrow-l)",
             textTransform: "uppercase",
             color: "var(--qc-ink-2)",
             marginBottom: 3,
@@ -88,8 +88,9 @@ function LensRow({ lens }: { lens: InsightLens }) {
         <span
           style={{
             display: "inline-block",
-            fontSize: 11,
-            fontWeight: 600,
+            fontFamily: "var(--qc-font-sans)",
+            fontSize: "var(--qc-fz-11)",
+            fontWeight: "var(--qc-w-semi)",
             padding: "2px 8px",
             borderRadius: 5,
             background: colors.bg,
@@ -145,8 +146,8 @@ function PillarColumn({
         <div style={{ display: "flex", flexDirection: "column", gap: 3, paddingTop: 2 }}>
           <span
             style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10,
+              fontFamily: "var(--qc-font-mono)",
+              fontSize: "var(--qc-fz-10)",
               letterSpacing: ".16em",
               color: "var(--qc-ink-2)",
               textTransform: "uppercase",
@@ -157,9 +158,10 @@ function PillarColumn({
           {hasData && insight.verdict_band && (
             <span
               style={{
-                fontSize: 11.5,
+                fontFamily: "var(--qc-font-sans)",
+                fontSize: "var(--qc-fz-12)",
                 color: ring ? ring.color : "var(--qc-ink)",
-                fontWeight: 600,
+                fontWeight: "var(--qc-w-semi)",
                 lineHeight: 1.3,
                 letterSpacing: ".01em",
               }}
@@ -187,8 +189,9 @@ function PillarColumn({
           >
             <span
               style={{
-                fontSize: 19,
-                fontWeight: 700,
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: "var(--qc-fz-18)",
+                fontWeight: "var(--qc-w-bold)",
                 color: ring.color,
                 fontVariantNumeric: "tabular-nums",
                 lineHeight: 1,
@@ -198,7 +201,8 @@ function PillarColumn({
             </span>
             <span
               style={{
-                fontSize: 8,
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: "var(--qc-fz-9)",
                 color: ring.color,
                 opacity: 0.7,
                 letterSpacing: ".06em",
@@ -211,7 +215,7 @@ function PillarColumn({
           </div>
         )}
         {!hasData && (
-          <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontStyle: "italic" }}>N/A</span>
+          <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", fontStyle: "italic" }}>N/A</span>
         )}
       </div>
 
@@ -274,9 +278,9 @@ function NarrativeBar({
       <div style={{ marginBottom: 16 }}>
         <div
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10,
-            letterSpacing: ".14em",
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-10)",
+            letterSpacing: "var(--qc-track-eyebrow)",
             textTransform: "uppercase",
             color: "var(--qc-ink-2)",
             marginBottom: 8,
@@ -284,7 +288,7 @@ function NarrativeBar({
         >
           QC Insight
         </div>
-        <p style={{ margin: 0, fontSize: 13.5, color: "var(--qc-ink)", lineHeight: 1.65, fontWeight: 400 }}>
+        <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", lineHeight: 1.65, fontWeight: "var(--qc-w-regular)" }}>
           <InlineMd text={overviewNarrative} />
         </p>
       </div>
@@ -307,9 +311,9 @@ function NarrativeBar({
     <div style={{ marginBottom: 16 }}>
       <div
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 10,
-          letterSpacing: ".14em",
+          fontFamily: "var(--qc-font-mono)",
+          fontSize: "var(--qc-fz-10)",
+          letterSpacing: "var(--qc-track-eyebrow)",
           textTransform: "uppercase",
           color: "var(--qc-ink-2)",
           marginBottom: 8,
@@ -317,10 +321,10 @@ function NarrativeBar({
       >
         QC Insight
       </div>
-      <p style={{ margin: 0, fontSize: 13.5, color: "var(--qc-ink)", lineHeight: 1.65 }}>
+      <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", lineHeight: 1.65 }}>
         {parts.map((p, i) => (
           <span key={i}>
-            <strong style={{ fontWeight: 600, color: "var(--qc-ink)" }}>{p.bold}</strong>
+            <strong style={{ fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{p.bold}</strong>
             {p.rest}
           </span>
         ))}

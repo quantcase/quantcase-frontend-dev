@@ -130,11 +130,11 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
                   </div>
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h4 style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.2, margin: 0, color: "var(--qc-ink)" }}>
+                  <h4 style={{ fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-semi)", lineHeight: 1.2, margin: 0, color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>
                     {lens.name}
                   </h4>
                   {lens.subtitle && (
-                    <p style={{ fontSize: 9.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: accentColor, margin: "2px 0 0" }}>
+                    <p style={{ fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: accentColor, margin: "2px 0 0", fontFamily: "var(--qc-font-sans)" }}>
                       {lens.subtitle}
                     </p>
                   )}
@@ -142,9 +142,10 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
                 <span style={{
                   flexShrink: 0,
                   display: "inline-flex", alignItems: "center", gap: 4,
-                  fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+                  fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-bold)", letterSpacing: "var(--qc-track-eyebrow)",
                   color: statusColor, background: statusBg,
                   borderRadius: 4, padding: "3px 7px", textTransform: "uppercase",
+                  fontFamily: "var(--qc-font-sans)",
                 }}>
                   <span style={{ width: 5, height: 5, borderRadius: "50%", background: statusColor, flexShrink: 0 }} />
                   {statusLabel}
@@ -155,7 +156,7 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
               <div style={{ marginBottom: 18, borderTop: "1px dashed var(--qc-hair)" }} />
 
               {/* Description */}
-              <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.6, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+              <p style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-2)", lineHeight: 1.6, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontFamily: "var(--qc-font-sans)" }}>
                 {renderMd(lens.description)}
               </p>
 

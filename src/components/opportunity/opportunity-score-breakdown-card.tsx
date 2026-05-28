@@ -59,9 +59,9 @@ function ArcGauge({ score, maxScore, color }: { score: number; maxScore: number;
           transform={`rotate(-90 ${cx} ${cy})`}
         />
       )}
-      <text x={cx} y={cy - 14} textAnchor="middle" fontSize={8} fontWeight={600} fill="var(--qc-ink-2)" letterSpacing="0.12em">OFI</text>
-      <text x={cx} y={cy + 14} textAnchor="middle" fontSize={30} fontWeight={600} fill="var(--qc-ink)" fontFamily="inherit">{score}</text>
-      <text x={cx} y={cy + 28} textAnchor="middle" fontSize={10} fill="var(--qc-ink-3)">/ {maxScore}</text>
+      <text x={cx} y={cy - 14} textAnchor="middle" style={{ fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)" }} fill="var(--qc-ink-2)" letterSpacing="0.12em">OFI</text>
+      <text x={cx} y={cy + 14} textAnchor="middle" style={{ fontSize: "var(--qc-fz-30)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-mono)" }} fill="var(--qc-ink)">{score}</text>
+      <text x={cx} y={cy + 28} textAnchor="middle" style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)" }} fill="var(--qc-ink-3)">/ {maxScore}</text>
     </svg>
   );
 }
@@ -96,7 +96,7 @@ export function OpportunityScoreBreakdownCard({
         <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
           <span style={{
             display: "inline-block",
-            fontSize: 10, fontWeight: 700,
+            fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-bold)", fontFamily: "var(--qc-font-sans)",
             color, background: color === "var(--qc-up)" ? "var(--qc-up-soft)" : color === "var(--qc-down)" ? "var(--qc-down-soft)" : "var(--qc-warn-soft)",
             border: `1px solid ${color}`,
             borderRadius: 4, padding: "2px 8px",
@@ -105,10 +105,10 @@ export function OpportunityScoreBreakdownCard({
           }}>
             {overallStatus}
           </span>
-          <p style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.01em" }}>
+          <p style={{ margin: "0 0 8px", fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "var(--qc-track-display)" }}>
             {title}
           </p>
-          <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
+          <p style={{ margin: 0, fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
             {subtitle}
           </p>
         </div>
@@ -128,15 +128,15 @@ export function OpportunityScoreBreakdownCard({
                 padding: "14px 14px 10px",
                 borderRight: !isLast ? "1px solid var(--qc-hair)" : "none",
               }}>
-                <p style={{ margin: "0 0 8px", fontSize: 9, fontWeight: 500, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                <p style={{ margin: "0 0 8px", fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
                   {item.label}
                 </p>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 8 }}>
-                  <span style={{ fontSize: 22, fontWeight: 500, color: "var(--qc-ink)", letterSpacing: "-0.02em", lineHeight: 1 }}>
+                  <span style={{ fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink)", letterSpacing: "-0.02em", lineHeight: 1 }}>
                     {item.score}
                   </span>
-                  <span style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>/{item.max}</span>
-                  <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 600, color: item.sc, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-3)" }}>/{item.max}</span>
+                  <span style={{ marginLeft: "auto", fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: item.sc, textTransform: "uppercase", letterSpacing: "var(--qc-track-pill)" }}>
                     {item.status.split(" ")[0]}
                   </span>
                 </div>

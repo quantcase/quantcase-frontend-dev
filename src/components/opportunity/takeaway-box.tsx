@@ -15,13 +15,14 @@ export function TakeawayBox({ title, text, inline = false, noBleed = false }: Ta
       style={{ background: "var(--qc-ink)", padding: 20 }}
     >
       {inline ? (
-        <p style={{ fontSize: 12, fontWeight: 300, color: "var(--qc-lime)", lineHeight: 1.5 }}>
+        <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", fontWeight: 300, color: "var(--qc-lime)", lineHeight: 1.5 }}>
           <span
             style={{
               display: "inline-block",
               marginRight: 6,
-              fontSize: 9,
-              fontWeight: 600,
+              fontSize: "var(--qc-fz-9)",
+              fontWeight: "var(--qc-w-semi)",
+              fontFamily: "var(--qc-font-sans)",
               color: "var(--qc-ink)",
               background: "var(--qc-lime)",
               borderRadius: 4,
@@ -39,8 +40,9 @@ export function TakeawayBox({ title, text, inline = false, noBleed = false }: Ta
           <span
             style={{
               display: "inline-block",
-              fontSize: 9,
-              fontWeight: 600,
+              fontSize: "var(--qc-fz-9)",
+              fontWeight: "var(--qc-w-semi)",
+              fontFamily: "var(--qc-font-sans)",
               color: "var(--qc-ink)",
               background: "var(--qc-lime)",
               borderRadius: 4,
@@ -51,7 +53,7 @@ export function TakeawayBox({ title, text, inline = false, noBleed = false }: Ta
           >
             {title}
           </span>
-          <p style={{ color: "var(--qc-on-dark)", paddingTop: 16, fontSize: 13, lineHeight: 1.5 }}>
+          <p style={{ color: "var(--qc-on-dark)", paddingTop: 16, fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", lineHeight: 1.5 }}>
             <BoldText text={text ?? "N/A"} />
           </p>
         </>

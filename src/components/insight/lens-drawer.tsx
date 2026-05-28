@@ -131,22 +131,23 @@ export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                   <span style={{
-                    fontSize: 9, fontWeight: 700, letterSpacing: "0.12em",
-                    textTransform: "uppercase", color: "var(--qc-ink-3)",
+                    fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-bold)", letterSpacing: "var(--qc-track-eyebrow-l)",
+                    textTransform: "uppercase", color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)",
                   }}>
                     {lens.category} lens
                   </span>
                   <span style={{
-                    fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+                    fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-bold)", letterSpacing: "var(--qc-track-eyebrow)",
                     color, background: bg, border: `1px solid ${color}`,
                     borderRadius: 4, padding: "2px 8px", textTransform: "uppercase",
+                    fontFamily: "var(--qc-font-sans)",
                   }}>
                     {lens.status}
                   </span>
                 </div>
                 <h2 style={{
-                  fontSize: 20, fontWeight: 400, margin: 0, lineHeight: 1.3,
-                  color: "var(--qc-ink)", fontFamily: "var(--qc-font-serif, Georgia, serif)",
+                  fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-regular)", margin: 0, lineHeight: 1.3,
+                  color: "var(--qc-ink)", fontFamily: "var(--qc-font-serif)",
                 }}>
                   {lens.name}
                 </h2>
@@ -176,14 +177,14 @@ export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) 
                 <>
                   {Object.keys(lens.key_metrics).length > 0 && (
                     <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
-                      <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: "0 0 12px" }}>
+                      <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)", margin: "0 0 12px", fontFamily: "var(--qc-font-sans)" }}>
                         Key Metrics
                       </p>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
                         {Object.entries(lens.key_metrics).map(([k, v]) => (
                           <div key={k}>
-                            <p style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>{k}</p>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", margin: 0, lineHeight: 1.3 }}>{v}</p>
+                            <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)", margin: "0 0 2px", fontFamily: "var(--qc-font-sans)" }}>{k}</p>
+                            <p style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", margin: 0, lineHeight: 1.3, fontFamily: "var(--qc-font-sans)" }}>{v}</p>
                           </div>
                         ))}
                       </div>
@@ -192,14 +193,14 @@ export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) 
 
                   {lens.highlights.length > 0 && (
                     <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
-                      <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-up)", margin: "0 0 10px" }}>
+                      <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-up)", margin: "0 0 10px", fontFamily: "var(--qc-font-sans)" }}>
                         Highlights
                       </p>
                       <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
                         {lens.highlights.map((h, i) => (
                           <li key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                             <span style={{ flexShrink: 0, marginTop: 4, width: 6, height: 6, borderRadius: "50%", background: "var(--qc-up)" }} />
-                            <span style={{ fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>{h}</span>
+                            <span style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", lineHeight: 1.6, fontFamily: "var(--qc-font-sans)" }}>{h}</span>
                           </li>
                         ))}
                       </ul>
@@ -208,14 +209,14 @@ export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) 
 
                   {lens.risks.length > 0 && (
                     <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
-                      <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-down)", margin: "0 0 10px" }}>
+                      <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-down)", margin: "0 0 10px", fontFamily: "var(--qc-font-sans)" }}>
                         Risks
                       </p>
                       <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
                         {lens.risks.map((r, i) => (
                           <li key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                             <span style={{ flexShrink: 0, marginTop: 4, width: 6, height: 6, borderRadius: "50%", background: "var(--qc-down)" }} />
-                            <span style={{ fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>{r}</span>
+                            <span style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", lineHeight: 1.6, fontFamily: "var(--qc-font-sans)" }}>{r}</span>
                           </li>
                         ))}
                       </ul>
@@ -225,7 +226,7 @@ export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) 
               )}
 
               {/* Footer meta */}
-              <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, textAlign: "right" }}>
+              <p style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-3)", margin: 0, textAlign: "right", fontFamily: "var(--qc-font-sans)" }}>
                 {lens.computed_at && <>Computed {new Date(lens.computed_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</>}
               </p>
             </div>

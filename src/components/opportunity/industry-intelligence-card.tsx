@@ -41,7 +41,7 @@ function KeyFindingRow({ theme, body, color }: { theme: string; body: string; co
         <div style={{ minWidth: 0 }}>
           {category && (
             <span style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+              fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
               color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
               letterSpacing: ".1em", display: "block", marginBottom: 2,
             }}>
@@ -49,7 +49,7 @@ function KeyFindingRow({ theme, body, color }: { theme: string; body: string; co
             </span>
           )}
           <p style={{
-            margin: 0, fontSize: 12, fontWeight: 500,
+            margin: 0, fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink)", lineHeight: 1.4,
             display: "-webkit-box", WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
@@ -73,10 +73,10 @@ function KeyFindingRow({ theme, body, color }: { theme: string; body: string; co
             display: "flex", alignItems: "center", gap: 6,
           }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.3 }}>{headline}</span>
+            <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.3 }}>{headline}</span>
           </div>
           <div style={{ padding: "10px 12px" }}>
-            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
+            <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
           </div>
         </div>
       )}
@@ -104,18 +104,18 @@ function DimensionRows({ dimensions }: { dimensions: IndustryAnalysis["score_car
 
         return (
           <div key={key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 12, color: "var(--qc-ink)", width: 120, flexShrink: 0, lineHeight: 1.2 }}>{label}</span>
+            <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", width: 120, flexShrink: 0, lineHeight: 1.2 }}>{label}</span>
             <div style={{ width: 100, flexShrink: 0, height: 4, borderRadius: 999, background: "rgba(0,0,0,0.10)", overflow: "hidden" }}>
               <div style={{ height: "100%", borderRadius: 999, width: `${pct}%`, background: barColor, transition: "width .4s" }} />
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, flex: 1 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: barColor, fontVariantNumeric: "tabular-nums" }}>
+              <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-mono)", color: barColor, fontVariantNumeric: "tabular-nums" }}>
                 {dim.score}
-                <span style={{ color: "var(--qc-ink-3)", fontWeight: 400 }}>/{dim.max}</span>
+                <span style={{ color: "var(--qc-ink-3)", fontWeight: "var(--qc-w-regular)" }}>/{dim.max}</span>
               </span>
               <span style={{
-                fontSize: 9, fontWeight: 500, color: "var(--qc-ink-2)",
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink-2)",
+                fontFamily: "var(--qc-font-mono)",
                 textTransform: "uppercase" as const, letterSpacing: ".06em",
                 marginLeft: "auto",
               }}>
@@ -191,7 +191,7 @@ export function IndustryIntelligenceCard({ data, investmentImplications }: Props
       )}
 
       {data.period && (
-        <p style={{ margin: 0, fontSize: 10, color: "var(--qc-ink-2)", textAlign: "right", padding: "0 4px" }}>
+        <p style={{ margin: 0, fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", textAlign: "right", padding: "0 4px" }}>
           {data.period}
         </p>
       )}

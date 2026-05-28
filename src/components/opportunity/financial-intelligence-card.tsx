@@ -43,7 +43,7 @@ function OperatingLeverageCard({ data }: { data: NonNullable<FinancialStrengthSe
       {/* tag line under eyebrow */}
       {verdict?.tag && (
         <span style={{
-          fontSize: 10, color: "var(--qc-ink-2)", lineHeight: 1.4,
+          fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.4,
           paddingLeft: 2,
         }}>
           {verdict.tag}
@@ -59,11 +59,11 @@ function OperatingLeverageCard({ data }: { data: NonNullable<FinancialStrengthSe
               padding: "5px 0",
               borderBottom: i < metricList.length - 1 ? "1px solid var(--qc-hair)" : "none",
             }}>
-              <span style={{ fontSize: 12, color: "var(--qc-ink)" }}>{m!.label}</span>
+              <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{m!.label}</span>
               <span style={{
-                fontSize: 12, fontWeight: 600,
+                fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)",
                 color: valueColor(m!.value ?? ""),
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "var(--qc-font-mono)",
                 fontVariantNumeric: "tabular-nums",
               }}>
                 {m!.value}
@@ -83,14 +83,14 @@ function OperatingLeverageCard({ data }: { data: NonNullable<FinancialStrengthSe
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span style={{
-              fontSize: 9, color: "var(--qc-ink-2)",
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)",
+              fontFamily: "var(--qc-font-mono)",
               textTransform: "uppercase" as const, letterSpacing: ".1em",
             }}>
               Fixed Costs
             </span>
             {totalFixed?.current_pct != null && (
-              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink)" }}>
+              <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>
                 {totalFixed.current_pct}% of revenue
               </span>
             )}
@@ -116,8 +116,8 @@ function OperatingLeverageCard({ data }: { data: NonNullable<FinancialStrengthSe
               return (
                 <div key={line.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <span style={{ width: 6, height: 6, borderRadius: 2, background: colors[i % colors.length], flexShrink: 0 }} />
-                  <span style={{ fontSize: 10, color: "var(--qc-ink)" }}>{line.label}</span>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink)" }}>
+                  <span style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{line.label}</span>
+                  <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>
                     {line.current_pct != null ? `${line.current_pct}%` : "—"}
                   </span>
                 </div>
@@ -154,15 +154,15 @@ function WorkingCapitalCard({ data }: { data: NonNullable<FinancialStrengthSecti
           display: "flex", alignItems: "center",
           padding: "3px 0 5px", borderBottom: "1px solid var(--qc-hair)",
         }}>
-          <span style={{ flex: 1, fontSize: 9, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase" as const, letterSpacing: ".08em" }}>
+          <span style={{ flex: 1, fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)", textTransform: "uppercase" as const, letterSpacing: ".08em" }}>
             Metric
           </span>
           {lastTwo.map((q) => (
-            <span key={q} style={{ width: 52, textAlign: "right" as const, fontSize: 9, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase" as const, letterSpacing: ".06em" }}>
+            <span key={q} style={{ width: 52, textAlign: "right" as const, fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)", textTransform: "uppercase" as const, letterSpacing: ".06em" }}>
               {q}
             </span>
           ))}
-          <span style={{ width: 24, textAlign: "center" as const, fontSize: 9, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}>
+          <span style={{ width: 24, textAlign: "center" as const, fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)" }}>
             ↕
           </span>
         </div>
@@ -190,18 +190,19 @@ function WorkingCapitalCard({ data }: { data: NonNullable<FinancialStrengthSecti
               padding: "5px 0",
               borderBottom: ri < rows.length - 1 ? "1px solid var(--qc-hair)" : "none",
             }}>
-              <span style={{ flex: 1, fontSize: 11, color: "var(--qc-ink)" }}>{row.label}</span>
+              <span style={{ flex: 1, fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{row.label}</span>
               {vals.map((v, vi) => (
                 <span key={vi} style={{
                   width: 52, textAlign: "right" as const,
-                  fontSize: 11, fontWeight: vi === 1 ? 600 : 400,
+                  fontSize: "var(--qc-fz-11)", fontWeight: vi === 1 ? "var(--qc-w-semi)" : "var(--qc-w-regular)",
+                  fontFamily: "var(--qc-font-mono)",
                   color: vi === 1 ? "var(--qc-ink)" : "var(--qc-ink-2)",
                   fontVariantNumeric: "tabular-nums",
                 }}>
                   {v != null ? v : "—"}
                 </span>
               ))}
-              <span style={{ width: 24, textAlign: "center" as const, fontSize: 12, color: trendColor, fontWeight: 600 }}>
+              <span style={{ width: 24, textAlign: "center" as const, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)", color: trendColor, fontWeight: "var(--qc-w-semi)" }}>
                 {trendSymbol}
               </span>
             </div>

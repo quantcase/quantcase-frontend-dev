@@ -48,7 +48,7 @@ function ScoreBar({ score, color }: { score: number; color: string }) {
           style={{ height: "100%", background: color, borderRadius: 99 }}
         />
       </div>
-      <span style={{ fontSize: 12, fontWeight: 600, color, minWidth: 24, textAlign: "right" }}>{score}</span>
+      <span style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-mono)", color, minWidth: 24, textAlign: "right" }}>{score}</span>
     </div>
   );
 }
@@ -59,7 +59,8 @@ function ScorePill({ score }: { score: number }) {
   const bg = ratingBg(score);
   return (
     <span style={{
-      fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+      fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-bold)", letterSpacing: "var(--qc-track-eyebrow)", textTransform: "uppercase",
+      fontFamily: "var(--qc-font-sans)",
       color, background: bg, border: `1px solid ${color}`, borderRadius: 4, padding: "2px 6px",
       whiteSpace: "nowrap",
     }}>
@@ -84,17 +85,17 @@ function PortfolioAverageRow({ stocks }: { stocks: StockMOD[] }) {
       padding: "14px 16px",
       marginBottom: 16,
     }}>
-      <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3, #888)", margin: "0 0 12px" }}>
+      <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow-l)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", margin: "0 0 12px" }}>
         Portfolio Average
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px 20px" }}>
         {[["Management", m], ["Opportunity", o], ["Deal", d]].map(([label, score]) => (
           <div key={label as string}>
-            <p style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3, #888)", margin: "0 0 4px" }}>
+            <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", margin: "0 0 4px" }}>
               {label}
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 22, fontWeight: 500, color: ratingColor(score as number), lineHeight: 1 }}>{score}</span>
+              <span style={{ fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-mono)", color: ratingColor(score as number), lineHeight: 1 }}>{score}</span>
               <ScorePill score={score as number} />
             </div>
           </div>
@@ -120,10 +121,10 @@ function StockRow({ stock, index }: { stock: StockMOD; index: number }) {
       {/* Symbol row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
         <div>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink, #0F172B)" }}>{stock.symbol}</span>
-          <span style={{ fontSize: 11, color: "var(--qc-ink-3, #888)", marginLeft: 6 }}>{stock.name}</span>
+          <span style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{stock.symbol}</span>
+          <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginLeft: 6 }}>{stock.name}</span>
         </div>
-        <span style={{ fontSize: 10, color: "var(--qc-ink-3, #888)", background: "var(--qc-section, #F5F5F5)", border: "1px solid var(--qc-hair, #E2E2E2)", borderRadius: 4, padding: "2px 7px", fontWeight: 500 }}>
+        <span style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", background: "var(--qc-section)", border: "1px solid var(--qc-hair)", borderRadius: 4, padding: "2px 7px", fontWeight: "var(--qc-w-medium)" }}>
           {stock.pct}% of book
         </span>
       </div>
@@ -140,12 +141,12 @@ function StockRow({ stock, index }: { stock: StockMOD; index: number }) {
               <span style={{
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 width: 18, height: 18, borderRadius: "50%",
-                background: "var(--qc-section, #F5F5F5)", border: "1px solid var(--qc-hair, #E2E2E2)",
-                fontSize: 9, fontWeight: 700, color: "var(--qc-ink-3, #888)", letterSpacing: "0.04em",
+                background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+                fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-bold)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-3)", letterSpacing: "var(--qc-track-mono)",
               }}>
                 {label}
               </span>
-              <span style={{ fontSize: 11, color: "var(--qc-ink-3, #888)" }}>{fullLabel}</span>
+              <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)" }}>{fullLabel}</span>
             </div>
             <ScoreBar score={score} color={ratingColor(score)} />
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -231,18 +232,18 @@ export function MODBreakdownDrawer({ open, stocks, onClose }: MODBreakdownDrawer
             }}>
               <div>
                 <div style={{
-                  fontSize: 9, fontWeight: 700, letterSpacing: "0.12em",
-                  textTransform: "uppercase", color: "var(--qc-ink-3, #888)", marginBottom: 6,
+                  fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-bold)", letterSpacing: "var(--qc-track-eyebrow-l)",
+                  textTransform: "uppercase", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginBottom: 6,
                 }}>
                   YOUR PORTFOLIO
                 </div>
                 <h2 style={{
-                  fontSize: 20, fontWeight: 400, margin: 0, lineHeight: 1.3,
-                  color: "var(--qc-ink, #0F172B)", fontFamily: "var(--qc-font-serif, Georgia, serif)",
+                  fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-regular)", margin: 0, lineHeight: 1.3,
+                  color: "var(--qc-ink)", fontFamily: "var(--qc-font-serif)",
                 }}>
                   MOD Score Breakdown
                 </h2>
-                <p style={{ fontSize: 12, color: "var(--qc-ink-3, #888)", margin: "4px 0 0" }}>
+                <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", margin: "4px 0 0" }}>
                   Management · Opportunity · Deal scores for each holding
                 </p>
               </div>
@@ -253,7 +254,7 @@ export function MODBreakdownDrawer({ open, stocks, onClose }: MODBreakdownDrawer
                   flexShrink: 0, background: "var(--qc-section, #F5F5F5)", border: "1px solid var(--qc-hair, #E2E2E2)",
                   borderRadius: 8, width: 32, height: 32, display: "flex",
                   alignItems: "center", justifyContent: "center", cursor: "pointer",
-                  color: "var(--qc-ink-3, #888)", fontSize: 16, lineHeight: 1,
+                  color: "var(--qc-ink-3)", fontSize: "var(--qc-fz-16)", lineHeight: 1,
                 }}
               >
                 ×
@@ -270,7 +271,7 @@ export function MODBreakdownDrawer({ open, stocks, onClose }: MODBreakdownDrawer
                 gridTemplateColumns: "1fr",
                 marginBottom: 4,
               }}>
-                <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3, #888)", margin: 0 }}>
+                <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow-l)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", margin: 0 }}>
                   {displayStocks.length} Holdings · sorted by portfolio weight
                 </p>
               </div>

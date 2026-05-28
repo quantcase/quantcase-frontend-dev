@@ -32,8 +32,9 @@ function OutlineToggle({
           key={option}
           onClick={() => onChange(option)}
           style={{
-            fontSize: 12,
-            fontWeight: 500,
+            fontSize: "var(--qc-fz-12)",
+            fontWeight: "var(--qc-w-medium)",
+            fontFamily: "var(--qc-font-sans)",
             padding: "4px 12px",
             borderRadius: 6,
             border: `1px solid ${value === option ? "var(--qc-ink)" : "var(--qc-hair)"}`,
@@ -83,8 +84,9 @@ export function TabularCard({
         <div>
           <div
             style={{
-              fontSize: 14,
-              fontWeight: 600,
+              fontSize: "var(--qc-fz-14)",
+              fontWeight: "var(--qc-w-semi)",
+              fontFamily: "var(--qc-font-sans)",
               color: "var(--qc-ink)",
               textTransform: titleCase ? "none" : "uppercase",
               letterSpacing: "0.01em",
@@ -93,7 +95,7 @@ export function TabularCard({
             {title}
           </div>
           {subtitle && (
-            <div style={{ fontSize: 12, color: "var(--qc-ink-2)", marginTop: 2 }}>{subtitle}</div>
+            <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", marginTop: 2 }}>{subtitle}</div>
           )}
         </div>
         <div className="flex items-center gap-3">

@@ -45,8 +45,9 @@ export function TabToggle({ options, value, onChange, className, variant = "pill
             key={option}
             onClick={() => onChange(option)}
             style={{
-              fontSize: 12,
-              fontWeight: 500,
+              fontSize: "var(--qc-fz-12)",
+              fontWeight: "var(--qc-w-medium)",
+              fontFamily: "var(--qc-font-sans)",
               padding: "4px 12px",
               borderRadius: 6,
               border: `1px solid ${value === option ? "var(--qc-ink)" : "var(--qc-hair)"}`,

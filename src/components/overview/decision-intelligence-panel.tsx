@@ -87,8 +87,8 @@ function CompactCard({
     >
       <span
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 9,
+          fontFamily: "var(--qc-font-mono)",
+          fontSize: "var(--qc-fz-9)",
           letterSpacing: ".12em",
           textTransform: "uppercase",
           color: "var(--qc-ink-2)",
@@ -101,8 +101,9 @@ function CompactCard({
       </span>
       <span
         style={{
-          fontSize: 12,
-          fontWeight: 600,
+          fontFamily: "var(--qc-font-sans)",
+          fontSize: "var(--qc-fz-12)",
+          fontWeight: "var(--qc-w-semi)",
           color,
           whiteSpace: "nowrap",
           overflow: "hidden",
@@ -150,8 +151,8 @@ function LinkableCompactCard({
     >
       <span
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 9,
+          fontFamily: "var(--qc-font-mono)",
+          fontSize: "var(--qc-fz-9)",
           letterSpacing: ".12em",
           textTransform: "uppercase",
           color: "var(--qc-ink-2)",
@@ -164,8 +165,9 @@ function LinkableCompactCard({
       </span>
       <span
         style={{
-          fontSize: 12,
-          fontWeight: 600,
+          fontFamily: "var(--qc-font-sans)",
+          fontSize: "var(--qc-fz-12)",
+          fontWeight: "var(--qc-w-semi)",
           color,
           whiteSpace: "nowrap",
           overflow: "hidden",
@@ -237,8 +239,8 @@ function AlertRow({
       <span
         style={{
           alignSelf: "flex-start",
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 8.5,
+          fontFamily: "var(--qc-font-mono)",
+          fontSize: "var(--qc-fz-9)",
           letterSpacing: ".12em",
           textTransform: "uppercase",
           color,
@@ -250,7 +252,7 @@ function AlertRow({
       >
         {source}
       </span>
-      <span style={{ fontSize: 11.5, color: "var(--qc-ink)", lineHeight: 1.5 }}>
+      <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink)", lineHeight: 1.5 }}>
         {text}
       </span>
     </div>
@@ -502,8 +504,9 @@ export function DecisionIntelligencePanel({
             <MonoEyebrow style={{ marginBottom: 5 }}>Overall Rating</MonoEyebrow>
             <span
               style={{
-                fontSize: 24,
-                fontWeight: 700,
+                fontFamily: "var(--qc-font-sans)",
+                fontSize: "var(--qc-fz-22)",
+                fontWeight: "var(--qc-w-bold)",
                 color: ratingColor,
                 letterSpacing: "-0.02em",
                 lineHeight: 1,
@@ -526,8 +529,9 @@ export function DecisionIntelligencePanel({
             >
               <span
                 style={{
-                  fontSize: 17,
-                  fontWeight: 700,
+                  fontFamily: "var(--qc-font-mono)",
+                  fontSize: "var(--qc-fz-16)",
+                  fontWeight: "var(--qc-w-bold)",
                   color: scoreColor(Math.round((mScore + oScore + dScore) / 3)),
                 }}
               >
@@ -535,8 +539,8 @@ export function DecisionIntelligencePanel({
               </span>
               <span
                 style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 9,
+                  fontFamily: "var(--qc-font-mono)",
+                  fontSize: "var(--qc-fz-9)",
                   color: "var(--qc-ink-2)",
                   letterSpacing: ".1em",
                 }}
@@ -560,7 +564,7 @@ export function DecisionIntelligencePanel({
               border: `1px solid ${scoreColor(Math.round(((mScore ?? 0) + (oScore ?? 0) + (dScore ?? 0)) / Math.max(1, [mScore, oScore, dScore].filter(s => s !== null).length)))}25`,
             }}
           >
-            <span style={{ fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.4 }}>
+            <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", lineHeight: 1.4 }}>
               Quality strong; timing unfavorable now
             </span>
           </div>
@@ -572,8 +576,9 @@ export function DecisionIntelligencePanel({
             {di.tag && (
               <span
                 style={{
-                  fontSize: 11,
-                  fontWeight: 500,
+                  fontFamily: "var(--qc-font-sans)",
+                  fontSize: "var(--qc-fz-11)",
+                  fontWeight: "var(--qc-w-medium)",
                   padding: "3px 9px",
                   borderRadius: 999,
                   background: "var(--qc-chip)",
@@ -587,8 +592,9 @@ export function DecisionIntelligencePanel({
             {di.idealFor && (
               <span
                 style={{
-                  fontSize: 11,
-                  fontWeight: 500,
+                  fontFamily: "var(--qc-font-sans)",
+                  fontSize: "var(--qc-fz-11)",
+                  fontWeight: "var(--qc-w-medium)",
                   padding: "3px 9px",
                   borderRadius: 999,
                   background: "var(--qc-chip)",

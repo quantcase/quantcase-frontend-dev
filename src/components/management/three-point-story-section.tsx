@@ -56,7 +56,7 @@ function StoryCard({ point }: { point: StoryPoint }) {
           />
           <span
             style={{
-              fontSize: 10, fontWeight: 600, color: cfg.color,
+              fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: cfg.color,
               letterSpacing: "0.08em", textTransform: "uppercase",
             }}
           >
@@ -65,7 +65,7 @@ function StoryCard({ point }: { point: StoryPoint }) {
         </div>
 
         {/* Headline */}
-        <p style={{ margin: 0, fontSize: 13, fontWeight: 400, color: "var(--qc-ink)", lineHeight: 1.6 }}>
+        <p style={{ margin: 0, fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-regular)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>
           {point.headline}
         </p>
       </div>

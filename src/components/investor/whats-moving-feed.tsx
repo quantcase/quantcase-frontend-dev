@@ -55,8 +55,8 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
         <span
           style={{
             fontFamily: "var(--qc-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.04em",
+            fontSize: "var(--qc-fz-11)",
+            letterSpacing: "var(--qc-track-mono)",
             color: "var(--qc-ink-3)",
             cursor: "pointer",
             whiteSpace: "nowrap",
@@ -67,7 +67,7 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
       </div>
 
       {/* Subtitle */}
-      <div className="px-2 pb-2" style={{ fontSize: 12, color: "var(--qc-ink-3)", marginTop: -8 }}>
+      <div className="px-2 pb-2" style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: -8 }}>
         Updates on stocks you hold or watch · scored by QC Insight
       </div>
 
@@ -87,12 +87,12 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
           >
             {/* Symbol + price */}
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.3 }}>{item.symbol}</div>
+              <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.3 }}>{item.symbol}</div>
               <div
                 style={{
-                  fontSize: 12,
+                  fontSize: "var(--qc-fz-12)",
                   fontFamily: "var(--qc-font-mono)",
-                  color: item.priceChangePositive ? "var(--qc-up, #22c55e)" : "var(--qc-down, #ef4444)",
+                  color: item.priceChangePositive ? "var(--qc-up)" : "var(--qc-down)",
                   marginTop: 2,
                 }}
               >
@@ -102,14 +102,14 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
 
             {/* Body */}
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 500, color: kindColors[item.kind], marginBottom: 3 }}>
+              <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: kindColors[item.kind], marginBottom: 3 }}>
                 {item.headlineLabel}
                 {item.headlineDetail && (
-                  <span style={{ color: "var(--qc-ink)", fontWeight: 400 }}> · {item.headlineDetail}</span>
+                  <span style={{ color: "var(--qc-ink)", fontWeight: "var(--qc-w-regular)" }}> · {item.headlineDetail}</span>
                 )}
               </div>
-              <div style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.5, marginBottom: 3 }}>{item.body}</div>
-              <div style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>{item.holdingDetail}</div>
+              <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.5, marginBottom: 3 }}>{item.body}</div>
+              <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)" }}>{item.holdingDetail}</div>
             </div>
 
             {/* QC Score + CTA */}
@@ -118,10 +118,10 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                 <div
                   style={{
                     fontFamily: "var(--qc-font-mono)",
-                    fontSize: 9,
-                    fontWeight: 600,
+                    fontSize: "var(--qc-fz-9)",
+                    fontWeight: "var(--qc-w-semi)",
                     color: "var(--qc-ink-3)",
-                    letterSpacing: "0.10em",
+                    letterSpacing: "var(--qc-track-eyebrow-l)",
                     textTransform: "uppercase",
                     marginBottom: 3,
                   }}
@@ -139,7 +139,7 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>
+                  <span style={{ fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>
                     {item.qcScore}
                   </span>
                 </div>

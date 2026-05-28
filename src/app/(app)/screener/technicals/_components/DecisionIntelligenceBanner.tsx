@@ -55,14 +55,14 @@ function SignalBucket({
                 background: sc.bg,
                 display: "flex", alignItems: "center", justifyContent: "space-between",
               }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>{indicator.name}</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: sc.color }}>{indicator.tag}</span>
+                <span style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>{indicator.name}</span>
+                <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: sc.color, fontFamily: "var(--qc-font-sans)" }}>{indicator.tag}</span>
               </div>
               <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
-                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>{indicator.explanation}</p>
+                <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.55, fontFamily: "var(--qc-font-sans)" }}>{indicator.explanation}</p>
                 {watchout && (
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.45 }}>
-                    <span style={{ fontWeight: 600 }}>Watchout: </span>{watchout}
+                  <p style={{ margin: 0, fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", lineHeight: 1.45, fontFamily: "var(--qc-font-sans)" }}>
+                    <span style={{ fontWeight: "var(--qc-w-semi)" }}>Watchout: </span>{watchout}
                   </p>
                 )}
               </div>
@@ -107,7 +107,7 @@ export function DecisionIntelligenceBanner({ di }: Props) {
         }}>
           <Brain style={{ width: 14, height: 14, color: "var(--qc-ink)" }} />
         </div>
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
+        <span style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", letterSpacing: "0.01em", fontFamily: "var(--qc-font-sans)" }}>
           Decision Intelligence
         </span>
       </div>
@@ -132,7 +132,7 @@ export function DecisionIntelligenceBanner({ di }: Props) {
           {/* Tag row */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
             <div>
-              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.3 }}>
+              <p style={{ margin: 0, fontSize: "var(--qc-fz-16)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", lineHeight: 1.3, fontFamily: "var(--qc-font-sans)" }}>
                 {di.tag}
               </p>
             </div>
@@ -154,13 +154,13 @@ export function DecisionIntelligenceBanner({ di }: Props) {
                 padding: "6px 8px",
               }}>
                 <p style={{
-                  margin: 0, fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+                  margin: 0, fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
                   color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
                   letterSpacing: ".1em", marginBottom: 3,
                 }}>
                   {item.label}
                 </p>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.3 }}>
+                <p style={{ margin: 0, fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", lineHeight: 1.3, fontFamily: "var(--qc-font-sans)" }}>
                   {item.value}
                 </p>
               </div>
@@ -173,16 +173,16 @@ export function DecisionIntelligenceBanner({ di }: Props) {
           {/* Actionable Insight */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
+              fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
+              letterSpacing: "var(--qc-track-eyebrow-l)", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             }}>
               Actionable Insight
             </div>
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
+            <p style={{ margin: 0, fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.005em", fontFamily: "var(--qc-font-sans)" }}>
               {di.actionableInsight.action}
             </p>
             {di.actionableInsight.firstShift && (
-              <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>
+              <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.55, fontFamily: "var(--qc-font-sans)" }}>
                 {di.actionableInsight.firstShift}
               </p>
             )}
@@ -194,21 +194,21 @@ export function DecisionIntelligenceBanner({ di }: Props) {
               <div style={{ height: 1, background: "var(--qc-hair)" }} />
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-                  letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
+                  fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
+                  letterSpacing: "var(--qc-track-eyebrow-l)", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
                 }}>
                   Bias
                 </div>
-                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>
+                <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.55, fontFamily: "var(--qc-font-sans)" }}>
                   {di.actionBias}
                 </p>
                 {di.actionableInsight.existingHolderAction && (
-                  <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>
+                  <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.55, fontFamily: "var(--qc-font-sans)" }}>
                     {di.actionableInsight.existingHolderAction}
                   </p>
                 )}
                 {di.actionableInsight.reEvaluateCondition && (
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
+                  <p style={{ margin: 0, fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", lineHeight: 1.5, fontFamily: "var(--qc-font-sans)" }}>
                     Re-evaluate: {di.actionableInsight.reEvaluateCondition}
                   </p>
                 )}
@@ -232,8 +232,8 @@ export function DecisionIntelligenceBanner({ di }: Props) {
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <Zap style={{ width: 11, height: 11, color: "var(--qc-ink-2)" }} />
           <span style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-            letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
+            letterSpacing: "var(--qc-track-eyebrow-l)", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
           }}>
             Signal Breakdown · hover for details
           </span>
@@ -248,19 +248,19 @@ export function DecisionIntelligenceBanner({ di }: Props) {
         <div style={{ borderTop: "1px solid var(--qc-hair)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
+              fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
+              letterSpacing: "var(--qc-track-eyebrow-l)", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             }}>
               Conviction
             </span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: conviction.color }}>{di.convictionLevel}</span>
+            <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: conviction.color, fontFamily: "var(--qc-font-sans)" }}>{di.convictionLevel}</span>
           </div>
           <div style={{ height: 4, borderRadius: 999, background: "rgba(0,0,0,0.10)", overflow: "hidden" }}>
             <div style={{ height: "100%", borderRadius: 999, width: conviction.width, background: conviction.barColor, transition: "width .4s" }} />
           </div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             {["Low", "Medium", "High"].map((l) => (
-              <span key={l} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--qc-ink-2)" }}>{l}</span>
+              <span key={l} style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)" }}>{l}</span>
             ))}
           </div>
         </div>
@@ -278,16 +278,16 @@ export function DecisionIntelligenceBanner({ di }: Props) {
           gap: 6,
         }}>
           <div style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-            letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
+            letterSpacing: "var(--qc-track-eyebrow-l)", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
           }}>
             Current Regime
           </div>
-          <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.3 }}>
+          <p style={{ margin: 0, fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", lineHeight: 1.3, fontFamily: "var(--qc-font-sans)" }}>
             {di.currentRegime.label}
           </p>
           {di.currentRegime.description && (
-            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>
+            <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.55, fontFamily: "var(--qc-font-sans)" }}>
               {di.currentRegime.description}
             </p>
           )}
@@ -322,9 +322,9 @@ export function DecisionIntelligenceBanner({ di }: Props) {
         >
           <TrendingUp style={{ width: 13, height: 13, color: "var(--qc-ink-2)" }} />
           <span style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10,
-            letterSpacing: ".14em",
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-10)",
+            letterSpacing: "var(--qc-track-eyebrow)",
             color: "var(--qc-ink)",
             textTransform: "uppercase" as const,
           }}>
@@ -348,8 +348,8 @@ export function DecisionIntelligenceBanner({ di }: Props) {
           {di.whatCanChange.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <span style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
+                fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
+                letterSpacing: "var(--qc-track-eyebrow-l)", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
               }}>
                 What Can Change
               </span>
@@ -361,7 +361,7 @@ export function DecisionIntelligenceBanner({ di }: Props) {
                     borderBottom: i < di.whatCanChange.length - 1 ? "1px solid var(--qc-hair)" : "none",
                   }}>
                     <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--qc-ink-2)", flexShrink: 0, marginTop: 5 }} />
-                    <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>{item}</p>
+                    <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.55, fontFamily: "var(--qc-font-sans)" }}>{item}</p>
                   </div>
                 ))}
               </div>

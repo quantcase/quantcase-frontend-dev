@@ -74,7 +74,7 @@ export function DealScoreBreakdownCard({ overview }: DealScoreBreakdownCardProps
         <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
           <span style={{
             display: "inline-block",
-            fontSize: 10, fontWeight: 700,
+            fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-bold)",
             color, background: bg,
             border: `1px solid ${color}`,
             borderRadius: 4, padding: "2px 8px",
@@ -84,12 +84,12 @@ export function DealScoreBreakdownCard({ overview }: DealScoreBreakdownCardProps
             {level} Conviction
           </span>
           {verdict?.title && (
-            <p style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.01em" }}>
+            <p style={{ margin: "0 0 6px", fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-16)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.01em" }}>
               {verdict.title}
             </p>
           )}
           {verdict?.description && (
-            <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
+            <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
               {verdict.description}
             </p>
           )}
@@ -111,14 +111,14 @@ export function DealScoreBreakdownCard({ overview }: DealScoreBreakdownCardProps
               padding: "14px 14px 10px",
               borderRight: !isLast ? "1px solid var(--qc-hair)" : "none",
             }}>
-              <p style={{ margin: "0 0 8px", fontSize: 9, fontWeight: 500, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              <p style={{ margin: "0 0 8px", fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
                 {item.label}
               </p>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 8 }}>
-                <span style={{ fontSize: 22, fontWeight: 500, color: "var(--qc-ink)", letterSpacing: "-0.02em", lineHeight: 1 }}>
+                <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", letterSpacing: "-0.02em", lineHeight: 1 }}>
                   {item.value}
                 </span>
-                <span style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>/{item.max}</span>
+                <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-3)" }}>/{item.max}</span>
               </div>
               <div style={{ height: 3, borderRadius: 999, background: "var(--qc-hair)", overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 999 }} />

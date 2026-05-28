@@ -47,15 +47,15 @@ export function MAPositionChart({
       {/* Header row */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <span style={{ fontSize: 11, color: QC_MUTED, fontWeight: 600, letterSpacing: "0.06em", fontFamily: "IBM Plex Mono, monospace", textTransform: "uppercase" }}>
+          <span style={{ fontSize: "var(--qc-fz-11)", color: QC_MUTED, fontWeight: "var(--qc-w-semi)", letterSpacing: "0.06em", fontFamily: "var(--qc-font-mono)", textTransform: "uppercase" }}>
             52W LOW
           </span>
-          <span style={{ fontSize: 13, fontWeight: 600, color: QC_HEADING }}>
+          <span style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: QC_HEADING, fontFamily: "var(--qc-font-sans)" }}>
             ₹{low52w.toLocaleString("en-IN")}
           </span>
         </div>
         <div className="flex flex-col items-center gap-0.5">
-          <span style={{ fontSize: 10, color: QC_MUTED, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "IBM Plex Mono, monospace" }}>
+          <span style={{ fontSize: "var(--qc-fz-10)", color: QC_MUTED, fontWeight: "var(--qc-w-semi)", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--qc-font-mono)" }}>
             Current Price
           </span>
           <span
@@ -64,15 +64,15 @@ export function MAPositionChart({
           >
             ₹{price.toLocaleString("en-IN")}
           </span>
-          <span style={{ fontSize: 10, color: QC_MUTED, fontFamily: "IBM Plex Mono, monospace" }}>
+          <span style={{ fontSize: "var(--qc-fz-10)", color: QC_MUTED, fontFamily: "var(--qc-font-mono)" }}>
             {pricePct.toFixed(1)}% of 52W range
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span style={{ fontSize: 13, fontWeight: 600, color: QC_HEADING }}>
+          <span style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: QC_HEADING, fontFamily: "var(--qc-font-sans)" }}>
             ₹{high52w.toLocaleString("en-IN")}
           </span>
-          <span style={{ fontSize: 11, color: QC_MUTED, fontWeight: 600, letterSpacing: "0.06em", fontFamily: "IBM Plex Mono, monospace", textTransform: "uppercase" }}>
+          <span style={{ fontSize: "var(--qc-fz-11)", color: QC_MUTED, fontWeight: "var(--qc-w-semi)", letterSpacing: "0.06em", fontFamily: "var(--qc-font-mono)", textTransform: "uppercase" }}>
             52W HIGH
           </span>
         </div>
@@ -183,7 +183,7 @@ export function MAPositionChart({
               >
                 {ma.label}
               </span>
-              <span style={{ fontSize: 11, color: "var(--qc-ink)", fontWeight: 600 }}>
+              <span style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)" }}>
                 ₹{ma.value.toFixed(2)}
               </span>
             </div>

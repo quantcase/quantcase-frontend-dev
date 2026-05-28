@@ -60,13 +60,13 @@ const COLUMNS: ColDef[] = [
       <div className="flex flex-col gap-0.5 min-w-0">
         <span
           className="truncate max-w-[280px] block"
-          style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}
+          style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}
         >
           {s.name}
         </span>
         <span
           className="truncate max-w-[280px] block"
-          style={{ fontSize: 10, color: "var(--qc-ink-2)" }}
+          style={{ fontSize: "var(--qc-fz-10)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}
         >
           {[s.amc_name, s.category].filter(Boolean).join(" · ")}
         </span>
@@ -78,7 +78,7 @@ const COLUMNS: ColDef[] = [
     label: "Plan",
     align: "left",
     render: (s) => (
-      <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>{s.plan_type ?? "—"}</span>
+      <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>{s.plan_type ?? "—"}</span>
     ),
   },
   {
@@ -86,7 +86,7 @@ const COLUMNS: ColDef[] = [
     label: "Risk",
     align: "left",
     render: (s) => (
-      <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>{s.risk_label ?? "—"}</span>
+      <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>{s.risk_label ?? "—"}</span>
     ),
   },
   {
@@ -95,7 +95,7 @@ const COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "morningstar",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "var(--qc-ink)", fontWeight: 500 }}>
+      <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink)", fontWeight: "var(--qc-w-medium)" }}>
         {s.morningstar == null ? "—" : `${s.morningstar}/5`}
       </span>
     ),
@@ -110,8 +110,9 @@ const COLUMNS: ColDef[] = [
       return (
         <span
           style={{
-            fontSize: 12,
-            fontWeight: 500,
+            fontSize: "var(--qc-fz-12)",
+            fontWeight: "var(--qc-w-medium)",
+            fontFamily: "var(--qc-font-mono)",
             color:
               v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
           }}
@@ -131,8 +132,9 @@ const COLUMNS: ColDef[] = [
       return (
         <span
           style={{
-            fontSize: 12,
-            fontWeight: 500,
+            fontSize: "var(--qc-fz-12)",
+            fontWeight: "var(--qc-w-medium)",
+            fontFamily: "var(--qc-font-mono)",
             color:
               v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
           }}
@@ -152,8 +154,9 @@ const COLUMNS: ColDef[] = [
       return (
         <span
           style={{
-            fontSize: 12,
-            fontWeight: 500,
+            fontSize: "var(--qc-fz-12)",
+            fontWeight: "var(--qc-w-medium)",
+            fontFamily: "var(--qc-font-mono)",
             color:
               v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
           }}
@@ -169,7 +172,7 @@ const COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "aum",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "var(--qc-ink)" }}>{cr(s.aum)}</span>
+      <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink)" }}>{cr(s.aum)}</span>
     ),
   },
   {
@@ -178,7 +181,7 @@ const COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "expense_ratio",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>{pct(s.expense_ratio)}</span>
+      <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-2)" }}>{pct(s.expense_ratio)}</span>
     ),
   },
   {
@@ -187,7 +190,7 @@ const COLUMNS: ColDef[] = [
     align: "right",
     sortKey: "nav",
     render: (s) => (
-      <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>
+      <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-2)" }}>
         {s.nav == null ? "—" : `₹${s.nav.toFixed(2)}`}
       </span>
     ),
@@ -670,7 +673,7 @@ function MfScreenerContent() {
                 <tr>
                   <th
                     className="px-4 py-2.5 text-left"
-                    style={{ width: 40, color: "var(--qc-ink-2)", fontSize: 10 }}
+                    style={{ width: 40, color: "var(--qc-ink-2)", fontSize: "var(--qc-fz-10)" }}
                   >
                     #
                   </th>
@@ -741,7 +744,7 @@ function MfScreenerContent() {
                       <td className="px-4 py-3" style={{ width: 40 }}>
                         <span
                           className="tabular-nums"
-                          style={{ fontSize: 11, color: "var(--qc-ink-2)" }}
+                          style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-2)" }}
                         >
                           {(page - 1) * 25 + i + 1}
                         </span>

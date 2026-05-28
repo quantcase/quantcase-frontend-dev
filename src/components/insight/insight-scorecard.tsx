@@ -370,18 +370,18 @@ function VertexTooltip({ lens, visible, pctX, pctY }: { lens: InsightLens | null
             pointerEvents: "none",
           }}
         >
-          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", color: "rgba(255,255,255,0.45)", textTransform: "uppercase", marginBottom: 3 }}>
+          <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", letterSpacing: "var(--qc-track-eyebrow)", color: "rgba(255,255,255,0.45)", textTransform: "uppercase", marginBottom: 3, fontFamily: "var(--qc-font-sans)" }}>
             {lens.name}
           </p>
-          <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", margin: 0 }}>
+          <p style={{ fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-semi)", color: "#fff", margin: 0, fontFamily: "var(--qc-font-sans)" }}>
             {lens.score}
-            <span style={{ fontSize: 11, fontWeight: 400, color: "rgba(255,255,255,0.45)", marginLeft: 2 }}>/ {lens.max_score}</span>
+            <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-regular)", color: "rgba(255,255,255,0.45)", marginLeft: 2 }}>/ {lens.max_score}</span>
             {(() => {
               const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
               const { hex } = axisStatusColor(pct);
               const label = lensStatusLabel(pct, lens.status ?? "");
               return (
-                <span style={{ marginLeft: 8, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", color: hex }}>
+                <span style={{ marginLeft: 8, fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-bold)", letterSpacing: "var(--qc-track-eyebrow)", color: hex, fontFamily: "var(--qc-font-sans)" }}>
                   {label}
                 </span>
               );
@@ -446,9 +446,10 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
                 {verdictLabel}
               </MonoLabel>
               <span style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+                fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-bold)", letterSpacing: "var(--qc-track-eyebrow)",
                 color: bandColor, background: bandBg, border: `1px solid ${bandColor}`,
                 borderRadius: 4, padding: "2px 8px", textTransform: "uppercase", whiteSpace: "nowrap",
+                fontFamily: "var(--qc-font-sans)",
               }}>
                 {bandLabel}
               </span>
@@ -456,14 +457,15 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
 
             <div style={{ flex: 1 }}>
               <h2 style={{
-                fontSize: 26, fontWeight: 400, lineHeight: 1.35, letterSpacing: "-0.01em",
-                margin: 0, color: "var(--qc-on-dark)", fontFamily: "var(--qc-font-serif, Georgia, serif)",
+                fontSize: "var(--qc-fz-26)", fontWeight: "var(--qc-w-regular)", lineHeight: 1.35,
+                letterSpacing: "var(--qc-track-display)", margin: 0,
+                color: "var(--qc-on-dark)", fontFamily: "var(--qc-font-serif)",
               }}>
                 {renderMd(insight.headline)}
               </h2>
 
               {insight.description && (
-                <p style={{ marginTop: 14, fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.65, maxWidth: "90%" }}>
+                <p style={{ marginTop: 14, fontSize: "var(--qc-fz-13)", color: "rgba(255,255,255,0.55)", lineHeight: 1.65, maxWidth: "90%", fontFamily: "var(--qc-font-sans)" }}>
                   {renderMd(insight.description)}
                 </p>
               )}
@@ -483,7 +485,8 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
                         display: "inline-flex", alignItems: "center", gap: 7,
                         background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.14)",
                         borderRadius: 999, padding: "5px 12px",
-                        fontSize: 12, color: "rgba(255,255,255,0.88)",
+                        fontSize: "var(--qc-fz-12)", color: "rgba(255,255,255,0.88)",
+                        fontFamily: "var(--qc-font-sans)",
                       }}
                     >
                       <span style={{ width: 6, height: 6, borderRadius: "50%", background: dotColor, flexShrink: 0 }} />
@@ -536,7 +539,8 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
             {/* Right of radar: band pill + thesis */}
             <div style={{ flex: 1, padding: "20px 20px 20px 8px" }}>
               <span style={{
-                display: "inline-block", fontSize: 10, fontWeight: 600, letterSpacing: "0.06em",
+                display: "inline-block", fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)",
+                letterSpacing: "var(--qc-track-eyebrow)", fontFamily: "var(--qc-font-sans)",
                 color: bandColor, background: bandBg, border: `1px solid ${bandColor}`,
                 borderRadius: 4, padding: "2px 10px", textTransform: "uppercase", marginBottom: 12,
               }}>
@@ -544,14 +548,14 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
               </span>
 
               <h3 style={{
-                fontSize: 16, fontWeight: 400, lineHeight: 1.4, margin: 0,
-                color: "var(--qc-ink)", fontFamily: "var(--qc-font-serif, Georgia, serif)",
+                fontSize: "var(--qc-fz-16)", fontWeight: "var(--qc-w-regular)", lineHeight: 1.4, margin: 0,
+                color: "var(--qc-ink)", fontFamily: "var(--qc-font-serif)",
               }}>
                 {insight.subtitle && renderMd(insight.subtitle)}
               </h3>
 
               {insight.analyzed_at && (
-                <p style={{ marginTop: 8, fontSize: 11, color: "var(--qc-ink-3)", lineHeight: 1.5 }}>
+                <p style={{ marginTop: 8, fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-3)", lineHeight: 1.5, fontFamily: "var(--qc-font-sans)" }}>
                   {insight.type.charAt(0).toUpperCase() + insight.type.slice(1)} · Analyzed {new Date(insight.analyzed_at).toLocaleDateString("en-IN", { month: "short", year: "2-digit" })}
                 </p>
               )}
@@ -568,7 +572,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
                       width: 8, height: 8, borderRadius: 2, flexShrink: 0,
                       background: row.tier.soft, border: `1.5px solid ${row.tier.hex}`,
                     }} />
-                    <span style={{ fontSize: 10, color: "var(--qc-ink-3)", letterSpacing: "0.02em" }}>{row.label}</span>
+                    <span style={{ fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-3)", letterSpacing: "var(--qc-track-mono)", fontFamily: "var(--qc-font-sans)" }}>{row.label}</span>
                   </div>
                 ))}
               </div>
@@ -615,11 +619,12 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
                     {lens.name.toUpperCase()}
                   </MonoLabel>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 4, margin: "6px 0 4px" }}>
-                    <span style={{ fontSize: 24, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1 }}>{lens.score}</span>
-                    <span style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>/{lens.max_score}</span>
+                    <span style={{ fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", lineHeight: 1, fontFamily: "var(--qc-font-sans)" }}>{lens.score}</span>
+                    <span style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)" }}>/{lens.max_score}</span>
                     <span style={{
-                      marginLeft: 6, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em",
-                      color: barColor, textTransform: "uppercase",
+                      marginLeft: 6, fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-bold)",
+                      letterSpacing: "var(--qc-track-eyebrow)", color: barColor, textTransform: "uppercase",
+                      fontFamily: "var(--qc-font-sans)",
                     }}>{statusLabel}</span>
                   </div>
                   <div style={{ height: 3, borderRadius: 99, background: "var(--qc-hair)", overflow: "hidden" }}>

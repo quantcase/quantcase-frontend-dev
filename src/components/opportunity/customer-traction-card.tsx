@@ -124,7 +124,7 @@ function RevenueTrajectorySignals({ signals }: { signals: AltDataSignal[] }) {
                 <p className="text-[11px] font-semibold leading-tight mb-0.5" style={{ color: "var(--qc-ink)" }}>
                   {s.source ?? "N/A"}
                 </p>
-                <p style={{ fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
+                <p style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
                   {s.insight ?? "N/A"}
                 </p>
               </div>
@@ -194,12 +194,12 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                             <>
                               <p className="text-[12px] font-semibold" style={{ color: "var(--qc-ink)" }}>— {label}</p>
                               <ul className="pl-3">
-                                <li style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.6 }}>– {body}</li>
+                                <li style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.6 }}>– {body}</li>
                               </ul>
                             </>
                           ) : (
                             <ul className="pl-3">
-                              <li style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.6 }}>– {body}</li>
+                              <li style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.6 }}>– {body}</li>
                             </ul>
                           )}
                         </div>
@@ -226,12 +226,12 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                             <>
                               <p className="text-[12px] font-semibold" style={{ color: "var(--qc-ink)" }}>— {label}</p>
                               <ul className="pl-3">
-                                <li style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.6 }}>– {body}</li>
+                                <li style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.6 }}>– {body}</li>
                               </ul>
                             </>
                           ) : (
                             <ul className="pl-3">
-                              <li style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.6 }}>– {body}</li>
+                              <li style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.6 }}>– {body}</li>
                             </ul>
                           )}
                         </div>
@@ -265,7 +265,7 @@ export function CustomerTractionCard({ data }: CustomerTractionCardProps) {
                           <p className="text-[11px] font-semibold leading-tight mb-0.5" style={{ color: "var(--qc-ink)" }}>
                             {tier.name ?? "N/A"}
                           </p>
-                          <p style={{ fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
+                          <p style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
                             {tier.description ?? "N/A"}
                           </p>
                         </div>

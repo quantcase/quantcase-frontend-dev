@@ -83,11 +83,11 @@ function SwotSection({ swot }: { swot: FundamentalsSwot }) {
                 </div>
                 <span
                   style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 10,
-                    fontWeight: 600,
+                    fontFamily: "var(--qc-font-mono)",
+                    fontSize: "var(--qc-fz-10)",
+                    fontWeight: "var(--qc-w-semi)",
                     textTransform: "uppercase",
-                    letterSpacing: "0.12em",
+                    letterSpacing: "var(--qc-track-eyebrow-l)",
                     color,
                   }}
                 >
@@ -97,9 +97,9 @@ function SwotSection({ swot }: { swot: FundamentalsSwot }) {
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
                 {swot[key].map((item) => (
                   <li key={item.title} style={{ lineHeight: 1.45 }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--qc-ink)" }}>{item.title}</span>
+                    <span style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{item.title}</span>
                     {" — "}
-                    <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>{item.description}</span>
+                    <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>{item.description}</span>
                   </li>
                 ))}
               </ul>
@@ -127,7 +127,7 @@ function FinancialsContent() {
   if (!symbol) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div style={{ fontSize: 13, color: "var(--qc-down)", padding: "24px 16px" }}>
+        <div style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down)", padding: "24px 16px" }}>
           Error: No symbol provided in query parameters
         </div>
       </ScreenerPageShell>
@@ -137,7 +137,7 @@ function FinancialsContent() {
   if (loading) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div style={{ fontSize: 13, color: "var(--qc-ink-2)", padding: "24px 16px" }}>Loading…</div>
+        <div style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", padding: "24px 16px" }}>Loading…</div>
       </ScreenerPageShell>
     );
   }
@@ -145,7 +145,7 @@ function FinancialsContent() {
   if (error) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div style={{ fontSize: 13, color: "var(--qc-down)", padding: "24px 16px" }}>Error: {error}</div>
+        <div style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down)", padding: "24px 16px" }}>Error: {error}</div>
       </ScreenerPageShell>
     );
   }
@@ -153,7 +153,7 @@ function FinancialsContent() {
   if (!data) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div style={{ fontSize: 13, color: "var(--qc-ink-2)", padding: "24px 16px" }}>
+        <div style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", padding: "24px 16px" }}>
           No financial data found for {symbol}
         </div>
       </ScreenerPageShell>

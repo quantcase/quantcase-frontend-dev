@@ -126,8 +126,9 @@ function SectionScoreCard({
         <p
           style={{
             margin: "0 0 2px",
-            fontSize: 9,
-            fontWeight: 600,
+            fontSize: "var(--qc-fz-9)",
+            fontWeight: "var(--qc-w-semi)",
+            fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink-2)",
             textTransform: "uppercase",
             letterSpacing: "0.1em",
@@ -138,8 +139,9 @@ function SectionScoreCard({
         <p
           style={{
             margin: "0 0 8px",
-            fontSize: 14,
-            fontWeight: 600,
+            fontSize: "var(--qc-fz-14)",
+            fontWeight: "var(--qc-w-semi)",
+            fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink)",
             lineHeight: 1.3,
           }}
@@ -151,8 +153,9 @@ function SectionScoreCard({
             display: "inline-flex",
             alignItems: "center",
             gap: 5,
-            fontSize: 10,
-            fontWeight: 600,
+            fontSize: "var(--qc-fz-10)",
+            fontWeight: "var(--qc-w-semi)",
+            fontFamily: "var(--qc-font-sans)",
             color: color,
             background: bg,
             border: `1px solid ${color}`,
@@ -169,7 +172,8 @@ function SectionScoreCard({
           <p
             style={{
               margin: 0,
-              fontSize: 12,
+              fontSize: "var(--qc-fz-12)",
+              fontFamily: "var(--qc-font-sans)",
               color: "var(--qc-ink-2)",
               lineHeight: 1.55,
             }}

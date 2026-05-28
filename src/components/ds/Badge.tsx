@@ -21,8 +21,8 @@ export function Badge({ variant, children, style }: BadgeProps) {
     <span
       style={{
         fontFamily: "var(--qc-font-mono)",
-        fontSize: 9.5,
-        letterSpacing: "0.14em",
+        fontSize: "var(--qc-fz-9)",
+        letterSpacing: "var(--qc-track-eyebrow)",
         textTransform: "uppercase",
         padding: "2px 7px",
         borderRadius: 4,

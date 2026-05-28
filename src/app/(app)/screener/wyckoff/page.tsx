@@ -409,7 +409,7 @@ function WyckoffChart({ bars, result }: { bars: WyckoffBar[]; result: WyckoffRes
       {/* Legend */}
       <div style={{
         display: "flex", flexWrap: "wrap", gap: "6px 14px", marginBottom: 10,
-        fontFamily: "var(--qc-font-mono)", fontSize: 10, color: "var(--qc-ink-2)",
+        fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)",
       }}>
         {[
           { dot: C.dotHH, label: "HH/HL" },
@@ -433,7 +433,7 @@ function WyckoffChart({ bars, result }: { bars: WyckoffBar[]; result: WyckoffRes
           ref={tipRef}
           style={{
             position: "absolute", top: 10, left: 80, display: "none",
-            fontFamily: "var(--qc-font-mono)", fontSize: 10,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
             background: "var(--qc-card)", border: "1px solid var(--qc-hair)",
             borderRadius: 8, boxShadow: "var(--qc-shadow-annot)",
             padding: "8px 12px", color: "var(--qc-ink)", lineHeight: 1.8, zIndex: 10,
@@ -461,16 +461,16 @@ function PhaseCard({ result }: { result: WyckoffResult }) {
         borderRadius: 10, padding: "20px 22px",
       }}>
         <p style={{
-          fontFamily: "var(--qc-font-mono)", fontSize: 9, letterSpacing: "0.14em",
+          fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", letterSpacing: "var(--qc-track-eyebrow)",
           color: "var(--qc-ink-3)", textTransform: "uppercase", marginBottom: 8,
         }}>
           Wyckoff Phase
         </p>
-        <p style={{ fontSize: 28, fontWeight: 600, color: tok.color, marginBottom: 4, lineHeight: 1, letterSpacing: "-0.01em" }}>
+        <p style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-26)", fontWeight: "var(--qc-w-semi)", color: tok.color, marginBottom: 4, lineHeight: 1, letterSpacing: "var(--qc-track-display)" }}>
           {result.phaseType}
         </p>
         {result.subPhase && (
-          <p style={{ fontFamily: "var(--qc-font-mono)", fontSize: 10, color: tok.color, opacity: 0.75, marginBottom: 10, letterSpacing: "0.04em" }}>
+          <p style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: tok.color, opacity: 0.75, marginBottom: 10, letterSpacing: "var(--qc-track-pill)" }}>
             {result.subPhase === "SOS Pullback" ? "Last Point of Support detected"
               : result.subPhase === "SOS Breakout" ? "Sign of Strength breakout"
               : result.subPhase === "Spring" ? "Spring (Phase C shakeout) detected"
@@ -479,13 +479,13 @@ function PhaseCard({ result }: { result: WyckoffResult }) {
               : result.subPhase}
           </p>
         )}
-        <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.65, marginBottom: 16 }}>{result.desc}</p>
+        <p style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-2)", lineHeight: 1.65, marginBottom: 16 }}>{result.desc}</p>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
-          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: 10, color: "var(--qc-ink-3)", whiteSpace: "nowrap" }}>Confidence</span>
+          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-3)", whiteSpace: "nowrap" }}>Confidence</span>
           <div style={{ flex: 1, height: 4, borderRadius: 999, background: "var(--qc-hair)", overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${result.conf}%`, background: tok.color, borderRadius: 999, transition: "width 1.2s ease" }} />
           </div>
-          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: 10, color: "var(--qc-ink-2)", fontWeight: 600 }}>{result.conf}%</span>
+          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-semi)" }}>{result.conf}%</span>
         </div>
       </div>
 
@@ -495,14 +495,14 @@ function PhaseCard({ result }: { result: WyckoffResult }) {
         borderRadius: 10, padding: "20px 22px",
       }}>
         <p style={{
-          fontFamily: "var(--qc-font-mono)", fontSize: 9, letterSpacing: "0.14em",
+          fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", letterSpacing: "var(--qc-track-eyebrow)",
           color: "var(--qc-ink-3)", textTransform: "uppercase", marginBottom: 10,
         }}>
           Trading Signal
         </p>
         <p style={{ fontSize: 36, marginBottom: 8, lineHeight: 1 }}>{result.signal.e}</p>
-        <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 10, color: "var(--qc-ink)", lineHeight: 1.3 }}>{result.signal.t}</p>
-        <p style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.65 }}>{result.signal.b}</p>
+        <p style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-semi)", marginBottom: 10, color: "var(--qc-ink)", lineHeight: 1.3 }}>{result.signal.t}</p>
+        <p style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-2)", lineHeight: 1.65 }}>{result.signal.b}</p>
       </div>
     </div>
   );
@@ -537,12 +537,12 @@ function MetricsStrip({ result }: { result: WyckoffResult }) {
           borderRadius: 10, padding: "14px 16px",
         }}>
           <p style={{
-            fontFamily: "var(--qc-font-mono)", fontSize: 9,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
             color: "var(--qc-ink-3)", letterSpacing: "0.12em",
             textTransform: "uppercase", marginBottom: 6,
           }}>{t.label}</p>
-          <p style={{ fontSize: 13, fontWeight: 600, color: t.subClr, lineHeight: 1.2, marginBottom: 4 }}>{t.value}</p>
-          <p style={{ fontFamily: "var(--qc-font-mono)", fontSize: 9, color: "var(--qc-ink-3)" }}>{t.sub}</p>
+          <p style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: t.subClr, lineHeight: 1.2, marginBottom: 4 }}>{t.value}</p>
+          <p style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-3)" }}>{t.sub}</p>
         </div>
       ))}
     </div>
@@ -577,14 +577,14 @@ function CycleSchematic({ phaseType }: { phaseType: string }) {
               transition: "all .25s",
             }}>
               <p style={{
-                fontFamily: "var(--qc-font-mono)", fontSize: 9, fontWeight: 700,
+                fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-bold)",
                 marginBottom: 6, color: isOn ? tok.color : "var(--qc-ink-3)",
                 whiteSpace: "nowrap",
               }}>
                 {p}
               </p>
               <p style={{
-                fontSize: 9, lineHeight: 1.45,
+                fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-9)", lineHeight: 1.45,
                 color: isOn ? "var(--qc-ink-2)" : "var(--qc-ink-3)",
               }}>
                 {CYCLE_DESC[i]}
@@ -594,8 +594,8 @@ function CycleSchematic({ phaseType }: { phaseType: string }) {
         })}
       </div>
       <p style={{
-        fontFamily: "var(--qc-font-mono)", fontSize: 9, color: "var(--qc-ink-3)",
-        marginTop: 10, letterSpacing: "0.04em",
+        fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-3)",
+        marginTop: 10, letterSpacing: "var(--qc-track-pill)",
       }}>
         Accum → Markup → Re-Acc → (back to Markup) → Distribution → Markdown → Re-Dist → (back to Markdown) → next Accum
       </p>
@@ -620,7 +620,7 @@ function EventsGrid({ result }: { result: WyckoffResult }) {
               borderBottom: i < result.events.length - 1 ? "1px solid var(--qc-hair)" : "none",
             }}>
               <span style={{
-                fontFamily: "var(--qc-font-mono)", fontSize: 9, padding: "3px 6px",
+                fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", padding: "3px 6px",
                 whiteSpace: "nowrap", flexShrink: 0, borderRadius: 4,
                 border: `1px solid ${ev.ok ? "rgba(31,122,74,0.25)" : "rgba(178,58,47,0.2)"}`,
                 background: ev.ok ? "var(--qc-up-soft)" : "var(--qc-down-soft)",
@@ -629,8 +629,8 @@ function EventsGrid({ result }: { result: WyckoffResult }) {
                 {ev.tag}
               </span>
               <div>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>{ev.label}</span>
-                <span style={{ fontSize: 12, color: "var(--qc-ink-2)", marginLeft: 4 }}>{ev.desc}</span>
+                <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{ev.label}</span>
+                <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", marginLeft: 4 }}>{ev.desc}</span>
               </div>
             </li>
           ))}
@@ -655,14 +655,14 @@ function EventsGrid({ result }: { result: WyckoffResult }) {
               borderBottom: i < arr.length - 1 ? "1px solid var(--qc-hair)" : "none",
             }}>
               <span style={{
-                fontFamily: "var(--qc-font-mono)", fontSize: 9, padding: "3px 6px",
+                fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", padding: "3px 6px",
                 whiteSpace: "nowrap", flexShrink: 0, borderRadius: 4,
                 border: "1px solid var(--qc-hair)", background: "var(--qc-section)",
                 color: "var(--qc-ink-2)",
               }}>
                 {row.tag}
               </span>
-              <div style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.55 }}>{row.content}</div>
+              <div style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", lineHeight: 1.55 }}>{row.content}</div>
             </li>
           ))}
         </ul>
@@ -685,20 +685,20 @@ function PageHeader({ symbol }: { symbol: string }) {
           background: "var(--qc-ink)", display: "flex",
           alignItems: "center", justifyContent: "center",
         }}>
-          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: 14, fontWeight: 700, color: "#fff" }}>W</span>
+          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-bold)", color: "#fff" }}>W</span>
         </div>
         <div>
-          <div style={{ fontSize: 16, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "-0.01em" }}>
+          <div style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-16)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", letterSpacing: "var(--qc-track-display)" }}>
             Wyckoff Analyzer
-            <span style={{ marginLeft: 8, fontSize: 13, fontWeight: 400, color: "var(--qc-ink-2)" }}>{symbol}</span>
+            <span style={{ fontFamily: "var(--qc-font-sans)", marginLeft: 8, fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-regular)", color: "var(--qc-ink-2)" }}>{symbol}</span>
           </div>
-          <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: 9, color: "var(--qc-ink-3)", letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 2 }}>
+          <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-3)", letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 2 }}>
             Market Phase Detection Engine
           </div>
         </div>
       </div>
       <span style={{
-        fontFamily: "var(--qc-font-mono)", fontSize: 9, color: "var(--qc-ink-3)",
+        fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-3)",
         border: "1px solid var(--qc-hair)", borderRadius: 6,
         padding: "5px 10px", letterSpacing: "0.08em",
       }}>
@@ -723,7 +723,7 @@ function LoadingState({ message }: { message: string }) {
       }} />
       <style>{`@keyframes qc-spin{to{transform:rotate(360deg)}}`}</style>
       <p style={{
-        fontFamily: "var(--qc-font-mono)", fontSize: 10,
+        fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
         color: "var(--qc-ink-3)", letterSpacing: "0.12em", textTransform: "uppercase",
       }}>
         {message}
@@ -761,7 +761,7 @@ function WyckoffContent() {
   if (!symbol) {
     return (
       <ScreenerPageShell navItems={[]}>
-        <div style={{ padding: "24px 16px", fontSize: 13, color: "var(--qc-down)" }}>No symbol provided</div>
+        <div style={{ padding: "24px 16px", fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-down)" }}>No symbol provided</div>
       </ScreenerPageShell>
     );
   }
@@ -783,7 +783,7 @@ function WyckoffContent() {
         {error && (
           <div style={{
             color: "var(--qc-down)", padding: "16px 0",
-            fontFamily: "var(--qc-font-mono)", fontSize: 12,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-12)",
           }}>
             Error fetching prices: {error}
           </div>
@@ -806,7 +806,7 @@ function WyckoffContent() {
         {!loading && !analyzing && !result && !error && prices.length === 0 && (
           <div style={{
             color: "var(--qc-ink-3)", padding: "40px 0",
-            textAlign: "center", fontFamily: "var(--qc-font-mono)", fontSize: 12,
+            textAlign: "center", fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-12)",
           }}>
             No price data available for {symbol}
           </div>
@@ -820,7 +820,7 @@ export default function WyckoffPage() {
   return (
     <Suspense fallback={
       <div style={{ minHeight: "100vh", background: "var(--qc-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: 13, color: "var(--qc-ink-3)" }}>Loading…</span>
+        <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-3)" }}>Loading…</span>
       </div>
     }>
       <WyckoffContent />

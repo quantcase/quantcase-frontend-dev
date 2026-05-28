@@ -77,9 +77,9 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
           <span
             style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10,
-              letterSpacing: ".12em",
+              fontFamily: "var(--qc-font-mono)",
+              fontSize: "var(--qc-fz-10)",
+              letterSpacing: "var(--qc-track-eyebrow-l)",
               color: "var(--qc-ink)",
               textTransform: "uppercase",
               whiteSpace: "nowrap",
@@ -92,8 +92,9 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
           </span>
           <span
             style={{
-              fontSize: 10,
-              fontWeight: 600,
+              fontFamily: "var(--qc-font-sans)",
+              fontSize: "var(--qc-fz-10)",
+              fontWeight: "var(--qc-w-semi)",
               padding: "3px 8px",
               borderRadius: 4,
               background: sentBg(verdictSentiment),
@@ -111,11 +112,12 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
           {rows.map((row, i) => (
             <div key={i}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: row.barPct != null ? 5 : 0 }}>
-                <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>{row.label}</span>
+                <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)" }}>{row.label}</span>
                 <span
                   style={{
-                    fontSize: 12,
-                    fontWeight: 500,
+                    fontFamily: "var(--qc-font-mono)",
+                    fontSize: "var(--qc-fz-12)",
+                    fontWeight: "var(--qc-w-medium)",
                     color: row.valueSentiment ? sentColor(row.valueSentiment) : "var(--qc-ink)",
                     fontVariantNumeric: "tabular-nums",
                   }}
@@ -162,7 +164,8 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
               <p
                 style={{
                   margin: 0,
-                  fontSize: 11,
+                  fontFamily: "var(--qc-font-sans)",
+                  fontSize: "var(--qc-fz-11)",
                   color: "var(--qc-ink-2)",
                   lineHeight: 1.5,
                   display: "-webkit-box",
@@ -325,7 +328,7 @@ function PriceLevelsBar({
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
         <MonoEyebrow>Price Levels · All-Time Scale</MonoEyebrow>
-        <span style={{ fontSize: 10, color: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}>
+        <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)" }}>
           {atl != null && `ATL ${fp(atl)}${atlDate ? ` (${atlDate})` : ""}`}
           {atl != null && ath != null && " · "}
           {ath != null && `ATH ${fp(ath)}${athDate ? ` (${athDate})` : ""}`}
@@ -389,7 +392,8 @@ function PriceLevelsBar({
                     <foreignObject x={x - 38} y={boxTop} width="76" height={LABEL_H} style={{ overflow: "visible" }}>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                         <span style={{
-                          fontSize: 11, fontWeight: isCmp ? 700 : 500,
+                          fontFamily: "var(--qc-font-mono)",
+                          fontSize: "var(--qc-fz-11)", fontWeight: isCmp ? "var(--qc-w-bold)" : "var(--qc-w-medium)",
                           fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
                           background: isCmp ? "#0F172B" : "transparent",
                           color: isCmp ? "#fff" : "var(--qc-ink)",
@@ -399,18 +403,18 @@ function PriceLevelsBar({
                           {fp(m.value)}
                         </span>
                         <span style={{
-                          fontSize: 9, fontWeight: 600, color,
+                          fontFamily: "var(--qc-font-mono)",
+                          fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-semi)", color,
                           background: "var(--qc-surface, #F5F5F5)",
                           border: `1px solid ${color}`,
                           borderRadius: 3, padding: "1px 5px",
                           whiteSpace: "nowrap",
-                          fontFamily: "'IBM Plex Mono', monospace",
                           letterSpacing: "0.05em",
                         }}>
                           {m.label}
                         </span>
                         {m.subLabel && (
-                          <span style={{ fontSize: 8.5, color: "var(--qc-ink-2)", whiteSpace: "nowrap" }}>
+                          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", whiteSpace: "nowrap" }}>
                             {m.subLabel}
                           </span>
                         )}
@@ -460,7 +464,7 @@ function PriceLevelsBar({
         ].map(({ dot, label }) => (
           <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: dot, display: "inline-block", flexShrink: 0 }} />
-            <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{label}</span>
+            <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)" }}>{label}</span>
           </div>
         ))}
       </div>
@@ -475,7 +479,7 @@ function InlineMd({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         p.startsWith("**") && p.endsWith("**") ? (
-          <strong key={i} style={{ color: "var(--qc-ink)", fontWeight: 600 }}>{p.slice(2, -2)}</strong>
+          <strong key={i} style={{ color: "var(--qc-ink)", fontWeight: "var(--qc-w-semi)" }}>{p.slice(2, -2)}</strong>
         ) : (
           <span key={i}>{p}</span>
         )
@@ -684,9 +688,9 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
           <div style={{ marginBottom: 14 }}>
             <div
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 11,
-                letterSpacing: ".12em",
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: "var(--qc-fz-11)",
+                letterSpacing: "var(--qc-track-eyebrow-l)",
                 textTransform: "uppercase",
                 color: "var(--qc-ink)",
                 marginBottom: 8,
@@ -694,7 +698,7 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
             >
               Technicals
             </div>
-            <p style={{ margin: 0, fontSize: 13, color: "var(--qc-ink)", lineHeight: 1.6 }}>
+            <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", lineHeight: 1.6 }}>
               {overviewSummary ? <InlineMd text={summary} /> : summary}
             </p>
           </div>

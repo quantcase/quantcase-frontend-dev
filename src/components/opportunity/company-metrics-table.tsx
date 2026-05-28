@@ -107,7 +107,8 @@ function CellContent({ col, val }: { col: ColDef; val: CellValue }) {
           whiteSpace: "pre-line",
           lineHeight: 1.45,
           color: "var(--qc-ink-2)",
-          fontSize: 11,
+          fontSize: "var(--qc-fz-11)",
+          fontFamily: "var(--qc-font-sans)",
         }}
       >
         {text}
@@ -152,8 +153,9 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
       <div className="flex items-center gap-2">
         <p
           style={{
-            fontSize: 11,
-            fontWeight: 600,
+            fontSize: "var(--qc-fz-11)",
+            fontWeight: "var(--qc-w-semi)",
+            fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink-2)",
             textTransform: "uppercase",
             letterSpacing: "0.08em",
@@ -175,7 +177,8 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
             minWidth: tableMinWidth,
             width: "100%",
             borderCollapse: "collapse",
-            fontSize: 12,
+            fontSize: "var(--qc-fz-12)",
+            fontFamily: "var(--qc-font-sans)",
           }}
         >
           <thead>
@@ -187,8 +190,9 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                   minWidth: COMPANY_COL_WIDTH,
                   padding: "10px 12px",
                   textAlign: "left",
-                  fontSize: 10,
-                  fontWeight: 600,
+                  fontSize: "var(--qc-fz-10)",
+                  fontWeight: "var(--qc-w-semi)",
+                  fontFamily: "var(--qc-font-sans)",
                   color: "var(--qc-ink-2)",
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
@@ -211,8 +215,9 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                     minWidth: col.width,
                     padding: "10px 12px",
                     textAlign: col.align,
-                    fontSize: 10,
-                    fontWeight: 600,
+                    fontSize: "var(--qc-fz-10)",
+                    fontWeight: "var(--qc-w-semi)",
+                    fontFamily: "var(--qc-font-sans)",
                     color: "var(--qc-ink-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.06em",
@@ -239,8 +244,9 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                   style={{
                     padding: "10px 12px",
                     whiteSpace: "nowrap",
-                    fontSize: 12,
-                    fontWeight: row.is_current ? 600 : 400,
+                    fontSize: "var(--qc-fz-12)",
+                    fontWeight: row.is_current ? "var(--qc-w-semi)" : "var(--qc-w-regular)",
+                    fontFamily: "var(--qc-font-sans)",
                     color: row.is_current ? "var(--qc-ink)" : "#121212",
                     position: "sticky",
                     left: 0,
@@ -269,7 +275,8 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                         padding: "10px 12px",
                         textAlign: col.align,
                         verticalAlign: "top",
-                        fontSize: 12,
+                        fontSize: "var(--qc-fz-12)",
+                        fontFamily: "var(--qc-font-sans)",
                       }}
                     >
                       <CellContent col={col} val={val} />
@@ -292,8 +299,9 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                   style={{
                     padding: "10px 12px",
                     whiteSpace: "nowrap",
-                    fontSize: 12,
-                    fontWeight: 600,
+                    fontSize: "var(--qc-fz-12)",
+                    fontWeight: "var(--qc-w-semi)",
+                    fontFamily: "var(--qc-font-sans)",
                     color: "var(--qc-ink)",
                     position: "sticky",
                     left: 0,
@@ -313,8 +321,9 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                         padding: "10px 12px",
                         textAlign: col.align,
                         verticalAlign: "top",
-                        fontSize: 12,
-                        fontWeight: 500,
+                        fontSize: "var(--qc-fz-12)",
+                        fontWeight: "var(--qc-w-medium)",
+                        fontFamily: "var(--qc-font-sans)",
                       }}
                     >
                       <CellContent col={col} val={val} />

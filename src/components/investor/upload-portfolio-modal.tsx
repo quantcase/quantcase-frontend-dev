@@ -105,10 +105,10 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
         {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 6 }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 500, color: "#0F172B", margin: 0 }}>
+            <h2 style={{ fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-serif)", color: "var(--qc-ink)", margin: 0 }}>
               Upload your portfolio
             </h2>
-            <p style={{ fontSize: 13, color: "#888", margin: "4px 0 0" }}>
+            <p style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", margin: "4px 0 0" }}>
               Upload a CSV or Excel file with your holdings.
             </p>
           </div>
@@ -116,7 +116,7 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
             onClick={handleClose}
             style={{
               background: "none", border: "none", cursor: "pointer",
-              padding: "2px 6px", fontSize: 18, color: "#888", lineHeight: 1,
+              padding: "2px 6px", fontSize: "var(--qc-fz-18)", color: "var(--qc-ink-3)", lineHeight: 1,
               borderRadius: 6,
             }}
             aria-label="Close"
@@ -131,8 +131,9 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
           download
           style={{
             display: "inline-flex", alignItems: "center", gap: 6,
-            fontSize: 12, color: "#0F172B", fontWeight: 500,
-            background: "#F5F5F5", border: "1px solid #E2E2E2",
+            fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", fontWeight: "var(--qc-w-medium)",
+            fontFamily: "var(--qc-font-sans)",
+            background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
             borderRadius: 6, padding: "5px 12px",
             textDecoration: "none", marginBottom: 20,
           }}
@@ -171,8 +172,8 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
           {selectedFile ? (
             <>
               <div style={{ fontSize: 24, marginBottom: 6 }}>📄</div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: "#0F172B" }}>{selectedFile.name}</div>
-              <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+              <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{selectedFile.name}</div>
+              <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: 2 }}>
                 {(selectedFile.size / 1024).toFixed(0)} KB · click to replace
               </div>
             </>
@@ -183,10 +184,10 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
                 <polyline points="17 8 12 3 7 8"/>
                 <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              <div style={{ fontSize: 13, fontWeight: 500, color: "#0F172B" }}>
+              <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>
                 Drop your file here, or <span style={{ textDecoration: "underline" }}>browse</span>
               </div>
-              <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
+              <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: 4 }}>
                 CSV, XLS, or XLSX · max 10 MB
               </div>
             </>
@@ -195,7 +196,7 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
 
         {/* Error */}
         {errorMessage && (
-          <div style={{ marginTop: 10, fontSize: 12, color: "#ef4444" }}>
+          <div style={{ marginTop: 10, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down)" }}>
             {errorMessage}
           </div>
         )}
@@ -205,9 +206,9 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
           <button
             onClick={handleClose}
             style={{
-              fontSize: 13, fontWeight: 500, padding: "8px 18px",
-              background: "#F5F5F5", border: "1px solid #E2E2E2",
-              borderRadius: 8, cursor: "pointer", color: "#0F172B",
+              fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", padding: "8px 18px",
+              background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+              borderRadius: 8, cursor: "pointer", color: "var(--qc-ink)",
             }}
           >
             Cancel
@@ -216,8 +217,8 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
             onClick={handleUpload}
             disabled={!selectedFile || uploadState === "uploading" || uploadState === "success"}
             style={{
-              fontSize: 13, fontWeight: 500, padding: "8px 20px",
-              background: uploadState === "success" ? "#22c55e" : "#0F172B",
+              fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", padding: "8px 20px",
+              background: uploadState === "success" ? "var(--qc-up)" : "var(--qc-ink)",
               color: "#fff", border: "none", borderRadius: 8,
               cursor: selectedFile && uploadState === "idle" ? "pointer" : "not-allowed",
               opacity: !selectedFile || uploadState === "uploading" ? 0.6 : 1,

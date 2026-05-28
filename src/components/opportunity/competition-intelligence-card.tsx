@@ -27,10 +27,10 @@ function MetricRow({ label, value, sublabel }: { label: string; value: string; s
   return (
     <div style={{ position: "relative" }} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", cursor: "default" }}>
-        <span style={{ fontSize: 12, color: "var(--qc-ink)", flex: 1, lineHeight: 1.2 }}>{label}</span>
+        <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", flex: 1, lineHeight: 1.2 }}>{label}</span>
         <span style={{
-          fontSize: 11, fontWeight: 600, color,
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color,
+          fontFamily: "var(--qc-font-mono)",
           textTransform: "uppercase" as const,
           letterSpacing: ".06em", flexShrink: 0,
         }}>
@@ -46,7 +46,7 @@ function MetricRow({ label, value, sublabel }: { label: string; value: string; s
           boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
           padding: "10px 12px",
         }}>
-          <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{sublabel}</p>
+          <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>{sublabel}</p>
         </div>
       )}
     </div>
@@ -75,14 +75,14 @@ function PricingPowerRow({ label, body, dot }: { label: string; body: string; do
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot, flexShrink: 0, marginTop: 4 }} />
         <div style={{ minWidth: 0 }}>
           <span style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+            fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
             color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
             letterSpacing: ".1em", display: "block", marginBottom: 2,
           }}>
             {label}
           </span>
           <p style={{
-            margin: 0, fontSize: 12, fontWeight: 500,
+            margin: 0, fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink)", lineHeight: 1.4,
             display: "-webkit-box", WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical", overflow: "hidden",
@@ -105,10 +105,10 @@ function PricingPowerRow({ label, body, dot }: { label: string; body: string; do
             display: "flex", alignItems: "center", gap: 6,
           }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.3 }}>{label}</span>
+            <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.3 }}>{label}</span>
           </div>
           <div style={{ padding: "10px 12px" }}>
-            <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
+            <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.6 }}>{body}</p>
           </div>
         </div>
       )}

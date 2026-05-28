@@ -43,20 +43,20 @@ export function ValuationHeroSection({
       >
         <div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 2 }}>
-            <p style={{ fontSize: 12, color: "var(--qc-ink)" }}>Current P/E ratio</p>
+            <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>Current P/E ratio</p>
             <SentimentPill label={verdictLabel} sentiment={sentiment} />
           </div>
           <div
             style={{
-              fontSize: 48, fontWeight: 500, letterSpacing: "-0.035em",
+              fontSize: "var(--qc-fz-44)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.035em",
               lineHeight: 1, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums",
               display: "flex", alignItems: "baseline", gap: 5,
             }}
           >
             {pe != null ? pe.toFixed(1) : "—"}
-            <span style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink-2)" }}>x</span>
+            <span style={{ fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.02em", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)" }}>x</span>
           </div>
-          <div style={{ fontSize: 12, color: "var(--qc-ink)", marginTop: 6, lineHeight: 1.45 }}>
+          <div style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", marginTop: 6, lineHeight: 1.45, fontFamily: "var(--qc-font-sans)" }}>
             {narrative}
           </div>
         </div>
@@ -66,11 +66,11 @@ export function ValuationHeroSection({
           <div
             style={{
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
-              marginBottom: 8, fontSize: 12, color: "var(--qc-ink)",
+              marginBottom: 8, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)",
             }}
           >
             <span>vs. Industry</span>
-            <b style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 500, color: "var(--qc-ink)" }}>
+            <b style={{ fontFamily: "var(--qc-font-mono)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)" }}>
               {industryPE != null ? `${industryPE.toFixed(1)}x` : "—"}
             </b>
           </div>
@@ -97,7 +97,7 @@ export function ValuationHeroSection({
           <div
             style={{
               display: "flex", justifyContent: "space-between", marginTop: 6,
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+              fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)",
               color: "var(--qc-ink-2)", letterSpacing: ".06em", textTransform: "uppercase",
             }}
           >

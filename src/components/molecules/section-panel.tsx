@@ -24,7 +24,7 @@ function SectionScoreBar({ scoring }: { scoring: SectionScoring }) {
 
   return (
     <div className="shrink-0 flex items-center gap-2">
-      <span style={{ fontSize: 13, fontWeight: 600, color: numericScore ? textColor : "var(--qc-ink-2)", letterSpacing: "0.01em" }}>
+      <span style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: numericScore ? textColor : "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)", letterSpacing: "0.01em" }}>
         {numericScore ? `${parsedScore}/${scoring.max_score}` : "N/A"}
       </span>
       {numericScore && (
@@ -82,9 +82,9 @@ export function SectionPanel({
       <div className="flex items-center justify-between" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
         <div className="flex flex-col" style={{ gap: subHeader ? 6 : 0 }}>
           {typeof title === "string" ? (
-            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>{title}</div>
+            <div style={{ fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)", letterSpacing: "0.01em" }}>{title}</div>
           ) : title}
-          {subtitle && <p style={{ margin: 0, fontSize: 13, fontWeight: 400, color: "var(--qc-ink-2)", lineHeight: 1.3 }}>{subtitle}</p>}
+          {subtitle && <p style={{ margin: 0, fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-regular)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-sans)", lineHeight: 1.3 }}>{subtitle}</p>}
           {subHeader && <div>{subHeader}</div>}
         </div>
         {scoring && <SectionScoreBar scoring={scoring} />}

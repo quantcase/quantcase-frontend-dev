@@ -90,8 +90,8 @@ function BasketRow({ basket }: { basket: Basket }) {
               boxShadow: "0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06)",
             }}
           >
-            <p style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.3, marginBottom: 5, color: "var(--qc-ink)" }}>{basket.title}</p>
-            <p style={{ fontSize: 11.5, lineHeight: 1.6, color: "var(--qc-ink-2)" }}>{basket.description}</p>
+            <p style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", lineHeight: 1.3, marginBottom: 5, color: "var(--qc-ink)" }}>{basket.title}</p>
+            <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", lineHeight: 1.6, color: "var(--qc-ink-2)" }}>{basket.description}</p>
           </motion.div>
         )}
       </AnimatePresence>

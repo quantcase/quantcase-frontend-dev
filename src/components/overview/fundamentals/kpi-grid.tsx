@@ -91,14 +91,14 @@ function KpiCard({ label, value, unit, yoy, muted, sparkValues, metricKey, selec
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <span style={{ fontSize: 11.5, color: "var(--qc-ink)", letterSpacing: ".01em" }}>
+        <span style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", letterSpacing: ".01em", fontFamily: "var(--qc-font-sans)" }}>
           {label}
         </span>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10.5, padding: "2px 6px", borderRadius: 4,
-            letterSpacing: ".02em", fontWeight: 500, lineHeight: 1.3,
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-10)", padding: "2px 6px", borderRadius: 4,
+            letterSpacing: ".02em", fontWeight: "var(--qc-w-medium)", lineHeight: 1.3,
             background: yoyBg,
             color: yoyColor,
             display: "inline-flex", alignItems: "center", gap: 3,
@@ -109,13 +109,13 @@ function KpiCard({ label, value, unit, yoy, muted, sparkValues, metricKey, selec
         </span>
       </div>
       {muted ? (
-        <div style={{ fontSize: 18, fontWeight: 400, color: "var(--qc-ink-2)", fontVariantNumeric: "tabular-nums", lineHeight: 1.1, marginTop: "auto" }}>
+        <div style={{ fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-regular)", color: "var(--qc-ink-2)", fontVariantNumeric: "tabular-nums", lineHeight: 1.1, marginTop: "auto", fontFamily: "var(--qc-font-mono)" }}>
           —
         </div>
       ) : (
-        <div style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-0.015em", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums", lineHeight: 1.1, marginTop: "auto" }}>
+        <div style={{ fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.015em", color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums", lineHeight: 1.1, marginTop: "auto", fontFamily: "var(--qc-font-mono)" }}>
           {value}
-          {unit && <span style={{ fontSize: 12, fontWeight: 400, color: "var(--qc-ink-2)", marginLeft: 3, letterSpacing: 0 }}>{unit}</span>}
+          {unit && <span style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-regular)", color: "var(--qc-ink-2)", marginLeft: 3, letterSpacing: 0, fontFamily: "var(--qc-font-mono)" }}>{unit}</span>}
         </div>
       )}
       {/* Sparkline */}

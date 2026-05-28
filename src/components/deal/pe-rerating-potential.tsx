@@ -28,7 +28,7 @@ function RichDescription({ segments }: { segments: (DescriptionSegment | Valuati
       {segments.map((seg, i) => {
         const cssColor = seg.color ? segmentCssColor[seg.color] : undefined;
         return (
-          <span key={i} style={{ fontWeight: seg.bold ? 600 : 400, color: cssColor ?? undefined }}>
+          <span key={i} style={{ fontFamily: "var(--qc-font-sans)", fontWeight: seg.bold ? "var(--qc-w-semi)" : "var(--qc-w-regular)", color: cssColor ?? undefined }}>
             {seg.text}
           </span>
         );

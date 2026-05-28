@@ -134,12 +134,12 @@ function MvTile({ tile }: { tile: FrameworkTile }) {
     >
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
         <div>
-          <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2 }}>{tile.name}</div>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".08em", color: "var(--qc-ink-2)", textTransform: "uppercase" }}>{tile.tf}</div>
+          <div style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", marginBottom: 2 }}>{tile.name}</div>
+          <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", letterSpacing: ".08em", color: "var(--qc-ink-2)", textTransform: "uppercase" }}>{tile.tf}</div>
         </div>
         <span
           style={{
-            fontSize: 10.5, fontWeight: 600, letterSpacing: ".04em", textTransform: "uppercase",
+            fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", letterSpacing: "var(--qc-track-pill)", textTransform: "uppercase",
             color: sentColor(tile.verdict),
             background: tile.verdict === "bear" ? "var(--qc-down-soft, #FDECEA)" : tile.verdict === "bull" ? "var(--qc-up-soft, #EAF4EE)" : "var(--qc-warn-soft, #FEF3E2)",
             padding: "3px 8px", borderRadius: 999,
@@ -152,14 +152,14 @@ function MvTile({ tile }: { tile: FrameworkTile }) {
         {tile.signals.map((sig) => (
           <div key={sig.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ width: 5, height: 5, borderRadius: "50%", background: sentColor(sig.sent), flexShrink: 0 }} />
-            <span style={{ flex: 1, fontSize: 11.5, color: "var(--qc-ink)" }}>{sig.label}</span>
-            <span style={{ fontSize: 11.5, fontWeight: 500, color: sentColor(sig.sent) }}>{sig.value}</span>
+            <span style={{ fontFamily: "var(--qc-font-sans)", flex: 1, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)" }}>{sig.label}</span>
+            <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: sentColor(sig.sent) }}>{sig.value}</span>
           </div>
         ))}
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--qc-hair-2)", paddingTop: 8 }}>
-        <span style={{ fontSize: 11, color: "var(--qc-ink-2)" }}>{tile.signalCount} signals</span>
-        <b style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-ink)" }}>{tile.footNote}</b>
+        <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)" }}>{tile.signalCount} signals</span>
+        <b style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)" }}>{tile.footNote}</b>
       </div>
     </div>
   );
@@ -201,7 +201,7 @@ export function MarketViewCard() {
                 background: "var(--qc-down-soft, #FDECEA)",
                 border: "1px solid #F0C0BB",
                 color: "var(--qc-down, #B23A2F)",
-                fontSize: 11, fontWeight: 600, letterSpacing: ".04em", textTransform: "uppercase",
+                fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", letterSpacing: "var(--qc-track-pill)", textTransform: "uppercase",
               }}
             >
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--qc-down, #B23A2F)", display: "inline-block" }} />
@@ -228,24 +228,24 @@ export function MarketViewCard() {
                 </g>
               </svg>
               <div style={{ textAlign: "center", marginTop: -8 }}>
-                <div style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-                  {SENTIMENT_SCORE}<span style={{ fontSize: 12, color: "var(--qc-ink-2)", fontWeight: 400 }}>/100</span>
+                <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.02em", color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                  {SENTIMENT_SCORE}<span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-regular)" }}>/100</span>
                 </div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--qc-ink-2)", marginTop: 4 }}>
+                <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", letterSpacing: "var(--qc-track-eyebrow-l)", textTransform: "uppercase", color: "var(--qc-ink-2)", marginTop: 4 }}>
                   Sentiment
                 </div>
               </div>
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <h3 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 500, letterSpacing: "-0.01em", color: "var(--qc-ink)", lineHeight: 1.3 }}>
+              <h3 style={{ margin: "0 0 6px", fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-16)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.01em", color: "var(--qc-ink)", lineHeight: 1.3 }}>
                 {FW.bear >= 4
                   ? `${FW.bear} of six frameworks read bearish.`
                   : FW.bull >= 4
                   ? `${FW.bull} of six frameworks read bullish.`
                   : "Market signals are mixed across frameworks."}
               </h3>
-              <p style={{ margin: 0, fontSize: 12.5, color: "var(--qc-ink)", lineHeight: 1.55 }}>
+              <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.55 }}>
                 {FW.bear >= 3
                   ? "Price structure, momentum, breadth and valuation are all flashing caution. Only macro and policy offer a partial offset. Capital flows are mixed, with FII selling and DII buying."
                   : "Signals are mixed — check individual framework tiles below for detail."}
@@ -264,14 +264,14 @@ export function MarketViewCard() {
               <div key={sent}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                   <span style={{ width: 7, height: 7, borderRadius: "50%", background: sentColor(sent), flexShrink: 0 }} />
-                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-ink-2)" }}>
+                  <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-ink-2)" }}>
                     {sent === "bull" ? "Bullish" : sent === "bear" ? "Bearish" : "Neutral"}
                   </span>
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em", color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-                  {FW[sent]}<span style={{ fontSize: 13, color: "var(--qc-ink-2)", fontWeight: 400 }}>/6</span>
+                <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.02em", color: "var(--qc-ink)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                  {FW[sent]}<span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-regular)" }}>/6</span>
                 </div>
-                <div style={{ fontSize: 11, color: "var(--qc-ink-2)", marginTop: 3 }}>{fwSubLabel(sent)}</div>
+                <div style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", marginTop: 3 }}>{fwSubLabel(sent)}</div>
               </div>
             ))}
           </div>
@@ -309,10 +309,10 @@ export function MarketViewCard() {
         }}
       >
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
-          <h4 style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>
+          <h4 style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)" }}>
             Signal tally · across 6 frameworks
           </h4>
-          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--qc-ink-2)", letterSpacing: ".08em" }}>
+          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)", letterSpacing: ".08em" }}>
             {TALLY_TOTAL} readings · weight-neutral
           </span>
         </div>
@@ -323,17 +323,17 @@ export function MarketViewCard() {
           aria-label={`${TALLY.bear} bearish, ${TALLY.neu} neutral, ${TALLY.bull} bullish signals`}
         >
           {TALLY.bear > 0 && (
-            <div style={{ flex: TALLY.bear, background: "var(--qc-down, #B23A2F)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontSize: 11, fontWeight: 500, minWidth: 0 }}>
+            <div style={{ flex: TALLY.bear, background: "var(--qc-down, #B23A2F)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", minWidth: 0 }}>
               <span>Bearish</span><b>{TALLY.bear}</b>
             </div>
           )}
           {TALLY.neu > 0 && (
-            <div style={{ flex: TALLY.neu, background: "var(--qc-warn, #B4731A)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontSize: 11, fontWeight: 500, minWidth: 0 }}>
+            <div style={{ flex: TALLY.neu, background: "var(--qc-warn, #B4731A)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", minWidth: 0 }}>
               <span>Neutral</span><b>{TALLY.neu}</b>
             </div>
           )}
           {TALLY.bull > 0 && (
-            <div style={{ flex: TALLY.bull, background: "var(--qc-up, #1F7A4A)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontSize: 11, fontWeight: 500, minWidth: 0 }}>
+            <div style={{ flex: TALLY.bull, background: "var(--qc-up, #1F7A4A)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", color: "#fff", fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", minWidth: 0 }}>
               <span>Bullish</span><b>{TALLY.bull}</b>
             </div>
           )}
@@ -352,8 +352,8 @@ export function MarketViewCard() {
                   paddingLeft: 8,
                 }}
               >
-                <div style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2 }}>{tile.shortName}</div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "var(--qc-ink)" }}>
+                <div style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", marginBottom: 2 }}>{tile.shortName}</div>
+                <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink)" }}>
                   {bear}<span style={{ color: "var(--qc-ink-2)" }}>·{neu}·{bull}</span>
                 </div>
               </div>

@@ -24,8 +24,8 @@ function SectionHeader({ label, count, linkLabel, onLinkClick, style }: SectionH
         <span
           style={{
             fontFamily: "var(--qc-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.16em",
+            fontSize: "var(--qc-fz-11)",
+            letterSpacing: "var(--qc-track-eyebrow-l)",
             textTransform: "uppercase",
             color: "var(--qc-ink-2)",
             whiteSpace: "nowrap",
@@ -41,8 +41,8 @@ function SectionHeader({ label, count, linkLabel, onLinkClick, style }: SectionH
           onClick={onLinkClick}
           style={{
             fontFamily: "var(--qc-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.04em",
+            fontSize: "var(--qc-fz-11)",
+            letterSpacing: "var(--qc-track-pill)",
             color: "var(--qc-ink-3)",
             cursor: "pointer",
             whiteSpace: "nowrap",

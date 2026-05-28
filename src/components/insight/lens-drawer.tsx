@@ -21,6 +21,7 @@ interface LensDrawerProps {
   lens: LensDetail | null;
   signals: Signal[];
   onClose: () => void;
+  callId?: string;
 }
 
 function statusColor(status: string | null | undefined) {
@@ -40,7 +41,7 @@ function statusBg(status: string | null | undefined) {
 }
 
 
-function LensDetailView({ lens, signals }: { lens: LensDetail; signals: Signal[] }) {
+function LensDetailView({ lens, signals, callId }: { lens: LensDetail; signals: Signal[]; callId?: string }) {
   switch (lens.slug) {
     case "guidance-credibility":
       return <LensDetailGuidance lens={lens} />;
@@ -53,7 +54,7 @@ function LensDetailView({ lens, signals }: { lens: LensDetail; signals: Signal[]
     case "industry-analysis":
       return <LensDetailIndustry lens={lens} signals={signals} />;
     case "competition":
-      return <LensDetailCompetition lens={lens} signals={signals} />;
+      return <LensDetailCompetition lens={lens} signals={signals} callId={callId} />;
     case "financial-strength":
       return <LensDetailFinancial lens={lens} signals={signals} />;
     case "customer-distribution":
@@ -72,7 +73,7 @@ function LensDetailView({ lens, signals }: { lens: LensDetail; signals: Signal[]
   }
 }
 
-export function LensDrawer({ lens, signals, onClose }: LensDrawerProps) {
+export function LensDrawer({ lens, signals, onClose, callId }: LensDrawerProps) {
   useEffect(() => {
     if (!lens) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -168,7 +169,7 @@ export function LensDrawer({ lens, signals, onClose }: LensDrawerProps) {
             <div style={{ flex: 1, padding: "20px 24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
 
               {/* Lens-specific rich view — or fall back to generic */}
-              <LensDetailView lens={lens} signals={signals} />
+              <LensDetailView lens={lens} signals={signals} callId={callId} />
 
               {/* Generic fallback: key metrics, highlights, risks */}
               {!["guidance-credibility", "promoter-activity", "disclosure-honesty", "capital-allocation", "industry-analysis", "competition", "financial-strength", "customer-distribution", "eps-engine", "earnings-forecast", "pe-rerating-potential", "earning-quality", "target-price-matrix"].includes(lens.slug) && (

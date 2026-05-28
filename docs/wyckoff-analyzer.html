@@ -1,0 +1,2439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Wyckoff Phase Analyzer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#080c12; --surface:#0d1420; --surface2:#121b2e;
+    --border:#1e2d47; --accent:#00d4ff; --accent2:#ff6b35;
+    --text:#e8f0ff; --muted:#556080; --gold:#ffd166;
+    --red:#ff4560; --green:#00e396;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:
+    radial-gradient(ellipse 60% 40% at 10% 10%,rgba(0,212,255,.05) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 90%,rgba(255,107,53,.04) 0%,transparent 60%);
+    pointer-events:none;z-index:0;}
+  .wrap{max-width:1400px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+
+  header{padding:28px 0 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .logo{display:flex;align-items:center;gap:14px;}
+  .logo-icon{width:42px;height:42px;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-size:17px;color:var(--accent);
+    clip-path:polygon(10% 0%,90% 0%,100% 10%,100% 90%,90% 100%,10% 100%,0% 90%,0% 10%);
+    background:rgba(0,212,255,.06);}
+  .logo h1{font-size:21px;font-weight:800;letter-spacing:-.5px;}
+  .logo span{color:var(--accent);}
+  .logo-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+  .hbadge{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);border:1px solid var(--border);padding:6px 12px;letter-spacing:1px;}
+
+  .upload-section{padding:60px 0 32px;}
+  .drop-zone{border:2px dashed var(--border);background:var(--surface);padding:72px 40px;text-align:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
+  .drop-zone::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,212,255,.04) 0%,transparent 50%);opacity:0;transition:opacity .3s;}
+  .drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:rgba(0,212,255,.04);}
+  .drop-zone:hover::after,.drop-zone.over::after{opacity:1;}
+  .drop-icon{font-size:52px;margin-bottom:18px;opacity:.7;}
+  .drop-zone h2{font-size:22px;font-weight:800;margin-bottom:10px;}
+  .drop-zone p{font-size:13px;color:var(--muted);font-family:'Space Mono',monospace;line-height:2;}
+  .fmt-tag{display:inline-block;margin-top:18px;font-family:'Space Mono',monospace;font-size:11px;
+    color:var(--accent);background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);padding:8px 18px;letter-spacing:1px;}
+  #fi{display:none;}
+  .file-bar{display:none;margin-top:14px;font-family:'Space Mono',monospace;font-size:11px;
+    color:var(--accent);padding:11px 18px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);
+    align-items:center;justify-content:space-between;}
+  .file-bar.show{display:flex;}
+  .run-btn{display:none;margin-top:18px;padding:15px 42px;background:var(--accent);color:var(--bg);
+    font-family:'Space Mono',monospace;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+    border:none;cursor:pointer;transition:all .2s;
+    clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);}
+  .run-btn.show{display:inline-flex;align-items:center;gap:10px;}
+  .run-btn:hover{background:#33dfff;transform:translateY(-1px);}
+
+  .results{display:none;padding:24px 0 60px;}
+  .results.show{display:block;}
+  .reset-btn{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);background:none;
+    border:1px solid var(--border);padding:8px 16px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;
+    transition:all .2s;margin-bottom:24px;}
+  .reset-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+  .sec-title{font-size:11px;font-family:'Space Mono',monospace;letter-spacing:3px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  .hero{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:2px;}
+  .pcard{background:var(--surface);border:1px solid var(--border);padding:32px 36px;position:relative;overflow:hidden;}
+  .pcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+  .pcard.bl::before{background:var(--accent);}
+  .pcard.bo::before{background:var(--accent2);}
+  .pcard.bg::before{background:var(--green);}
+  .pcard.br::before{background:var(--red);}
+  .pcard.by::before{background:var(--gold);}
+  .plabel{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+  .pname{font-size:42px;font-weight:800;line-height:1;margin-bottom:8px;}
+  .ptype{font-size:13px;font-family:'Space Mono',monospace;margin-bottom:16px;}
+  .pdesc{font-size:13px;color:#9fb0cc;line-height:1.7;}
+  .conf-row{margin-top:20px;display:flex;align-items:center;gap:12px;}
+  .conf-track{flex:1;height:4px;background:var(--border);overflow:hidden;}
+  .conf-fill{height:100%;transition:width 1.2s ease;}
+  .conf-lbl{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;}
+
+  .metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:2px;}
+  .mcard{background:var(--surface);border:1px solid var(--border);padding:20px 24px;}
+  .mlbl{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+  .mval{font-size:24px;font-weight:800;line-height:1;}
+  .msub{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);margin-top:4px;}
+  .pos{color:var(--green);} .neg{color:var(--red);} .neu{color:var(--gold);}
+
+  .chart-box{background:var(--surface);border:1px solid var(--border);padding:28px;margin-bottom:2px;}
+  .ctitle{font-size:13px;font-weight:600;letter-spacing:.5px;}
+  .csub{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);margin-top:3px;margin-bottom:16px;}
+  .chart-wrap{position:relative;width:100%;overflow-x:auto;}
+  .chart-wrap canvas{display:block;}
+  .tooltip{position:absolute;top:10px;left:10px;font-family:'Space Mono',monospace;font-size:10px;
+    background:rgba(8,12,18,.9);border:1px solid var(--border);padding:8px 12px;
+    color:var(--text);pointer-events:none;line-height:1.8;z-index:10;display:none;}
+
+  .schembox{background:var(--surface);border:1px solid var(--border);padding:28px;margin-bottom:2px;}
+  .timeline{display:flex;margin-top:20px;}
+  .tstep{flex:1;padding:16px 12px;text-align:center;border:1px solid var(--border);border-right:none;transition:all .3s;}
+  .tstep:last-child{border-right:1px solid var(--border);}
+  .tstep.on{background:rgba(0,212,255,.08);border-color:var(--accent);z-index:1;}
+  .tstep.on.d{background:rgba(255,107,53,.08);border-color:var(--accent2);}
+  .tslbl{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;margin-bottom:6px;color:var(--muted);}
+  .tstep.on   .tslbl{color:var(--accent);}
+  .tstep.on.d .tslbl{color:var(--accent2);}
+  .tsname{font-size:10px;color:var(--muted);line-height:1.4;}
+  .tstep.on .tsname{color:var(--text);}
+  .schemsub{margin-top:14px;font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);}
+
+  .evgrid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:2px;}
+  .evcard{background:var(--surface);border:1px solid var(--border);padding:24px;}
+  .evlist{list-style:none;margin-top:12px;}
+  .evlist li{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(30,45,71,.6);font-size:12px;}
+  .evlist li:last-child{border-bottom:none;}
+  .etag{font-family:'Space Mono',monospace;font-size:9px;padding:3px 7px;white-space:nowrap;flex-shrink:0;border:1px solid;}
+  .etag.ok  {background:rgba(0,227,150,.12);color:var(--green);border-color:rgba(0,227,150,.25);}
+  .etag.no  {background:rgba(255,69,96,.10); color:var(--red);  border-color:rgba(255,69,96,.2);}
+  .etag.info{background:rgba(255,209,102,.10);color:var(--gold);border-color:rgba(255,209,102,.25);}
+  .etxt{color:#9fb0cc;line-height:1.5;}
+
+  .loader{display:none;position:fixed;inset:0;background:rgba(8,12,18,.93);z-index:100;
+    align-items:center;justify-content:center;flex-direction:column;gap:20px;}
+  .loader.show{display:flex;}
+  .spin{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+  .ltxt{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+  @media(max-width:900px){
+    .hero,.evgrid{grid-template-columns:1fr;}
+    .metrics{grid-template-columns:repeat(3,1fr);}
+  }
+</style>
+</head>
+<body>
+<div class="loader" id="loader"><div class="spin"></div><div class="ltxt">Resampling & Analyzing…</div></div>
+
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">W</div>
+      <div>
+        <h1>Wyckoff <span>Analyzer</span></h1>
+        <div class="logo-sub">Market Phase Detection Engine</div>
+      </div>
+    </div>
+    <div class="hbadge">5-MIN → DAILY RESAMPLER</div>
+  </header>
+
+  <div class="upload-section" id="uploadSec">
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-icon">📊</div>
+      <h2>Upload Your 5-Min OHLCV Data</h2>
+      <p>Drop a CSV / TXT file here, or click to browse<br>No headers needed — columns are auto-assigned</p>
+      <div class="fmt-tag">DATE &nbsp;·&nbsp; TIME &nbsp;·&nbsp; OPEN &nbsp;·&nbsp; HIGH &nbsp;·&nbsp; LOW &nbsp;·&nbsp; CLOSE &nbsp;·&nbsp; VOLUME</div>
+      <input type="file" id="fi" accept=".csv,.txt"/>
+    </div>
+    <div class="file-bar" id="fileBar"></div>
+    <br>
+    <button class="run-btn" id="runBtn" onclick="runAnalysis()">▸ &nbsp;Analyze Wyckoff Phase</button>
+  </div>
+
+  <div class="results" id="resultsSec">
+    <button class="reset-btn" onclick="resetApp()">← Upload New File</button>
+    <div id="out"></div>
+  </div>
+</div>
+
+<script>
+let rawRows=[], dailyBars=[], pChart=null, vChart=null;
+
+// FILE HANDLING
+const dropZone=document.getElementById('dropZone'), fi=document.getElementById('fi');
+dropZone.addEventListener('click',()=>fi.click());
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('over');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('over'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('over');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0]);});
+fi.addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0]);});
+
+function loadFile(file){
+  Papa.parse(file,{
+    header:false, skipEmptyLines:true,
+    complete(res){
+      const rows=res.data;
+      if(!rows.length){ alert('Empty file.'); return; }
+
+      // ── Auto-detect format ────────────────────────────────────────────────
+      // Format A (EOD / daily):   Date, OPEN, HIGH, LOW, CLOSE, VOLUME  (6 cols, YYYY-MM-DD)
+      // Format B (5-min intraday): Date, Time, Open, High, Low, Close, Volume (7 cols, DD/MM/YYYY)
+      // Detection: skip header row, inspect first data row.
+
+      // Find first non-header row
+      const firstData = rows.find(r=>{
+        const v=parseFloat(r[1]);
+        return !isNaN(v) && v>0;
+      });
+      if(!firstData){ alert('Could not parse file — no numeric data found.'); return; }
+
+      const isEOD = firstData.length===6
+                 || (firstData.length>=6 && firstData[0].trim().includes('-'));
+      // EOD: 6 cols, or date contains '-' (YYYY-MM-DD) rather than '/' (DD/MM/YYYY)
+
+      if(isEOD){
+        // ── EOD daily format ─────────────────────────────────────────────
+        // Columns: [0]=Date(YYYY-MM-DD), [1]=Open, [2]=High, [3]=Low, [4]=Close, [5]=Volume
+        // Skip header row if present (first cell not a number)
+        const dataRows = rows.filter(r=>r.length>=5 && !isNaN(parseFloat(r[1])));
+        rawRows = dataRows.map(r=>({
+          dateStr: r[0].trim(),   // keep as YYYY-MM-DD — resampleDaily handles it
+          open:   parseFloat(r[1]),
+          high:   parseFloat(r[2]),
+          low:    parseFloat(r[3]),
+          close:  parseFloat(r[4]),
+          volume: parseFloat(r[5])||0
+        })).filter(r=>!isNaN(r.open)&&!isNaN(r.close));
+
+        const bar=document.getElementById('fileBar');
+        bar.textContent=`✓  ${file.name}   |   ${rawRows.length.toLocaleString()} daily bars loaded (EOD)`;
+        bar.classList.add('show');
+        document.getElementById('runBtn').classList.add('show');
+
+      } else {
+        // ── 5-min intraday format ─────────────────────────────────────────
+        // Columns: [0]=Date(DD/MM/YYYY), [1]=Time, [2]=Open, [3]=High, [4]=Low, [5]=Close, [6]=Volume
+        rawRows = rows.filter(r=>r.length>=7).map(r=>({
+          dateStr: r[0].trim(),
+          open:   parseFloat(r[2]), high: parseFloat(r[3]),
+          low:    parseFloat(r[4]), close: parseFloat(r[5]),
+          volume: parseFloat(r[6])||0
+        })).filter(r=>!isNaN(r.open)&&!isNaN(r.close));
+
+        const bar=document.getElementById('fileBar');
+        bar.textContent=`✓  ${file.name}   |   ${rawRows.length.toLocaleString()} 5-min bars loaded`;
+        bar.classList.add('show');
+        document.getElementById('runBtn').classList.add('show');
+      }
+    },
+    error(e){alert('Parse error: '+e.message);}
+  });
+}
+
+// RESAMPLE / NORMALISE → daily bars, sorted oldest→newest
+// Handles two input formats:
+//   EOD (YYYY-MM-DD):       already daily — just normalise date and sort
+//   5-min (DD/MM/YYYY):     aggregate multiple intraday rows into one daily bar
+function resampleDaily(rows){
+  const map={};
+  rows.forEach(r=>{
+    const d=r.dateStr.trim();
+    let sortKey;
+
+    if(d.includes('-')){
+      // YYYY-MM-DD  (EOD format — already a sortable key)
+      sortKey=d;
+    } else if(d.includes('/')){
+      // DD/MM/YYYY  (intraday format — convert to YYYY-MM-DD)
+      const p=d.split('/');
+      if(p.length<3) return;
+      sortKey=`${p[2]}-${p[1]}-${p[0]}`;
+    } else {
+      return; // unrecognised date — skip
+    }
+
+    if(!map[sortKey]){
+      map[sortKey]={date:d, sortKey,
+        open:r.open, high:r.high, low:r.low, close:r.close, volume:r.volume};
+    } else {
+      // Aggregate: keep first open, highest high, lowest low, last close, sum volume
+      map[sortKey].high  = Math.max(map[sortKey].high,  r.high);
+      map[sortKey].low   = Math.min(map[sortKey].low,   r.low);
+      map[sortKey].close = r.close;
+      map[sortKey].volume+= r.volume;
+    }
+  });
+  return Object.values(map).sort((a,b)=>a.sortKey.localeCompare(b.sortKey));
+}
+
+// ══════════════════════════════════════════════════════════
+//  ZIGZAG PIVOT ENGINE
+// ══════════════════════════════════════════════════════════
+
+// Step 1 — raw pivot detection (k bars each side)
+function detectPivots(bars, k=3){
+  const pivots=[], n=bars.length;
+  for(let i=k; i<n-k; i++){
+    let isH=true, isL=true;
+    for(let j=1; j<=k; j++){
+      if(bars[i].high <= bars[i-j].high || bars[i].high <= bars[i+j].high) isH=false;
+      if(bars[i].low  >= bars[i-j].low  || bars[i].low  >= bars[i+j].low ) isL=false;
+    }
+    if(isH) pivots.push({type:'high', index:i, price:bars[i].high, date:bars[i].date, bar:bars[i]});
+    if(isL) pivots.push({type:'low',  index:i, price:bars[i].low,  date:bars[i].date, bar:bars[i]});
+  }
+  return pivots.sort((a,b)=>a.index-b.index);
+}
+
+// Step 2 — enforce strict High→Low→High alternation
+function alternateFilter(pivots){
+  if(!pivots.length) return [];
+  const zz=[pivots[0]];
+  for(let i=1; i<pivots.length; i++){
+    const last=zz[zz.length-1], curr=pivots[i];
+    // Same bar index: a wide candle can register both a local high and low.
+    // Collapse same-bar duplicates into whichever is more extreme for its type.
+    if(curr.index === last.index){
+      if(curr.type===last.type){
+        if(curr.type==='high' && curr.price>last.price) zz[zz.length-1]=curr;
+        else if(curr.type==='low'  && curr.price<last.price) zz[zz.length-1]=curr;
+      }
+      // Different types on same bar: keep only the last (the bar is just wide — not a pivot)
+      // We skip this pivot entirely to avoid same-bar H+L duplicates
+      continue;
+    }
+    if(curr.type===last.type){
+      if(curr.type==='high' && curr.price>last.price) zz[zz.length-1]=curr;
+      else if(curr.type==='low'  && curr.price<last.price) zz[zz.length-1]=curr;
+    } else {
+      zz.push(curr);
+    }
+  }
+  return zz;
+}
+
+// Step 3 — remove swings smaller than minSwingPct
+// Runs in a loop until no more merges happen, so alternation is always preserved.
+function significanceFilter(zz, minPct=2.0){
+  if(zz.length<2) return zz;
+  let changed = true;
+  let arr = zz.slice();
+  while(changed){
+    changed = false;
+    const out = [arr[0]];
+    for(let i=1; i<arr.length; i++){
+      const last = out[out.length-1];
+      const curr = arr[i];
+      const pct  = Math.abs(curr.price - last.price) / last.price * 100;
+      if(pct >= minPct){
+        out.push(curr);
+      } else {
+        // Swing too small — merge by keeping the more extreme pivot
+        if(curr.type === last.type){
+          // Same type (shouldn't happen after alternateFilter, but guard anyway)
+          if(curr.type==='high' && curr.price > last.price) out[out.length-1] = curr;
+          else if(curr.type==='low'  && curr.price < last.price) out[out.length-1] = curr;
+        } else {
+          // Drop the less extreme of the two adjacent pivots
+          // Keep whichever extends further from the pivot before last
+          if(out.length >= 2){
+            const prev = out[out.length-2];
+            const keepLast = Math.abs(last.price - prev.price) >= Math.abs(curr.price - prev.price);
+            if(!keepLast) out[out.length-1] = curr;
+            // else: keep last, discard curr
+          }
+          // If out has only 1 element, just keep the more extreme
+          else {
+            if(curr.type==='high' && curr.price > last.price) out[out.length-1] = curr;
+            else if(curr.type==='low' && curr.price < last.price) out[out.length-1] = curr;
+          }
+        }
+        changed = true;
+      }
+    }
+    arr = out;
+  }
+  // Final alternation enforcement pass
+  return alternateFilter(arr);
+}
+
+// Compute adaptive minPct for this bar series.
+// Goal: keep 6-25 meaningful Wyckoff pivots.
+//
+// Algorithm: binary-search over sorted swing values to find the highest
+// threshold that still leaves ≥6 pivots in the final zigzag.
+// Hard clamp: [3%, 15%].
+//
+// MEMOIZED (Fix 7): keyed on bars.length + last close (2 decimal places).
+// findPriorTR calls this repeatedly on historical slices — without memoization
+// that's ~50 probes × ~20 inner significanceFilter passes = ~1000 inner loops.
+// The cache is cleared on each top-level analyzeWyckoff call via the key design:
+// different slices always have different lengths or last closes.
+const _dynMinPctCache = new Map();
+function dynamicMinPct(bars){
+  if(bars.length < 20) return 3.0;
+
+  // Cache key: length + last close rounded to 2dp (stable, cheap to compute)
+  const key = bars.length + '|' + bars[bars.length-1].close.toFixed(2);
+  if(_dynMinPctCache.has(key)) return _dynMinPctCache.get(key);
+
+  const rawAlt = alternateFilter(detectPivots(bars, 3));
+  if(rawAlt.length < 4){ _dynMinPctCache.set(key, 3.0); return 3.0; }
+
+  const swings = rawAlt.slice(1).map((p,i) =>
+    Math.abs(p.price - rawAlt[i].price) / rawAlt[i].price * 100
+  ).sort((a,b) => a - b);
+
+  const TARGET = 6;
+  let chosen = 3.0;
+  for(let i = swings.length - 1; i >= 0; i--){
+    const cand = swings[i];
+    if(cand < 3.0) break;
+    const filtered = significanceFilter(rawAlt.slice(), cand);
+    if(filtered.length >= TARGET){ chosen = cand; break; }
+  }
+  const result = Math.min(15, Math.max(3, chosen));
+  _dynMinPctCache.set(key, result);
+  // Prevent unbounded cache growth (each analyzeWyckoff call may add ~50 entries)
+  if(_dynMinPctCache.size > 500) _dynMinPctCache.clear();
+  return result;
+}
+
+// Full zigzag pipeline — uses ATR-based dynamic threshold
+function getZigzag(bars, k=3, minPct=null){
+  const threshold = minPct !== null ? minPct : dynamicMinPct(bars);
+  return significanceFilter(alternateFilter(detectPivots(bars, k)), threshold);
+}
+
+
+function findTradingRange(bars, zz, strictMode=false){
+  const n = bars.length;
+  if(zz.length < 3) return null;
+  const lastClose = bars[n-1].close;
+
+  // ── helper: test one lookback window ──────────────────
+  function tryWindow(lookback, strict){
+    const windowStart  = Math.max(0, n - lookback);
+    const beforeWindow = zz.filter(p => p.index <  windowStart);
+    const inWindow     = zz.filter(p => p.index >= windowStart);
+    const inWinHighs_pre = inWindow.filter(p=>p.type==='high');
+    const inWinLows_pre  = inWindow.filter(p=>p.type==='low');
+    if(inWinHighs_pre.length < 1 || inWinLows_pre.length < 1) return null;
+    // In STRICT mode (current range): block 1H+1L — that's just one swing.
+    // In non-strict mode (historical slices in findPriorTR): allow 1H+1L since
+    // the zigzag may compress many oscillations into one representative pivot each.
+    if(strict && inWinHighs_pre.length < 2 && inWinLows_pre.length < 2) return null;
+    // Non-strict: keep the old lb=60 guard only (prevents trivial short-window single swings)
+    if(!strict && lookback <= 60 && inWinHighs_pre.length < 2 && inWinLows_pre.length < 2) return null;
+
+    const refHigh = beforeWindow.length
+      ? Math.max(...beforeWindow.filter(p=>p.type==='high').map(p=>p.price), -Infinity)
+      : -Infinity;
+    const refLow  = beforeWindow.length
+      ? Math.min(...beforeWindow.filter(p=>p.type==='low' ).map(p=>p.price),  Infinity)
+      :  Infinity;
+
+    const winHighs = inWindow.filter(p => p.type === 'high');
+    const winLows  = inWindow.filter(p => p.type === 'low');
+
+    // Net directional move — check both first-to-last AND last-3 tail; use flatter
+    const netH_full = winHighs.length>=2
+      ? (winHighs[winHighs.length-1].price - winHighs[0].price) / winHighs[0].price * 100 : 0;
+    const netL_full = winLows.length>=2
+      ? (winLows[winLows.length-1].price   - winLows[0].price)  / winLows[0].price  * 100 : 0;
+    const lastH3 = winHighs.slice(-3), lastL3 = winLows.slice(-3);
+    const netH_tail = lastH3.length>=2 ? (lastH3[lastH3.length-1].price - lastH3[0].price) / lastH3[0].price * 100 : netH_full;
+    const netL_tail = lastL3.length>=2 ? (lastL3[lastL3.length-1].price - lastL3[0].price) / lastL3[0].price * 100 : netL_full;
+    const netH = Math.abs(netH_tail) < Math.abs(netH_full) ? netH_tail : netH_full;
+    const netL = Math.abs(netL_tail) < Math.abs(netL_full) ? netL_tail : netL_full;
+
+    // ── PASS 1: Standard TR (flat highs AND flat lows) ────
+    const netFlat = Math.abs(netH)<=5 && Math.abs(netL)<=5;
+    if(netFlat){
+      const top    = winHighs.length ? Math.max(...winHighs.map(p=>p.price)) : -Infinity;
+      const bottom = winLows .length ? Math.min(...winLows .map(p=>p.price)) :  Infinity;
+      if(top<=bottom || top===-Infinity || bottom===Infinity) return null;
+      const widthPct = ((top-bottom)/bottom*100).toFixed(1);
+      if(parseFloat(widthPct)<1.5) return null;
+      if(lastClose > top * 1.01 || lastClose < bottom * 0.99) return null;  // already broke out
+
+      // Detect spike from a prior failed-breakout still inside the window.
+      // Case A (≥2 highs): first high ≥2% above ALL subsequent highs → UTAD residual spike.
+      // Case B (exactly 1 high): that single high is ≥12% above the average low → isolated UTAD.
+      //   This fires when the 120/180-bar window captures: low → spike-high → low (3 pivots).
+      // Mirror logic for lows (Spring spike).
+      let stdFailed = false;
+      if(winHighs.length >= 2){
+        const fH = winHighs[0].price, lH = winHighs[winHighs.length-1].price;
+        if(winHighs.slice(1).every(p=>p.price < fH*0.98) && (fH-lH)/lH > 0.02) stdFailed='up';
+      } else if(winHighs.length === 1 && winLows.length >= 2){
+        // Single isolated high — check if it is a spike well above the surrounding lows
+        const spikeH = winHighs[0].price;
+        const avgL   = winLows.reduce((s,p)=>s+p.price,0) / winLows.length;
+        if((spikeH - avgL) / avgL * 100 > 12 && lastClose < spikeH * 0.94) stdFailed='up';
+      }
+      if(!stdFailed && winLows.length >= 2){
+        const fL = winLows[0].price, lL = winLows[winLows.length-1].price;
+        if(winLows.slice(1).every(p=>p.price > fL*1.02) && (lL-fL)/fL > 0.02) stdFailed='down';
+      } else if(!stdFailed && winLows.length === 1 && winHighs.length >= 2){
+        // Single isolated low — check if it is a spike well below the surrounding highs
+        const spikeL = winLows[0].price;
+        const avgH   = winHighs.reduce((s,p)=>s+p.price,0) / winHighs.length;
+        if((avgH - spikeL) / avgH * 100 > 12 && lastClose > spikeL * 1.06) stdFailed='down';
+      }
+      return {top, bottom, mid:(top+bottom)/2, width:widthPct,
+              startBarIdx:windowStart, barCount:n-windowStart,
+              pivots:inWindow, refHigh, refLow,
+              failedBreakout:stdFailed, expanded:!!stdFailed,
+              _winHighs:winHighs, _winLows:winLows, _netH:netH, _netL:netL};
+    }
+
+    // ── PASS 2: Failed-breakout expanded range ────────────
+    const highsAboveRef = winHighs.filter(p => p.price > refHigh * 1.005);
+    const lowsBelowRef  = winLows .filter(p => p.price < refLow  * 0.995);
+    let failedBreakout = false;
+
+    if(highsAboveRef.length===1 && lowsBelowRef.length===0){
+      const spike=highsAboveRef[0], spikeIdx=winHighs.indexOf(spike);
+      const afterSpike=winHighs.slice(spikeIdx+1);
+      if(afterSpike.length>=1 && afterSpike.every(p=>p.price<=refHigh*1.01) && lastClose<spike.price*0.96){
+        const nonSpikeHighs=winHighs.filter(p=>p!==spike);
+        const nsNetH=nonSpikeHighs.length>=2
+          ?(nonSpikeHighs[nonSpikeHighs.length-1].price-nonSpikeHighs[0].price)/nonSpikeHighs[0].price*100:0;
+        if(Math.abs(nsNetH)<=8 && Math.abs(netL)<=8) failedBreakout='up';
+      }
+    }
+    if(!failedBreakout && lowsBelowRef.length===1 && highsAboveRef.length===0){
+      const spike=lowsBelowRef[0], spikeIdx=winLows.indexOf(spike);
+      const afterSpike=winLows.slice(spikeIdx+1);
+      if(afterSpike.length>=1 && afterSpike.every(p=>p.price>=refLow*0.99) && lastClose>spike.price*1.04){
+        const nonSpikeLows=winLows.filter(p=>p!==spike);
+        const nsNetL=nonSpikeLows.length>=2
+          ?(nonSpikeLows[nonSpikeLows.length-1].price-nonSpikeLows[0].price)/nonSpikeLows[0].price*100:0;
+        if(Math.abs(nsNetL)<=8 && Math.abs(netH)<=8) failedBreakout='down';
+      }
+    }
+    if(!failedBreakout) return null;
+
+    const top    = winHighs.length ? Math.max(...winHighs.map(p=>p.price)) : -Infinity;
+    const bottom = winLows .length ? Math.min(...winLows .map(p=>p.price)) :  Infinity;
+    if(top<=bottom || top===-Infinity || bottom===Infinity) return null;
+    const widthPct = ((top-bottom)/bottom*100).toFixed(1);
+    if(parseFloat(widthPct)<2.0) return null;
+    return {top, bottom, mid:(top+bottom)/2, width:widthPct,
+            startBarIdx:windowStart, barCount:n-windowStart,
+            pivots:inWindow, refHigh, refLow,
+            failedBreakout, expanded:true,
+            _winHighs:winHighs, _winLows:winLows, _netH:netH, _netL:netL};
+  }
+
+  // ── Try 60, 120, 180 — keep the WIDEST qualifying window ──
+  // "Widest" = largest barCount, which anchors SC/BC and prior-context correctly.
+  let best = null;
+  for(const lb of [60, 120, 180]){
+    const candidate = tryWindow(lb, strictMode);
+    if(!candidate) continue;
+    // Prefer longer window when it gives a wider (more complete) range.
+    // Guard: only upgrade to a longer window if it doesn't expand the TR
+    // top/bottom dramatically (which would mean the longer window is catching
+    // a prior trend, not the same range).
+    if(!best){
+      best = candidate;
+    } else {
+      const sameRange = candidate.top    <= best.top    * 1.05
+                     && candidate.bottom >= best.bottom * 0.95;
+      if(sameRange) best = candidate;   // wider window, same range — take it
+    }
+  }
+
+  if(!best) return null;
+
+  // Strip internal helpers before returning
+  const {_winHighs, _winLows, _netH, _netL, refHigh, refLow, ...result} = best;
+  return result;
+}
+// Volume analysis per swing — uses INTENSITY (avg volume per bar) not total.
+// Total volume grows with swing length, creating a false bullish bias on trending
+// data where up-swings tend to be longer. Per-bar intensity is the real Wyckoff
+// "effort" measure: how hard is each side working per unit of time?
+function swingVolume(bars, zz){
+  if(zz.length<2) return {upSwingVol:0, dnSwingVol:0, volBias:'neutral'};
+  const last4=zz.slice(-4);
+  let upIntensity=0, dnIntensity=0, upSwings=0, dnSwings=0;
+  for(let i=1; i<last4.length; i++){
+    const a=last4[i-1], b=last4[i];
+    const swingBars=bars.slice(a.index, b.index+1);
+    const swingLen=Math.max(1, swingBars.length);
+    // Per-bar average volume = intensity of effort on this swing
+    const intensity=swingBars.reduce((s,x)=>s+x.volume,0) / swingLen;
+    if(b.type==='high'){ upIntensity+=intensity; upSwings++; }
+    else               { dnIntensity+=intensity; dnSwings++; }
+  }
+  const avgUp=upSwings ? upIntensity/upSwings : 0;
+  const avgDn=dnSwings ? dnIntensity/dnSwings : 0;
+  const bias=avgUp>avgDn*1.2?'bullish':avgDn>avgUp*1.2?'bearish':'neutral';
+  return {upSwingVol:avgUp, dnSwingVol:avgDn, volBias:bias};
+}
+
+// ── Detect PS (Preliminary Support) ─────────────────────────────────────────
+// First significant demand bar after a prolonged decline; precedes SC.
+// Criteria: down bar with wide spread + elevated vol + close in UPPER half
+// (shows absorption, but NOT as extreme as SC). Must be near a new low.
+function detectPS(bars){
+  const n=bars.length;
+  for(let i=Math.max(5,n-180); i<n-2; i++){
+    const b=bars[i];
+    const prior=bars.slice(Math.max(0,i-60),i);
+    if(prior.length<5) continue;
+    const avgVol   =prior.reduce((s,x)=>s+x.volume,0)/prior.length;
+    const avgSpread=prior.reduce((s,x)=>s+(x.high-x.low),0)/prior.length;
+    const priorLow =Math.min(...prior.map(x=>x.low));
+    const spread   =b.high-b.low;
+    const closePos =spread>0?(b.close-b.low)/spread:0.5;
+    // PS is lighter than SC: spread 1.3-1.8×, vol 1.3-1.8×, close upper 50%
+    if(b.close>=b.open) continue;           // down bar
+    if(spread<=avgSpread*1.3) continue;
+    if(b.volume<=avgVol*1.3) continue;
+    if(b.low>priorLow*1.02) continue;       // near new low
+    if(closePos<0.45) continue;             // close in upper half (absorbed)
+    // Must NOT qualify as SC (lighter event)
+    if(spread>avgSpread*1.8 && b.volume>avgVol*2.0) continue; // that's an SC
+    return {detected:true, idx:i, bar:b};
+  }
+  return {detected:false};
+}
+
+// ── Detect PSY (Preliminary Supply) ─────────────────────────────────────────
+// Mirror of PS for distribution: first supply bar after prolonged advance.
+// Criteria: up bar + wide spread + elevated vol + close in LOWER half.
+function detectPSY(bars){
+  const n=bars.length;
+  for(let i=Math.max(5,n-180); i<n-2; i++){
+    const b=bars[i];
+    const prior=bars.slice(Math.max(0,i-60),i);
+    if(prior.length<5) continue;
+    const avgVol   =prior.reduce((s,x)=>s+x.volume,0)/prior.length;
+    const avgSpread=prior.reduce((s,x)=>s+(x.high-x.low),0)/prior.length;
+    const priorHigh=Math.max(...prior.map(x=>x.high));
+    const spread   =b.high-b.low;
+    const closePos =spread>0?(b.close-b.low)/spread:0.5;
+    if(b.close<=b.open) continue;           // up bar
+    if(spread<=avgSpread*1.3) continue;
+    if(b.volume<=avgVol*1.3) continue;
+    if(b.high<priorHigh*0.99) continue;     // near new high
+    if(closePos>0.55) continue;             // close in lower half (supply)
+    if(spread>avgSpread*1.8 && b.volume>avgVol*2.0) continue; // that's a BC
+    return {detected:true, idx:i, bar:b};
+  }
+  return {detected:false};
+}
+
+// ── Detect ST (Secondary Test) ────────────────────────────────────────────────
+// After SC: price returns to SC low area on LOWER vol + NARROWER spread.
+// Confirms absorption — supply is drying up at support.
+function detectST(bars, scResult){
+  if(!scResult.detected) return {detected:false};
+  const n=bars.length;
+  const scIdx=scResult.idx;
+  const scBar=scResult.bar;
+  // Look in bars after SC for a dip toward SC low area
+  for(let i=scIdx+3; i<Math.min(scIdx+80, n); i++){
+    const b=bars[i];
+    const prior=bars.slice(Math.max(0,i-20),i);
+    if(prior.length<3) continue;
+    const avgVol   =prior.reduce((s,x)=>s+x.volume,0)/prior.length;
+    const avgSpread=prior.reduce((s,x)=>s+(x.high-x.low),0)/prior.length;
+    const spread   =b.high-b.low;
+    // Returns to SC area (within 8%)
+    if(b.low>scBar.low*1.08) continue;
+    // On LOWER vol than SC
+    if(b.volume>=scBar.volume*0.8) continue;
+    // On NARROWER spread than SC
+    if(spread>=(scBar.high-scBar.low)*0.8) continue;
+    return {detected:true, idx:i, bar:b};
+  }
+  return {detected:false};
+}
+
+// ── Detect SOW (Sign of Weakness) ─────────────────────────────────────────────
+// Down-move to TR lower boundary on expanded spread + volume.
+// SOW closes NEAR THE LOW (supply dominant — NOT absorbed like SC).
+// Used within an active TR context.
+function detectSOW(bars, trBottom, trTop){
+  const n=bars.length;
+  const trRange=trTop-trBottom;
+  for(let i=Math.max(5,n-120); i<n; i++){
+    const b=bars[i];
+    const prior=bars.slice(Math.max(0,i-30),i);
+    if(prior.length<5) continue;
+    const avgVol   =prior.reduce((s,x)=>s+x.volume,0)/prior.length;
+    const avgSpread=prior.reduce((s,x)=>s+(x.high-x.low),0)/prior.length;
+    const spread   =b.high-b.low;
+    const closePos =spread>0?(b.close-b.low)/spread:0.5;
+    const posInTR  =(b.close-trBottom)/trRange;
+    if(b.close>=b.open) continue;           // must be a down bar
+    if(spread<=avgSpread*1.3) continue;     // wider than normal
+    if(b.volume<=avgVol*1.4) continue;      // elevated vol
+    if(posInTR>0.30) continue;              // near TR bottom
+    if(closePos>0.35) continue;             // closes near LOW (supply dominant)
+    return {detected:true, idx:i, bar:b};
+  }
+  return {detected:false};
+}
+
+// Detect SC (Selling Climax)
+//
+// Improvements over naive version:
+//   1. avgVol computed from bars BEFORE the candidate bar (not the whole window including it)
+//      — prevents the TR's contracting volume from lowering the bar to clear
+//   2. Close must be in the UPPER half of the bar's range (buyers stepped in)
+//      — eliminates gap-down crashes that close on the lows (those are SOW, not SC)
+//   3. Require an Automatic Rally (AR): the next 1-3 bars must close ABOVE the SC close
+//      — confirms absorption; a genuine SC is immediately met by demand
+//
+// Criteria (all must hold):
+//   a) Down bar (close < open)
+//   b) Wide spread: > 1.8× avg spread of prior 60 bars
+//   c) High volume: > 2× avg volume of prior 60 bars
+//   d) At or near a 60-period low (within 1.5%)
+//   e) Close in upper half of bar range (absorption, not panic cascade)
+//   f) At least one of the next 1-3 bars closes above the SC close (AR)
+function detectSC(bars){
+  // The SC can occur anywhere in the TR window — extend search to 180 bars.
+  // The AR (Automatic Rally) is "the most important upward movement since the
+  // market began the previous trend Phase" (book p.116) — it is a sustained
+  // multi-bar rally, not just one bar above SC close.
+  // We require: within next 10 bars, price reaches at least SC_close + 2% AND
+  //             at least one bar must have a clear upward close above SC close.
+  // This is more consistent with the book description of the AR as a significant move.
+  const n=bars.length;
+  for(let i=5; i<n-3; i++){  // start from bar 5 — SC is always near range start (Phase A)
+    const b=bars[i];
+    const prior=bars.slice(Math.max(0,i-60),i);
+    if(prior.length<5) continue;
+    const avgVol    = prior.reduce((s,x)=>s+x.volume,0)/prior.length;
+    const avgSpread = prior.reduce((s,x)=>s+(x.high-x.low),0)/prior.length;
+    const priorLow  = Math.min(...prior.map(x=>x.low));
+
+    const spread    = b.high-b.low;
+    const closePos  = spread>0 ? (b.close-b.low)/spread : 0.5;
+
+    if(b.close >= b.open) continue;
+    if(spread <= avgSpread*1.8) continue;
+    if(b.volume <= avgVol*2.0) continue;
+    if(b.low > priorLow*1.015) continue;
+    if(closePos < 0.4) continue;
+
+    // Automatic Rally: within next 10 bars, price must rally meaningfully.
+    // Require: (a) at least one close > SC close (demand appeared)
+    //          (b) highest close in next 10 bars > SC close * 1.02 (2%+ rally = significant)
+    // This matches the book: AR is the first SIGNIFICANT signal of buyer interest.
+    const lookAhead = Math.min(10, n-1-i);
+    const nextBars  = Array.from({length:lookAhead}, (_,j) => bars[i+1+j]);
+    const hasClose  = nextBars.some(x => x.close > b.close);
+    const maxClose  = Math.max(...nextBars.map(x => x.close));
+    const hasRally  = maxClose > b.close * 1.02;
+    if(!hasClose || !hasRally) continue;
+
+    return {detected:true, idx:i, bar:b, arHigh:maxClose};
+  }
+  return {detected:false};
+}
+
+// Detect BC (Buying Climax)
+//
+// Mirror of SC with same improvements:
+//   1. Pre-event avgVol from prior 60 bars
+//   2. Close must be in the LOWER half of the bar's range (sellers appeared)
+//   3. Require an Automatic Reaction (AR): next 1-3 bars close BELOW the BC close
+function detectBC(bars){
+  // Mirror of detectSC improvements:
+  // - Extend search window to 180 bars
+  // - AR (Automatic Reaction) must be a meaningful decline, not just one bar down
+  const n=bars.length;
+  for(let i=5; i<n-3; i++){  // start from bar 5 — BC is always near range start (Phase A)
+    const b=bars[i];
+    const prior=bars.slice(Math.max(0,i-60),i);
+    if(prior.length<5) continue;
+    const avgVol    = prior.reduce((s,x)=>s+x.volume,0)/prior.length;
+    const avgSpread = prior.reduce((s,x)=>s+(x.high-x.low),0)/prior.length;
+    const priorHigh = Math.max(...prior.map(x=>x.high));
+
+    const spread   = b.high-b.low;
+    const closePos = spread>0 ? (b.close-b.low)/spread : 0.5;
+
+    if(b.close <= b.open) continue;
+    if(spread <= avgSpread*1.8) continue;
+    if(b.volume <= avgVol*2.0) continue;
+    if(b.high < priorHigh*0.985) continue;
+    if(closePos > 0.6) continue;
+
+    // Automatic Reaction: within next 10 bars, price must decline meaningfully.
+    // Require: (a) at least one close < BC close (supply appeared)
+    //          (b) lowest close in next 10 bars < BC close * 0.98 (2%+ decline = significant)
+    const lookAhead = Math.min(10, n-1-i);
+    const nextBars  = Array.from({length:lookAhead}, (_,j) => bars[i+1+j]);
+    const hasClose  = nextBars.some(x => x.close < b.close);
+    const minClose  = Math.min(...nextBars.map(x => x.close));
+    const hasReact  = minClose < b.close * 0.98;
+    if(!hasClose || !hasReact) continue;
+
+    return {detected:true, idx:i, bar:b, arLow:minClose};
+  }
+  return {detected:false};
+}
+
+// Detect Spring — uses the most recent ZIGZAG low pivot, not raw bar wicks.
+//
+// Why: a single intraday wick below TR support that closes back inside the same
+// session is noise, not a Spring. A Spring is a STRUCTURAL event: the most recent
+// zigzag low pivot must have CLOSED below TR support, and subsequent price must
+// have recovered back above it. Using zigzag pivots eliminates single-bar noise.
+//
+// Criteria (all must hold):
+//   a) Most recent zigzag low pivot price < TR bottom (closed below support)
+//   b) That pivot is within the last 20 bars (recent, not stale)
+//   c) Current close is back above TR bottom (recovery confirmed)
+//   d) Current close > that pivot's price (net upward recovery from the low)
+function detectSpring(bars, tr, zz){
+  if(!tr || !zz || zz.length < 2) return false;
+  const n = bars.length;
+  const lastClose = bars[n-1].close;
+  if(lastClose < tr.bottom) return false;  // price still below support = not recovered
+
+  // Scan ALL zigzag LOW pivots within the TR window, most recent first.
+  // The book does not limit Spring to recent bars — Phase B can last hundreds of bars
+  // and the Spring (Phase C) can be followed by a lengthy Phase D before current close.
+  // We look for the most recent zigzag low that closed BELOW TR support and from which
+  // price has since recovered above it.
+  const trStart = tr.startBarIdx ?? 0;
+  const zzLows = zz
+    .filter(p => p.type === 'low' && p.index >= trStart)
+    .sort((a,b) => b.index - a.index);  // most recent first
+
+  for(const low of zzLows){
+    const pivotBar = bars[low.index];
+    if(!pivotBar) continue;
+    // Spring requires the bar to CLOSE below support (not just wick below).
+    // A wick that closes back inside the same session is a test, not a Spring.
+    const brokeBelow = pivotBar.close < tr.bottom * 0.999;
+    if(!brokeBelow) continue;
+    // Price must currently be back above support (recovered)
+    const recovered = lastClose > tr.bottom;
+    // Net positive from the Spring low
+    const netUp = lastClose > low.price;
+    if(recovered && netUp) return true;
+  }
+  return false;
+}
+
+// Detect Upthrust — uses the most recent ZIGZAG high pivot, not raw bar wicks.
+//
+// Mirror of detectSpring for the upper boundary.
+// Criteria (all must hold):
+//   a) Most recent zigzag high pivot price > TR top (closed above resistance)
+//   b) That pivot is within the last 20 bars
+//   c) Current close is back below TR top (rejection confirmed)
+//   d) Current close < that pivot's price (net downward rejection from the high)
+function detectUpthrust(bars, tr, zz){
+  if(!tr || !zz || zz.length < 2) return false;
+  const n = bars.length;
+  const lastClose = bars[n-1].close;
+  if(lastClose > tr.top) return false;  // price still above resistance = not rejected
+
+  // Scan ALL zigzag HIGH pivots within the TR window, most recent first.
+  // Same reasoning as detectSpring — the book does not limit Upthrust to recent bars.
+  // Upthrust (UT in Phase B) or UTAD (Phase C) can be followed by a long Phase D.
+  // Two criteria for a valid Upthrust bar:
+  //   Option A: bar.close > tr.top (closed above resistance — strong evidence)
+  //   Option B: bar.high > tr.top AND bar.close < tr.top (wick above, closed back inside)
+  //     — the book explicitly describes this as a valid Upthrust pattern (p.136)
+  const trStart = tr.startBarIdx ?? 0;
+  const zzHighs = zz
+    .filter(p => p.type === 'high' && p.index >= trStart)
+    .sort((a,b) => b.index - a.index);  // most recent first
+
+  for(const high of zzHighs){
+    const pivotBar = bars[high.index];
+    if(!pivotBar) continue;
+    // Option A: closed above resistance (strong Upthrust)
+    const closedAbove = pivotBar.close > tr.top * 1.001;
+    // Option B: wick above resistance, closed back inside (wick Upthrust — book p.136)
+    const wickAbove = high.price > tr.top * 1.001 && pivotBar.close <= tr.top;
+    if(!closedAbove && !wickAbove) continue;
+    // Price must currently be back below resistance (rejected)
+    const rejected = lastClose < tr.top;
+    // Net negative from the Upthrust high
+    const netDown = lastClose < high.price;
+    if(rejected && netDown) return true;
+  }
+  return false;
+}
+
+// Volume drying up — recent 20-bar avg vs full avg
+function isVolDrying(bars){
+  const fullAvg=bars.reduce((s,b)=>s+b.volume,0)/bars.length;
+  const rec=bars.slice(-20);
+  const recAvg=rec.reduce((s,b)=>s+b.volume,0)/rec.length;
+  return recAvg < fullAvg*0.72;
+}
+
+
+function findPriorTR(bars, fixedMinPct){
+  const n = bars.length;
+  if(n < 120) return null;
+  const lastClose = bars[n-1].close;
+
+  // Use caller-supplied threshold so every historical slice uses the same
+  // sensitivity as the main analysis.  Fall back to a fresh computation only
+  // when called in isolation (e.g. unit tests).
+  const minPct = (fixedMinPct != null) ? fixedMinPct : dynamicMinPct(bars);
+
+  // Build the full-history zigzag once with the fixed threshold.
+  const fullZZ = getZigzag(bars, 3, minPct);
+  if(fullZZ.length < 4) return null;
+
+  // Probe endpoints: each pivot index PLUS offsets of -30 and -60 bars.
+  // The -30/-60 offsets catch TRs that ended just before a breakout launch —
+  // the pivot itself may land after the breakout, so its slice already includes
+  // the new high/low inside the TR window, causing brokeUp/brokeDown to fail.
+  const pivotIndices = fullZZ
+    .map(p => p.index)
+    .filter(idx => idx >= 80 && idx <= n - 30);
+
+  const seen = new Set();
+  const candidates = [];
+  for(const idx of pivotIndices){
+    for(const offset of [0, -20, -40, -60]){
+      const e = idx + offset;
+      if(e >= 80 && e <= n - 30 && !seen.has(e)){
+        seen.add(e);
+        candidates.push(e);
+      }
+    }
+  }
+  // Sort most-recent first so we return the closest prior TR
+  candidates.sort((a, b) => b - a);
+
+  for(const endBar of candidates){
+    const slice   = bars.slice(0, endBar);
+    const zzSlice = significanceFilter(alternateFilter(detectPivots(slice, 3)), minPct);
+    const tr      = findTradingRange(slice, zzSlice);
+    if(!tr) continue;
+
+    // ── GUARD 1: Reject wide "ranges" — real Wyckoff TRs are narrow consolidations.
+    // A "range" wider than 40% on a daily chart is almost certainly a trend correction,
+    // not a consolidation. The prior-trend + position guard (Guard 2) handles finer
+    // discrimination between genuine TRs and uptrend pullbacks within the 15–40% band.
+    if(parseFloat(tr.width) > 40) continue;
+
+    const afterBars   = bars.slice(endBar);
+    const peakAfter   = Math.max(...afterBars.map(b => b.high));
+    const troughAfter = Math.min(...afterBars.map(b => b.low));
+
+    // ── GUARD 2: ATH breakout in an uptrend is NOT a UTAD.
+    // A UTAD is a bull trap at the top of a DISTRIBUTION range (prior downtrend context).
+    // If the post-slice peak is the all-time high of the full dataset AND the prior
+    // trend was up, this is a Sign of Strength breakout — not a distribution trap.
+    // Check: peakAfter is within 2% of the all-time high of the full bar series.
+    const allTimeHigh = Math.max(...bars.map(b => b.high));
+    const peakIsATH   = peakAfter >= allTimeHigh * 0.98;
+
+    // Breakout: price moved genuinely beyond the TR boundary after this slice.
+    const peakExceedsTop    = peakAfter   > tr.top    * 1.08;
+    const troughUnderBottom = troughAfter < tr.bottom * 0.92;
+
+    // For UTAD-absorbed case: peakAfter ≤ TR top but the TR top itself was set by
+    // the spike. Detect this by checking if the TR top is ≥10% above the TR bottom
+    // midpoint AND the LAST bar in the slice is well below tr.top (spike already fell).
+    const sliceLastClose = bars[endBar - 1].close;
+    const trHeight = tr.top - tr.bottom;
+    const topIsSpike = tr.top > tr.bottom * 1.10
+                    && sliceLastClose < tr.top * 0.94;
+
+    // brokeUp: price moved ≥8% above the TR top after the slice ended.
+    // Also handles the UTAD-absorbed case (spike already in the window).
+    const brokeUp   = peakExceedsTop || (topIsSpike && peakAfter >= tr.top * 0.95);
+    const brokeDown = troughUnderBottom;
+
+    // Back inside: current price within the TR band ±10% tolerance
+    const backInside = lastClose <= tr.top    * 1.10
+                    && lastClose >= tr.bottom * 0.90;
+
+    // Position of current price within the prior TR (0=bottom, 1=top; can exceed 0-1)
+    // Used by the classifier to determine Re-Acc vs Re-Dist direction for ptr.brokeUp.
+    const posInPriorTR = tr.top > tr.bottom
+      ? (lastClose - tr.bottom) / (tr.top - tr.bottom)
+      : 0.5;
+
+    // findPriorTR returns the range on pure mechanics (width + breakout + backInside).
+    // The CLASSIFIER has full priorWasUp/Down context and makes the final call.
+    const brokeUpEffective   = brokeUp   && backInside;
+    const brokeDownEffective = brokeDown && backInside;
+
+    // Resolve direction when both flags set — use price position
+    const trRange = tr.top - tr.bottom;
+    let effectiveBrokeUp   = brokeUpEffective   && !brokeDownEffective;
+    let effectiveBrokeDown = brokeDownEffective && !brokeUpEffective;
+    if(brokeUpEffective && brokeDownEffective){
+      effectiveBrokeUp   = posInPriorTR > 0.5;
+      effectiveBrokeDown = !effectiveBrokeUp;
+    }
+
+    if(effectiveBrokeUp || effectiveBrokeDown){
+      const returnFromPeak   = effectiveBrokeUp   ? (peakAfter   - lastClose) / peakAfter   * 100 : 0;
+      const returnFromTrough = effectiveBrokeDown ? (lastClose - troughAfter) / troughAfter * 100 : 0;
+      return {
+        top:         tr.top,
+        bottom:      tr.bottom,
+        mid:         tr.mid,
+        width:       tr.width,
+        brokeUp:     effectiveBrokeUp,
+        brokeDown:   effectiveBrokeDown,
+        peakAfter,
+        troughAfter,
+        returnPct:   effectiveBrokeUp ? returnFromPeak : returnFromTrough,
+        startBarIdx: tr.startBarIdx,
+        barCount:    tr.barCount,
+        posInRange:  posInPriorTR,   // classifier uses this for direction routing
+      };
+    }
+  }
+  return null;
+}
+
+// ══════════════════════════════════════════════════════════
+//  LOCAL BREAKOUT DETECTOR
+// ══════════════════════════════════════════════════════════
+// The main zigzag uses a threshold calibrated to the full history.
+// For a 10-year stock (15% threshold), a recent 7-8% tight range is
+// completely invisible — no pivots detected, no TR found.
+//
+// This function runs a SECOND, LOCAL analysis on the last 90 bars using
+// a locally-appropriate threshold. It detects:
+//
+//   "A flat compression range formed recently, price just broke above it
+//    on significant volume — Sign of Strength, Re-Accumulation complete."
+//
+// Returns: { top, bottom, width, barCount, breakoutDate, volRatio,
+//            priorRally, startBarIdx } or null
+//
+// Conditions (ALL must hold):
+//   1. Local ZZ (last 90 bars, local threshold) has ≥2 highs + ≥2 lows
+//      within the last 60 bars of that slice
+//   2. Those highs are flat (netH < 8%) AND lows are flat (netL < 8%)
+//   3. Current close is ABOVE the local range top (breakout occurred)
+//   4. The breakout bar is within the last 10 bars
+//   5. Breakout bar volume > 1.5× average volume during the range
+//   6. A meaningful rally preceded the range: the 60 bars before the
+//      range contained a low that is ≥15% below the range bottom
+//      → confirms Re-Accumulation after a markdown leg, not just noise
+function detectLocalBreakout(bars){
+  const n = bars.length;
+  if(n < 90) return null;
+
+  const last90     = bars.slice(-90);
+  const localMin   = dynamicMinPct(last90);
+  const localZZ    = getZigzag(last90, 3, localMin);
+
+  // Use the last 60 bars of the 90-bar slice
+  const WINDOW = 60;
+  const ws     = Math.max(0, last90.length - WINDOW);
+  const inW    = localZZ.filter(p => p.index >= ws);
+  const winH   = inW.filter(p => p.type === 'high');
+  const winL   = inW.filter(p => p.type === 'low');
+
+  if(winH.length < 2 || winL.length < 2) return null;
+
+  const trTop = Math.max(...winH.map(p => p.price));
+  const trBot = Math.min(...winL.map(p => p.price));
+  const netH  = Math.abs((winH[winH.length-1].price - winH[0].price) / winH[0].price * 100);
+  const netL  = Math.abs((winL[winL.length-1].price - winL[0].price) / winL[0].price * 100);
+
+  // Condition 2: flat compression (both axes flat)
+  if(netH >= 8 || netL >= 8) return null;
+
+  const lastClose = bars[n-1].close;
+
+  // Condition 3: price broke above range top
+  if(lastClose <= trTop * 1.005) return null;
+
+  // Condition 4: find the breakout bar (first bar closing above top, within last 10)
+  let boIdx = -1;
+  for(let i = n - 10; i < n; i++){
+    if(bars[i].close > trTop * 1.005){ boIdx = i; break; }
+  }
+  if(boIdx < 0) return null;
+
+  // Condition 5: breakout volume vs range average
+  // Range = global bars from ws to boIdx (exclude breakout bar itself)
+  const globalWs     = n - 90 + ws;
+  const rangeVolBars = bars.slice(globalWs, boIdx);
+  if(rangeVolBars.length < 5) return null;
+  const rangeAvgVol  = rangeVolBars.reduce((s,b) => s + b.volume, 0) / rangeVolBars.length;
+  const boVol        = bars[boIdx].volume;
+  const volRatio     = boVol / rangeAvgVol;
+  if(volRatio < 1.5) return null;
+
+  // Condition 6: prior rally — low in 60 bars before range start ≥15% below range bottom
+  const preStart     = Math.max(0, globalWs - 60);
+  const preRangeLow  = Math.min(...bars.slice(preStart, globalWs).map(b => b.low));
+  const priorRally   = (trBot - preRangeLow) / preRangeLow * 100;
+  if(priorRally < 15) return null;
+
+  return {
+    top:          trTop,
+    bottom:       trBot,
+    mid:          (trTop + trBot) / 2,
+    width:        parseFloat(((trTop - trBot) / trBot * 100).toFixed(1)),
+    barCount:     boIdx - globalWs,
+    startBarIdx:  globalWs,
+    breakoutDate: bars[boIdx].date,
+    breakoutClose: bars[boIdx].close,
+    volRatio:     parseFloat(volRatio.toFixed(1)),
+    priorRally:   parseFloat(priorRally.toFixed(1)),
+    rangeAvgVol:  Math.round(rangeAvgVol),
+    breakoutVol:  boVol,
+  };
+}
+
+// ══════════════════════════════════════════════════════════
+//  WYCKOFF PHASE CLASSIFIER
+// ── NEW analyzeWyckoff ────────────────────────────────────────────────────────
+// Architecture:
+//   Step 1  Find range via 3-candle zone clustering (windows 30/60/120/180)
+//   Step 2  Determine prior trend via two-layer % change read
+//   Step 3  Classify: Accumulation / Distribution / Re-Acc / Re-Dist / Markup / Markdown
+//   Step 4  Enrich: Spring/UTAD (ptr), SC/BC, vol bias, events, confidence
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── classifyRange ────────────────────────────────────────────────────────────
+// Determines Accumulation vs Re-Distribution (priorDir=down)
+//                    or Distribution vs Re-Accumulation (priorDir=up)
+// using a multi-signal scoring approach based on Wyckoff book signals.
+//
+// Key principle from the book:
+//   "This is undoubtedly one of the most difficult tasks for the Wyckoff trader:
+//    to know how to distinguish between a redistribution range and an accumulation range."
+//
+// Signals used (all from the book):
+//   SC / Spring   → evidence of institutional absorption = Accumulation
+//   BC / Upthrust → evidence of institutional distribution = Distribution
+//   pricePos      → deep lows = Acc territory; near highs = Dist territory
+//   pctFromATH    → far from ATH = Acc/Re-Dist; near ATH = Dist/Re-Acc
+//   volBias       → bullish = demand in control; bearish = supply in control
+//   volDrying     → contracting volume = absorption (Acc/Re-Acc signal)
+//
+// Cap rule (matches book): Distribution REQUIRES evidence of supply (BC or UTAD).
+//   Without BC/Upthrust in an up-range → default to Re-Accumulation.
+//   Without SC/Spring in a down-range, and price not at deep lows → default to Re-Distribution.
+//   This reflects the book's point: "the fact of its presence adds great strength to the scenario."
+
+function classifyRange(priorDir, s){
+  if(priorDir==='down'){
+    // Contest: Accumulation (score > 0) vs Re-Distribution (score ≤ 0)
+    let score = 0;
+
+    // SC is the primary Accumulation signal (institutional absorption exhausting supply)
+    if(s.sc)             score += 2;
+    else                 score -= 2;  // no SC = no confirmed exhaustion = Re-Dist tendency
+
+    // Spring confirms Phase C shakeout = demand absorbed supply = Accumulation
+    if(s.spring)         score += 2;
+
+    // BC in a downtrend context = bear bounce high = Re-Distribution characteristic
+    if(s.bc)             score -= 1;
+
+    // Price position (deep lows = Acc, mid/high range = Re-Dist)
+    if(s.pp < 0.20)      score += 2;   // deep bear market lows
+    else if(s.pp < 0.35) score += 1;
+    else if(s.pp > 0.70) score -= 2;
+    else if(s.pp > 0.55) score -= 1;
+
+    // Distance from ATH (very far = potential base; near = still in decline zone)
+    if(s.ath < -60)      score += 1;
+    if(s.ath > -25)      score -= 1;
+
+    // Volume character
+    if(s.vb === 'bullish') score += 1;  // demand starting to dominate
+    if(s.vb === 'bearish') score -= 1;  // supply still in control
+    if(s.vd)               score += 1;  // volume drying = supply exhausting
+
+    // Cap rule: without SC or Spring AND not at deep lows → cannot confirm Accumulation
+    // Score ≤ 0 already handles most cases, but explicitly prevent Acc
+    // when no climax event AND price is not deeply depressed
+    if(!s.sc && !s.spring && s.pp >= 0.20) score = Math.min(score, 0);
+
+    return score > 0 ? 'Accumulation' : 'Re-Distribution';
+
+  } else {
+    // Contest: Distribution (score > 0) vs Re-Accumulation (score ≤ 0)
+    let score = 0;
+
+    // BC is the primary Distribution signal (institutional selling exhausting demand)
+    if(s.bc)             score += 3;
+    else                 score -= 2;  // no BC = no confirmed top = Re-Acc tendency
+
+    // Upthrust signal depends on WHERE price is NOW relative to the range:
+    // - If price is in the UPPER half after the UT → UA (Phase B strength) → Re-Acc signal
+    // - If price is in the LOWER half after the UT → UTAD (Phase C) → Distribution signal
+    // Book: "When UA occurs and price remains above resistance for some time before
+    //        falling, this behavior can be labeled as minor Sign Of Strength (mSOS)"
+    if(s.upthrust){
+      const posInTR = s.posInTR ?? 0.5;
+      if(posInTR >= 0.6)  score -= 1;  // near top after UT = UA = Phase B strength = Re-Acc
+      else                score += 2;  // near bottom after UT = UTAD = Distribution
+    }
+
+    // Price position (near ATH = Dist territory; mid-range = Re-Acc mid-uptrend)
+    if(s.pp > 0.85)      score += 2;
+    else if(s.pp > 0.70) score += 1;
+    else if(s.pp < 0.40) score -= 2;
+    else if(s.pp < 0.55) score -= 1;
+
+    // Distance from ATH
+    if(s.ath > -10)      score += 2;
+    else if(s.ath > -20) score += 1;
+    if(s.ath < -40)      score -= 1;
+
+    // Volume character (book: Distribution = high constant vol; Re-Acc = decreasing vol)
+    if(s.vd)             score -= 1;  // contracting volume = absorption = Re-Acc
+    if(s.vb === 'bearish') score += 1;
+    if(s.vb === 'bullish') score -= 1;
+
+    // Cap rule: without BC or a genuine UTAD → cannot confirm Distribution.
+    // A Phase B UA (upthrust in upper half of range) is NOT confirmation of distribution.
+    // A genuine UTAD requires: price declined deep into the range (posInTR < 0.5)
+    // AND the macro trend is not overwhelmingly bullish (which would suggest Phase B test).
+    // Book: UTAD = "test event within the distribution and redistribution ranges" —
+    // it does not occur in strong bull markets that are merely pausing.
+    const strongBull = (s.rMacro ?? 0) > 50;  // prior 1yr+ move > 50% = strong uptrend
+    const genuineUTAD = s.upthrust && (s.posInTR ?? 0.5) < 0.5 && !strongBull;
+    if(!s.bc && !genuineUTAD) score = Math.min(score, 0);
+
+    return score > 0 ? 'Distribution' : 'Re-Accumulation';
+  }
+}
+
+
+function analyzeWyckoff(bars){
+  const n=bars.length;
+  if(n<20) return _emptyResult(bars);
+
+  // ── 1. ZONE-BASED RANGE DETECTION ─────────────────────────────────────────
+  // Try windows 30, 60, 120, 180 bars.
+  // For each: detect all 3-candle swing highs/lows → find densest cluster within
+  // 1.5% → resistance zone (top) and support zone (bottom).
+  // Winner = highest density (members per lookback bar).
+
+  function try3CandleWindow(lookback){
+    const sliceStart=Math.max(0,n-lookback);
+    const slice=bars.slice(sliceStart);
+    const highs=[], lows=[];
+    for(let i=1;i<slice.length-1;i++){
+      if(slice[i].high>slice[i-1].high&&slice[i].high>slice[i+1].high)
+        highs.push({index:i, price:slice[i].high, date:slice[i].date});
+      if(slice[i].low<slice[i-1].low&&slice[i].low<slice[i+1].low)
+        lows.push({index:i, price:slice[i].low, date:slice[i].date});
+    }
+    // Minimum members per zone scales with lookback — wider windows need more touches
+    // lb=30→2 | lb=60→3 | lb=120→5 | lb=180→6
+    const minZoneMembers = lookback<=30?2:lookback<=60?3:lookback<=120?5:6;
+    function densestZone(pivots){
+      if(pivots.length<minZoneMembers) return null;
+      let best=null, bestN=0;
+      for(let i=0;i<pivots.length;i++){
+        const a=pivots[i].price;
+        const members=pivots.filter(p=>p.price>=a*0.985&&p.price<=a*1.015);
+        if(members.length>bestN){bestN=members.length;best=members;}
+      }
+      return bestN>=minZoneMembers?best:null;
+    }
+    const resM=densestZone(highs), supM=densestZone(lows);
+    if(!resM||!supM) return null;
+    const top=Math.max(...resM.map(p=>p.price));
+    const bottom=Math.min(...supM.map(p=>p.price));
+    if(top<=bottom) return null;
+    const widthPct=(top-bottom)/bottom*100;
+    if(widthPct<3||widthPct>15) return null;  // >15% is a trend channel, not a range
+    // Minimum density: at least 10 pivot members per 100 bars.
+    // A sparse zone (< 0.10) has too few touches to be a meaningful range.
+    const density=(resM.length+supM.length)/lookback;
+    if(density<0.10) return null;
+    const rIdx=resM.map(p=>p.index), sIdx=supM.map(p=>p.index);
+    if(Math.max(...rIdx)-Math.min(...rIdx)<10 &&
+       Math.max(...sIdx)-Math.min(...sIdx)<10) return null;
+    // Round to natural price levels FIRST, then check close is inside.
+    // Rounding happens before the close check so we test against the same
+    // levels that will be displayed — floor(support) and ceil(resistance).
+    function priceStep(p){ return p<10?0.1:p<100?1:p<1000?5:p<10000?10:50; }
+    function floorTo(p){ const s=priceStep(p); return Math.floor(p/s)*s; }
+    function ceilTo(p){  const s=priceStep(p); return Math.ceil(p/s)*s;  }
+    function roundTo(p){ const s=priceStep(p); return Math.round(p/s)*s; }
+    const rBottom= floorTo(bottom);
+    const rTop   = ceilTo(top);
+    const rMid   = roundTo((top+bottom)/2);
+    // Close must be strictly inside the rounded range — no tolerance.
+    // If close is below support or above resistance, price has broken out/down.
+    const lastClose=bars[n-1].close;
+    if(lastClose>rTop||lastClose<rBottom) return null;
+    return {
+      top:rTop, bottom:rBottom, width:widthPct.toFixed(1),
+      lookback,
+      density:(resM.length+supM.length)/lookback,
+      totalMembers:resM.length+supM.length,
+      windowStart:sliceStart,
+      barCount:n-sliceStart,
+      startBarIdx:sliceStart,
+      resCount:resM.length, supCount:supM.length,
+      resMembers:resM, supMembers:supM,
+      failedBreakout:false, expanded:false,
+      mid:rMid,
+      _source:'zone'
+    };
+  }
+
+  const candidates=[];
+  for(const lb of [30,60,120,180]){
+    const r=try3CandleWindow(lb);
+    if(r) candidates.push(r);
+  }
+  candidates.sort((a,b)=>b.density-a.density);
+  const tr=candidates.length>0 ? candidates[0] : null;
+  const isWide = tr ? tr.lookback>=120 : false;
+
+  // Attach all valid ranges to the primary TR for multi-timeframe display.
+  // Rules:
+  //   1. Secondary must OVERLAP with the primary (share price territory)
+  //   2. Deduplicate: skip if both boundaries are within 3% of an already-included range
+  //      OR if one boundary matches and the other differs by < 5% (not meaningfully wider)
+  //   3. Sort narrow → wide (ascending lookback) for display
+  // Label by width: ≤6% = Micro, ≤12% = Inner, >12% = Macro
+  //
+  // FIX: Mark primary with a boolean flag BEFORE filtering to avoid reference-equality
+  // issues when two candidates have identical density (unstable sort tie-breaking).
+  if(tr && candidates.length>1){
+    // Step 1: stamp the primary flag directly on each candidate object
+    candidates.forEach((r,i)=>{ r._isPrimary = (i===0); });
+
+    const included = [];
+    tr.allRanges = candidates
+      .slice()
+      .filter(r=>{
+        if(r._isPrimary){ included.push(r); return true; }
+        // Must overlap with primary
+        if(!(r.bottom < tr.top && r.top > tr.bottom)) return false;
+        // Deduplicate against all already-included ranges
+        const isDuplicate = included.some(ex=>{
+          const tClose = Math.abs(r.top    - ex.top)    / (ex.top    || 1) < 0.03;
+          const bClose = Math.abs(r.bottom - ex.bottom) / (ex.bottom || 1) < 0.03;
+          const tDiff  = Math.abs(r.top    - ex.top)    / (ex.top    || 1);
+          const bDiff  = Math.abs(r.bottom - ex.bottom) / (ex.bottom || 1);
+          if(tClose && bClose)          return true;  // essentially same range
+          if(tClose && bDiff  < 0.05)   return true;  // same resistance, barely wider support
+          if(bClose && tDiff  < 0.05)   return true;  // same support, barely wider resistance
+          return false;
+        });
+        if(isDuplicate) return false;
+        included.push(r);
+        return true;
+      })
+      .sort((a,b)=>a.lookback-b.lookback)
+      .map(r=>{
+        const w=parseFloat(r.width);
+        const label=w<=6?'Micro':w<=12?'Inner':'Macro';
+        return {
+          lb:r.lookback, bottom:r.bottom, top:r.top,
+          mid:r.mid,
+          width:r.width, density:r.density,
+          members:r.totalMembers, label,
+          isPrimary: !!r._isPrimary   // use the stamped flag, not reference equality
+        };
+      });
+
+    // Clean up the temporary flag
+    candidates.forEach(r=>{ delete r._isPrimary; });
+
+  } else if(tr){
+    const w=parseFloat(tr.width);
+    const label=w<=6?'Micro':w<=12?'Inner':'Macro';
+    tr.allRanges=[{
+      lb:tr.lookback, bottom:tr.bottom, top:tr.top, mid:tr.mid,
+      width:tr.width, density:tr.density,
+      members:tr.totalMembers, label, isPrimary:true
+    }];
+  }
+
+  // ── 2. PRIOR TREND ─────────────────────────────────────────────────────────
+  // Two-layer read anchored to the window start (when price entered the range).
+  // r126 = 6-month change before window start  (recent direction)
+  // r365 = 1-year change before window start   (macro context)
+  // Also uses pricePos and pctFromATH as sanity checks.
+
+  const allTimeHigh=Math.max(...bars.map(b=>b.high));
+  const allTimeLow =Math.min(...bars.map(b=>b.low));
+  const pricePos=(bars[n-1].close-allTimeLow)/(allTimeHigh-allTimeLow||1);
+  const pctFromATH=(bars[n-1].close-allTimeHigh)/allTimeHigh*100;
+
+  function getChg(ws, lb){
+    const from=Math.max(0,ws-lb);
+    const to  =Math.max(from+2, Math.min(ws, n-1));
+    if(to-from<10) return null;
+    return (bars[to].close-bars[from].close)/bars[from].close*100;
+  }
+
+  function calcPriorTrend(windowStart){
+    const ws=Math.min(windowStart, n-2);
+    const r126=getChg(ws,126)??0;
+    // Extend macro lookup: try 365 → 504 → 756 bars to find decisive long-term trend.
+    // Stocks near ATH often consolidate for 1-2 years; r365 captures only the flat
+    // period. 504 (2yr) and 756 (3yr) bars see through to the underlying uptrend.
+    const r365=getChg(ws,365)??getChg(ws,252)??r126;
+    const r504=getChg(ws,504)??r365;
+    const r756=getChg(ws,756)??r504;
+    // Best macro = most decisive (largest absolute move) among 365/504/756
+    const rMacro=[r365,r504,r756].reduce((best,v)=>Math.abs(v)>Math.abs(best)?v:best, r365);
+
+    let dir;
+    // R1: near-high stock declining → DOWN
+    if(r126<=-10 && pricePos>0.65)                           dir='down';
+    // R2: moderate decline inside strong macro uptrend → UP (correction)
+    else if(r126<=-10&&rMacro>20&&r126>-22&&pctFromATH>-30) dir='up';
+    // R3: recent strong uptrend → UP
+    // Guard: only fire if macro trend is not strongly negative.
+    // A +13% bounce inside a -46% macro decline is still a downtrend.
+    // Without this guard, R3 fires before R4a (rMacro<-12) can correct it.
+    else if(r126>10 && rMacro>-20)                             dir='up';
+    // R4a: macro clearly down → DOWN
+    else if(rMacro<-12)                                       dir='down';
+    // R4b: macro up but deeply off ATH → trend has reversed → DOWN
+    else if(rMacro>15&&pctFromATH<-35)                        dir='down';
+    // R4c: macro up and not deeply off ATH → UP
+    else if(rMacro>15&&pctFromATH>=-35)                       dir='up';
+    // R4d: mild recent decline + significantly off highs → DOWN
+    else if(r126<-5&&pctFromATH<-25)                          dir='down';
+    // R5 TIEBREAKER — no Transitional: force a direction from price position
+    // Near ATH (top 10% of history) or above mid → UP; below mid → DOWN
+    else if(pricePos>=0.50)                                   dir='up';
+    else                                                       dir='down';
+
+    return {dir, r126, r365:rMacro};
+  }
+
+  const priorAnchor = tr ? tr.windowStart : n;
+  const priorInfo   = calcPriorTrend(priorAnchor);
+  const priorDir    = priorInfo.dir;
+
+  // ── 3. PHASE CLASSIFICATION ────────────────────────────────────────────────
+  // Run detection helpers EARLY so classification can use SC, BC, Spring, Upthrust.
+  // These are needed before phaseType is determined.
+  const trBarsEarly = tr ? bars.slice(tr.startBarIdx) : bars;
+  const scEarly     = detectSC(trBarsEarly);
+  const bcEarly     = detectBC(trBarsEarly);
+  const minPctEarly = dynamicMinPct(bars);
+  const zzEarly     = getZigzag(bars,3,minPctEarly);
+  const springEarly = tr ? detectSpring(bars, tr, zzEarly) : false;
+  const utEarly     = tr ? detectUpthrust(bars, tr, zzEarly) : false;
+  const {volBias:vbEarly} = swingVolume(bars, zzEarly);
+  const vdEarly     = isVolDrying(bars);
+
+  let phaseType, subPhase='', inRange=!!tr;
+
+  if(tr){
+    const posInTRnow = (bars[n-1].close - tr.bottom) / (tr.top - tr.bottom || 1);
+    phaseType = classifyRange(priorDir, {
+      pp:pricePos, ath:pctFromATH,
+      sc:scEarly.detected, bc:bcEarly.detected,
+      spring:springEarly, upthrust:utEarly,
+      vb:vbEarly, vd:vdEarly,
+      posInTR:posInTRnow,
+      rMacro:priorInfo.r365  // macro trend strength to qualify UTAD vs Phase B UA
+    });
+  } else {
+    // No range — Markup or Markdown only
+    phaseType = priorDir==='up' ? 'Markup' : 'Markdown';
+    inRange=false;
+  }
+
+  // ── 4. PRIOR TR (Spring / UTAD layer) ─────────────────────────────────────
+  // Keep findPriorTR: detects historical breakout+return patterns (Spring/UTAD).
+  // Only runs when no current TR found — adds the ptr enrichment layer.
+  // Reuse minPct and zz already computed in step 3 (zzEarly / minPctEarly).
+  const ptr = !tr ? findPriorTR(bars, minPctEarly) : null;
+
+  // If ptr found and no current TR, refine the phase:
+  // ptr.brokeDown + priorDir=up + posInRange>=0 + volBias!=bearish → Re-Accumulation (Spring)
+  // ptr.brokeDown + else → Re-Distribution (LPSY)
+  // ptr.brokeUp  + priorDir=up → Re-Accumulation (SOS pullback)
+  // ptr.brokeUp  + priorDir=down → Re-Distribution (UTAD)
+
+  // ── 5. DETECTION HELPERS ──────────────────────────────────────────────────
+  // sc, bc, spring, upthrust, volBias, volDrying already computed early for classification.
+  // Reuse them here; compute remaining helpers now.
+  const trBars   = tr ? bars.slice(tr.startBarIdx) : bars;
+  const sc       = scEarly;
+  const bc       = bcEarly;
+  const zz       = zzEarly;  // single declaration for all downstream use
+  const ps       = detectPS(trBars);
+  const psy      = detectPSY(trBars);
+  const st       = detectST(trBars, sc);
+  const sow      = tr ? detectSOW(bars, tr.bottom, tr.top) : {detected:false};
+  const spring   = springEarly;
+  const upthrust = utEarly;
+  const volBias  = vbEarly;
+  const volDrying= vdEarly;
+  const localBO  = !tr && !ptr ? detectLocalBreakout(bars) : null;
+
+  // ── 6. PTR PHASE OVERRIDE ─────────────────────────────────────────────────
+  if(ptr && !tr){
+    const posInPtr=(bars[n-1].close-ptr.bottom)/(ptr.top-ptr.bottom);
+
+    if(ptr.brokeUp){
+      // Broke above range top then returned.
+      // BUT if price has now fallen BELOW the prior range bottom (posInPtr < 0),
+      // the "return" was actually a full breakdown — this is Markdown, not UTAD.
+      // Discard ptr and let the trend classification stand.
+      if(posInPtr < 0){
+        // Price below prior range bottom → confirmed breakdown → Markdown
+        phaseType = priorDir==='down' ? 'Markdown' : 'Re-Distribution';
+        subPhase  = '';
+      } else {
+        // Price still inside or above the prior range → UTAD or SOS Pullback
+        const brokeUpIsSOS = priorDir==='up' || (priorDir!=='down' && posInPtr>=0.5);
+        if(brokeUpIsSOS){
+          phaseType='Re-Accumulation'; subPhase='SOS Pullback';
+        } else {
+          phaseType='Re-Distribution'; subPhase='UTAD';
+        }
+      }
+    } else {
+      // Broke below range bottom then bounced
+      // Re-Accumulation Spring requires the stock to be in uptrend territory.
+      // A stock deeply below its ATH and at the bottom of its entire price history
+      // cannot be pausing in an uptrend — it is in a prolonged markdown.
+      // Guard: pricePos > 0.30 (not in deep bear territory across full history)
+      //        AND pctFromATH > -50 (not more than 50% below its peak)
+      // This blocks dead-cat bounces in broken stocks (e.g. -81% from ATH, pp=0.05)
+      // from being mislabelled as Re-Accumulation Springs.
+      const notDeeplyBroken = pricePos > 0.30 && pctFromATH > -50;
+      const brokeDownIsSpring = posInPtr>=0
+                              && !(priorDir==='down' && posInPtr<0.4)
+                              && volBias!=='bearish'
+                              && notDeeplyBroken;
+      if(brokeDownIsSpring){
+        phaseType='Re-Accumulation'; subPhase='Spring';
+      } else {
+        phaseType='Re-Distribution'; subPhase='LPSY';
+      }
+    }
+  }
+
+  // localBO override: SOS breakout above a micro-range
+  if(localBO){
+    phaseType='Re-Accumulation'; subPhase='SOS Breakout';
+  }
+
+  // ── 7. SUB-PHASE (A/B/C/D) for range phases ───────────────────────────────
+  if(inRange && !subPhase){
+    if(phaseType==='Accumulation'||phaseType==='Re-Accumulation'){
+      if(spring)                subPhase= sc.detected?'Phase C':'Phase C';
+      else if(sc.detected)      subPhase='Phase B';
+      else                      subPhase='Phase A';
+      // Phase D: spring confirmed + pressing range top + demand dominant
+      if(spring && tr){
+        const posInTR=(bars[n-1].close-tr.bottom)/(tr.top-tr.bottom);
+        if(posInTR>0.6 && volBias!=='bearish') subPhase='Phase D';
+      }
+    }
+    if(phaseType==='Distribution'||phaseType==='Re-Distribution'){
+      if(upthrust)              subPhase='Phase C';
+      else if(bc.detected)      subPhase='Phase B';
+      else                      subPhase='Phase A';
+      if(upthrust && tr){
+        const posInTR=(bars[n-1].close-tr.bottom)/(tr.top-tr.bottom);
+        if(posInTR<0.4 && volBias!=='bullish') subPhase='Phase D';
+      }
+    }
+  }
+
+  // ── 8. CONFIDENCE ─────────────────────────────────────────────────────────
+  let conf=50;
+  if(tr){
+    conf=55;
+    if(tr.totalMembers>=10)   conf+=10;
+    if(tr.totalMembers>=16)   conf+=5;
+    if(isWide)                conf+=5;
+    if(volBias==='bullish'&&(phaseType==='Accumulation'||phaseType==='Re-Accumulation')) conf+=8;
+    if(volBias==='bearish'&&(phaseType==='Distribution'||phaseType==='Re-Distribution')) conf+=8;
+    if(sc.detected&&(phaseType==='Accumulation'||phaseType==='Re-Accumulation')) conf+=8;
+    if(bc.detected&&(phaseType==='Distribution'||phaseType==='Re-Distribution')) conf+=8;
+    if(spring)  conf+=7;
+    if(upthrust)conf+=7;
+    if(volDrying)conf+=5;
+  } else if(ptr){
+    conf=65;
+    if(ptr.returnPct>10) conf+=7;
+    if(volBias==='bullish'&&phaseType==='Re-Accumulation') conf+=8;
+    if(volBias==='bearish'&&phaseType==='Re-Distribution') conf+=8;
+  } else if(localBO){
+    conf=localBO.volRatio>=2.0?78:72;
+  } else {
+    // Trending — confidence from clarity of prior trend
+    conf=Math.abs(priorInfo.r126)>20?75:Math.abs(priorInfo.r126)>10?65:55;
+  }
+  conf=Math.min(95,Math.max(0,conf));
+
+  // ── 9. DESCRIPTION & SIGNAL ───────────────────────────────────────────────
+  const lastClose=bars[n-1].close;
+  const trDesc=tr?`₹${tr.bottom.toFixed(0)}–₹${tr.top.toFixed(0)} (${tr.width}% wide, ${tr.barCount} bars, ${tr.resCount}H+${tr.supCount}L cluster)`:'';
+  const posInTR=tr?((lastClose-tr.bottom)/(tr.top-tr.bottom)):0;
+  const posInTRpct=tr?(posInTR*100).toFixed(0)+'%':'—';
+
+  let desc='', signal={e:'⚖️',t:'',b:''}, events=[];
+
+  if(phaseType==='Accumulation'){
+    desc=`Price is consolidating in a ${trDesc} range after a ${Math.abs(priorInfo.r365).toFixed(0)}% decline. This is Accumulation — institutional buying is absorbing the remaining supply at depressed prices (price position: ${(pricePos*100).toFixed(0)}th percentile of history). ${sc.detected?'A Selling Climax has been detected, confirming institutional absorption.':''} Volume is ${volDrying?'contracting (supply exhausted)':'being monitored for drying-up signals'}.`;
+    signal={e:'⏳',t:'ACCUMULATION — Building a Base',b:`Do not enter yet. Watch for a Selling Climax (wide bar, extreme volume, closes upper half) then a Spring below ₹${tr?.bottom.toFixed(0)} that quickly recovers. That sequence confirms Phase C and is the optimal long entry.`};
+  } else if(phaseType==='Distribution'){
+    desc=`Price is consolidating in a ${trDesc} range at elevated levels (${(pricePos*100).toFixed(0)}th percentile) after a ${priorInfo.r365.toFixed(0)}% advance. This is Distribution — large interests are offloading inventory into retail demand. ${bc.detected?'A Buying Climax has been detected, confirming institutional selling.':''} Supply is dominant.`;
+    signal={e:'⏳',t:'DISTRIBUTION — Supply Building',b:`Reduce or exit longs. Watch for an Upthrust above ₹${tr?.top.toFixed(0)} that fails and reverses — that is the Phase C entry for shorts. Stop above the UTAD spike high. Target: TR bottom ₹${tr?.bottom.toFixed(0)} and below.`};
+  } else if(phaseType==='Re-Accumulation'){
+    if(subPhase==='SOS Breakout'&&localBO){
+      desc=`Price broke above a ${localBO.width}% micro-range (₹${localBO.bottom.toFixed(0)}–₹${localBO.top.toFixed(0)}) on ${localBO.volRatio.toFixed(1)}× average volume — a Sign of Strength confirming Re-Accumulation. The macro trend is UP (${priorInfo.r365.toFixed(0)}% over the past year) and this breakout is a stepping-stone continuation.`;
+      signal={e:'🟢',t:'RE-ACCUMULATION — SOS Breakout',b:`Price is in markup. Buy pullbacks that hold above ₹${localBO.bottom.toFixed(0)} (old range = new support). Stop below ₹${localBO.bottom.toFixed(0)}. Next target: measured move above ₹${localBO.top.toFixed(0)}.`};
+    } else if(subPhase==='Spring'||subPhase==='SOS Pullback'){
+      const ptrRef=ptr?`₹${ptr.bottom.toFixed(0)}–₹${ptr.top.toFixed(0)}`:'prior range';
+      desc=`Price tested below the ${ptrRef} and recovered — a ${subPhase==='Spring'?'Spring shakeout (bear trap)':'Sign of Strength pullback (Last Point of Support)'}. The macro trend is UP. This is Re-Accumulation: institutions absorbed the last remaining supply before the next markup leg.`;
+      signal={e:'🟢',t:'RE-ACCUMULATION',b:`Enter long on the recovery. Stop below the ${subPhase==='Spring'?'Spring':'pullback'} low. Target: prior range top and beyond.`};
+    } else {
+      desc=`Price is pausing in a ${trDesc} range mid-uptrend (prior trend: +${priorInfo.r365.toFixed(0)}% over the past year). This is Re-Accumulation — a stepping-stone consolidation where institutions are building additional positions before the next markup leg. Volume is ${volDrying?'contracting (absorption complete)':'contracting inside the range'}. ${spring?'A Spring has confirmed Phase C — demand has absorbed supply.':''}`;
+      signal={e:'⏸️',t:'RE-ACCUMULATION — Next Leg Up Loading',b:`Hold longs. Do not exit into weakness. Buy dips to range support ₹${tr?.bottom.toFixed(0)} on drying volume${spring?' — Spring already confirmed, highest-conviction entry zone':'. Watch for a Spring below support as Phase C entry'}. Breakout above ₹${tr?.top.toFixed(0)} on expanding volume confirms the next markup leg.`};
+    }
+  } else if(phaseType==='Re-Distribution'){
+    if(subPhase==='UTAD'||subPhase==='LPSY'){
+      const ptrRef=ptr?`₹${ptr.bottom.toFixed(0)}–₹${ptr.top.toFixed(0)}`:'prior range';
+      desc=`Price ${subPhase==='UTAD'?'broke above then returned inside':'broke below then failed to recover into'} the ${ptrRef}. This is Re-Distribution: the ${subPhase==='UTAD'?'breakout was a bull trap (UTAD)':'bounce is a Last Point of Supply (LPSY)'}. The macro context is declining (${priorInfo.r365.toFixed(0)}% trend) and the next leg should continue lower.`;
+      signal={e:'🔴',t:'RE-DISTRIBUTION',b:`Short the ${subPhase==='UTAD'?'reversal from the UTAD spike':'weak LPSY bounce'}. Stop above ${subPhase==='UTAD'?`UTAD high ₹${ptr?.peakAfter?.toFixed(0)||''}`:` ₹${ptr?.top?.toFixed(0)||''}`}. Target: prior lows and below.`};
+    } else {
+      desc=`Price is pausing in a ${trDesc} range mid-downtrend (prior trend: ${priorInfo.r365.toFixed(0)}% over the past year). This is Re-Distribution — a pause in the downtrend where remaining demand is being exhausted before the next markdown leg. ${upthrust?'An Upthrust has confirmed Phase C — supply has overwhelmed demand.':''} Supply is ${volBias==='bearish'?'dominant (bearish volume bias)':'building'}.`;
+      signal={e:'⏸️',t:'RE-DISTRIBUTION — Next Leg Down Loading',b:`Short rallies to range resistance ₹${tr?.top.toFixed(0)} on drying volume${upthrust?' — Upthrust already confirmed, highest-conviction short entry':'. Watch for an Upthrust above resistance as Phase C entry'}. Breakdown below ₹${tr?.bottom.toFixed(0)} on expanding volume confirms the next markdown leg.`};
+    }
+  } else if(phaseType==='Markup'){
+    desc=`Price is in a confirmed uptrend: higher highs and higher lows (prior trend: +${priorInfo.r365.toFixed(0)}% over the past year). No active trading range detected — demand is dominant and price is being marked up. ${volBias==='bullish'?'Volume confirms: more intensity on up-swings than down-swings.':''}`;
+    signal={e:'🚀',t:'MARKUP — Uptrend in Progress',b:`Stay long. Trail stops below swing lows. Look for Re-Accumulation ranges (stepping stones) as add-to-long opportunities. A significant range forming after a large advance may indicate Distribution — watch for climactic volume at highs.`};
+  } else if(phaseType==='Markdown'){
+    desc=`Price is in a confirmed downtrend: lower highs and lower lows (prior trend: ${priorInfo.r365.toFixed(0)}% over the past year). No active trading range detected — supply is dominant and price is being marked down. ${volBias==='bearish'?'Volume confirms: more intensity on down-swings than up-swings.':''}`;
+    signal={e:'📉',t:'MARKDOWN — Downtrend in Progress',b:`Avoid longs. Short rallies that fail at lower highs. Look for Re-Distribution ranges (stepping stones lower) as add-to-short opportunities. A climactic wide bar on extreme volume at lows may signal an approaching Selling Climax and Accumulation base.`};
+  } else {
+    desc='Insufficient trend clarity. Price action is mixed with no confirmed range or trend. Wait for either a clear TR (range) or a decisive HH+HL / LH+LL structure before committing.';
+    signal={e:'⚖️',t:'TRANSITIONAL — Wait for Clarity',b:'Reduce size to minimum. Do not force a direction. Watch for a clear Selling Climax or Buying Climax to define the next phase, or a breakout/breakdown from the current choppy zone.'};
+  }
+
+  // ── 10. EVENTS PANEL ─────────────────────────────────────────────────────
+  if(inRange){
+    const isAccum=phaseType==='Accumulation'||phaseType==='Re-Accumulation';
+    const isDist =phaseType==='Distribution'||phaseType==='Re-Distribution';
+    events=[
+      {tag:'RANGE', label:'Trading Range',    ok:true,         desc:`${trDesc} | Price at ${posInTRpct} of range`},
+      {tag:'PRIOR', label:'Prior Trend',       ok:true,         desc:`r126=${priorInfo.r126.toFixed(0)}% r365=${priorInfo.r365.toFixed(0)}% → ${priorDir}`},
+      ...(isAccum?[
+        {tag:'PS',    label:'Preliminary Support', ok:ps.detected,  desc:ps.detected?`PS bar: ${ps.bar?.date}`:'Watching for first demand bar after decline'},
+        {tag:'SC',    label:'Selling Climax',      ok:sc.detected,  desc:sc.detected?`SC: ${sc.bar?.date} — panic selling absorbed`:'Watching for high-vol wide-spread down bar closing upper half'},
+        {tag:'ST',    label:'Secondary Test',      ok:st.detected,  desc:st.detected?`ST: ${st.bar?.date} — lower vol re-test`:'Lower-vol retest of SC area needed'},
+        {tag:'SPRING',label:'Spring / Shakeout',   ok:spring,       desc:spring?'Spring confirmed — bear trap, Phase C':'Watch for dip below range bottom that quickly recovers'},
+        {tag:'SOS',   label:'Sign of Strength',    ok:spring&&volBias==='bullish', desc:spring?`Vol bias: ${volBias}`:'Wide advance on high vol after Spring'},
+        {tag:'VOL',   label:'Volume Drying',       ok:volDrying,    desc:volDrying?'Volume contracting — absorption in progress':'Monitor for volume contraction on downswings'},
+      ]:[]),
+      ...(isDist?[
+        {tag:'PSY',  label:'Preliminary Supply',   ok:psy.detected, desc:psy.detected?`PSY bar: ${psy.bar?.date}`:'Watching for first supply bar after advance'},
+        {tag:'BC',   label:'Buying Climax',        ok:bc.detected,  desc:bc.detected?`BC: ${bc.bar?.date} — public buying absorbed`:'Watching for high-vol wide-spread up bar closing lower half'},
+        {tag:'SOW',  label:'Sign of Weakness',     ok:sow.detected, desc:sow.detected?`SOW: ${sow.bar?.date} — supply dominant`:'Wide-spread high-vol down bar closing near low'},
+        {tag:'UT',   label:'Upthrust / UTAD',      ok:upthrust,     desc:upthrust?'Upthrust confirmed — bull trap, Phase C':'Watch for spike above range top that reverses'},
+        {tag:'LPSY', label:'Last Point of Supply', ok:subPhase==='Phase D', desc:'Feeble low-volume rally — ideal short entry'},
+        {tag:'VOL',  label:'Vol on Down-Moves',    ok:volBias==='bearish', desc:`Swing vol bias: ${volBias}`},
+      ]:[]),
+    ];
+  } else if(ptr){
+    events=[
+      {tag:'PTR',   label:'Prior Range',        ok:true,         desc:`₹${ptr.bottom.toFixed(0)}–₹${ptr.top.toFixed(0)}`},
+      {tag:'BREAK', label:ptr.brokeUp?'Breakout (UTAD/SOS)':'Breakdown (Spring/LPSY)', ok:true, desc:`${ptr.brokeUp?'Above':'Below'} ₹${ptr.brokeUp?ptr.top.toFixed(0):ptr.bottom.toFixed(0)}, returned ${ptr.returnPct?.toFixed(1)}%`},
+      {tag:'POS',   label:'Position in Range',  ok:ptr?((bars[n-1].close-ptr.bottom)/(ptr.top-ptr.bottom))>0:false, desc:`posInRange=${((bars[n-1].close-ptr.bottom)/(ptr.top-ptr.bottom)).toFixed(2)}`},
+      {tag:'VOL',   label:'Volume Bias',        ok:volBias!=='neutral', desc:`${volBias}`},
+      {tag:'PRIOR', label:'Prior Trend',        ok:true,         desc:`r126=${priorInfo.r126.toFixed(0)}% r365=${priorInfo.r365.toFixed(0)}% → ${priorDir}`},
+    ];
+  } else if(localBO){
+    events=[
+      {tag:'RANGE', label:'Micro Range',        ok:true,         desc:`₹${localBO.bottom.toFixed(0)}–₹${localBO.top.toFixed(0)} (${localBO.width}% wide)`},
+      {tag:'SOS',   label:'SOS Breakout',       ok:true,         desc:`${localBO.volRatio.toFixed(1)}× avg volume on breakout`},
+      {tag:'PRIOR', label:'Prior Trend',        ok:true,         desc:`r365=${priorInfo.r365.toFixed(0)}% — uptrend`},
+      {tag:'VOL',   label:'Volume Bias',        ok:volBias==='bullish', desc:`${volBias}`},
+    ];
+  } else {
+    events=[
+      {tag:'STR',   label:'Structure',          ok:phaseType!=='Transitional', desc:`${phaseType} (r126=${priorInfo.r126.toFixed(0)}% r365=${priorInfo.r365.toFixed(0)}%)`},
+      {tag:'VOL',   label:'Volume Bias',        ok:volBias!=='neutral', desc:`${volBias}`},
+      {tag:'PRIOR', label:'Prior Trend',        ok:priorDir!=='sideways', desc:`${priorDir} | r126=${priorInfo.r126.toFixed(0)}% r365=${priorInfo.r365.toFixed(0)}%`},
+    ];
+  }
+
+  // ── 11. RETURN OBJECT (all fields the UI expects) ─────────────────────────
+  const priceChg  =((lastClose-bars[0].close)/bars[0].close)*100;
+  const avgVol10  =bars.slice(-10).reduce((s,b)=>s+b.volume,0)/10;
+  const avgVolAll =bars.reduce((s,b)=>s+b.volume,0)/n;
+  const volRatio  =avgVolAll>0?avgVol10/avgVolAll:1;
+
+  // 2-year swing context (used by UI)
+  const bars2yr   =bars.slice(Math.max(0,n-504));
+  const high2yr   =Math.max(...bars2yr.map(b=>b.high));
+  const low2yr    =Math.min(...bars2yr.map(b=>b.low));
+  const range2yr  =high2yr-low2yr||1;
+  const posIn2yrRange=(lastClose-low2yr)/range2yr;
+  const nearSwingHigh2yr=lastClose>=high2yr*0.97;
+  const nearSwingLow2yr =lastClose<=low2yr *1.03;
+
+  // SMA20
+  const sma20=bars.length>=20
+    ? bars.slice(-20).reduce((s,b)=>s+b.close,0)/20
+    : bars.reduce((s,b)=>s+b.close,0)/bars.length;
+
+  return {
+    // Classification
+    phaseType, subPhase, conf, desc, signal, events,
+
+    // Range
+    tr, ptr, localBO, spring, upthrust,
+
+    // Zigzag (for chart rendering)
+    zz,
+
+    // Structure (kept for UI compatibility)
+    structure:  priorDir==='up'?'uptrend':priorDir==='down'?'downtrend':'transitional',
+    priorStructure: priorDir,
+    priorPctChg: priorInfo.r126,
+
+    // Detection events
+    sc, bc, ps, psy, st, sow,
+    volBias, volDrying,
+
+    // Price context
+    lastClose, maxHigh:allTimeHigh, minLow:allTimeLow,
+    pricePos, priceChg, volRatio, sma20,
+
+    // 2-year range context
+    posIn2yrRange, nearSwingHigh2yr, nearSwingLow2yr,
+
+    // Legacy compat fields
+    priorWasUp:   priorDir==='up',
+    priorWasDown: priorDir==='down',
+    correctionInUptrend: priorDir==='up' && priorInfo.r126<-8,
+    failedBreakout:false, expandedRange:false,
+  };
+}
+
+function _emptyResult(bars){
+  return {
+    phaseType:'Accumulation',subPhase:'Insufficient Data',conf:0,
+    desc:'Not enough data.',signal:{e:'⚖️',t:'INSUFFICIENT DATA',b:'Need at least 10 bars.'},
+    events:[],tr:null,ptr:null,localBO:null,spring:false,upthrust:false,
+    zz:[],structure:'insufficient',priorStructure:'insufficient',priorPctChg:0,
+    sc:{detected:false},bc:{detected:false},ps:{detected:false},psy:{detected:false},
+    st:{detected:false},sow:{detected:false},
+    volBias:'neutral',volDrying:false,
+    lastClose:bars[bars.length-1]?.close??0,maxHigh:0,minLow:0,
+    pricePos:0.5,priceChg:0,volRatio:1,sma20:0,
+    posIn2yrRange:0.5,nearSwingHigh2yr:false,nearSwingLow2yr:false,
+    priorWasUp:false,priorWasDown:false,correctionInUptrend:false,
+    failedBreakout:false,expandedRange:false,
+  };
+}
+
+
+function phaseColor(pt){
+  return {'Markup':'#00e396','Re-Accumulation':'#00d4ff','Accumulation':'#a78bfa',
+          'Distribution':'#ff6b35','Re-Distribution':'#ffd166','Markdown':'#ff4560'}[pt]||'#00d4ff';
+}
+function phaseAccentCls(pt){
+  return {'Markup':'bg','Re-Accumulation':'bl','Accumulation':'bl',
+          'Distribution':'bo','Re-Distribution':'by','Markdown':'br'}[pt]||'bl';
+}
+
+// ── CYCLE SCHEMATIC ───────────────────────────────────────
+const CYCLE     =['Accumulation','Markup','Re-Accumulation','Distribution','Markdown','Re-Distribution'];
+const CYCLE_DESC=[
+  'After a downtrend, price appears to be settling into a range. Could be institutions absorbing supply — or just a pause before another leg down. Watch for a clean breakout with volume to confirm.',
+  'Price has broken out and seems to be trending up with higher highs and higher lows. Looks like demand is in control, but no trend lasts forever. Stay alert for signs of exhaustion.',
+  'The uptrend has stalled into a sideways range. Could be a healthy pause before the next move up — or early signs of distribution. The next breakout direction will tell the story.',
+  'After a strong rally, price is stalling at the highs in a range. Could be smart money quietly offloading — or just a consolidation before another push up. A breakdown below support would be the warning sign.',
+  'Price has broken down and appears to be trending lower with lower highs and lower lows. Looks like supply is in control, but watch for any signs of demand stepping in.',
+  'The downtrend has paused into a sideways range. Could be a brief rest before the next leg down — or early signs of accumulation. The next breakdown or breakout will clarify.'
+];
+
+function renderResults(r, bars){
+  const pc   = phaseColor(r.phaseType);
+  const aCls = phaseAccentCls(r.phaseType);
+  const sigCls = {'🚀':'bg','📈':'bg','⏸️':'by','⏳':'by','👀':'by','⚠️':'br','🎯':'bg','📉':'br','⚖️':'by'}[r.signal.e]||'by';
+
+  const pClr = r.priceChg>=0?'pos':'neg';
+  const vClr = r.volRatio>1.1?'pos':r.volRatio<0.9?'neg':'neu';
+  const strClr = r.structure==='uptrend'?'pos':r.structure==='downtrend'?'neg':'neu';
+  const strLabel = {'uptrend':'↗ Uptrend','downtrend':'↘ Downtrend','sideways':'↔ Sideways','transitional':'↔ Mixed','insufficient':'— Insufficient'}[r.structure]||'—';
+
+  // Build multi-range string for display
+  let trStr = 'None active';
+  if(r.tr){
+    const primary = r.tr.allRanges?.find(x=>x.isPrimary) || {label:'',bottom:r.tr.bottom,top:r.tr.top,width:r.tr.width};
+    trStr = `${primary.label ? primary.label+' ' : ''}₹${r.tr.bottom} – ₹${r.tr.top} (${r.tr.width}%)`;
+    if(r.tr.allRanges && r.tr.allRanges.length>1){
+      const others = r.tr.allRanges.filter(x=>!x.isPrimary);
+      trStr += ' | ' + others.map(x=>`${x.label} ₹${x.bottom}–₹${x.top} (${x.width}%)`).join(' | ');
+    }
+  }
+  const zzStr = `${r.zz.length} pivots`;
+  const priorStr = r.priorStructure==='uptrend'?'Prior ↗':r.priorStructure==='downtrend'?'Prior ↘':'—';
+
+  document.getElementById('out').innerHTML=`
+  <div class="hero">
+    <div class="pcard ${aCls}">
+      <div class="plabel">Wyckoff Phase — Zigzag Engine</div>
+      <div class="pname" style="color:${pc};font-size:28px;margin-bottom:4px">${r.phaseType}</div>
+      ${r.subPhase?`<div class="ptype" style="color:${pc};opacity:.7;font-size:11px;margin-bottom:10px;letter-spacing:0.5px">${
+        r.subPhase==='SOS Pullback'?'Last Point of Support detected':
+        r.subPhase==='SOS Breakout'?'Sign of Strength breakout':
+        r.subPhase==='Spring'?'Spring (Phase C shakeout) detected':
+        r.subPhase==='UTAD'?'Upthrust After Distribution detected':
+        r.subPhase==='LPSY'?'Last Point of Supply detected':
+        r.subPhase
+      }</div>`:''}
+      <div class="pdesc">${r.desc}</div>
+      <div class="conf-row" style="margin-top:16px">
+        <div class="conf-lbl">Confidence</div>
+        <div class="conf-track"><div class="conf-fill" id="cfill" style="width:0%;background:${pc}"></div></div>
+        <div class="conf-lbl">${r.conf}%</div>
+      </div>
+    </div>
+    <div class="pcard ${sigCls}">
+      <div class="plabel">Trading Signal</div>
+      <div style="font-size:44px;margin-bottom:10px">${r.signal.e}</div>
+      <div class="pname" style="font-size:18px;margin-bottom:12px">${r.signal.t}</div>
+      <div class="pdesc">${r.signal.b}</div>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="mcard"><div class="mlbl">Last Close</div><div class="mval">₹${r.lastClose.toFixed(2)}</div><div class="msub ${pClr}">${r.priceChg>=0?'+':''}${r.priceChg.toFixed(1)}% overall</div></div>
+    <div class="mcard"><div class="mlbl">Swing Structure</div><div class="mval ${strClr}" style="font-size:17px">${strLabel}</div><div class="msub">${zzStr} · ${priorStr}</div></div>
+    <div class="mcard"><div class="mlbl">Trading Range</div><div class="mval neu" style="font-size:15px">${trStr}</div><div class="msub">${r.tr?r.tr.width+'% width':'no active range'}</div></div>
+    <div class="mcard"><div class="mlbl">Volume Bias</div><div class="mval ${r.volBias==='bullish'?'pos':r.volBias==='bearish'?'neg':'neu'}" style="font-size:17px">${r.volBias==='bullish'?'↑ Bullish':r.volBias==='bearish'?'↓ Bearish':'→ Neutral'}</div><div class="msub">swing vol · ratio ${r.volRatio.toFixed(2)}x</div></div>
+    <div class="mcard"><div class="mlbl">Key Events</div><div class="mval" style="font-size:14px">${r.sc.detected?'SC ✓':r.bc.detected?'BC ✓':'—'} ${r.spring?'· Spring ✓':''} ${r.upthrust?'· UT ✓':''}</div><div class="msub">detected events</div></div>
+  </div>
+
+  <div class="schembox">
+    <div class="sec-title">Wyckoff Market Cycle — Current Position</div>
+    <div class="timeline">
+      ${CYCLE.map((p,i)=>`
+        <div class="tstep${p===r.phaseType?' on':''}${p===r.phaseType&&(p==='Markdown'||p==='Distribution'||p==='Re-Distribution')?' d':''}">
+          <div class="tslbl" style="font-size:10px;white-space:nowrap">${p}</div>
+          <div class="tsname">${CYCLE_DESC[i]}</div>
+        </div>`).join('')}
+    </div>
+    <div class="schemsub">Accum → Markup → Re-Acc → (back to Markup) → Distribution → Markdown → Re-Dist → (back to Markdown) → next Accum</div>
+  </div>
+
+  <div class="chart-box">
+    <div class="ctitle">Daily Candlestick Chart — Last 3 Years</div>
+    <div class="csub">OHLC · 20-day SMA · drag to pan · scroll to move &nbsp;|&nbsp; Pivot dots: <span style="color:#00e396">●HH/HL</span> <span style="color:#ff4560">●LH/LL</span> <span style="color:#aaa">●EH/EL</span> <span style="color:#00d4ff">●SC</span> <span style="color:#ff6b35">●BC</span> <span style="color:#a78bfa">●Spring</span> <span style="color:#ffd166">●UT</span></div>
+    <div class="chart-wrap"><canvas id="pc"></canvas><div class="tooltip" id="pcTip"></div></div>
+  </div>
+  <div class="chart-box">
+    <div class="ctitle">Daily Volume</div>
+    <div class="csub">Green = up-day · Red = down-day</div>
+    <div class="chart-wrap"><canvas id="vc"></canvas></div>
+  </div>
+
+  <div class="evgrid">
+    <div class="evcard">
+      <div class="sec-title">Wyckoff Event Detection</div>
+      <ul class="evlist">
+        ${r.events.map(e=>`<li>
+          <span class="etag ${e.ok?'ok':'no'}">${e.tag}</span>
+          <div class="etxt"><strong style="color:var(--text)">${e.label}</strong><br>${e.desc}</div>
+        </li>`).join('')}
+      </ul>
+    </div>
+    <div class="evcard">
+      <div class="sec-title">Zigzag Engine Evidence</div>
+      <ul class="evlist">
+        <li><span class="etag info">ZZ</span><div class="etxt">Zigzag pivots: <strong style="color:var(--text)">${r.zz.length}</strong> detected (ATR-based dynamic threshold)</div></li>
+        <li><span class="etag info">STR</span><div class="etxt">Current structure: <strong style="color:var(--text)">${strLabel}</strong> · Prior 6M: <strong style="color:var(--text)">${r.priorStructure} (${r.priorPctChg>=0?'+':''}${r.priorPctChg.toFixed(1)}%)</strong></div></li>
+        <li><span class="etag info">TR</span><div class="etxt">Active trading range: <strong style="color:var(--text)">${r.tr?`₹${r.tr.bottom.toFixed(1)}–₹${r.tr.top.toFixed(1)} (${r.tr.width}% wide)`:'No active range detected'}</strong></div></li>
+        ${r.ptr ? `<li><span class="etag ${r.ptr.brokeUp?'no':'ok'}">${r.ptr.brokeUp?'UTAD':'SPR'}</span><div class="etxt">
+          Prior TR: <strong style="color:var(--text)">₹${r.ptr.bottom.toFixed(0)}–₹${r.ptr.top.toFixed(0)}</strong>
+          · ${r.ptr.brokeUp?`Broke up to ₹${r.ptr.peakAfter.toFixed(0)}`:`Broke down to ₹${r.ptr.troughAfter.toFixed(0)}`}
+          · returned inside → <strong style="color:${r.ptr.brokeUp?'var(--red)':'var(--green)'}">${r.ptr.brokeUp?'Old top = resistance':'Old bottom = support'}</strong>
+        </div></li>` : ''}
+        <li><span class="etag info">LOC</span><div class="etxt">
+          2-year swing position: <strong style="color:${r.nearSwingHigh2yr?'var(--green)':r.nearSwingLow2yr?'var(--red)':'var(--gold)'}">${(r.posIn2yrRange*100).toFixed(0)}% of 2yr range</strong>
+          &nbsp;·&nbsp;
+          <strong style="color:${r.nearSwingHigh2yr?'var(--green)':r.nearSwingLow2yr?'var(--red)':'var(--muted)'}">${r.nearSwingHigh2yr?'Near swing highs':r.nearSwingLow2yr?'Near swing lows':'Mid-range'}</strong>
+          ${r.correctionInUptrend?'<span style="color:var(--accent);font-size:10px"> ← correction in uptrend detected</span>':''}
+        </div></li>
+        <li><span class="etag info">VOL</span><div class="etxt">Swing volume bias: <strong style="color:var(--text)">${r.volBias}</strong> · ${r.volDrying?'Volume drying up inside range':'Volume normal'}</div></li>
+        <li><span class="etag info">SC/BC</span><div class="etxt">
+          SC: <strong style="color:${r.sc.detected?'var(--green)':'var(--muted)'}">${r.sc.detected?'✓ Detected':'✗ None'}</strong> &nbsp;
+          BC: <strong style="color:${r.bc.detected?'var(--red)':'var(--muted)'}">${r.bc.detected?'✓ Detected':'✗ None'}</strong>
+        </div></li>
+        <li><span class="etag info">EVTS</span><div class="etxt">
+          Spring: <strong style="color:${r.spring?'var(--green)':'var(--muted)'}">${r.spring?'✓':'✗'}</strong> &nbsp;
+          Upthrust: <strong style="color:${r.upthrust?'var(--red)':'var(--muted)'}">${r.upthrust?'✓':'✗'}</strong> &nbsp;
+          Vol Drying: <strong style="color:${r.volDrying?'var(--gold)':'var(--muted)'}">${r.volDrying?'✓':'✗'}</strong>
+        </div></li>
+      </ul>
+    </div>
+  </div>`;
+
+  setTimeout(()=>{const el=document.getElementById('cfill');if(el)el.style.width=r.conf+'%';},100);
+  renderCharts(bars, r);
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function parseToISO(d){const p=d.split('/');return p.length===3?`${p[2]}-${p[1]}-${p[0]}`:d;}
+function filterLast3Years(bars){
+  const cutoff=new Date(parseToISO(bars[bars.length-1].date));
+  cutoff.setFullYear(cutoff.getFullYear()-3);
+  return bars.filter(b=>new Date(parseToISO(b.date))>=cutoff);
+}
+function calcSMA(bars,p){return bars.map((_,i)=>i<p-1?null:bars.slice(i-p+1,i+1).reduce((s,b)=>s+b.close,0)/p);}
+function fmtVol(v){if(v>=1e7)return(v/1e7).toFixed(1)+'Cr';if(v>=1e5)return(v/1e5).toFixed(1)+'L';return v.toLocaleString();}
+function fmtPrice(v){return'₹'+v.toFixed(2);}
+
+// ── CANVAS CHART STATE ────────────────────────────────────
+const CS={bars:[],sma:[],offset:0,cw:8,gap:1,dragging:false,dragX:0,dragOff:0,resizeBound:false};
+const PAD={L:70,R:16,T:24,B:36};
+
+function drawCharts(){
+  const pcEl=document.getElementById('pc');
+  const vcEl=document.getElementById('vc');
+  if(!pcEl||!vcEl) return;
+  const W=pcEl.width, bars=CS.bars, sma=CS.sma, cw=CS.cw, gap=CS.gap;
+  const slot=cw+gap;   // pixel width of one candle slot (cw=body, gap=space between)
+  const n=bars.length;
+  const drawW=W-PAD.L-PAD.R;
+  const visCount=Math.max(1,Math.floor(drawW/slot));
+  const startIdx=Math.max(0,Math.min(CS.offset,n-visCount));
+  const endIdx=Math.min(n,startIdx+visCount+1);
+  const vis=bars.slice(startIdx,endIdx);
+
+  // ── PRICE CANVAS ─────────────────────────────────────────
+  const pH=pcEl.height-PAD.T-PAD.B;
+  const pc=pcEl.getContext('2d');
+  pc.clearRect(0,0,W,pcEl.height);
+
+  // price range with padding
+  let lo=Infinity,hi=-Infinity;
+  vis.forEach(b=>{lo=Math.min(lo,b.low);hi=Math.max(hi,b.high);});
+  // also include SMA in range
+  vis.forEach((_,i)=>{const sv=sma[startIdx+i];if(sv){lo=Math.min(lo,sv);hi=Math.max(hi,sv);}});
+  const pad=(hi-lo)*0.06; lo-=pad; hi+=pad;
+  const toY=p=>PAD.T+(hi-p)/(hi-lo)*pH;
+
+  // Horizontal grid + price labels
+  const steps=6;
+  for(let i=0;i<=steps;i++){
+    const p=lo+(hi-lo)*(i/steps);
+    const y=toY(p);
+    pc.strokeStyle='rgba(30,45,71,0.55)';pc.lineWidth=1;
+    pc.beginPath();pc.moveTo(PAD.L,y);pc.lineTo(W-PAD.R,y);pc.stroke();
+    pc.fillStyle='#4a5e7a';pc.font='9px Space Mono';pc.textAlign='right';
+    pc.fillText(p.toFixed(1),PAD.L-4,y+3);
+  }
+
+  // Vertical grid + month labels
+  let lastLbl='';
+  vis.forEach((b,i)=>{
+    const cx=PAD.L+i*(slot)+cw/2;
+    const d=new Date(parseToISO(b.date));
+    const lbl=d.toLocaleString('default',{month:'short'})+' '+d.getFullYear().toString().slice(2);
+    if(lbl!==lastLbl){
+      lastLbl=lbl;
+      pc.strokeStyle='rgba(30,45,71,0.4)';pc.lineWidth=1;
+      pc.beginPath();pc.moveTo(cx,PAD.T);pc.lineTo(cx,pcEl.height-PAD.B);pc.stroke();
+      pc.fillStyle='#4a5e7a';pc.font='9px Space Mono';pc.textAlign='center';
+      pc.fillText(lbl,cx,pcEl.height-PAD.B+14);
+    }
+  });
+
+  // SMA line
+  pc.beginPath();pc.strokeStyle='#ffd166';pc.lineWidth=1.5;pc.setLineDash([5,3]);
+  let sm=false;
+  vis.forEach((_,i)=>{
+    const sv=sma[startIdx+i];if(sv===null)return;
+    const x=PAD.L+i*(slot)+cw/2,y=toY(sv);
+    sm?(pc.lineTo(x,y)):(pc.moveTo(x,y),sm=true);
+  });
+  pc.stroke();pc.setLineDash([]);
+
+  // ── TRADING RANGE LINES ───────────────────────────────────
+  const res=CS.result;
+  if(res && res.tr){
+    const isAccum=res.phaseType==='Accumulation'||res.phaseType==='Re-Accumulation';
+    // Colour palette — bullish = cyan family, bearish = orange/red family
+    const hue = isAccum ? '185' : '22';  // cyan vs orange in HSL
+
+    // Collect all unique levels across all ranges to draw
+    // Each range = { top, bottom, mid, label, isPrimary, lb }
+    const allR = res.tr.allRanges || [{
+      top:res.tr.top, bottom:res.tr.bottom, mid:res.tr.mid,
+      label:'', isPrimary:true, lb:res.tr.lookback
+    }];
+
+    // Deduplicate levels: only draw a line if it is at least 2px different from
+    // an already-drawn line (avoids overlapping labels when multiple windows find
+    // the same zone at the same price)
+    const drawnY = [];
+    function isFresh(y){ return drawnY.every(dy=>Math.abs(dy-y)>8); }
+
+    // ── Draw widest (macro) range first as a subtle filled band ──────────────
+    const macroR = [...allR].sort((a,b)=>parseFloat(b.width)-parseFloat(a.width))[0];
+    const macroTop=toY(macroR.top), macroBot=toY(macroR.bottom);
+    pc.fillStyle=`hsla(${hue},90%,60%,0.04)`;
+    pc.fillRect(PAD.L, macroTop, W-PAD.L-PAD.R, macroBot-macroTop);
+
+    // ── Draw each range's lines, widest first (so primary draws on top) ──────
+    const sorted=[...allR].sort((a,b)=>parseFloat(b.width)-parseFloat(a.width));
+
+    sorted.forEach((r,i)=>{
+      const isPrimary=r.isPrimary;
+      const rTop=toY(r.top), rBot=toY(r.bottom);
+
+      // Visual style scales with importance:
+      // Primary = solid bright line 1.5px
+      // Secondary, wider  = dashed slightly dimmer
+      // Secondary, narrower = dotted, dimmer still
+      const alpha = isPrimary ? 0.75 : (parseFloat(r.width)>10 ? 0.45 : 0.35);
+      const color = `hsla(${hue},90%,65%,${alpha})`;
+      const lw    = isPrimary ? 1.5 : 1;
+      const dash  = isPrimary ? [6,3] : parseFloat(r.width)>10 ? [8,4] : [3,5];
+
+      pc.setLineDash(dash);
+      pc.lineWidth=lw;
+      pc.strokeStyle=color;
+
+      // Resistance line
+      if(isFresh(rTop)){
+        pc.beginPath();pc.moveTo(PAD.L,rTop);pc.lineTo(W-PAD.R,rTop);pc.stroke();
+        drawnY.push(rTop);
+      }
+      // Support line
+      if(isFresh(rBot)){
+        pc.beginPath();pc.moveTo(PAD.L,rBot);pc.lineTo(W-PAD.R,rBot);pc.stroke();
+        drawnY.push(rBot);
+      }
+      pc.setLineDash([]);
+
+      // Labels — primary on LEFT, secondaries on RIGHT staggered by i
+      pc.font = isPrimary ? 'bold 9px Space Mono' : '8px Space Mono';
+      pc.fillStyle=color;
+      const prefix = r.label ? r.label+' ' : '';
+      if(isPrimary){
+        pc.textAlign='left';
+        if(isFresh(rTop-10)||i===0) pc.fillText(prefix+'R ₹'+r.top, PAD.L+2, rTop-4);
+        if(isFresh(rBot+14)||i===0) pc.fillText(prefix+'S ₹'+r.bottom, PAD.L+2, rBot+12);
+      } else {
+        // Stack secondary labels on right side, offset vertically to avoid overlap
+        const yOffset = i * 1;  // slight stagger
+        pc.textAlign='right';
+        if(isFresh(rTop-10+yOffset)) pc.fillText(prefix+'R ₹'+r.top, W-PAD.R-2, rTop-4+yOffset);
+        if(isFresh(rBot+14+yOffset)) pc.fillText(prefix+'S ₹'+r.bottom, W-PAD.R-2, rBot+12+yOffset);
+      }
+    });
+
+    // ── Mid line of primary range ────────────────────────────────────────────
+    const trMid=toY(res.tr.mid);
+    pc.setLineDash([2,6]);
+    pc.lineWidth=0.8;
+    pc.strokeStyle=`hsla(${hue},70%,65%,0.18)`;
+    pc.beginPath();pc.moveTo(PAD.L,trMid);pc.lineTo(W-PAD.R,trMid);pc.stroke();
+    pc.setLineDash([]);
+  }
+
+  // ── PRIOR TRADING RANGE (UTAD / Spring reference) ─────────
+  // Drawn as a softer dashed band with [·····] style to distinguish from active TR
+  if(res && res.ptr){
+    const ptrTop = toY(res.ptr.top);
+    const ptrBot = toY(res.ptr.bottom);
+    // Colour: red-tint for UTAD (brokeUp = Re-Dist), blue-tint for Spring (Re-Acc)
+    const ptrColor = res.ptr.brokeUp
+      ? 'rgba(255,69,96,0.55)'       // Re-Distribution — UTAD
+      : 'rgba(0,212,255,0.55)';      // Re-Accumulation — Spring
+    const ptrFill  = res.ptr.brokeUp
+      ? 'rgba(255,69,96,0.06)'
+      : 'rgba(0,212,255,0.06)';
+
+    // Fill band
+    pc.fillStyle = ptrFill;
+    pc.fillRect(PAD.L, ptrTop, W - PAD.L - PAD.R, ptrBot - ptrTop);
+
+    // Top & bottom lines — long dash + dot pattern
+    pc.setLineDash([8, 3, 2, 3]);
+    pc.lineWidth = 1.5;
+    pc.strokeStyle = ptrColor;
+    pc.beginPath(); pc.moveTo(PAD.L, ptrTop); pc.lineTo(W - PAD.R, ptrTop); pc.stroke();
+    pc.beginPath(); pc.moveTo(PAD.L, ptrBot); pc.lineTo(W - PAD.R, ptrBot); pc.stroke();
+    pc.setLineDash([]);
+
+    // UTAD / Spring peak marker — small horizontal tick where breakout peaked/troughed
+    const peakPrice  = res.ptr.brokeUp ? res.ptr.peakAfter   : null;
+    const troughPrice= res.ptr.brokeUp ? null                : res.ptr.troughAfter;
+    const extremePrice = peakPrice || troughPrice;
+    if(extremePrice && extremePrice > lo && extremePrice < hi){
+      const ey = toY(extremePrice);
+      pc.strokeStyle = res.ptr.brokeUp ? 'rgba(255,69,96,0.7)' : 'rgba(0,212,255,0.7)';
+      pc.setLineDash([3,4]);
+      pc.lineWidth = 1;
+      pc.beginPath(); pc.moveTo(PAD.L, ey); pc.lineTo(W - PAD.R, ey); pc.stroke();
+      pc.setLineDash([]);
+      pc.fillStyle   = res.ptr.brokeUp ? '#ff4560' : '#00d4ff';
+      pc.font = 'bold 9px Space Mono'; pc.textAlign = 'right';
+      pc.fillText((res.ptr.brokeUp ? 'UTAD ₹' : 'SPR ₹') + extremePrice.toFixed(0), W - PAD.R - 2, ey - 3);
+    }
+
+    // Labels on the left
+    pc.fillStyle = ptrColor; pc.font = 'bold 9px Space Mono'; pc.textAlign = 'left';
+    pc.fillText('pR ₹' + res.ptr.top.toFixed(0),    PAD.L + 2, ptrTop - 4);
+    pc.fillText('pS ₹' + res.ptr.bottom.toFixed(0), PAD.L + 2, ptrBot + 12);
+  }
+
+  // ── ZIGZAG PIVOT DOTS ─────────────────────────────────────
+  // Each dot shows: price, HH/LH/HL/LL label, swing % from prior pivot,
+  // and special event tags (SC, BC, Spring, UT)
+  vis.forEach((b,i)=>{
+    const x=PAD.L+i*(slot), cx=x+cw/2;
+    const isUp=b.close>=b.open;
+    const upC='rgba(0,227,150,0.9)',dnC='rgba(255,69,96,0.9)';
+    const col=isUp?upC:dnC;
+    const bodyT=toY(Math.max(b.open,b.close)),bodyB=toY(Math.min(b.open,b.close));
+    const bodyH=Math.max(1,bodyB-bodyT);
+    // wick
+    pc.strokeStyle=col;pc.lineWidth=1;
+    pc.beginPath();pc.moveTo(cx,toY(b.high));pc.lineTo(cx,toY(b.low));pc.stroke();
+    // body
+    if(cw>=3){
+      pc.fillStyle=col;pc.fillRect(x,bodyT,cw,bodyH);
+      pc.strokeStyle=isUp?'#00e396':'#ff4560';pc.lineWidth=0.5;pc.strokeRect(x,bodyT,cw,bodyH);
+    } else {
+      pc.fillStyle=col;pc.fillRect(cx,bodyT,1,bodyH);
+    }
+  });
+
+  if(res && res.zz && res.zz.length){
+    const zz = res.zz;
+
+    // Pre-compute structure labels for every pivot
+    // Compare each high to the prior high, each low to the prior low
+    const prevHighs = {}, prevLows = {};
+    let lastH = null, lastL = null;
+    const structLabel = {};
+    zz.forEach((p,i) => {
+      if(p.type === 'high'){
+        if(lastH !== null){
+          const chg = (p.price - lastH) / lastH * 100;
+          if(chg >  1.5) structLabel[i] = 'HH';
+          else if(chg < -1.5) structLabel[i] = 'LH';
+          else             structLabel[i] = 'EH';
+        } else { structLabel[i] = ''; }
+        lastH = p.price;
+      } else {
+        if(lastL !== null){
+          const chg = (p.price - lastL) / lastL * 100;
+          if(chg >  1.5) structLabel[i] = 'HL';
+          else if(chg < -1.5) structLabel[i] = 'LL';
+          else             structLabel[i] = 'EL';
+        } else { structLabel[i] = ''; }
+        lastL = p.price;
+      }
+    });
+
+    // Special event override labels
+    const eventLabel = {};
+    const scIdx  = res.sc?.detected  ? res.sc.idx  : -1;
+    const bcIdx  = res.bc?.detected  ? res.bc.idx  : -1;
+    // Spring: last low pivot that dipped below TR bottom
+    if(res.spring && res.tr){
+      const springPiv = [...zz].reverse().find(p => p.type==='low' && p.price < res.tr.bottom * 1.01);
+      if(springPiv) eventLabel[zz.indexOf(springPiv)] = 'SPR';
+    }
+    // Upthrust: last high pivot that spiked above TR top
+    if(res.upthrust && res.tr){
+      const utPiv = [...zz].reverse().find(p => p.type==='high' && p.price > res.tr.top * 0.99);
+      if(utPiv) eventLabel[zz.indexOf(utPiv)] = 'UT';
+    }
+    // SC / BC — find nearest pivot to those bar indices
+    if(scIdx >= 0){
+      let best = -1, bestDist = Infinity;
+      zz.forEach((p,i) => { const d = Math.abs(p.index - scIdx); if(p.type==='low' && d < bestDist){ bestDist=d; best=i; }});
+      if(best >= 0) eventLabel[best] = 'SC';
+    }
+    if(bcIdx >= 0){
+      let best = -1, bestDist = Infinity;
+      zz.forEach((p,i) => { const d = Math.abs(p.index - bcIdx); if(p.type==='high' && d < bestDist){ bestDist=d; best=i; }});
+      if(best >= 0) eventLabel[best] = 'BC';
+    }
+
+    zz.forEach((piv, i) => {
+      const vi = piv.index - startIdx;
+      if(vi < 0 || vi >= vis.length) return;
+
+      const cx   = PAD.L + vi*(slot) + cw/2;
+      // Plot the dot at bar.close (inside the candle body) rather than at the
+      // wick extreme (bar.high / bar.low). When the chart range is large and
+      // candles are compressed to a few pixels, wick-positioned dots float
+      // visually below or above the candle body. Close-positioned dots always
+      // sit on the candle regardless of zoom level.
+      const dotBar = vis[vi];
+      const py   = dotBar ? toY(dotBar.close) : toY(piv.price);
+      const isH  = piv.type === 'high';
+      const sLbl = structLabel[i] || '';
+      const eLbl = eventLabel[i]  || '';
+
+      // Swing % from prior pivot
+      const prev = zz[i-1];
+      const swingPct = prev ? Math.abs((piv.price - prev.price) / prev.price * 100).toFixed(1) : null;
+
+      // Colour: special events get distinct colours, otherwise HH/HL=bullish, LH/LL=bearish
+      let dotColor;
+      if(eLbl === 'SC')   dotColor = '#00d4ff';   // cyan — climax low
+      else if(eLbl === 'BC')  dotColor = '#ff6b35';   // orange — climax high
+      else if(eLbl === 'SPR') dotColor = '#a78bfa';   // purple — spring
+      else if(eLbl === 'UT')  dotColor = '#ffd166';   // gold — upthrust
+      else if(isH){
+        dotColor = sLbl==='HH' ? '#00e396' :        // green — bullish high
+                   sLbl==='LH' ? '#ff4560' :        // red — bearish high
+                   '#aaaaaa';                        // grey — equal
+      } else {
+        dotColor = sLbl==='HL' ? '#00e396' :        // green — bullish low
+                   sLbl==='LL' ? '#ff4560' :        // red — bearish low
+                   '#aaaaaa';
+      }
+
+      // Dot — slightly larger for special events
+      const r = eLbl ? 5 : 4;
+      pc.beginPath();
+      pc.arc(cx, py, r, 0, Math.PI*2);
+      pc.fillStyle = dotColor;
+      pc.fill();
+      // Ring for special events
+      if(eLbl){
+        pc.beginPath();
+        pc.arc(cx, py, r+2, 0, Math.PI*2);
+        pc.strokeStyle = dotColor;
+        pc.lineWidth = 1;
+        pc.stroke();
+      }
+
+      // Labels — only when candles are wide enough to avoid clutter
+      if(cw >= 4){
+        const offset = isH ? -10 : 10;
+        pc.textAlign = 'center';
+
+        // Structure label (HH / LH / HL / LL / EH / EL)
+        if(sLbl || eLbl){
+          const lbl = eLbl || sLbl;
+          const lblColor = eLbl ? dotColor :
+                           (sLbl==='HH'||sLbl==='HL') ? '#00e396' :
+                           (sLbl==='LH'||sLbl==='LL') ? '#ff4560' : '#888';
+          pc.fillStyle = lblColor;
+          pc.font = 'bold 8px Space Mono';
+          pc.fillText(lbl, cx, py + (isH ? offset - 8 : offset + 8));
+        }
+
+        // Price
+        pc.fillStyle = dotColor;
+        pc.font = '8px Space Mono';
+        pc.fillText('₹' + piv.price.toFixed(0), cx, py + offset);
+
+        // Swing % — shown slightly further out
+        if(swingPct && cw >= 6){
+          pc.fillStyle = 'rgba(180,180,180,0.7)';
+          pc.font = '7px Space Mono';
+          pc.fillText(swingPct+'%', cx, py + (isH ? offset - 17 : offset + 17));
+        }
+      }
+    });
+  }
+  // ── VOLUME CANVAS ─────────────────────────────────────────
+  const vc=vcEl.getContext('2d');
+  vc.clearRect(0,0,W,vcEl.height);
+  const vH=vcEl.height-PAD.B;
+  let maxV=0; vis.forEach(b=>{if(b.volume>maxV)maxV=b.volume;});
+  if(maxV===0)maxV=1;
+
+  // grid line
+  vc.strokeStyle='rgba(30,45,71,0.55)';vc.lineWidth=1;
+  vc.beginPath();vc.moveTo(PAD.L,4);vc.lineTo(W-PAD.R,4);vc.stroke();
+  vc.fillStyle='#4a5e7a';vc.font='9px Space Mono';vc.textAlign='right';
+  vc.fillText(fmtVol(maxV),PAD.L-4,10);
+
+  vis.forEach((b,i)=>{
+    const x=PAD.L+i*(slot);
+    const isUp=b.close>=b.open;
+    const barH=Math.max(1,(b.volume/maxV)*vH);
+    vc.fillStyle=isUp?'rgba(0,227,150,0.65)':'rgba(255,69,96,0.65)';
+    vc.fillRect(x,vcEl.height-PAD.B-barH,cw,barH);
+  });
+
+  // store for tooltip
+  CS._vis=vis;CS._startIdx=startIdx;CS._toY=toY;CS._lo=lo;CS._hi=hi;CS._pH=pH;
+}
+
+function renderCharts(allBars, result){
+  // clean up old listeners by cloning canvases
+  const oldPc=document.getElementById('pc');
+  const oldVc=document.getElementById('vc');
+  const newPc=oldPc.cloneNode(false);
+  const newVc=oldVc.cloneNode(false);
+  oldPc.parentNode.replaceChild(newPc,oldPc);
+  oldVc.parentNode.replaceChild(newVc,oldVc);
+
+  const bars=filterLast3Years(allBars);
+  const sma=calcSMA(bars,20);
+  const n=bars.length;
+
+  // size canvases — use full window width for maximum chart space
+  const W = Math.max(window.innerWidth || 900, newPc.parentElement.clientWidth || 900);
+  newPc.width=W; newPc.height=400;
+  newVc.width=W; newVc.height=140;
+
+  // bars is already filtered to the last 3 years by filterLast3Years().
+  // Compute cw so ALL n bars fit exactly in the canvas — offset stays at 0.
+  // This guarantees the full 3-year window is visible without any scrolling.
+  const drawW_init = W - PAD.L - PAD.R;
+  const slotF = drawW_init / Math.max(n, 1);   // exact pixels per candle slot
+  let cw, gap;
+  if(slotF < 2){
+    cw = 1; gap = 0;   // pack tight: 1px body, no gap
+  } else {
+    gap = 1;
+    cw  = Math.min(12, Math.max(1, Math.floor(slotF) - gap));
+  }
+  CS.bars=bars; CS.sma=sma; CS.cw=cw; CS.gap=gap; CS.result=result;
+  CS.offset = 0;   // always start from the beginning of the 3-year window
+
+  drawCharts();
+
+  // ── MOUSE DRAG ────────────────────────────────────────────
+  newPc.addEventListener('mousedown',e=>{
+    CS.dragging=true;CS.dragX=e.clientX;CS.dragOff=CS.offset;
+    newPc.style.cursor='grabbing';
+  });
+  newPc.style.cursor='crosshair';
+  window.addEventListener('mouseup',()=>{CS.dragging=false;newPc.style.cursor='crosshair';});
+  window.addEventListener('mousemove',e=>{
+    if(!CS.dragging)return;
+    const dx=e.clientX-CS.dragX;
+    const shift=Math.round(-dx/(CS.cw+CS.gap));
+    const visC=Math.floor((newPc.width-PAD.L-PAD.R)/(CS.cw+CS.gap));
+    CS.offset=Math.max(0,Math.min(CS.dragOff+shift,CS.bars.length-visC));
+    drawCharts();
+  });
+
+  // ── SCROLL WHEEL ──────────────────────────────────────────
+  newPc.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const visC=Math.floor((newPc.width-PAD.L-PAD.R)/(CS.cw+CS.gap));
+    CS.offset=Math.max(0,Math.min(CS.offset+Math.sign(e.deltaY)*5,CS.bars.length-visC));
+    drawCharts();
+  },{passive:false});
+
+  // ── TOOLTIP ───────────────────────────────────────────────
+  const tipEl=document.getElementById('pcTip');
+  newPc.addEventListener('mousemove',e=>{
+    if(CS.dragging||!CS._vis){if(tipEl)tipEl.style.display='none';return;}
+    const rect=newPc.getBoundingClientRect();
+    const mx=e.clientX-rect.left;
+    const i=Math.floor((mx-PAD.L)/(CS.cw+CS.gap));
+    const vis=CS._vis;
+    if(i<0||i>=vis.length){if(tipEl)tipEl.style.display='none';return;}
+    const b=vis[i];
+    const isUp=b.close>=b.open;
+    if(tipEl){
+      tipEl.style.display='block';
+      tipEl.innerHTML=`<span style="color:#556080">${b.date}</span><br>
+        O <b>${fmtPrice(b.open)}</b>  
+        H <b style="color:var(--green)">${fmtPrice(b.high)}</b>  
+        L <b style="color:var(--red)">${fmtPrice(b.low)}</b>  
+        C <b style="color:${isUp?'var(--green)':'var(--red)'}">${fmtPrice(b.close)}</b><br>
+        Vol <b>${fmtVol(b.volume)}</b>`;
+    }
+    // crosshair line
+    drawCharts();
+    const cx=PAD.L+i*(CS.cw+CS.gap)+CS.cw/2;
+    const pc2=newPc.getContext('2d');
+    pc2.strokeStyle='rgba(255,255,255,0.15)';pc2.lineWidth=1;pc2.setLineDash([3,3]);
+    pc2.beginPath();pc2.moveTo(cx,PAD.T);pc2.lineTo(cx,newPc.height-PAD.B);pc2.stroke();
+    pc2.setLineDash([]);
+  });
+  newPc.addEventListener('mouseleave',()=>{if(tipEl)tipEl.style.display='none';drawCharts();});
+
+  // ── RESIZE ────────────────────────────────────────────────
+  if(!CS.resizeBound){
+    CS.resizeBound=true;
+    window.addEventListener('resize',()=>{
+      const pc3=document.getElementById('pc'),vc3=document.getElementById('vc');
+      if(!pc3||!vc3)return;
+      const NW=pc3.parentElement.clientWidth||900;
+      pc3.width=NW;vc3.width=NW;
+      drawCharts();
+    });
+  }
+}
+
+function runAnalysis(){
+  if(!rawRows.length){alert('Please upload a file first.');return;}
+  document.getElementById('loader').classList.add('show');
+  setTimeout(()=>{
+    dailyBars=resampleDaily(rawRows);
+    if(dailyBars.length<20){
+      document.getElementById('loader').classList.remove('show');
+      alert(`Only ${dailyBars.length} daily bars after resampling. Need at least 20.`);
+      return;
+    }
+    const result=analyzeWyckoff(dailyBars);
+    if(!result || !result.phaseType){
+      document.getElementById('loader').classList.remove('show');
+      alert('Could not analyse this data. Please check the file format and try again.');
+      return;
+    }
+    renderResults(result,dailyBars);
+    document.getElementById('loader').classList.remove('show');
+    document.getElementById('uploadSec').style.display='none';
+    document.getElementById('resultsSec').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  },700);
+}
+
+function resetApp(){
+  rawRows=[];dailyBars=[];
+  CS.bars=[];CS.sma=[];CS.offset=0;
+  document.getElementById('uploadSec').style.display='';
+  document.getElementById('resultsSec').classList.remove('show');
+  document.getElementById('out').innerHTML='';
+  document.getElementById('fileBar').classList.remove('show');
+  document.getElementById('runBtn').classList.remove('show');
+  document.getElementById('fi').value='';
+}
+</script>
+</body>
+</html>

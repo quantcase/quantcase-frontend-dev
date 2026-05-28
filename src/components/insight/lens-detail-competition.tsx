@@ -9,6 +9,7 @@ import { BACKEND_URL } from "@/lib/constants";
 interface Props {
   lens: LensDetail;
   signals: Signal[];
+  callId?: string;
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -50,12 +51,30 @@ function statusColor(s: string | null | undefined) {
 function dedup(signals: TopSignal[]): TopSignal[] {
   const seen = new Set<string>();
   return signals.filter((s) => {
-    if (seen.has(s.metric)) return false;
-    seen.add(s.metric);
+    if (seen.has(s.signal_id)) return false;
+    seen.add(s.signal_id);
     return true;
   });
 }
 
+function getKm(km: Record<string, string>, ...fragments: string[]): string {
+  for (const key of Object.keys(km)) {
+    if (fragments.every((f) => key.toLowerCase().includes(f.toLowerCase()))) {
+      return km[key];
+    }
+  }
+  return "—";
+}
+
+function formatSigValue(s: TopSignal): string {
+  if (s.actual_value == null) return "—";
+  const v = s.actual_value;
+  const unit = s.unit ?? "";
+  if (unit === "%") return `${v}%`;
+  if (unit === "Cr") return `₹${v.toLocaleString("en-IN")} Cr`;
+  if (unit === "bps") return `${v} bps`;
+  return `${v}`;
+}
 
 // ── sub-components ────────────────────────────────────────────────────────────
 
@@ -102,7 +121,7 @@ interface SignalCardProps {
 function SignalCard({ icon, headline, sub, badge, badgeColor }: SignalCardProps) {
   const isPos = icon === "check" || icon === "up";
   const borderColor = isPos ? "var(--qc-up)" : icon === "warn" ? "var(--qc-warn)" : "var(--qc-down)";
-  const arrow = icon === "check" ? "✓" : icon === "up" ? "↑" : icon === "warn" ? "↓" : "↓";
+  const arrow = icon === "check" ? "✓" : icon === "up" ? "↑" : icon === "warn" ? "!" : "↓";
   const arrowColor = isPos ? "var(--qc-up)" : icon === "warn" ? "var(--qc-warn)" : "var(--qc-down)";
 
   return (
@@ -138,12 +157,7 @@ function ratingColor(r: string) {
   return "var(--qc-warn)";
 }
 
-interface RatingChipProps {
-  label: string;
-  value: string;
-}
-
-function RatingChip({ label, value }: RatingChipProps) {
+function RatingChip({ label, value }: { label: string; value: string }) {
   const color = ratingColor(value);
   return (
     <div style={{
@@ -167,7 +181,6 @@ interface PeerCardData {
   dealScore: number | null;
 }
 
-
 function scoreLabel(score: number | null): string {
   if (score === null) return "N/A";
   if (score >= 70) return "Strong";
@@ -175,33 +188,41 @@ function scoreLabel(score: number | null): string {
   return "Weak";
 }
 
+function buildPeerMetrics(km: Record<string, string>, topSignals: TopSignal[]) {
+  // Pick up to 4 key metrics generically — prefer % growth signals, then whatever is available
+  const sigItems = topSignals
+    .filter((s) => s.actual_value != null)
+    .slice(0, 4)
+    .map((s) => ({ label: s.label.slice(0, 16), value: formatSigValue(s) }));
+
+  if (sigItems.length >= 4) return sigItems;
+
+  // Pad with key_metrics
+  const kmItems = Object.entries(km).slice(0, 4 - sigItems.length).map(([k, v]) => ({
+    label: k.replace(/_/g, " ").slice(0, 16),
+    value: String(v).slice(0, 14),
+  }));
+
+  return [...sigItems, ...kmItems];
+}
+
 function CompetitionPeerCard({ ticker, data }: { ticker: string; data: PeerCardData }) {
   const competitionLens = data.competitionLens;
   const km = competitionLens?.key_metrics ?? {};
+  const topSigs = competitionLens?.top_signals ?? [];
   const statusCol = competitionLens ? statusColor(competitionLens.status) : "var(--qc-ink-3)";
-
-  const companyGrowth = km["Company PV Growth (Q3)"] ?? km["Revenue Growth (Q3)"] ?? "—";
-  const pvGrowth = km["PV Industry Growth (Q3)"] ?? "—";
-  const gfEbitdaQ3 = km["Greenfield EBITDA Growth (Q3)"] ?? km["EBITDA Growth (Q3)"] ?? "—";
-  const outperf = km["Outperformance vs PV Market"] ?? "—";
+  const metrics = buildPeerMetrics(km, topSigs).slice(0, 4);
 
   const mgmt = scoreLabel(data.managementScore);
   const opp = scoreLabel(data.opportunityScore);
   const deal = scoreLabel(data.dealScore);
-
-  const fundamentals = [
-    { label: "GROWTH", value: companyGrowth },
-    { label: "OUTPERF.", value: outperf },
-    { label: "GF EBITDA", value: gfEbitdaQ3 },
-    { label: "PV INDUSTRY", value: pvGrowth },
-  ];
 
   return (
     <div style={{ padding: "18px 20px", background: "var(--qc-card)", display: "flex", flexDirection: "column", gap: 14, height: "100%" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
           <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>{ticker}</p>
-          <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>NSE: {ticker} · Auto Ancillaries</p>
+          <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>NSE: {ticker}</p>
         </div>
         {competitionLens && (
           <span style={{ fontSize: 10, fontWeight: 700, color: statusCol, textTransform: "uppercase", letterSpacing: "0.06em" }}>
@@ -221,46 +242,38 @@ function CompetitionPeerCard({ ticker, data }: { ticker: string; data: PeerCardD
         </div>
       </div>
 
-      <div>
-        <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
-          KEY METRICS
-        </p>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {fundamentals.map((f) => (
-            <RatingChip key={f.label} label={f.label} value={f.value} />
-          ))}
+      {metrics.length > 0 && (
+        <div>
+          <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
+            KEY METRICS
+          </p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {metrics.map((f) => (
+              <RatingChip key={f.label} label={f.label} value={f.value} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
-// ── Primary card (always MSUMI) ────────────────────────────────────────────────
+// ── Primary card (current company) ────────────────────────────────────────────
 
 function PrimaryPeerCard({ ticker, lens }: { ticker: string; lens: LensDetail }) {
   const km = lens.key_metrics;
+  const topSigs = dedup(lens.top_signals ?? []);
   const statusCol = statusColor(lens.status);
+  const metrics = buildPeerMetrics(km, topSigs).slice(0, 4);
 
-  const companyGrowth = km["Company PV Growth (Q3)"] ?? "+25%";
-  const pvGrowth = km["PV Industry Growth (Q3)"] ?? "+19%";
-  const gfEbitdaQ3 = km["Greenfield EBITDA Growth (Q3)"] ?? "+7.6%";
-  const outperf = km["Outperformance vs PV Market"] ?? "+6pp";
-
-  const modManagement = lens.score >= 70 ? "Strong" : lens.score >= 40 ? "Moderate" : "Weak";
-
-  const fundamentals = [
-    { label: "GROWTH", value: companyGrowth },
-    { label: "OUTPERF.", value: outperf },
-    { label: "GF EBITDA", value: gfEbitdaQ3 },
-    { label: "PV INDUSTRY", value: pvGrowth },
-  ];
+  const modLabel = lens.score >= 70 ? "Strong" : lens.score >= 40 ? "Moderate" : "Weak";
 
   return (
     <div style={{ padding: "18px 20px", background: "var(--qc-card)", display: "flex", flexDirection: "column", gap: 14, height: "100%" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
           <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>{ticker}</p>
-          <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>NSE: {ticker} · Auto Ancillaries</p>
+          <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>NSE: {ticker}</p>
         </div>
         <span style={{ fontSize: 10, fontWeight: 700, color: statusCol, textTransform: "uppercase", letterSpacing: "0.06em" }}>
           {lens.status}
@@ -272,40 +285,34 @@ function PrimaryPeerCard({ ticker, lens }: { ticker: string; lens: LensDetail })
           M.O.D. FRAMEWORK
         </p>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          <RatingChip label="MANAGEMENT" value={modManagement} />
-          <RatingChip label="OPPORTUNITY" value="Moderate" />
-          <RatingChip label="DEAL" value="Fair" />
+          <RatingChip label="OPPORTUNITY" value={modLabel} />
         </div>
       </div>
 
-      <div>
-        <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
-          KEY METRICS
-        </p>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {fundamentals.map((f) => (
-            <RatingChip key={f.label} label={f.label} value={f.value} />
-          ))}
+      {metrics.length > 0 && (
+        <div>
+          <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
+            KEY METRICS
+          </p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {metrics.map((f) => (
+              <RatingChip key={f.label} label={f.label} value={f.value} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
-// ── Peer slot: fetches lenses for a ticker and renders the appropriate state ──
-
-interface PeerSlotProps {
-  ticker: string;
-  index: number; // 1, 2, or 3
-  onDeselect: () => void;
-}
+// ── Peer slot ─────────────────────────────────────────────────────────────────
 
 interface LensesApiResponse {
   callId: string;
   categories: Record<string, LensDetail[]>;
 }
 
-function PeerSlot({ ticker, index, onDeselect }: PeerSlotProps) {
+function PeerSlot({ ticker, onDeselect }: { ticker: string; onDeselect: () => void }) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<PeerCardData | null>(null);
 
@@ -318,18 +325,17 @@ function PeerSlot({ ticker, index, onDeselect }: PeerSlotProps) {
       .then((res: LensesApiResponse) => {
         const cats = res.categories ?? {};
         const competitionLens = cats.opportunity?.find((l) => l.slug === "competition" && l.computed) ?? null;
-
-        const mgmtScores = (cats.management ?? []).map((l) => l.score).filter((s): s is number => s !== null);
-        const oppScores = (cats.opportunity ?? []).map((l) => l.score).filter((s): s is number => s !== null);
-        const dealScores = (cats.deal ?? []).map((l) => l.score).filter((s): s is number => s !== null);
-
+        const avg = (arr: LensDetail[]) => {
+          const scores = arr.map((l) => l.score).filter((s): s is number => s !== null);
+          return scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
+        };
         setData({
           ticker,
           callId,
           competitionLens,
-          managementScore: mgmtScores.length ? mgmtScores.reduce((a, b) => a + b, 0) / mgmtScores.length : null,
-          opportunityScore: oppScores.length ? oppScores.reduce((a, b) => a + b, 0) / oppScores.length : null,
-          dealScore: dealScores.length ? dealScores.reduce((a, b) => a + b, 0) / dealScores.length : null,
+          managementScore: avg(cats.management ?? []),
+          opportunityScore: avg(cats.opportunity ?? []),
+          dealScore: avg(cats.deal ?? []),
         });
       })
       .catch(() => setData(null))
@@ -398,32 +404,175 @@ function PeerSlot({ ticker, index, onDeselect }: PeerSlotProps) {
   );
 }
 
-// ── Empty peer slot placeholder ────────────────────────────────────────────────
-
-function PeerCell({ index }: { index: number }) {
+function PeerCell({ index: _index }: { index: number }) {
   return (
     <div style={{
       padding: "40px 20px",
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      gap: 10, background: "var(--qc-section)",
-      minHeight: 160,
+      gap: 10, background: "var(--qc-section)", minHeight: 160,
     }}>
       <span style={{ fontSize: 22, color: "var(--qc-hair)", lineHeight: 1 }}>⊕</span>
       <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: 0 }}>
-        SELECT PEER {index}
+        SELECT PEER {_index}
       </p>
     </div>
   );
 }
 
+// ── build pillar tiles generically from lens data ─────────────────────────────
+
+function buildPillars(lens: LensDetail, topSignals: TopSignal[]): PillarTileProps[] {
+  const km = lens.key_metrics;
+
+  // Market Position: find highest-impact signal with actual value
+  const topSig = topSignals.find((s) => s.impact === "high" && s.actual_value != null);
+  const marketSub = topSig ? `${formatSigValue(topSig)} — ${topSig.label.slice(0, 40)}` : getKm(km, "growth");
+  const marketScore = lens.score >= 70 ? 3 : lens.score >= 40 ? 2 : 1;
+
+  // Pricing Power: look for cost/margin/pass-through signals
+  const pricingSig = topSignals.find((s) =>
+    s.metric.toLowerCase().includes("cost") || s.metric.toLowerCase().includes("margin") ||
+    s.label.toLowerCase().includes("margin") || s.label.toLowerCase().includes("pricing")
+  );
+  const pricingSub = pricingSig ? pricingSig.statement?.slice(0, 50) ?? pricingSig.label.slice(0, 50) : "Pricing dynamics from key metrics";
+  const pricingScore = pricingSig?.direction === "beat" ? 3 : 2;
+
+  // Entry Barriers: qualitative from highlights
+  const barrierSub = lens.highlights[1]?.slice(0, 50) ?? "Competitive moat assessment";
+  const barrierScore = lens.score >= 60 ? 3 : lens.score >= 40 ? 2 : 1;
+
+  return [
+    {
+      label: "Market Position",
+      rating: lens.score >= 70 ? "Strong" : lens.score >= 40 ? "Medium" : "Weak",
+      sub: marketSub.slice(0, 60),
+      color: lens.score >= 70 ? "var(--qc-up)" : lens.score >= 40 ? "var(--qc-warn)" : "var(--qc-down)",
+      score: marketScore, max: 3,
+    },
+    {
+      label: "Pricing Power",
+      rating: pricingScore === 3 ? "High" : "Medium",
+      sub: pricingSub,
+      color: pricingScore === 3 ? "var(--qc-up)" : "var(--qc-warn)",
+      score: pricingScore, max: 3,
+    },
+    {
+      label: "Entry Barriers",
+      rating: barrierScore === 3 ? "High" : "Medium",
+      sub: barrierSub,
+      color: barrierScore >= 3 ? "var(--qc-up)" : "var(--qc-warn)",
+      score: barrierScore, max: 3,
+    },
+    {
+      label: "Porter's Score",
+      rating: `${Math.round(lens.score / 10)}/10`,
+      sub: lens.description.slice(0, 55),
+      color: lens.score >= 70 ? "var(--qc-up)" : lens.score >= 40 ? "var(--qc-warn)" : "var(--qc-down)",
+      score: Math.round(lens.score / 10), max: 10,
+    },
+  ];
+}
+
+// ── build signal cards generically from lens top_signals ─────────────────────
+
+function buildSignalCards(lens: LensDetail, topSignals: TopSignal[]): SignalCardProps[] {
+  const cards: SignalCardProps[] = [];
+
+  const highImpact = topSignals.filter((s) => s.impact === "high");
+  const pool = highImpact.length >= 2 ? highImpact : topSignals;
+
+  // Positive signals (up to 2)
+  const posSignals = pool.filter((s) => s.direction === "beat" || s.direction === "above" ||
+    (s.actual_value != null && s.actual_value > 0 && s.metric.toLowerCase().includes("growth")));
+  posSignals.slice(0, 2).forEach((s) => {
+    cards.push({
+      icon: "up",
+      headline: s.label,
+      sub: s.statement?.slice(0, 100) ?? lens.highlights[cards.length]?.slice(0, 100) ?? "",
+      badge: formatSigValue(s),
+      badgeColor: "var(--qc-up)",
+    });
+  });
+
+  // Negative/watch signals (up to 2)
+  const negSignals = pool.filter((s) => s.direction === "miss" || s.direction === "below");
+  const warnSignals = negSignals.length === 0 ? lens.risks.slice(0, 2).map((r) => ({
+    icon: "warn" as const,
+    headline: r.slice(0, 80),
+    sub: "",
+    badge: "Watch",
+    badgeColor: "var(--qc-warn)",
+  })) : negSignals.slice(0, 2).map((s) => ({
+    icon: "down" as const,
+    headline: s.label,
+    sub: s.statement?.slice(0, 100) ?? "",
+    badge: formatSigValue(s),
+    badgeColor: "var(--qc-down)",
+  }));
+
+  cards.push(...warnSignals);
+
+  // Ensure exactly 4 cards
+  while (cards.length < 4) {
+    const extra = pool[cards.length];
+    if (!extra) break;
+    cards.push({
+      icon: "up",
+      headline: extra.label,
+      sub: extra.statement?.slice(0, 100) ?? "",
+      badge: formatSigValue(extra),
+      badgeColor: "var(--qc-up)",
+    });
+  }
+
+  return cards.slice(0, 4);
+}
+
+// ── Derive ticker from callId (e.g. AADHARHFC_FY2026_Q3 → AADHARHFC) ─────────
+
+function tickerFromCallId(callId: string | undefined): string {
+  if (!callId) return "COMPANY";
+  return callId.split("_")[0];
+}
+
+// ── Peer ticker suggestions from key_metrics or a generic fallback list ───────
+
+const FALLBACK_PEERS = ["HDFCBANK", "ICICIBANK", "KOTAKBANK", "AXISBANK", "SBIN", "INFY", "TCS", "WIPRO", "TATAMOTORS", "MSWIL"];
+
 // ── main export ───────────────────────────────────────────────────────────────
 
-const PRIMARY_TICKER = "MSUMI";
-const PEER_TICKERS = ["MOTHERSON", "BOSCHLTD", "SCHAEFFLER", "BHARATFORG", "SUMITOMO ELEC", "MINDA CORP", "LUMAX INDS", "YAZAKI INDIA"];
-
-export function LensDetailCompetition({ lens, signals: _signals }: Props) {
+export function LensDetailCompetition({ lens, signals: _signals, callId }: Props) {
   const [selectedPeers, setSelectedPeers] = useState<string[]>([]);
   const [swotExpanded, setSwotExpanded] = useState(false);
+
+  const topSignals = dedup(lens.top_signals ?? []);
+  const km = lens.key_metrics;
+  const statusCol = statusColor(lens.status);
+
+  const primaryTicker = tickerFromCallId(callId);
+
+  // Derive peer suggestions from key_metrics keys mentioning other companies, else fall back
+  const peerTickers = FALLBACK_PEERS.filter((t) => t !== primaryTicker).slice(0, 8);
+
+  const pillars = buildPillars(lens, topSignals);
+  const signalCards = buildSignalCards(lens, topSignals);
+  const quoteSignal = topSignals.find((s) => s.statement && s.statement.length > 60) ?? null;
+
+  // Summary metrics: top 3 signals with actual values
+  const summaryMetrics = topSignals
+    .filter((s) => s.actual_value != null)
+    .slice(0, 3)
+    .map((s) => ({
+      label: s.label.slice(0, 20),
+      value: formatSigValue(s),
+      sub: s.statement?.slice(0, 40) ?? "",
+    }));
+
+  // Subtitle line
+  const subtitleSig = topSignals.find((s) => s.actual_value != null && s.impact === "high");
+  const subtitle = subtitleSig
+    ? `${formatSigValue(subtitleSig)} ${subtitleSig.label} — ${lens.highlights[0]?.slice(0, 60) ?? ""}`
+    : lens.description.slice(0, 120);
 
   function togglePeer(ticker: string) {
     setSelectedPeers((prev) => {
@@ -433,118 +582,18 @@ export function LensDetailCompetition({ lens, signals: _signals }: Props) {
     });
   }
 
-  const km = lens.key_metrics;
-  const topSignals = dedup(lens.top_signals ?? []);
-  const quarter = "Q3 FY26";
-  const statusCol = statusColor(lens.status);
-
-  // ── Competitive position pillars ──
-  const outperf = km["Outperformance vs PV Market"] ?? "+6 percentage points";
-  const companyGrowth = km["Company PV Growth (Q3)"] ?? "+25%";
-  const pvGrowth = km["PV Industry Growth (Q3)"] ?? "+19%";
-  const gfEbitda9m = km["Greenfield EBITDA Growth (9M)"] ?? "+9.6%";
-
-  const pillars: PillarTileProps[] = [
-    {
-      label: "Market Position",
-      rating: "Strong",
-      sub: `3/3 signal · ${companyGrowth} vs ${pvGrowth} industry`,
-      color: "var(--qc-up)",
-      score: 3, max: 3,
-    },
-    {
-      label: "Pricing Power",
-      rating: "Medium",
-      sub: "2/3 · Copper pass-through partial; timing lag",
-      color: "var(--qc-warn)",
-      score: 2, max: 3,
-    },
-    {
-      label: "Entry Barriers",
-      rating: "High",
-      sub: "3/3 · OEM quals, capex, long-term programmes",
-      color: "var(--qc-up)",
-      score: 3, max: 3,
-    },
-    {
-      label: "Porter's Score",
-      rating: `${Math.round(lens.score / 10)}/10`,
-      sub: "Comp. intensity medium · Buyer power high",
-      color: lens.score >= 70 ? "var(--qc-up)" : lens.score >= 40 ? "var(--qc-warn)" : "var(--qc-down)",
-      score: Math.round(lens.score / 10), max: 10,
-    },
-  ];
-
-  // ── Quote from top signal statement ──
-  const quoteSignal = topSignals.find((s) => s.statement && s.statement.length > 60) ?? null;
-
-  // ── Signal cards from top_signals ──
-  const outperfSignal = topSignals.find((s) => s.metric === "MSWIL_outperformed_market");
-  const gfRevSignal = topSignals.find((s) => s.metric === "SEG_GREENFIELD_REV");
-  const gfEbitdaSignal = topSignals.find((s) => s.metric === "SEG_GREENFIELD_EBITDA" && s.label.includes("9M"));
-  const twSignal = topSignals.find((s) => s.metric === "2W_INDUSTRY_GROWTH" && s.label.includes("Q3"));
-  const gfEbitdaQ3 = topSignals.find((s) => s.metric === "SEG_GREENFIELD_EBITDA" && s.label.includes("Quarterly"));
-
-  const signalCards: SignalCardProps[] = [
-    {
-      icon: "check",
-      headline: outperfSignal
-        ? `Company grew ${outperfSignal.actual_value}% YoY vs ${pvGrowth} PV market`
-        : "Engine-agnostic: ICE · hybrid · EV all covered",
-      sub: outperfSignal?.statement ?? "Moat = 12–18 month OEM requalification cycle.",
-      badge: outperf,
-      badgeColor: "var(--qc-up)",
-    },
-    {
-      icon: "up",
-      headline: gfRevSignal
-        ? `Greenfield revenue +${gfRevSignal.actual_value}% — 9M cumulative`
-        : "Greenfield segment revenue accelerating",
-      sub: gfRevSignal?.statement ?? "Margin-accretive expansion driving competitive moat.",
-      badge: gfEbitda9m,
-      badgeColor: "var(--qc-up)",
-    },
-    {
-      icon: "warn",
-      headline: twSignal
-        ? `2W segment +${twSignal.actual_value}% YoY but -2% QoQ`
-        : "Two-wheeler sequential moderation",
-      sub: twSignal?.statement ?? "OEM timeline slippage = key watch-out.",
-      badge: "-2% QoQ",
-      badgeColor: "var(--qc-warn)",
-    },
-    {
-      icon: "down",
-      headline: gfEbitdaQ3
-        ? `Greenfield EBITDA +${gfEbitdaQ3.actual_value}% Q3 vs +${gfEbitdaSignal?.actual_value ?? 9.6}% 9M`
-        : "Greenfield EBITDA margin pace slowing",
-      sub: gfEbitdaQ3?.statement ?? "Potential margin pressure or operational headwinds in Q3.",
-      badge: `+${gfEbitdaQ3?.actual_value ?? 7.6}%`,
-      badgeColor: "var(--qc-down)",
-    },
-  ];
-
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
       {/* ── COMPETITIVE POSITION ── */}
       <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
 
-        {/* Header */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "10px 16px", background: "var(--qc-section)",
           borderBottom: "1px solid var(--qc-hair)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <SectionLabel>COMPETITIVE POSITION</SectionLabel>
-            <span style={{
-              fontSize: 10, fontWeight: 600, color: "var(--qc-ink-2)",
-              background: "var(--qc-hair)", borderRadius: 4, padding: "2px 8px",
-            }}>
-              {quarter}
-            </span>
-          </div>
+          <SectionLabel>COMPETITIVE POSITION</SectionLabel>
           <span style={{
             fontSize: 10, fontWeight: 600,
             border: `1px solid ${statusCol}`,
@@ -555,25 +604,18 @@ export function LensDetailCompetition({ lens, signals: _signals }: Props) {
           </span>
         </div>
 
-        {/* Subtitle */}
         <div style={{ padding: "8px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
           <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>
-            {companyGrowth} revenue vs {pvGrowth} PV market growth — share gains visible; greenfield margins hold at {gfEbitda9m}
+            {subtitle.slice(0, 140)}
           </p>
         </div>
 
-        {/* 4-column pillar strip */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 1, background: "var(--qc-hair)" }}>
           {pillars.map((p, i) => <PillarTile key={i} {...p} />)}
         </div>
 
-        {/* Blockquote */}
         {quoteSignal && (
-          <div style={{
-            margin: "0", padding: "16px 20px",
-            background: "var(--qc-card)",
-            borderTop: "1px solid var(--qc-hair)",
-          }}>
+          <div style={{ padding: "16px 20px", background: "var(--qc-card)", borderTop: "1px solid var(--qc-hair)" }}>
             <div style={{ borderLeft: "3px solid var(--qc-ink-3)", paddingLeft: 14 }}>
               <p style={{
                 fontSize: 13, fontStyle: "italic",
@@ -583,13 +625,12 @@ export function LensDetailCompetition({ lens, signals: _signals }: Props) {
                 {quoteSignal.statement?.slice(0, 240)}{(quoteSignal.statement?.length ?? 0) > 240 ? "…" : ""}
               </p>
               <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "6px 0 0" }}>
-                Quantcase peer analysis · {quarter}
+                Quantcase peer analysis
               </p>
             </div>
           </div>
         )}
 
-        {/* Signal cards 2×2 */}
         <div style={{
           display: "grid", gridTemplateColumns: "1fr 1fr",
           gap: 10, padding: "14px 16px",
@@ -599,7 +640,7 @@ export function LensDetailCompetition({ lens, signals: _signals }: Props) {
           {signalCards.map((card, i) => <SignalCard key={i} {...card} />)}
         </div>
 
-        {/* Collapsible: Detailed Peer KPI & SWOT */}
+        {/* Collapsible: Detailed KPI & SWOT */}
         <div
           onClick={() => setSwotExpanded((v) => !v)}
           style={{
@@ -613,39 +654,38 @@ export function LensDetailCompetition({ lens, signals: _signals }: Props) {
         </div>
         {swotExpanded && (
           <div style={{ padding: "14px 16px", background: "var(--qc-card)", borderTop: "1px solid var(--qc-hair)" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, background: "var(--qc-hair)", borderRadius: 8, overflow: "hidden" }}>
-              {Object.entries(km).slice(0, 8).map(([k, v], i, arr) => (
-                <div key={k} style={{
-                  padding: "12px 14px", background: "var(--qc-section)",
-                  borderRight: i % 2 === 0 ? "1px solid var(--qc-hair)" : undefined,
-                  borderBottom: i < arr.length - 2 ? "1px solid var(--qc-hair)" : undefined,
-                }}>
-                  <p style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: "0 0 3px" }}>
-                    {k}
-                  </p>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>{v}</p>
-                </div>
-              ))}
-            </div>
+            {Object.keys(km).length > 0 ? (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, background: "var(--qc-hair)", borderRadius: 8, overflow: "hidden" }}>
+                {Object.entries(km).slice(0, 8).map(([k, v], i, arr) => (
+                  <div key={k} style={{
+                    padding: "12px 14px", background: "var(--qc-section)",
+                    borderRight: i % 2 === 0 ? "1px solid var(--qc-hair)" : undefined,
+                    borderBottom: i < arr.length - 2 ? "1px solid var(--qc-hair)" : undefined,
+                  }}>
+                    <p style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: "0 0 3px" }}>
+                      {k.replace(/_/g, " ")}
+                    </p>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>{v}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>No detailed metrics available</p>
+            )}
           </div>
         )}
       </div>
 
       {/* Summary footer */}
       <LensDrawerSummaryCard
-        title="Strong competitive position — market share gains across segments."
+        title={lens.name}
         body={lens.takeaway}
-        metrics={[
-          { label: "Company Growth", value: companyGrowth, sub: "Revenue YoY Q3" },
-          { label: "Outperformance", value: outperf, sub: "vs PV market" },
-          { label: "GF EBITDA 9M", value: gfEbitda9m, sub: "Greenfield margin" },
-        ]}
+        metrics={summaryMetrics}
       />
 
-      {/* ── SIGNAL QUADRANT ── */}
+      {/* ── SIGNAL QUADRANT / PEER COMPARISON ── */}
       <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
 
-        {/* Header */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "12px 16px", background: "var(--qc-card)",
@@ -663,7 +703,7 @@ export function LensDetailCompetition({ lens, signals: _signals }: Props) {
               </span>
             </div>
             <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: "4px 0 0" }}>
-              Select up to 3 peers from the wiring harness & auto ancillary universe to compare signals side-by-side
+              Select up to 3 peers to compare signals side-by-side
             </p>
           </div>
           <span style={{
@@ -676,27 +716,18 @@ export function LensDetailCompetition({ lens, signals: _signals }: Props) {
           </span>
         </div>
 
-        {/* Peer chip selector */}
-        <div style={{
-          padding: "12px 16px",
-          borderBottom: "1px solid var(--qc-hair)",
-          background: "var(--qc-section)",
-        }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
             <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", marginRight: 4 }}>
               PEER SET
             </span>
-            {/* Primary ticker — always active, not clickable */}
-            <Chip active>{PRIMARY_TICKER} ✓</Chip>
-            {PEER_TICKERS.map((t) => {
+            <Chip active>{primaryTicker} ✓</Chip>
+            {peerTickers.map((t) => {
               const isActive = selectedPeers.includes(t);
               const isDisabled = !isActive && selectedPeers.length >= 3;
               return (
-                <span
-                  key={t}
-                  onClick={() => !isDisabled && togglePeer(t)}
-                  style={{ cursor: isDisabled ? "not-allowed" : "pointer", opacity: isDisabled ? 0.45 : 1 }}
-                >
+                <span key={t} onClick={() => !isDisabled && togglePeer(t)}
+                  style={{ cursor: isDisabled ? "not-allowed" : "pointer", opacity: isDisabled ? 0.45 : 1 }}>
                   <Chip active={isActive}>{t}{isActive ? " ✓" : ""}</Chip>
                 </span>
               );
@@ -704,39 +735,22 @@ export function LensDetailCompetition({ lens, signals: _signals }: Props) {
           </div>
         </div>
 
-        {/* 2×2 peer grid — equal-height rows via CSS grid */}
         <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gridTemplateRows: "1fr 1fr",
-          gap: 1,
-          background: "var(--qc-hair)",
+          display: "grid", gridTemplateColumns: "1fr 1fr",
+          gridTemplateRows: "1fr 1fr", gap: 1, background: "var(--qc-hair)",
         }}>
-          {/* Primary — always top-left */}
           <div style={{ background: "var(--qc-card)", display: "flex", flexDirection: "column" }}>
-            <PrimaryPeerCard ticker={PRIMARY_TICKER} lens={lens} />
+            <PrimaryPeerCard ticker={primaryTicker} lens={lens} />
           </div>
-
-          {/* Peer slot 1 — top-right */}
           {selectedPeers[0] ? (
-            <PeerSlot ticker={selectedPeers[0]} index={1} onDeselect={() => togglePeer(selectedPeers[0])} />
-          ) : (
-            <PeerCell index={1} />
-          )}
-
-          {/* Peer slot 2 — bottom-left */}
+            <PeerSlot ticker={selectedPeers[0]} onDeselect={() => togglePeer(selectedPeers[0])} />
+          ) : <PeerCell index={1} />}
           {selectedPeers[1] ? (
-            <PeerSlot ticker={selectedPeers[1]} index={2} onDeselect={() => togglePeer(selectedPeers[1])} />
-          ) : (
-            <PeerCell index={2} />
-          )}
-
-          {/* Peer slot 3 — bottom-right */}
+            <PeerSlot ticker={selectedPeers[1]} onDeselect={() => togglePeer(selectedPeers[1])} />
+          ) : <PeerCell index={2} />}
           {selectedPeers[2] ? (
-            <PeerSlot ticker={selectedPeers[2]} index={3} onDeselect={() => togglePeer(selectedPeers[2])} />
-          ) : (
-            <PeerCell index={3} />
-          )}
+            <PeerSlot ticker={selectedPeers[2]} onDeselect={() => togglePeer(selectedPeers[2])} />
+          ) : <PeerCell index={3} />}
         </div>
       </div>
     </div>

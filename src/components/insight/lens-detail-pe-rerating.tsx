@@ -10,6 +10,16 @@ interface Props {
   signals: unknown[];
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getKm(km: Record<string, string>, ...fragments: string[]): string {
+  for (const frag of fragments) {
+    const found = Object.entries(km).find(([k]) => k.toLowerCase().includes(frag.toLowerCase()));
+    if (found) return found[1];
+  }
+  return "—";
+}
+
 // ─── Scenario data derived from lens ─────────────────────────────────────────
 
 interface Scenario {
@@ -28,11 +38,24 @@ interface Scenario {
   pillColor: string;
 }
 
-function buildScenarios(km: Record<string, string>): Scenario[] {
-  // Use key_metrics where available, fall back to sensible defaults for MSUMI
-  const revYoY = km["mswil_revenue_yoy"] ?? "+25.5%";
-  const ebitdaYoY = km["mswil_ebitda_yoy"] ?? "+10.5%";
-  const patYoY = km["mswil_pat_yoy"] ?? "+6.4%";
+function buildScenarios(lens: LensDetail): Scenario[] {
+  const km = lens.key_metrics ?? {};
+
+  // Pick representative growth/profitability metrics from key_metrics
+  const revGrowth = getKm(km, "growth", "cagr", "revenue_yoy");
+  const profitGrowth = getKm(km, "pat_growth", "profit_growth", "net_profit_growth");
+  const roa = getKm(km, "roa", "return_on_asset");
+  const roe = getKm(km, "roe", "return_on_equity");
+  const guidance = getKm(km, "guidance", "target", "milestone");
+
+  const bullNarrative = lens.highlights?.[0]
+    ?? `Strong execution on guidance targets accelerates growth.${roa !== "—" ? ` ROA at ${roa}` : ""}${roe !== "—" ? `, ROE at ${roe}` : ""}. Premium re-rating on sustained delivery.`;
+
+  const baseNarrative = lens.highlights?.[1]
+    ?? `${revGrowth !== "—" ? `Growth of ${revGrowth}` : "Steady growth"} sustains with ${profitGrowth !== "—" ? `${profitGrowth} profit improvement` : "stable profitability"}. Market re-rates on execution visibility.`;
+
+  const bearNarrative = lens.risks?.[0]
+    ?? `Growth decelerates below guidance.${guidance !== "—" ? ` ${guidance} target at risk.` : ""} Market de-rates on earnings quality concerns.`;
 
   return [
     {
@@ -43,7 +66,7 @@ function buildScenarios(km: Record<string, string>): Scenario[] {
       returnRange: "-10% to -25%",
       returnPositive: false,
       vsText: "vs current multiples",
-      narrative: `Revenue growth decelerates below 10%, commodity cost inflation sustains, greenfield ramp disappoints. PAT growth (${patYoY}) fails to bridge gap to revenue growth, margin compression continues. Market de-rates on earnings quality concerns.`,
+      narrative: bearNarrative,
       color: "var(--qc-down)",
       borderColor: "rgba(220,38,38,0.30)",
       bg: "rgba(220,38,38,0.04)",
@@ -58,7 +81,7 @@ function buildScenarios(km: Record<string, string>): Scenario[] {
       returnRange: "+5% to +20%",
       returnPositive: true,
       vsText: "vs current multiples",
-      narrative: `Revenue sustains ${revYoY} growth momentum, greenfield utilization improves steadily. EBITDA (${ebitdaYoY}) catches up gradually as commodity headwinds ease. EV mix expands, market re-rates on execution visibility.`,
+      narrative: baseNarrative,
       color: "var(--qc-blue)",
       borderColor: "rgba(59,130,246,0.30)",
       bg: "rgba(59,130,246,0.04)",
@@ -73,7 +96,7 @@ function buildScenarios(km: Record<string, string>): Scenario[] {
       returnRange: "+25% to +50%",
       returnPositive: true,
       vsText: "vs current multiples",
-      narrative: `Greenfield accelerates past 25% growth, EV revenue share crosses 10%, margin convergence materialises. CAPEX (${km["capex_plan_fy2026"] ?? "₹220 Cr"}) delivers high ROI. Premium re-rating on governance improvement and analyst upgrades.`,
+      narrative: bullNarrative,
       color: "var(--qc-up)",
       borderColor: "rgba(31,122,74,0.30)",
       bg: "rgba(31,122,74,0.04)",
@@ -86,13 +109,29 @@ function buildScenarios(km: Record<string, string>): Scenario[] {
 // ─── Left panel: Current Market Perception ────────────────────────────────────
 
 function MarketPerceptionPanel({ lens }: { lens: LensDetail }) {
-  const km = lens.key_metrics;
-  const revYoY = km["mswil_revenue_yoy"] ?? "+25.5%";
-  const evShare = km["ev_revenue_share"] ?? "5.8%";
-  // Fair value zone: cheap < 18x, fair 20–26x, expensive > 28x
-  // We don't have current P/E from lens; use score as proxy (76/100 → ~22x range)
-  const currentPe = "~22x";
-  const markerPct = 58; // roughly in fair zone
+  const km = lens.key_metrics ?? {};
+  const sig = lens.top_signals ?? [];
+
+  // Pick top 4 metrics from key_metrics for the mini grid
+  const kmEntries = Object.entries(km).slice(0, 4);
+  const metricGrid = kmEntries.length > 0
+    ? kmEntries.map(([k, v]) => ({
+        label: k.replace(/_/g, " ").replace(/([A-Z])/g, " $1").trim().toUpperCase().slice(0, 18),
+        value: v,
+        positive: v.startsWith("+") || (!v.startsWith("-") && parseFloat(v) > 0),
+      }))
+    : sig.slice(0, 4).map((s) => ({
+        label: s.label.slice(0, 18).toUpperCase(),
+        value: s.actual_value != null ? `${s.actual_value}${s.unit ? ` ${s.unit}` : ""}` : "—",
+        positive: (s.actual_value ?? 0) > 0,
+      }));
+
+  // Score-derived P/E zone marker
+  const markerPct = Math.min(95, Math.max(5, (lens.score / 100) * 100));
+  const peZone = lens.score >= 70 ? "Fair–Premium" : lens.score >= 50 ? "Fair" : "Discount";
+
+  // Headline derived from takeaway or highlights
+  const headline = lens.takeaway?.split(".")[0] ?? lens.highlights?.[0] ?? lens.description;
 
   return (
     <div style={{
@@ -110,27 +149,21 @@ function MarketPerceptionPanel({ lens }: { lens: LensDetail }) {
         </span>
       </div>
 
-      {/* Headline */}
       <div>
-        <h3 style={{ fontSize: 20, fontWeight: 400, color: "var(--qc-ink)", margin: "0 0 8px", fontFamily: "var(--qc-font-serif, Georgia, serif)", lineHeight: 1.25 }}>
-          Growth re-rating in progress
+        <h3 style={{ fontSize: 16, fontWeight: 400, color: "var(--qc-ink)", margin: "0 0 8px", lineHeight: 1.35 }}>
+          {headline}
         </h3>
         <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.6 }}>
-          MSUMI trades at fair multiples despite strong {revYoY} revenue growth. EV revenue ({evShare} mix) is a nascent re-rating trigger not yet priced in.
+          Score: {lens.score}/100 — {lens.status ?? "Moderate"} re-rating signal
         </p>
       </div>
 
       {/* Key metrics mini grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, paddingTop: 10, borderTop: "1px solid var(--qc-hair)" }}>
-        {[
-          { label: "Revenue YoY", value: km["mswil_revenue_yoy"] ?? "+25.5%", positive: true },
-          { label: "EBITDA YoY", value: km["mswil_ebitda_yoy"] ?? "+10.5%", positive: true },
-          { label: "PAT YoY", value: km["mswil_pat_yoy"] ?? "+6.4%", positive: true },
-          { label: "EV Mix", value: km["ev_revenue_share"] ?? "5.8%", positive: true },
-        ].map((m) => (
+        {metricGrid.map((m) => (
           <div key={m.label}>
-            <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>{m.label}</p>
-            <p style={{ fontSize: 14, fontWeight: 700, color: m.value.startsWith("+") ? "var(--qc-up)" : "var(--qc-ink)", margin: 0 }}>{m.value}</p>
+            <p style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>{m.label}</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: m.positive ? "var(--qc-up)" : "var(--qc-ink)", margin: 0 }}>{m.value}</p>
           </div>
         ))}
       </div>
@@ -155,7 +188,7 @@ function MarketPerceptionPanel({ lens }: { lens: LensDetail }) {
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
           <span style={{ fontSize: 10, color: "var(--qc-up)" }}>Cheap &lt;18x</span>
-          <span style={{ fontSize: 10, color: "var(--qc-golden-ink)" }}>Fair 20–26x</span>
+          <span style={{ fontSize: 10, color: "var(--qc-golden-ink, var(--qc-warn))" }}>Fair 20–26x</span>
           <span style={{ fontSize: 10, color: "var(--qc-down)" }}>Expensive &gt;28x</span>
         </div>
         <span style={{
@@ -163,7 +196,7 @@ function MarketPerceptionPanel({ lens }: { lens: LensDetail }) {
           background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
           borderRadius: 6, padding: "4px 12px", display: "inline-block",
         }}>
-          Current: {currentPe}
+          Zone: {peZone}
         </span>
       </div>
     </div>
@@ -224,7 +257,10 @@ function ScenarioCard({ scenario, delay }: { scenario: Scenario; delay: number }
 }
 
 function ScenarioEnginePanel({ lens }: { lens: LensDetail }) {
-  const scenarios = buildScenarios(lens.key_metrics);
+  const scenarios = buildScenarios(lens);
+
+  // Context note derived from risks/highlights
+  const footerNote = lens.risks?.[0] ?? lens.description ?? "Re-rating potential depends on execution and macro conditions.";
 
   return (
     <div style={{
@@ -249,7 +285,6 @@ function ScenarioEnginePanel({ lens }: { lens: LensDetail }) {
         ))}
       </div>
 
-      {/* Footer note */}
       <div style={{
         display: "flex", alignItems: "center", gap: 8,
         padding: "10px 12px",
@@ -259,7 +294,7 @@ function ScenarioEnginePanel({ lens }: { lens: LensDetail }) {
       }}>
         <span style={{ fontSize: 13 }}>✏️</span>
         <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>
-          Re-rating potential depends on greenfield ramp execution, EV mix growth, and governance clarity.
+          {footerNote.length > 120 ? footerNote.slice(0, 117) + "..." : footerNote}
         </p>
       </div>
     </div>
@@ -343,15 +378,26 @@ function CatalystItem({ icon, label, sublabel, positive }: { icon: string; label
 }
 
 function MarketCatalystsPanel({ lens }: { lens: LensDetail }) {
-  const positives = [
-    { icon: "🚗", label: "EV revenue acceleration", sublabel: `EV mix at ${lens.key_metrics["ev_revenue_share"] ?? "5.8%"} with clear growth trajectory and management commitment` },
-    { icon: "📈", label: "Greenfield ramp execution", sublabel: `18.8% Q3 quarterly growth signals strong capacity utilisation momentum` },
-    { icon: "💼", label: "CAPEX ROI realisation", sublabel: `₹${lens.key_metrics["capex_plan_fy2026"] ?? "220 Cr"} CAPEX deployment — ROI recognition could trigger re-rating` },
-  ];
-  const negatives = [
-    { icon: "⚠️", label: "Profitability growth lag", sublabel: `PAT +${lens.key_metrics["mswil_pat_yoy"] ?? "6.4%"} vs revenue +${lens.key_metrics["mswil_revenue_yoy"] ?? "25.5%"} signals margin compression` },
-    { icon: "🏗️", label: "Capital allocation opacity", sublabel: "Ongoing customer discussions limit clarity on deployment timeline and ROI profile" },
-  ];
+  // Build positive catalysts from highlights, negative from risks
+  const positives = (lens.highlights ?? []).slice(0, 3).map((h, i) => ({
+    icon: ["📈", "💼", "🚀"][i] ?? "✅",
+    label: h.split(" ").slice(0, 5).join(" "),
+    sublabel: h,
+  }));
+
+  const negatives = (lens.risks ?? []).slice(0, 2).map((r, i) => ({
+    icon: ["⚠️", "🏗️"][i] ?? "⚠️",
+    label: r.split(" ").slice(0, 5).join(" "),
+    sublabel: r,
+  }));
+
+  // Fallbacks if no highlights/risks
+  if (positives.length === 0) {
+    positives.push({ icon: "📈", label: "Strong fundamentals", sublabel: lens.takeaway ?? "Solid operational metrics." });
+  }
+  if (negatives.length === 0) {
+    negatives.push({ icon: "⚠️", label: "Execution risk", sublabel: "Monitor guidance delivery and macro conditions." });
+  }
 
   return (
     <div style={{
@@ -369,7 +415,6 @@ function MarketCatalystsPanel({ lens }: { lens: LensDetail }) {
         </span>
       </div>
 
-      {/* Positive */}
       <div>
         <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-up)", margin: "0 0 8px" }}>
           Positive Catalysts
@@ -381,7 +426,6 @@ function MarketCatalystsPanel({ lens }: { lens: LensDetail }) {
         </div>
       </div>
 
-      {/* Negative */}
       <div>
         <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-down)", margin: "0 0 8px" }}>
           Negative Catalysts
@@ -406,6 +450,11 @@ function NarrativeStrip({ lens }: { lens: LensDetail }) {
     ? "Transition phase, execution watch"
     : "De-rating risk, narrative weak";
 
+  // Derive shift narrative from risks and highlights
+  const shiftNote = lens.risks?.[0]
+    ? `${lens.risks[0].slice(0, 100)}...`
+    : "Narrative can shift if execution on guidance targets improves and macro conditions ease.";
+
   return (
     <div style={{
       display: "grid",
@@ -417,19 +466,16 @@ function NarrativeStrip({ lens }: { lens: LensDetail }) {
       border: "1px solid var(--qc-hair)",
       borderRadius: 10,
     }}>
-      {/* Left: label */}
       <div>
         <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: "0 0 6px" }}>
           Current Narrative
         </p>
-        <h4 style={{ fontSize: 20, fontWeight: 400, color: "var(--qc-ink)", margin: 0, fontFamily: "var(--qc-font-serif, Georgia, serif)", lineHeight: 1.25 }}>
+        <h4 style={{ fontSize: 18, fontWeight: 400, color: "var(--qc-ink)", margin: 0, lineHeight: 1.25 }}>
           {narrativeLabel}
         </h4>
       </div>
 
-      {/* Center: gradient slider + labels below */}
       <div style={{ minWidth: 0 }}>
-        {/* Track + marker */}
         <div style={{ position: "relative", height: 10, borderRadius: 99, background: "linear-gradient(to right, var(--qc-down), var(--qc-warn) 50%, var(--qc-up))", marginBottom: 10 }}>
           <motion.div
             initial={{ left: "0%" }}
@@ -443,7 +489,6 @@ function NarrativeStrip({ lens }: { lens: LensDetail }) {
             }}
           />
         </div>
-        {/* Labels: left / center / right — each takes 1/3, no wrapping risk */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
           <span style={{ fontSize: 9, color: "var(--qc-down)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", lineHeight: 1.4 }}>
             Weak Narrative · De-Rating Risk
@@ -457,17 +502,16 @@ function NarrativeStrip({ lens }: { lens: LensDetail }) {
         </div>
       </div>
 
-      {/* Right: narrative note */}
       <div style={{ borderLeft: "3px solid var(--qc-blue)", paddingLeft: 16 }}>
         <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.6 }}>
-          Narrative can shift positively if greenfield ramp accelerates, EV mix crosses 10%, and commodity headwinds ease in H2 FY27.
+          {shiftNote}
         </p>
       </div>
     </div>
   );
 }
 
-// ─── Dark footer bar ──────────────────────────────────────────────────────────
+// ─── Summary footer metrics ───────────────────────────────────────────────────
 
 const PE_RERATING_METRICS = [
   { label: "Base Case Exit P/E", value: "20–26x", sub: "Most Probable" },
@@ -476,10 +520,16 @@ const PE_RERATING_METRICS = [
 ];
 
 function SummaryFooter({ lens }: { lens: LensDetail }) {
+  const title = lens.score >= 70
+    ? "Solid re-rating potential with positive momentum."
+    : lens.score >= 50
+    ? "Moderate re-rating potential exists."
+    : "Limited re-rating potential; monitor execution.";
+
   return (
     <LensDrawerSummaryCard
-      title="Moderate re-rating potential exists."
-      body={lens.description}
+      title={title}
+      body={lens.takeaway ?? lens.description}
       metrics={PE_RERATING_METRICS}
     />
   );
@@ -491,7 +541,6 @@ export function LensDetailPeRerating({ lens }: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-      {/* Sub-header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)" }}>
           Valuation Intelligence
@@ -501,17 +550,14 @@ export function LensDetailPeRerating({ lens }: Props) {
         </span>
       </div>
 
-      {/* 3-panel row */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr 1fr", gap: 14, alignItems: "stretch" }}>
         <MarketPerceptionPanel lens={lens} />
         <ScenarioEnginePanel lens={lens} />
         <MarketCatalystsPanel lens={lens} />
       </div>
 
-      {/* Narrative strip */}
       <NarrativeStrip lens={lens} />
 
-      {/* Dark summary footer */}
       <SummaryFooter lens={lens} />
 
     </div>

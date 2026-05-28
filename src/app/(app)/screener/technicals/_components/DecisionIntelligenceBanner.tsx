@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Brain, Info, AlertTriangle, Zap } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { Brain, Info, Zap, TrendingUp } from "lucide-react";
 import type { DecisionIntelligence, DecisionIntelligenceIndicator } from "@/types/technicals";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -81,6 +83,9 @@ interface Props {
 
 export function DecisionIntelligenceBanner({ di }: Props) {
   const conviction = convictionConfig(di.convictionLevel);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const symbol = searchParams.get("symbol") ?? "";
 
   return (
     <div style={{
@@ -287,6 +292,45 @@ export function DecisionIntelligenceBanner({ di }: Props) {
             </p>
           )}
         </div>
+      )}
+
+      {/* ── Wyckoff Analyzer button ── */}
+      {symbol && (
+        <button
+          onClick={() => router.push(`/screener/wyckoff?symbol=${symbol}`)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 7,
+            width: "100%",
+            padding: "10px 14px",
+            background: "var(--qc-card)",
+            border: "1px solid var(--qc-hair)",
+            borderRadius: 14,
+            cursor: "pointer",
+            transition: "background .15s, border-color .15s",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = "var(--qc-chip)";
+            (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--qc-ink-2)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = "var(--qc-card)";
+            (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--qc-hair)";
+          }}
+        >
+          <TrendingUp style={{ width: 13, height: 13, color: "var(--qc-ink-2)" }} />
+          <span style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 10,
+            letterSpacing: ".14em",
+            color: "var(--qc-ink)",
+            textTransform: "uppercase" as const,
+          }}>
+            Wyckoff Analysis
+          </span>
+        </button>
       )}
 
       {/* ── 4. Risk Alerts + What Can Change ── */}

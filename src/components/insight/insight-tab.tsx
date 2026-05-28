@@ -192,7 +192,7 @@ function InsightDashboard({
         </div>
       </div>
 
-      <LensDrawer lens={activeLens} signals={signals} onClose={() => setActiveLensSlug(null)} />
+      <LensDrawer lens={activeLens} signals={signals} onClose={() => setActiveLensSlug(null)} callId={callId} />
     </>
   );
 }

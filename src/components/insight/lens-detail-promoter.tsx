@@ -8,14 +8,10 @@ import type { LensDetail, TopSignal } from "@/hooks/useLenses";
 import type { Signal } from "@/hooks/useSignals";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
-const IMPACT_Y: Record<string, number> = { high: 3, medium: 2, low: 1 };
 const IMPACT_COLOR: Record<string, string> = {
   high: "#1F7A4A",
   medium: "#B4731A",
   low: "#9A9A92",
-};
-const QUARTER_X: Record<string, number> = {
-  "2025-07": 1, "2025-08": 1, "2025-09": 2, "2025-10": 3, "2025-11": 3, "2025-12": 3,
 };
 
 interface Props {
@@ -33,16 +29,34 @@ interface SignalRow {
   icon: string;
 }
 
+function getKm(km: Record<string, string>, ...fragments: string[]): string | null {
+  const key = Object.keys(km).find((k) =>
+    fragments.every((f) => k.toLowerCase().includes(f.toLowerCase()))
+  );
+  return key ? km[key] : null;
+}
+
+function quarterFromDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  const m = d.getMonth();
+  const q = m < 3 ? 1 : m < 6 ? 2 : m < 9 ? 3 : 4;
+  const fy = m < 3 ? d.getFullYear() : d.getFullYear() + 1;
+  return `Q${q} FY${String(fy).slice(2)}`;
+}
+
 function buildSignalRows(topSignals: TopSignal[]): SignalRow[] {
   return topSignals.map((s) => {
     const metric = s.metric.toLowerCase();
-    const label = s.label;
 
     let badge: string;
     let badgeColor: string;
     let badgeBg: string;
     let borderColor: string;
     let icon: string;
+
+    const dir = (s.direction ?? "").toLowerCase();
 
     if (metric === "proactive_disclosure") {
       badge = "PROACTIVE";
@@ -51,7 +65,7 @@ function buildSignalRows(topSignals: TopSignal[]): SignalRow[] {
       borderColor = "var(--qc-up)";
       icon = "↑";
     } else if (metric === "capital_allocation_clarity") {
-      const isNeg = label.toLowerCase().includes("decline") || label.toLowerCase().includes("opaque");
+      const isNeg = s.label.toLowerCase().includes("decline") || s.label.toLowerCase().includes("opaque");
       badge = isNeg ? "OPAQUE" : "DISCLOSED";
       badgeColor = isNeg ? "var(--qc-warn)" : "var(--qc-up)";
       badgeBg = isNeg ? "rgba(180,115,26,0.10)" : "rgba(31,122,74,0.10)";
@@ -63,15 +77,21 @@ function buildSignalRows(topSignals: TopSignal[]): SignalRow[] {
       badgeBg = "rgba(31,122,74,0.10)";
       borderColor = "var(--qc-up)";
       icon = "✓";
+    } else if (metric === "guidance_given" || dir === "tracking" || dir === "in_line") {
+      badge = dir === "tracking" ? "TRACKING" : dir === "in_line" ? "IN LINE" : "GUIDANCE";
+      badgeColor = "var(--qc-blue)";
+      badgeBg = "rgba(37,99,235,0.08)";
+      borderColor = "var(--qc-blue)";
+      icon = "→";
     } else {
-      badge = "STABLE";
+      badge = "OBSERVED";
       badgeColor = "var(--qc-ink-3)";
       badgeBg = "var(--qc-section)";
       borderColor = "var(--qc-ink-3)";
       icon = "—";
     }
 
-    return { label, metric: s.metric.replace(/_/g, " "), badge, badgeColor, badgeBg, borderColor, icon };
+    return { label: s.label, metric: s.metric.replace(/_/g, " "), badge, badgeColor, badgeBg, borderColor, icon };
   });
 }
 
@@ -88,10 +108,19 @@ export function LensDetailPromoter({ lens }: Props) {
         : "var(--qc-warn)";
 
   const km = lens.key_metrics;
-  const zScore = km["aggregate_z_score"] ?? "5.00";
-  const sampleSize = km["signal_sample_size"] ?? "5";
-  const proactiveCount = km["proactive_disclosure_signals"] ?? "2 of 11";
-  const clarityCount = km["capital_allocation_clarity_signals"] ?? "2 of 11";
+
+  // Derive KPI tile values from actual API keys
+  const rawZScore = getKm(km, "z_aggregate") ?? getKm(km, "z_score") ?? getKm(km, "weighted_z") ?? String(lens.z_score ?? "—");
+  const zScore = isNaN(parseFloat(rawZScore)) ? rawZScore : parseFloat(rawZScore).toFixed(1);
+  const sampleSize = getKm(km, "total_signals") ?? getKm(km, "signal_sample") ?? String(lens.signal_count ?? "—");
+  const proactiveCount = getKm(km, "proactive_disclosure") ?? "—";
+  const clarityCount = getKm(km, "transparency_capital") ?? getKm(km, "capital_allocation_clarity") ?? "—";
+
+  const quarterLabel = quarterFromDate(lens.computed_at);
+
+  // Quote: first signal with a statement longer than 80 chars, else takeaway
+  const quoteSig = topSignals.find((s) => s.statement && s.statement.length > 80);
+  const quoteText = quoteSig?.statement?.slice(0, 220) ?? lens.takeaway?.slice(0, 220) ?? "";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -107,13 +136,15 @@ export function LensDetailPromoter({ lens }: Props) {
           <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)" }}>
             PROMOTER ACTIVITY
           </span>
-          <span style={{
-            fontSize: 9, fontWeight: 600, letterSpacing: "0.06em",
-            color: "var(--qc-ink-3)", background: "var(--qc-section)",
-            border: "1px solid var(--qc-hair)", borderRadius: 4, padding: "2px 7px",
-          }}>
-            Q3 FY26
-          </span>
+          {quarterLabel && (
+            <span style={{
+              fontSize: 9, fontWeight: 600, letterSpacing: "0.06em",
+              color: "var(--qc-ink-3)", background: "var(--qc-section)",
+              border: "1px solid var(--qc-hair)", borderRadius: 4, padding: "2px 7px",
+            }}>
+              {quarterLabel}
+            </span>
+          )}
           <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 600, color: statusColor, display: "flex", alignItems: "center", gap: 5 }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, display: "inline-block" }} />
             {st.charAt(0).toUpperCase() + st.slice(1).toLowerCase()}
@@ -123,14 +154,14 @@ export function LensDetailPromoter({ lens }: Props) {
         {/* 4-column KPI strip */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 0 }}>
           {[
-            { label: "Z-SCORE", value: parseFloat(zScore).toFixed(1), sub: "Aggregate governance signal score", color: "var(--qc-ink)", bgColor: "var(--qc-card)" },
-            { label: "SIGNAL SAMPLE", value: sampleSize, sub: "Unique signals evaluated", color: "var(--qc-ink)", bgColor: "var(--qc-card)" },
-            { label: "PROACTIVE DISCLOSE", value: proactiveCount, sub: "Of total observations", color: "var(--qc-up)", bgColor: "var(--qc-card)" },
-            { label: "CAPITAL CLARITY", value: clarityCount, sub: "Of total observations", color: "var(--qc-warn)", bgColor: "var(--qc-card)" },
+            { label: "Z-SCORE", value: zScore, sub: "Aggregate governance signal score", color: "var(--qc-ink)" },
+            { label: "SIGNAL SAMPLE", value: sampleSize, sub: "Unique signals evaluated", color: "var(--qc-ink)" },
+            { label: "PROACTIVE DISCLOSE", value: proactiveCount, sub: "Proactive disclosure signals", color: "var(--qc-up)" },
+            { label: "CAPITAL CLARITY", value: clarityCount, sub: "Capital allocation clarity signals", color: "var(--qc-warn)" },
           ].map((tile, i, arr) => (
             <div key={i} style={{
               padding: "14px 14px",
-              background: tile.bgColor,
+              background: "var(--qc-card)",
               borderRight: i < arr.length - 1 ? "1px solid var(--qc-hair)" : undefined,
               borderTop: "1px solid var(--qc-hair)",
               display: "flex", flexDirection: "column", gap: 4,
@@ -150,25 +181,30 @@ export function LensDetailPromoter({ lens }: Props) {
       </div>
 
       {/* Blockquote */}
-      <div style={{ borderLeft: "3px solid var(--qc-ink)", paddingLeft: 16, paddingTop: 4, paddingBottom: 4, margin: "0 2px" }}>
-        <p style={{
-          fontSize: 13, fontStyle: "italic", color: "var(--qc-ink)", margin: "0 0 6px",
-          lineHeight: 1.65, fontFamily: "var(--qc-font-serif, Georgia, serif)",
-        }}>
-          Management discloses procedurally but withholds strategically — commodity headwinds are surfaced, but margin guidance and capital deployment timelines are consistently deferred.
-        </p>
-        <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, letterSpacing: "0.04em" }}>
-          Quantcase governance analysis · Q3 FY26
-        </p>
-      </div>
+      {quoteText && (
+        <div style={{ borderLeft: "3px solid var(--qc-ink)", paddingLeft: 16, paddingTop: 4, paddingBottom: 4, margin: "0 2px" }}>
+          <p style={{
+            fontSize: 13, fontStyle: "italic", color: "var(--qc-ink)", margin: "0 0 6px",
+            lineHeight: 1.65, fontFamily: "var(--qc-font-serif, Georgia, serif)",
+          }}>
+            {quoteText}
+          </p>
+          <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, letterSpacing: "0.04em" }}>
+            Quantcase governance analysis{quarterLabel ? ` · ${quarterLabel}` : ""}
+          </p>
+        </div>
+      )}
 
       {/* Signal timeline chart */}
       {(() => {
         const scatterData = topSignals.map((s, i) => {
-          const ym = (s.actual_date ?? "").slice(0, 7);
-          const x = QUARTER_X[ym] ?? (i + 1);
+          const ym = (s.actual_date ?? s.guided_date ?? "").slice(0, 7);
+          // Map YYYY-MM to quarter index 1–4 within the fiscal year
+          const [yr, mo] = ym ? ym.split("-").map(Number) : [0, 0];
+          const q = mo ? (mo < 4 ? 4 : mo < 7 ? 1 : mo < 10 ? 2 : 3) : (i + 1);
+          const x = mo ? q : (i % 3) + 1;
           const impact = (s.impact ?? "medium").toLowerCase();
-          return { x, y: IMPACT_Y[impact] ?? 2, impact, label: s.label, metric: s.metric };
+          return { x, y: { high: 3, medium: 2, low: 1 }[impact] ?? 2, impact, label: s.label, metric: s.metric };
         });
         return (
           <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
@@ -177,13 +213,13 @@ export function LensDetailPromoter({ lens }: Props) {
               borderBottom: "1px solid var(--qc-hair)", display: "flex", alignItems: "center", gap: 8,
             }}>
               <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)" }}>
-                SIGNAL TIMELINE · Q1–Q3 FY26
+                SIGNAL TIMELINE
               </span>
               <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
-                {[["high", "High impact"], ["medium", "Medium"], ["low", "Low"]].map(([k, label]) => (
+                {(["high", "medium", "low"] as const).map((k) => (
                   <span key={k} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: "var(--qc-ink-3)" }}>
                     <span style={{ width: 7, height: 7, borderRadius: "50%", background: IMPACT_COLOR[k], display: "inline-block" }} />
-                    {label}
+                    {k.charAt(0).toUpperCase() + k.slice(1)}
                   </span>
                 ))}
               </div>
@@ -194,7 +230,7 @@ export function LensDetailPromoter({ lens }: Props) {
                   <XAxis
                     type="number" dataKey="x" domain={[0.5, 3.5]}
                     ticks={[1, 2, 3]}
-                    tickFormatter={(v) => ["", "Q1 FY26", "Q2 FY26", "Q3 FY26"][v] ?? ""}
+                    tickFormatter={(v) => ["", "Q1", "Q2", "Q3"][v] ?? ""}
                     tick={{ fontSize: 10, fill: "#9A9A92" }} axisLine={false} tickLine={false}
                   />
                   <YAxis
@@ -270,12 +306,12 @@ export function LensDetailPromoter({ lens }: Props) {
 
       {/* Summary footer */}
       <LensDrawerSummaryCard
-        title="Selective transparency — procedural disclosure, strategic deferral."
+        title={lens.name}
         body={lens.takeaway}
         metrics={[
-          { label: "Z-Score", value: parseFloat(zScore).toFixed(1), sub: "Aggregate governance score" },
-          { label: "Proactive Disclose", value: proactiveCount, sub: "Of total observations" },
-          { label: "Capital Clarity", value: clarityCount, sub: "Of total observations" },
+          { label: "Z-Score", value: zScore, sub: "Aggregate governance score" },
+          { label: "Proactive Disclose", value: proactiveCount, sub: "Proactive disclosure signals" },
+          { label: "Capital Clarity", value: clarityCount, sub: "Capital allocation signals" },
         ]}
       />
     </div>

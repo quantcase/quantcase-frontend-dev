@@ -18,11 +18,6 @@ interface ScenarioDef {
   icon: string;
   probability: string;
   isMostLikely: boolean;
-  targetLo: string;
-  targetHi: string;
-  fromCmp: string;
-  fromCmpPositive: boolean;
-  cagr: string;
   epsCagr: string;
   exitPe: string;
   fyEps: string;
@@ -35,16 +30,47 @@ interface ScenarioDef {
   border: string;
 }
 
-function buildScenarios(km: Record<string, string>): ScenarioDef[] {
-  const revGrowth = parseFloat(km["MSWIL_Revenue_Growth_YoY"] ?? "19.6");
-  const gfRev = parseFloat(km["Greenfield_Revenue_Growth_Q3"] ?? "18.8");
+function buildScenarios(lens: LensDetail): ScenarioDef[] {
+  const km = lens.key_metrics ?? {};
+  const sig = lens.top_signals ?? [];
 
-  // Derive scenario assumptions from available metrics
-  // Bear: revenue slows, PAT lags further
-  // Base: current trajectory continues
-  // Bull: greenfield accelerates, margin expansion
-  void revGrowth;
-  void gfRev;
+  // Pull best available growth metrics from signals
+  const growthSignal = sig.find(
+    (s) => (s.metric?.includes("GROWTH") || s.metric?.includes("growth")) && s.actual_value != null
+  );
+  const guidanceSignal = sig.find((s) => s.direction === "tracking" && s.guided_value != null);
+  const profitSignal = sig.find(
+    (s) => (s.metric === "PAT" || s.metric === "NET_PROFIT" || s.metric?.includes("PAT")) && s.actual_value != null
+  );
+  const roaSignal = sig.find((s) => s.metric === "ROA" && s.actual_value != null);
+  const roeSignal = sig.find(
+    (s) => (s.metric === "ROE" || s.metric?.includes("EQUITY")) && s.actual_value != null
+  );
+
+  const baseGrowth = growthSignal?.actual_value ?? 0;
+  const guidedGrowth = guidanceSignal?.guided_value ?? baseGrowth * 1.1;
+
+  // Derive EPS CAGR approximations from growth signals
+  const baseEpsCagr = baseGrowth > 0 ? `${baseGrowth.toFixed(1)}%` : "—";
+  const bullEpsCagr = guidedGrowth > 0 ? `${(guidedGrowth * 1.3).toFixed(1)}%` : "—";
+  const bearEpsCagr = baseGrowth > 0 ? `${(baseGrowth * 0.55).toFixed(1)}%` : "—";
+
+  // FY EPS — use EPS signal or PAT as proxy
+  const epsSignal = sig.find((s) => s.metric === "EPS_DILUTED" && s.actual_value != null);
+  const baseFyEps = epsSignal?.actual_value != null
+    ? `₹${epsSignal.actual_value}`
+    : profitSignal?.unit === "Cr" && profitSignal.actual_value != null
+    ? `₹${profitSignal.actual_value} Cr`
+    : Object.entries(km).find(([k]) => k.toLowerCase().includes("eps"))?.[1] ?? "—";
+
+  // ROA/ROE for narrative
+  const roa = roaSignal?.actual_value != null ? `${roaSignal.actual_value}%` : km["ROA"] ?? km["roa"] ?? "";
+  const roe = roeSignal?.actual_value != null ? `${roeSignal.actual_value}%` : km["ROE"] ?? km["roe"] ?? "";
+
+  // Highlights/risks for narrative text
+  const bullNarrative = lens.highlights?.[0] ?? "Strong execution and favourable tailwinds drive premium re-rating.";
+  const baseNarrative = lens.highlights?.[1] ?? lens.takeaway?.split(".")[0] ?? "Management guidance on-track with stable margins and steady growth.";
+  const bearNarrative = lens.risks?.[0] ?? "Macro headwinds and execution challenges compress margins and multiples.";
 
   return [
     {
@@ -53,17 +79,12 @@ function buildScenarios(km: Record<string, string>): ScenarioDef[] {
       icon: "🐻",
       probability: "25% Probability",
       isMostLikely: false,
-      targetLo: "₹1,855",
-      targetHi: "₹2,113",
-      fromCmp: "-18.3% from CMP",
-      fromCmpPositive: false,
-      cagr: "CAGR: -6.4% p.a.",
-      epsCagr: "-3.0%",
-      exitPe: "18–21x",
-      fyEps: "₹103",
+      epsCagr: bearEpsCagr,
+      exitPe: "14–18x",
+      fyEps: baseFyEps,
       sectionLabel: "WHAT CAN GO WRONG",
       sectionLabelColor: "var(--qc-down)",
-      narrative: "Demand slowdown persists, margin pressure continues and valuation de-rates further.",
+      narrative: bearNarrative,
       narrativeIcon: "📉",
       color: "var(--qc-down)",
       bg: "rgba(220,38,38,0.04)",
@@ -75,17 +96,12 @@ function buildScenarios(km: Record<string, string>): ScenarioDef[] {
       icon: "🎯",
       probability: "50% Probability",
       isMostLikely: true,
-      targetLo: "₹3,122",
-      targetHi: "₹3,548",
-      fromCmp: "+26.0% from CMP",
-      fromCmpPositive: true,
-      cagr: "CAGR: +8.0% p.a.",
-      epsCagr: "8.0%",
-      exitPe: "22–25x",
-      fyEps: "₹142",
+      epsCagr: baseEpsCagr,
+      exitPe: "20–26x",
+      fyEps: baseFyEps,
       sectionLabel: "WHAT DRIVES THIS OUTCOME",
       sectionLabelColor: "var(--qc-blue)",
-      narrative: "Moderate demand recovery, stable margins and re-rating to historical average.",
+      narrative: `${baseNarrative}${roa ? ` ROA at ${roa}` : ""}${roe ? `, ROE at ${roe}` : ""}.`.replace(/\.\./, "."),
       narrativeIcon: "📈",
       color: "var(--qc-blue)",
       bg: "rgba(59,130,246,0.04)",
@@ -97,17 +113,12 @@ function buildScenarios(km: Record<string, string>): ScenarioDef[] {
       icon: "🐂",
       probability: "25% Probability",
       isMostLikely: false,
-      targetLo: "₹4,457",
-      targetHi: "₹5,057",
-      fromCmp: "+84.8% from CMP",
-      fromCmpPositive: true,
-      cagr: "CAGR: +15.0% p.a.",
-      epsCagr: "15.0%",
-      exitPe: "26–30x",
-      fyEps: "₹171",
+      epsCagr: bullEpsCagr,
+      exitPe: "28–35x",
+      fyEps: baseFyEps,
       sectionLabel: "WHAT CAN ACCELERATE UPSIDE",
       sectionLabelColor: "var(--qc-up)",
-      narrative: "AI monetization scales faster, operating leverage improves and premium valuation restores.",
+      narrative: bullNarrative,
       narrativeIcon: "🚀",
       color: "var(--qc-up)",
       bg: "rgba(31,122,74,0.04)",
@@ -119,6 +130,9 @@ function buildScenarios(km: Record<string, string>): ScenarioDef[] {
 // ─── Scenario card ─────────────────────────────────────────────────────────────
 
 function ScenarioCard({ s }: { s: ScenarioDef }) {
+  const epsCagrNum = parseFloat(s.epsCagr);
+  const epsCagrPositive = !isNaN(epsCagrNum) ? epsCagrNum >= 0 : s.key !== "bear";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -172,34 +186,10 @@ function ScenarioCard({ s }: { s: ScenarioDef }) {
         </div>
       </div>
 
-      {/* Target range */}
-      <div>
-        <p style={{
-          fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em",
-          color: "var(--qc-ink-3)", margin: "0 0 4px",
-        }}>Target Range</p>
-        <p style={{
-          fontSize: s.key === "base" ? 30 : 24, fontWeight: 600, color: s.color,
-          margin: "0 0 4px", lineHeight: 1.3, letterSpacing: "-0.02em",
-        }}>
-          {s.targetLo} – {s.targetHi}
-        </p>
-        <p style={{
-          fontSize: 12, fontWeight: 600, color: s.color,
-          margin: "0 0 2px",
-        }}>
-          {s.fromCmp}
-        </p>
-        <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>{s.cagr}</p>
-      </div>
-
-      {/* Divider */}
-      <div style={{ borderTop: "1px solid var(--qc-hair)" }} />
-
       {/* EPS/PE/FY metrics */}
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {[
-          { label: "EPS CAGR", value: s.epsCagr, color: s.fromCmpPositive ? s.color : "var(--qc-down)" },
+          { label: "EPS CAGR", value: s.epsCagr, color: epsCagrPositive ? s.color : "var(--qc-down)" },
           { label: "Exit P/E", value: s.exitPe, color: "var(--qc-ink)" },
           { label: "FY EPS", value: s.fyEps, color: "var(--qc-ink)" },
         ].map(({ label, value, color }) => (
@@ -249,9 +239,8 @@ function ScenarioCard({ s }: { s: ScenarioDef }) {
 // ─── Gauge SVG (speedometer for risk/reward) ─────────────────────────────────
 
 function RiskRewardGauge({ ratio }: { ratio: number }) {
-  // Semi-circle gauge, 0-3x range, needle at ratio
   const pct = Math.min(1, ratio / 3);
-  const angle = -180 + pct * 180; // -180 (left) to 0 (right)
+  const angle = -180 + pct * 180;
   const rad = (angle * Math.PI) / 180;
   const cx = 60, cy = 60, r = 40;
   const nx = cx + r * Math.cos(rad);
@@ -259,10 +248,8 @@ function RiskRewardGauge({ ratio }: { ratio: number }) {
 
   return (
     <svg width={120} height={70} viewBox="0 0 120 70" style={{ overflow: "visible" }}>
-      {/* Track */}
       <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
         fill="none" stroke="#e5e7eb" strokeWidth={10} strokeLinecap="round" />
-      {/* Fill red→amber→green */}
       <defs>
         <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="var(--qc-down)" />
@@ -272,7 +259,6 @@ function RiskRewardGauge({ ratio }: { ratio: number }) {
       </defs>
       <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
         fill="none" stroke="url(#gaugeGrad)" strokeWidth={10} strokeLinecap="round" />
-      {/* Needle */}
       <motion.line
         initial={{ x2: cx, y2: cy - r }}
         animate={{ x2: nx, y2: ny }}
@@ -287,27 +273,51 @@ function RiskRewardGauge({ ratio }: { ratio: number }) {
 
 // ─── Probability weighted footer ──────────────────────────────────────────────
 
-function WeightedOutcomeBar() {
+function WeightedOutcomeBar({ lens }: { lens: LensDetail }) {
+  const km = lens.key_metrics ?? {};
+  const sig = lens.top_signals ?? [];
+
+  // Weighted CAGR label: derive from growth signal
+  const growthSignal = sig.find(
+    (s) => s.metric?.includes("GROWTH") && s.actual_value != null
+  );
+  const baseGrowth = growthSignal?.actual_value ?? 0;
+  const weightedCagrLo = (baseGrowth * 0.6).toFixed(0);
+  const weightedCagrHi = (baseGrowth * 0.9).toFixed(0);
+  const weightedCagrText = baseGrowth > 0 ? `+${weightedCagrLo}% to +${weightedCagrHi}%` : "—";
+
+  // Weighted range — use any absolute value metric as rough proxy
+  const absSignal = sig.find(
+    (s) => s.unit === "Cr" && s.actual_value != null && s.actual_value > 100
+  );
+  const rangeText = absSignal?.actual_value != null
+    ? `₹${(absSignal.actual_value * 0.85).toFixed(0)}–₹${(absSignal.actual_value * 1.1).toFixed(0)} Cr`
+    : Object.entries(km).find(([k]) => k.toLowerCase().includes("aum") || k.toLowerCase().includes("revenue"))?.[1] ?? "—";
+
+  // Risk/reward ratio from score
+  const rrRatio = lens.score >= 70 ? 1.6 : lens.score >= 55 ? 1.2 : 0.9;
+  const rrLabel = rrRatio >= 1.5 ? "Attractive" : rrRatio >= 1.1 ? "Moderate" : "Cautious";
+
   const tiles = [
     {
       icon: "Σ",
       label: "Probability Weighted Outcome · Expected 3Y CAGR",
-      value: "+7% to +9%",
+      value: weightedCagrText,
       valueColor: "var(--qc-up)",
       isText: true,
     },
     {
       icon: "◎",
       label: "Weighted Target Range",
-      value: "₹2,950 – ₹3,250",
-      sub: "+15% to +27% from CMP",
+      value: rangeText,
+      sub: "Probability-weighted estimate",
       isText: false,
     },
     {
       icon: "⚖",
       label: "Risk / Reward (vs Bear Case)",
-      value: "1.6x",
-      sub: "Attractive",
+      value: `${rrRatio}x`,
+      sub: rrLabel,
       isText: false,
     },
   ];
@@ -354,7 +364,7 @@ function WeightedOutcomeBar() {
             }}>
               {t.value}
             </p>
-            {t.sub && (
+            {"sub" in t && t.sub && (
               <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>{t.sub}</p>
             )}
           </div>
@@ -368,13 +378,17 @@ function WeightedOutcomeBar() {
         gap: 12,
         borderLeft: "1px solid var(--qc-hair)",
       }}>
-        <RiskRewardGauge ratio={1.6} />
+        <RiskRewardGauge ratio={rrRatio} />
         <p style={{
           fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.5,
           margin: 0, maxWidth: 140,
         }}>
-          Asymmetric payoff with limited downside and{" "}
-          <strong style={{ color: "var(--qc-up)" }}>meaningful upside.</strong>
+          {rrRatio >= 1.5
+            ? <>Asymmetric payoff with limited downside and{" "}<strong style={{ color: "var(--qc-up)" }}>meaningful upside.</strong></>
+            : rrRatio >= 1.1
+            ? <>Balanced payoff with moderate risk and <strong style={{ color: "var(--qc-blue)" }}>reasonable upside.</strong></>
+            : <>Elevated risk relative to potential upside — <strong style={{ color: "var(--qc-down)" }}>proceed cautiously.</strong></>
+          }
         </p>
       </div>
     </div>
@@ -383,9 +397,16 @@ function WeightedOutcomeBar() {
 
 // ─── Sub-header ───────────────────────────────────────────────────────────────
 
-function SubHeader({ km }: { km: Record<string, string> }) {
-  const cmp = "₹2,560";
-  const horizon = "3-year holding period";
+function SubHeader({ lens }: { lens: LensDetail }) {
+  const km = lens.key_metrics ?? {};
+  const sig = lens.top_signals ?? [];
+
+  // Try to find any revenue/AUM/business metric for the sub-header context line
+  const contextMetric = sig.find((s) => s.unit === "Cr" && s.actual_value != null && s.actual_value > 100);
+  const contextValue = contextMetric
+    ? `${contextMetric.label}: ₹${contextMetric.actual_value} Cr`
+    : Object.entries(km).slice(0, 1).map(([k, v]) => `${k}: ${v}`)[0] ?? "";
+
   return (
     <div style={{
       display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -410,21 +431,37 @@ function SubHeader({ km }: { km: Record<string, string> }) {
       </div>
       <div style={{ textAlign: "right" }}>
         <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>
-          {horizon} · Current Price: {cmp} · 9M Revenue: {km["MSWIL_9M_Revenue"] ?? "8,143 Cr"}
+          3-year holding period{contextValue ? ` · ${contextValue}` : ""}
         </p>
       </div>
     </div>
   );
 }
 
+// ─── Summary footer metrics ───────────────────────────────────────────────────
+
+function buildFooterMetrics(lens: LensDetail, scenarios: ScenarioDef[]) {
+  const base = scenarios.find((s) => s.key === "base")!;
+  const bull = scenarios.find((s) => s.key === "bull")!;
+  const bear = scenarios.find((s) => s.key === "bear")!;
+  const rrRatio = lens.score >= 70 ? 1.6 : lens.score >= 55 ? 1.2 : 0.9;
+
+  return [
+    { label: "Base EPS CAGR", value: base.epsCagr, sub: "Most likely outcome" },
+    { label: "Bull EPS CAGR", value: bull.epsCagr, sub: "Upside scenario" },
+    { label: "Risk/Reward", value: `${rrRatio}×`, sub: `vs Bear (${bear.epsCagr} EPS CAGR)` },
+  ];
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function LensDetailTargetPriceMatrix({ lens }: Props) {
-  const scenarios = buildScenarios(lens.key_metrics);
+  const scenarios = buildScenarios(lens);
+  const footerMetrics = buildFooterMetrics(lens, scenarios);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <SubHeader km={lens.key_metrics} />
+      <SubHeader lens={lens} />
 
       {/* 3 scenario cards */}
       <div style={{ display: "flex", gap: 14, alignItems: "stretch" }}>
@@ -434,17 +471,13 @@ export function LensDetailTargetPriceMatrix({ lens }: Props) {
       </div>
 
       {/* Probability-weighted outcome row */}
-      <WeightedOutcomeBar />
+      <WeightedOutcomeBar lens={lens} />
 
       {/* Summary footer */}
       <LensDrawerSummaryCard
-        title="Attractive risk/reward with meaningful base-case upside."
-        body={lens.takeaway}
-        metrics={[
-          { label: "Base Target", value: "₹3,122–₹3,548", sub: "+26% from CMP" },
-          { label: "Bull Target", value: "₹4,457–₹5,057", sub: "+84.8% from CMP" },
-          { label: "Risk/Reward", value: "1.6×", sub: "vs Bear case" },
-        ]}
+        title={lens.takeaway?.split(".")[0] ?? "Risk/reward analysis complete."}
+        body={lens.takeaway ?? ""}
+        metrics={footerMetrics}
       />
     </div>
   );

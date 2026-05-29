@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { TrendingUp } from "lucide-react";
-import { MonoLabel, LimeCountPip, ActionButton } from "@/components/ds";
+import { MonoLabel, LimeCountPip } from "@/components/ds";
 
 export type MovingItemKind = "score_upgrade" | "score_downgrade" | "earnings";
 
@@ -33,6 +33,12 @@ const kindColors: Record<MovingItemKind, string> = {
   earnings:        "var(--qc-warn, #f59e0b)",
 };
 
+const kindBorderColors: Record<MovingItemKind, string> = {
+  score_upgrade:   "var(--qc-up,  #22c55e)",
+  score_downgrade: "var(--qc-down, #ef4444)",
+  earnings:        "var(--qc-warn, #f59e0b)",
+};
+
 function scoreColor(score: number) {
   if (score >= 70) return "var(--qc-up, #22c55e)";
   if (score >= 50) return "var(--qc-warn, #f59e0b)";
@@ -45,7 +51,7 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
       className="rounded-[10px] p-2"
       style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
     >
-      {/* Header — matches WhoToCallToday */}
+      {/* Header */}
       <div className="px-2 pt-1 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <TrendingUp className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
@@ -74,83 +80,135 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
       {/* Inner white card */}
       <div className="rounded-[10px] overflow-hidden" style={{ background: "var(--qc-card)" }}>
         {items.map((item, idx) => (
-          <div
+          <Link
             key={item.id}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "110px minmax(0,1fr) auto",
-              gap: 16,
-              alignItems: "start",
-              padding: "16px 18px",
-              borderTop: idx === 0 ? "none" : "1px solid var(--qc-hair-2)",
-            }}
+            href={item.ctaHref}
+            style={{ textDecoration: "none", display: "block" }}
+            className="moving-feed-row"
           >
-            {/* Symbol + price */}
-            <div>
-              <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1.3 }}>{item.symbol}</div>
-              <div
-                style={{
-                  fontSize: "var(--qc-fz-12)",
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "100px minmax(0,1fr) 64px",
+                gap: 20,
+                alignItems: "center",
+                padding: "14px 18px",
+                borderTop: idx === 0 ? "none" : "1px solid var(--qc-hair-2)",
+                borderLeft: `3px solid ${kindBorderColors[item.kind]}`,
+                transition: "background 0.12s ease",
+              }}
+            >
+              {/* Symbol + price */}
+              <div style={{ flexShrink: 0 }}>
+                <div style={{
+                  fontSize: "var(--qc-fz-13)",
+                  fontWeight: "var(--qc-w-semi)",
+                  fontFamily: "var(--qc-font-sans)",
+                  color: "var(--qc-ink)",
+                  lineHeight: 1.3,
+                  letterSpacing: "0.02em",
+                }}>
+                  {item.symbol}
+                </div>
+                <div style={{
+                  fontSize: "var(--qc-fz-11)",
                   fontFamily: "var(--qc-font-mono)",
                   color: item.priceChangePositive ? "var(--qc-up)" : "var(--qc-down)",
-                  marginTop: 2,
-                }}
-              >
-                {item.price} {item.priceChange}
+                  marginTop: 3,
+                  letterSpacing: "0.01em",
+                }}>
+                  {item.price}
+                  <span style={{ marginLeft: 4, opacity: 0.85 }}>{item.priceChange}</span>
+                </div>
               </div>
-            </div>
 
-            {/* Body */}
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: kindColors[item.kind], marginBottom: 3 }}>
-                {item.headlineLabel}
-                {item.headlineDetail && (
-                  <span style={{ color: "var(--qc-ink)", fontWeight: "var(--qc-w-regular)" }}> · {item.headlineDetail}</span>
-                )}
-              </div>
-              <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", lineHeight: 1.5, marginBottom: 3 }}>{item.body}</div>
-              <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)" }}>{item.holdingDetail}</div>
-            </div>
-
-            {/* QC Score + CTA */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10 }}>
-              <div style={{ textAlign: "right" }}>
-                <div
-                  style={{
-                    fontFamily: "var(--qc-font-mono)",
-                    fontSize: "var(--qc-fz-9)",
+              {/* Body */}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4, flexWrap: "wrap" }}>
+                  <span style={{
+                    fontSize: "var(--qc-fz-12)",
                     fontWeight: "var(--qc-w-semi)",
-                    color: "var(--qc-ink-3)",
-                    letterSpacing: "var(--qc-track-eyebrow-l)",
-                    textTransform: "uppercase",
-                    marginBottom: 3,
-                  }}
-                >
+                    fontFamily: "var(--qc-font-sans)",
+                    color: kindColors[item.kind],
+                    whiteSpace: "nowrap",
+                  }}>
+                    {item.headlineLabel}
+                  </span>
+                  {item.headlineDetail && (
+                    <span style={{
+                      fontSize: "var(--qc-fz-12)",
+                      fontFamily: "var(--qc-font-mono)",
+                      color: "var(--qc-ink-2)",
+                      fontWeight: "var(--qc-w-regular)",
+                    }}>
+                      {item.headlineDetail}
+                    </span>
+                  )}
+                </div>
+                <div style={{
+                  fontSize: "var(--qc-fz-12)",
+                  fontFamily: "var(--qc-font-sans)",
+                  color: "var(--qc-ink-2)",
+                  lineHeight: 1.55,
+                  marginBottom: 5,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}>
+                  {item.body}
+                </div>
+                <div style={{
+                  fontSize: "var(--qc-fz-11)",
+                  fontFamily: "var(--qc-font-sans)",
+                  color: "var(--qc-ink-3)",
+                  letterSpacing: "0.01em",
+                }}>
+                  {item.holdingDetail}
+                </div>
+              </div>
+
+              {/* QC Score */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
+                <div style={{
+                  fontFamily: "var(--qc-font-mono)",
+                  fontSize: "var(--qc-fz-9)",
+                  fontWeight: "var(--qc-w-semi)",
+                  color: "var(--qc-ink-3)",
+                  letterSpacing: "var(--qc-track-eyebrow-l)",
+                  textTransform: "uppercase",
+                }}>
                   QC SCORE
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
-                  <span
-                    style={{
-                      width: 7,
-                      height: 7,
-                      borderRadius: "50%",
-                      background: scoreColor(item.qcScore),
-                      display: "inline-block",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span style={{ fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <span style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: scoreColor(item.qcScore),
+                    display: "inline-block",
+                    flexShrink: 0,
+                  }} />
+                  <span style={{
+                    fontSize: "var(--qc-fz-15)",
+                    fontWeight: "var(--qc-w-semi)",
+                    color: "var(--qc-ink)",
+                    fontFamily: "var(--qc-font-mono)",
+                  }}>
                     {item.qcScore}
                   </span>
                 </div>
               </div>
-              <Link href={item.ctaHref} style={{ textDecoration: "none" }}>
-                <ActionButton noWrap size="sm">{item.ctaLabel} →</ActionButton>
-              </Link>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
+
+      <style>{`
+        .moving-feed-row:hover > div {
+          background: var(--qc-section, #f5f5f5) !important;
+        }
+      `}</style>
     </div>
   );
 }

@@ -324,7 +324,7 @@ export default function InvestorDashboardPage() {
         >
           <MODSynopsisCard
             overallScore={72}
-            headline={`Your book scores <span style="color:#818cf8;font-style:italic">72/100</span> — strong on management, <span style="color:#818cf8;font-style:italic">stretched on deal.</span>`}
+            headline={`Your book scores <span style="color:#C8A84B;font-style:italic">72/100</span> — strong on management, <span style="color:#C8A84B;font-style:italic">stretched on deal.</span>`}
             subScores={[
               { label: "Management", score: 81, rating: "STRONG"    },
               { label: "Opportunity", score: 74, rating: "FAIR"      },

@@ -70,7 +70,7 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
 
       {/* Header — mono label + optional upload button */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <MonoLabel size={10} tracking="0.14em" color="rgba(255,255,255,0.40)">
+        <MonoLabel size={10} tracking="0.14em" color="rgba(255,255,255,0.45)">
           {isShadow ? "Shadow Portfolio · MOD Synopsis" : "Your Portfolio · MOD Synopsis"}
         </MonoLabel>
         {isShadow && onUploadPortfolio && (
@@ -99,7 +99,7 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
       {/* Headline — serif, matches management verdict card */}
       <p
         style={{
-          fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-regular)", lineHeight: 1.4,
+          fontSize: "var(--qc-fz-26)", fontWeight: "var(--qc-w-regular)", lineHeight: 1.35,
           color: "var(--qc-on-dark)", margin: 0,
           fontFamily: "var(--qc-font-serif)",
           letterSpacing: "var(--qc-track-display)",
@@ -128,7 +128,7 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
       >
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           {draggingSymbols.length > 0 && (
-            <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "rgba(255,255,255,0.40)" }}>
+            <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "rgba(255,255,255,0.45)" }}>
               Dragging Deal score:
             </span>
           )}
@@ -139,15 +139,15 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
+                display: "inline-flex", alignItems: "center", gap: 7,
                 background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.14)",
-                borderRadius: 999, padding: "4px 10px",
-                fontSize: "var(--qc-fz-11)", color: "rgba(255,255,255,0.85)",
+                borderRadius: 999, padding: "5px 12px",
+                fontSize: "var(--qc-fz-12)", color: "rgba(255,255,255,0.88)",
                 fontFamily: "var(--qc-font-sans)",
                 textDecoration: "none",
               }}
             >
-              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--qc-down,#DC2626)", flexShrink: 0 }} />
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--qc-down,#DC2626)", flexShrink: 0 }} />
               {s}
             </Link>
           ))}

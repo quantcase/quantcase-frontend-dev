@@ -56,7 +56,8 @@ const COL_CELL: React.CSSProperties = {
   borderBottom: "1px solid var(--qc-hair)",
 };
 
-function ScoreChip({ score, verdict }: { score: number; verdict: string }) {
+function ScoreChip({ score, verdict }: { score: number | null; verdict: string | null }) {
+  if (score === null || verdict === null) return <span style={{ fontSize: "var(--qc-fz-11)", color: "#888" }}>—</span>;
   const ref = useRef<HTMLSpanElement>(null);
   const [show, setShow] = useState(false);
   const [alignRight, setAlignRight] = useState(false);
@@ -153,13 +154,13 @@ function PeerTableRow({
       <td style={cellStyle}>{peer.npQtrCr !== null ? `₹${fmtNum(peer.npQtrCr, 0)} Cr` : "—"}</td>
       <td style={{ ...cellStyle, color: profitVar.color }}>{profitVar.text}</td>
       <td style={{ ...cellStyle, textAlign: "center" }}>
-        <ScoreChip score={peer.management.score} verdict={peer.management.verdict} />
+        <ScoreChip score={peer.management?.score ?? null} verdict={peer.management?.verdict ?? null} />
       </td>
       <td style={{ ...cellStyle, textAlign: "center" }}>
-        <ScoreChip score={peer.opportunity.score} verdict={peer.opportunity.verdict} />
+        <ScoreChip score={peer.opportunity?.score ?? null} verdict={peer.opportunity?.verdict ?? null} />
       </td>
       <td style={{ ...cellStyle, textAlign: "center", paddingRight: 14 }}>
-        <ScoreChip score={peer.deal.score} verdict={peer.deal.verdict} />
+        <ScoreChip score={peer.deal?.score ?? null} verdict={peer.deal?.verdict ?? null} />
       </td>
     </tr>
   );

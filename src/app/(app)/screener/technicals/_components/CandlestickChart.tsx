@@ -38,9 +38,12 @@ interface Props {
 }
 
 function toLineData(series: IndicatorPoint[]): LineData[] {
+  const seen = new Set<string>();
   return series
     .filter((p): p is { date: string; value: number } => p.value !== null)
-    .map((p) => ({ time: p.date as Time, value: p.value }));
+    .map((p) => ({ time: p.date as Time, value: p.value }))
+    .sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : 0))
+    .filter((p) => { if (seen.has(p.time as string)) return false; seen.add(p.time as string); return true; });
 }
 
 interface LineConfig {
@@ -114,6 +117,7 @@ function detectRsiDivergences(
 
   const sorted = [...priceBars]
     .sort((a, b) => a.date.localeCompare(b.date))
+    .filter((p, i, arr) => i === 0 || p.date !== arr[i - 1].date)
     .filter((p) => rsiMap.has(p.date));
 
   if (sorted.length < minSpan + lookback * 2) return [];
@@ -355,11 +359,15 @@ export function CandlestickChart({
     }
 
     // Volume bars colored by candle direction
-    volumeSeriesRef.current.setData(sorted.map((p) => ({
-      time: p.date as Time,
-      value: p.volume,
-      color: p.close >= p.open ? "rgba(21,128,61,0.22)" : "rgba(185,28,28,0.22)",
-    })));
+    volumeSeriesRef.current.setData(
+      sorted
+        .filter((p) => p.volume != null)
+        .map((p) => ({
+          time: p.date as Time,
+          value: p.volume,
+          color: p.close >= p.open ? "rgba(21,128,61,0.22)" : "rgba(185,28,28,0.22)",
+        }))
+    );
 
     chartRef.current?.timeScale().fitContent();
   }, [prices]);
@@ -386,7 +394,9 @@ export function CandlestickChart({
 
     if (prices.length === 0) return;
 
-    const sorted = [...prices].sort((a, b) => a.date.localeCompare(b.date));
+    const sorted = [...prices]
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .filter((p, i, arr) => i === 0 || p.date !== arr[i - 1].date);
     const firstDate = sorted[0].date as Time;
     const lastDate = sorted[sorted.length - 1].date as Time;
 
@@ -473,7 +483,9 @@ export function CandlestickChart({
       nextLegend.push({ key: cfg.title, title: cfg.title, color: cfg.color, isOsc: false, visible: true });
     }
 
-    const sorted = [...prices].sort((a, b) => a.date.localeCompare(b.date));
+    const sorted = [...prices]
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .filter((p, i, arr) => i === 0 || p.date !== arr[i - 1].date);
     const firstDate = sorted[0]?.date as Time | undefined;
     const lastDate = sorted[sorted.length - 1]?.date as Time | undefined;
 
@@ -590,7 +602,9 @@ export function CandlestickChart({
 
     // Average volume line (DEFAULT + STRUCTURE modes)
     if ((chartMode === "DEFAULT" || chartMode === "STRUCTURE") && prices.length > 0) {
-      const sortedPrices = [...prices].sort((a, b) => a.date.localeCompare(b.date));
+      const sortedPrices = [...prices]
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .filter((p, i, arr) => i === 0 || p.date !== arr[i - 1].date);
       const period = 20;
       const avgVolData: LineData[] = [];
       for (let i = period - 1; i < sortedPrices.length; i++) {

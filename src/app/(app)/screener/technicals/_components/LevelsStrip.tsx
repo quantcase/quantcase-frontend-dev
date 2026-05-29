@@ -17,8 +17,9 @@ interface LevelsStripProps {
   changeIsPositive: boolean;
 }
 
-const fmt = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
-const pctFmt = (n: number) => {
+const fmt = (n: number | null | undefined) => n == null ? "—" : `₹${Math.round(n).toLocaleString("en-IN")}`;
+const pctFmt = (n: number | null | undefined) => {
+  if (n == null) return "—";
   const sign = n >= 0 ? "+" : "";
   return `${sign}${n.toFixed(1)}%`;
 };

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Briefcase } from "lucide-react";
-import { MonoLabel, LimeCountPip, ActionButton } from "@/components/ds";
+import { MonoLabel, LimeCountPip } from "@/components/ds";
 
 export type Conviction = "POSITIVE" | "NEUTRAL" | "WATCH" | "HOLD";
 export type ThesisTag = "OPPORTUNITY" | "MANAGEMENT" | "DEAL";
@@ -24,7 +24,6 @@ export interface ShadowStock {
 interface ShadowPortfolioProps {
   count: number;
   stocks: ShadowStock[];
-  thesisDriftCount: number;
 }
 
 function ThesisChip({ tag }: { tag: ThesisTag }) {
@@ -48,10 +47,7 @@ function ThesisChip({ tag }: { tag: ThesisTag }) {
   );
 }
 
-export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortfolioProps) {
-  const mgmtCount = stocks.filter(s => s.thesisTags.includes("MANAGEMENT")).length;
-  const oppCount  = stocks.filter(s => s.thesisTags.includes("OPPORTUNITY")).length;
-  const dealCount = stocks.filter(s => s.thesisTags.includes("DEAL")).length;
+export function ShadowPortfolio({ count, stocks }: ShadowPortfolioProps) {
 
   return (
     <div
@@ -66,33 +62,32 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
           <LimeCountPip count={count} />
         </div>
         <div className="flex items-center gap-3">
-          <button
+          <Link
+            href="/investor/portfolio"
             style={{
               fontFamily: "var(--qc-font-mono)",
               fontSize: "var(--qc-fz-11)",
               letterSpacing: "var(--qc-track-mono)",
               color: "var(--qc-ink-3)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
+              textDecoration: "none",
               whiteSpace: "nowrap",
             }}
           >
             ALL THESES ▾
-          </button>
-          <span
+          </Link>
+          <Link
+            href="/investor/portfolio"
             style={{
               fontFamily: "var(--qc-font-mono)",
               fontSize: "var(--qc-fz-11)",
               letterSpacing: "var(--qc-track-mono)",
               color: "var(--qc-ink-3)",
-              cursor: "pointer",
+              textDecoration: "none",
               whiteSpace: "nowrap",
             }}
           >
             MANAGE →
-          </span>
+          </Link>
         </div>
       </div>
 
@@ -107,7 +102,7 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr 1fr 0.6fr 0.6fr 3fr 1.1fr 0.7fr",
+            gridTemplateColumns: "2fr 1fr 0.6fr 0.6fr 3fr 1.1fr",
             padding: "7px 18px",
             fontSize: "var(--qc-fz-10)",
             fontWeight: "var(--qc-w-medium)",
@@ -124,100 +119,93 @@ export function ShadowPortfolio({ count, stocks, thesisDriftCount }: ShadowPortf
           <div>QC</div>
           <div>THESIS</div>
           <div>CONVICTION</div>
-          <div />
         </div>
 
         {/* Rows */}
         <div>
           {stocks.map((s, i) => (
-            <div
+            <Link
               key={s.symbol}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "2fr 1fr 0.6fr 0.6fr 3fr 1.1fr 0.7fr",
-                padding: "10px 18px",
-                alignItems: "center",
-                borderBottom: i < stocks.length - 1 ? "1px solid var(--qc-hair-2)" : "none",
-              }}
+              href={s.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none", display: "block" }}
+              className="shadow-portfolio-row"
             >
-              <div>
-                <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{s.symbol}</div>
-                <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: 1 }}>{s.name}</div>
-              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2fr 1fr 0.6fr 0.6fr 3fr 1.1fr",
+                  padding: "10px 18px",
+                  alignItems: "center",
+                  borderBottom: i < stocks.length - 1 ? "1px solid var(--qc-hair-2)" : "none",
+                  transition: "background 0.12s ease",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{s.symbol}</div>
+                  <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: 1 }}>{s.name}</div>
+                </div>
 
-              <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.ltp}</div>
+                <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.ltp}</div>
 
-              <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: s.changePositive ? "var(--qc-up)" : "var(--qc-down)", fontFamily: "var(--qc-font-mono)" }}>
-                {s.change1d}
-              </div>
+                <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: s.changePositive ? "var(--qc-up)" : "var(--qc-down)", fontFamily: "var(--qc-font-mono)" }}>
+                  {s.change1d}
+                </div>
 
-              <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.qcScore}</div>
+                <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.qcScore}</div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
-                {s.thesisTags.map(tag => <ThesisChip key={tag} tag={tag} />)}
-                <button
-                  style={{
-                    fontSize: "var(--qc-fz-10)",
-                    fontFamily: "var(--qc-font-sans)",
-                    color: "var(--qc-ink-2)",
-                    background: "var(--qc-section)",
-                    border: "1px solid var(--qc-hair)",
-                    borderRadius: 3,
-                    padding: "1px 6px",
-                    cursor: "pointer",
-                  }}
-                >
-                  {s.whyInvested} ▾
-                </button>
-                {s.thesisDrift && (
-                  <span
+                <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
+                  {s.thesisTags.map(tag => <ThesisChip key={tag} tag={tag} />)}
+                  <button
+                    onClick={e => e.preventDefault()}
                     style={{
                       fontSize: "var(--qc-fz-10)",
-                      fontWeight: "var(--qc-w-medium)",
                       fontFamily: "var(--qc-font-sans)",
-                      color: "#92400e",
-                      background: "#fef3c7",
-                      border: "1px solid #fde68a",
+                      color: "var(--qc-ink-2)",
+                      background: "var(--qc-section)",
+                      border: "1px solid var(--qc-hair)",
                       borderRadius: 3,
                       padding: "1px 6px",
-                      letterSpacing: "var(--qc-track-mono)",
-                      textTransform: "uppercase",
+                      cursor: "pointer",
                     }}
                   >
-                    DRIFT
-                  </span>
-                )}
-              </div>
+                    {s.whyInvested} ▾
+                  </button>
+                  {s.thesisDrift && (
+                    <span
+                      style={{
+                        fontSize: "var(--qc-fz-10)",
+                        fontWeight: "var(--qc-w-medium)",
+                        fontFamily: "var(--qc-font-sans)",
+                        color: "#92400e",
+                        background: "#fef3c7",
+                        border: "1px solid #fde68a",
+                        borderRadius: 3,
+                        padding: "1px 6px",
+                        letterSpacing: "var(--qc-track-mono)",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      DRIFT
+                    </span>
+                  )}
+                </div>
 
-              <div style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
-                {s.conviction}
+                <div style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
+                  {s.conviction}
+                </div>
               </div>
-
-              <Link href={s.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
-                <ActionButton noWrap size="sm">Open →</ActionButton>
-              </Link>
-            </div>
+            </Link>
           ))}
         </div>
 
-        {/* Footer */}
-        <div style={{ height: 1, background: "var(--qc-hair-2)" }} />
-        <div style={{ padding: "10px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>
-            <span style={{ fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)" }}>{mgmtCount} on Management</span>
-            <span style={{ color: "var(--qc-hair)", margin: "0 5px" }}>·</span>
-            <span style={{ fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)" }}>{oppCount} on Opportunity</span>
-            <span style={{ color: "var(--qc-hair)", margin: "0 5px" }}>·</span>
-            <span style={{ fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)" }}>{dealCount} on Deal</span>
-            {thesisDriftCount > 0 && (
-              <>
-                <span style={{ color: "var(--qc-hair)", margin: "0 5px" }}>·</span>
-                <span style={{ color: "#92400e" }}>⚠ {thesisDriftCount} thesis drifting from QC view</span>
-              </>
-            )}
-          </div>
-          <ActionButton size="sm">+ Add a stock to track</ActionButton>
-        </div>
+        <style>{`
+          .shadow-portfolio-row:hover > div {
+            background: var(--qc-section, #f5f5f5) !important;
+          }
+        `}</style>
+
       </div>
     </div>
   );

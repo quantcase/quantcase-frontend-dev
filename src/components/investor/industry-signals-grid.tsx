@@ -91,19 +91,6 @@ export function IndustrySignalsGrid({ count: countProp }: IndustrySignalsGridPro
           <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Industry Signals</MonoLabel>
           <LimeCountPip count={displayCount} />
         </div>
-        <Link
-          href="/screener/industry-intelligence"
-          style={{
-            fontFamily: "var(--qc-font-mono)",
-            fontSize: "var(--qc-fz-11)",
-            letterSpacing: "var(--qc-track-mono)",
-            color: "var(--qc-ink-3)",
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-          }}
-        >
-          INDUSTRY TERMINAL →
-        </Link>
       </div>
 
       {/* Subtitle */}

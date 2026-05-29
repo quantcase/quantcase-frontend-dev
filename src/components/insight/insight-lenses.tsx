@@ -108,23 +108,22 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
               style={{
                 display: "flex",
                 flexDirection: "column",
-                padding: "18px 18px 18px",
+                padding: "12px 16px",
                 cursor: isClickable ? "pointer" : "default",
                 position: "relative",
                 borderRight: isLeft ? "1px solid var(--qc-hair)" : "none",
                 borderBottom: isTop ? "1px solid var(--qc-hair)" : "none",
-                borderLeft: `3px solid ${accentColor}`,
               }}
             >
               {/* Header */}
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                 {Icon && (
                   <div style={{
                     flexShrink: 0,
                     width: 36, height: 36, borderRadius: 8,
-                    background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+                    background: statusBg, border: `1px solid ${accentColor}22`,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "var(--qc-ink-2)",
+                    color: accentColor,
                   }}>
                     <Icon size={16} strokeWidth={1.5} />
                   </div>

@@ -10,7 +10,6 @@ import { useSignals } from "@/hooks/useSignals";
 
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { AssetActionBar } from "@/components/molecules/asset-action-bar";
-import { ReanalyzeButton } from "@/components/management/reanalyze-button";
 import { InsightScorecard } from "@/components/insight/insight-scorecard";
 import { InsightLenses } from "@/components/insight/insight-lenses";
 import { InsightSignalMap } from "@/components/insight/insight-signal-map";
@@ -172,12 +171,12 @@ function InsightDashboard({
 
   return (
     <>
-      <div className="mb-8 px-4 pt-4 space-y-8">
+      <div className="px-6 pt-3 space-y-3">
         <div id="section-score">
           <InsightScorecard insight={insight} verdictLabel={TYPE_VERDICT_LABELS[type]} onLensClick={handleLensClick} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 24, alignItems: "stretch" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 12, alignItems: "stretch" }}>
           {insight.lenses.length > 0 && (
             <div id="section-lenses" style={{ display: "flex", flexDirection: "column" }}>
               <InsightLenses lenses={insight.lenses} heading={lensHeading} onLensClick={handleLensClick} />
@@ -234,18 +233,7 @@ function InsightTabContent({ type }: { type: InsightType }) {
 
   return (
     <>
-      <ScreenerPageShell
-        headerRight={
-          <ReanalyzeButton
-            isAnalyzing={isAnalyzing}
-            aggregateStatus={aggregateStatus}
-            progress={progress}
-            analyzedAt={insight.analyzed_at ?? null}
-            analyzeError={analyzeError}
-            onClick={trigger}
-          />
-        }
-      >
+      <ScreenerPageShell>
         <InsightDashboard insight={insight} type={type} ticker={symbol} />
       </ScreenerPageShell>
       <AssetActionBar ticker={symbol} />

@@ -106,12 +106,23 @@ function SearchZone() {
   );
 }
 
+function useScrolled(threshold = 4) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > threshold);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [threshold]);
+  return scrolled;
+}
+
 function TopBarInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
   const symbol = searchParams.get("symbol");
   const rmId = searchParams.get("rm_id");
+  const scrolled = useScrolled();
 
   const isHome = pathname === "/dashboard";
   const isScreenerHomePage = pathname === "/screener/home";
@@ -297,22 +308,29 @@ function TopBarInner() {
   }
 
   return (
-    <header
-      className="fixed left-[72px] right-0 top-0 z-30 flex h-[60px] items-center justify-between px-6"
-      style={{ background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}
+    <motion.header
+      className="fixed left-[72px] right-0 top-0 z-30 flex h-[60px] items-center px-6"
+      animate={scrolled ? "scrolled" : "top"}
+      variants={{
+        top: {
+          background: "rgba(255,255,255,0)",
+          backdropFilter: "blur(0px)",
+          WebkitBackdropFilter: "blur(0px)",
+          borderBottom: "1px solid rgba(226,226,226,0)",
+          boxShadow: "0 1px 8px rgba(0,0,0,0)",
+        },
+        scrolled: {
+          background: "rgba(255,255,255,0.82)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          borderBottom: "1px solid rgba(226,226,226,0.6)",
+          boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
+        },
+      }}
+      transition={{ duration: 0.25, ease: "easeInOut" }}
     >
       <div className="flex h-full items-center">{leftZone}</div>
-
-      {/* Right: user avatar */}
-      <div className="flex items-center gap-4">
-        <div
-          className="flex size-9 items-center justify-center rounded-full text-sm font-semibold text-white"
-          style={{ background: "var(--qc-ink)" }}
-        >
-          PJ
-        </div>
-      </div>
-    </header>
+    </motion.header>
   );
 }
 
@@ -324,7 +342,7 @@ function TopBarGuard() {
       fallback={
         <header
           className="fixed left-[72px] right-0 top-0 z-30 h-[60px]"
-          style={{ background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}
+          style={{ background: "transparent" }}
         />
       }
     >

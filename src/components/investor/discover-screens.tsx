@@ -128,18 +128,19 @@ export function DiscoverScreens({ screens }: DiscoverScreensProps) {
           <Compass className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
           <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Discover · Worth your attention this week</MonoLabel>
         </div>
-        <span
+        <Link
+          href="/screener/home"
           style={{
             fontFamily: "var(--qc-font-mono)",
             fontSize: "var(--qc-fz-11)",
             letterSpacing: "var(--qc-track-mono)",
             color: "var(--qc-ink-3)",
-            cursor: "pointer",
+            textDecoration: "none",
             whiteSpace: "nowrap",
           }}
         >
           ALL SCREENS →
-        </span>
+        </Link>
       </div>
 
       {/* Subtitle */}

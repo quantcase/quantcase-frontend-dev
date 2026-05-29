@@ -6,6 +6,15 @@ import { Users } from "lucide-react";
 import { useScreenerPeers, type PeerRow } from "@/hooks/useScreenerPeers";
 import { MonoLabel, LimeCountPip } from "@/components/ds";
 
+type ActiveFactor = "management" | "opportunity" | "deal" | null;
+
+function pathToActiveFactor(pathname: string): ActiveFactor {
+  if (pathname.includes("/management")) return "management";
+  if (pathname.includes("/opportunity")) return "opportunity";
+  if (pathname.includes("/deal")) return "deal";
+  return null;
+}
+
 function fmtCap(cr: number | null): string {
   if (cr === null) return "—";
   if (cr >= 1_00_000) return `₹${(cr / 1_00_000).toFixed(1)}L Cr`;
@@ -108,14 +117,18 @@ function ScoreChip({ score, verdict }: { score: number | null; verdict: string |
   );
 }
 
+const ACTIVE_COL_BG = "rgba(15,23,43,0.035)";
+
 function PeerTableRow({
   peer,
   isLast,
   onClick,
+  activeFactor,
 }: {
   peer: PeerRow;
   isLast: boolean;
   onClick: () => void;
+  activeFactor: ActiveFactor;
 }) {
   const profitVar = fmtVar(peer.qtrProfitVar);
   const salesVar = fmtVar(peer.qtrSalesVar);
@@ -128,6 +141,8 @@ function PeerTableRow({
     textAlign: "left",
     fontFamily: "inherit",
   };
+  const activeCell = (factor: ActiveFactor): React.CSSProperties =>
+    activeFactor === factor ? { background: ACTIVE_COL_BG } : {};
 
   return (
     <tr
@@ -153,13 +168,13 @@ function PeerTableRow({
       <td style={{ ...cellStyle, color: salesVar.color }}>{salesVar.text}</td>
       <td style={cellStyle}>{peer.npQtrCr !== null ? `₹${fmtNum(peer.npQtrCr, 0)} Cr` : "—"}</td>
       <td style={{ ...cellStyle, color: profitVar.color }}>{profitVar.text}</td>
-      <td style={{ ...cellStyle, textAlign: "center" }}>
+      <td style={{ ...cellStyle, textAlign: "center", ...activeCell("management") }}>
         <ScoreChip score={peer.management?.score ?? null} verdict={peer.management?.verdict ?? null} />
       </td>
-      <td style={{ ...cellStyle, textAlign: "center" }}>
+      <td style={{ ...cellStyle, textAlign: "center", ...activeCell("opportunity") }}>
         <ScoreChip score={peer.opportunity?.score ?? null} verdict={peer.opportunity?.verdict ?? null} />
       </td>
-      <td style={{ ...cellStyle, textAlign: "center", paddingRight: 14 }}>
+      <td style={{ ...cellStyle, textAlign: "center", paddingRight: 14, ...activeCell("deal") }}>
         <ScoreChip score={peer.deal?.score ?? null} verdict={peer.deal?.verdict ?? null} />
       </td>
     </tr>
@@ -173,6 +188,7 @@ interface SimilarStocksProps {
 export function SimilarStocks({ symbol }: SimilarStocksProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const activeFactor = pathToActiveFactor(pathname);
   const { data, loading } = useScreenerPeers(symbol);
 
   const [showAll, setShowAll] = useState(false);
@@ -246,9 +262,9 @@ export function SimilarStocks({ symbol }: SimilarStocksProps) {
                 <th style={COL_HEADER}>Sales Var</th>
                 <th style={COL_HEADER}>Qtr Profit</th>
                 <th style={COL_HEADER}>Profit Var</th>
-                <th style={{ ...COL_HEADER, textAlign: "center" }}>Mgmt</th>
-                <th style={{ ...COL_HEADER, textAlign: "center" }}>Opp</th>
-                <th style={{ ...COL_HEADER, textAlign: "center", paddingRight: 14 }}>Deal</th>
+                <th style={{ ...COL_HEADER, textAlign: "center", ...(activeFactor === "management" ? { background: ACTIVE_COL_BG, color: "var(--qc-ink-2)" } : {}) }}>Mgmt</th>
+                <th style={{ ...COL_HEADER, textAlign: "center", ...(activeFactor === "opportunity" ? { background: ACTIVE_COL_BG, color: "var(--qc-ink-2)" } : {}) }}>Opp</th>
+                <th style={{ ...COL_HEADER, textAlign: "center", paddingRight: 14, ...(activeFactor === "deal" ? { background: ACTIVE_COL_BG, color: "var(--qc-ink-2)" } : {}) }}>Deal</th>
               </tr>
             </thead>
             <tbody>
@@ -258,6 +274,7 @@ export function SimilarStocks({ symbol }: SimilarStocksProps) {
                   peer={peer}
                   isLast={idx === peers.length - 1}
                   onClick={() => handleClick(peer.symbol)}
+                  activeFactor={activeFactor}
                 />
               ))}
             </tbody>

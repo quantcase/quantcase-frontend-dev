@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Zap } from "lucide-react";
 import { MonoLabel } from "@/components/ds";
 
@@ -8,7 +9,7 @@ export interface MacroRegime {
   title: string;
   arrow: string;
   subtitle: string;
-  sectors: { name: string; direction: "up" | "down"; metric: string }[];
+  sectors: { name: string; direction: "up" | "down"; metric: string; basketId?: string }[];
 }
 
 interface EventsMovingMarketProps {
@@ -28,23 +29,9 @@ export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime,
       style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", flex: 1 }}
     >
       {/* Header — matches WhoToCallToday */}
-      <div className="px-2 pt-1 pb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Zap className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
-          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Events Moving the Market</MonoLabel>
-        </div>
-        <span
-          style={{
-            fontFamily: "var(--qc-font-mono)",
-            fontSize: "var(--qc-fz-11)",
-            letterSpacing: "var(--qc-track-mono)",
-            color: "var(--qc-ink-3)",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-          }}
-        >
-          FULL MACRO BRIEF →
-        </span>
+      <div className="px-2 pt-1 pb-3 flex items-center gap-2">
+        <Zap className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+        <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Events Moving the Market</MonoLabel>
       </div>
 
       {/* Subtitle */}
@@ -78,12 +65,18 @@ export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime,
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {regime.sectors.map((sec) => (
-                  <div key={sec.name}>
+                  <Link
+                    key={sec.name}
+                    href={sec.basketId ? `/screener/basket?id=${sec.basketId}` : "/screener/home"}
+                    style={{ textDecoration: "none", display: "block", borderRadius: 6, padding: "4px 6px", margin: "-4px -6px", transition: "background 0.15s" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "var(--qc-section)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  >
                     <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{sec.name}</div>
                     <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: arrowColor(sec.direction) }}>
                       {arrowChar(sec.direction)} {sec.metric}
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

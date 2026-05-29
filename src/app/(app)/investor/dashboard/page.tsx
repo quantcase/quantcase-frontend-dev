@@ -101,9 +101,9 @@ const MACRO_REGIMES: MacroRegime[] = [
     arrow: "↑",
     subtitle: "Input Cost Inflation",
     sectors: [
-      { name: "Paints",   direction: "down", metric: "margin" },
-      { name: "Tyres",    direction: "down", metric: "margin" },
-      { name: "Aviation", direction: "down", metric: "cost"   },
+      { name: "Paints",   direction: "down", metric: "margin", basketId: "paints"   },
+      { name: "Tyres",    direction: "down", metric: "margin", basketId: "tyres"    },
+      { name: "Aviation", direction: "down", metric: "cost",   basketId: "aviation" },
     ],
   },
   {
@@ -112,9 +112,9 @@ const MACRO_REGIMES: MacroRegime[] = [
     arrow: "↑",
     subtitle: "Expansion",
     sectors: [
-      { name: "Defense",     direction: "up", metric: "capex"  },
-      { name: "Industrials", direction: "up", metric: "orders" },
-      { name: "Electronics", direction: "up", metric: "local"  },
+      { name: "Defense",     direction: "up", metric: "capex",  basketId: "defense"     },
+      { name: "Industrials", direction: "up", metric: "orders", basketId: "industrials" },
+      { name: "Electronics", direction: "up", metric: "local",  basketId: "electronics" },
     ],
   },
   {
@@ -123,9 +123,9 @@ const MACRO_REGIMES: MacroRegime[] = [
     arrow: "↑",
     subtitle: "Momentum",
     sectors: [
-      { name: "Cap Goods",   direction: "up", metric: "orders"   },
-      { name: "Industrials", direction: "up", metric: "activity" },
-      { name: "Logistics",   direction: "up", metric: "volume"   },
+      { name: "Cap Goods",   direction: "up", metric: "orders",   basketId: "capital-goods" },
+      { name: "Industrials", direction: "up", metric: "activity", basketId: "industrials"   },
+      { name: "Logistics",   direction: "up", metric: "volume",   basketId: "logistics"     },
     ],
   },
   {
@@ -134,9 +134,9 @@ const MACRO_REGIMES: MacroRegime[] = [
     arrow: "→",
     subtitle: "Policy Pause",
     sectors: [
-      { name: "Banks",       direction: "up",   metric: "NIM stable" },
-      { name: "Real Estate", direction: "down", metric: "demand"     },
-      { name: "Utilities",   direction: "down", metric: "cap cost"   },
+      { name: "Banks",       direction: "up",   metric: "NIM stable", basketId: "private-banks" },
+      { name: "Real Estate", direction: "down", metric: "demand",     basketId: "real-estate"   },
+      { name: "Utilities",   direction: "down", metric: "cap cost",   basketId: "utilities"     },
     ],
   },
 ];
@@ -409,7 +409,6 @@ export default function InvestorDashboardPage() {
           <ShadowPortfolio
             count={shadowCount}
             stocks={shadowStocksToShow}
-            thesisDriftCount={shadowStocksToShow.filter((s) => s.thesisDrift).length}
           />
         </section>
 

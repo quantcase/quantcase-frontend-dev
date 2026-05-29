@@ -445,20 +445,22 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
 
   return (
     <>
-      {/* Sticky footer bar */}
+      {/* Floating pill action bar */}
       <div
         style={{
-          position: "sticky",
-          bottom: 0,
+          position: "fixed",
+          bottom: 24,
+          left: "50%",
+          transform: "translateX(-50%)",
           zIndex: 50,
-          background: "rgba(255,255,255,0.95)",
-          backdropFilter: "blur(8px)",
-          borderTop: "1px solid var(--qc-hair, #E2E2E2)",
-          padding: "10px 24px",
           display: "flex",
           alignItems: "center",
-          gap: 10,
+          gap: 4,
+          padding: "6px",
+          borderRadius: 9999,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.32), 0 2px 8px rgba(0,0,0,0.18)",
         }}
+        className="qc-dark-gradient-card"
       >
         {/* Shadow Portfolio button */}
         {inPortfolio ? (
@@ -467,17 +469,17 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "7px 14px",
-              borderRadius: 8,
-              border: "1px solid var(--qc-up-soft, #bbf7d0)",
-              background: "var(--qc-up-bg, #f0fdf4)",
+              padding: "7px 16px",
+              borderRadius: 9999,
               fontSize: "var(--qc-fz-12)",
               fontWeight: "var(--qc-w-medium)",
               fontFamily: "var(--qc-font-sans)",
-              color: "var(--qc-up, #16a34a)",
+              color: "#86efac",
+              background: "rgba(134,239,172,0.12)",
+              border: "1px solid rgba(134,239,172,0.25)",
             }}
           >
-            <Check size={14} />
+            <Check size={13} />
             In Shadow Portfolio
           </div>
         ) : (
@@ -488,23 +490,26 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "7px 14px",
-              borderRadius: 8,
-              border: "1px solid var(--qc-hair, #E2E2E2)",
-              background: justAdded ? "var(--qc-up-bg, #f0fdf4)" : "var(--qc-card, #fff)",
+              padding: "7px 16px",
+              borderRadius: 9999,
+              border: "1px solid rgba(255,255,255,0.12)",
+              background: justAdded ? "rgba(134,239,172,0.12)" : "rgba(255,255,255,0.08)",
               fontSize: "var(--qc-fz-12)",
               fontWeight: "var(--qc-w-medium)",
               fontFamily: "var(--qc-font-sans)",
-              color: justAdded ? "var(--qc-up, #16a34a)" : "var(--qc-ink, #0F172B)",
+              color: justAdded ? "#86efac" : "rgba(255,255,255,0.90)",
               cursor: loading ? "default" : "pointer",
               opacity: loading ? 0.5 : 1,
-              transition: "background 0.2s, color 0.2s",
+              transition: "background 0.2s, color 0.2s, border-color 0.2s",
             }}
           >
-            {justAdded ? <Check size={14} /> : <BookmarkPlus size={14} />}
+            {justAdded ? <Check size={13} /> : <BookmarkPlus size={13} />}
             {justAdded ? "Added!" : "Add to Shadow Portfolio"}
           </button>
         )}
+
+        {/* Divider */}
+        <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.12)", flexShrink: 0 }} />
 
         {/* Notes button */}
         <button
@@ -513,19 +518,36 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
             display: "flex",
             alignItems: "center",
             gap: 6,
-            padding: "7px 14px",
-            borderRadius: 8,
-            border: "1px solid var(--qc-hair, #E2E2E2)",
-            background: "var(--qc-card, #fff)",
+            padding: "7px 16px",
+            borderRadius: 9999,
+            border: "1px solid rgba(255,255,255,0.12)",
+            background: "rgba(255,255,255,0.08)",
             fontSize: "var(--qc-fz-12)",
             fontWeight: "var(--qc-w-medium)",
             fontFamily: "var(--qc-font-sans)",
-            color: "var(--qc-ink, #0F172B)",
+            color: "rgba(255,255,255,0.90)",
             cursor: "pointer",
+            transition: "background 0.15s",
           }}
         >
-          <StickyNote size={14} />
-          Notes{noteCount > 0 && ` (${noteCount})`}
+          <StickyNote size={13} />
+          Notes
+          {noteCount > 0 && (
+            <span
+              style={{
+                fontSize: "var(--qc-fz-10)",
+                fontWeight: "var(--qc-w-bold)",
+                fontFamily: "var(--qc-font-mono)",
+                color: "#86efac",
+                background: "rgba(134,239,172,0.15)",
+                borderRadius: 999,
+                padding: "1px 6px",
+                marginLeft: 2,
+              }}
+            >
+              {noteCount}
+            </span>
+          )}
         </button>
 
         {/* Extra actions slot */}

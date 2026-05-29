@@ -58,18 +58,6 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
           <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">What&apos;s moving in your stocks</MonoLabel>
           <LimeCountPip count={count} />
         </div>
-        <span
-          style={{
-            fontFamily: "var(--qc-font-mono)",
-            fontSize: "var(--qc-fz-11)",
-            letterSpacing: "var(--qc-track-mono)",
-            color: "var(--qc-ink-3)",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-          }}
-        >
-          ALL UPDATES →
-        </span>
       </div>
 
       {/* Subtitle */}

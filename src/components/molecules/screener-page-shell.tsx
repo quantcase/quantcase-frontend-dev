@@ -43,24 +43,22 @@ function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps)
   return (
     <div className="min-h-screen" style={{ background: "var(--qc-bg)" }}>
       {/* Company Header — design-sample style */}
-      <div className="flex items-start justify-between gap-4" style={{ padding: "12px 24px 10px" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <h1
-            style={{ margin: 0, fontSize: "var(--qc-fz-30)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.015em", color: "var(--qc-ink)", lineHeight: 1.2 }}
-          >
-            {companyName}
-          </h1>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {symbol && (
-              <Chip>
-                <span style={{ color: "var(--qc-ink-2)" }}>{exchange}:</span>&nbsp;{symbol}
-              </Chip>
-            )}
-            {sector && <Chip>{sector}</Chip>}
-            {industry && industry !== sector && <Chip>{industry}</Chip>}
-          </div>
+      <div className="flex items-center justify-between gap-4" style={{ padding: "10px 24px 10px" }}>
+        <h1
+          style={{ margin: 0, fontSize: "var(--qc-fz-30)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.015em", color: "var(--qc-ink)", lineHeight: 1.2 }}
+        >
+          {companyName}
+        </h1>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          {symbol && (
+            <Chip>
+              <span style={{ color: "var(--qc-ink-2)" }}>{exchange}:</span>&nbsp;{symbol}
+            </Chip>
+          )}
+          {sector && <Chip>{sector}</Chip>}
+          {industry && industry !== sector && <Chip>{industry}</Chip>}
+          {headerRight}
         </div>
-        {headerRight && <div className="flex items-center gap-3 pt-1">{headerRight}</div>}
       </div>
 
       {/* In-page section nav */}
@@ -72,7 +70,11 @@ function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps)
       <div className="pb-8">{children}</div>
 
       {/* Similar stocks strip */}
-      {symbol && <SimilarStocks symbol={symbol} />}
+      {symbol && (
+        <div className="pb-12">
+          <SimilarStocks symbol={symbol} />
+        </div>
+      )}
     </div>
   );
 }

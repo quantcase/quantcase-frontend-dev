@@ -99,7 +99,7 @@ function LensRow({ lens }: { lens: InsightLens }) {
             letterSpacing: ".01em",
           }}
         >
-          {toTitleCase(lens.subtitle)}
+          {lens.subtitle ? toTitleCase(lens.subtitle) : ""}
         </span>
       </div>
     </div>

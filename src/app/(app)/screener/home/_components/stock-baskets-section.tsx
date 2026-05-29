@@ -105,7 +105,7 @@ export function StockBasketsSection() {
   const { data: basketsData, loading: basketsLoading, error: basketsError } = useBaskets();
 
   return (
-    <div className="max-w-[1400px] mx-auto px-6 pb-12">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pb-12">
       {basketsError && (
         <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 mb-6">
           <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
@@ -114,7 +114,7 @@ export function StockBasketsSection() {
       )}
 
       {basketsLoading && (
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="rounded-[10px] border h-[320px] animate-pulse" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }} />
           ))}
@@ -122,7 +122,7 @@ export function StockBasketsSection() {
       )}
 
       {!basketsLoading && !basketsError && basketsData && (
-        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Object.keys(basketsData.grouped).length}, 1fr)` }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
           {Object.entries(basketsData.grouped).map(([category, baskets]) => {
             const meta = getCategoryMeta(category);
             return (

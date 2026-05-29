@@ -186,20 +186,16 @@ export function MultiLineBarComboChart({
   const resolvedRightLabel =
     activeGroup.rightAxisLabel ?? rightAxisLabel ?? (hasLines ? activeGroup.lineSeries[0]?.name : undefined);
 
-  const groupToggles = groupNames.length > 1 ? (
-    <div className="flex items-center gap-2">
-      {groupNames.map((g) => (
-        <GroupButton key={g} label={g} active={g === activeGroupName} onClick={() => setActiveGroupName(g)} />
-      ))}
-    </div>
-  ) : null;
+  const hasGroupToggles = groupNames.length > 1;
 
   const inner = (
     <div style={{ width: "100%" }}>
       {/* Group toggles — standalone top-right (no card header) */}
-      {!title && groupToggles && (
-        <div className="flex items-center justify-end gap-2 mb-3">
-          {groupToggles}
+      {!title && hasGroupToggles && (
+        <div className="flex flex-wrap items-center justify-end gap-2 mb-3">
+          {groupNames.map((g) => (
+            <GroupButton key={g} label={g} active={g === activeGroupName} onClick={() => setActiveGroupName(g)} />
+          ))}
         </div>
       )}
 
@@ -339,7 +335,7 @@ export function MultiLineBarComboChart({
       >
         {/* Card header */}
         <div
-          className="flex items-center justify-between"
+          className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
           style={{ paddingTop: 4, paddingBottom: 10, paddingLeft: 8, paddingRight: 8 }}
         >
           <div>
@@ -361,7 +357,13 @@ export function MultiLineBarComboChart({
               </div>
             )}
           </div>
-          {groupToggles}
+          {hasGroupToggles && (
+            <div className="flex flex-wrap gap-2">
+              {groupNames.map((g) => (
+                <GroupButton key={g} label={g} active={g === activeGroupName} onClick={() => setActiveGroupName(g)} />
+              ))}
+            </div>
+          )}
         </div>
         {/* Content box */}
         <div

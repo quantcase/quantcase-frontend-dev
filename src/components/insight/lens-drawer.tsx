@@ -107,9 +107,9 @@ export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) 
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
+            className="w-full sm:w-[min(85vw,1100px)]"
             style={{
               position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 70,
-              width: "min(70vw, 1100px)",
               background: "var(--qc-card)",
               borderLeft: "1px solid var(--qc-hair)",
               overflowY: "auto",
@@ -118,11 +118,11 @@ export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) 
             }}
           >
             {/* Header */}
-            <div style={{
+            <div className="px-4 sm:px-6" style={{
               position: "sticky", top: 0, zIndex: 10,
               background: "var(--qc-card)",
               borderBottom: "1px solid var(--qc-hair)",
-              padding: "18px 24px 16px",
+              padding: "18px 0 16px",
               display: "flex",
               alignItems: "flex-start",
               justifyContent: "space-between",
@@ -167,7 +167,7 @@ export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) 
             </div>
 
             {/* Body */}
-            <div style={{ flex: 1, padding: "20px 24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
+            <div className="px-4 sm:px-6 overflow-x-hidden" style={{ flex: 1, paddingTop: 20, paddingBottom: 32, display: "flex", flexDirection: "column", gap: 20 }}>
 
               {/* Lens-specific rich view — or fall back to generic */}
               <LensDetailView lens={lens} signals={signals} ticker={ticker} />

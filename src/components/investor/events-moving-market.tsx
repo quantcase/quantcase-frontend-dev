@@ -42,15 +42,19 @@ export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime,
       {/* Inner white card */}
       <div className="rounded-[10px] overflow-hidden" style={{ background: "var(--qc-card)", display: "flex", flexDirection: "column" }}>
         {/* Regime columns */}
-        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, flex: 1 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ padding: "16px 20px", gap: 0, flex: 1 }}>
           {regimes.map((regime, i) => (
             <div
               key={regime.category}
-              style={{
-                borderRight: i < regimes.length - 1 ? "1px solid var(--qc-hair-2)" : "none",
-                paddingRight: i < regimes.length - 1 ? 20 : 0,
-                paddingLeft: i > 0 ? 20 : 0,
-              }}
+              className={[
+                i % 2 === 0 && i + 1 < regimes.length ? "sm:border-r sm:border-[var(--qc-hair-2)]" : "",
+                i % 2 === 0 ? "sm:pr-5" : "sm:pl-5",
+                "lg:border-r-0 lg:pr-0 lg:pl-0",
+                i < regimes.length - 1 ? "lg:border-r lg:border-[var(--qc-hair-2)] lg:pr-5" : "",
+                i > 0 ? "lg:pl-5" : "",
+                i < regimes.length - 1 ? "pb-4 sm:pb-0 border-b border-[var(--qc-hair-2)] sm:border-b-0" : "",
+                i % 2 === 1 ? "pt-4 sm:pt-0" : "",
+              ].filter(Boolean).join(" ")}
             >
               <div style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", letterSpacing: "var(--qc-track-eyebrow)", textTransform: "uppercase", marginBottom: 4 }}>
                 {regime.category}
@@ -85,7 +89,7 @@ export function EventsMovingMarket({ regimes, totalSectorSignals, refreshedTime,
 
         {/* Footer */}
         <div style={{ height: 1, background: "var(--qc-hair-2)" }} />
-        <div style={{ padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="flex flex-wrap justify-between items-center gap-1" style={{ padding: "10px 20px" }}>
           <div style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>
             {regimes.length} active macro regimes · {totalSectorSignals} sector signals mapped
           </div>

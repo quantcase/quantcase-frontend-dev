@@ -136,7 +136,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
   const label = scoreLabel(insightType);
 
   return (
-    <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ overflow: "visible" }}>
+    <svg width="100%" height="100%" viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ overflow: "visible" }}>
       <defs>
         {/* Per-segment gradients from center (transparent) → vertex color */}
         {data.map((d, i) => {
@@ -430,7 +430,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 12 }}>
 
         {/* LEFT — dark verdict panel */}
         <motion.div
@@ -440,7 +440,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
           variants={cardVariants}
           style={{ borderRadius: 14, overflow: "hidden" }}
         >
-          <DarkGradientCard radius={14} style={{ padding: "28px 28px 24px", display: "flex", flexDirection: "column", minHeight: 260, height: "100%" }}>
+          <DarkGradientCard radius={14} style={{ padding: "20px 16px 20px", display: "flex", flexDirection: "column", minHeight: 260, height: "100%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <MonoLabel size={10} tracking="0.14em" color="rgba(255,255,255,0.45)">
                 {verdictLabel}
@@ -515,11 +515,11 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
           }}
         >
           {/* Top: radar + context text */}
-          <div style={{ display: "flex", alignItems: "center", flex: 1, padding: "8px 0 0" }}>
+          <div className="flex flex-col sm:flex-row items-center" style={{ flex: 1, padding: "8px 0 0" }}>
 
             {/* Radar */}
-            <div style={{ flex: "0 0 52%", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px 0 16px 16px" }}>
-              <div style={{ position: "relative", width: 260, height: 260 }}>
+            <div className="flex items-center justify-center w-full sm:w-auto" style={{ flexShrink: 0, padding: "16px 0 16px 16px" }}>
+              <div className="w-[220px] h-[220px] sm:w-[260px] sm:h-[260px]" style={{ position: "relative" }}>
                 <VertexTooltip lens={hoveredLens} visible={hoveredVertex !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
                 <SVGRadar
                   data={radarData}
@@ -537,7 +537,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
             </div>
 
             {/* Right of radar: band pill + thesis */}
-            <div style={{ flex: 1, padding: "20px 20px 20px 8px" }}>
+            <div className="w-full" style={{ flex: 1, padding: "20px 20px 20px 16px" }}>
               <span style={{
                 display: "inline-block", fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)",
                 letterSpacing: "var(--qc-track-eyebrow)", fontFamily: "var(--qc-font-sans)",
@@ -580,14 +580,14 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
           </div>
 
           {/* Bottom: lens score tiles */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${Math.min(insight.lenses.length, 4)}, 1fr)`,
-            borderTop: "1px solid var(--qc-hair)",
-            borderBottomLeftRadius: 14,
-            borderBottomRightRadius: 14,
-            overflow: "hidden",
-          }}>
+          <div
+            className="grid grid-cols-2 sm:grid-cols-4"
+            style={{
+              borderTop: "1px solid var(--qc-hair)",
+              borderBottomLeftRadius: 14,
+              borderBottomRightRadius: 14,
+              overflow: "hidden",
+            }}>
             {insight.lenses.map((lens, i) => {
               const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
               const barColor = lensBarColor(pct);
@@ -608,6 +608,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
                   style={{
                     padding: "14px 16px 12px",
                     borderRight: !isLast ? "1px solid var(--qc-hair)" : undefined,
+                    borderBottom: "1px solid var(--qc-hair)",
                     cursor: isClickable ? "pointer" : "default",
                     position: "relative",
                   }}

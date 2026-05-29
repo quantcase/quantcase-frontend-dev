@@ -154,7 +154,7 @@ export function KeyRatioTiles({ data }: Props) {
     <div className="px-4">
       {/* stats-plank: single bordered card, dividers between cells */}
       <div
-        className="grid grid-cols-5 overflow-hidden"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 overflow-hidden"
         style={{
           background: "var(--qc-card)",
           border: "1px solid var(--qc-hair)",
@@ -201,7 +201,19 @@ export function KeyRatioTiles({ data }: Props) {
         ].map((cell, i) => (
           <div
             key={i}
-            style={i > 0 ? { borderLeft: "1px solid var(--qc-hair-2)" } : undefined}
+            className={[
+              /* Always show top separator except first two cells (first row on mobile 2-col) */
+              i >= 2 ? "border-t border-[var(--qc-hair-2)] lg:border-t-0" : "",
+              /* Left separator: every cell after first; but not cols that start a new row */
+              /* 2-col (mobile): no left border on even indices (col 0 of each row) */
+              /* 3-col (sm): no left border on i=0,3 */
+              /* 5-col (lg): left border on all i>0 */
+              i === 0 ? "" :
+              i === 1 ? "border-l border-[var(--qc-hair-2)]" :
+              i === 2 ? "sm:border-l border-[var(--qc-hair-2)]" :
+              i === 3 ? "sm:border-l-0 lg:border-l border-[var(--qc-hair-2)]" :
+              "border-l border-[var(--qc-hair-2)]",
+            ].filter(Boolean).join(" ")}
           >
             {cell}
           </div>

@@ -98,10 +98,10 @@ export function ShadowPortfolio({ count, stocks }: ShadowPortfolioProps) {
 
       {/* Inner white card */}
       <div className="rounded-[10px] overflow-hidden" style={{ background: "var(--qc-card)" }}>
-        {/* Table header */}
+        {/* Table header — desktop only */}
         <div
+          className="hidden sm:grid"
           style={{
-            display: "grid",
             gridTemplateColumns: "2fr 1fr 0.6fr 0.6fr 3fr 1.1fr",
             padding: "7px 18px",
             fontSize: "var(--qc-fz-10)",
@@ -132,9 +132,10 @@ export function ShadowPortfolio({ count, stocks }: ShadowPortfolioProps) {
               style={{ textDecoration: "none", display: "block" }}
               className="shadow-portfolio-row"
             >
+              {/* Desktop row */}
               <div
+                className="hidden sm:grid"
                 style={{
-                  display: "grid",
                   gridTemplateColumns: "2fr 1fr 0.6fr 0.6fr 3fr 1.1fr",
                   padding: "10px 18px",
                   alignItems: "center",
@@ -146,15 +147,11 @@ export function ShadowPortfolio({ count, stocks }: ShadowPortfolioProps) {
                   <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{s.symbol}</div>
                   <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: 1 }}>{s.name}</div>
                 </div>
-
                 <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.ltp}</div>
-
                 <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: s.changePositive ? "var(--qc-up)" : "var(--qc-down)", fontFamily: "var(--qc-font-mono)" }}>
                   {s.change1d}
                 </div>
-
                 <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.qcScore}</div>
-
                 <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
                   {s.thesisTags.map(tag => <ThesisChip key={tag} tag={tag} />)}
                   <button
@@ -173,27 +170,53 @@ export function ShadowPortfolio({ count, stocks }: ShadowPortfolioProps) {
                     {s.whyInvested} ▾
                   </button>
                   {s.thesisDrift && (
-                    <span
-                      style={{
-                        fontSize: "var(--qc-fz-10)",
-                        fontWeight: "var(--qc-w-medium)",
-                        fontFamily: "var(--qc-font-sans)",
-                        color: "#92400e",
-                        background: "#fef3c7",
-                        border: "1px solid #fde68a",
-                        borderRadius: 3,
-                        padding: "1px 6px",
-                        letterSpacing: "var(--qc-track-mono)",
-                        textTransform: "uppercase",
-                      }}
-                    >
+                    <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "#92400e", background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 3, padding: "1px 6px", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
                       DRIFT
                     </span>
                   )}
                 </div>
-
                 <div style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
                   {s.conviction}
+                </div>
+              </div>
+
+              {/* Mobile card row */}
+              <div
+                className="sm:hidden"
+                style={{
+                  padding: "12px 16px",
+                  borderBottom: i < stocks.length - 1 ? "1px solid var(--qc-hair-2)" : "none",
+                  transition: "background 0.12s ease",
+                }}
+              >
+                {/* Top: symbol + price row */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                  <div>
+                    <div style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{s.symbol}</div>
+                    <div style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: 1 }}>{s.name}</div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{s.ltp}</div>
+                    <div style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", color: s.changePositive ? "var(--qc-up)" : "var(--qc-down)", fontFamily: "var(--qc-font-mono)", marginTop: 2 }}>
+                      {s.change1d}
+                    </div>
+                  </div>
+                </div>
+                {/* Bottom: QC + thesis + conviction */}
+                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>
+                    QC {s.qcScore}
+                  </span>
+                  <span style={{ color: "var(--qc-hair-2)" }}>·</span>
+                  {s.thesisTags.map(tag => <ThesisChip key={tag} tag={tag} />)}
+                  {s.thesisDrift && (
+                    <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "#92400e", background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 3, padding: "1px 6px", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
+                      DRIFT
+                    </span>
+                  )}
+                  <span style={{ marginLeft: "auto", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
+                    {s.conviction}
+                  </span>
                 </div>
               </div>
             </Link>

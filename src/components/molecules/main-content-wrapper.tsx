@@ -23,7 +23,7 @@ export function MainContentWrapper({ children }: { children: React.ReactNode }) 
 
   return (
     <div
-      className={cn("ml-[72px] min-h-screen")}
+      className={cn("md:ml-[72px] min-h-screen pb-[60px] md:pb-0")}
       style={{ background: "var(--qc-bg)", paddingTop: !hideTopBar ? 60 : undefined }}
     >
       {children}

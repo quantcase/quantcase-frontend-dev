@@ -78,7 +78,7 @@ export function HoldingsPanel({
       }}
     >
       {/* Header row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div className="flex flex-wrap justify-between items-start gap-2">
         <div>
           <div style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", letterSpacing: "var(--qc-track-eyebrow-l)", textTransform: "uppercase", marginBottom: 2 }}>
             {isShadow ? "SHADOW HOLDINGS" : "YOUR HOLDINGS"}
@@ -133,7 +133,7 @@ export function HoldingsPanel({
       </div>
 
       {/* Equity value + sparkline */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <div className="flex justify-between items-end">
         <div>
           <div style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", letterSpacing: "var(--qc-track-eyebrow-l)", textTransform: "uppercase", marginBottom: 4 }}>
             EQUITY VALUE
@@ -147,7 +147,9 @@ export function HoldingsPanel({
             <span style={{ color: "var(--qc-up)" }}>{ytdChange} YTD</span>
           </div>
         </div>
-        <MiniSparkline />
+        <div className="hidden sm:block">
+          <MiniSparkline />
+        </div>
       </div>
 
       {/* Cap breakdown tabs */}

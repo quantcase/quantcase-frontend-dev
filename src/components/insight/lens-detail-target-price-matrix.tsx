@@ -342,9 +342,7 @@ function WeightedOutcomeBar({ lens, scenarios }: { lens: LensDetail; scenarios: 
   ];
 
   return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr auto",
+    <div className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_1fr_auto]" style={{
       gap: 0,
       border: "1px solid var(--qc-hair)",
       borderRadius: 10,

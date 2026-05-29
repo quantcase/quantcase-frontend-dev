@@ -9,10 +9,8 @@ export function GrowthStatCard({
 }) {
   return (
     <div
-      style={{
-        padding: "14px 16px",
-        borderLeft: divider ? "1px solid var(--qc-hair)" : undefined,
-      }}
+      className={divider ? "border-t sm:border-t-0 sm:border-l border-[var(--qc-hair)]" : ""}
+      style={{ padding: "14px 16px" }}
     >
       <div
         style={{

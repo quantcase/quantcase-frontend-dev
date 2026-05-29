@@ -477,8 +477,6 @@ export function DecisionIntelligencePanel({
         display: "flex",
         flexDirection: "column",
         gap: 12,
-        position: "sticky",
-        top: 60,
       }}
     >
       {/* Header */}

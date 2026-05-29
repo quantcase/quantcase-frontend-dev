@@ -155,7 +155,7 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
       )}
 
       {/* Hero row: small golden verdict card + 4-meter stats card */}
-      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 14, marginBottom: 14 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-[280px_1fr]" style={{ gap: 14, marginBottom: 14 }}>
 
         {/* Left: verdict + conviction — golden gradient card */}
         <section
@@ -230,7 +230,7 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
             justifyContent: "center",
           }}
         >
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 16 }}>
             {icMetrics.map((m) => (
               <div key={m.category}>
                 <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", letterSpacing: ".1em", textTransform: "uppercase", color: "var(--qc-ink-2)", marginBottom: 6 }}>
@@ -264,17 +264,15 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
           }}
         >
           {/* Top half: Key Highlights | Key Risks */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2">
             {[
               { items: keyHighlights.slice(0, 3), heading: "Key highlights", count: "reasons to own", color: "var(--qc-up, #1F7A4A)" },
               { items: keyRisks.slice(0, 3),      heading: "Key risks",      count: "reasons to wait", color: "var(--qc-down, #B23A2F)" },
             ].map(({ items, heading, count, color }, idx) => (
               <div
                 key={heading}
-                style={{
-                  padding: "14px 16px",
-                  borderRight: idx === 0 ? "1px solid var(--qc-hair)" : "none",
-                }}
+                className={idx === 0 ? "border-b sm:border-b-0 sm:border-r border-[var(--qc-hair)]" : ""}
+                style={{ padding: "14px 16px" }}
               >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                   <MonoEyebrow>{heading}</MonoEyebrow>
@@ -309,14 +307,12 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
           <div style={{ height: 1, background: "var(--qc-hair)" }} />
 
           {/* Bottom half: If You Own | If You Don't Own */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2">
             {[actionOwn, actionDontOwn].map((act, idx) => (
               <div
                 key={act.eyebrow}
-                style={{
-                  padding: "14px 16px",
-                  borderRight: idx === 0 ? "1px solid var(--qc-hair)" : "none",
-                }}
+                className={idx === 0 ? "border-b sm:border-b-0 sm:border-r border-[var(--qc-hair)]" : ""}
+                style={{ padding: "14px 16px" }}
               >
                 <MonoEyebrow style={{ marginBottom: 6 }}>{act.eyebrow}</MonoEyebrow>
                 <div style={{ fontSize: "var(--qc-fz-14)", fontFamily: "var(--qc-font-sans)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)", marginBottom: 4, display: "flex", gap: 6 }}>

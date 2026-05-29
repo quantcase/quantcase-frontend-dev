@@ -225,7 +225,7 @@ export function LensDetailCustomer({ lens }: Props) {
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 0 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 0 }}>
           {tiles.map((tile, i) => (
             <div key={i} style={{
               padding: "16px 14px", background: "var(--qc-card)",
@@ -267,7 +267,7 @@ export function LensDetailCustomer({ lens }: Props) {
 
       {/* Signal cards — 2×2 grid */}
       {cards.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 10 }}>
           {cards.map((card, i) => (
             <div key={i} style={{
               padding: "13px 14px",

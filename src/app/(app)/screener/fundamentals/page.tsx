@@ -55,9 +55,8 @@ function SwotSection({ swot }: { swot: FundamentalsSwot }) {
     <div id="section-swot">
       <SectionPanel title="SWOT Analysis" subtitle="Strategic assessment across four dimensions">
         <div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
             gap: 1,
             background: "var(--qc-hair)",
             borderRadius: 10,
@@ -171,10 +170,10 @@ function FinancialsContent() {
       <div className="px-4 pt-6 pb-8 space-y-6">
 
         {/* Two-column section: Left (Charts, SWOT, Growth & Returns) + Right (Decision Intelligence) */}
-        <div className="grid grid-cols-3 gap-[14px] items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[14px] items-start">
 
           {/* Left column */}
-          <div className="col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6">
 
             {/* Price / PE / Sales chart */}
             {chartsData && (
@@ -193,7 +192,7 @@ function FinancialsContent() {
             {/* Growth & Returns */}
             <div id="section-growth-returns">
               <SectionPanel title="Growth & Returns" subtitle="Compounded growth rates and return metrics">
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)" }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                   <GrowthStatCard
                     title="Compounded Sales Growth"
                     rows={[

@@ -133,7 +133,7 @@ function KpiStrip({ topSignals, km }: { topSignals: TopSignal[]; km: Record<stri
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: "1px solid var(--qc-hair)", borderRadius: 10, overflow: "hidden" }}>
+    <div className="grid grid-cols-2 sm:grid-cols-4" style={{ border: "1px solid var(--qc-hair)", borderRadius: 10, overflow: "hidden" }}>
       {tiles.map((t, i) => {
         const isGrowth = t.actual_value != null && t.actual_value > 0;
         const color = t.direction === "beat" ? "var(--qc-up)" : t.direction === "miss" ? "var(--qc-down)" : isGrowth ? "var(--qc-up)" : "var(--qc-warn)";
@@ -318,13 +318,14 @@ export function LensDetailFinancial({ lens, signals }: Props) {
 
       <KpiStrip topSignals={topSignals} km={lens.key_metrics} />
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, border: "1px solid var(--qc-hair)", borderRadius: 10, overflow: "hidden" }}>
+      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 1, border: "1px solid var(--qc-hair)", borderRadius: 10, overflow: "hidden" }}>
 
         {/* Left — signal table */}
-        <div style={{ borderRight: "1px solid var(--qc-hair)" }}>
+        <div style={{ borderRight: "1px solid var(--qc-hair)", overflowX: "auto" }}>
           <div style={{
             display: "grid",
             gridTemplateColumns: "70px 1fr 90px 110px 90px",
+            minWidth: 460,
             gap: 8, padding: "8px 14px",
             background: "var(--qc-section)",
             borderBottom: "1px solid var(--qc-hair)",
@@ -349,6 +350,7 @@ export function LensDetailFinancial({ lens, signals }: Props) {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "70px 1fr 90px 110px 90px",
+                  minWidth: 460,
                   gap: 8, alignItems: "center", padding: "11px 14px",
                   borderBottom: i < rows.length - 1 ? "1px solid var(--qc-hair)" : undefined,
                   background: isActive ? `${row.statusColor}10` : "var(--qc-card)",

@@ -473,9 +473,7 @@ function NarrativeStrip({ lens }: { lens: LensDetail }) {
     : "Narrative can shift if execution on guidance targets improves and macro conditions ease.";
 
   return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "200px 1fr 220px",
+    <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr_220px]" style={{
       alignItems: "center",
       gap: 28,
       padding: "20px 24px",
@@ -579,7 +577,7 @@ export function LensDetailPeRerating({ lens }: Props) {
         </span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr 1fr", gap: 14, alignItems: "stretch" }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr]" style={{ gap: 14, alignItems: "stretch" }}>
         <MarketPerceptionPanel lens={lens} />
         <ScenarioEnginePanel lens={lens} />
         <MarketCatalystsPanel lens={lens} />

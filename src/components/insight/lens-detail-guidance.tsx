@@ -88,7 +88,7 @@ export function LensDetailGuidance({ lens }: Props) {
         </div>
 
         {/* KPI strip */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: 0 }}>
           {[
             { label: "SIGNAL COUNT", value: signalCount, sub: "Governance signals evaluated", color: "var(--qc-ink)" },
             { label: "Z-SCORE", value: zScore, sub: ci ? `CI ${ci}` : "Confidence index", color: "var(--qc-ink)" },

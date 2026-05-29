@@ -449,7 +449,6 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
       <div
         style={{
           position: "fixed",
-          bottom: 24,
           left: "50%",
           transform: "translateX(-50%)",
           zIndex: 50,
@@ -460,7 +459,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
           borderRadius: 9999,
           boxShadow: "0 8px 32px rgba(0,0,0,0.32), 0 2px 8px rgba(0,0,0,0.18)",
         }}
-        className="qc-dark-gradient-card"
+        className="qc-dark-gradient-card bottom-[calc(60px+env(safe-area-inset-bottom)+12px)] md:bottom-6"
       >
         {/* Shadow Portfolio button */}
         {inPortfolio ? (
@@ -469,7 +468,6 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "7px 16px",
               borderRadius: 9999,
               fontSize: "var(--qc-fz-12)",
               fontWeight: "var(--qc-w-medium)",
@@ -478,9 +476,10 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
               background: "rgba(134,239,172,0.12)",
               border: "1px solid rgba(134,239,172,0.25)",
             }}
+            className="px-3 py-2 sm:px-4 sm:py-[7px]"
           >
             <Check size={13} />
-            In Shadow Portfolio
+            <span className="hidden sm:inline">In Shadow Portfolio</span>
           </div>
         ) : (
           <button
@@ -490,7 +489,6 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "7px 16px",
               borderRadius: 9999,
               border: "1px solid rgba(255,255,255,0.12)",
               background: justAdded ? "rgba(134,239,172,0.12)" : "rgba(255,255,255,0.08)",
@@ -502,9 +500,10 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
               opacity: loading ? 0.5 : 1,
               transition: "background 0.2s, color 0.2s, border-color 0.2s",
             }}
+            className="px-3 py-2 sm:px-4 sm:py-[7px]"
           >
             {justAdded ? <Check size={13} /> : <BookmarkPlus size={13} />}
-            {justAdded ? "Added!" : "Add to Shadow Portfolio"}
+            <span className="hidden sm:inline">{justAdded ? "Added!" : "Add to Shadow Portfolio"}</span>
           </button>
         )}
 
@@ -518,7 +517,6 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
             display: "flex",
             alignItems: "center",
             gap: 6,
-            padding: "7px 16px",
             borderRadius: 9999,
             border: "1px solid rgba(255,255,255,0.12)",
             background: "rgba(255,255,255,0.08)",
@@ -529,9 +527,10 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
             cursor: "pointer",
             transition: "background 0.15s",
           }}
+          className="px-3 py-2 sm:px-4 sm:py-[7px]"
         >
           <StickyNote size={13} />
-          Notes
+          <span className="hidden sm:inline">Notes</span>
           {noteCount > 0 && (
             <span
               style={{

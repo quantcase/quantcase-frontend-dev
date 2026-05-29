@@ -58,7 +58,7 @@ export function SectorSidePanel({ holdings }: { holdings: Holding[] }) {
           <div style={{ width: `${fairPct}%`,   background: "var(--qc-warn)" }} />
           <div style={{ width: `${weakPct}%`,   background: "#B91C1C" }} />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6 }}>
+        <div className="grid grid-cols-3 gap-1.5">
           {[
             { label: "Strong 80+",    val: `${strongPct}%`, sub: `${strong.length} stocks`,    color: "var(--qc-up)"  },
             { label: "Fair 60–79",    val: `${fairPct}%`,   sub: `${fair.length} stocks`,      color: "var(--qc-warn)" },

@@ -514,7 +514,7 @@ function IndustryBasketView({ basketId }: { basketId: string }) {
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 100% at 50% 0%, var(--qc-lime) 0%, transparent 70%)" }} />
         </div>
 
-        <div className="relative max-w-[1400px] mx-auto px-8 pt-10 pb-8">
+        <div className="relative max-w-[1400px] mx-auto px-4 sm:px-8 pt-10 pb-8">
           {loading && !basket && (
             <div className="flex items-center gap-2 py-16 justify-center" style={{ color: "var(--qc-ink-2)" }}>
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -554,7 +554,7 @@ function IndustryBasketView({ basketId }: { basketId: string }) {
                   )}
                 </div>
 
-                <h1 className="text-[32px] font-medium leading-tight" style={{ color: "var(--qc-ink)" }}>
+                <h1 className="text-[22px] sm:text-[32px] font-medium leading-tight" style={{ color: "var(--qc-ink)" }}>
                   {"title" in basket && basket.title ? basket.title : basketId}
                 </h1>
                 <p className="text-[13px]" style={{ color: "var(--qc-ink-2)" }}>
@@ -563,7 +563,7 @@ function IndustryBasketView({ basketId }: { basketId: string }) {
               </div>
 
               {metrics && (
-                <div className="flex items-center gap-3 flex-shrink-0 pt-6">
+                <div className="flex items-center gap-3 flex-wrap pt-2 sm:pt-6">
                   {[
                     { label: "Composite", value: metrics.composite_score.toFixed(1) },
                     { label: "3W Velocity", value: `${metrics.velocity_3w > 0 ? "+" : ""}${metrics.velocity_3w}` },
@@ -585,7 +585,7 @@ function IndustryBasketView({ basketId }: { basketId: string }) {
       </div>
 
       {/* Body */}
-      <div className="max-w-[1400px] mx-auto px-8 py-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-8">
         <div className="rounded-[10px] border p-2" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}>
           {/* Toolbar */}
           <div className="px-2 pt-1 pb-3 flex items-center justify-between gap-3 flex-wrap">
@@ -698,7 +698,7 @@ function IndustryBasketView({ basketId }: { basketId: string }) {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid var(--qc-hair)" }}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3" style={{ borderTop: "1px solid var(--qc-hair)" }}>
                   <p className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>
                     {table.getFilteredRowModel().rows.length} stocks
                   </p>
@@ -946,7 +946,7 @@ function BasketContent() {
             />
           </div>
 
-          <div className="relative max-w-[1400px] mx-auto px-8 pt-10 pb-8">
+          <div className="relative max-w-[1400px] mx-auto px-4 sm:px-8 pt-10 pb-8">
 
             {/* Loading state */}
             {isLoading && !basket && (
@@ -988,7 +988,7 @@ function BasketContent() {
                     </span>
                   </div>
 
-                  <h1 className="text-[32px] font-medium leading-tight" style={{ color: "var(--qc-ink)" }}>
+                  <h1 className="text-[22px] sm:text-[32px] font-medium leading-tight" style={{ color: "var(--qc-ink)" }}>
                     {basket.title}
                   </h1>
                   <p className="text-[14px] max-w-2xl leading-relaxed" style={{ color: "var(--qc-ink-2)" }}>
@@ -997,7 +997,7 @@ function BasketContent() {
                 </div>
 
                 {/* Right: stat pills */}
-                <div className="flex items-center gap-3 flex-shrink-0 pt-6">
+                <div className="flex items-center gap-3 flex-wrap pt-2 sm:pt-6">
                   {latestQuarter && (
                     <div
                       className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-[10px] border"
@@ -1032,7 +1032,7 @@ function BasketContent() {
         </div>
 
         {/* ── Body content ── */}
-        <div className="max-w-[1400px] mx-auto px-8 py-8 space-y-4">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-8 space-y-4">
 
         {basket && (
           <>
@@ -1062,7 +1062,7 @@ function BasketContent() {
               style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}
             >
               {/* Toolbar */}
-              <div className="px-2 pt-1 pb-3 flex items-center justify-between gap-3 flex-wrap">
+              <div className="px-2 pt-1 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
                 <p
                   className="text-[10px] font-bold uppercase tracking-[0.10em]"
                   style={{ color: "var(--qc-ink)" }}
@@ -1240,7 +1240,7 @@ function BasketContent() {
 
                     {/* Pagination footer */}
                     <div
-                      className="flex items-center justify-between px-4 py-3"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3"
                       style={{ borderTop: "1px solid var(--qc-hair)" }}
                     >
                       <p className="text-[11px]" style={{ color: "var(--qc-ink-2)" }}>

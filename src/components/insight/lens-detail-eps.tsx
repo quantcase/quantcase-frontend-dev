@@ -147,7 +147,7 @@ function valueColor(scenarioKey: ScenarioKey, rowKey: string, value: string): st
 
 function ScenarioTable({ scenarios }: { scenarios: Record<ScenarioKey, ScenarioRow> }) {
   return (
-    <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
+    <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "auto" }}>
 
       {/* Title bar */}
       <div style={{
@@ -176,7 +176,7 @@ function ScenarioTable({ scenarios }: { scenarios: Record<ScenarioKey, ScenarioR
       </div>
 
       {/* Column headers */}
-      <div style={{ display: "grid", gridTemplateColumns: "150px 1fr 1fr 1fr", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "150px 1fr 1fr 1fr", minWidth: 480, background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
         <div style={{ padding: "10px 14px", borderRight: "1px solid var(--qc-hair)", display: "flex", flexDirection: "column", justifyContent: "center", gap: 3 }}>
           <p style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>METRIC</p>
           <p style={{ fontSize: 8, color: "var(--qc-ink-3)", margin: 0, opacity: 0.7 }}>3-yr forward view</p>
@@ -210,6 +210,7 @@ function ScenarioTable({ scenarios }: { scenarios: Record<ScenarioKey, ScenarioR
             style={{
               display: "grid",
               gridTemplateColumns: "150px 1fr 1fr 1fr",
+              minWidth: 480,
               borderBottom: !isLast ? "1px solid var(--qc-hair)" : undefined,
               background: isLast ? "var(--qc-section)" : "var(--qc-card)",
             }}
@@ -260,7 +261,7 @@ function ScenarioTable({ scenarios }: { scenarios: Record<ScenarioKey, ScenarioR
       })}
 
       {/* Bottom scenario summaries */}
-      <div style={{ display: "grid", gridTemplateColumns: "150px 1fr 1fr 1fr", borderTop: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "150px 1fr 1fr 1fr", minWidth: 480, borderTop: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
         <div style={{ borderRight: "1px solid var(--qc-hair)", padding: "12px 14px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 3 }}>
           <p style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>ANALYST VIEW</p>
           <p style={{ fontSize: 8, color: "var(--qc-ink-3)", margin: 0, opacity: 0.7, lineHeight: 1.4 }}>Scenario assumptions & rationale</p>

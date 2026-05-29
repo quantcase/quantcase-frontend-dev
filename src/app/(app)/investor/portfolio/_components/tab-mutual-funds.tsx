@@ -11,14 +11,15 @@ export function MutualFundsTab({ funds }: { funds: MutualFund[] }) {
       </div>
 
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 480 }}>
           <thead>
             <tr style={{ background: "var(--qc-bg)" }}>
-              {["Fund", "Units · NAV", "Current Value", "P&L", "XIRR", "Day"].map((h, i) => (
-                <th key={h} style={{ fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600, padding: "10px 20px", textAlign: i === 0 ? "left" : "right", borderBottom: "1px solid var(--qc-hair)" }}>
-                  {h}
-                </th>
-              ))}
+              <th style={{ fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600, padding: "10px 20px", textAlign: "left", borderBottom: "1px solid var(--qc-hair)" }}>Fund</th>
+              <th className="hidden sm:table-cell" style={{ fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600, padding: "10px 20px", textAlign: "right", borderBottom: "1px solid var(--qc-hair)" }}>Units · NAV</th>
+              <th style={{ fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600, padding: "10px 20px", textAlign: "right", borderBottom: "1px solid var(--qc-hair)" }}>Current Value</th>
+              <th style={{ fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600, padding: "10px 20px", textAlign: "right", borderBottom: "1px solid var(--qc-hair)" }}>P&L</th>
+              <th className="hidden sm:table-cell" style={{ fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600, padding: "10px 20px", textAlign: "right", borderBottom: "1px solid var(--qc-hair)" }}>XIRR</th>
+              <th className="hidden sm:table-cell" style={{ fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600, padding: "10px 20px", textAlign: "right", borderBottom: "1px solid var(--qc-hair)" }}>Day</th>
             </tr>
           </thead>
           <tbody>
@@ -28,7 +29,7 @@ export function MutualFundsTab({ funds }: { funds: MutualFund[] }) {
                   <div style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{f.name}</div>
                   <div style={{ fontSize: 10, color: "var(--qc-ink-3)", marginTop: 2, fontWeight: 500 }}>{f.type}</div>
                 </td>
-                <td style={{ padding: "14px 20px", textAlign: "right", fontFamily: "var(--qc-font-mono)", fontSize: 12, color: "var(--qc-ink)" }}>
+                <td className="hidden sm:table-cell" style={{ padding: "14px 20px", textAlign: "right", fontFamily: "var(--qc-font-mono)", fontSize: 12, color: "var(--qc-ink)" }}>
                   {f.units} @ ₹{f.nav}
                 </td>
                 <td style={{ padding: "14px 20px", textAlign: "right", fontFamily: "var(--qc-font-mono)", fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>
@@ -38,10 +39,10 @@ export function MutualFundsTab({ funds }: { funds: MutualFund[] }) {
                   {f.pnl >= 0 ? "+" : ""}{fmtLakhs(f.pnl)}<br />
                   <span style={{ fontSize: 10 }}>{f.pnl >= 0 ? "+" : ""}{f.pnlPct.toFixed(1)}%</span>
                 </td>
-                <td style={{ padding: "14px 20px", textAlign: "right", fontFamily: "var(--qc-font-mono)", fontSize: 11, fontWeight: 600, color: "var(--qc-up)" }}>
+                <td className="hidden sm:table-cell" style={{ padding: "14px 20px", textAlign: "right", fontFamily: "var(--qc-font-mono)", fontSize: 11, fontWeight: 600, color: "var(--qc-up)" }}>
                   {f.xirr.toFixed(1)}%
                 </td>
-                <td style={{ padding: "14px 20px", textAlign: "right", fontFamily: "var(--qc-font-mono)", fontSize: 11, color: f.dayChangePct >= 0 ? "var(--qc-up)" : "#B91C1C" }}>
+                <td className="hidden sm:table-cell" style={{ padding: "14px 20px", textAlign: "right", fontFamily: "var(--qc-font-mono)", fontSize: 11, color: f.dayChangePct >= 0 ? "var(--qc-up)" : "#B91C1C" }}>
                   {f.dayChangePct >= 0 ? "+" : ""}{f.dayChangePct.toFixed(1)}%
                 </td>
               </tr>

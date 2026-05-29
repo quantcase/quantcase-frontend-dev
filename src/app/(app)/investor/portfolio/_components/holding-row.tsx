@@ -137,73 +137,106 @@ export function HoldingRow({ holding, defaultExpanded = false }: { holding: Hold
 
   return (
     <div style={{ borderBottom: "1px solid var(--qc-hair)", background: expanded ? "#FAFAF8" : "transparent", transition: "background 0.12s" }}>
-      {/* Main row */}
-      <div
-        onClick={() => setExpanded(e => !e)}
-        style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto auto auto auto", gap: 14, alignItems: "center", padding: "14px 20px", cursor: "pointer" }}
-      >
-        <ExpandIcon expanded={expanded} />
+      {/* Main row — desktop: 7-column grid; mobile: stacked card */}
+      <div onClick={() => setExpanded(e => !e)} style={{ cursor: "pointer" }}>
 
-        {/* Stock info */}
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 15, fontWeight: 700, letterSpacing: "0.01em", color: "var(--qc-ink)" }}>
-            {holding.alert && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#B91C1C", flexShrink: 0 }} />}
-            {holding.symbol}
+        {/* Desktop layout */}
+        <div
+          className="hidden sm:grid"
+          style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto", gap: 14, alignItems: "center", padding: "14px 20px" }}
+        >
+          <ExpandIcon expanded={expanded} />
+
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 15, fontWeight: 700, letterSpacing: "0.01em", color: "var(--qc-ink)" }}>
+              {holding.alert && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#B91C1C", flexShrink: 0 }} />}
+              {holding.symbol}
+            </div>
+            <div style={{ fontSize: 11, color: "var(--qc-ink-3)", marginTop: 1 }}>{holding.name} · {holding.sector}</div>
+            <div style={{ display: "inline-block", fontSize: 9, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 6px", borderRadius: 3, marginTop: 4, ...capBadgeStyle(holding.capType) }}>
+              {holding.capType} Cap
+            </div>
           </div>
-          <div style={{ fontSize: 11, color: "var(--qc-ink-3)", marginTop: 1 }}>{holding.name} · {holding.sector}</div>
-          <div style={{ display: "inline-block", fontSize: 9, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 6px", borderRadius: 3, marginTop: 4, ...capBadgeStyle(holding.capType) }}>
-            {holding.capType} Cap
+
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: tc.dot }} />
+            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: tc.color }}>{tc.label}</div>
+          </div>
+
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 11, fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-3)" }}>{holding.qty} shares</div>
+            <div style={{ fontSize: 10, color: "var(--qc-ink-3)", marginTop: 1 }}>@ ₹{fmt(holding.avgCost)}</div>
+          </div>
+
+          <div style={{ textAlign: "right", minWidth: 70 }}>
+            <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{fmtLakhs(holding.currentValue)}</div>
+            <div style={{ fontSize: 10, marginTop: 2, fontFamily: "var(--qc-font-mono)", color: holding.pnl >= 0 ? "var(--qc-up)" : "#B91C1C" }}>
+              {holding.pnl >= 0 ? "+" : ""}{fmtLakhs(holding.pnl)} ({holding.pnlPct >= 0 ? "+" : ""}{holding.pnlPct.toFixed(1)}%)
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 80 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+              <span style={{ fontSize: 22, fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1, color: modColor(holding.modScore) }}>{holding.modScore}</span>
+              <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>/100</span>
+            </div>
+            <div style={{ display: "flex", gap: 3 }}>
+              {pillarsPresent.map(p => <div key={p} style={{ height: 3, width: 18, borderRadius: 2, background: PILLAR_COLOR[p] }} />)}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 70 }}>
+            <div style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600 }}>4Q trend {dirLabel}</div>
+            <div style={{ display: "flex", gap: 3, alignItems: "flex-end" }}>
+              {last4.map((q, i) => {
+                const bar = q.bars[0];
+                const h = 10 + (i / (last4.length - 1)) * 10;
+                return <div key={i} style={{ width: 12, height: h, borderRadius: "2px 2px 0 0", background: bar ? PILLAR_COLOR[bar.pillar] : "var(--qc-ink-2)" }} />;
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Thesis chip */}
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <div style={{ width: 7, height: 7, borderRadius: "50%", background: tc.dot }} />
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: tc.color }}>{tc.label}</div>
-        </div>
-
-        {/* Qty / cost */}
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 11, fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-3)" }}>{holding.qty} shares</div>
-          <div style={{ fontSize: 10, color: "var(--qc-ink-3)", marginTop: 1 }}>@ ₹{fmt(holding.avgCost)}</div>
-        </div>
-
-        {/* Value + P&L */}
-        <div style={{ textAlign: "right", minWidth: 70 }}>
-          <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{fmtLakhs(holding.currentValue)}</div>
-          <div style={{ fontSize: 10, marginTop: 2, fontFamily: "var(--qc-font-mono)", color: holding.pnl >= 0 ? "var(--qc-up)" : "#B91C1C" }}>
-            {holding.pnl >= 0 ? "+" : ""}{fmtLakhs(holding.pnl)} ({holding.pnlPct >= 0 ? "+" : ""}{holding.pnlPct.toFixed(1)}%)
+        {/* Mobile layout */}
+        <div className="sm:hidden" style={{ padding: "12px 16px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <ExpandIcon expanded={expanded} />
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 14, fontWeight: 700, color: "var(--qc-ink)" }}>
+                  {holding.alert && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#B91C1C", flexShrink: 0 }} />}
+                  {holding.symbol}
+                </div>
+                <div style={{ fontSize: 10, color: "var(--qc-ink-3)", marginTop: 1 }}>{holding.name} · {holding.sector}</div>
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>{fmtLakhs(holding.currentValue)}</div>
+              <div style={{ fontSize: 10, marginTop: 1, fontFamily: "var(--qc-font-mono)", color: holding.pnl >= 0 ? "var(--qc-up)" : "#B91C1C" }}>
+                {holding.pnlPct >= 0 ? "+" : ""}{holding.pnlPct.toFixed(1)}%
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* MOD mini score */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 80 }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-            <span style={{ fontSize: 22, fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1, color: modColor(holding.modScore) }}>{holding.modScore}</span>
-            <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>/100</span>
-          </div>
-          <div style={{ display: "flex", gap: 3 }}>
-            {pillarsPresent.map(p => <div key={p} style={{ height: 3, width: 18, borderRadius: 2, background: PILLAR_COLOR[p] }} />)}
-          </div>
-        </div>
-
-        {/* 4Q trend */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 70 }}>
-          <div style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600 }}>4Q trend {dirLabel}</div>
-          <div style={{ display: "flex", gap: 3, alignItems: "flex-end" }}>
-            {last4.map((q, i) => {
-              const bar = q.bars[0];
-              const h = 10 + (i / (last4.length - 1)) * 10;
-              return <div key={i} style={{ width: 12, height: h, borderRadius: "2px 2px 0 0", background: bar ? PILLAR_COLOR[bar.pillar] : "var(--qc-ink-2)" }} />;
-            })}
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ display: "inline-block", fontSize: 9, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 6px", borderRadius: 3, ...capBadgeStyle(holding.capType) }}>
+              {holding.capType} Cap
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: tc.dot }} />
+              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: tc.color }}>{tc.label}</div>
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 3, marginLeft: "auto" }}>
+              <span style={{ fontSize: 18, fontWeight: 400, color: modColor(holding.modScore) }}>{holding.modScore}</span>
+              <span style={{ fontSize: 10, color: "var(--qc-ink-3)" }}>/100</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Expanded detail */}
       {expanded && (
-        <div style={{ padding: "0 20px 20px", borderTop: "1px solid var(--qc-hair)" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, paddingTop: 16 }}>
+        <div style={{ padding: "0 16px 16px", borderTop: "1px solid var(--qc-hair)" }} className="sm:px-5 sm:pb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
             <ModSubScores subScores={holding.subScores} overall={holding.modScore} />
             <QuarterTrend quarters={holding.quarterTrend} />
             <JournalBlock holding={holding} />
@@ -243,7 +276,7 @@ export function HoldingsCard({ holdings }: { holdings: Holding[] }) {
   return (
     <div style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 12, overflow: "hidden" }}>
       {/* Header */}
-      <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--qc-hair)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--qc-hair)" }} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600, color: "var(--qc-ink-2)" }}>Equity holdings</span>
           <span style={{ background: "var(--qc-bg)", padding: "2px 8px", borderRadius: 999, fontSize: 11, color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)" }}>{holdings.length}</span>

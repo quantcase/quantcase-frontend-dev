@@ -46,7 +46,7 @@ export function MovingAveragesStrip({ cmp, smas, aboveSMAs, belowSMAs }: MovingA
         </h4>
         <div style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-sans)" }}>{summaryText}</div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+      <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 16 }}>
         {smas.map((sma) => {
           const gap = sma.val > 0 ? ((cmp - sma.val) / sma.val) * 100 : 0;
           const fillPct = Math.min(Math.abs(gap) * 3, 50);

@@ -16,7 +16,7 @@ export function NewsTab({ items }: { items: NewsItem[] }) {
   return (
     <div style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 12, overflow: "hidden" }}>
       {/* Header */}
-      <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-bg)" }} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600, color: "var(--qc-ink-2)" }}>News & MOD Impact</span>
           <span style={{ background: "var(--qc-card)", padding: "2px 8px", borderRadius: 999, fontSize: 11, color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)" }}>{items.length} new today</span>
@@ -26,7 +26,11 @@ export function NewsTab({ items }: { items: NewsItem[] }) {
 
       {/* News items */}
       {items.map((item, idx) => (
-        <div key={idx} style={{ padding: "14px 20px", borderBottom: idx < items.length - 1 ? "1px solid var(--qc-hair)" : "none", display: "grid", gridTemplateColumns: "1fr auto", gap: 12, cursor: "pointer" }}>
+        <div
+          key={idx}
+          style={{ padding: "14px 20px", borderBottom: idx < items.length - 1 ? "1px solid var(--qc-hair)" : "none", cursor: "pointer" }}
+          className="flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto]"
+        >
           <div>
             <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 6 }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", background: "var(--qc-ink)", color: "#fff", padding: "2px 7px", borderRadius: 4, whiteSpace: "nowrap", flexShrink: 0 }}>{item.ticker}</span>
@@ -38,9 +42,9 @@ export function NewsTab({ items }: { items: NewsItem[] }) {
               <span>{item.age}</span>
             </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end", flexShrink: 0, minWidth: 120 }}>
-            <div style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600, textAlign: "right" }}>MOD Impact</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-start", flexShrink: 0 }} className="sm:items-end sm:min-w-[120px]">
+            <div style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--qc-ink-3)", fontWeight: 600 }}>MOD Impact</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }} className="sm:flex-col sm:gap-1">
               {item.impacts.map((imp, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 8px", borderRadius: 6, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap", ...impactStyle(imp.type) }}>
                   <span style={{ fontStyle: "italic", fontSize: 14 }}>{imp.pillar}</span>
@@ -49,7 +53,7 @@ export function NewsTab({ items }: { items: NewsItem[] }) {
               ))}
             </div>
             {item.scoreChange && (
-              <div style={{ fontSize: 10, fontWeight: 600, textAlign: "right", marginTop: 6, color: scoreColor(item.scoreChangeType) }}>
+              <div style={{ fontSize: 10, fontWeight: 600, marginTop: 4, color: scoreColor(item.scoreChangeType) }}>
                 {item.scoreChange}
               </div>
             )}

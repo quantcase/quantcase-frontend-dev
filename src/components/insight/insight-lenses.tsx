@@ -73,11 +73,9 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
 
       {/* Single inner card — 2-col CSS grid, interior dividers only */}
       <div
-        className="rounded-[10px] overflow-hidden"
+        className="rounded-[10px] overflow-hidden grid grid-cols-1 sm:grid-cols-2"
         style={{
           background: "var(--qc-card)",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
           flex: 1,
         }}
       >
@@ -105,13 +103,13 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
                 hover: { backgroundColor: "#F3F2EE" },
               } : undefined}
               transition={{ duration: 0.15, ease: "easeOut" }}
+              className={isLeft ? "sm:border-r sm:border-r-[var(--qc-hair)]" : ""}
               style={{
                 display: "flex",
                 flexDirection: "column",
                 padding: "12px 16px",
                 cursor: isClickable ? "pointer" : "default",
                 position: "relative",
-                borderRight: isLeft ? "1px solid var(--qc-hair)" : "none",
                 borderBottom: isTop ? "1px solid var(--qc-hair)" : "none",
               }}
             >

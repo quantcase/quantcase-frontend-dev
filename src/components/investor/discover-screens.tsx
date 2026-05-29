@@ -150,12 +150,10 @@ export function DiscoverScreens({ screens }: DiscoverScreensProps) {
 
       {/* 3-column card grid inside white inner card */}
       <div
-        className="rounded-[10px]"
+        className="rounded-[10px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
         style={{
           background: "var(--qc-card)",
           padding: "14px",
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
           gap: 10,
         }}
       >

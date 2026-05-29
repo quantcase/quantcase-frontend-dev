@@ -79,7 +79,7 @@ export function SectionPanel({
       }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
+      <div className="flex flex-wrap items-center justify-between gap-2" style={{ paddingTop: 4, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
         <div className="flex flex-col" style={{ gap: subHeader ? 6 : 0 }}>
           {typeof title === "string" ? (
             <div style={{ fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)", letterSpacing: "0.01em" }}>{title}</div>

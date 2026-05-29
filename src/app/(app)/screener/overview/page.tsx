@@ -105,11 +105,10 @@ function OverviewContent() {
           </div>
         )}
 
-        {/* 2-column layout: 70% left, 30% right */}
+        {/* 2-column layout: 70% left, 30% right — stacks to 1 column on mobile */}
         <div
+          className="grid grid-cols-1 lg:grid-cols-[1fr_420px]"
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 420px",
             gap: 16,
             alignItems: "start",
             padding: "0 16px",
@@ -156,7 +155,7 @@ function OverviewContent() {
           </div>
 
           {/* ── Right column: Decision Intelligence ── */}
-          <div>
+          <div className="lg:sticky lg:top-[60px]">
             <DecisionIntelligencePanel
               management={managementInsight ?? null}
               opportunity={opportunityInsight ?? null}

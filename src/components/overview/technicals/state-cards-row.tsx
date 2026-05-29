@@ -92,9 +92,8 @@ export interface StateCardsRowItem {
 export function StateCardsRow({ items }: { items: StateCardsRowItem[] }) {
   return (
     <div
+      className="grid grid-cols-2 sm:grid-cols-4"
       style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${items.length},1fr)`,
         gap: 1,
         background: "var(--qc-hair)",
         border: "1px solid var(--qc-hair)",

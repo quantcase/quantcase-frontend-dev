@@ -350,12 +350,14 @@ export function CandlestickChart({
         { label: "CHG%", value: `${sign}${chgPct.toFixed(2)}%`, color: chgColor },
       ];
       ohlcBarRef.current.innerHTML = tiles.map((t, i) =>
-        `<div style="display:flex;flex-direction:column;align-items:flex-start;${i < tiles.length - 1 ? `padding-right:10px;border-right:1px solid ${QC_BORDER};margin-right:2px` : ""}">
+        `<div style="display:flex;flex-direction:column;align-items:flex-start;${i < tiles.length - 1 ? `padding-right:8px;border-right:1px solid ${QC_BORDER};margin-right:2px` : ""}">
           <span style="font-size:9px;color:${QC_MUTED};font-weight:500;text-transform:uppercase;letter-spacing:0.08em;line-height:1.2">${t.label}</span>
-          <span style="font-size:11px;color:${t.color};font-weight:600;line-height:1.4">${t.value}</span>
+          <span style="font-size:11px;color:${t.color};font-weight:600;line-height:1.4;white-space:nowrap">${t.value}</span>
         </div>`
       ).join("");
       ohlcBarRef.current.style.display = "flex";
+      ohlcBarRef.current.style.flexWrap = "wrap";
+      ohlcBarRef.current.style.gap = "4px";
     }
 
     // Volume bars colored by candle direction
@@ -661,8 +663,8 @@ export function CandlestickChart({
       {/* OHLC info bar — written once via DOM ref when prices load, never touched by React re-renders */}
       <div
         ref={ohlcBarRef}
-        className="absolute top-2 left-2 z-10 items-center gap-1 font-mono select-none backdrop-blur-sm rounded-[6px] px-2 py-1.5"
-        style={{ display: "none", background: "rgba(255,255,255,0.88)", border: `1px solid ${QC_BORDER}` }}
+        className="absolute top-2 left-2 z-10 font-mono select-none backdrop-blur-sm rounded-[6px] px-2 py-1.5"
+        style={{ display: "none", background: "rgba(255,255,255,0.88)", border: `1px solid ${QC_BORDER}`, maxWidth: "calc(100% - 1rem)", flexWrap: "wrap", gap: 4 }}
       />
 
       {/* Phase + Volume Signal badges */}
@@ -687,7 +689,7 @@ export function CandlestickChart({
         </div>
       )}
 
-      <div ref={containerRef} className="w-full" />
+      <div ref={containerRef} className="w-full overflow-hidden" />
 
       {/* Legend */}
       {legendItems.length > 0 && (

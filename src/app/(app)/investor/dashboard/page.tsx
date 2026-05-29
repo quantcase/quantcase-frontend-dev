@@ -262,8 +262,8 @@ export default function InvestorDashboardPage() {
   return (
     <div style={{ background: "var(--qc-bg, #F5F5F5)", minHeight: "100vh" }}>
       <main
+        className="px-4 pb-16 pt-6 sm:px-6 md:px-9"
         style={{
-          padding: "28px 36px 60px",
           fontFamily: "var(--qc-font-sans)",
           color: "var(--qc-ink, #0F172B)",
         }}
@@ -284,14 +284,11 @@ export default function InvestorDashboardPage() {
             {greeting}, <span style={{ fontWeight: "var(--qc-w-medium)" }}>Raj</span>
           </h1>
           <div
+            className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5"
             style={{
-              marginTop: 6,
               fontSize: "var(--qc-fz-12)",
               fontFamily: "var(--qc-font-sans)",
               color: "var(--qc-ink-3)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
             }}
           >
             <span>{todayMeta}</span>
@@ -314,13 +311,7 @@ export default function InvestorDashboardPage() {
             ROW 1 — MOD Synopsis (left) + Holdings (right)
         ═══════════════════════════════════════════════════════════════ */}
         <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "5fr 6fr",
-            gap: 14,
-            marginBottom: 14,
-            alignItems: "stretch",
-          }}
+          className="grid grid-cols-1 lg:grid-cols-[5fr_6fr] gap-3.5 mb-3.5 items-stretch"
         >
           <MODSynopsisCard
             overallScore={72}
@@ -364,13 +355,7 @@ export default function InvestorDashboardPage() {
             ROW 2 — What's Moving (left) + Industry Signals (right)
         ═══════════════════════════════════════════════════════════════ */}
         <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "3fr 2fr",
-            gap: 14,
-            marginBottom: 14,
-            alignItems: "start",
-          }}
+          className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3.5 mb-3.5 items-start"
         >
           <WhatsMovingFeed count={4} items={MOVING_ITEMS} />
           <IndustrySignalsGrid />
@@ -380,13 +365,7 @@ export default function InvestorDashboardPage() {
             ROW 3 — Market View (left narrow) + Events Moving Market (right wide)
         ═══════════════════════════════════════════════════════════════ */}
         <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "380px 1fr",
-            gap: 14,
-            marginBottom: 14,
-            alignItems: "stretch",
-          }}
+          className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-3.5 mb-3.5 items-stretch"
         >
           <MarketViewCard
             score={72}
@@ -405,7 +384,7 @@ export default function InvestorDashboardPage() {
         {/* ════════════════════════════════════════════════════════════
             ROW 4 — Shadow Portfolio (full width)
         ═══════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 14 }}>
+        <section className="mb-3.5">
           <ShadowPortfolio
             count={shadowCount}
             stocks={shadowStocksToShow}
@@ -415,14 +394,14 @@ export default function InvestorDashboardPage() {
         {/* ════════════════════════════════════════════════════════════
             ROW 6 — Discover Screens (full width)
         ═══════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 14 }}>
+        <section className="mb-3.5">
           <DiscoverScreens screens={DISCOVER_SCREENS} />
         </section>
 
         {/* ════════════════════════════════════════════════════════════
             ROW 7 — Research Library Banner (full width)
         ═══════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 14 }}>
+        <section className="mb-3.5">
           <ResearchLibraryBanner
             newIcNotes={3}
             catalystsNext30Days={5}

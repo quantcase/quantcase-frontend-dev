@@ -177,7 +177,7 @@ export function LensDetailCapital({ lens }: Props) {
 
         {/* KPI tiles — top 4 high-impact signals */}
         {kpiPool.length > 0 && (
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(kpiPool.length, 4)}, 1fr)`, gap: 0 }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 0 }}>
             {kpiPool.map((s, i) => {
               const { color } = rowStatus(s);
               return (

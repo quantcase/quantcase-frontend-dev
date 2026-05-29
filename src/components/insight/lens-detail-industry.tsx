@@ -190,7 +190,7 @@ export function LensDetailIndustry({ lens, signals }: Props) {
         </div>
 
         {/* 4-column KPI strip */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", background: "var(--qc-card)", borderTop: "1px solid var(--qc-hair)" }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ background: "var(--qc-card)", borderTop: "1px solid var(--qc-hair)" }}>
           {kpiTiles.map((tile, i) => (
             <div key={i} style={{
               padding: "14px 16px",
@@ -216,8 +216,7 @@ export function LensDetailIndustry({ lens, signals }: Props) {
 
         {/* Detail signal rows in 2-column grid */}
         {detailSignals.length > 0 && (
-          <div style={{
-            display: "grid", gridTemplateColumns: "1fr 1fr",
+          <div className="grid grid-cols-1 sm:grid-cols-2" style={{
             gap: 1, borderTop: "1px solid var(--qc-hair)",
             background: "var(--qc-hair)",
           }}>
@@ -302,7 +301,7 @@ export function LensDetailIndustry({ lens, signals }: Props) {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", background: "var(--qc-card)" }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2" style={{ background: "var(--qc-card)" }}>
           <div style={{ padding: "14px 16px", borderRight: "1px solid var(--qc-hair)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <SectionLabel>DEMAND SIGNALS</SectionLabel>

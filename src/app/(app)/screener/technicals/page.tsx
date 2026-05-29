@@ -85,9 +85,9 @@ function TechnicalsContent() {
           />
         </div>
 
-        {/* Row 1: Price Chart + Rule Engine (2/3) + Decision Intelligence (1/3) */}
-        <div className="grid grid-cols-3 gap-[14px] items-start">
-          <div className="col-span-2 flex flex-col gap-[14px]">
+        {/* Row 1: Price Chart + Rule Engine (left) + Decision Intelligence (right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[14px] items-start">
+          <div className="flex flex-col gap-[14px] min-w-0">
             <div id="section-price-chart">
               <SectionPanel
                 title="Price Chart"
@@ -126,7 +126,7 @@ function TechnicalsContent() {
               </div>
             )}
           </div>
-          <div className="col-span-1 sticky top-28">
+          <div className="lg:sticky lg:top-28">
             {data.decisionIntelligence && (
               <DecisionIntelligenceBanner di={data.decisionIntelligence} />
             )}

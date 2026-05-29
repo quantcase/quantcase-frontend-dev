@@ -707,7 +707,7 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
         )}
 
         {/* 4-column state cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10 }}>
           {stateCards.map((card) => (
             <StateCard key={card.label} {...card} />
           ))}

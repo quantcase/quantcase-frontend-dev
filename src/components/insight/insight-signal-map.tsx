@@ -31,7 +31,7 @@ export function InsightSignalMap({ signals, heading }: InsightSignalMapProps) {
         className="rounded-[10px] p-3"
         style={{ background: "var(--qc-card)", flex: 1 }}
       >
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 10 }}>
           {signals.map((s, i) => (
             <SignalTile
               key={i}

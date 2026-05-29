@@ -171,12 +171,12 @@ function InsightDashboard({
 
   return (
     <>
-      <div className="px-6 pt-3 space-y-3">
+      <div className="px-3 sm:px-6 pt-3 space-y-3">
         <div id="section-score">
           <InsightScorecard insight={insight} verdictLabel={TYPE_VERDICT_LABELS[type]} onLensClick={handleLensClick} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 12, alignItems: "stretch" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-[3fr_1fr]" style={{ gap: 12, alignItems: "stretch" }}>
           {insight.lenses.length > 0 && (
             <div id="section-lenses" style={{ display: "flex", flexDirection: "column" }}>
               <InsightLenses lenses={insight.lenses} heading={lensHeading} onLensClick={handleLensClick} />

@@ -121,7 +121,7 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
       <SectionLabel>Fundamentals</SectionLabel>
 
       {/* Hero row */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 14, marginBottom: 14 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px]" style={{ gap: 14, marginBottom: 14 }}>
         <ValuationHeroSection
           pe={pe}
           industryPE={industryPE}

@@ -196,7 +196,7 @@ function Pagination({
 
   return (
     <div
-      className="flex items-center justify-between px-5 py-3"
+      className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-5 py-3"
       style={{ borderTop: "1px solid var(--qc-hair)", background: "var(--qc-bg)" }}
     >
       <p className="text-[12px]" style={{ color: "var(--qc-ink-2)" }}>
@@ -449,7 +449,7 @@ export function MfScreenerSection() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto px-6 pb-12">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pb-12">
       {/* Basket quick-picks */}
       {!mfBasketsLoading && mfBasketsData && mfBasketsData.baskets.length > 0 && (
         <div className="mb-6">
@@ -480,13 +480,13 @@ export function MfScreenerSection() {
 
       {/* Filters bar */}
       <div
-        className="flex items-center gap-2 flex-wrap mb-3 px-3 py-2.5 rounded-[10px]"
+        className="flex items-center gap-2 overflow-x-auto mb-3 px-3 py-2.5 rounded-[10px]"
         style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
       >
         <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--qc-ink-2)" }} />
 
         <div
-          className="flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5"
+          className="flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 shrink-0"
           style={{ background: "var(--qc-bg)", border: "1px solid var(--qc-hair)" }}
         >
           <Search className="h-3 w-3 shrink-0" style={{ color: "var(--qc-ink-2)" }} />
@@ -535,7 +535,7 @@ export function MfScreenerSection() {
           </>
         )}
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3 shrink-0">
           {hasFilters && (
             <button
               onClick={resetFilters}

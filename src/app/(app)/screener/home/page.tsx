@@ -39,9 +39,9 @@ export default function ScreenerHomePage() {
   return (
     <div style={{ background: "var(--qc-bg)", minHeight: "100vh" }}>
       {/* ── Hero ── */}
-      <div className="relative max-w-3xl mx-auto px-6 pt-16 pb-14 flex flex-col items-center gap-6">
+      <div className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-10 sm:pb-14 flex flex-col items-center gap-6">
         <div className="text-center space-y-2">
-          <h2 className="text-[32px] font-medium leading-tight" style={{ color: "var(--qc-ink)" }}>
+          <h2 className="text-[24px] sm:text-[32px] font-medium leading-tight" style={{ color: "var(--qc-ink)" }}>
             What would you like to research today?
           </h2>
           <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>
@@ -50,12 +50,12 @@ export default function ScreenerHomePage() {
         </div>
 
         {/* Tab selector */}
-        <div className="flex items-center gap-1 rounded-full border p-1" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}>
+        <div className="flex items-center gap-1 rounded-full border p-1 overflow-x-auto max-w-full" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}>
           {ASSET_TABS.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className="px-4 py-1.5 rounded-full text-xs font-medium transition-all"
+              className="px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap"
               style={activeTab === tab ? { background: "var(--qc-ink)", color: "var(--qc-on-dark)" } : { color: "var(--qc-ink-2)" }}
             >
               {tab}
@@ -65,7 +65,7 @@ export default function ScreenerHomePage() {
 
         {/* Search / hero content per tab */}
         {activeTab === "PE / Pre-IPO" && (
-          <div className="w-full grid grid-cols-3 gap-4">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-4">
             {PE_CARDS.map((item) => (
               <button
                 key={item.key}

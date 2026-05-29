@@ -43,9 +43,10 @@ function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps)
   return (
     <div className="min-h-screen" style={{ background: "var(--qc-bg)" }}>
       {/* Company Header — design-sample style */}
-      <div className="flex items-center justify-between gap-4" style={{ padding: "10px 24px 10px" }}>
+      <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4" style={{ padding: "10px 16px 10px" }}>
         <h1
-          style={{ margin: 0, fontSize: "var(--qc-fz-30)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.015em", color: "var(--qc-ink)", lineHeight: 1.2 }}
+          className="text-2xl sm:text-[length:var(--qc-fz-30)]"
+          style={{ margin: 0, fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.015em", color: "var(--qc-ink)", lineHeight: 1.2 }}
         >
           {companyName}
         </h1>

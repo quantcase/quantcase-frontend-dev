@@ -167,7 +167,7 @@ export function LensDetailDisclosure({ lens }: Props) {
         </div>
 
         {/* 3-column KPI strip */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: 0 }}>
           {[
             { label: "Z-SCORE", value: zScore, sub: "Governance signal aggregate", color: statusColor },
             { label: "TOTAL SIGNALS", value: totalSignals, sub: "Signals evaluated", color: "var(--qc-ink)" },
@@ -259,7 +259,7 @@ export function LensDetailDisclosure({ lens }: Props) {
       })()}
 
       {/* 2×2 dimension cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 10 }}>
         {dims.map((dim, i) => (
           <div key={i} style={{
             padding: "14px 14px",

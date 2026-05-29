@@ -18,11 +18,8 @@ export function ResearchLibraryBanner({
   return (
     <Link
       href={href}
+      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 20,
         background: "#0F172B",
         borderRadius: 14,
         padding: "20px 26px",
@@ -89,7 +86,7 @@ export function ResearchLibraryBanner({
       </div>
 
       {/* Right: pill stats + CTA */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+      <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap" style={{ flexShrink: 0 }}>
         <div
           style={{
             display: "flex",

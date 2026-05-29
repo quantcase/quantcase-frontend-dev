@@ -397,7 +397,7 @@ export function LensDetailEarningQuality({ lens }: Props) {
       </div>
 
       {/* Metric tiles */}
-      <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(tiles.length, 4)}, 1fr)`, gap: 8 }}>
+      <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 8 }}>
         {tiles.map((t) => (
           <MetricTile key={t.label} label={t.label} value={t.value} note={t.note} />
         ))}
@@ -432,7 +432,7 @@ export function LensDetailEarningQuality({ lens }: Props) {
       </div>
 
       {/* Insight cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 8 }}>
         {allCards.map((card, i) => (
           <InsightCard
             key={i}

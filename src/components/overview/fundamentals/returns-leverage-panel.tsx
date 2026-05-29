@@ -137,7 +137,7 @@ export function ReturnsLeveragePanel({ roce, roe, debtToEquity, roce3yAvg, roe3y
         Returns &amp; Leverage
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
+      <div className="grid grid-cols-1 sm:grid-cols-3">
         <div style={{ borderRight: "1px solid var(--qc-hair)", padding: "0 18px" }}>
           <MetricRow
             label="ROCE"

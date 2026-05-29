@@ -610,7 +610,7 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 1, background: "var(--qc-hair)" }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 1, background: "var(--qc-hair)" }}>
           {pillars.map((p, i) => <PillarTile key={i} {...p} />)}
         </div>
 
@@ -631,8 +631,7 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
           </div>
         )}
 
-        <div style={{
-          display: "grid", gridTemplateColumns: "1fr 1fr",
+        <div className="grid grid-cols-1 sm:grid-cols-2" style={{
           gap: 10, padding: "14px 16px",
           background: "var(--qc-card)",
           borderTop: "1px solid var(--qc-hair)",
@@ -735,8 +734,7 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
           </div>
         </div>
 
-        <div style={{
-          display: "grid", gridTemplateColumns: "1fr 1fr",
+        <div className="grid grid-cols-1 sm:grid-cols-2" style={{
           gridTemplateRows: "1fr 1fr", gap: 1, background: "var(--qc-hair)",
         }}>
           <div style={{ background: "var(--qc-card)", display: "flex", flexDirection: "column" }}>

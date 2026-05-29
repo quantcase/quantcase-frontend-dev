@@ -11,4 +11,5 @@ export { DarkGradientCard } from "./DarkGradientCard";
 export { CommonCard } from "./CommonCard";
 export { GoldenCard } from "./GoldenCard";
 export { SignalTile } from "./SignalTile";
+export { SectionHeader } from "./SectionHeader";
 export type { SignalTileProps, SignalTileMetric } from "./SignalTile";

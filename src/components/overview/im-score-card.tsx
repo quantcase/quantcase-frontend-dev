@@ -85,22 +85,28 @@ function LensRow({ lens }: { lens: InsightLens }) {
         >
           {lens.name}
         </div>
-        <span
-          style={{
-            display: "inline-block",
-            fontFamily: "var(--qc-font-sans)",
-            fontSize: "var(--qc-fz-11)",
-            fontWeight: "var(--qc-w-semi)",
-            padding: "2px 8px",
-            borderRadius: 5,
-            background: colors.bg,
-            border: `1px solid ${colors.border}`,
-            color: colors.text,
-            letterSpacing: ".01em",
-          }}
-        >
-          {lens.subtitle ? toTitleCase(lens.subtitle) : ""}
-        </span>
+        {lens.subtitle ? (
+          <span
+            style={{
+              display: "inline-block",
+              fontFamily: "var(--qc-font-sans)",
+              fontSize: "var(--qc-fz-11)",
+              fontWeight: "var(--qc-w-semi)",
+              padding: "2px 8px",
+              borderRadius: 5,
+              background: colors.bg,
+              border: `1px solid ${colors.border}`,
+              color: colors.text,
+              letterSpacing: ".01em",
+            }}
+          >
+            {toTitleCase(lens.subtitle)}
+          </span>
+        ) : (
+          <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-3)", fontStyle: "italic" }}>
+            —
+          </span>
+        )}
       </div>
     </div>
   );

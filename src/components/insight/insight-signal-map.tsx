@@ -1,8 +1,7 @@
 "use client";
 
-import { BarChart2 } from "lucide-react";
 import type { InsightSignalMapItem } from "@/types/analysis";
-import { SignalTile, MonoLabel, LimeCountPip } from "@/components/ds";
+import { SignalTile, SectionHeader } from "@/components/ds";
 
 interface InsightSignalMapProps {
   signals: InsightSignalMapItem[];
@@ -17,14 +16,7 @@ export function InsightSignalMap({ signals, heading }: InsightSignalMapProps) {
       className="rounded-[10px] p-2"
       style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", display: "flex", flexDirection: "column", flex: 1 }}
     >
-      {/* Header */}
-      <div className="px-2 pt-1 pb-3 flex items-center gap-2">
-        <BarChart2 className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
-        <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">
-          {heading ?? "Signals"}
-        </MonoLabel>
-        <LimeCountPip count={signals.length} />
-      </div>
+      <SectionHeader label={heading ?? "Signals"} count={signals.length} style={{ marginBottom: 0, padding: "10px 12px 16px" }} />
 
       {/* Inner card with 2-col grid */}
       <div

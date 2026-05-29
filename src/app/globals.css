@@ -266,7 +266,7 @@
     /* ── QuantCase design tokens ── */
     --qc-bg:          var(--qc-hair-2);
     --qc-surface:     #FBFAF7;
-    --qc-section:     #F3F2EE;
+    --qc-section:     #f8f8f8;
     --qc-card:        #FFFFFF;
 
     --qc-ink:         #210B2C;

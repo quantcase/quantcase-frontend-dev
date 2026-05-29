@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { LimeCountPip } from "./LimeCountPip";
 
 interface SectionHeaderProps {
@@ -9,31 +8,36 @@ interface SectionHeaderProps {
   style?: React.CSSProperties;
 }
 
-function SectionHeader({ label, count, linkLabel, onLinkClick, style }: SectionHeaderProps) {
+export function SectionHeader({ label, count, linkLabel, onLinkClick, style }: SectionHeaderProps) {
   return (
     <div
       style={{
         display: "flex",
-        alignItems: "center",
+        alignItems: "baseline",
         justifyContent: "space-between",
         marginBottom: 14,
         ...style,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
         <span
           style={{
-            fontFamily: "var(--qc-font-mono)",
-            fontSize: "var(--qc-fz-11)",
-            letterSpacing: "var(--qc-track-eyebrow-l)",
-            textTransform: "uppercase",
-            color: "var(--qc-ink-2)",
+            fontFamily: "var(--font-instrument-serif, 'Instrument Serif', Georgia, serif)",
+            fontSize: 34,
+            fontWeight: 400,
+            letterSpacing: "-0.02em",
+            color: "var(--qc-ink)",
             whiteSpace: "nowrap",
+            lineHeight: 1.1,
           }}
         >
           {label}
         </span>
-        {count !== undefined && <LimeCountPip count={count} />}
+        {count !== undefined && (
+          <span style={{ position: "relative", bottom: 3 }}>
+            <LimeCountPip count={count} />
+          </span>
+        )}
       </div>
 
       {linkLabel && (

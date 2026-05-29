@@ -38,7 +38,6 @@ export default function LandingFinalCta() {
             lineHeight: 0.95,
             letterSpacing: "-0.035em",
             fontWeight: 400,
-            margin: 0,
           }}
         >
           Search any stock.{" "}

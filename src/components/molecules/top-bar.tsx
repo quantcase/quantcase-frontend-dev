@@ -311,7 +311,8 @@ function TopBarInner() {
     <motion.header
       className="fixed left-0 md:left-[72px] right-0 top-0 z-30 flex h-[60px] items-center px-4 md:px-6"
       animate={scrolled ? "scrolled" : "top"}
-      variants={{
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      variants={({
         top: {
           background: "rgba(255,255,255,0)",
           backdropFilter: "blur(0px)",
@@ -326,7 +327,7 @@ function TopBarInner() {
           borderBottom: "1px solid rgba(226,226,226,0.6)",
           boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
         },
-      }}
+      }) as any}
       transition={{ duration: 0.25, ease: "easeInOut" }}
     >
       <div className="flex h-full items-center overflow-x-auto scrollbar-none min-w-0 w-full">

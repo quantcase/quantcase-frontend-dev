@@ -46,13 +46,14 @@ function OverviewContent() {
   const { data: transcriptCalls } = useTranscriptCalls(symbol === "—" ? "" : symbol);
   const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
 
-  const { data: managementInsight } = useManagementAnalysis(firstCallId);
-  const { data: opportunityInsight } = useOpportunityAnalysis(firstCallId);
-  const { data: dealInsight } = useDealAnalysis(firstCallId);
+  const ticker = symbol === "—" ? "" : symbol;
+  const { data: managementInsight } = useManagementAnalysis(ticker);
+  const { data: opportunityInsight } = useOpportunityAnalysis(ticker);
+  const { data: dealInsight } = useDealAnalysis(ticker);
   const { data: technicalsData } = useTechnicals(symbol === "—" ? "" : symbol);
 
   // Overview analysis
-  const { data: overviewData, loading: overviewLoading, refetch: refetchOverview } = useOverviewFetch(firstCallId);
+  const { data: overviewData, refetch: refetchOverview } = useOverviewFetch(firstCallId);
 
   const handleOverviewComplete = useCallback(() => {
     refetchOverview();

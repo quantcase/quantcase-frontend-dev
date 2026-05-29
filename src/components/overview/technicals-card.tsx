@@ -71,6 +71,8 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
           display: "flex",
           flexDirection: "column",
           gap: 10,
+          minWidth: 0,
+          overflow: "hidden",
         }}
       >
         {/* Label + verdict pill — both nowrap to prevent wrapping */}
@@ -111,8 +113,8 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {rows.map((row, i) => (
             <div key={i}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: row.barPct != null ? 5 : 0 }}>
-                <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)" }}>{row.label}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 4, minWidth: 0, marginBottom: row.barPct != null ? 5 : 0 }}>
+                <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", flexShrink: 0 }}>{row.label}</span>
                 <span
                   style={{
                     fontFamily: "var(--qc-font-mono)",
@@ -120,6 +122,11 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
                     fontWeight: "var(--qc-w-medium)",
                     color: row.valueSentiment ? sentColor(row.valueSentiment) : "var(--qc-ink)",
                     fontVariantNumeric: "tabular-nums",
+                    minWidth: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    textAlign: "right",
                   }}
                 >
                   {row.value}
@@ -198,26 +205,33 @@ interface PriceLevelMarker {
   side: "top" | "bottom";
 }
 
-const CLUSTER_PCT = 3.5; // markers within this % are "close"
+// Spread label X positions so no two labels on the same side overlap.
+// Labels start at their true dot X, then are nudged apart if within MIN_LABEL_GAP SVG units.
+const MIN_LABEL_GAP = 80; // minimum horizontal gap between label centres
 
-function assignLabelRows(markers: PriceLevelMarker[], toPct: (v: number) => number): (PriceLevelMarker & { row: number })[] {
-  const sorted = [...markers].sort((a, b) => toPct(a.value) - toPct(b.value));
-  const result: (PriceLevelMarker & { row: number })[] = [];
-  // greedily assign rows so no two same-row labels are within CLUSTER_PCT
-  for (const m of sorted) {
-    const pct = toPct(m.value);
-    let row = 0;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const conflict = result.find(
-        (r) => r.side === m.side && r.row === row && Math.abs(toPct(r.value) - pct) < CLUSTER_PCT
-      );
-      if (!conflict) break;
-      row++;
+function spreadLabelPositions(
+  markers: (PriceLevelMarker & { dotX: number })[],
+): (PriceLevelMarker & { dotX: number; labelX: number })[] {
+  // Sort by dotX so we nudge left→right
+  const sorted = [...markers].map((m) => ({ ...m, labelX: m.dotX }));
+  sorted.sort((a, b) => a.dotX - b.dotX);
+
+  // Forward pass: push right if too close to previous
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = sorted[i - 1];
+    if (sorted[i].labelX - prev.labelX < MIN_LABEL_GAP) {
+      sorted[i].labelX = prev.labelX + MIN_LABEL_GAP;
     }
-    result.push({ ...m, row });
   }
-  return result;
+  // Backward pass: pull left if we overshot the right edge (clamp is handled per-render)
+  for (let i = sorted.length - 2; i >= 0; i--) {
+    const next = sorted[i + 1];
+    if (next.labelX - sorted[i].labelX < MIN_LABEL_GAP) {
+      sorted[i].labelX = next.labelX - MIN_LABEL_GAP;
+    }
+  }
+
+  return sorted;
 }
 
 function markerDotStyle(style: PriceLevelMarker["style"]): { bg: string; border: string; size: number } {
@@ -244,13 +258,14 @@ function labelColor(style: PriceLevelMarker["style"]): string {
   }
 }
 
-// Label box: value line ~14px + pill ~16px + optional subLabel ~12px = ~42px total
-// STEM_GAP: gap between dot edge and start of stem line
-// ROW_STEP: distance from bar centre to label box edge (top of bottom label / bottom of top label)
-const LABEL_H = 46;    // foreignObject height (value + pill + optional subLabel)
-const STEM_GAP = 6;    // px gap between dot edge and stem start
-const ROW_STEP = LABEL_H + 14; // stem length ~14px between label bottom and bar
-const BAR_EDGE_MARGIN = 28;    // extra space at top for ATL/ATH date text
+// Fixed SVG geometry — labels always sit at a fixed distance from the bar
+const W = 1000;
+const PAD = 60;           // horizontal inset so edge labels don't clip
+const BAR_Y = 120;        // bar sits at a fixed vertical centre
+const TOP_LABEL_Y = 20;   // top edge of all top-side label boxes (price + pill)
+const BOT_LABEL_Y = 160;  // top edge of all bottom-side label boxes
+const LABEL_H = 46;       // foreignObject height
+const TOTAL_H = BOT_LABEL_Y + LABEL_H + 16;
 
 function PriceLevelsBar({
   markers,
@@ -274,45 +289,19 @@ function PriceLevelsBar({
   const span = high - low;
   if (span <= 0) return null;
 
+  const barW = W - PAD * 2;
   const toPct = (v: number) => Math.max(0, Math.min(100, ((v - low) / span) * 100));
+  const toX = (v: number) => PAD + (toPct(v) * barW) / 100;
 
-  const withRows = assignLabelRows(markers, toPct);
-  const topMarkers = withRows.filter((m) => m.side === "top");
-  const bottomMarkers = withRows.filter((m) => m.side === "bottom");
-  const maxTopRow = topMarkers.length > 0 ? topMarkers.reduce((mx, m) => Math.max(mx, m.row), 0) : -1;
-  const maxBottomRow = bottomMarkers.length > 0 ? bottomMarkers.reduce((mx, m) => Math.max(mx, m.row), 0) : -1;
+  // Attach dotX to each marker, then spread label positions per side
+  const withDotX = markers.map((m) => ({ ...m, dotX: toX(m.value) }));
+  const topSpread = spreadLabelPositions(withDotX.filter((m) => m.side === "top"));
+  const botSpread = spreadLabelPositions(withDotX.filter((m) => m.side === "bottom"));
 
-  // barY: enough room above for all top label rows + ATL/ATH date text
-  const barY = BAR_EDGE_MARGIN + (maxTopRow + 1) * ROW_STEP;
-  // totalHeight: bar + all bottom label rows + bottom padding
-  const totalHeight = barY + (maxBottomRow + 1) * ROW_STEP + LABEL_H + 16;
+  // Clamp label centres so they stay within the SVG width
+  const clampLX = (lx: number) => Math.max(PAD, Math.min(W - PAD, lx));
 
-  // For top labels: label box bottom edge is at barY - stemLength, top edge is LABEL_H above that
-  // For bottom labels: label box top edge is at barY + stemLength
-  const STEM_LEN = 14; // px from dot edge to label box edge
-
-  // Returns the Y of the TOP edge of the label foreignObject
-  const labelBoxTop = (side: "top" | "bottom", row: number, dotRadius: number): number => {
-    if (side === "top") {
-      // label box bottom = barY - dotRadius - STEM_GAP - STEM_LEN - row*(LABEL_H + STEM_LEN)
-      const boxBottom = barY - dotRadius - STEM_GAP - STEM_LEN - row * ROW_STEP;
-      return boxBottom - LABEL_H;
-    } else {
-      // label box top = barY + dotRadius + STEM_GAP + STEM_LEN + row*(LABEL_H + STEM_LEN)
-      return barY + dotRadius + STEM_GAP + STEM_LEN + row * ROW_STEP;
-    }
-  };
-
-  const stemStart = (side: "top" | "bottom", dotRadius: number): number =>
-    side === "top" ? barY - dotRadius - STEM_GAP : barY + dotRadius + STEM_GAP;
-
-  const stemEnd = (side: "top" | "bottom", row: number, dotRadius: number): number => {
-    if (side === "top") {
-      return labelBoxTop(side, row, dotRadius) + LABEL_H + 2; // just below label box bottom
-    } else {
-      return labelBoxTop(side, row, dotRadius) - 2; // just above label box top
-    }
-  };
+  const allSpread = [...topSpread, ...botSpread];
 
   return (
     <div
@@ -336,111 +325,116 @@ function PriceLevelsBar({
         </span>
       </div>
 
-      {/* SVG chart — PAD keeps dots/labels inset so edges never clip */}
+      {/* SVG chart */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {(() => {
-          const PAD = 40; // horizontal padding in SVG units on each side
-          const W = 1000;
-          const barW = W - PAD * 2;
-          // map price % → SVG x within padded bar
-          const toX = (v: number) => PAD + toPct(v) * barW / 100;
+        <svg
+          width="100%"
+          viewBox={`0 0 ${W} ${TOTAL_H}`}
+          style={{ display: "block", margin: "0 auto" }}
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <defs>
+            <linearGradient id="plBarGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stopColor="#D9E8B3" />
+              <stop offset="50%"  stopColor="#F3E4C3" />
+              <stop offset="100%" stopColor="#F0D3C9" />
+            </linearGradient>
+          </defs>
 
-          return (
-            <svg
-              width="100%"
-              viewBox={`0 0 ${W} ${totalHeight}`}
-              style={{ display: "block", margin: "0 auto" }}
-              preserveAspectRatio="xMidYMid meet"
-            >
-              <defs>
-                <linearGradient id="plBarGrad" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%"   stopColor="#D9E8B3" />
-                  <stop offset="50%"  stopColor="#F3E4C3" />
-                  <stop offset="100%" stopColor="#F0D3C9" />
-                </linearGradient>
-              </defs>
+          {/* Bar track */}
+          <rect x={PAD} y={BAR_Y - 3} width={barW} height="6" rx="3" fill="url(#plBarGrad)" />
 
-              {/* Bar track */}
-              <rect x={PAD} y={barY - 3} width={barW} height="6" rx="3" fill="url(#plBarGrad)" />
+          {/* ATL / ATH edge labels */}
+          {atl != null && (
+            <g>
+              <text x={PAD} y={BAR_Y + 16} fontSize="9" fontWeight="600" fill="var(--qc-down, #B23A2F)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">ATL</text>
+              {atlDate && <text x={PAD} y={BAR_Y + 27} fontSize="8" fill="var(--qc-ink-2)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">{atlDate}</text>}
+            </g>
+          )}
+          {ath != null && (
+            <g>
+              <text x={PAD + barW} y={BAR_Y + 16} fontSize="9" fontWeight="600" fill="var(--qc-down, #B23A2F)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">ATH</text>
+              {athDate && <text x={PAD + barW} y={BAR_Y + 27} fontSize="8" fill="var(--qc-ink-2)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">{athDate}</text>}
+            </g>
+          )}
 
-              {/* Markers: dot + connector line + label */}
-              {withRows.map((m, i) => {
-                const x = toX(m.value);
-                const ds = markerDotStyle(m.style);
-                const r = ds.size / 2;
-                const color = labelColor(m.style);
-                const isCmp = m.style === "cmp";
-                const boxTop = labelBoxTop(m.side, m.row, r);
+          {/* Markers: dot on bar + slanted dashed connector + label at fixed row */}
+          {allSpread.map((m, i) => {
+            const dotX = m.dotX;
+            const labelX = clampLX(m.labelX);
+            const ds = markerDotStyle(m.style);
+            const r = ds.size / 2;
+            const color = labelColor(m.style);
+            const isCmp = m.style === "cmp";
 
-                return (
-                  <g key={i}>
-                    {/* Dashed stem */}
-                    <line
-                      x1={x} y1={stemStart(m.side, r)}
-                      x2={x} y2={stemEnd(m.side, m.row, r)}
-                      stroke={color} strokeWidth="1.2"
-                      strokeDasharray="3 3" opacity="0.6"
-                    />
+            // Connector: from dot edge → label anchor
+            const isTop = m.side === "top";
+            const dotY = BAR_Y + (isTop ? -r : r);
+            const labelAnchorY = isTop ? TOP_LABEL_Y + LABEL_H : BOT_LABEL_Y;
 
-                    {/* Dot */}
-                    <circle cx={x} cy={barY} r={r} fill={ds.bg} stroke={ds.border} strokeWidth={isCmp ? 2.5 : 1.8} />
-                    {isCmp && (
-                      <circle cx={x} cy={barY} r={r + 3} fill="none" stroke="#0F172B" strokeWidth="1" opacity="0.18" />
+            return (
+              <g key={i}>
+                {/* Slanted dashed connector from dot to label */}
+                <line
+                  x1={dotX} y1={dotY}
+                  x2={labelX} y2={labelAnchorY}
+                  stroke={color} strokeWidth="1.2"
+                  strokeDasharray="3 3" opacity="0.5"
+                />
+
+                {/* Dot on bar */}
+                <circle cx={dotX} cy={BAR_Y} r={r} fill={ds.bg} stroke={ds.border} strokeWidth={isCmp ? 2.5 : 1.8} />
+                {isCmp && (
+                  <circle cx={dotX} cy={BAR_Y} r={r + 3} fill="none" stroke="#0F172B" strokeWidth="1" opacity="0.18" />
+                )}
+
+                {/* Label box at fixed row, centred on labelX */}
+                <foreignObject
+                  x={labelX - 38}
+                  y={isTop ? TOP_LABEL_Y : BOT_LABEL_Y}
+                  width="76"
+                  height={LABEL_H}
+                  style={{ overflow: "visible" }}
+                >
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                    <span style={{
+                      fontFamily: "var(--qc-font-mono)",
+                      fontSize: "var(--qc-fz-11)",
+                      fontWeight: isCmp ? "var(--qc-w-bold)" : "var(--qc-w-medium)",
+                      fontVariantNumeric: "tabular-nums",
+                      whiteSpace: "nowrap",
+                      background: isCmp ? "#0F172B" : "transparent",
+                      color: isCmp ? "#fff" : "var(--qc-ink)",
+                      padding: isCmp ? "1px 6px" : "0",
+                      borderRadius: isCmp ? 4 : 0,
+                    }}>
+                      {fp(m.value)}
+                    </span>
+                    <span style={{
+                      fontFamily: "var(--qc-font-mono)",
+                      fontSize: "var(--qc-fz-9)",
+                      fontWeight: "var(--qc-w-semi)",
+                      color,
+                      background: "var(--qc-surface, #F5F5F5)",
+                      border: `1px solid ${color}`,
+                      borderRadius: 3,
+                      padding: "1px 5px",
+                      whiteSpace: "nowrap",
+                      letterSpacing: "0.05em",
+                    }}>
+                      {m.label}
+                    </span>
+                    {m.subLabel && (
+                      <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", whiteSpace: "nowrap" }}>
+                        {m.subLabel}
+                      </span>
                     )}
-
-                    {/* Label: value + pill tag */}
-                    <foreignObject x={x - 38} y={boxTop} width="76" height={LABEL_H} style={{ overflow: "visible" }}>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                        <span style={{
-                          fontFamily: "var(--qc-font-mono)",
-                          fontSize: "var(--qc-fz-11)", fontWeight: isCmp ? "var(--qc-w-bold)" : "var(--qc-w-medium)",
-                          fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
-                          background: isCmp ? "#0F172B" : "transparent",
-                          color: isCmp ? "#fff" : "var(--qc-ink)",
-                          padding: isCmp ? "1px 6px" : "0",
-                          borderRadius: isCmp ? 4 : 0,
-                        }}>
-                          {fp(m.value)}
-                        </span>
-                        <span style={{
-                          fontFamily: "var(--qc-font-mono)",
-                          fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-semi)", color,
-                          background: "var(--qc-surface, #F5F5F5)",
-                          border: `1px solid ${color}`,
-                          borderRadius: 3, padding: "1px 5px",
-                          whiteSpace: "nowrap",
-                          letterSpacing: "0.05em",
-                        }}>
-                          {m.label}
-                        </span>
-                        {m.subLabel && (
-                          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", whiteSpace: "nowrap" }}>
-                            {m.subLabel}
-                          </span>
-                        )}
-                      </div>
-                    </foreignObject>
-                  </g>
-                );
-              })}
-
-              {/* ATL edge label (left, below bar) */}
-              {atl != null && (
-                <g>
-                  {atlDate && <text x={PAD} y={barY - 8} fontSize="8" fill="var(--qc-ink-2)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">{atlDate}</text>}
-                  <text x={PAD} y={barY + 16} fontSize="9" fontWeight="600" fill="var(--qc-down, #B23A2F)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">ATL</text>
-                </g>
-              )}
-              {/* ATH edge label (right, below bar) */}
-              {ath != null && (
-                <g>
-                  {athDate && <text x={PAD + barW} y={barY - 8} fontSize="8" fill="var(--qc-ink-2)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">{athDate}</text>}
-                  <text x={PAD + barW} y={barY + 16} fontSize="9" fontWeight="600" fill="var(--qc-down, #B23A2F)" fontFamily="'IBM Plex Mono', monospace" textAnchor="middle">ATH</text>
-                </g>
-              )}
-            </svg>
-          );
-        })()}
+                  </div>
+                </foreignObject>
+              </g>
+            );
+          })}
+        </svg>
       </div>
 
       {/* Legend */}
@@ -707,7 +701,7 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
         )}
 
         {/* 4-column state cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10, minWidth: 0 }}>
           {stateCards.map((card) => (
             <StateCard key={card.label} {...card} />
           ))}

@@ -1,7 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useInView, animate } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { FileText, Building2, Zap, TrendingUp, Users } from "lucide-react";
 
 const serif: React.CSSProperties = { fontFamily: "var(--font-instrument-serif, 'Instrument Serif', serif)" };
 const mono: React.CSSProperties = { fontFamily: "'Geist Mono', 'JetBrains Mono', ui-monospace, monospace" };
@@ -13,33 +14,99 @@ const sources = [
 ];
 
 const calibrations = [
-  { label: "Guidance accuracy model", value: 84 },
-  { label: "Valuation signals", value: 71 },
-  { label: "Management flags", value: 78 },
+  { label: "Guidance accuracy", short: "Guidance", value: 84 },
+  { label: "Valuation signals", short: "Valuation", value: 71 },
+  { label: "Management flags", short: "Mgmt flags", value: 78 },
 ];
 
-function ProgressBar({ value, delay = 0 }: { value: number; delay?: number }) {
+const metrics = [
+  { num: 12.4, suffix: "M", label: "Documents read", decimals: 1, Icon: FileText, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
+  { num: 3840, suffix: "", label: "Companies tracked", decimals: 0, Icon: Building2, iconBg: "rgba(14,26,43,0.06)", iconColor: "#0E1A2B", iconBorder: "rgba(14,26,43,0.12)" },
+  { num: 98.2, suffix: "%", label: "Uptime", decimals: 1, Icon: Zap, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
+];
+
+function AnimatedNumber({ to, suffix, decimals }: { to: number; suffix: string; decimals: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+
+  useEffect(() => {
+    if (!inView || !ref.current) return;
+    const controls = animate(0, to, {
+      duration: 1.8,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate(v) {
+        if (ref.current) {
+          ref.current.textContent = v.toFixed(decimals) + suffix;
+        }
+      },
+    });
+    return () => controls.stop();
+  }, [inView, to, suffix, decimals]);
+
+  return <span ref={ref}>0{suffix}</span>;
+}
+
+function CalibrationBar({ value, delay = 0, inView }: { value: number; delay?: number; inView: boolean }) {
   const [w, setW] = useState(0);
   useEffect(() => {
+    if (!inView) return;
     const id = setTimeout(() => setW(value), delay);
     return () => clearTimeout(id);
-  }, [value, delay]);
+  }, [inView, value, delay]);
+
   return (
-    <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: "rgba(14,26,43,0.10)" }}>
+    <div className="relative h-[3px] w-full overflow-hidden rounded-full" style={{ background: "rgba(14,26,43,0.08)" }}>
       <div
-        className="h-full"
-        style={{ width: `${w}%`, background: "#B98A3E", transition: "width 1600ms cubic-bezier(0.16, 1, 0.3, 1)" }}
+        className="absolute inset-y-0 left-0 rounded-full"
+        style={{
+          width: `${w}%`,
+          background: "linear-gradient(90deg, #B98A3E 0%, #D4A95F 100%)",
+          transition: "width 1600ms cubic-bezier(0.16, 1, 0.3, 1)",
+          boxShadow: "0 0 8px rgba(185,138,62,0.5)",
+        }}
       />
     </div>
   );
 }
 
 export default function LandingPoweredByAi() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const gridInView = useInView(sectionRef, { once: true, margin: "-80px" });
+
   return (
-    <section id="engine" className="relative py-24 md:py-44" style={{ background: "#F5F0E6" }}>
-      <div className="mx-auto max-w-[1280px] px-8 md:px-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-8 flex items-center justify-center gap-4">
+    <section id="engine" className="relative overflow-hidden py-20 md:py-32" style={{ background: "#F5F0E6" }}>
+      {/* Subtle dot grid */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          opacity: 0.35,
+          backgroundImage: "radial-gradient(rgba(14,26,43,0.18) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+
+      {/* Radial glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2"
+        style={{
+          width: 900,
+          height: 500,
+          background: "radial-gradient(ellipse at 50% 0%, rgba(185,138,62,0.06) 0%, transparent 65%)",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-[1280px] px-8 md:px-12">
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-3xl text-center"
+        >
+          <div className="mb-6 flex items-center justify-center gap-4">
             <span className="h-px w-12" style={{ background: "rgba(185,138,62,0.7)" }} />
             <span className="text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.28em", color: "#B98A3E" }}>
               Powered by AI
@@ -58,33 +125,33 @@ export default function LandingPoweredByAi() {
             }}
           >
             Reads everything{" "}
-            <span className="serif-italic" style={{ color: "rgba(14,26,43,0.80)" }}>you don&apos;t have time to.</span>
+            <span style={{ color: "rgba(14,26,43,0.45)", fontStyle: "italic" }}>you don&apos;t have time to.</span>
           </h2>
-          <p className="mx-auto mt-6 max-w-xl text-base" style={{ ...sans, color: "#3A4B61" }}>
+          <p className="mx-auto mt-5 max-w-xl text-base" style={{ ...sans, color: "rgba(14,26,43,0.55)" }}>
             Every earnings call. Every filing. Every competitor move. Synthesised in seconds — and unlike a human analyst, it never
             forgets what management promised last quarter.
           </p>
-        </div>
+        </motion.div>
 
         {/* Marquee */}
         <div
-          className="relative mt-16 overflow-hidden py-2"
+          className="relative mt-12 overflow-hidden py-2"
           style={{
             maskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
             WebkitMaskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
           }}
         >
-          <div className="marquee-track gap-4">
+          <div className="marquee-track gap-3">
             {[...sources, ...sources].map((s, i) => (
               <span
                 key={i}
-                className="inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-xs uppercase"
+                className="inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-[10px] uppercase"
                 style={{
                   ...mono,
                   letterSpacing: "0.18em",
-                  color: "rgba(14,26,43,0.70)",
+                  color: "rgba(14,26,43,0.55)",
                   border: "1px solid rgba(14,26,43,0.08)",
-                  background: "#EFE8D8",
+                  background: "rgba(14,26,43,0.04)",
                 }}
               >
                 <span className="h-1 w-1 rounded-full" style={{ background: "#B98A3E" }} />
@@ -94,74 +161,154 @@ export default function LandingPoweredByAi() {
           </div>
         </div>
 
-        {/* Calibration grid */}
-        <div className="mt-16 grid grid-cols-1 gap-6 md:mt-24 md:grid-cols-12 md:gap-8">
-          {/* Calibrations panel */}
+        {/* Main grid */}
+        <div ref={sectionRef} className="mt-14 grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
+
+          {/* Left: calibration panel — 7 cols */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="rounded-3xl p-7 backdrop-blur-md md:col-span-7 md:p-10"
-            style={{ border: "1px solid rgba(14,26,43,0.08)", background: "rgba(255,255,255,0.40)" }}
+            className="md:col-span-7 rounded-2xl overflow-hidden"
+            style={{ border: "1px solid rgba(14,26,43,0.09)", background: "rgba(14,26,43,0.03)" }}
           >
-            <div className="mb-8 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.60)" }}>
-                <span className="relative flex h-2 w-2">
+            {/* Header row */}
+            <div
+              className="flex items-center justify-between px-7 py-4"
+              style={{ borderBottom: "1px solid rgba(14,26,43,0.07)" }}
+            >
+              <div className="flex items-center gap-2.5 text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.24em", color: "rgba(14,26,43,0.45)" }}>
+                <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-50" style={{ background: "#B98A3E" }} />
-                  <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: "#B98A3E" }} />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: "#B98A3E" }} />
                 </span>
                 Live calibration
               </div>
-              <span className="text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.40)" }}>
+              <span className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.24em", color: "rgba(14,26,43,0.28)" }}>
                 Updating
               </span>
             </div>
-            <div className="space-y-8">
+
+            {/* Bars list */}
+            <div className="divide-y" style={{ borderColor: "rgba(14,26,43,0.06)" }}>
               {calibrations.map((c, i) => (
-                <div key={c.label}>
-                  <div className="mb-3 flex items-baseline justify-between">
-                    <span className="text-sm" style={{ ...sans, color: "#0E1A2B" }}>{c.label}</span>
-                    <span className="text-2xl" style={{ ...mono, color: "#0E1A2B" }}>{c.value}%</span>
+                <motion.div
+                  key={c.label}
+                  className="group relative px-7 py-6"
+                  whileHover={{ background: "rgba(14,26,43,0.025)" }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="mb-4 flex items-end justify-between gap-4">
+                    <div>
+                      <span
+                        className="text-[10px] uppercase block mb-1"
+                        style={{ ...mono, letterSpacing: "0.20em", color: "rgba(14,26,43,0.28)" }}
+                      >
+                        0{i + 1}
+                      </span>
+                      <span className="text-[14px]" style={{ ...sans, color: "rgba(14,26,43,0.70)", fontWeight: 400 }}>
+                        {c.label}
+                      </span>
+                    </div>
+                    <span
+                      style={{
+                        ...mono,
+                        color: "#0E1A2B",
+                        fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+                        lineHeight: 1,
+                        letterSpacing: "-0.04em",
+                        fontWeight: 400,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {c.value}%
+                    </span>
                   </div>
-                  <ProgressBar value={c.value} delay={300 + i * 200} />
-                </div>
+                  <CalibrationBar value={c.value} delay={400 + i * 180} inView={gridInView} />
+                </motion.div>
               ))}
             </div>
-            <p className="mt-10 pt-6 text-sm" style={{ ...sans, color: "#3A4B61", borderTop: "1px solid rgba(14,26,43,0.08)" }}>
-              A self-improving system — every prediction tracked against real outcomes, recalibrating continuously.
-            </p>
+
+            {/* Footer note */}
+            <div className="px-7 py-4" style={{ borderTop: "1px solid rgba(14,26,43,0.06)" }}>
+              <p className="text-[12px] leading-relaxed" style={{ ...sans, color: "rgba(14,26,43,0.35)", margin: 0 }}>
+                Every prediction is tracked against real outcomes and recalibrated continuously.
+              </p>
+            </div>
           </motion.div>
 
-          {/* Metric tiles */}
-          <div className="grid grid-cols-1 gap-6 md:col-span-5 md:gap-8">
-            {[
-              { num: "12.4M", label: "Documents read" },
-              { num: "3,840", label: "Companies tracked" },
-              { num: "98.2%", label: "Uptime" },
-            ].map((m, i) => (
+          {/* Right: metric tiles — 5 cols */}
+          <div className="md:col-span-5 flex flex-col gap-4">
+            {metrics.map((m, i) => (
               <motion.div
                 key={m.label}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.1 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="rounded-3xl p-6 md:p-8"
-                style={{ border: "1px solid rgba(14,26,43,0.08)", background: "#EFE8D8" }}
+                initial={{ opacity: 0, x: 24 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.7, delay: 0.15 + i * 0.10, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ scale: 1.018 }}
+                className="flex-1 flex items-center gap-5 rounded-2xl px-6 py-5 cursor-default overflow-hidden relative"
+                style={{
+                  border: "1px solid rgba(14,26,43,0.09)",
+                  background: "rgba(14,26,43,0.03)",
+                }}
               >
+                {/* Large background watermark icon */}
                 <div
-                  style={{
-                    ...mono,
-                    color: "#0E1A2B",
-                    fontSize: "clamp(2rem, 4vw, 3.5rem)",
-                    lineHeight: 1,
-                    letterSpacing: "-0.03em",
-                  }}
+                  aria-hidden
+                  className="pointer-events-none absolute -right-3 -bottom-3 opacity-[0.045]"
+                  style={{ color: "#0E1A2B" }}
                 >
-                  {m.num}
+                  <m.Icon size={88} strokeWidth={1} />
                 </div>
-                <div className="mt-3 text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.55)" }}>
-                  {m.label}
+
+                {/* Prominent icon block */}
+                <div className="relative flex-shrink-0">
+                  {/* Outer halo ring */}
+                  <div
+                    className="absolute inset-0 rounded-2xl"
+                    style={{
+                      background: m.iconBg,
+                      transform: "scale(1.35)",
+                      opacity: 0.5,
+                      borderRadius: 20,
+                    }}
+                  />
+                  <motion.div
+                    whileHover={{ rotate: [0, -6, 6, 0] }}
+                    transition={{ duration: 0.5 }}
+                    className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl"
+                    style={{
+                      background: m.iconBg,
+                      border: `1px solid ${m.iconBorder}`,
+                      color: m.iconColor,
+                    }}
+                  >
+                    <m.Icon size={24} strokeWidth={1.4} />
+                  </motion.div>
+                </div>
+
+                {/* Label + number stacked */}
+                <div className="relative flex flex-col gap-1 flex-1 min-w-0">
+                  <div
+                    className="text-[10px] uppercase"
+                    style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.38)" }}
+                  >
+                    {m.label}
+                  </div>
+                  <div
+                    style={{
+                      ...mono,
+                      color: "#0E1A2B",
+                      fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+                      lineHeight: 1,
+                      letterSpacing: "-0.04em",
+                      fontWeight: 400,
+                    }}
+                  >
+                    <AnimatedNumber to={m.num} suffix={m.suffix} decimals={m.decimals} />
+                  </div>
                 </div>
               </motion.div>
             ))}

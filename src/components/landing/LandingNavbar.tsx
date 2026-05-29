@@ -47,7 +47,7 @@ export default function LandingNavbar() {
           ))}
         </nav>
 
-        <a href="#cta" className="lp-cta-btn group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium">
+        <a href="/signin" className="lp-cta-btn group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium">
           Start free
           <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
         </a>

@@ -50,7 +50,7 @@ export default function LandingFinalCta() {
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-6">
-          <a href="#" className="lp-cta-btn group inline-flex items-center gap-3 rounded-full px-9 py-5 text-base font-medium">
+          <a href="/signin" className="lp-cta-btn group inline-flex items-center gap-3 rounded-full px-9 py-5 text-base font-medium">
             Start researching
             <span className="inline-block transition-transform group-hover:translate-x-1">↗</span>
           </a>

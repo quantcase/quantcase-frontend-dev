@@ -2,50 +2,55 @@
 
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
 import type { Signal } from "@/hooks/useSignals";
+import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
   lens: LensDetail;
   signals: Signal[];
 }
 
-function directionIcon(direction: string | null): { icon: string; color: string } {
+function rowIcon(direction: string | null): { icon: string; bg: string; color: string } {
   const d = (direction ?? "").toLowerCase();
-  if (d === "beat") return { icon: "✓", color: "var(--qc-up)" };
-  if (d === "miss") return { icon: "✕", color: "var(--qc-down)" };
-  return { icon: "●", color: "var(--qc-ink-3)" };
+  if (d === "beat") return { icon: "✓", bg: "rgba(22,163,74,0.12)", color: "#16a34a" };
+  if (d === "miss") return { icon: "✕", bg: "rgba(220,38,38,0.12)", color: "#dc2626" };
+  // in_line, tracking, etc → neutral grey pill
+  return { icon: "—", bg: "rgba(18,18,18,0.07)", color: "#888888" };
 }
 
-function insightCardStyle(direction: string | null) {
+function insightBorderColor(direction: string | null): string {
   const d = (direction ?? "").toLowerCase();
-  if (d === "beat") return { border: "var(--qc-up)", iconBg: "rgba(31,122,74,0.10)", iconColor: "var(--qc-up)", icon: "✓" };
-  if (d === "miss") return { border: "var(--qc-down)", iconBg: "rgba(220,38,38,0.10)", iconColor: "var(--qc-down)", icon: "✕" };
-  return { border: "var(--qc-warn)", iconBg: "rgba(180,115,26,0.10)", iconColor: "var(--qc-warn)", icon: "●" };
+  if (d === "beat") return "#16a34a";
+  if (d === "miss") return "#dc2626";
+  return "#d97706"; // amber for tracking/neutral
 }
 
-function formatDelta(pct: number | null | undefined): { text: string; color: string } {
-  if (pct == null) return { text: "—", color: "var(--qc-ink-3)" };
-  if (pct === 0) return { text: "flat", color: "var(--qc-ink-3)" };
-  const text = pct > 0 ? `+${pct.toFixed(1)} pp` : `${pct.toFixed(1)} pp`;
-  return { text, color: pct > 0 ? "var(--qc-up)" : "var(--qc-down)" };
+function insightIconStyle(direction: string | null): { bg: string; color: string; icon: string } {
+  const d = (direction ?? "").toLowerCase();
+  if (d === "beat") return { bg: "rgba(22,163,74,0.12)", color: "#16a34a", icon: "✓" };
+  if (d === "miss") return { bg: "rgba(220,38,38,0.12)", color: "#dc2626", icon: "✕" };
+  return { bg: "rgba(217,119,6,0.12)", color: "#d97706", icon: "●" };
 }
 
-function formatStake(value: number | null, unit: string | null): string {
-  if (value == null || value === 0) return "—";
-  return unit ? `${value}${unit}` : String(value);
+function formatDelta(delta: number | null | undefined): { text: string; color: string } {
+  if (delta == null) return { text: "—", color: "#888888" };
+  if (delta === 0) return { text: "flat", color: "#888888" };
+  const text = delta > 0 ? `+${delta.toFixed(1)} pp` : `${delta.toFixed(1)} pp`;
+  return { text, color: delta > 0 ? "#16a34a" : "#dc2626" };
 }
 
 export function LensDetailPromoter({ lens, signals: _signals }: Props) {
   const topSignals: TopSignal[] = lens.top_signals ?? [];
 
-  const stakeSignals = topSignals.filter((s) => s.metric === "PROMOTER_STAKE");
-  const insightSignals = topSignals.filter((s) => s.metric === "PROMOTER_INSIGHT");
+  const stakeRows = topSignals.filter(
+    (s) => s.metric === "PROMOTER_STAKE" && !s.label?.startsWith("META_")
+  );
+  const insightCards = topSignals.filter((s) => s.metric === "PROMOTER_INSIGHT");
 
-  // META signals for header context
-  const metaStake = topSignals.find((s) => s.metric === "META_CURRENT_STAKE");
-  const metaPledge = topSignals.find((s) => s.metric === "META_PLEDGE_PCT");
-  const metaVerdict = topSignals.find((s) => s.metric === "META_VERDICT");
+  // META signals for pledge column and header context
+  const metaPledge = topSignals.find((s) => s.label === "META_PLEDGE_PCT");
+  const metaVerdict = topSignals.find((s) => s.label === "META_VERDICT");
+  const globalPledge = metaPledge?.actual_value ?? 0;
 
-  // Header subtitle: lens description or meta verdict
   const subtitle = lens.description ?? metaVerdict?.statement ?? "";
 
   return (
@@ -53,68 +58,113 @@ export function LensDetailPromoter({ lens, signals: _signals }: Props) {
 
       {/* Section header */}
       <div>
-        <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 4px" }}>
+        <p style={{
+          fontSize: 9, fontWeight: 700, textTransform: "uppercase",
+          letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 4px",
+        }}>
           PROMOTER ACTIVITY · {lens.name.toUpperCase()}
         </p>
         {subtitle && (
-          <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>{subtitle}</p>
+          <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>
+            {subtitle}
+          </p>
         )}
       </div>
 
       {/* Stake timeline table */}
-      {stakeSignals.length > 0 && (
-        <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
-          {stakeSignals.map((s, i) => {
-            const isLast = i === stakeSignals.length - 1;
-            const stake = formatStake(s.actual_value, s.unit);
-            const pledge = s.guided_value != null ? `${s.guided_value}% pledge` : "—";
-            const delta = formatDelta(s.delta_pct);
-            const icon = directionIcon(s.direction);
+      {stakeRows.length > 0 && (
+        <div style={{
+          borderRadius: 10,
+          border: "1px solid var(--qc-hair)",
+          overflow: "hidden",
+          background: "var(--qc-card)",
+        }}>
+          {/* Column headers */}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "100px 110px 120px 72px 1fr",
+            alignItems: "center",
+            padding: "8px 20px",
+            borderBottom: "1px solid var(--qc-hair)",
+            background: "var(--qc-surface, #F5F5F5)",
+            gap: 0,
+          }}>
+            {["Period", "Stake", "Pledge", "Change", "Signal"].map((h) => (
+              <span key={h} style={{
+                fontSize: 10, fontWeight: 500, textTransform: "uppercase",
+                letterSpacing: "0.08em", color: "#888888",
+              }}>
+                {h}
+              </span>
+            ))}
+          </div>
+          {stakeRows.map((s, i) => {
+            const isLast = i === stakeRows.length - 1;
+            const pledgePct = s.guided_value != null ? s.guided_value : globalPledge;
+            const delta = formatDelta(s.delta ?? s.delta_pct);
+            const icon = rowIcon(s.direction ?? null);
 
             return (
               <div
-                key={s.signal_id}
+                key={s.signal_id ?? i}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "100px 130px 110px 70px 1fr",
+                  gridTemplateColumns: "100px 110px 120px 72px 1fr",
                   alignItems: "center",
-                  padding: "14px 20px",
+                  padding: "13px 20px",
                   borderBottom: !isLast ? "1px solid var(--qc-hair)" : undefined,
-                  background: "var(--qc-card)",
                   gap: 0,
                 }}
               >
                 {/* Date */}
-                <span style={{ fontSize: 12, color: "var(--qc-ink-3)", fontWeight: 500 }}>
+                <span style={{
+                  fontSize: 12, color: "var(--qc-ink-3)", fontWeight: 500,
+                }}>
                   {s.label ?? "—"}
                 </span>
 
                 {/* Stake % */}
-                <span style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>
-                  {stake}
+                <span style={{
+                  fontSize: 13, fontWeight: 700, color: "var(--qc-ink)",
+                  fontVariantNumeric: "tabular-nums",
+                }}>
+                  {s.actual_value != null ? `${s.actual_value}%` : "—"}
                 </span>
 
                 {/* Pledge % */}
-                <span style={{ fontSize: 13, color: "var(--qc-ink-3)", fontVariantNumeric: "tabular-nums" }}>
-                  {pledge}
+                <span style={{
+                  fontSize: 12, color: "var(--qc-ink-3)",
+                  fontVariantNumeric: "tabular-nums",
+                }}>
+                  {`${pledgePct.toFixed(2)}% pledge`}
                 </span>
 
                 {/* Delta */}
-                <span style={{ fontSize: 13, fontWeight: 500, color: delta.color, fontVariantNumeric: "tabular-nums" }}>
+                <span style={{
+                  fontSize: 12, fontWeight: 500,
+                  color: delta.color,
+                  fontVariantNumeric: "tabular-nums",
+                }}>
                   {delta.text}
                 </span>
 
-                {/* Direction icon + statement */}
+                {/* Icon + statement */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{
                     width: 18, height: 18, borderRadius: 4, flexShrink: 0,
-                    background: icon.color === "var(--qc-up)" ? "rgba(31,122,74,0.12)" : icon.color === "var(--qc-down)" ? "rgba(220,38,38,0.12)" : "rgba(18,18,18,0.06)",
+                    background: icon.bg,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 10, fontWeight: 700, color: icon.color,
                   }}>
                     {icon.icon}
                   </span>
-                  <span style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.4 }}>
+                  <span style={{
+                    fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.4,
+                    overflow: "hidden",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                  }}>
                     {s.statement}
                   </span>
                 </div>
@@ -125,34 +175,48 @@ export function LensDetailPromoter({ lens, signals: _signals }: Props) {
       )}
 
       {/* Insight cards */}
-      {insightSignals.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 }}>
-          {insightSignals.map((s, i) => {
-            const style = insightCardStyle(s.direction);
+      {insightCards.length > 0 && (
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: 10,
+        }}>
+          {insightCards.map((s, i) => {
+            const borderColor = insightBorderColor(s.direction ?? null);
+            const iconStyle = insightIconStyle(s.direction ?? null);
             return (
-              <div key={i} style={{
-                padding: "16px 18px",
-                background: "var(--qc-card)",
-                border: "1px solid var(--qc-hair)",
-                borderLeft: `3px solid ${style.border}`,
-                borderRadius: 8,
-                display: "flex", flexDirection: "column", gap: 8,
-              }}>
+              <div
+                key={i}
+                style={{
+                  padding: "14px 16px",
+                  background: "var(--qc-card)",
+                  border: "1px solid var(--qc-hair)",
+                  borderLeft: `3px solid ${borderColor}`,
+                  borderRadius: 8,
+                  display: "flex", flexDirection: "column", gap: 6,
+                }}
+              >
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{
                     width: 20, height: 20, borderRadius: 4, flexShrink: 0,
-                    background: style.iconBg,
+                    background: iconStyle.bg,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 11, fontWeight: 700, color: style.iconColor,
+                    fontSize: 11, fontWeight: 700, color: iconStyle.color,
                   }}>
-                    {style.icon}
+                    {iconStyle.icon}
                   </span>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-ink)", margin: 0, lineHeight: 1.3 }}>
+                  <p style={{
+                    fontSize: 12, fontWeight: 700, color: "var(--qc-ink)",
+                    margin: 0, lineHeight: 1.3,
+                  }}>
                     {s.label}
                   </p>
                 </div>
                 {s.statement && (
-                  <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>
+                  <p style={{
+                    fontSize: 12, color: "var(--qc-ink-3)",
+                    margin: 0, lineHeight: 1.5,
+                  }}>
                     {s.statement}
                   </p>
                 )}
@@ -164,17 +228,11 @@ export function LensDetailPromoter({ lens, signals: _signals }: Props) {
 
       {/* Takeaway */}
       {lens.takeaway && (
-        <div style={{
-          padding: "14px 16px", background: "var(--qc-section)",
-          borderRadius: 10, border: "1px solid var(--qc-hair)",
-        }}>
-          <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
-            QUANTCASE ASSESSMENT
-          </p>
-          <p style={{ fontSize: 13, color: "var(--qc-ink)", margin: 0, lineHeight: 1.6 }}>
-            {lens.takeaway}
-          </p>
-        </div>
+        <LensDrawerSummaryCard
+          title={lens.name}
+          body={lens.takeaway}
+          metrics={[]}
+        />
       )}
     </div>
   );

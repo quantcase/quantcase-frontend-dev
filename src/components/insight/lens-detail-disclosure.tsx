@@ -2,6 +2,7 @@
 
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
 import type { Signal } from "@/hooks/useSignals";
+import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
   lens: LensDetail;
@@ -15,19 +16,61 @@ const DIMS = [
   { prefix: "DIM_GV", abbr: "GV", label: "Governance signals", metaScore: "META_GV_SCORE" },
 ];
 
-function scoreBarColor(direction: string | null): string {
+function scoreColor(direction: string | null): string {
   const d = (direction ?? "").toLowerCase();
   if (d === "beat") return "var(--qc-up)";
   if (d === "miss") return "var(--qc-down)";
   return "var(--qc-warn)";
 }
 
-function scoreBarWidth(label: string | null | undefined): number {
-  if (!label) return 0;
-  // label like "5/8" → 5/8 * 100
+function scoreFraction(label: string | null | undefined): { num: number; den: number } | null {
+  if (!label) return null;
   const m = label.match(/^(\d+)\/(\d+)$/);
-  if (m) return (parseInt(m[1]) / parseInt(m[2])) * 100;
-  return 0;
+  if (m) return { num: parseInt(m[1]), den: parseInt(m[2]) };
+  return null;
+}
+
+function PieChart({ fraction, color, size = 44 }: { fraction: { num: number; den: number }; color: string; size?: number }) {
+  const pct = fraction.num / fraction.den;
+  const r = (size - 6) / 2;
+  const cx = size / 2;
+  const cy = size / 2;
+  const circumference = 2 * Math.PI * r;
+  const dash = pct * circumference;
+  const gap = circumference - dash;
+  // Start from top (-90deg)
+  const startAngle = -Math.PI / 2;
+  const endAngle = startAngle + pct * 2 * Math.PI;
+  const x1 = cx + r * Math.cos(startAngle);
+  const y1 = cy + r * Math.sin(startAngle);
+  const x2 = cx + r * Math.cos(endAngle);
+  const y2 = cy + r * Math.sin(endAngle);
+  const largeArc = pct > 0.5 ? 1 : 0;
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
+      {/* Track */}
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--qc-hair)" strokeWidth={3} />
+      {/* Fill arc */}
+      {pct > 0 && pct < 1 && (
+        <path
+          d={`M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`}
+          fill="none"
+          stroke={color}
+          strokeWidth={3}
+          strokeLinecap="round"
+        />
+      )}
+      {pct === 1 && (
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={3} />
+      )}
+      {/* Center label */}
+      <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle"
+        style={{ fontSize: 10, fontWeight: 700, fill: color, fontFamily: "inherit", fontVariantNumeric: "tabular-nums" }}>
+        {fraction.num}/{fraction.den}
+      </text>
+    </svg>
+  );
 }
 
 function calloutTagStyle(direction: string | null) {
@@ -85,8 +128,8 @@ export function LensDetailDisclosure({ lens }: Props) {
           const meta = topSignals.find((s) => s.metric === metaScore);
 
           const scoreLabel = meta?.label ?? (header?.actual_value != null ? `${header.actual_value}/10` : null);
-          const barWidth = scoreBarWidth(scoreLabel);
-          const barColor = scoreBarColor(header?.direction ?? null);
+          const pieColor = scoreColor(header?.direction ?? null);
+          const pieFraction = scoreFraction(scoreLabel);
           const tagStyle = calloutTagStyle(callout?.direction ?? null);
           const tagText = calloutTagLabel(callout?.label);
 
@@ -98,59 +141,47 @@ export function LensDetailDisclosure({ lens }: Props) {
               borderRadius: 10,
               display: "flex", flexDirection: "column", gap: 10,
             }}>
-              {/* Card header row */}
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{
-                    width: 30, height: 30, borderRadius: 6, flexShrink: 0,
-                    background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 9, fontWeight: 700, color: "var(--qc-ink-3)", letterSpacing: "0.04em",
-                  }}>
-                    {abbr}
-                  </span>
-                  <div>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0, lineHeight: 1.2 }}>
-                      {label}
+              {/* Card header: 3-col — icon | title+tag+subtitle | pie */}
+              <div style={{ display: "grid", gridTemplateColumns: "34px 1fr auto", gap: "0 10px", alignItems: "start" }}>
+                {/* Col 1: icon */}
+                <span style={{
+                  width: 30, height: 30, borderRadius: 6, flexShrink: 0,
+                  background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 9, fontWeight: 700, color: "var(--qc-ink-3)", letterSpacing: "0.04em",
+                }}>
+                  {abbr}
+                </span>
+
+                {/* Col 2: title + tag + subtitle */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0, lineHeight: 1.2 }}>
+                    {label}
+                  </p>
+                  {tagText && (
+                    <span style={{
+                      alignSelf: "flex-start",
+                      display: "flex", alignItems: "center", gap: 5,
+                      fontSize: 9, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase",
+                      color: tagStyle.color, background: tagStyle.bg, border: `1px solid ${tagStyle.border}`,
+                      borderRadius: 99, padding: "3px 10px", whiteSpace: "nowrap",
+                    }}>
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: tagStyle.dot, flexShrink: 0 }} />
+                      {tagText}
+                    </span>
+                  )}
+                  {header?.statement && (
+                    <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>
+                      {header.statement}
                     </p>
-                    {header?.statement && (
-                      <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: "2px 0 0", lineHeight: 1.4 }}>
-                        {header.statement}
-                      </p>
-                    )}
-                  </div>
+                  )}
                 </div>
-                {/* Callout tag — top right */}
-                {tagText && (
-                  <span style={{
-                    flexShrink: 0,
-                    display: "flex", alignItems: "center", gap: 5,
-                    fontSize: 9, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase",
-                    color: tagStyle.color, background: tagStyle.bg, border: `1px solid ${tagStyle.border}`,
-                    borderRadius: 99, padding: "3px 10px", whiteSpace: "nowrap",
-                  }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: tagStyle.dot, flexShrink: 0 }} />
-                    {tagText}
-                  </span>
+
+                {/* Col 3: pie chart */}
+                {pieFraction && (
+                  <PieChart fraction={pieFraction} color={pieColor} size={48} />
                 )}
               </div>
-
-              {/* Score fraction + bar */}
-              {scoreLabel && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                  <span style={{ fontSize: 18, fontWeight: 700, color: barColor, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-                    {scoreLabel}
-                  </span>
-                  <div style={{ height: 5, borderRadius: 99, background: "var(--qc-hair)", overflow: "hidden" }}>
-                    <div style={{
-                      height: "100%", borderRadius: 99,
-                      width: `${barWidth}%`,
-                      background: barColor,
-                      transition: "width 0.4s ease",
-                    }} />
-                  </div>
-                </div>
-              )}
 
               {/* Bullet list */}
               {bullets.length > 0 && (
@@ -194,7 +225,7 @@ export function LensDetailDisclosure({ lens }: Props) {
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <span style={{ fontSize: 11, color: cs.iconColor }}>{icon}</span>
                       <p style={{ fontSize: 12, fontWeight: 700, color: cs.textColor, margin: 0, lineHeight: 1.3 }}>
-                        {callout.label}
+                        {calloutTagLabel(callout.label)}
                       </p>
                     </div>
                     {callout.statement && (
@@ -276,6 +307,15 @@ export function LensDetailDisclosure({ lens }: Props) {
             );
           })}
         </div>
+      )}
+
+      {/* Takeaway */}
+      {lens.takeaway && (
+        <LensDrawerSummaryCard
+          title={lens.name}
+          body={lens.takeaway}
+          metrics={[]}
+        />
       )}
     </div>
   );

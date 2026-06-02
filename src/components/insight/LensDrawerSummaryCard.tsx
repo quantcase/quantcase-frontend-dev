@@ -28,8 +28,8 @@ export function LensDrawerSummaryCard({ title, body, metrics }: LensDrawerSummar
         <Brain size={20} />
       </div>
 
-      {/* Text */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Text — capped so metrics column always has room */}
+      <div style={{ flex: "1 1 0", minWidth: 0, overflow: "hidden" }}>
         <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-golden-ink)", margin: "0 0 4px", lineHeight: 1.4 }}>
           {title}
         </p>
@@ -38,14 +38,28 @@ export function LensDrawerSummaryCard({ title, body, metrics }: LensDrawerSummar
         </p>
       </div>
 
-      {/* Metrics */}
+      {/* Metrics — fixed-width column, never shrinks */}
       {metrics.length > 0 && (
-        <div style={{ display: "flex", gap: 28, flexShrink: 0, paddingLeft: 24, borderLeft: "1px solid rgba(255,255,255,0.15)" }}>
+        <div style={{
+          display: "flex", gap: 20, flexShrink: 0,
+          paddingLeft: 24, borderLeft: "1px solid rgba(255,255,255,0.15)",
+        }}>
           {metrics.map((m) => (
-            <div key={m.label} style={{ textAlign: "center" }}>
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "rgba(255,255,255,0.55)", margin: "0 0 4px" }}>{m.label}</p>
-              <p style={{ fontSize: 18, fontWeight: 700, color: "var(--qc-golden-ink)", margin: "0 0 2px", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>{m.value}</p>
-              <p style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", margin: 0 }}>{m.sub}</p>
+            <div key={m.label} style={{ textAlign: "center", width: 90, minWidth: 0 }}>
+              <p style={{
+                fontSize: 9, fontWeight: 700, textTransform: "uppercase",
+                letterSpacing: "0.10em", color: "rgba(255,255,255,0.55)",
+                margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              }}>{m.label}</p>
+              <p style={{
+                fontSize: 18, fontWeight: 700, color: "var(--qc-golden-ink)",
+                margin: "0 0 2px", fontVariantNumeric: "tabular-nums", lineHeight: 1,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              }}>{m.value}</p>
+              <p style={{
+                fontSize: 10, color: "rgba(255,255,255,0.45)", margin: 0,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              }}>{m.sub}</p>
             </div>
           ))}
         </div>

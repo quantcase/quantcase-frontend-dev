@@ -1,6 +1,7 @@
 "use client";
 
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
+import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
   lens: LensDetail;
@@ -193,6 +194,33 @@ export function LensDetailGuidance({ lens }: Props) {
             </span>
           </div>
 
+          {/* Column header row */}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "56px 1fr 90px 90px 60px 90px",
+            gap: 0,
+            borderBottom: "1px solid var(--qc-hair)",
+            background: "var(--qc-section)",
+            borderLeft: "3px solid transparent",
+          }}>
+            <div style={{ padding: "6px 10px 6px 12px", borderRight: "1px solid var(--qc-hair)" }} />
+            <div style={{ padding: "6px 16px", borderRight: "1px solid var(--qc-hair)" }}>
+              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>METRIC</span>
+            </div>
+            <div style={{ padding: "6px 12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)" }}>
+              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>GUIDED</span>
+            </div>
+            <div style={{ padding: "6px 12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)" }}>
+              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>ACTUAL</span>
+            </div>
+            <div style={{ padding: "6px 12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)" }}>
+              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>DELTA</span>
+            </div>
+            <div style={{ padding: "6px 14px 6px 12px", textAlign: "right" }}>
+              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>STATUS</span>
+            </div>
+          </div>
+
           {timelineSignals.map((s, i) => {
             const isLast = i === timelineSignals.length - 1;
             const cfg = directionConfig(s.direction, s.impact);
@@ -208,19 +236,20 @@ export function LensDetailGuidance({ lens }: Props) {
                 key={s.signal_id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "64px 1fr auto",
+                  gridTemplateColumns: "56px 1fr 90px 90px 60px 90px",
                   gap: 0,
                   borderBottom: !isLast ? "1px solid var(--qc-hair)" : undefined,
                   borderLeft: `3px solid ${cfg.leftBorder}`,
                   background: "var(--qc-card)",
-                  alignItems: "stretch",
+                  alignItems: "center",
                 }}
               >
                 {/* Date / period column */}
                 <div style={{
                   padding: "14px 10px 14px 12px",
                   borderRight: "1px solid var(--qc-hair)",
-                  display: "flex", alignItems: "flex-start", justifyContent: "center",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  alignSelf: "stretch",
                 }}>
                   <span style={{ fontSize: 9, fontWeight: 600, color: "var(--qc-ink-3)", textTransform: "uppercase", letterSpacing: "0.06em", textAlign: "center", lineHeight: 1.4 }}>
                     {dateLabel}
@@ -228,7 +257,7 @@ export function LensDetailGuidance({ lens }: Props) {
                 </div>
 
                 {/* Metric name + statement */}
-                <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch" }}>
                   <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>
                     {metricTitle}
                   </p>
@@ -239,28 +268,32 @@ export function LensDetailGuidance({ lens }: Props) {
                   )}
                 </div>
 
-                {/* Guided / Actual / Delta / Badge */}
-                <div style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 16 }}>
-                  {hasGuidedOrActual && (
-                    <>
-                      <div style={{ textAlign: "right", minWidth: 54 }}>
-                        <p style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>GUIDED</p>
-                        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>{guidedStr}</span>
-                      </div>
-                      <div style={{ textAlign: "right", minWidth: 54 }}>
-                        <p style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>ACTUAL</p>
-                        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>{actualStr}</span>
-                      </div>
-                    </>
-                  )}
-                  {hasDelta && (
-                    <span style={{
-                      fontSize: 14, fontWeight: 600, color: deltaColor(s.delta_pct),
-                      fontVariantNumeric: "tabular-nums", minWidth: 52, textAlign: "right",
-                    }}>
-                      {deltaLabel(s.delta_pct)}
-                    </span>
-                  )}
+                {/* GUIDED column */}
+                <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>
+                    {hasGuidedOrActual ? guidedStr : "—"}
+                  </span>
+                </div>
+
+                {/* ACTUAL column */}
+                <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>
+                    {hasGuidedOrActual ? actualStr : "—"}
+                  </span>
+                </div>
+
+                {/* Delta column */}
+                <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  <span style={{
+                    fontSize: 13, fontWeight: 600, color: hasDelta ? deltaColor(s.delta_pct) : "var(--qc-ink-3)",
+                    fontVariantNumeric: "tabular-nums",
+                  }}>
+                    {hasDelta ? deltaLabel(s.delta_pct) : "—"}
+                  </span>
+                </div>
+
+                {/* Status badge column */}
+                <div style={{ padding: "12px 14px 12px 12px", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
                   <span style={{
                     fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
                     color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
@@ -277,17 +310,11 @@ export function LensDetailGuidance({ lens }: Props) {
 
       {/* Takeaway */}
       {lens.takeaway && (
-        <div style={{
-          padding: "14px 16px", background: "var(--qc-section)",
-          borderRadius: 10, border: "1px solid var(--qc-hair)",
-        }}>
-          <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 8px" }}>
-            ANALYST TAKEAWAY
-          </p>
-          <p style={{ fontSize: 13, color: "var(--qc-ink)", margin: 0, lineHeight: 1.6 }}>
-            {lens.takeaway}
-          </p>
-        </div>
+        <LensDrawerSummaryCard
+          title={lens.name}
+          body={lens.takeaway}
+          metrics={[]}
+        />
       )}
     </div>
   );

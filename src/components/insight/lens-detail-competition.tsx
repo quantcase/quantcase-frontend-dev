@@ -48,32 +48,30 @@ function statusColor(s: string | null | undefined) {
   return "var(--qc-warn)";
 }
 
-function dedup(signals: TopSignal[]): TopSignal[] {
-  const seen = new Set<string>();
-  return signals.filter((s) => {
-    if (seen.has(s.signal_id)) return false;
-    seen.add(s.signal_id);
-    return true;
+function directionIcon(dir: string | null): { arrow: string; color: string } {
+  if (dir === "beat") return { arrow: "↑", color: "var(--qc-up)" };
+  if (dir === "miss" || dir === "major_miss") return { arrow: "↓", color: "var(--qc-down)" };
+  if (dir === "in_line") return { arrow: "✓", color: "var(--qc-up)" };
+  return { arrow: "~", color: "var(--qc-warn)" };
+}
+
+// Parse "KEY=val|KEY2=val2" statement from PEER_ROW signals
+function parsePeerStatement(statement: string | null): Record<string, string> {
+  if (!statement) return {};
+  const result: Record<string, string> = {};
+  statement.split("|").forEach((part) => {
+    const [k, v] = part.split("=");
+    if (k && v) result[k.trim()] = v.trim();
   });
+  return result;
 }
 
-function getKm(km: Record<string, string>, ...fragments: string[]): string {
-  for (const key of Object.keys(km)) {
-    if (fragments.every((f) => key.toLowerCase().includes(f.toLowerCase()))) {
-      return km[key];
-    }
-  }
-  return "—";
+function sigByMetric(signals: TopSignal[], metric: string): TopSignal | undefined {
+  return signals.find((s) => s.metric === metric);
 }
 
-function formatSigValue(s: TopSignal): string {
-  if (s.actual_value == null) return "—";
-  const v = s.actual_value;
-  const unit = s.unit ?? "";
-  if (unit === "%") return `${v}%`;
-  if (unit === "Cr") return `₹${v.toLocaleString("en-IN")} Cr`;
-  if (unit === "bps") return `${v} bps`;
-  return `${v}`;
+function sigsStartingWith(signals: TopSignal[], prefix: string): TopSignal[] {
+  return signals.filter((s) => s.metric.startsWith(prefix));
 }
 
 // ── sub-components ────────────────────────────────────────────────────────────
@@ -147,6 +145,112 @@ function SignalCard({ icon, headline, sub, badge, badgeColor }: SignalCardProps)
   );
 }
 
+// ── Peer KPI table ────────────────────────────────────────────────────────────
+
+interface PeerRow {
+  label: string;
+  revenue: string;
+  revGrowth: string;
+  opm: string;
+  roce: string;
+  de: string;
+  mktShare: string;
+  isCurrent: boolean;
+  isAvg: boolean;
+}
+
+function buildPeerTableRows(peerSignals: TopSignal[]): PeerRow[] {
+  return peerSignals.map((s) => {
+    const kv = parsePeerStatement(s.statement);
+    const revRaw = s.actual_value;
+    const roceRaw = s.guided_value;
+    const deRaw = s.delta_pct;
+    const revGrowth = kv["REV_GROWTH"] ?? "—";
+    const mktShare = kv["MKT_SHARE"] ?? "—";
+    const opm = kv["OPM"] ?? "—";
+
+    // Revenue formatting: values are in actual Cr units (some come as full rupees)
+    let revFormatted = "—";
+    if (revRaw != null) {
+      const crVal = revRaw > 1e9 ? Math.round(revRaw / 1e7) : Math.round(revRaw);
+      revFormatted = `₹${crVal.toLocaleString("en-IN")} Cr`;
+    }
+
+    const roceFormatted = roceRaw != null ? `${roceRaw.toFixed(2)}%` : "—";
+    const deFormatted = deRaw != null ? deRaw.toFixed(2) : "—";
+
+    const isCurrentTicker = s.metric.endsWith("_CURRENT") ||
+      (s.label.includes("(Current)") || s.label.toLowerCase().includes("(current)"));
+    const isAvg = s.metric === "PEER_ROW_INDUSTRY_AVG" || s.label.toLowerCase().includes("industry");
+
+    return {
+      label: s.label,
+      revenue: revFormatted,
+      revGrowth: revGrowth !== "—" ? `+${revGrowth}` : "—",
+      opm: opm !== "—" ? `${opm}%` : "—",
+      roce: roceFormatted,
+      de: deFormatted,
+      mktShare: mktShare !== "—" ? `${mktShare}` : "—",
+      isCurrent: isCurrentTicker,
+      isAvg,
+    };
+  });
+}
+
+function PeerKpiTable({ peerSignals }: { peerSignals: TopSignal[] }) {
+  const rows = buildPeerTableRows(peerSignals);
+  if (rows.length === 0) return null;
+
+  const thStyle: React.CSSProperties = {
+    fontSize: 10, fontWeight: 500, textTransform: "uppercase",
+    letterSpacing: "0.10em", color: "var(--qc-ink-3)",
+    padding: "8px 12px", textAlign: "left" as const,
+    borderBottom: "1px solid var(--qc-hair)",
+    whiteSpace: "nowrap",
+  };
+
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+        <thead>
+          <tr style={{ background: "var(--qc-section)" }}>
+            <th style={thStyle}>COMPANY</th>
+            <th style={{ ...thStyle, textAlign: "right" as const }}>REVENUE</th>
+            <th style={{ ...thStyle, textAlign: "right" as const }}>REV GROWTH</th>
+            <th style={{ ...thStyle, textAlign: "right" as const }}>OPM%</th>
+            <th style={{ ...thStyle, textAlign: "right" as const }}>ROCE%</th>
+            <th style={{ ...thStyle, textAlign: "right" as const }}>D/E</th>
+            <th style={{ ...thStyle, textAlign: "right" as const }}>MKT SHARE</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => {
+            const rowStyle: React.CSSProperties = {
+              fontWeight: row.isCurrent ? 700 : row.isAvg ? 400 : 400,
+              fontStyle: row.isAvg ? "italic" : undefined,
+              color: row.isCurrent ? "var(--qc-ink)" : "var(--qc-ink-2)",
+              borderBottom: i < rows.length - 1 ? "1px solid var(--qc-hair)" : undefined,
+            };
+            const tdStyle: React.CSSProperties = { padding: "10px 12px" };
+            const tdRightStyle: React.CSSProperties = { ...tdStyle, textAlign: "right" as const };
+            return (
+              <tr key={i} style={rowStyle}>
+                <td style={tdStyle}>{row.label}</td>
+                <td style={tdRightStyle}>{row.revenue}</td>
+                <td style={tdRightStyle}>{row.revGrowth}</td>
+                <td style={tdRightStyle}>{row.opm}</td>
+                <td style={tdRightStyle}>{row.roce}</td>
+                <td style={tdRightStyle}>{row.de}</td>
+                <td style={tdRightStyle}>{row.mktShare}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 // ── Peer company card ─────────────────────────────────────────────────────────
 
 function ratingColor(r: string) {
@@ -189,7 +293,6 @@ function scoreLabel(score: number | null): string {
 }
 
 function buildPeerMetrics(km: Record<string, string>, topSignals: TopSignal[]) {
-  // Pick up to 4 key metrics generically — prefer % growth signals, then whatever is available
   const sigItems = topSignals
     .filter((s) => s.actual_value != null)
     .slice(0, 4)
@@ -197,13 +300,22 @@ function buildPeerMetrics(km: Record<string, string>, topSignals: TopSignal[]) {
 
   if (sigItems.length >= 4) return sigItems;
 
-  // Pad with key_metrics
   const kmItems = Object.entries(km).slice(0, 4 - sigItems.length).map(([k, v]) => ({
     label: k.replace(/_/g, " ").slice(0, 16),
     value: String(v).slice(0, 14),
   }));
 
   return [...sigItems, ...kmItems];
+}
+
+function formatSigValue(s: TopSignal): string {
+  if (s.actual_value == null) return "—";
+  const v = s.actual_value;
+  const unit = s.unit ?? "";
+  if (unit === "%") return `${v}%`;
+  if (unit === "Cr") return `₹${v.toLocaleString("en-IN")} Cr`;
+  if (unit === "bps") return `${v} bps`;
+  return `${v}`;
 }
 
 function CompetitionPeerCard({ ticker, data }: { ticker: string; data: PeerCardData }) {
@@ -262,7 +374,7 @@ function CompetitionPeerCard({ ticker, data }: { ticker: string; data: PeerCardD
 
 function PrimaryPeerCard({ ticker, lens }: { ticker: string; lens: LensDetail }) {
   const km = lens.key_metrics;
-  const topSigs = dedup(lens.top_signals ?? []);
+  const topSigs = lens.top_signals ?? [];
   const statusCol = statusColor(lens.status);
   const metrics = buildPeerMetrics(km, topSigs).slice(0, 4);
 
@@ -419,125 +531,140 @@ function PeerCell({ index: _index }: { index: number }) {
   );
 }
 
-// ── build pillar tiles generically from lens data ─────────────────────────────
+// ── Build pillar tiles from named metric signals ───────────────────────────────
 
-function buildPillars(lens: LensDetail, topSignals: TopSignal[]): PillarTileProps[] {
-  const km = lens.key_metrics;
+function pillarRating(sig: TopSignal | undefined, metric: string): { rating: string; sub: string; color: string; score: number; max: number } {
+  if (!sig) return { rating: "—", sub: "", color: "var(--qc-ink-3)", score: 1, max: 3 };
 
-  // Market Position: find highest-impact signal with actual value
-  const topSig = topSignals.find((s) => s.impact === "high" && s.actual_value != null);
-  const marketSub = topSig ? `${formatSigValue(topSig)} — ${topSig.label.slice(0, 40)}` : getKm(km, "growth");
-  const marketScore = lens.score >= 70 ? 3 : lens.score >= 40 ? 2 : 1;
+  if (metric === "PORTERS_SCORE") {
+    const actual = sig.actual_value ?? 0;
+    const max = sig.guided_value ?? 10;
+    const color = actual >= 7 ? "var(--qc-up)" : actual >= 5 ? "var(--qc-warn)" : "var(--qc-down)";
+    return {
+      rating: `${actual}/${max}`,
+      sub: sig.statement?.slice(0, 55) ?? "",
+      color,
+      score: actual,
+      max,
+    };
+  }
 
-  // Pricing Power: look for cost/margin/pass-through signals
-  const pricingSig = topSignals.find((s) =>
-    s.metric.toLowerCase().includes("cost") || s.metric.toLowerCase().includes("margin") ||
-    s.label.toLowerCase().includes("margin") || s.label.toLowerCase().includes("pricing")
-  );
-  const pricingSub = pricingSig ? pricingSig.statement?.slice(0, 50) ?? pricingSig.label.slice(0, 50) : "Pricing dynamics from key metrics";
-  const pricingScore = pricingSig?.direction === "beat" ? 3 : 2;
+  // MARKET_POSITION, PRICING_POWER, ENTRY_BARRIERS: actual is score out of guided (e.g. 2/3 or 3/3)
+  const actual = sig.actual_value ?? 0;
+  const max = sig.guided_value ?? 3;
+  const ratio = actual / max;
 
-  // Entry Barriers: qualitative from highlights
-  const barrierSub = lens.highlights[1]?.slice(0, 50) ?? "Competitive moat assessment";
-  const barrierScore = lens.score >= 60 ? 3 : lens.score >= 40 ? 2 : 1;
+  let rating = "";
+  let color = "";
+  if (metric === "MARKET_POSITION") {
+    rating = ratio >= 1 ? "Strong" : ratio >= 0.67 ? "Moderate" : "Weak";
+    color = ratio >= 1 ? "var(--qc-up)" : ratio >= 0.67 ? "var(--qc-warn)" : "var(--qc-down)";
+  } else if (metric === "PRICING_POWER") {
+    rating = ratio >= 1 ? "High" : ratio >= 0.67 ? "Medium" : "Low";
+    color = ratio >= 1 ? "var(--qc-up)" : ratio >= 0.67 ? "var(--qc-warn)" : "var(--qc-down)";
+  } else if (metric === "ENTRY_BARRIERS") {
+    rating = ratio >= 1 ? "High" : ratio >= 0.67 ? "Medium" : "Low";
+    color = ratio >= 1 ? "var(--qc-up)" : ratio >= 0.67 ? "var(--qc-warn)" : "var(--qc-down)";
+  } else {
+    rating = ratio >= 0.8 ? "Strong" : ratio >= 0.5 ? "Medium" : "Weak";
+    color = ratio >= 0.8 ? "var(--qc-up)" : ratio >= 0.5 ? "var(--qc-warn)" : "var(--qc-down)";
+  }
 
-  return [
-    {
-      label: "Market Position",
-      rating: lens.score >= 70 ? "Strong" : lens.score >= 40 ? "Medium" : "Weak",
-      sub: marketSub.slice(0, 60),
-      color: lens.score >= 70 ? "var(--qc-up)" : lens.score >= 40 ? "var(--qc-warn)" : "var(--qc-down)",
-      score: marketScore, max: 3,
-    },
-    {
-      label: "Pricing Power",
-      rating: pricingScore === 3 ? "High" : "Medium",
-      sub: pricingSub,
-      color: pricingScore === 3 ? "var(--qc-up)" : "var(--qc-warn)",
-      score: pricingScore, max: 3,
-    },
-    {
-      label: "Entry Barriers",
-      rating: barrierScore === 3 ? "High" : "Medium",
-      sub: barrierSub,
-      color: barrierScore >= 3 ? "var(--qc-up)" : "var(--qc-warn)",
-      score: barrierScore, max: 3,
-    },
-    {
-      label: "Porter's Score",
-      rating: `${Math.round(lens.score / 10)}/10`,
-      sub: lens.description.slice(0, 55),
-      color: lens.score >= 70 ? "var(--qc-up)" : lens.score >= 40 ? "var(--qc-warn)" : "var(--qc-down)",
-      score: Math.round(lens.score / 10), max: 10,
-    },
-  ];
+  return {
+    rating,
+    sub: sig.statement?.slice(0, 55) ?? "",
+    color,
+    score: actual,
+    max,
+  };
 }
 
-// ── build signal cards generically from lens top_signals ─────────────────────
+// ── derive signal cards from COMP_STRENGTH_* and COMP_RISK_* ─────────────────
 
-function buildSignalCards(lens: LensDetail, topSignals: TopSignal[]): SignalCardProps[] {
+function buildSignalCardsFromNamed(topSignals: TopSignal[]): SignalCardProps[] {
   const cards: SignalCardProps[] = [];
 
-  const highImpact = topSignals.filter((s) => s.impact === "high");
-  const pool = highImpact.length >= 2 ? highImpact : topSignals;
+  const strengths = sigsStartingWith(topSignals, "COMP_STRENGTH_");
+  const risks = sigsStartingWith(topSignals, "COMP_RISK_");
 
-  // Positive signals (up to 2)
-  const posSignals = pool.filter((s) => s.direction === "beat" || s.direction === "above" ||
-    (s.actual_value != null && s.actual_value > 0 && s.metric.toLowerCase().includes("growth")));
-  posSignals.slice(0, 2).forEach((s) => {
+  strengths.slice(0, 2).forEach((s) => {
+    const badge = s.delta_pct != null ? `+${s.delta_pct} bps` :
+      s.actual_value != null ? `${s.actual_value}${s.unit ?? ""}` : "Moat";
     cards.push({
       icon: "up",
       headline: s.label,
-      sub: s.statement?.slice(0, 100) ?? lens.highlights[cards.length]?.slice(0, 100) ?? "",
-      badge: formatSigValue(s),
+      sub: s.statement?.slice(0, 100) ?? "",
+      badge,
       badgeColor: "var(--qc-up)",
     });
   });
 
-  // Negative/watch signals (up to 2)
-  const negSignals = pool.filter((s) => s.direction === "miss" || s.direction === "below");
-  const warnSignals = negSignals.length === 0 ? lens.risks.slice(0, 2).map((r) => ({
-    icon: "warn" as const,
-    headline: r.slice(0, 80),
-    sub: "",
-    badge: "Watch",
-    badgeColor: "var(--qc-warn)",
-  })) : negSignals.slice(0, 2).map((s) => ({
-    icon: "down" as const,
-    headline: s.label,
-    sub: s.statement?.slice(0, 100) ?? "",
-    badge: formatSigValue(s),
-    badgeColor: "var(--qc-down)",
-  }));
-
-  cards.push(...warnSignals);
-
-  // Ensure exactly 4 cards
-  while (cards.length < 4) {
-    const extra = pool[cards.length];
-    if (!extra) break;
+  risks.slice(0, 2).forEach((s) => {
+    const isWarn = s.direction === "tracking";
+    const badge = s.delta_pct != null ? `${s.delta_pct > 0 ? "+" : ""}${s.delta_pct} bps` :
+      s.actual_value != null ? `${s.actual_value}${s.unit ?? ""}` : "Risk";
     cards.push({
-      icon: "up",
-      headline: extra.label,
-      sub: extra.statement?.slice(0, 100) ?? "",
-      badge: formatSigValue(extra),
-      badgeColor: "var(--qc-up)",
+      icon: isWarn ? "warn" : "down",
+      headline: s.label,
+      sub: s.statement?.slice(0, 100) ?? "",
+      badge,
+      badgeColor: isWarn ? "var(--qc-warn)" : "var(--qc-down)",
     });
+  });
+
+  // Fill remaining slots from high-impact signals if needed
+  if (cards.length < 4) {
+    const pool = topSignals.filter((s) =>
+      !s.metric.startsWith("COMP_STRENGTH_") &&
+      !s.metric.startsWith("COMP_RISK_") &&
+      !s.metric.startsWith("PEER_ROW_") &&
+      !["MARKET_POSITION", "PRICING_POWER", "ENTRY_BARRIERS", "PORTERS_SCORE", "ROCE_VS_INDUSTRY"].includes(s.metric)
+    );
+    for (const s of pool) {
+      if (cards.length >= 4) break;
+      const isNeg = s.direction === "miss" || s.direction === "major_miss";
+      cards.push({
+        icon: isNeg ? "down" : "up",
+        headline: s.label,
+        sub: s.statement?.slice(0, 100) ?? "",
+        badge: s.actual_value != null ? `${s.actual_value}${s.unit ?? ""}` : "",
+        badgeColor: isNeg ? "var(--qc-down)" : "var(--qc-up)",
+      });
+    }
   }
 
   return cards.slice(0, 4);
 }
 
-// ── Derive ticker from callId (e.g. AADHARHFC_FY2026_Q3 → AADHARHFC) ─────────
+// ── derive subtitle from ROCE_VS_INDUSTRY or strongest signal ────────────────
 
-function tickerFromCallId(callId: string | undefined): string {
-  if (!callId) return "COMPANY";
-  return callId.split("_")[0];
+function buildSubtitle(lens: LensDetail, topSignals: TopSignal[]): string {
+  const roce = sigByMetric(topSignals, "ROCE_VS_INDUSTRY");
+  if (roce?.statement) return roce.statement;
+  const str1 = sigByMetric(topSignals, "COMP_STRENGTH_1");
+  if (str1?.statement) return str1.statement;
+  return lens.takeaway ?? lens.description.slice(0, 140);
 }
 
-// ── Peer ticker suggestions from key_metrics or a generic fallback list ───────
+// ── Derive peer suggestions from PEER_ROW signals, falling back to a list ────
 
 const FALLBACK_PEERS = ["HDFCBANK", "ICICIBANK", "KOTAKBANK", "AXISBANK", "SBIN", "INFY", "TCS", "WIPRO", "TATAMOTORS", "MSWIL"];
+
+function derivePeerSuggestions(peerSignals: TopSignal[], primaryTicker: string): string[] {
+  const fromSignals = peerSignals
+    .map((s) => {
+      // Extract ticker from metric name: PEER_ROW_MSUMI → MSUMI
+      const raw = s.metric.replace("PEER_ROW_", "");
+      if (raw === "INDUSTRY_AVG" || raw === "INDUSTRY" || raw === primaryTicker) return null;
+      // Verify label doesn't say "(Current)" or "Industry"
+      if (s.label.includes("(Current)") || s.label.toLowerCase().includes("industry")) return null;
+      return raw;
+    })
+    .filter((t): t is string => t !== null);
+
+  if (fromSignals.length > 0) return fromSignals.slice(0, 8);
+  return FALLBACK_PEERS.filter((t) => t !== primaryTicker).slice(0, 8);
+}
 
 // ── main export ───────────────────────────────────────────────────────────────
 
@@ -545,22 +672,40 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
   const [selectedPeers, setSelectedPeers] = useState<string[]>([]);
   const [swotExpanded, setSwotExpanded] = useState(false);
 
-  const topSignals = dedup(lens.top_signals ?? []);
-  const km = lens.key_metrics;
+  const topSignals = lens.top_signals ?? [];
   const statusCol = statusColor(lens.status);
-
   const primaryTicker = ticker ?? "COMPANY";
 
-  // Derive peer suggestions from key_metrics keys mentioning other companies, else fall back
-  const peerTickers = FALLBACK_PEERS.filter((t) => t !== primaryTicker).slice(0, 8);
+  // Named-metric signals
+  const mktPosSig = sigByMetric(topSignals, "MARKET_POSITION");
+  const pricingPowerSig = sigByMetric(topSignals, "PRICING_POWER");
+  const entryBarriersSig = sigByMetric(topSignals, "ENTRY_BARRIERS");
+  const portersSig = sigByMetric(topSignals, "PORTERS_SCORE");
+  const roceVsIndustrySig = sigByMetric(topSignals, "ROCE_VS_INDUSTRY");
+  const peerSignals = sigsStartingWith(topSignals, "PEER_ROW_");
 
-  const pillars = buildPillars(lens, topSignals);
-  const signalCards = buildSignalCards(lens, topSignals);
-  const quoteSignal = topSignals.find((s) => s.statement && s.statement.length > 60) ?? null;
+  const pillars: PillarTileProps[] = (
+    [
+      ["MARKET POSITION", mktPosSig, "MARKET_POSITION"],
+      ["PRICING POWER", pricingPowerSig, "PRICING_POWER"],
+      ["ENTRY BARRIERS", entryBarriersSig, "ENTRY_BARRIERS"],
+      ["PORTER'S SCORE", portersSig, "PORTERS_SCORE"],
+    ] as [string, TopSignal | undefined, string][]
+  ).map(([label, sig, metric]) => ({ label, ...pillarRating(sig, metric) }));
 
-  // Summary metrics: top 3 signals with actual values
-  const summaryMetrics = topSignals
-    .filter((s) => s.actual_value != null)
+  const signalCards = buildSignalCardsFromNamed(topSignals);
+  const subtitle = buildSubtitle(lens, topSignals);
+
+  // ROCE vs industry context for the quote block
+  const quoteSignal = roceVsIndustrySig ?? topSignals.find((s) => s.statement && s.statement.length > 60) ?? null;
+
+  // Summary metrics for footer card
+  const summaryMetrics = [
+    roceVsIndustrySig,
+    mktPosSig,
+    sigByMetric(topSignals, "COMP_STRENGTH_1"),
+  ]
+    .filter((s): s is TopSignal => s != null && s.actual_value != null)
     .slice(0, 3)
     .map((s) => ({
       label: s.label.slice(0, 20),
@@ -568,17 +713,18 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
       sub: s.statement?.slice(0, 40) ?? "",
     }));
 
-  // Subtitle line
-  const subtitleSig = topSignals.find((s) => s.actual_value != null && s.impact === "high");
-  const subtitle = subtitleSig
-    ? `${formatSigValue(subtitleSig)} ${subtitleSig.label} — ${lens.highlights[0]?.slice(0, 60) ?? ""}`
-    : lens.description.slice(0, 120);
+  // Quarter badge from callId (passed via lens or ticker context — use lens.computed_at as fallback)
+  const periodLabel = lens.computed_at
+    ? new Date(lens.computed_at).toLocaleDateString("en-IN", { month: "short", year: "2-digit" })
+    : "";
 
-  function togglePeer(ticker: string) {
+  const peerSuggestions = derivePeerSuggestions(peerSignals, primaryTicker);
+
+  function togglePeer(t: string) {
     setSelectedPeers((prev) => {
-      if (prev.includes(ticker)) return prev.filter((t) => t !== ticker);
+      if (prev.includes(t)) return prev.filter((x) => x !== t);
       if (prev.length >= 3) return prev;
-      return [...prev, ticker];
+      return [...prev, t];
     });
   }
 
@@ -588,12 +734,26 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
       {/* ── COMPETITIVE POSITION ── */}
       <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
 
+        {/* Header */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "10px 16px", background: "var(--qc-section)",
           borderBottom: "1px solid var(--qc-hair)",
         }}>
-          <SectionLabel>COMPETITIVE POSITION</SectionLabel>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <SectionLabel>COMPETITIVE POSITION</SectionLabel>
+            {periodLabel && (
+              <span style={{
+                fontSize: 10, fontWeight: 600,
+                background: "var(--qc-section)",
+                border: "1px solid var(--qc-hair)",
+                borderRadius: 20, padding: "2px 10px",
+                color: "var(--qc-ink-2)",
+              }}>
+                {periodLabel}
+              </span>
+            )}
+          </div>
           <span style={{
             fontSize: 10, fontWeight: 600,
             border: `1px solid ${statusCol}`,
@@ -604,17 +764,20 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
           </span>
         </div>
 
+        {/* Subtitle */}
         <div style={{ padding: "8px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
           <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>
-            {subtitle.slice(0, 140)}
+            {subtitle.slice(0, 160)}
           </p>
         </div>
 
+        {/* 4-pillar grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 1, background: "var(--qc-hair)" }}>
           {pillars.map((p, i) => <PillarTile key={i} {...p} />)}
         </div>
 
-        {quoteSignal && (
+        {/* ROCE quote block */}
+        {quoteSignal?.statement && (
           <div style={{ padding: "16px 20px", background: "var(--qc-card)", borderTop: "1px solid var(--qc-hair)" }}>
             <div style={{ borderLeft: "3px solid var(--qc-ink-3)", paddingLeft: 14 }}>
               <p style={{
@@ -622,15 +785,16 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
                 color: "var(--qc-ink)", margin: 0, lineHeight: 1.7,
                 fontFamily: "var(--qc-font-serif, Georgia, serif)",
               }}>
-                {quoteSignal.statement?.slice(0, 240)}{(quoteSignal.statement?.length ?? 0) > 240 ? "…" : ""}
+                {quoteSignal.statement.slice(0, 280)}{quoteSignal.statement.length > 280 ? "…" : ""}
               </p>
               <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "6px 0 0" }}>
-                Quantcase peer analysis
+                Quantcase peer analysis · {periodLabel}
               </p>
             </div>
           </div>
         )}
 
+        {/* Strength / Risk signal cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2" style={{
           gap: 10, padding: "14px 16px",
           background: "var(--qc-card)",
@@ -639,7 +803,7 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
           {signalCards.map((card, i) => <SignalCard key={i} {...card} />)}
         </div>
 
-        {/* Collapsible: Detailed KPI & SWOT */}
+        {/* Collapsible: Detailed Peer KPI & SWOT */}
         <div
           onClick={() => setSwotExpanded((v) => !v)}
           style={{
@@ -652,24 +816,13 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
           <span style={{ fontSize: 10, color: "var(--qc-ink-3)" }}>{swotExpanded ? "▲" : "▼"}</span>
         </div>
         {swotExpanded && (
-          <div style={{ padding: "14px 16px", background: "var(--qc-card)", borderTop: "1px solid var(--qc-hair)" }}>
-            {Object.keys(km).length > 0 ? (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, background: "var(--qc-hair)", borderRadius: 8, overflow: "hidden" }}>
-                {Object.entries(km).slice(0, 8).map(([k, v], i, arr) => (
-                  <div key={k} style={{
-                    padding: "12px 14px", background: "var(--qc-section)",
-                    borderRight: i % 2 === 0 ? "1px solid var(--qc-hair)" : undefined,
-                    borderBottom: i < arr.length - 2 ? "1px solid var(--qc-hair)" : undefined,
-                  }}>
-                    <p style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: "0 0 3px" }}>
-                      {k.replace(/_/g, " ")}
-                    </p>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>{v}</p>
-                  </div>
-                ))}
-              </div>
+          <div style={{ background: "var(--qc-card)", borderTop: "1px solid var(--qc-hair)" }}>
+            {peerSignals.length > 0 ? (
+              <PeerKpiTable peerSignals={peerSignals} />
             ) : (
-              <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>No detailed metrics available</p>
+              <div style={{ padding: "14px 16px" }}>
+                <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>No peer data available</p>
+              </div>
             )}
           </div>
         )}
@@ -678,7 +831,7 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
       {/* Summary footer */}
       <LensDrawerSummaryCard
         title={lens.name}
-        body={lens.takeaway}
+        body={lens.takeaway ?? lens.description}
         metrics={summaryMetrics}
       />
 
@@ -721,7 +874,7 @@ export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props
               PEER SET
             </span>
             <Chip active>{primaryTicker} ✓</Chip>
-            {peerTickers.map((t) => {
+            {peerSuggestions.map((t) => {
               const isActive = selectedPeers.includes(t);
               const isDisabled = !isActive && selectedPeers.length >= 3;
               return (

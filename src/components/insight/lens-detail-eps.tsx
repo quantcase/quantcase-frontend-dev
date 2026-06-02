@@ -3,7 +3,7 @@
 import type React from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, BarChart2, Activity, Zap, TrendingDown, Minus } from "lucide-react";
-import type { LensDetail } from "@/hooks/useLenses";
+import type { LensDetail, TopSignal } from "@/hooks/useLenses";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
@@ -26,9 +26,18 @@ const SCENARIO_ICON: Record<ScenarioKey, React.ElementType> = {
   bear: TrendingDown,
 };
 
-// ─── Parse helpers ────────────────────────────────────────────────────────────
+// ─── Signal lookup helpers ─────────────────────────────────────────────────────
 
-// highlights[] follow "Bull: ...", "Base: ...", "Bear: ..." convention
+function findSignal(signals: TopSignal[], metric: string): TopSignal | undefined {
+  return signals.find((s) => s.metric === metric);
+}
+
+function findSignalByMetricPrefix(signals: TopSignal[], prefix: string): TopSignal | undefined {
+  return signals.find((s) => s.metric?.toLowerCase().startsWith(prefix.toLowerCase()));
+}
+
+// ─── Text parsing helpers (for highlights[] narrative) ─────────────────────────
+
 function highlightForScenario(highlights: string[], prefix: "Bull" | "Base" | "Bear"): string {
   const re = new RegExp(`^${prefix}[:\\s]`, "i");
   const hit = highlights.find((h) => re.test(h));
@@ -37,117 +46,184 @@ function highlightForScenario(highlights: string[], prefix: "Bull" | "Base" | "B
   return highlights[idx] ?? "";
 }
 
-// Extract a % CAGR from a narrative string, e.g. "18.5% EPS CAGR" or "22% PAT CAGR"
-function extractCagrFromText(text: string): string {
+// Extract the first % CAGR figure from a narrative string
+function extractCagr(text: string): string {
   const m = text.match(/(\d+(?:\.\d+)?)\s*%\s*(PAT|EPS|revenue|AUM|disbursement)?\s*CAGR/i);
   if (m) return `${m[1]}%`;
-  const m2 = text.match(/(\d+(?:\.\d+)?)\s*%\s*(PAT|EPS|profit)/i);
+  const m2 = text.match(/(\d+(?:\.\d+)?)\s*%\s*(PAT|EPS|profit)\s/i);
   if (m2) return `${m2[1]}%`;
-  const m3 = text.match(/(\d+(?:\.\d+)?)\s*%/);
-  if (m3) return `${m3[1]}%`;
-  return "—";
+  return "";
 }
 
-// Extract revenue/growth % from a narrative ("26% revenue CAGR", "21% AUM growth")
-function extractRevenueGrowthFromText(text: string): string {
+// Extract revenue / growth CAGR range like "26–28%" or single "26%"
+function extractRevenueCagr(text: string): string {
+  const mRange = text.match(/(\d+(?:\.\d+)?)\s*[–\-]\s*(\d+(?:\.\d+)?)\s*%\s*(revenue|AUM|disbursement|loan|advance)?\s*(CAGR|growth)?/i);
+  if (mRange) return `${mRange[1]}–${mRange[2]}%`;
   const m = text.match(/(\d+(?:\.\d+)?)\s*%\s*(revenue|AUM|disbursement|loan|advance)\s*(CAGR|growth)?/i);
   if (m) return `${m[1]}%`;
-  return "—";
+  return "";
 }
 
-// Extract margin mention from narrative (e.g. "26.1% EBITDA margin", "150bps margin expansion")
-function extractMarginFromText(text: string): string {
-  const m1 = text.match(/([+-]?\d+)\s*bps\s*margin/i);
-  if (m1) return `${parseInt(m1[1]) > 0 ? "+" : ""}${m1[1]}bps`;
-  const m2 = text.match(/(\d+(?:\.\d+)?)\s*%\s*(EBITDA|NIM|PBT|ROA|ROE|margin)/i);
+// Extract YoY % growth mentioned in signal statement text like "up 20% YoY" or "grew 25.5% YoY"
+function extractYoyFromStatement(statement: string): string {
+  const m = statement.match(/(?:up|grew?|growth|increased?)\s+(\d+(?:\.\d+)?)\s*%\s*(?:YoY|y[- ]o[- ]y)/i);
+  if (m) return `${m[1]}%`;
+  // Also catch "up 20%" without explicit YoY
+  const m2 = statement.match(/(?:up|grew?)\s+(\d+(?:\.\d+)?)\s*%/i);
   if (m2) return `${m2[1]}%`;
-  return "—";
+  return "";
 }
 
-// ─── Build scenarios from lens data ──────────────────────────────────────────
-
-interface ScenarioRow {
-  industryCagr: { value: string; note: string };
-  revenueGrowth: { value: string; note: string };
-  marginTrajectory: { value: string; note: string };
-  expectedEpsCagr: { value: string; subtitle: string };
+// Extract margin movement — bps or % EBITDA/NIM
+function extractMargin(text: string): string {
+  const mBps = text.match(/([+-]?\d+(?:\.\d+)?)\s*bps\s*margin/i);
+  if (mBps) return `${parseInt(mBps[1]) > 0 ? "+" : ""}${mBps[1]}bps`;
+  const mPct = text.match(/(\d+(?:\.\d+)?)\s*%\s*(EBITDA|NIM|PBT|ROA|ROE)\s*margin/i);
+  if (mPct) return `${mPct[1]}%`;
+  const mStable = text.match(/flat|stable/i);
+  if (mStable) return "Flat";
+  return "";
 }
 
-function buildScenariosFromLens(lens: LensDetail): Record<ScenarioKey, ScenarioRow> {
+// ─── Scenario data model ───────────────────────────────────────────────────────
+
+interface ScenarioMetrics {
+  industryGrowth: { value: string; note: string };
+  revenueCagr:    { value: string; note: string };
+  marginTraj:     { value: string; note: string };
+  epsCagr:        { value: string; note: string };
+  narrative:      string;
+}
+
+function buildScenarios(lens: LensDetail): Record<ScenarioKey, ScenarioMetrics> {
+  const signals = lens.top_signals ?? [];
   const highlights = lens.highlights ?? [];
-  const sig = lens.top_signals ?? [];
 
+  // Industry growth — always keyed as "industry_growth"
+  const industrySignal = findSignal(signals, "industry_growth");
+  const industryValue = industrySignal?.actual_value != null
+    ? `${industrySignal.actual_value > 0 ? "+" : ""}${industrySignal.actual_value}%`
+    : "~8–10%";
+
+  // Per-scenario narratives from highlights[]
   const bullText = highlightForScenario(highlights, "Bull");
   const baseText = highlightForScenario(highlights, "Base");
   const bearText = highlightForScenario(highlights, "Bear");
 
-  const bullCagr = extractCagrFromText(bullText);
-  const baseCagr = extractCagrFromText(baseText);
-  const bearCagr = extractCagrFromText(bearText);
+  // EPS/PAT CAGR per scenario — parse from narrative
+  const bullEps = extractCagr(bullText);
+  const baseEps = extractCagr(baseText);
+  const bearEps = extractCagr(bearText);
 
-  const bullRev = extractRevenueGrowthFromText(bullText);
-  const baseRev = extractRevenueGrowthFromText(baseText);
-  const bearRev = extractRevenueGrowthFromText(bearText);
+  // Revenue CAGR — layered fallback chain:
+  // 1. Named %-unit signal (revenue_growth_yoy, revenue_growth_9m_yoy, revenue_growth_*)
+  // 2. Absolute revenue signal's statement text (e.g. "up 20% YoY" in ACC's revenue_quarterly)
+  // 3. Narrative highlight text parsing (extractRevenueCagr)
+  const namedRevSignal =
+    findSignal(signals, "revenue_growth_yoy") ??
+    findSignal(signals, "revenue_growth_9m_yoy") ??
+    findSignalByMetricPrefix(signals, "revenue_growth");
 
-  const bullMargin = extractMarginFromText(bullText);
-  const baseMargin = extractMarginFromText(baseText);
-  const bearMargin = extractMarginFromText(bearText);
+  // Proxy: any revenue_quarterly / revenue_annual / total_income signal with a statement mentioning YoY %
+  const revProxySignal = namedRevSignal == null
+    ? signals.find((s) =>
+        (s.metric?.includes("revenue") || s.metric === "total_income") &&
+        s.statement != null &&
+        extractYoyFromStatement(s.statement) !== ""
+      )
+    : undefined;
 
-  // Industry growth from a signal with direction "tracking" or from PAT signal context
-  const industrySignal = sig.find((s) => s.metric?.toLowerCase().includes("industry") || s.metric?.toLowerCase().includes("sector"));
-  const industryBase = industrySignal?.actual_value != null ? `${industrySignal.actual_value}%` : "Moderate";
+  const signalRevPct =
+    (namedRevSignal?.unit === "%" && namedRevSignal.actual_value != null)
+      ? `${namedRevSignal.actual_value}%`
+      : revProxySignal?.statement
+      ? extractYoyFromStatement(revProxySignal.statement)
+      : "";
 
-  // Fallback: derive numeric multipliers from base CAGR if text parsing yields "—"
-  const baseCagrNum = parseFloat(baseCagr) || 0;
-  const fmt = (n: number) => n > 0 ? `${n.toFixed(1)}%` : "—";
+  const baseRevCagr = extractRevenueCagr(baseText) || signalRevPct;
+  const basePct = parseFloat(baseRevCagr) || 0;
+
+  const bullRevCagr = extractRevenueCagr(bullText) || (basePct > 0 ? `${(basePct * 1.35).toFixed(0)}%` : signalRevPct);
+  const bearRevCagr = extractRevenueCagr(bearText) || (basePct > 0 ? `${(basePct * 0.5).toFixed(0)}%` : "");
+
+  // Margin — parse from narrative
+  const bullMargin = extractMargin(bullText);
+  const baseMargin = extractMargin(baseText);
+  const bearMargin = extractMargin(bearText);
+
+  // Ebitda margin signal for base note
+  const ebitdaMarginSignal = findSignal(signals, "ebitda_margin") ?? findSignal(signals, "ebitda_margin_reported");
 
   return {
     bull: {
-      industryCagr: { value: industryBase, note: "Sector tailwinds" },
-      revenueGrowth: { value: bullRev !== "—" ? bullRev : baseCagrNum > 0 ? fmt(baseCagrNum * 1.3) : "—", note: "Beat guidance" },
-      marginTrajectory: { value: bullMargin !== "—" ? bullMargin : "+150bps", note: "Operating leverage" },
-      expectedEpsCagr: { value: bullCagr !== "—" ? bullCagr : baseCagrNum > 0 ? fmt(baseCagrNum * 1.3) : "—", subtitle: "Accelerated growth" },
+      industryGrowth: { value: industryValue, note: industrySignal?.statement?.split(";")[0] ?? "Sector tailwinds drive outperformance" },
+      revenueCagr:    { value: bullRevCagr || baseRevCagr, note: bullText.split(";")[0] || "Market share gains and AI-driven demand" },
+      marginTraj:     { value: bullMargin || "+100–150bps", note: "Operating leverage + mix improvement" },
+      epsCagr:        { value: bullEps || "", note: "Triple-compounding EPS engine" },
+      narrative:      bullText,
     },
     base: {
-      industryCagr: { value: industryBase, note: "Steady growth" },
-      revenueGrowth: { value: baseRev !== "—" ? baseRev : baseCagr, note: "On-track execution" },
-      marginTrajectory: { value: baseMargin !== "—" ? baseMargin : "+50bps", note: "Stable improvement" },
-      expectedEpsCagr: { value: baseCagr !== "—" ? baseCagr : "—", subtitle: "Solid growth + margin tailwind" },
+      industryGrowth: { value: industryValue, note: "Sector growth in line with guidance" },
+      revenueCagr:    { value: baseRevCagr, note: baseText.split(";")[0] || "Management guidance trajectory" },
+      marginTraj:     {
+        value: baseMargin || (ebitdaMarginSignal?.actual_value != null ? `${ebitdaMarginSignal.actual_value}%` : "Flat to +50bps"),
+        note: "Stable improvement on operational leverage",
+      },
+      epsCagr:        { value: baseEps || "", note: "Revenue growth + stable margins + buybacks" },
+      narrative:      baseText,
     },
     bear: {
-      industryCagr: { value: industryBase, note: "Sector headwinds" },
-      revenueGrowth: { value: bearRev !== "—" ? bearRev : baseCagrNum > 0 ? fmt(baseCagrNum * 0.5) : "—", note: "Competitive pressure" },
-      marginTrajectory: { value: bearMargin !== "—" ? bearMargin : "-100bps", note: "Margin compression" },
-      expectedEpsCagr: { value: bearCagr !== "—" ? bearCagr : baseCagrNum > 0 ? fmt(baseCagrNum * 0.5) : "—", subtitle: "Below industry standard" },
+      industryGrowth: { value: industryValue, note: "Macro headwinds weigh on sector" },
+      revenueCagr:    { value: bearRevCagr, note: bearText.split(";")[0] || "Demand slowdown + competitive pressure" },
+      marginTraj:     { value: bearMargin || "-100 to -150bps", note: "Input cost inflation + low utilisation" },
+      epsCagr:        { value: bearEps || "", note: "Volume + margin compression" },
+      narrative:      bearText,
     },
   };
 }
 
-// ─── MetricRow key type ───────────────────────────────────────────────────────
+// ─── Colour helper ─────────────────────────────────────────────────────────────
 
-type MetricKey = "industryCagr" | "revenueGrowth" | "marginTrajectory" | "expectedEpsCagr";
-
-const METRIC_ROWS: Array<{ key: MetricKey; label: string; icon: React.ElementType }> = [
-  { key: "industryCagr",     label: "INDUSTRY GROWTH",   icon: TrendingUp },
-  { key: "revenueGrowth",    label: "REVENUE CAGR",      icon: BarChart2 },
-  { key: "marginTrajectory", label: "MARGIN TRAJECTORY", icon: Activity },
-  { key: "expectedEpsCagr",  label: "EPS CAGR FORECAST", icon: Zap },
-];
-
-function valueColor(scenarioKey: ScenarioKey, rowKey: string, value: string): string {
-  if (rowKey === "expectedEpsCagr") return SCENARIO_META[scenarioKey].cssVar;
-  const num = parseFloat(value);
-  if (!isNaN(num)) return num >= 0 ? "var(--qc-up)" : "var(--qc-down)";
-  if (value.startsWith("+")) return "var(--qc-up)";
+function valueColor(scenarioKey: ScenarioKey, isEps: boolean, value: string): string {
+  if (isEps) return SCENARIO_META[scenarioKey].cssVar;
+  if (value.startsWith("+") || /^\d+(\.\d+)?%$/.test(value)) {
+    const num = parseFloat(value);
+    if (!isNaN(num) && num < 0) return "var(--qc-down)";
+    return scenarioKey === "bear" ? "var(--qc-down)" : scenarioKey === "bull" ? "var(--qc-up)" : "var(--qc-ink)";
+  }
   if (value.startsWith("-")) return "var(--qc-down)";
+  if (value === "Flat") return "var(--qc-ink-2)";
   return "var(--qc-ink)";
 }
 
-// ─── Scenario table ───────────────────────────────────────────────────────────
+// ─── Metric row config ─────────────────────────────────────────────────────────
 
-function ScenarioTable({ scenarios }: { scenarios: Record<ScenarioKey, ScenarioRow> }) {
+type MetricKey = keyof Omit<ScenarioMetrics, "narrative">;
+
+const METRIC_ROWS: Array<{ key: MetricKey; label: string; icon: React.ElementType; isLarge?: boolean }> = [
+  { key: "industryGrowth", label: "INDUSTRY GROWTH",   icon: TrendingUp },
+  { key: "revenueCagr",    label: "REVENUE CAGR",      icon: BarChart2 },
+  { key: "marginTraj",     label: "MARGIN TRAJECTORY", icon: Activity },
+  { key: "epsCagr",        label: "EPS CAGR FORECAST", icon: Zap, isLarge: true },
+];
+
+// ─── Scenario table ────────────────────────────────────────────────────────────
+
+function ScenarioTable({ lens, scenarios }: { lens: LensDetail; scenarios: Record<ScenarioKey, ScenarioMetrics> }) {
+  // Derive forecast period from takeaway or computed_at
+  const period = (() => {
+    const t = lens.takeaway ?? "";
+    const m = t.match(/FY\d{2,4}[–\-]FY\d{2,4}E?/i);
+    if (m) return m[0].toUpperCase();
+    if (lens.computed_at) {
+      const yr = new Date(lens.computed_at).getFullYear();
+      return `FY${String(yr).slice(2)}–FY${String(yr + 3).slice(2)}E`;
+    }
+    return "3-YR FORWARD";
+  })();
+
   return (
-    <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "auto" }}>
+    <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
 
       {/* Title bar */}
       <div style={{
@@ -160,124 +236,151 @@ function ScenarioTable({ scenarios }: { scenarios: Record<ScenarioKey, ScenarioR
           SCENARIO-BASED EARNINGS FORECAST
         </p>
         <span style={{
-          fontSize: 9, fontWeight: 600, padding: "2px 7px",
+          fontSize: 9, fontWeight: 600, padding: "2px 8px",
           background: "var(--qc-card)", border: "1px solid var(--qc-hair)",
-          borderRadius: 5, color: "var(--qc-ink-2)",
+          borderRadius: 5, color: "var(--qc-ink-2)", letterSpacing: "0.04em",
         }}>
-          3-yr CAGR / Avg · All three scenarios
+          {period}
         </span>
       </div>
 
-      {/* Subtitle */}
-      <div style={{ padding: "6px 16px 8px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
+      {/* Sub-legend */}
+      <div style={{ padding: "5px 16px 6px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
         <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0 }}>
           Bull case — optimistic · Base case — as per mgmt guidance · Bear case — risk-heavy
         </p>
       </div>
 
-      {/* Column headers */}
-      <div style={{ display: "grid", gridTemplateColumns: "150px 1fr 1fr 1fr", minWidth: 480, background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
-        <div style={{ padding: "10px 14px", borderRight: "1px solid var(--qc-hair)", display: "flex", flexDirection: "column", justifyContent: "center", gap: 3 }}>
-          <p style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>METRIC</p>
-          <p style={{ fontSize: 8, color: "var(--qc-ink-3)", margin: 0, opacity: 0.7 }}>3-yr forward view</p>
+      {/* Scroll wrapper for narrow viewports */}
+      <div style={{ overflowX: "auto" }}>
+
+        {/* Column headers */}
+        <div style={{ display: "grid", gridTemplateColumns: "130px 1fr 1fr 1fr", minWidth: 500, background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
+          <div style={{ padding: "10px 14px", borderRight: "1px solid var(--qc-hair)" }} />
+          {SCENARIO_ORDER.map((key, i) => {
+            const Icon = SCENARIO_ICON[key];
+            return (
+              <div key={key} style={{
+                padding: "10px 14px",
+                borderRight: i < 2 ? "1px solid var(--qc-hair)" : undefined,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
+                  <div style={{
+                    width: 18, height: 18, borderRadius: 4,
+                    background: `color-mix(in srgb, ${SCENARIO_META[key].cssVar} 12%, transparent)`,
+                    border: `1px solid color-mix(in srgb, ${SCENARIO_META[key].cssVar} 30%, transparent)`,
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                  }}>
+                    <Icon size={10} color={SCENARIO_META[key].cssVar} strokeWidth={2.5} />
+                  </div>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: SCENARIO_META[key].cssVar, margin: 0, textTransform: "uppercase" }}>
+                    {SCENARIO_META[key].label}
+                  </p>
+                </div>
+                <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0 }}>{SCENARIO_META[key].sub}</p>
+              </div>
+            );
+          })}
         </div>
-        {SCENARIO_ORDER.map((key, i) => {
-          const Icon = SCENARIO_ICON[key];
+
+        {/* Metric rows */}
+        {METRIC_ROWS.map((row, rowIdx) => {
+          const isLast = rowIdx === METRIC_ROWS.length - 1;
+          const RowIcon = row.icon;
           return (
-            <div key={key} style={{
-              padding: "10px 14px",
-              borderRight: i < 2 ? "1px solid var(--qc-hair)" : undefined,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
-                <Icon size={11} color={SCENARIO_META[key].cssVar} strokeWidth={2.5} />
-                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: SCENARIO_META[key].cssVar, margin: 0, textTransform: "uppercase" }}>
-                  {SCENARIO_META[key].label}
+            <div
+              key={row.key}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "130px 1fr 1fr 1fr",
+                minWidth: 500,
+                borderBottom: !isLast ? "1px solid var(--qc-hair)" : undefined,
+                background: isLast ? "var(--qc-section)" : "var(--qc-card)",
+              }}
+            >
+              {/* Row label */}
+              <div style={{
+                padding: "14px 14px",
+                borderRight: "1px solid var(--qc-hair)",
+                display: "flex", alignItems: "flex-start", gap: 7,
+              }}>
+                <div style={{
+                  width: 22, height: 22, borderRadius: 4,
+                  background: "var(--qc-section)",
+                  border: "1px solid var(--qc-hair)",
+                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                }}>
+                  <RowIcon size={11} color="var(--qc-ink-3)" strokeWidth={2} />
+                </div>
+                <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.4, paddingTop: 2 }}>
+                  {row.label}
                 </p>
               </div>
-              <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0 }}>{SCENARIO_META[key].sub}</p>
+
+              {/* Scenario cells */}
+              {SCENARIO_ORDER.map((scenarioKey, i) => {
+                const metric = scenarios[scenarioKey][row.key] as { value: string; note: string };
+                const color = valueColor(scenarioKey, row.key === "epsCagr", metric.value);
+                return (
+                  <motion.div
+                    key={scenarioKey}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22, delay: rowIdx * 0.05 + i * 0.02 }}
+                    style={{
+                      padding: "14px 14px",
+                      borderRight: i < 2 ? "1px solid var(--qc-hair)" : undefined,
+                      borderLeft: isLast
+                        ? `3px solid color-mix(in srgb, ${SCENARIO_META[scenarioKey].cssVar} 35%, transparent)`
+                        : undefined,
+                    }}
+                  >
+                    <p style={{
+                      fontSize: isLast ? 17 : 14,
+                      fontWeight: 700,
+                      color,
+                      margin: "0 0 4px",
+                      lineHeight: 1,
+                      fontVariantNumeric: "tabular-nums",
+                    }}>
+                      {metric.value || "—"}
+                    </p>
+                    {metric.note && (
+                      <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>
+                        {metric.note}
+                      </p>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
           );
         })}
-      </div>
 
-      {/* Metric rows */}
-      {METRIC_ROWS.map((row, rowIdx) => {
-        const isLast = rowIdx === METRIC_ROWS.length - 1;
-        const RowIcon = row.icon;
-        return (
-          <div
-            key={row.key}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "150px 1fr 1fr 1fr",
-              minWidth: 480,
-              borderBottom: !isLast ? "1px solid var(--qc-hair)" : undefined,
-              background: isLast ? "var(--qc-section)" : "var(--qc-card)",
-            }}
-          >
-            {/* Row label */}
-            <div style={{
-              padding: "14px 14px",
-              borderRight: "1px solid var(--qc-hair)",
-              display: "flex", alignItems: "flex-start", gap: 7,
-            }}>
-              <RowIcon size={13} color="var(--qc-ink-3)" strokeWidth={2} style={{ flexShrink: 0, marginTop: 1 }} />
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.4 }}>
-                {row.label}
+        {/* Bottom scenario narratives */}
+        <div style={{ display: "grid", gridTemplateColumns: "130px 1fr 1fr 1fr", minWidth: 500, borderTop: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
+          <div style={{ borderRight: "1px solid var(--qc-hair)", padding: "12px 14px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 3 }}>
+            <p style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>ANALYST VIEW</p>
+            <p style={{ fontSize: 8, color: "var(--qc-ink-3)", margin: 0, opacity: 0.7, lineHeight: 1.4 }}>Scenario assumptions & rationale</p>
+          </div>
+          {SCENARIO_ORDER.map((key, i) => (
+            <div key={key} style={{ padding: "12px 14px", borderRight: i < 2 ? "1px solid var(--qc-hair)" : undefined }}>
+              <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.6 }}>
+                <span style={{ fontWeight: 600, color: SCENARIO_META[key].cssVar }}>
+                  {key.charAt(0).toUpperCase() + key.slice(1)} case
+                </span>{" "}
+                {scenarios[key].narrative || (
+                  key === "bull"
+                    ? `assumes AI-led demand acceleration and strong execution driving market share gains, resulting in ${scenarios.bull.epsCagr.value} EPS CAGR over the forecast period.`
+                    : key === "base"
+                    ? `reflects management guidance with moderate revenue recovery and stable margins, leading to ${scenarios.base.epsCagr.value} EPS CAGR from a normalized base.`
+                    : `reflects macro weakness and discretionary spend cuts, which pressure growth and margins, leading to ${scenarios.bear.epsCagr.value} EPS CAGR over the forecast period.`
+                )}
               </p>
             </div>
-
-            {/* Scenario cells */}
-            {SCENARIO_ORDER.map((scenarioKey, i) => {
-              const d = scenarios[scenarioKey];
-              const metric = d[row.key];
-              const displayValue = metric.value;
-              const note = "subtitle" in metric ? metric.subtitle : "note" in metric ? metric.note : "";
-              const color = valueColor(scenarioKey, row.key, displayValue);
-
-              return (
-                <motion.div
-                  key={scenarioKey}
-                  initial={{ opacity: 0, y: 3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25, delay: rowIdx * 0.05 }}
-                  style={{
-                    padding: "14px 14px",
-                    borderRight: i < 2 ? "1px solid var(--qc-hair)" : undefined,
-                    borderLeft: isLast ? `3px solid color-mix(in srgb, ${SCENARIO_META[scenarioKey].cssVar} 35%, transparent)` : undefined,
-                  }}
-                >
-                  <p style={{ fontSize: isLast ? 17 : 14, fontWeight: 700, color, margin: "0 0 3px", lineHeight: 1 }}>
-                    {displayValue}
-                  </p>
-                  {note && (
-                    <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>{note}</p>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        );
-      })}
-
-      {/* Bottom scenario summaries */}
-      <div style={{ display: "grid", gridTemplateColumns: "150px 1fr 1fr 1fr", minWidth: 480, borderTop: "1px solid var(--qc-hair)", background: "var(--qc-card)" }}>
-        <div style={{ borderRight: "1px solid var(--qc-hair)", padding: "12px 14px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 3 }}>
-          <p style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>ANALYST VIEW</p>
-          <p style={{ fontSize: 8, color: "var(--qc-ink-3)", margin: 0, opacity: 0.7, lineHeight: 1.4 }}>Scenario assumptions & rationale</p>
+          ))}
         </div>
-        {SCENARIO_ORDER.map((key, i) => (
-          <div key={key} style={{ padding: "12px 14px", borderRight: i < 2 ? "1px solid var(--qc-hair)" : undefined }}>
-            <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>
-              <span style={{ fontWeight: 600, color: SCENARIO_META[key].cssVar }}>
-                {key.charAt(0).toUpperCase() + key.slice(1)} case
-              </span>{" "}
-              {key === "bull" && `assumes strong execution and favourable sector tailwinds driving acceleration, resulting in ${scenarios.bull.expectedEpsCagr.value} EPS CAGR.`}
-              {key === "base" && `reflects management guidance with steady execution and stable margins, leading to ${scenarios.base.expectedEpsCagr.value} EPS CAGR.`}
-              {key === "bear" && `reflects macro weakness and margin pressure constraining growth, leading to ${scenarios.bear.expectedEpsCagr.value} EPS CAGR.`}
-            </p>
-          </div>
-        ))}
+
       </div>
 
       {/* Footer */}
@@ -288,45 +391,40 @@ function ScenarioTable({ scenarios }: { scenarios: Record<ScenarioKey, ScenarioR
   );
 }
 
-// ─── Summary metrics from top_signals ────────────────────────────────────────
+// ─── Summary metrics from top_signals ─────────────────────────────────────────
 
-function buildSummaryMetrics(lens: LensDetail, scenarios: Record<ScenarioKey, ScenarioRow>) {
-  const sig = lens.top_signals ?? [];
+function buildSummaryMetrics(lens: LensDetail, scenarios: Record<ScenarioKey, ScenarioMetrics>) {
+  const signals = lens.top_signals ?? [];
 
-  // Revenue/growth label — pick the most meaningful growth signal
-  const revSignal = sig.find((s) => s.actual_value != null && s.unit === "%" &&
-    (s.metric?.includes("GROWTH") || s.metric?.includes("growth") || s.metric?.includes("CAGR")));
-  const revLabel = revSignal ? revSignal.label.replace(/\(.*\)/, "").trim().slice(0, 20) : "Growth";
-  const revValue = revSignal ? `${revSignal.actual_value}%` : scenarios.base.revenueGrowth.value;
-  const revSub = revSignal?.actual_date ? revSignal.actual_date.slice(0, 7) : "YoY";
+  const industrySignal = findSignal(signals, "industry_growth");
+  const revSignal =
+    findSignal(signals, "revenue_growth_yoy") ??
+    findSignal(signals, "revenue_growth_9m_yoy") ??
+    findSignalByMetricPrefix(signals, "revenue_growth");
 
-  // PAT/profit metric — prefer a Cr value over a % for the summary
-  const patSignal = sig.find((s) => s.actual_value != null &&
-    (s.metric === "PAT" || s.metric === "NET_PROFIT" || s.metric?.includes("PAT")));
-  const patLabel = patSignal ? patSignal.label.replace(/\(.*\)/, "").trim().slice(0, 20) : "Profitability";
-  const patValue = patSignal?.unit === "Cr"
-    ? `₹${patSignal.actual_value} Cr`
-    : patSignal?.actual_value != null
-    ? `${patSignal.actual_value}%`
-    : "—";
-  const patSub = patSignal?.actual_date ? patSignal.actual_date.slice(0, 7) : "Latest";
+  const revValue = revSignal?.actual_value != null ? `${revSignal.actual_value}%` : scenarios.base.revenueCagr.value;
+  const revLabel = revSignal?.label?.replace(/\(.*\)/, "").trim().slice(0, 22) ?? "Revenue Growth";
 
   return [
-    { label: "Base EPS CAGR", value: scenarios.base.expectedEpsCagr.value, sub: "As per mgmt guidance" },
-    { label: revLabel, value: revValue, sub: revSub },
-    { label: patLabel, value: patValue, sub: patSub },
+    { label: "Base EPS CAGR", value: scenarios.base.epsCagr.value || "—", sub: "As per mgmt guidance" },
+    { label: revLabel, value: revValue || "—", sub: revSignal?.actual_date?.slice(0, 7) ?? "YoY" },
+    {
+      label: "Industry CAGR",
+      value: industrySignal?.actual_value != null ? `${industrySignal.actual_value}%` : "—",
+      sub: "Sector baseline",
+    },
   ];
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Main component ────────────────────────────────────────────────────────────
 
 export function LensDetailEps({ lens }: Props) {
-  const scenarios = buildScenariosFromLens(lens);
+  const scenarios = buildScenarios(lens);
   const summaryMetrics = buildSummaryMetrics(lens, scenarios);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <ScenarioTable scenarios={scenarios} />
+      <ScenarioTable lens={lens} scenarios={scenarios} />
       <LensDrawerSummaryCard
         title={lens.takeaway?.split(".")[0] ?? "Earnings scenario analysis."}
         body={lens.takeaway ?? ""}

@@ -59,7 +59,6 @@ function SignalTile({ indicator }: { indicator: DecisionIntelligenceIndicator })
       onMouseLeave={() => setTip(false)}
     >
       <div className="flex items-center gap-1.5 mb-1">
-        <span style={{ width: 7, height: 7, borderRadius: "50%", background: dot, flexShrink: 0, display: "inline-block" }} />
         <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{indicator.name}</p>
       </div>
       <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: dot, fontFamily: "var(--qc-font-sans)", lineHeight: 1.3 }}>{indicator.tag}</p>

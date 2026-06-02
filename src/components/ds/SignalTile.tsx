@@ -73,9 +73,8 @@ export function SignalTile({ label, value, sentiment, detail, metrics = [] }: Si
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      {/* Name row with dot */}
+      {/* Name row */}
       <div className="flex items-center gap-1.5 mb-1">
-        <span style={{ width: 7, height: 7, borderRadius: "50%", background: sc.dot, flexShrink: 0, display: "inline-block" }} />
         <p className="truncate" style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>
           {label}
         </p>

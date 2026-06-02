@@ -95,14 +95,14 @@ export function InvestmentConclusionCard({ dealData, oppTakeaways, technicalsDat
   const aiInsight = di?.actionableInsight;
   const entryTriggerFallback = dealData?.target_price_matrix?.base?.target_range ?? null;
 
-  const actionOwn = aiInsight?.existingHolderAction
-    ? { eyebrow: "If you own", title: aiInsight.existingHolderAction.split(";")[0].trim(), sub: aiInsight.existingHolderAction.split(";").slice(1).join(";").trim() || di?.actionBias || "" }
+  const actionOwn = aiInsight?.existing_position
+    ? { eyebrow: "If you own", title: aiInsight.existing_position.split(";")[0].trim(), sub: aiInsight.existing_position.split(";").slice(1).join(";").trim() || "" }
     : isBullish
       ? { eyebrow: "If you own", title: "Hold and add on every dip", sub: marketSummary ? marketSummary.slice(0, 90) + "." : "Monitor key support and resistance levels." }
       : { eyebrow: "If you own", title: `Trim into strength${entryTriggerFallback ? " above " + entryTriggerFallback : ""}`, sub: `${marketCondition ? "Market condition: " + marketCondition + "." : ""} Keep core exposure only if macro thesis is your primary reason.` };
 
-  const actionDontOwn = (aiInsight?.firstShift || aiInsight?.reEvaluateCondition)
-    ? { eyebrow: "If you don't own", title: aiInsight.action ?? "Wait for entry signal", sub: aiInsight.firstShift ?? aiInsight.reEvaluateCondition ?? "" }
+  const actionDontOwn = aiInsight?.watch_for
+    ? { eyebrow: "If you don't own", title: aiInsight.new_position ?? "Wait for entry signal", sub: aiInsight.watch_for }
     : isBullish
       ? { eyebrow: "If you don't own", title: "Enter on a pullback to support", sub: "Wait for a clean base or breakout with volume confirmation before adding." }
       : { eyebrow: "If you don't own", title: "Wait for pullback or breadth turn", sub: `${marketBias ? "Market bias: " + marketBias + "." : ""} Re-assess when breadth frameworks flip neutral.` };

@@ -99,40 +99,53 @@ export interface TechnicalsTimeframesRaw {
 }
 
 export interface DecisionIntelligenceIndicator {
+  tab: string;
   name: string;
   tag: string;
   explanation: string;
-  sentiment: "positive" | "negative" | "transitional";
+  sentiment: "positive" | "negative" | "transitional" | "neutral";
   growthWatchout: string | null;
   valueWatchout: string | null;
 }
 
 interface ActionableInsight {
-  action: string;
-  firstShift: string;
-  existingHolderAction: string;
-  reEvaluateCondition: string;
+  watch_for: string;
+  new_position: string;
+  existing_position: string;
 }
 
 export interface DecisionIntelligence {
   tag: string;
   lens: string;
   idealFor: string;
+  playbook: string;
   timeframe: string;
   actionableInsight: ActionableInsight;
+  actionableInsight_investor: ActionableInsight;
+  actionableInsight_positional: ActionableInsight;
   convictionLevel: string;
+  convictionScore: number;
+  priorityWatchout: string;
   indicators: DecisionIntelligenceIndicator[];
   whatCanChange: string[];
   currentRegime: {
     label: string;
     description: string;
   };
-  actionBias: string;
-  strategyViews: {
-    growth: string;
-    value: string;
+  levelsToWatch: {
+    regime: { label: string; price: number };
+    immediate: { label: string; price: number };
+    structural: { label: string; price: number };
+    horizonNote: string;
   };
-  riskAlerts: string[];
+  ruleEngine: {
+    tabSummaries: {
+      trend: string;
+      timing: string;
+      structure: string;
+      relativeStrength: string;
+    };
+  };
 }
 
 export interface TechnicalsResponse {
@@ -153,6 +166,15 @@ export interface TechnicalsResponse {
   insights: string[];
   ruleEngine?: RuleEngine;
   decisionIntelligence?: DecisionIntelligence;
+}
+
+// Raw API envelope — decisionIntelligence is nested one level deeper in the response
+export interface TechnicalsApiResponse extends Omit<TechnicalsResponse, "decisionIntelligence"> {
+  decisionIntelligence?: {
+    decisionIntelligence?: DecisionIntelligence;
+    ruleEngine?: RuleEngine;
+    scores?: Record<string, unknown>;
+  };
 }
 
 export interface TechnicalsDerived {

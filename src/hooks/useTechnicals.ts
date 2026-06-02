@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { rawFetch } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
-import type { TechnicalsResponse, TechnicalsDerived } from "@/types/technicals";
+import type { TechnicalsResponse, TechnicalsApiResponse, TechnicalsDerived } from "@/types/technicals";
 
 function computeDerived(data: TechnicalsResponse): TechnicalsDerived {
   const supportNum = data.supportResistance.static.support[0] ?? 0;
@@ -24,9 +24,14 @@ export function useTechnicals(symbol: string) {
 
   useEffect(() => {
     if (!symbol?.trim()) return;
-    rawFetch<TechnicalsResponse>(`${BACKEND_URL}/api/screener/${symbol}/technicals`, {
+    rawFetch<TechnicalsApiResponse>(`${BACKEND_URL}/api/screener/${symbol}/technicals`, {
       onStart: () => { setLoading(true); setError(null); setData(null); setDerived(null); },
-      onSuccess: (response) => {
+      onSuccess: (raw) => {
+        // Unwrap the nested decisionIntelligence envelope
+        const response: TechnicalsResponse = {
+          ...raw,
+          decisionIntelligence: raw.decisionIntelligence?.decisionIntelligence,
+        };
         setData(response);
         setDerived(computeDerived(response));
         setLoading(false);

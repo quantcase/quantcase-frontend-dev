@@ -452,13 +452,8 @@ export function DecisionIntelligencePanel({
     alerts.push({ source: "Technical", text: a, sentiment: sent });
   });
 
-  // DI risk alerts
-  if (di?.riskAlerts?.length) {
-    alerts.push({ source: "Macro", text: di.riskAlerts[0], sentiment: "negative" });
-  }
-
   // Fallback
-  if (reAlerts.length === 0 && !di?.riskAlerts?.length) {
+  if (reAlerts.length === 0) {
     const trendSent = technicalsData?.trend?.direction ? techSent(technicalsData.trend.direction) : "neutral";
     if (trendSent === "negative") {
       alerts.push({ source: "Technical", text: "Price below key moving averages — caution until structure recovers.", sentiment: "negative" });

@@ -39,7 +39,14 @@ function formatVal(s: TopSignal): string {
     if (v >= 100_000) return `${(v / 100_000).toFixed(1)}L`;
     return v.toLocaleString("en-IN");
   }
-  return `${v}`;
+  // Bare large numbers — abbreviate using Indian scale
+  if (typeof v === "number" && Math.abs(v) >= 100_000) {
+    const abs = Math.abs(v);
+    const sign = v < 0 ? "-" : "";
+    if (abs >= 10_000_000) return `${sign}${(abs / 10_000_000).toFixed(2)} Cr`;
+    return `${sign}${(abs / 100_000).toFixed(1)}L`;
+  }
+  return typeof v === "number" ? v.toLocaleString("en-IN") : `${v}`;
 }
 
 function statusColor(s: string | null | undefined): string {

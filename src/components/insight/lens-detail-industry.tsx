@@ -1,16 +1,13 @@
 "use client";
 
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
-import type { Signal } from "@/hooks/useSignals";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
   lens: LensDetail;
-  signals: Signal[];
   isBfsi?: boolean;
 }
 
-// Fixed KPI metrics for the top strip — vary by sector type
 const KPI_METRICS_NON_BFSI = [
   "INDUSTRY_REVENUE",
   "INDUSTRY_REV_CAGR_3Y",
@@ -18,7 +15,6 @@ const KPI_METRICS_NON_BFSI = [
   "INDUSTRY_ROCE",
 ] as const;
 
-// Loan book metric varies by bank — try both
 const BFSI_LOAN_BOOK_VARIANTS = ["INDUSTRY_AUM", "INDUSTRY_LOAN_ADV"] as const;
 
 const KPI_METRICS_BFSI_BASE = [
@@ -27,21 +23,12 @@ const KPI_METRICS_BFSI_BASE = [
   "INDUSTRY_REV_CAGR_3Y",
 ] as const;
 
-// Management consensus signal metrics (from peer_context)
 const MGMT_DEMAND_BULLISH = "MGMT_DEMAND_BULLISH_COUNT";
-const MGMT_DEMAND_TOTAL = "MGMT_DEMAND_TOTAL_COUNT";
 const MGMT_SUPPLY_TIGHT = "MGMT_SUPPLY_TIGHT_COUNT";
-const MGMT_SUPPLY_TOTAL = "MGMT_SUPPLY_TOTAL_COUNT";
 
-const PEER_CONTEXT_METRICS = new Set<string>([
-  ...KPI_METRICS_NON_BFSI,
-  ...KPI_METRICS_BFSI_BASE,
-  ...BFSI_LOAN_BOOK_VARIANTS,
-  MGMT_DEMAND_BULLISH,
-  MGMT_DEMAND_TOTAL,
-  MGMT_SUPPLY_TIGHT,
-  MGMT_SUPPLY_TOTAL,
-]);
+function toTitleCase(s: string): string {
+  return s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -73,7 +60,6 @@ function formatKpiValue(s: TopSignal): string {
   const unit = s.unit ?? "";
 
   if (s.metric === "INDUSTRY_REVENUE" || s.metric === "INDUSTRY_AUM" || s.metric === "INDUSTRY_LOAN_ADV") {
-    // Values are raw INR (e.g. 70656908700000 = ₹70.66 lakh Cr)
     if (v >= 1e12) return `₹${(v / 1e12).toFixed(1)}L Cr`;
     if (v >= 1e9) return `₹${(v / 1e7).toFixed(1)} Cr`;
     return `₹${v.toLocaleString("en-IN")}`;
@@ -83,23 +69,8 @@ function formatKpiValue(s: TopSignal): string {
   if (unit === "bps") return `${v} bps`;
   if (unit === "INR/KG") return `₹${v.toLocaleString("en-IN")}/kg`;
   if (unit === "USD/MT") return `$${v.toLocaleString("en-US")}/MT`;
-  if (unit === "transcripts") return String(v);
   if (unit === "x") return `${v}x`;
   return String(v);
-}
-
-function formatSignalBadge(s: TopSignal): string | null {
-  if (s.actual_value == null) return null;
-  const v = s.actual_value;
-  const unit = s.unit ?? "";
-  if (unit === "%") return `${v > 0 ? "+" : ""}${v}%`;
-  if (unit === "Cr") return `₹${v.toLocaleString("en-IN")} Cr`;
-  if (unit === "INR/KG") return `₹${v.toLocaleString("en-IN")}`;
-  if (unit === "USD/MT") return `$${v.toLocaleString("en-US")}`;
-  if (unit === "x") return `${v}x`;
-  if (unit === "transcripts") return `${v}`;
-  if (s.delta_pct != null && s.delta_pct !== 0) return `${s.delta_pct > 0 ? "+" : ""}${s.delta_pct.toFixed(0)}%`;
-  return null;
 }
 
 function signalDir(s: TopSignal): "up" | "down" | "neutral" {
@@ -110,52 +81,23 @@ function signalDir(s: TopSignal): "up" | "down" | "neutral" {
   return "neutral";
 }
 
-function toneFromSignals(signals: Signal[]): { label: string; color: string } {
-  const toneSignal = signals.find((s) => s.signal_type === "tone");
-  const label = toneSignal?.raw_value ?? "Neutral";
-  const lower = label.toLowerCase();
-  const color =
-    lower.includes("confident") || lower.includes("positive") || lower.includes("bullish")
-      ? "var(--qc-up)"
-      : lower.includes("cautious") || lower.includes("concern") || lower.includes("warning")
-      ? "var(--qc-warn)"
-      : "var(--qc-ink-3)";
-  return { label, color };
-}
 
-function deriveQuarter(lens: LensDetail): string {
-  if (lens.computed_at) {
-    const d = new Date(lens.computed_at);
-    if (!isNaN(d.getTime())) {
-      const month = d.getMonth() + 1;
-      const fy = month >= 4 ? d.getFullYear() + 1 : d.getFullYear();
-      const q = month >= 4 && month <= 6 ? "Q1"
-        : month >= 7 && month <= 9 ? "Q2"
-        : month >= 10 && month <= 12 ? "Q3"
-        : "Q4";
-      return `${q} FY${String(fy).slice(2)}`;
-    }
-  }
-  return lens.key_metrics["Quarter"] ?? "";
-}
-
-export function LensDetailIndustry({ lens, signals, isBfsi }: Props) {
+export function LensDetailIndustry({ lens, isBfsi }: Props) {
   const topSignals = lens.top_signals ?? [];
 
-  // --- KPI tiles: fixed 4 peer_context signals by metric name ---
-  const kpiSignalMap = new Map<string, TopSignal>();
+  const signalMap = new Map<string, TopSignal>();
   for (const s of topSignals) {
-    if (!kpiSignalMap.has(s.metric)) kpiSignalMap.set(s.metric, s);
+    if (!signalMap.has(s.metric)) signalMap.set(s.metric, s);
   }
 
-  // For BFSI, loan book metric varies by bank — pick whichever variant exists
-  const loanBookMetric = BFSI_LOAN_BOOK_VARIANTS.find((m) => kpiSignalMap.has(m)) ?? BFSI_LOAN_BOOK_VARIANTS[0];
+  // KPI tiles
+  const loanBookMetric = BFSI_LOAN_BOOK_VARIANTS.find((m) => signalMap.has(m)) ?? BFSI_LOAN_BOOK_VARIANTS[0];
   const KPI_METRICS: readonly string[] = isBfsi
     ? [...KPI_METRICS_BFSI_BASE, loanBookMetric]
     : KPI_METRICS_NON_BFSI;
 
   const kpiTiles = KPI_METRICS.map((metric) => {
-    const s = kpiSignalMap.get(metric);
+    const s = signalMap.get(metric);
     if (!s) return null;
     const dir = signalDir(s);
     const valueColor =
@@ -165,49 +107,44 @@ export function LensDetailIndustry({ lens, signals, isBfsi }: Props) {
     return { s, displayValue: formatKpiValue(s), valueColor };
   }).filter(Boolean) as { s: TopSignal; displayValue: string; valueColor: string }[];
 
-  // --- Management consensus counts ---
-  const demandBullish = kpiSignalMap.get(MGMT_DEMAND_BULLISH)?.actual_value ?? 0;
-  const demandTotal = kpiSignalMap.get(MGMT_DEMAND_TOTAL)?.actual_value ?? 0;
-  const supplyTight = kpiSignalMap.get(MGMT_SUPPLY_TIGHT)?.actual_value ?? 0;
-  const supplyTotal = kpiSignalMap.get(MGMT_SUPPLY_TOTAL)?.actual_value ?? 0;
+  // Management consensus counts
+  const demandBullish = signalMap.get(MGMT_DEMAND_BULLISH)?.actual_value ?? 0;
+  const supplyTight = signalMap.get(MGMT_SUPPLY_TIGHT)?.actual_value ?? 0;
 
-  const demandBullishStatement = kpiSignalMap.get(MGMT_DEMAND_BULLISH)?.statement ?? "";
-  const supplyTightStatement = kpiSignalMap.get(MGMT_SUPPLY_TIGHT)?.statement ?? "";
-
-  // Transcript count: use signal_count, or fallback from metadata
-  const transcriptCount = kpiSignalMap.get(MGMT_DEMAND_TOTAL)?.actual_value
-    ? String(kpiSignalMap.get(MGMT_DEMAND_TOTAL)?.actual_value)
-    : String(Math.max(demandTotal, supplyTotal));
-
-  // Tailwind vs headwind bar: use demand bullish / (demand + supply total)
-  const totalConsensus = (demandTotal + supplyTotal) || 1;
-  const tailwindPct = Math.round((demandBullish / totalConsensus) * 100);
+  // Tailwind % = bullish demand signals / (bullish demand + tight supply)
+  const totalSentiment = (demandBullish + supplyTight) || 1;
+  const tailwindPct = Math.round((demandBullish / totalSentiment) * 100);
   const headwindPct = 100 - tailwindPct;
   const tailwindsDominant = tailwindPct >= headwindPct;
 
-  // --- Detail signal rows: non-peer_context, deduplicated ---
-  const detailSignals: TopSignal[] = [];
-  const seenIds = new Set<string>();
-  for (const s of topSignals) {
-    if (PEER_CONTEXT_METRICS.has(s.metric)) continue;
-    if (seenIds.has(s.signal_id)) continue;
-    seenIds.add(s.signal_id);
-    detailSignals.push(s);
-  }
 
-  // Split detail signals into demand (up) and supply (down/neutral)
-  const demandSignals = detailSignals.filter((s) => signalDir(s) === "up");
-  const supplySignals = detailSignals.filter((s) => signalDir(s) !== "up");
+  // Exclude KPI and MGMT metrics; classify remaining by metric prefix then direction
+  const KPI_PREFIXES = ["INDUSTRY_", "MGMT_"];
+  const detailSignals = topSignals.filter(
+    (s) => !KPI_PREFIXES.some((p) => s.metric.startsWith(p))
+  );
+  const demandSignals = detailSignals.filter((s) => s.metric.startsWith("DEMAND_"));
+  const supplySignals = detailSignals.filter((s) => s.metric.startsWith("SUPPLY_"));
+  // Signals that don't match either prefix fall back to direction-based classification
+  const unclassified = detailSignals.filter(
+    (s) => !s.metric.startsWith("DEMAND_") && !s.metric.startsWith("SUPPLY_")
+  );
+  const allDemandSignals = [
+    ...demandSignals,
+    ...unclassified.filter((s) => s.direction === "beat" || s.direction === "above" || s.direction === "tracking" || s.direction === "in_line"),
+  ];
+  const allSupplySignals = [
+    ...supplySignals,
+    ...unclassified.filter((s) => s.direction === "miss" || s.direction === "below" || s.direction === "major_miss"),
+  ];
 
-  const { label: toneLabel, color: toneColor } = toneFromSignals(signals);
-  const quarter = deriveQuarter(lens);
-
-  // Summary card metrics
-  const summaryMetrics = kpiTiles.slice(0, 3).map((t) => ({
-    label: t.s.label,
-    value: t.displayValue,
-    sub: t.s.statement?.slice(0, 60) ?? "",
-  }));
+  // Tone derived from tailwind ratio
+  const toneLabel = tailwindPct >= 60
+    ? "reasonably sanguine and happy tone"
+    : tailwindPct >= 40
+    ? "mixed tone"
+    : "cautious tone";
+  const toneColor = tailwindPct >= 60 ? "var(--qc-up)" : tailwindPct >= 40 ? "var(--qc-warn)" : "var(--qc-down)";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -215,26 +152,15 @@ export function LensDetailIndustry({ lens, signals, isBfsi }: Props) {
       {/* ── INDUSTRY KPIS ── */}
       <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
 
-        {/* Header row */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "10px 16px",
           background: "var(--qc-section)",
           borderBottom: "1px solid var(--qc-hair)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <SectionLabel>INDUSTRY KPIS</SectionLabel>
-            {quarter && (
-              <span style={{
-                fontSize: 10, fontWeight: 600, color: "var(--qc-ink-2)",
-                background: "var(--qc-hair)", borderRadius: 4, padding: "2px 8px",
-              }}>
-                {quarter}
-              </span>
-            )}
-          </div>
+          <SectionLabel>INDUSTRY KPIS</SectionLabel>
           <StatusBadge
-            label={lens.status ?? "Neutral"}
+            label={toTitleCase(lens.status ?? "Neutral")}
             color={
               lens.status === "STRONG" ? "var(--qc-up)" :
               lens.status === "WEAK" ? "var(--qc-down)" :
@@ -243,9 +169,8 @@ export function LensDetailIndustry({ lens, signals, isBfsi }: Props) {
           />
         </div>
 
-        {/* Takeaway description */}
-        <div style={{ padding: "8px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
-          <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.6 }}>
+        <div style={{ padding: "12px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
+          <p style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", margin: 0, lineHeight: 1.7 }}>
             {lens.takeaway ?? lens.description}
           </p>
         </div>
@@ -281,51 +206,40 @@ export function LensDetailIndustry({ lens, signals, isBfsi }: Props) {
           </div>
         )}
 
-        {/* Detail signal rows — 2-column grid */}
-        {detailSignals.length > 0 && (
+        {/* Highlights & Risks — 2-column layout with headers */}
+        {(lens.highlights.length > 0 || lens.risks.length > 0) && (
           <div className="grid grid-cols-1 sm:grid-cols-2" style={{
-            gap: 1,
             borderTop: "1px solid var(--qc-hair)",
-            background: "var(--qc-hair)",
+            background: "var(--qc-card)",
           }}>
-            {detailSignals.map((s) => {
-              const dir = signalDir(s);
-              const borderColor = dir === "up" ? "var(--qc-up)" : dir === "down" ? "var(--qc-down)" : "var(--qc-warn)";
-              const arrowColor = borderColor;
-              const arrow = dir === "up" ? "↑" : dir === "down" ? "↓" : "→";
-              const badge = formatSignalBadge(s);
-
-              return (
-                <div key={s.signal_id} style={{
-                  display: "flex", alignItems: "flex-start", gap: 10,
-                  padding: "12px 16px",
-                  background: "var(--qc-card)",
-                  borderLeft: `3px solid ${borderColor}`,
-                }}>
-                  <span style={{ flexShrink: 0, marginTop: 1, color: arrowColor, fontWeight: 700, fontSize: 13 }}>
-                    {arrow}
-                  </span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)", margin: 0, lineHeight: 1.4 }}>
-                      {s.label}
-                    </p>
-                    {s.statement && (
-                      <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "2px 0 0", lineHeight: 1.5 }}>
-                        {s.statement.slice(0, 110)}{s.statement.length > 110 ? "…" : ""}
-                      </p>
-                    )}
+            {/* Highlights column */}
+            <div style={{ padding: "14px 16px", borderRight: "1px solid var(--qc-hair)" }}>
+              <div style={{ marginBottom: 10 }}>
+                <SectionLabel>HIGHLIGHTS</SectionLabel>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {lens.highlights.map((h, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                    <span style={{ flexShrink: 0, color: "var(--qc-up)", fontWeight: 700, fontSize: 11 }}>↑</span>
+                    <p style={{ fontSize: 11, fontWeight: 400, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.5 }}>{h}</p>
                   </div>
-                  {badge && (
-                    <span style={{
-                      flexShrink: 0, fontSize: 10, fontWeight: 700,
-                      color: arrowColor, whiteSpace: "nowrap", marginTop: 2,
-                    }}>
-                      {badge}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            </div>
+            {/* Risks column */}
+            <div style={{ padding: "14px 16px" }}>
+              <div style={{ marginBottom: 10 }}>
+                <SectionLabel>RISKS</SectionLabel>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {lens.risks.map((r, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                    <span style={{ flexShrink: 0, color: "var(--qc-down)", fontWeight: 700, fontSize: 11 }}>↓</span>
+                    <p style={{ fontSize: 11, fontWeight: 400, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.5 }}>{r}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -333,26 +247,16 @@ export function LensDetailIndustry({ lens, signals, isBfsi }: Props) {
       {/* ── MANAGEMENT CONSENSUS ── */}
       <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
 
-        {/* Header */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "10px 16px",
           background: "var(--qc-section)",
           borderBottom: "1px solid var(--qc-hair)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <SectionLabel>MANAGEMENT CONSENSUS</SectionLabel>
-            <span style={{
-              fontSize: 10, fontWeight: 600, color: "var(--qc-ink-2)",
-              background: "var(--qc-hair)", borderRadius: 4, padding: "2px 8px",
-            }}>
-              {transcriptCount} transcripts{quarter ? ` · ${quarter}` : ""}
-            </span>
-          </div>
-          <StatusBadge label={`${toneLabel} tone`} color={toneColor} />
+          <SectionLabel>MANAGEMENT CONSENSUS</SectionLabel>
+          <StatusBadge label={toTitleCase(toneLabel)} color={toneColor} />
         </div>
 
-        {/* Headline + subtitle */}
         <div style={{ padding: "12px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
           <p style={{
             fontSize: 16, fontWeight: 700, margin: "0 0 2px",
@@ -362,12 +266,11 @@ export function LensDetailIndustry({ lens, signals, isBfsi }: Props) {
           </p>
           <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>
             {tailwindsDominant
-              ? (demandBullishStatement || lens.highlights[0]?.slice(0, 100) || "Positive demand signals dominant")
-              : (supplyTightStatement || lens.risks[0]?.slice(0, 100) || "Supply pressure increasing")}
+              ? (allDemandSignals[0]?.statement ?? lens.highlights[0]?.slice(0, 100) ?? "Positive demand signals dominant")
+              : (allSupplySignals[0]?.statement ?? lens.risks[0]?.slice(0, 100) ?? "Supply pressure increasing")}
           </p>
         </div>
 
-        {/* Tailwind / headwind bar */}
         <div style={{ padding: "12px 16px", background: "var(--qc-card)", borderBottom: "1px solid var(--qc-hair)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-up)" }}>
@@ -383,79 +286,50 @@ export function LensDetailIndustry({ lens, signals, isBfsi }: Props) {
           </div>
         </div>
 
-        {/* Demand / Supply signal columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2" style={{ background: "var(--qc-card)" }}>
 
-          {/* Demand signals */}
           <div style={{ padding: "14px 16px", borderRight: "1px solid var(--qc-hair)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <SectionLabel>DEMAND SIGNALS</SectionLabel>
-              <span style={{
-                fontSize: 10, fontWeight: 600,
-                color: tailwindsDominant ? "var(--qc-up)" : "var(--qc-down)",
-              }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: tailwindsDominant ? "var(--qc-up)" : "var(--qc-down)" }}>
                 {tailwindsDominant ? "▲ Strong" : "▼ Weakening"}
               </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {demandSignals.length > 0 ? demandSignals.map((s) => (
+              {allDemandSignals.map((s) => (
                 <div key={s.signal_id} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                  <span style={{ color: "var(--qc-up)", fontWeight: 700, flexShrink: 0, marginTop: 1, fontSize: 11 }}>↑</span>
+                  <span style={{ flexShrink: 0, marginTop: 5, width: 5, height: 5, borderRadius: "50%", background: "var(--qc-ink-3)", display: "inline-block" }} />
                   <p style={{ fontSize: 11, color: "var(--qc-ink-2)", margin: 0, flex: 1, lineHeight: 1.5 }}>
                     {s.label}
                     {s.statement && (
                       <span style={{ color: "var(--qc-ink-3)", fontWeight: 400 }}>
-                        {" — "}{s.statement.slice(0, 80)}{s.statement.length > 80 ? "…" : ""}
+                        {" — "}{s.statement}
                       </span>
                     )}
-                  </p>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink-3)", flexShrink: 0 }}>
-                    100%
-                  </span>
-                </div>
-              )) : lens.highlights.map((h, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                  <span style={{ color: "var(--qc-up)", fontWeight: 700, flexShrink: 0, marginTop: 1, fontSize: 11 }}>↑</span>
-                  <p style={{ fontSize: 11, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.5 }}>
-                    {h}
                   </p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Supply signals */}
           <div style={{ padding: "14px 16px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <SectionLabel>SUPPLY SIGNALS</SectionLabel>
-              <span style={{
-                fontSize: 10, fontWeight: 600,
-                color: !tailwindsDominant ? "var(--qc-down)" : "var(--qc-warn)",
-              }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: !tailwindsDominant ? "var(--qc-down)" : "var(--qc-warn)" }}>
                 {!tailwindsDominant ? "▼ Pressure rising" : "▼ Moderate"}
               </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {supplySignals.length > 0 ? supplySignals.map((s) => (
+              {allSupplySignals.map((s) => (
                 <div key={s.signal_id} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                  <span style={{ color: "var(--qc-down)", fontWeight: 700, flexShrink: 0, marginTop: 1, fontSize: 11 }}>↓</span>
+                  <span style={{ flexShrink: 0, marginTop: 5, width: 5, height: 5, borderRadius: "50%", background: "var(--qc-ink-3)", display: "inline-block" }} />
                   <p style={{ fontSize: 11, color: "var(--qc-ink-2)", margin: 0, flex: 1, lineHeight: 1.5 }}>
                     {s.label}
                     {s.statement && (
                       <span style={{ color: "var(--qc-ink-3)", fontWeight: 400 }}>
-                        {" — "}{s.statement.slice(0, 80)}{s.statement.length > 80 ? "…" : ""}
+                        {" — "}{s.statement}
                       </span>
                     )}
-                  </p>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "var(--qc-ink-3)", flexShrink: 0 }}>
-                    100%
-                  </span>
-                </div>
-              )) : lens.risks.map((r, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                  <span style={{ color: "var(--qc-down)", fontWeight: 700, flexShrink: 0, marginTop: 1, fontSize: 11 }}>↓</span>
-                  <p style={{ fontSize: 11, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.5 }}>
-                    {r}
                   </p>
                 </div>
               ))}
@@ -465,7 +339,6 @@ export function LensDetailIndustry({ lens, signals, isBfsi }: Props) {
         </div>
       </div>
 
-      {/* Summary footer */}
       <LensDrawerSummaryCard
         title={lens.name}
         body={lens.takeaway ?? lens.description}

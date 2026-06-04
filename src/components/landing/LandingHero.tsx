@@ -119,10 +119,6 @@ export default function LandingHero() {
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: "rgba(14,26,43,0.40)" }} />
             Self-improving AI
           </span>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: "rgba(14,26,43,0.40)" }} />
-            SOC 2 · Read-only
-          </span>
         </motion.div>
       </div>
 
@@ -159,7 +155,7 @@ export default function LandingHero() {
 
       {/* Scroll cue */}
       <div
-        className="absolute bottom-8 left-1/2 z-20 -translate-x-1/2 text-[10px] uppercase"
+        className="absolute bottom-8 left-1/2 z-20 -translate-x-1/2 text-[10px] uppercase hidden md:block"
         style={{ ...mono, letterSpacing: "0.3em", color: "rgba(14,26,43,0.50)" }}
       >
         <div className="flex flex-col items-center gap-2">

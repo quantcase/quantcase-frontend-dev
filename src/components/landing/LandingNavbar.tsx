@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 
 const links = [
   { label: "Framework", href: "#framework" },
-  { label: "Engine", href: "#engine" },
-  { label: "Example", href: "#example" },
-  { label: "Portfolio", href: "#portfolio" },
+  { label: "Essays", href: "#portfolio" },
 ];
 
 export default function LandingNavbar() {

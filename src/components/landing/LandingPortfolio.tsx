@@ -85,9 +85,6 @@ export default function LandingPortfolio() {
               ))}
             </div>
 
-            <p className="mt-8 text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.45)" }}>
-              Read-only access · SOC 2 certified · Your holdings are never sold or shared.
-            </p>
           </div>
 
           {/* Right: ranked portfolio preview */}

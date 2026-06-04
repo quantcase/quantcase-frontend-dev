@@ -52,14 +52,14 @@ export default function LandingLiveExample() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.7, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex items-center justify-between gap-6 py-2"
+                  className="flex items-start justify-between gap-4 py-2 sm:items-center"
                   style={{ listStyleType: "none", marginLeft: 0 }}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="h-1.5 w-1.5 rounded-full flex-shrink-0" style={{ background: "#B98A3E" }} />
+                    <span className="h-1.5 w-1.5 rounded-full flex-shrink-0 mt-0.5 sm:mt-0" style={{ background: "#B98A3E" }} />
                     <span className="text-sm" style={{ ...sans, color: "#0E1A2B" }}>{t.label}</span>
                   </div>
-                  <span className="text-xs uppercase" style={{ ...mono, letterSpacing: "0.15em", color: "#3A4B61" }}>
+                  <span className="text-xs uppercase text-right flex-shrink-0" style={{ ...mono, letterSpacing: "0.15em", color: "#3A4B61" }}>
                     {t.state}
                   </span>
                 </motion.li>

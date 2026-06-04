@@ -14,9 +14,9 @@ const sources = [
 ];
 
 const calibrations = [
-  { label: "Guidance accuracy", short: "Guidance", value: 84 },
-  { label: "Valuation signal", short: "Valuation", value: 71 },
-  { label: "Distribution strength", short: "Distribution", value: 78 },
+  { label: "Guidance accuracy", short: "Guidance", tag: "Proactive disclosure", tagColor: "#2D7A4F", tagBg: "rgba(45,122,79,0.10)", value: 84 },
+  { label: "Valuation signal", short: "Valuation", tag: "Limited re-rating potential", tagColor: "#C0392B", tagBg: "rgba(192,57,43,0.10)", value: 71 },
+  { label: "Distribution strength", short: "Distribution", tag: "Moderate", tagColor: "#B98A3E", tagBg: "rgba(185,138,62,0.12)", value: 78 },
 ];
 
 const metrics = [
@@ -207,9 +207,18 @@ export default function LandingPoweredByAi() {
                       >
                         0{i + 1}
                       </span>
-                      <span className="text-[14px]" style={{ ...sans, color: "rgba(14,26,43,0.70)", fontWeight: 400 }}>
-                        {c.label}
-                      </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[14px]" style={{ ...sans, color: "rgba(14,26,43,0.70)", fontWeight: 400 }}>
+                          {c.label}
+                        </span>
+                        <span
+                          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] uppercase"
+                          style={{ ...mono, letterSpacing: "0.16em", color: c.tagColor, background: c.tagBg }}
+                        >
+                          <span className="h-1 w-1 rounded-full flex-shrink-0" style={{ background: c.tagColor }} />
+                          {c.tag}
+                        </span>
+                      </div>
                     </div>
                     <span
                       style={{

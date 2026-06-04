@@ -49,10 +49,6 @@ function deltaLabel(pct: number | null | undefined): string {
   return pct > 0 ? `+${pct.toFixed(1)}%` : `${pct.toFixed(1)}%`;
 }
 
-function deltaColor(pct: number | null | undefined): string {
-  if (pct == null || pct === 0) return "var(--qc-ink-3)";
-  return pct > 0 ? "var(--qc-up)" : "var(--qc-down)";
-}
 
 export function LensDetailGuidance({ lens }: Props) {
   const topSignals: TopSignal[] = lens.top_signals ?? [];
@@ -278,17 +274,17 @@ export function LensDetailGuidance({ lens }: Props) {
                 {/* ACTUAL column */}
                 <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                   <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>
-                    {hasGuidedOrActual ? actualStr : "—"}
+                    {s.direction?.toLowerCase() === "tracking" ? "" : hasGuidedOrActual ? actualStr : ""}
                   </span>
                 </div>
 
                 {/* Delta column */}
                 <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                   <span style={{
-                    fontSize: 13, fontWeight: 600, color: hasDelta ? deltaColor(s.delta_pct) : "var(--qc-ink-3)",
+                    fontSize: 13, fontWeight: 600, color: (hasDelta && s.direction?.toLowerCase() !== "tracking") ? cfg.color : "var(--qc-ink-3)",
                     fontVariantNumeric: "tabular-nums",
                   }}>
-                    {hasDelta ? deltaLabel(s.delta_pct) : "—"}
+                    {(hasDelta && s.direction?.toLowerCase() !== "tracking") ? deltaLabel(s.delta_pct) : ""}
                   </span>
                 </div>
 

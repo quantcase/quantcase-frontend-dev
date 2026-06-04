@@ -115,10 +115,6 @@ export default function LandingHero() {
             <span className="h-1.5 w-1.5 rounded-full animate-pulse-soft" style={{ background: "#B98A3E" }} />
             Indian &amp; US Equities
           </span>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: "rgba(14,26,43,0.40)" }} />
-            Self-improving AI
-          </span>
         </motion.div>
       </div>
 

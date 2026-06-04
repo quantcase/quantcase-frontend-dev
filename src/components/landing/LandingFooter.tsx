@@ -42,22 +42,12 @@ export default function LandingFooter() {
               ))}
             </ul>
           </div>
-          <div>
-            <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Legal</div>
-            <ul className="mt-4 space-y-3 text-sm" style={{ padding: 0 }}>
-              {["Privacy", "Terms", "Disclosures"].map((l) => (
-                <li key={l} style={{ listStyleType: "none", marginLeft: 0 }}>
-                  <a href="#" className="lp-footer-link">{l}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
 
         {/* Desktop-only link columns */}
         <div className="hidden md:grid md:grid-cols-12 md:gap-8 md:-mt-[5.5rem]">
           <div className="md:col-span-5" /> {/* spacer */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-3">
             <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Product</div>
             <ul className="mt-5 space-y-3 text-sm" style={{ padding: 0 }}>
               {[["Framework", "#framework"], ["Engine", "#engine"], ["Example", "#example"], ["Portfolio", "#portfolio"]].map(([label, href]) => (
@@ -67,20 +57,10 @@ export default function LandingFooter() {
               ))}
             </ul>
           </div>
-          <div className="md:col-span-2">
+          <div className="md:col-span-4">
             <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Company</div>
             <ul className="mt-5 space-y-3 text-sm" style={{ padding: 0 }}>
               {["About", "Research", "Careers", "Contact"].map((l) => (
-                <li key={l} style={{ listStyleType: "none", marginLeft: 0 }}>
-                  <a href="#" className="lp-footer-link">{l}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="md:col-span-3">
-            <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Legal</div>
-            <ul className="mt-5 space-y-3 text-sm" style={{ padding: 0 }}>
-              {["Privacy", "Terms", "Disclosures", "Trust Center"].map((l) => (
                 <li key={l} style={{ listStyleType: "none", marginLeft: 0 }}>
                   <a href="#" className="lp-footer-link">{l}</a>
                 </li>

@@ -9,18 +9,18 @@ const sans: React.CSSProperties = { fontFamily: "'Geist', system-ui, sans-serif"
 const steps = [
   {
     num: "01",
-    title: "It reads everything.",
-    desc: "Earnings calls, filings, competitor moves, price action — synthesised in seconds. Unlike a human analyst, it never forgets what management promised last quarter.",
+    title: "It reads the full picture.",
+    desc: "Earnings calls, management guidance, filings, price action — ingested and cross-referenced automatically. It remembers every promise management made last quarter. And whether they kept it.",
   },
   {
     num: "02",
     title: "It scores every stock.",
-    desc: "Three lenses — Management, Opportunity, Deal — each judged independently and rolled into a single conviction score out of 100.",
+    desc: "Three independent lenses — Management, Opportunity, Deal — each scored separately, then combined into a single conviction score out of 100. No black box. Every number traceable to a reason.",
   },
   {
     num: "03",
-    title: "It learns from outcomes.",
-    desc: "Every prediction tracked against real results. The model recalibrates continuously, so the score that ranks your portfolio today is sharper than yesterday's.",
+    title: "It holds management accountable.",
+    desc: "Guidance credibility updates after every earnings cycle. If a management team misses what they promised, the score reflects it — before the market does.",
   },
 ];
 

@@ -21,6 +21,7 @@ import type { Signal } from "@/hooks/useSignals";
 interface Props {
   lens: LensDetail;
   signals: Signal[];
+  isBfsi?: boolean;
 }
 
 const CHART_UP = "#1F7A4A";
@@ -300,7 +301,7 @@ function ChartPanel({ activeKey, rows, topSignals }: { activeKey: RowKey; rows: 
 
 // ── Main export ──────────────────────────────────────────────────────────────
 
-export function LensDetailFinancial({ lens, signals }: Props) {
+export function LensDetailFinancial({ lens, signals: _signals, isBfsi }: Props) {
   const topSignals: TopSignal[] = dedup(lens.top_signals ?? []);
   const [activeKey, setActiveKey] = useState<RowKey>("primary");
 
@@ -330,7 +331,7 @@ export function LensDetailFinancial({ lens, signals }: Props) {
             background: "var(--qc-section)",
             borderBottom: "1px solid var(--qc-hair)",
           }}>
-            {["SIGNAL", "METRIC", "CURRENT", "VS GUIDED", "STATUS"].map((h) => (
+            {["SIGNAL", "METRIC", "CURRENT", isBfsi ? "YoY TREND" : "VS GUIDED", "STATUS"].map((h) => (
               <p key={h} style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: 0 }}>{h}</p>
             ))}
           </div>

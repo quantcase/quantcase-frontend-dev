@@ -77,8 +77,8 @@ export default function LandingHero() {
           className="mt-8 max-w-xl text-base md:text-lg"
           style={{ ...sans, color: "#3A4B61", lineHeight: 1.55 }}
         >
-          Top fund managers don't have better instincts. They have a repeatable
-          process. Quantcase is that process — built into a single score.
+          Top investors don&apos;t have better instincts. They have a repeatable
+          process. Quantcase is that process, built into a single score.
         </motion.p>
 
         {/* CTAs */}

@@ -48,12 +48,6 @@ function statusColor(s: string | null | undefined) {
   return "var(--qc-warn)";
 }
 
-function directionIcon(dir: string | null): { arrow: string; color: string } {
-  if (dir === "beat") return { arrow: "↑", color: "var(--qc-up)" };
-  if (dir === "miss" || dir === "major_miss") return { arrow: "↓", color: "var(--qc-down)" };
-  if (dir === "in_line") return { arrow: "✓", color: "var(--qc-up)" };
-  return { arrow: "~", color: "var(--qc-warn)" };
-}
 
 // Parse "KEY=val|KEY2=val2" statement from PEER_ROW signals
 function parsePeerStatement(statement: string | null): Record<string, string> {
@@ -533,15 +527,22 @@ function PeerCell({ index: _index }: { index: number }) {
 
 // ── Build pillar tiles from named metric signals ───────────────────────────────
 
+function directionColor(dir: string | null | undefined): string {
+  if (dir === "beat") return "var(--qc-up)";
+  if (dir === "miss" || dir === "major_miss") return "var(--qc-down)";
+  return "var(--qc-warn)"; // in_line or anything else
+}
+
 function pillarRating(sig: TopSignal | undefined, metric: string): { rating: string; sub: string; color: string; score: number; max: number } {
-  if (!sig) return { rating: "—", sub: "", color: "var(--qc-ink-3)", score: 1, max: 3 };
+  if (!sig) return { rating: "—", sub: "", color: "var(--qc-ink-3)", score: 0, max: 3 };
 
   if (metric === "PORTERS_SCORE") {
     const actual = sig.actual_value ?? 0;
+    // guided_value is the denominator for dot display; score is out of 10 for color logic
     const max = sig.guided_value ?? 10;
     const color = actual >= 7 ? "var(--qc-up)" : actual >= 5 ? "var(--qc-warn)" : "var(--qc-down)";
     return {
-      rating: `${actual}/${max}`,
+      rating: `${actual}/10`,
       sub: sig.statement?.slice(0, 55) ?? "",
       color,
       score: actual,
@@ -549,25 +550,22 @@ function pillarRating(sig: TopSignal | undefined, metric: string): { rating: str
     };
   }
 
-  // MARKET_POSITION, PRICING_POWER, ENTRY_BARRIERS: actual is score out of guided (e.g. 2/3 or 3/3)
+  // MARKET_POSITION, PRICING_POWER, ENTRY_BARRIERS
+  // Label is derived from direction field only — never from actual_value ratio
+  const dir = sig.direction;
+  const color = directionColor(dir);
   const actual = sig.actual_value ?? 0;
-  const max = sig.guided_value ?? 3;
-  const ratio = actual / max;
+  const max = sig.guided_value ?? 3; // treat missing guided_value as 3
 
   let rating = "";
-  let color = "";
   if (metric === "MARKET_POSITION") {
-    rating = ratio >= 1 ? "Strong" : ratio >= 0.67 ? "Moderate" : "Weak";
-    color = ratio >= 1 ? "var(--qc-up)" : ratio >= 0.67 ? "var(--qc-warn)" : "var(--qc-down)";
+    rating = dir === "beat" ? "Strong" : dir === "in_line" ? "Moderate" : "Weak";
   } else if (metric === "PRICING_POWER") {
-    rating = ratio >= 1 ? "High" : ratio >= 0.67 ? "Medium" : "Low";
-    color = ratio >= 1 ? "var(--qc-up)" : ratio >= 0.67 ? "var(--qc-warn)" : "var(--qc-down)";
+    rating = dir === "beat" ? "Strong" : dir === "in_line" ? "Moderate" : "Low";
   } else if (metric === "ENTRY_BARRIERS") {
-    rating = ratio >= 1 ? "High" : ratio >= 0.67 ? "Medium" : "Low";
-    color = ratio >= 1 ? "var(--qc-up)" : ratio >= 0.67 ? "var(--qc-warn)" : "var(--qc-down)";
+    rating = dir === "beat" ? "High" : dir === "in_line" ? "Medium" : "Low";
   } else {
-    rating = ratio >= 0.8 ? "Strong" : ratio >= 0.5 ? "Medium" : "Weak";
-    color = ratio >= 0.8 ? "var(--qc-up)" : ratio >= 0.5 ? "var(--qc-warn)" : "var(--qc-down)";
+    rating = dir === "beat" ? "Strong" : dir === "in_line" ? "Moderate" : "Weak";
   }
 
   return {

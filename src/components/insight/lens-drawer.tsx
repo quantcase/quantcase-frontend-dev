@@ -22,6 +22,7 @@ interface LensDrawerProps {
   signals: Signal[];
   onClose: () => void;
   ticker?: string;
+  isBfsi?: boolean;
 }
 
 function statusColor(status: string | null | undefined) {
@@ -41,7 +42,7 @@ function statusBg(status: string | null | undefined) {
 }
 
 
-function LensDetailView({ lens, signals, ticker }: { lens: LensDetail; signals: Signal[]; ticker?: string }) {
+function LensDetailView({ lens, signals, ticker, isBfsi }: { lens: LensDetail; signals: Signal[]; ticker?: string; isBfsi?: boolean }) {
   switch (lens.slug) {
     case "guidance-credibility":
       return <LensDetailGuidance lens={lens} />;
@@ -52,11 +53,11 @@ function LensDetailView({ lens, signals, ticker }: { lens: LensDetail; signals: 
     case "capital-allocation":
       return <LensDetailCapital lens={lens} signals={signals} />;
     case "industry-analysis":
-      return <LensDetailIndustry lens={lens} signals={signals} />;
+      return <LensDetailIndustry lens={lens} signals={signals} isBfsi={isBfsi} />;
     case "competition":
       return <LensDetailCompetition lens={lens} signals={signals} ticker={ticker} />;
     case "financial-strength":
-      return <LensDetailFinancial lens={lens} signals={signals} />;
+      return <LensDetailFinancial lens={lens} signals={signals} isBfsi={isBfsi} />;
     case "customer-distribution":
       return <LensDetailCustomer lens={lens} signals={signals} />;
     case "eps-engine":
@@ -73,7 +74,7 @@ function LensDetailView({ lens, signals, ticker }: { lens: LensDetail; signals: 
   }
 }
 
-export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) {
+export function LensDrawer({ lens, signals, onClose, ticker, isBfsi }: LensDrawerProps) {
   useEffect(() => {
     if (!lens) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -122,7 +123,7 @@ export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) 
               position: "sticky", top: 0, zIndex: 10,
               background: "var(--qc-card)",
               borderBottom: "1px solid var(--qc-hair)",
-              padding: "18px 0 16px",
+              paddingTop: "18px", paddingBottom: "16px",
               display: "flex",
               alignItems: "flex-start",
               justifyContent: "space-between",
@@ -170,7 +171,7 @@ export function LensDrawer({ lens, signals, onClose, ticker }: LensDrawerProps) 
             <div className="px-4 sm:px-6 overflow-x-hidden" style={{ flex: 1, paddingTop: 20, paddingBottom: 32, display: "flex", flexDirection: "column", gap: 20 }}>
 
               {/* Lens-specific rich view — or fall back to generic */}
-              <LensDetailView lens={lens} signals={signals} ticker={ticker} />
+              <LensDetailView lens={lens} signals={signals} ticker={ticker} isBfsi={isBfsi} />
 
               {/* Generic fallback: key metrics, highlights, risks */}
               {!["guidance-credibility", "promoter-activity", "disclosure-honesty", "capital-allocation", "industry-analysis", "competition", "financial-strength", "customer-distribution", "eps-engine", "earnings-forecast", "pe-rerating-potential", "earning-quality", "target-price-matrix"].includes(lens.slug) && (

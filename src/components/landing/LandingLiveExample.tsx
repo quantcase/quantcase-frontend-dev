@@ -37,9 +37,9 @@ export default function LandingLiveExample() {
                 margin: 0,
               }}
             >
-              Know the stock.
+              Fundamentals &amp; Technicals.
               <br />
-              <span className="serif-italic" style={{ color: "rgba(14,26,43,0.80)" }}>Know the moment.</span>
+              <span className="serif-italic" style={{ color: "rgba(14,26,43,0.80)" }}>In one screen.</span>
             </h2>
             <p className="mt-6 max-w-md text-base" style={{ ...sans, color: "#3A4B61" }}>
               MOD tells you what to own. Automated technicals tell you when to pull the trigger. One screen. Complete picture.

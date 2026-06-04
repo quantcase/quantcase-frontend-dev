@@ -7,14 +7,24 @@ import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCar
 interface Props {
   lens: LensDetail;
   signals: Signal[];
+  isBfsi?: boolean;
 }
 
-// Fixed KPI metrics that always appear in the top strip (from peer_context signals)
-const KPI_METRICS = [
+// Fixed KPI metrics for the top strip — vary by sector type
+const KPI_METRICS_NON_BFSI = [
   "INDUSTRY_REVENUE",
   "INDUSTRY_REV_CAGR_3Y",
   "INDUSTRY_OPM",
   "INDUSTRY_ROCE",
+] as const;
+
+// Loan book metric varies by bank — try both
+const BFSI_LOAN_BOOK_VARIANTS = ["INDUSTRY_AUM", "INDUSTRY_LOAN_ADV"] as const;
+
+const KPI_METRICS_BFSI_BASE = [
+  "INDUSTRY_ROA",
+  "INDUSTRY_NIM",
+  "INDUSTRY_REV_CAGR_3Y",
 ] as const;
 
 // Management consensus signal metrics (from peer_context)
@@ -23,8 +33,10 @@ const MGMT_DEMAND_TOTAL = "MGMT_DEMAND_TOTAL_COUNT";
 const MGMT_SUPPLY_TIGHT = "MGMT_SUPPLY_TIGHT_COUNT";
 const MGMT_SUPPLY_TOTAL = "MGMT_SUPPLY_TOTAL_COUNT";
 
-const PEER_CONTEXT_METRICS = new Set([
-  ...KPI_METRICS,
+const PEER_CONTEXT_METRICS = new Set<string>([
+  ...KPI_METRICS_NON_BFSI,
+  ...KPI_METRICS_BFSI_BASE,
+  ...BFSI_LOAN_BOOK_VARIANTS,
   MGMT_DEMAND_BULLISH,
   MGMT_DEMAND_TOTAL,
   MGMT_SUPPLY_TIGHT,
@@ -60,10 +72,8 @@ function formatKpiValue(s: TopSignal): string {
   const v = s.actual_value;
   const unit = s.unit ?? "";
 
-  if (s.metric === "INDUSTRY_REVENUE") {
-    // Express in Lakh Cr or Cr
-    const cr = v / 1e7; // paise→Cr? Actually value is in raw INR
-    // The API returns raw values like 3358401100000 (3.3 lakh Cr)
+  if (s.metric === "INDUSTRY_REVENUE" || s.metric === "INDUSTRY_AUM" || s.metric === "INDUSTRY_LOAN_ADV") {
+    // Values are raw INR (e.g. 70656908700000 = ₹70.66 lakh Cr)
     if (v >= 1e12) return `₹${(v / 1e12).toFixed(1)}L Cr`;
     if (v >= 1e9) return `₹${(v / 1e7).toFixed(1)} Cr`;
     return `₹${v.toLocaleString("en-IN")}`;
@@ -129,7 +139,7 @@ function deriveQuarter(lens: LensDetail): string {
   return lens.key_metrics["Quarter"] ?? "";
 }
 
-export function LensDetailIndustry({ lens, signals }: Props) {
+export function LensDetailIndustry({ lens, signals, isBfsi }: Props) {
   const topSignals = lens.top_signals ?? [];
 
   // --- KPI tiles: fixed 4 peer_context signals by metric name ---
@@ -137,6 +147,12 @@ export function LensDetailIndustry({ lens, signals }: Props) {
   for (const s of topSignals) {
     if (!kpiSignalMap.has(s.metric)) kpiSignalMap.set(s.metric, s);
   }
+
+  // For BFSI, loan book metric varies by bank — pick whichever variant exists
+  const loanBookMetric = BFSI_LOAN_BOOK_VARIANTS.find((m) => kpiSignalMap.has(m)) ?? BFSI_LOAN_BOOK_VARIANTS[0];
+  const KPI_METRICS: readonly string[] = isBfsi
+    ? [...KPI_METRICS_BFSI_BASE, loanBookMetric]
+    : KPI_METRICS_NON_BFSI;
 
   const kpiTiles = KPI_METRICS.map((metric) => {
     const s = kpiSignalMap.get(metric);
@@ -173,7 +189,7 @@ export function LensDetailIndustry({ lens, signals }: Props) {
   const detailSignals: TopSignal[] = [];
   const seenIds = new Set<string>();
   for (const s of topSignals) {
-    if (PEER_CONTEXT_METRICS.has(s.metric as typeof KPI_METRICS[number])) continue;
+    if (PEER_CONTEXT_METRICS.has(s.metric)) continue;
     if (seenIds.has(s.signal_id)) continue;
     seenIds.add(s.signal_id);
     detailSignals.push(s);
@@ -247,7 +263,7 @@ export function LensDetailIndustry({ lens, signals }: Props) {
                   fontSize: 9, fontWeight: 700, textTransform: "uppercase",
                   letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 6px",
                 }}>
-                  {tile.s.label}
+                  {(tile.s.metric === "INDUSTRY_AUM" || tile.s.metric === "INDUSTRY_LOAN_ADV") ? "Industry AUM" : tile.s.label}
                 </p>
                 <p style={{
                   fontSize: 22, fontWeight: 600, color: tile.valueColor,

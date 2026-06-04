@@ -2,7 +2,7 @@
 
 import { motion, useInView, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { FileText, Building2, Zap, TrendingUp, Users } from "lucide-react";
+import { FileText, Zap, MessageSquareQuote } from "lucide-react";
 
 const serif: React.CSSProperties = { fontFamily: "var(--font-instrument-serif, 'Instrument Serif', serif)" };
 const mono: React.CSSProperties = { fontFamily: "'Geist Mono', 'JetBrains Mono', ui-monospace, monospace" };
@@ -15,14 +15,14 @@ const sources = [
 
 const calibrations = [
   { label: "Guidance accuracy", short: "Guidance", value: 84 },
-  { label: "Valuation signals", short: "Valuation", value: 71 },
-  { label: "Management flags", short: "Mgmt flags", value: 78 },
+  { label: "Valuation signal", short: "Valuation", value: 71 },
+  { label: "Distribution strength", short: "Distribution", value: 78 },
 ];
 
 const metrics = [
-  { num: 12.4, suffix: "M", label: "Documents read", decimals: 1, Icon: FileText, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
-  { num: 3840, suffix: "", label: "Companies tracked", decimals: 0, Icon: Building2, iconBg: "rgba(14,26,43,0.06)", iconColor: "#0E1A2B", iconBorder: "rgba(14,26,43,0.12)" },
-  { num: 98.2, suffix: "%", label: "Uptime", decimals: 1, Icon: Zap, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
+  { num: 50, suffix: "K+", label: "Documents read", decimals: 0, Icon: FileText, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
+  { num: 600, suffix: "K+", label: "Signals analyzed", decimals: 0, Icon: Zap, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
+  { num: 20, suffix: "K+", label: "Guidance promises tracked", decimals: 0, Icon: MessageSquareQuote, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
 ];
 
 function AnimatedNumber({ to, suffix, decimals }: { to: number; suffix: string; decimals: number }) {
@@ -128,8 +128,8 @@ export default function LandingPoweredByAi() {
             <span style={{ color: "rgba(14,26,43,0.45)", fontStyle: "italic" }}>you don&apos;t have time to.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-base" style={{ ...sans, color: "rgba(14,26,43,0.55)" }}>
-            Every earnings call. Every filing. Every competitor move. Synthesised in seconds — and unlike a human analyst, it never
-            forgets what management promised last quarter.
+            Hundreds of documents per company: peer comparisons, sector filings, years of earnings history; all read together, never
+            in isolation; distilled into a single, decisive verdict.
           </p>
         </motion.div>
 

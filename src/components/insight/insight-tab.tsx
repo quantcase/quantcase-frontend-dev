@@ -7,6 +7,7 @@ import { useAnalysis } from "@/hooks/useAnalysis";
 import { useAnalyzeTrigger } from "@/hooks/useAnalyzeTrigger";
 import { useLenses } from "@/hooks/useLenses";
 import { useSignals } from "@/hooks/useSignals";
+import { useScreenerData } from "@/hooks/useScreenerData";
 
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { AssetActionBar } from "@/components/molecules/asset-action-bar";
@@ -158,6 +159,8 @@ function InsightDashboard({
   const [activeLensSlug, setActiveLensSlug] = useState<string | null>(null);
   const { lenses: lensDetails } = useLenses(ticker);
   const { signals } = useSignals(ticker);
+  const { data: screenerData } = useScreenerData(ticker);
+  const isBfsi = screenerData?.company?.isBfsi ?? false;
 
   const handleLensClick = useCallback((slug: string) => {
     setActiveLensSlug(slug);
@@ -190,7 +193,7 @@ function InsightDashboard({
         </div>
       </div>
 
-      <LensDrawer lens={activeLens} signals={signals} onClose={() => setActiveLensSlug(null)} ticker={ticker} />
+      <LensDrawer lens={activeLens} signals={signals} onClose={() => setActiveLensSlug(null)} ticker={ticker} isBfsi={isBfsi} />
     </>
   );
 }

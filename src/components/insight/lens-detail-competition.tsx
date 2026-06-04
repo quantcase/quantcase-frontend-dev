@@ -89,7 +89,11 @@ function PillarTile({ label, rating, sub, color, score, max }: PillarTileProps) 
         {label}
       </p>
       <p style={{ fontSize: 22, fontWeight: 600, color, margin: 0, lineHeight: 1.1 }}>{rating}</p>
-      <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>{sub}</p>
+      <p title={sub} style={{
+        fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4,
+        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+        cursor: sub ? "help" : "default",
+      }}>{sub}</p>
       <div style={{ display: "flex", gap: 3, marginTop: 2 }}>
         {Array.from({ length: max }).map((_, j) => (
           <div key={j} style={{
@@ -543,7 +547,7 @@ function pillarRating(sig: TopSignal | undefined, metric: string): { rating: str
     const color = actual >= 7 ? "var(--qc-up)" : actual >= 5 ? "var(--qc-warn)" : "var(--qc-down)";
     return {
       rating: `${actual}/10`,
-      sub: sig.statement?.slice(0, 55) ?? "",
+      sub: sig.statement ?? "",
       color,
       score: actual,
       max,
@@ -570,7 +574,7 @@ function pillarRating(sig: TopSignal | undefined, metric: string): { rating: str
 
   return {
     rating,
-    sub: sig.statement?.slice(0, 55) ?? "",
+    sub: sig.statement ?? "",
     color,
     score: actual,
     max,

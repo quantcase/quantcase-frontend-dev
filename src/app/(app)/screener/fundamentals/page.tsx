@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import React, { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ShieldCheck,
@@ -28,7 +28,70 @@ import { PnLChart } from "@/components/fundamentals/pnl-chart";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { FundamentalsIntelligenceBanner } from "@/components/fundamentals/fundamentals-intelligence-banner";
 
+// ─── Inline skeleton components ───────────────────────────────────────────────
 
+function Shimmer({ style, rounded = 8 }: { style?: React.CSSProperties; rounded?: number }) {
+  return <div className="skeleton-shimmer" style={{ borderRadius: rounded, ...style }} />;
+}
+
+function FundamentalsPageSkeleton() {
+  return (
+    <div className="px-4 pt-6 pb-8 space-y-6">
+      {/* Two-col: charts + DI panel */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-[14px] items-start">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Charts card */}
+          <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+            <Shimmer style={{ height: 10, width: "25%" }} rounded={4} />
+            <Shimmer style={{ height: 280 }} rounded={10} />
+          </div>
+          {/* SWOT */}
+          <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+            <Shimmer style={{ height: 10, width: "20%" }} rounded={4} />
+            <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: 8 }}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <Shimmer style={{ height: 24 }} rounded={6} />
+                  {Array.from({ length: 3 }).map((_, j) => <Shimmer key={j} style={{ height: 13 }} rounded={4} />)}
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Growth & Returns */}
+          <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+            <Shimmer style={{ height: 10, width: "28%" }} rounded={4} />
+            <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: 8 }}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <Shimmer style={{ height: 13 }} rounded={4} />
+                  {Array.from({ length: 4 }).map((_, j) => <Shimmer key={j} style={{ height: 13 }} rounded={4} />)}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* DI panel */}
+        <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+          <Shimmer style={{ height: 10, width: "40%" }} rounded={4} />
+          <Shimmer style={{ height: 52 }} rounded={10} />
+          {Array.from({ length: 5 }).map((_, i) => <Shimmer key={i} style={{ height: 40 }} rounded={8} />)}
+        </div>
+      </div>
+      {/* P&L table */}
+      <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+        <Shimmer style={{ height: 10, width: "20%" }} rounded={4} />
+        {Array.from({ length: 6 }).map((_, i) => <Shimmer key={i} style={{ height: 36 }} rounded={6} />)}
+      </div>
+      {/* Balance sheet */}
+      <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+        <Shimmer style={{ height: 10, width: "22%" }} rounded={4} />
+        {Array.from({ length: 5 }).map((_, i) => <Shimmer key={i} style={{ height: 36 }} rounded={6} />)}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const FUNDAMENTALS_NAV = [
   { id: "section-charts",           label: "Charts" },
@@ -133,14 +196,6 @@ function FinancialsContent() {
     );
   }
 
-  if (loading) {
-    return (
-      <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", padding: "24px 16px" }}>Loading…</div>
-      </ScreenerPageShell>
-    );
-  }
-
   if (error) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
@@ -149,13 +204,14 @@ function FinancialsContent() {
     );
   }
 
-  if (!data) {
+  if (loading || !data) {
     return (
-      <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
-        <div style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)", padding: "24px 16px" }}>
-          No financial data found for {symbol}
-        </div>
-      </ScreenerPageShell>
+      <>
+        <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
+          <FundamentalsPageSkeleton />
+        </ScreenerPageShell>
+        <AssetActionBar ticker={symbol} />
+      </>
     );
   }
 

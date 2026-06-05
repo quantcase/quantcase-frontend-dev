@@ -5,11 +5,11 @@ import type { FinancialsResponse } from "@/types/financials";
 
 export function useFinancials(symbol: string) {
   const [data, setData] = useState<FinancialsResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!symbol?.trim());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!symbol?.trim()) return;
+    if (!symbol?.trim()) { setLoading(false); return; }
     rawFetch<FinancialsResponse>(`${BACKEND_URL}/api/screener/${symbol}/financials`, {
       onStart: () => { setLoading(true); setError(null); setData(null); },
       onSuccess: (response) => { setData(response); setLoading(false); },

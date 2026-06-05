@@ -19,11 +19,11 @@ function computeDerived(data: TechnicalsResponse): TechnicalsDerived {
 export function useTechnicals(symbol: string) {
   const [data, setData] = useState<TechnicalsResponse | null>(null);
   const [derived, setDerived] = useState<TechnicalsDerived | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!symbol?.trim());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!symbol?.trim()) return;
+    if (!symbol?.trim()) { setLoading(false); return; }
     rawFetch<TechnicalsApiResponse>(`${BACKEND_URL}/api/screener/${symbol}/technicals`, {
       onStart: () => { setLoading(true); setError(null); setData(null); setDerived(null); },
       onSuccess: (raw) => {

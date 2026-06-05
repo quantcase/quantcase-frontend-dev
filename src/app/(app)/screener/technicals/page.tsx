@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import React, { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { AssetActionBar } from "@/components/molecules/asset-action-bar";
@@ -11,6 +11,65 @@ import { DecisionIntelligenceBanner } from "./_components/DecisionIntelligenceBa
 import { TechnicalsRuleEngine, type EngineTab } from "./_components/TechnicalsRuleEngine";
 import { LevelsStrip } from "./_components/LevelsStrip";
 import { SectionPanel } from "@/components/molecules/section-panel";
+
+// ─── Inline skeleton components ───────────────────────────────────────────────
+
+function Shimmer({ style, rounded = 8 }: { style?: React.CSSProperties; rounded?: number }) {
+  return <div className="skeleton-shimmer" style={{ borderRadius: rounded, ...style }} />;
+}
+
+function TechnicalsLevelsStripSkeleton() {
+  return (
+    <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", overflow: "hidden" }}>
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className={["px-5 py-3.5 flex flex-col gap-2", i > 0 ? "border-l border-[var(--qc-hair)]" : ""].join(" ")}>
+            <Shimmer style={{ height: 9, width: "55%" }} rounded={4} />
+            <Shimmer style={{ height: 18, width: "70%" }} rounded={5} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TechnicalsChartSkeleton() {
+  return (
+    <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+      <Shimmer style={{ height: 10, width: "20%" }} rounded={4} />
+      <Shimmer style={{ height: 340 }} rounded={10} />
+    </div>
+  );
+}
+
+function TechnicalsRuleEngineSkeleton() {
+  return (
+    <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+      <Shimmer style={{ height: 10, width: "25%" }} rounded={4} />
+      <div style={{ display: "flex", gap: 8 }}>
+        {Array.from({ length: 4 }).map((_, i) => <Shimmer key={i} style={{ height: 30, width: 90 }} rounded={20} />)}
+      </div>
+      {Array.from({ length: 5 }).map((_, i) => <Shimmer key={i} style={{ height: 44 }} rounded={8} />)}
+    </div>
+  );
+}
+
+function TechnicalsDecisionSkeleton() {
+  return (
+    <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+      <Shimmer style={{ height: 10, width: "40%" }} rounded={4} />
+      <Shimmer style={{ height: 52 }} rounded={10} />
+      <Shimmer style={{ height: 9, width: "30%" }} rounded={4} />
+      <div className="grid grid-cols-2" style={{ gap: 8 }}>
+        {Array.from({ length: 4 }).map((_, i) => <Shimmer key={i} style={{ height: 56 }} rounded={10} />)}
+      </div>
+      <Shimmer style={{ height: 9, width: "30%" }} rounded={4} />
+      {Array.from({ length: 3 }).map((_, i) => <Shimmer key={i} style={{ height: 36 }} rounded={8} />)}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const TECHNICALS_NAV = [
   { id: "section-price-levels", label: "Price Levels" },
@@ -43,14 +102,6 @@ function TechnicalsContent() {
     );
   }
 
-  if (loading) {
-    return (
-      <ScreenerPageShell navItems={TECHNICALS_NAV}>
-        <div className="text-sm px-4 pt-6">Loading...</div>
-      </ScreenerPageShell>
-    );
-  }
-
   if (error) {
     return (
       <ScreenerPageShell navItems={TECHNICALS_NAV}>
@@ -59,62 +110,62 @@ function TechnicalsContent() {
     );
   }
 
-  if (!data || !derived) {
-    return (
-      <ScreenerPageShell navItems={TECHNICALS_NAV}>
-        <div className="text-sm px-4 pt-6">No technical data found for {symbol}</div>
-      </ScreenerPageShell>
-    );
-  }
-
-  const changeIsPositive = data.price.changePercent >= 0;
-  const changeDisplay = `${changeIsPositive ? "+" : ""}${data.price.changePercent.toFixed(1)}%`;
+  const changeIsPositive = !loading && data ? data.price.changePercent >= 0 : false;
+  const changeDisplay = !loading && data ? `${changeIsPositive ? "+" : ""}${data.price.changePercent.toFixed(1)}%` : "";
 
   return (
     <>
     <ScreenerPageShell navItems={TECHNICALS_NAV}>
       <div className="mb-8 px-4 space-y-[14px] pt-4">
         <div id="section-price-levels">
-          <LevelsStrip
-            price={data.price}
-            movingAverages={data.movingAverages}
-            supportResistance={data.supportResistance}
-            meta={data.meta}
-            changeDisplay={changeDisplay}
-            changeIsPositive={changeIsPositive}
-          />
+          {loading ? (
+            <TechnicalsLevelsStripSkeleton />
+          ) : data && derived ? (
+            <LevelsStrip
+              price={data.price}
+              movingAverages={data.movingAverages}
+              supportResistance={data.supportResistance}
+              meta={data.meta}
+              changeDisplay={changeDisplay}
+              changeIsPositive={changeIsPositive}
+            />
+          ) : null}
         </div>
 
         {/* Row 1: Price Chart + Rule Engine (left) + Decision Intelligence (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[14px] items-start">
           <div className="flex flex-col gap-[14px] min-w-0">
             <div id="section-price-chart">
-              <SectionPanel
-                title="Price Chart"
-                headerAction={
-                  chartMode !== "DEFAULT" ? (
-                    <button
-                      onClick={() => setChartMode("DEFAULT")}
-                      className="px-2.5 py-1 rounded-[8px] font-mono text-[10px] uppercase tracking-[0.14em] border transition-colors"
-                      style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)", color: "var(--qc-ink)" }}
-                    >
-                      Default View
-                    </button>
-                  ) : null
-                }
-              >
-                <CandlestickChart
-                  prices={prices}
-                  indicators={indicators}
-                  chartMode={chartMode}
-                  loading={pricesLoading}
-                  error={pricesError}
-                  supportResistance={data.supportResistance}
-                  structureEngine={data.ruleEngine?.structureEngine}
-                />
-              </SectionPanel>
+              {loading ? (
+                <TechnicalsChartSkeleton />
+              ) : (
+                <SectionPanel
+                  title="Price Chart"
+                  headerAction={
+                    chartMode !== "DEFAULT" ? (
+                      <button
+                        onClick={() => setChartMode("DEFAULT")}
+                        className="px-2.5 py-1 rounded-[8px] font-mono text-[10px] uppercase tracking-[0.14em] border transition-colors"
+                        style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)", color: "var(--qc-ink)" }}
+                      >
+                        Default View
+                      </button>
+                    ) : null
+                  }
+                >
+                  <CandlestickChart
+                    prices={prices}
+                    indicators={indicators}
+                    chartMode={chartMode}
+                    loading={pricesLoading}
+                    error={pricesError}
+                    supportResistance={data!.supportResistance}
+                    structureEngine={data!.ruleEngine?.structureEngine}
+                  />
+                </SectionPanel>
+              )}
             </div>
-            {data.ruleEngine && (
+            {!loading && data?.ruleEngine && (
               <div id="section-rule-engine">
                 <TechnicalsRuleEngine
                   ruleEngine={data.ruleEngine}
@@ -125,11 +176,14 @@ function TechnicalsContent() {
                 />
               </div>
             )}
+            {loading && <TechnicalsRuleEngineSkeleton />}
           </div>
           <div className="lg:sticky lg:top-28">
-            {data.decisionIntelligence && (
+            {loading ? (
+              <TechnicalsDecisionSkeleton />
+            ) : data?.decisionIntelligence ? (
               <DecisionIntelligenceBanner di={data.decisionIntelligence} />
-            )}
+            ) : null}
           </div>
         </div>
 

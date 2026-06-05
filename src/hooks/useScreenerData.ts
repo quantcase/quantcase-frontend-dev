@@ -5,11 +5,11 @@ import { ScreenerData } from '@/types/screener';
 
 export function useScreenerData(symbol: string) {
   const [data, setData] = useState<ScreenerData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!symbol?.trim());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!symbol?.trim()) return;
+    if (!symbol?.trim()) { setLoading(false); return; }
 
     const url = `${BACKEND_URL}/api/screener/${symbol}`;
 

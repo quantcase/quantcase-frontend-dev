@@ -19,11 +19,11 @@ interface UseAnalysisResult {
 
 export function useAnalysis(ticker: string): UseAnalysisResult {
   const [insights, setInsights] = useState<InsightData[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!ticker?.trim());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!ticker.trim()) return;
+    if (!ticker.trim()) { setLoading(false); return; }
 
     const url = `${BACKEND_URL}/api/analysis?ticker=${ticker}`;
 

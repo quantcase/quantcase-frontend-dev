@@ -11,15 +11,20 @@ import { InvestmentConclusionCard } from "@/components/overview/investment-concl
 import { DecisionIntelligencePanel } from "@/components/overview/decision-intelligence-panel";
 import { useScreenerData } from "@/hooks/useScreenerData";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
-import { useManagementAnalysis } from "@/hooks/useManagementAnalysis";
-import { useOpportunityAnalysis } from "@/hooks/useOpportunityAnalysis";
-import { useDealAnalysis } from "@/hooks/useDealAnalysis";
+import { useAnalysis } from "@/hooks/useAnalysis";
 import { useTechnicals } from "@/hooks/useTechnicals";
 import { KeyRatioTiles } from "@/components/overview/key-ratio-tiles";
 import { CompanyProfileCard } from "@/components/overview/company-profile-card";
 import { ReanalyzeButton } from "@/components/management/reanalyze-button";
 import { OverviewAnalyzePrompt } from "@/components/overview/overview-analysis";
 import { useOverviewFetch, useOverviewTrigger } from "@/hooks/useOverviewAnalysis";
+import {
+  KeyRatioTilesSkeleton,
+  IMScoreCardSkeleton,
+  TechnicalsCardSkeleton,
+  DecisionIntelligenceSkeleton,
+  CompanyProfileSkeleton,
+} from "@/components/overview/skeletons";
 
 const OVERVIEW_NAV = [
   { id: "section-about",                  label: "About" },
@@ -41,16 +46,17 @@ function OverviewContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "—";
 
-  const { data, error } = useScreenerData(symbol);
+  const { data, error, loading: screenerLoading } = useScreenerData(symbol);
 
   const { data: transcriptCalls } = useTranscriptCalls(symbol === "—" ? "" : symbol);
   const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
 
   const ticker = symbol === "—" ? "" : symbol;
-  const { data: managementInsight } = useManagementAnalysis(ticker);
-  const { data: opportunityInsight } = useOpportunityAnalysis(ticker);
-  const { data: dealInsight } = useDealAnalysis(ticker);
-  const { data: technicalsData } = useTechnicals(symbol === "—" ? "" : symbol);
+  const { getInsight, loading: analysisLoading } = useAnalysis(ticker);
+  const managementInsight = getInsight("management");
+  const opportunityInsight = getInsight("opportunity");
+  const dealInsight = getInsight("deal");
+  const { data: technicalsData, loading: technicalsLoading } = useTechnicals(symbol === "—" ? "" : symbol);
 
   // Overview analysis
   const { data: overviewData, refetch: refetchOverview } = useOverviewFetch(firstCallId);
@@ -100,11 +106,9 @@ function OverviewContent() {
         )}
 
         {/* Metric tiles — full width across top */}
-        {data && (
-          <div className="mb-5">
-            <KeyRatioTiles data={data} />
-          </div>
-        )}
+        <div className="mb-5">
+          {screenerLoading ? <KeyRatioTilesSkeleton /> : data ? <KeyRatioTiles data={data} /> : null}
+        </div>
 
         {/* 2-column layout: 70% left, 30% right — stacks to 1 column on mobile */}
         <div
@@ -121,17 +125,25 @@ function OverviewContent() {
 
             {/* About */}
             <div id="section-about">
-              {data && <CompanyProfileCard data={data} overviewData={overviewData} />}
+              {screenerLoading ? (
+                <CompanyProfileSkeleton />
+              ) : data ? (
+                <CompanyProfileCard data={data} overviewData={overviewData} />
+              ) : null}
             </div>
 
             {/* QC Insight */}
             <div id="section-qc-insight">
-              <IMScoreCard
-                management={managementInsight ?? null}
-                opportunity={opportunityInsight ?? null}
-                deal={dealInsight ?? null}
-                overviewData={overviewData}
-              />
+              {analysisLoading ? (
+                <IMScoreCardSkeleton />
+              ) : (
+                <IMScoreCard
+                  management={managementInsight ?? null}
+                  opportunity={opportunityInsight ?? null}
+                  deal={dealInsight ?? null}
+                  overviewData={overviewData}
+                />
+              )}
             </div>
 
             {/* Overview Analysis — trigger prompt only; data flows into existing section components */}
@@ -150,23 +162,31 @@ function OverviewContent() {
 
             {/* Technicals */}
             <div id="section-technicals">
-              {technicalsData && <TechnicalsCard data={technicalsData} overviewSummary={overviewData?.technical_summary ?? null} />}
+              {technicalsLoading ? (
+                <TechnicalsCardSkeleton />
+              ) : technicalsData ? (
+                <TechnicalsCard data={technicalsData} overviewSummary={overviewData?.technical_summary ?? null} />
+              ) : null}
             </div>
 
           </div>
 
           {/* ── Right column: Decision Intelligence ── */}
           <div className="lg:sticky lg:top-[60px]">
-            <DecisionIntelligencePanel
-              management={managementInsight ?? null}
-              opportunity={opportunityInsight ?? null}
-              deal={dealInsight ?? null}
-              technicalsData={technicalsData ?? null}
-              screenerData={data ?? null}
-              rating={rating}
-              overviewData={overviewData}
-              symbol={symbol}
-            />
+            {(screenerLoading || analysisLoading || technicalsLoading) && !data && !technicalsData ? (
+              <DecisionIntelligenceSkeleton />
+            ) : (
+              <DecisionIntelligencePanel
+                management={managementInsight ?? null}
+                opportunity={opportunityInsight ?? null}
+                deal={dealInsight ?? null}
+                technicalsData={technicalsData ?? null}
+                screenerData={data ?? null}
+                rating={rating}
+                overviewData={overviewData}
+                symbol={symbol}
+              />
+            )}
           </div>
 
         </div>

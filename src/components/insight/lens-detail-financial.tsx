@@ -131,7 +131,7 @@ function KpiStrip({ topSignals, km }: { topSignals: TopSignal[]; km: Record<stri
       signal_id: k, metric: k, label: k.replace(/_/g, " "),
       actual_value: null, guided_value: null, actual_date: null, guided_date: null,
       value_targeted: null, value_at_announcement: null, announcement_date: null, target_date: null,
-      unit: null, delta: null, delta_pct: null, direction: null, impact: null, statement: v,
+      unit: null, delta: null, delta_pct: null, direction: null, impact: null, statement: v, original_statement: null,
     });
   }
 

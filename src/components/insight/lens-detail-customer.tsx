@@ -15,7 +15,7 @@ interface Props {
 function dedup(signals: TopSignal[]): TopSignal[] {
   const seen = new Set<string>();
   return signals.filter((s) => {
-    if (seen.has(s.signal_id)) return false;
+    if (!s.signal_id || seen.has(s.signal_id)) return false;
     seen.add(s.signal_id);
     return true;
   });
@@ -165,7 +165,7 @@ function buildCards(topSignals: TopSignal[], lens: LensDetail): CardItem[] {
   // Fill remaining from all signals
   const otherSigs = dedupedSignals.filter((s) => sigSentiment(s) === "up" && s.impact !== "high");
 
-  const usedIds = new Set<string>();
+  const usedIds = new Set<string | null>();
 
   // Add top 2 positive high-impact
   for (const s of posSigs) {

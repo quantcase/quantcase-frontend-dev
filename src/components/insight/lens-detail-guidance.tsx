@@ -29,10 +29,13 @@ function directionConfig(direction: string | null, impact: string | null) {
   return { label: d.toUpperCase(), color: "var(--qc-ink-2)", bg: "var(--qc-section)", border: "var(--qc-hair)", leftBorder: "var(--qc-hair)" };
 }
 
-function formatValue(value: number | null | undefined | string, unit: string | null): string {
+function formatValue(value: number | null | undefined | string, unit: string | null, isUnresolved = false): string {
+  if (isUnresolved) return "—";
   if (value === null || value === undefined || value === "undefined" || value === 0 && unit === "binary") return "—";
   if (typeof value === "number" && isNaN(value)) return "—";
-  return unit && unit !== "binary" ? `${value} ${unit}` : String(value);
+  // unit "ratio" is a count label (e.g. "6/8"), don't append the unit
+  if (!unit || unit === "binary" || unit === "ratio") return String(value);
+  return `${value} ${unit}`;
 }
 
 function formatDate(dateStr: string | null): string {
@@ -44,9 +47,17 @@ function formatDate(dateStr: string | null): string {
   return `Q${q} FY${String(fy).slice(2)}`;
 }
 
-function deltaLabel(pct: number | null | undefined): string {
-  if (pct == null) return "";
-  return pct > 0 ? `+${pct.toFixed(1)}%` : pct < 0 ? `${pct.toFixed(1)}%` : "flat";
+function deltaLabel(delta: number | null | undefined, deltaPct: number | null | undefined, unit: string | null): string {
+  // For large absolute deltas (revenue in Cr, subscribers in millions), prefer absolute delta
+  // For % metrics, prefer pct-point delta; for ratios/counts, use pct delta
+  if (delta == null && deltaPct == null) return "";
+  if (unit === "%" || unit === "pp") {
+    const v = delta ?? deltaPct;
+    if (v == null) return "";
+    return v > 0 ? `+${v.toFixed(1)} pp` : v < 0 ? `${v.toFixed(1)} pp` : "flat";
+  }
+  if (deltaPct == null) return "";
+  return deltaPct > 0 ? `+${deltaPct.toFixed(1)}%` : deltaPct < 0 ? `${deltaPct.toFixed(1)}%` : "flat";
 }
 
 
@@ -193,7 +204,7 @@ export function LensDetailGuidance({ lens }: Props) {
           {/* Column header row */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "56px 1fr 90px 90px 60px 90px",
+            gridTemplateColumns: "56px 1fr 90px 90px 80px 90px",
             gap: 0,
             borderBottom: "1px solid var(--qc-hair)",
             background: "var(--qc-section)",
@@ -220,21 +231,28 @@ export function LensDetailGuidance({ lens }: Props) {
           {timelineSignals.map((s, i) => {
             const isLast = i === timelineSignals.length - 1;
             const cfg = directionConfig(s.direction, s.impact);
+            const isTracking = (s.direction ?? "").toLowerCase() === "tracking";
             const guidedNum = (s.guided_value !== null && s.guided_value !== undefined && (s.guided_value as unknown) !== "undefined") ? s.guided_value : null;
-            const actualNum = (s.actual_value !== null && s.actual_value !== undefined && (s.actual_value as unknown) !== "undefined") ? s.actual_value : null;
+            const actualNum = (s.actual_value !== null && s.actual_value !== undefined && (s.actual_value as unknown) !== "undefined" && s.actual_value !== 0) ? s.actual_value : null;
             const guidedStr = formatValue(guidedNum, s.unit);
-            const actualStr = formatValue(actualNum, s.unit);
-            const hasDelta = s.delta_pct != null && guidedNum !== null && actualNum !== null;
+            const actualStr = formatValue(actualNum, s.unit, isTracking || actualNum === null);
+            const hasDelta = !isTracking && s.delta_pct != null && guidedNum !== null && actualNum !== null;
             const hasGuidedOrActual = guidedNum !== null || actualNum !== null;
             const dateLabel = s.label ?? formatDate(s.guided_date ?? s.actual_date);
-            const metricTitle = s.metric.replace(/_/g, " ");
+            // Extract a clean metric title from the statement (everything before " guided") or fall back to formatted metric key
+            const statementTitle = s.statement
+              ? s.statement.split(/ guided | at | guided at /i)[0].trim()
+              : null;
+            const metricTitle = statementTitle && statementTitle.length <= 40
+              ? statementTitle
+              : s.metric.replace(/_/g, " ");
 
             return (
               <div
                 key={s.signal_id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "56px 1fr 90px 90px 60px 90px",
+                  gridTemplateColumns: "56px 1fr 90px 90px 80px 90px",
                   gap: 0,
                   borderBottom: !isLast ? "1px solid var(--qc-hair)" : undefined,
                   borderLeft: `3px solid ${cfg.leftBorder}`,
@@ -286,7 +304,7 @@ export function LensDetailGuidance({ lens }: Props) {
                     fontSize: 13, fontWeight: 600, color: hasDelta ? cfg.color : "var(--qc-ink-3)",
                     fontVariantNumeric: "tabular-nums",
                   }}>
-                    {hasDelta ? deltaLabel(s.delta_pct) : ""}
+                    {hasDelta ? deltaLabel(s.delta, s.delta_pct, s.unit) : ""}
                   </span>
                 </div>
 

@@ -29,9 +29,10 @@ function directionConfig(direction: string | null, impact: string | null) {
   return { label: d.toUpperCase(), color: "var(--qc-ink-2)", bg: "var(--qc-section)", border: "var(--qc-hair)", leftBorder: "var(--qc-hair)" };
 }
 
-function formatValue(value: number | null, unit: string | null): string {
-  if (value === null) return "—";
-  return unit ? `${value} ${unit}` : String(value);
+function formatValue(value: number | null | undefined | string, unit: string | null): string {
+  if (value === null || value === undefined || value === "undefined" || value === 0 && unit === "binary") return "—";
+  if (typeof value === "number" && isNaN(value)) return "—";
+  return unit && unit !== "binary" ? `${value} ${unit}` : String(value);
 }
 
 function formatDate(dateStr: string | null): string {
@@ -45,8 +46,7 @@ function formatDate(dateStr: string | null): string {
 
 function deltaLabel(pct: number | null | undefined): string {
   if (pct == null) return "";
-  if (pct === 0) return "flat";
-  return pct > 0 ? `+${pct.toFixed(1)}%` : `${pct.toFixed(1)}%`;
+  return pct > 0 ? `+${pct.toFixed(1)}%` : pct < 0 ? `${pct.toFixed(1)}%` : "flat";
 }
 
 
@@ -220,10 +220,12 @@ export function LensDetailGuidance({ lens }: Props) {
           {timelineSignals.map((s, i) => {
             const isLast = i === timelineSignals.length - 1;
             const cfg = directionConfig(s.direction, s.impact);
-            const guidedStr = formatValue(s.guided_value, s.unit);
-            const actualStr = formatValue(s.actual_value, s.unit);
-            const hasDelta = s.delta_pct != null;
-            const hasGuidedOrActual = s.guided_value !== null || s.actual_value !== null;
+            const guidedNum = (s.guided_value !== null && s.guided_value !== undefined && (s.guided_value as unknown) !== "undefined") ? s.guided_value : null;
+            const actualNum = (s.actual_value !== null && s.actual_value !== undefined && (s.actual_value as unknown) !== "undefined") ? s.actual_value : null;
+            const guidedStr = formatValue(guidedNum, s.unit);
+            const actualStr = formatValue(actualNum, s.unit);
+            const hasDelta = s.delta_pct != null && guidedNum !== null && actualNum !== null;
+            const hasGuidedOrActual = guidedNum !== null || actualNum !== null;
             const dateLabel = s.label ?? formatDate(s.guided_date ?? s.actual_date);
             const metricTitle = s.metric.replace(/_/g, " ");
 
@@ -274,17 +276,17 @@ export function LensDetailGuidance({ lens }: Props) {
                 {/* ACTUAL column */}
                 <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                   <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>
-                    {s.direction?.toLowerCase() === "tracking" ? "" : hasGuidedOrActual ? actualStr : ""}
+                    {hasGuidedOrActual ? actualStr : ""}
                   </span>
                 </div>
 
                 {/* Delta column */}
                 <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                   <span style={{
-                    fontSize: 13, fontWeight: 600, color: (hasDelta && s.direction?.toLowerCase() !== "tracking") ? cfg.color : "var(--qc-ink-3)",
+                    fontSize: 13, fontWeight: 600, color: hasDelta ? cfg.color : "var(--qc-ink-3)",
                     fontVariantNumeric: "tabular-nums",
                   }}>
-                    {(hasDelta && s.direction?.toLowerCase() !== "tracking") ? deltaLabel(s.delta_pct) : ""}
+                    {hasDelta ? deltaLabel(s.delta_pct) : ""}
                   </span>
                 </div>
 

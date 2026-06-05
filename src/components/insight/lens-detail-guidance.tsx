@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
@@ -61,8 +63,121 @@ function deltaLabel(delta: number | null | undefined, deltaPct: number | null | 
 }
 
 
+// ── Signal detail tooltip ────────────────────────────────────────────────────
+
+interface TooltipProps {
+  signal: TopSignal;
+  anchorRect: DOMRect;
+  dirCfg: ReturnType<typeof directionConfig>;
+  metricTitle: string;
+  guidedStr: string;
+  actualStr: string;
+  deltaStr: string;
+  dateLabel: string;
+}
+
+function SignalTooltip({ signal: s, anchorRect, dirCfg, metricTitle, guidedStr, actualStr, deltaStr, dateLabel }: TooltipProps) {
+  const WIDTH = 420;
+  const GAP = 8;
+  const vpW = typeof window !== "undefined" ? window.innerWidth : 1200;
+  const vpH = typeof window !== "undefined" ? window.innerHeight : 800;
+
+  const left = Math.min(Math.max(anchorRect.left, 8), vpW - WIDTH - 8);
+
+  const ESTIMATED_HEIGHT = 200;
+  const spaceBelow = vpH - anchorRect.bottom - GAP;
+  const showAbove = spaceBelow < ESTIMATED_HEIGHT && anchorRect.top > ESTIMATED_HEIGHT;
+  const top = showAbove ? anchorRect.top - ESTIMATED_HEIGHT - GAP : anchorRect.bottom + GAP;
+
+  const cells: Array<{ label: string; value: string; accent?: boolean }> = [];
+  if (dateLabel) cells.push({ label: "Period", value: dateLabel });
+  if (s.announcement_date) cells.push({ label: "Announced", value: s.announcement_date });
+  if (guidedStr && guidedStr !== "—") cells.push({ label: "Guided", value: guidedStr, accent: true });
+  if (s.target_date) cells.push({ label: "Target date", value: formatDate(s.target_date) });
+  if (actualStr && actualStr !== "—") cells.push({ label: "Actual", value: actualStr, accent: true });
+  if (s.actual_date) cells.push({ label: "Actual date", value: formatDate(s.actual_date) });
+  if (s.value_at_announcement != null) cells.push({ label: "At announcement", value: `${s.value_at_announcement} ${s.unit ?? ""}`.trim() });
+  if (deltaStr) cells.push({ label: "Delta", value: deltaStr, accent: true });
+  if (s.impact) cells.push({ label: "Impact", value: s.impact });
+
+  // Dark palette constants
+  const BG       = "#16181d";
+  const BORDER   = "rgba(255,255,255,0.08)";
+  const DIVIDER  = "rgba(255,255,255,0.07)";
+  const MUTED    = "rgba(255,255,255,0.38)";
+  const BODY     = "rgba(255,255,255,0.72)";
+  const WHITE    = "#ffffff";
+
+  const content = (
+    <div style={{
+      position: "fixed", top, left, width: WIDTH, zIndex: 9999,
+      background: BG,
+      border: `1px solid ${BORDER}`,
+      borderRadius: 12,
+      boxShadow: "0 16px 48px rgba(0,0,0,0.45)",
+      overflow: "hidden",
+      pointerEvents: "none",
+    }}>
+      {/* Header */}
+      <div style={{ padding: "12px 16px 11px", borderBottom: `1px solid ${DIVIDER}`, display: "flex", alignItems: "center", gap: 10 }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: WHITE, margin: 0, flex: 1, letterSpacing: "-0.01em" }}>{metricTitle}</p>
+        <span style={{
+          fontSize: 10, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase",
+          color: dirCfg.color, background: "rgba(255,255,255,0.07)", border: `1px solid rgba(255,255,255,0.12)`,
+          borderRadius: 5, padding: "2px 8px", flexShrink: 0,
+        }}>{dirCfg.label}</span>
+        {deltaStr && <span style={{ fontSize: 13, fontWeight: 600, color: dirCfg.color, flexShrink: 0 }}>{deltaStr}</span>}
+      </div>
+
+      {/* Statement */}
+      {s.statement && (
+        <div style={{ padding: "10px 16px 11px", borderBottom: `1px solid ${DIVIDER}` }}>
+          <p style={{ fontSize: 12, color: BODY, margin: 0, lineHeight: 1.6 }}>{s.statement}</p>
+        </div>
+      )}
+
+      {/* Original statement */}
+      {s.original_statement && (
+        <div style={{ padding: "10px 16px 11px", borderBottom: `1px solid ${DIVIDER}` }}>
+          <p style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.09em", color: MUTED, margin: "0 0 4px" }}>Original statement</p>
+          <p style={{ fontSize: 12, color: BODY, margin: 0, lineHeight: 1.6, fontStyle: "italic" }}>{s.original_statement}</p>
+        </div>
+      )}
+
+      {/* 2-col data grid */}
+      {cells.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", padding: "12px 16px", gap: "10px 20px" }}>
+          {cells.map(({ label, value, accent }) => (
+            <div key={label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <span style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.09em", color: MUTED }}>{label}</span>
+              <span style={{ fontSize: 13, fontWeight: accent ? 600 : 400, color: accent ? WHITE : BODY, fontVariantNumeric: "tabular-nums", letterSpacing: accent ? "-0.01em" : undefined }}>{value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  return typeof document !== "undefined" ? createPortal(content, document.body) : null;
+}
+
+// ── Main component ───────────────────────────────────────────────────────────
+
+type TooltipState = { signal: TopSignal; rect: DOMRect; metricTitle: string; guidedStr: string; actualStr: string; deltaStr: string; dateLabel: string };
+
 export function LensDetailGuidance({ lens }: Props) {
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const topSignals: TopSignal[] = lens.top_signals ?? [];
+
+  const showTooltip = useCallback((state: TooltipState) => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    setTooltip(state);
+  }, []);
+
+  const hideTooltip = useCallback(() => {
+    hideTimer.current = setTimeout(() => setTooltip(null), 120);
+  }, []);
 
   // Split headline tiles from timeline signals
   const headlineHitRate = topSignals.find((s) => s.metric === "HEADLINE_HIT_RATE");
@@ -232,13 +347,16 @@ export function LensDetailGuidance({ lens }: Props) {
             const isLast = i === timelineSignals.length - 1;
             const cfg = directionConfig(s.direction, s.impact);
             const isTracking = (s.direction ?? "").toLowerCase() === "tracking";
-            const guidedNum = (s.guided_value !== null && s.guided_value !== undefined && (s.guided_value as unknown) !== "undefined") ? s.guided_value : null;
+            // value_targeted / value_at_announcement are the authoritative keys; fall back to guided_value
+            const guidedRaw = s.value_targeted ?? s.value_at_announcement ?? s.guided_value;
+            const guidedNum = (guidedRaw !== null && guidedRaw !== undefined && (guidedRaw as unknown) !== "undefined") ? guidedRaw : null;
             const actualNum = (s.actual_value !== null && s.actual_value !== undefined && (s.actual_value as unknown) !== "undefined" && s.actual_value !== 0) ? s.actual_value : null;
             const guidedStr = formatValue(guidedNum, s.unit);
             const actualStr = formatValue(actualNum, s.unit, isTracking || actualNum === null);
             const hasDelta = !isTracking && s.delta_pct != null && guidedNum !== null && actualNum !== null;
             const hasGuidedOrActual = guidedNum !== null || actualNum !== null;
-            const dateLabel = s.label ?? formatDate(s.guided_date ?? s.actual_date);
+            // announcement_date is the period label (e.g. "Q3 FY26"); fall back to target_date → guided_date → actual_date
+            const dateLabel = s.announcement_date ?? s.label ?? formatDate(s.target_date ?? s.guided_date ?? s.actual_date);
             // Extract a clean metric title from the statement (everything before " guided") or fall back to formatted metric key
             const statementTitle = s.statement
               ? s.statement.split(/ guided | at | guided at /i)[0].trim()
@@ -249,7 +367,12 @@ export function LensDetailGuidance({ lens }: Props) {
 
             return (
               <div
-                key={s.signal_id}
+                key={s.signal_id ?? `${s.metric}-${i}`}
+                onMouseEnter={(e) => {
+                  const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                  showTooltip({ signal: s, rect, metricTitle, guidedStr, actualStr, deltaStr: hasDelta ? deltaLabel(s.delta, s.delta_pct, s.unit) : "", dateLabel });
+                }}
+                onMouseLeave={hideTooltip}
                 style={{
                   display: "grid",
                   gridTemplateColumns: "56px 1fr 90px 90px 80px 90px",
@@ -330,6 +453,20 @@ export function LensDetailGuidance({ lens }: Props) {
           title={lens.name}
           body={lens.takeaway}
           metrics={[]}
+        />
+      )}
+
+      {/* Signal detail tooltip */}
+      {tooltip && (
+        <SignalTooltip
+          signal={tooltip.signal}
+          anchorRect={tooltip.rect}
+          dirCfg={directionConfig(tooltip.signal.direction, tooltip.signal.impact)}
+          metricTitle={tooltip.metricTitle}
+          guidedStr={tooltip.guidedStr}
+          actualStr={tooltip.actualStr}
+          deltaStr={tooltip.deltaStr}
+          dateLabel={tooltip.dateLabel}
         />
       )}
     </div>

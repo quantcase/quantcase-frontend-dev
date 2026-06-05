@@ -47,8 +47,9 @@ interface FinRow {
 function dedup(signals: TopSignal[]): TopSignal[] {
   const seen = new Set<string>();
   return signals.filter((s) => {
-    if (seen.has(s.signal_id)) return false;
-    seen.add(s.signal_id);
+    const key = s.signal_id ?? s.metric;
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
 }
@@ -129,6 +130,7 @@ function KpiStrip({ topSignals, km }: { topSignals: TopSignal[]; km: Record<stri
     tiles.push({
       signal_id: k, metric: k, label: k.replace(/_/g, " "),
       actual_value: null, guided_value: null, actual_date: null, guided_date: null,
+      value_targeted: null, value_at_announcement: null, announcement_date: null, target_date: null,
       unit: null, delta: null, delta_pct: null, direction: null, impact: null, statement: v,
     });
   }

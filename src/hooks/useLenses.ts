@@ -2,11 +2,15 @@ import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/constants";
 
 export interface TopSignal {
-  signal_id: string;
+  signal_id: string | null;
   metric: string;
   label: string;
   guided_value: number | null;
   guided_date: string | null;
+  value_targeted: number | null;
+  value_at_announcement: number | null;
+  announcement_date: string | null;
+  target_date: string | null;
   actual_value: number | null;
   actual_date: string | null;
   unit: string | null;
@@ -15,6 +19,7 @@ export interface TopSignal {
   direction: string | null;
   impact: string | null;
   statement: string | null;
+  original_statement: string | null;
 }
 
 export interface LensDetail {

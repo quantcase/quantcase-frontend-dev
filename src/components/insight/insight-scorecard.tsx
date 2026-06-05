@@ -510,72 +510,54 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
             background: "var(--qc-card)",
             border: "1px solid var(--qc-hair)",
             display: "flex", flexDirection: "column",
-            borderBottomLeftRadius: 14,
-            borderBottomRightRadius: 14,
           }}
         >
           {/* Top: radar + context text */}
-          <div className="flex flex-col sm:flex-row items-center" style={{ flex: 1, padding: "8px 0 0" }}>
+          <div className="flex flex-col sm:flex-row" style={{ flex: 1, padding: "28px 16px 0" }}>
 
-            {/* Radar */}
-            <div className="flex items-center justify-center w-full sm:w-auto" style={{ flexShrink: 0, padding: "16px 0 16px 16px" }}>
-              <div className="w-[220px] h-[220px] sm:w-[260px] sm:h-[260px]" style={{ position: "relative" }}>
-                <VertexTooltip lens={hoveredLens} visible={hoveredVertex !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
-                <SVGRadar
-                  data={radarData}
-                  overallScore={overallScore}
-                  insightType={insight.type}
-                  hoveredIndex={hoveredVertex}
-                  onHoverVertex={(i, pctX, pctY) => {
-                    setHoveredVertex(i);
-                    if (i !== null && pctX !== undefined && pctY !== undefined) {
-                      setTooltipPos({ pctX, pctY });
-                    }
-                  }}
-                />
-              </div>
+            {/* Radar — horizontal padding absorbs left/right axis label overflow */}
+            <div style={{ flexShrink: 0, width: 300, height: 260, position: "relative", overflow: "visible", padding: "0 28px" }}>
+              <VertexTooltip lens={hoveredLens} visible={hoveredVertex !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
+              <SVGRadar
+                data={radarData}
+                overallScore={overallScore}
+                insightType={insight.type}
+                hoveredIndex={hoveredVertex}
+                onHoverVertex={(i, pctX, pctY) => {
+                  setHoveredVertex(i);
+                  if (i !== null && pctX !== undefined && pctY !== undefined) {
+                    setTooltipPos({ pctX, pctY });
+                  }
+                }}
+              />
             </div>
 
-            {/* Right of radar: band pill + thesis */}
-            <div className="w-full" style={{ flex: 1, padding: "20px 20px 20px 16px" }}>
-              <span style={{
-                display: "inline-block", fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)",
-                letterSpacing: "var(--qc-track-eyebrow)", fontFamily: "var(--qc-font-sans)",
-                color: bandColor, background: bandBg, border: `1px solid ${bandColor}`,
-                borderRadius: 4, padding: "2px 10px", textTransform: "uppercase", marginBottom: 12,
-              }}>
-                {bandLabel}
-              </span>
+            {/* Right of radar: thesis section */}
+            <div style={{ flex: 1, padding: "4px 24px 16px 12px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <MonoLabel size={9} tracking="0.16em" color="var(--qc-ink-3)" style={{ marginBottom: 8 }}>
+                THESIS
+              </MonoLabel>
 
               <h3 style={{
-                fontSize: "var(--qc-fz-16)", fontWeight: "var(--qc-w-regular)", lineHeight: 1.4, margin: 0,
-                color: "var(--qc-ink)", fontFamily: "var(--qc-font-serif)",
+                fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-medium)", lineHeight: 1.35, margin: "0 0 12px",
+                color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)", letterSpacing: "-0.01em",
               }}>
                 {insight.subtitle && renderMd(insight.subtitle)}
               </h3>
 
-              {insight.analyzed_at && (
-                <p style={{ marginTop: 8, fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-3)", lineHeight: 1.5, fontFamily: "var(--qc-font-sans)" }}>
-                  {insight.type.charAt(0).toUpperCase() + insight.type.slice(1)} · Analyzed {new Date(insight.analyzed_at).toLocaleDateString("en-IN", { month: "short", year: "2-digit" })}
+              {insight.thesis && (
+                <p style={{
+                  margin: 0,
+                  fontSize: "var(--qc-fz-11)",
+                  color: "var(--qc-ink-3)",
+                  lineHeight: 1.7,
+                  fontFamily: "var(--qc-font-sans)",
+                  borderLeft: "2px solid var(--qc-hair)",
+                  paddingLeft: 10,
+                }}>
+                  {renderMd(insight.thesis)}
                 </p>
               )}
-
-              {/* Compact legend */}
-              <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 5 }}>
-                {[
-                  { label: "Strong ≥ 80%",    tier: TIER_COLORS.strong },
-                  { label: "Moderate 50–79%", tier: TIER_COLORS.moderate },
-                  { label: "Weak < 50%",      tier: TIER_COLORS.weak },
-                ].map((row) => (
-                  <div key={row.label} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <span style={{
-                      width: 8, height: 8, borderRadius: 2, flexShrink: 0,
-                      background: row.tier.soft, border: `1.5px solid ${row.tier.hex}`,
-                    }} />
-                    <span style={{ fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-3)", letterSpacing: "var(--qc-track-mono)", fontFamily: "var(--qc-font-sans)" }}>{row.label}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
 

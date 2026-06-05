@@ -132,6 +132,10 @@
 .animate-float-slow { animation: floatSlowKF 9s ease-in-out infinite; }
 .animate-pulse-soft { animation: pulseSoftKF 2.4s ease-in-out infinite; }
 
+/* Remove focus rings globally */
+*:focus { outline: none; }
+*:focus-visible { outline: none; box-shadow: none; }
+
 /* Landing CTA button (ink bg → gold on hover) */
 .lp-cta-btn {
   background: #0E1A2B;

@@ -84,18 +84,7 @@ function OverviewContent() {
     <>
     <ScreenerPageShell
       navItems={OVERVIEW_NAV}
-      headerRight={
-        overviewData ? (
-          <ReanalyzeButton
-            isAnalyzing={isAnalyzing}
-            aggregateStatus={jobStatus}
-            progress={progress}
-            analyzedAt={overviewData.analyzed_at ?? null}
-            analyzeError={analyzeError}
-            onClick={trigger}
-          />
-        ) : undefined
-      }
+      headerRight={undefined}
     >
       <div className="pb-8 pt-6">
 

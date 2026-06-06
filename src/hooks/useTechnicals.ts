@@ -6,7 +6,7 @@ import type { TechnicalsResponse, TechnicalsApiResponse, TechnicalsDerived } fro
 function unwrapDI(raw: TechnicalsApiResponse["decisionIntelligence"]): TechnicalsResponse["decisionIntelligence"] {
   if (!raw) return undefined;
   if ("decisionIntelligence" in raw) return raw.decisionIntelligence;
-  return raw;
+  return raw as TechnicalsResponse["decisionIntelligence"];
 }
 
 function computeDerived(data: TechnicalsResponse): TechnicalsDerived {

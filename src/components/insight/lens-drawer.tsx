@@ -62,7 +62,7 @@ function LensDetailView({ lens, ticker, isBfsi }: { lens: LensDetail; ticker?: s
     case "earnings-forecast":
       return <LensDetailEarningsForecast lens={lens} ticker={ticker} />;
     case "pe-rerating-potential":
-      return <LensDetailPeRerating lens={lens} />;
+      return <LensDetailPeRerating lens={lens} ticker={ticker} />;
     case "earning-quality":
       return <LensDetailEarningQuality lens={lens} ticker={ticker} />;
     case "target-price-matrix":

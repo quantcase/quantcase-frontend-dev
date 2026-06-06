@@ -1,40 +1,110 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import type { LensDetail } from "@/hooks/useLenses";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
+import { BACKEND_URL } from "@/lib/constants";
 
-interface Props {
-  lens: LensDetail;
+// ─── API types ────────────────────────────────────────────────────────────────
+
+interface PeScenario {
+  scenario: "bear" | "base" | "bull";
+  pe_low: number | null;
+  pe_high: number | null;
+  pe_range_label: string;
+  return_low: number | null;
+  return_high: number | null;
+  return_label: string | null;
+  what_happens: string;
 }
 
-// ─── Scenario data derived from lens ─────────────────────────────────────────
-
-interface Scenario {
-  key: "bear" | "base" | "bull";
+interface Catalyst {
   label: string;
-  icon: string;
-  peRange: string;
-  returnRange: string;
-  returnPositive: boolean;
-  vsText: string;
-  narrative: string;
-  color: string;
-  borderColor: string;
-  bg: string;
-  pillBg: string;
-  pillColor: string;
+  statement: string;
 }
 
-function formatPeRange(lo: number | null | undefined, hi: number | null | undefined): string {
+interface PeReratingData {
+  ticker: string;
+  call_id: string;
+  available: boolean;
+  is_stale: boolean;
+  computed_at: string | null;
+  score: number;
+  status: string | null;
+  z_score: number | null;
+  takeaway: string | null;
+  highlights: string[];
+  risks: string[];
+  current_pe: number | null;
+  current_eps: number | null;
+  current_price: number | null;
+  pe_as_of: string | null;
+  pe_3y: {
+    min: number; max: number; avg: number;
+    p25: number; p50: number; p75: number;
+  } | null;
+  fair_value_zone: {
+    cheap_below: number;
+    fair_low: number;
+    fair_high: number;
+    expensive_above: number;
+    midpoint: number;
+  } | null;
+  scenarios: PeScenario[];
+  summary_bar: {
+    base_pe_range_label: string | null;
+    base_pe_low: number | null;
+    base_pe_high: number | null;
+    base_return_label: string | null;
+    holding_years: number | null;
+    current_pe: number | null;
+  } | null;
+  narrative: {
+    score: number;
+    label: string;
+    description: string | null;
+  } | null;
+  positive_catalysts: Catalyst[];
+  negative_catalysts: Catalyst[];
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
+function usePeRerating(ticker: string | undefined) {
+  const [data, setData] = useState<PeReratingData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!ticker?.trim()) return;
+    setLoading(true);
+    setError(null);
+    fetch(`${BACKEND_URL}/api/deal/pe-rerating-potential?ticker=${ticker}`)
+      .then((r) => r.json())
+      .then((res: { success: boolean; data: PeReratingData }) => {
+        setData(res.data ?? null);
+        setLoading(false);
+      })
+      .catch((e) => {
+        setError(String(e));
+        setLoading(false);
+      });
+  }, [ticker]);
+
+  return { data, loading, error };
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmtPe(lo: number | null, hi: number | null): string {
   if (lo == null && hi == null) return "—";
   if (lo != null && hi != null) return `${lo}–${hi}x`;
   if (lo != null) return `${lo}x`;
   return `${hi}x`;
 }
 
-function formatReturnRange(lo: number | null | undefined, hi: number | null | undefined): string {
+function fmtReturn(lo: number | null, hi: number | null): string {
   if (lo == null && hi == null) return "—";
   const fmt = (n: number) => `${n >= 0 ? "+" : ""}${n}%`;
   if (lo != null && hi != null) return `${fmt(lo)} to ${fmt(hi)}`;
@@ -42,112 +112,65 @@ function formatReturnRange(lo: number | null | undefined, hi: number | null | un
   return fmt(hi!);
 }
 
-function buildScenarios(lens: LensDetail): Scenario[] {
-  const sig = lens.top_signals ?? [];
+// ─── Scenario config ──────────────────────────────────────────────────────────
 
-  const findSig = (metric: string) => sig.find((s) => s.metric === metric);
+const SCENARIO_CONFIG = {
+  bear: {
+    label: "Bear Case",
+    icon: "🐻",
+    color: "var(--qc-down)",
+    borderColor: "rgba(220,38,38,0.30)",
+    bg: "rgba(220,38,38,0.04)",
+    pillBg: "rgba(220,38,38,0.12)",
+    pillColor: "var(--qc-down)",
+  },
+  base: {
+    label: "Base Case",
+    icon: "⊙",
+    color: "var(--qc-blue)",
+    borderColor: "rgba(59,130,246,0.30)",
+    bg: "rgba(59,130,246,0.04)",
+    pillBg: "rgba(59,130,246,0.12)",
+    pillColor: "var(--qc-blue)",
+  },
+  bull: {
+    label: "Bull Case",
+    icon: "🐂",
+    color: "var(--qc-up)",
+    borderColor: "rgba(31,122,74,0.30)",
+    bg: "rgba(31,122,74,0.04)",
+    pillBg: "rgba(31,122,74,0.12)",
+    pillColor: "var(--qc-up)",
+  },
+} as const;
 
-  // Dynamic P/E ranges: actual_value = range low, guided_value = range high
-  const bearPe   = findSig("SCENARIO_BEAR_PE_RANGE");
-  const basePe   = findSig("SCENARIO_BASE_PE_RANGE");
-  const bullPe   = findSig("SCENARIO_BULL_PE_RANGE");
-  const bearRet  = findSig("SCENARIO_BEAR_RETURN");
-  const baseRet  = findSig("SCENARIO_BASE_RETURN");
-  const bullRet  = findSig("SCENARIO_BULL_RETURN");
+// ─── MarketPerceptionPanel ────────────────────────────────────────────────────
 
-  const bearPeRange  = formatPeRange(bearPe?.actual_value, bearPe?.guided_value);
-  const basePeRange  = formatPeRange(basePe?.actual_value, basePe?.guided_value);
-  const bullPeRange  = formatPeRange(bullPe?.actual_value, bullPe?.guided_value);
-  const bearRetRange = formatReturnRange(bearRet?.actual_value, bearRet?.guided_value);
-  const baseRetRange = formatReturnRange(baseRet?.actual_value, baseRet?.guided_value);
-  const bullRetRange = formatReturnRange(bullRet?.actual_value, bullRet?.guided_value);
+function MarketPerceptionPanel({ data }: { data: PeReratingData }) {
+  const fvz = data.fair_value_zone;
+  const pe3y = data.pe_3y;
+  const currentPe = data.current_pe;
 
-  const bullNarrative = lens.highlights?.[0] ?? "Strong execution on guidance targets accelerates growth. Premium re-rating on sustained delivery.";
-  const baseNarrative = lens.highlights?.[1] ?? "Steady growth sustains with stable profitability. Market re-rates on execution visibility.";
-  const bearNarrative = lens.risks?.[0] ?? "Growth decelerates below guidance. Market de-rates on earnings quality concerns.";
+  // Position the marker along the P/E range
+  let markerPct = 50;
+  if (fvz && currentPe != null) {
+    const rangeMin = fvz.cheap_below * 0.7;
+    const rangeMax = fvz.expensive_above * 1.3;
+    markerPct = Math.min(95, Math.max(5, ((currentPe - rangeMin) / (rangeMax - rangeMin)) * 100));
+  }
 
-  return [
-    {
-      key: "bear",
-      label: "Bear Case",
-      icon: "🐻",
-      peRange: bearPeRange,
-      returnRange: bearRetRange,
-      returnPositive: false,
-      vsText: "vs current multiples",
-      narrative: bearNarrative,
-      color: "var(--qc-down)",
-      borderColor: "rgba(220,38,38,0.30)",
-      bg: "rgba(220,38,38,0.04)",
-      pillBg: "rgba(220,38,38,0.12)",
-      pillColor: "var(--qc-down)",
-    },
-    {
-      key: "base",
-      label: "Base Case",
-      icon: "⊙",
-      peRange: basePeRange,
-      returnRange: baseRetRange,
-      returnPositive: (baseRet?.actual_value ?? 0) >= 0,
-      vsText: "vs current multiples",
-      narrative: baseNarrative,
-      color: "var(--qc-blue)",
-      borderColor: "rgba(59,130,246,0.30)",
-      bg: "rgba(59,130,246,0.04)",
-      pillBg: "rgba(59,130,246,0.12)",
-      pillColor: "var(--qc-blue)",
-    },
-    {
-      key: "bull",
-      label: "Bull Case",
-      icon: "🐂",
-      peRange: bullPeRange,
-      returnRange: bullRetRange,
-      returnPositive: true,
-      vsText: "vs current multiples",
-      narrative: bullNarrative,
-      color: "var(--qc-up)",
-      borderColor: "rgba(31,122,74,0.30)",
-      bg: "rgba(31,122,74,0.04)",
-      pillBg: "rgba(31,122,74,0.12)",
-      pillColor: "var(--qc-up)",
-    },
-  ];
-}
+  // Zone label
+  let peZone = "Fair";
+  if (fvz && currentPe != null) {
+    if (currentPe < fvz.cheap_below) peZone = "Cheap";
+    else if (currentPe > fvz.expensive_above) peZone = "Expensive";
+    else peZone = "Fair Value";
+  }
 
-// ─── Left panel: Current Market Perception ────────────────────────────────────
-
-function MarketPerceptionPanel({ lens }: { lens: LensDetail }) {
-  const sig = lens.top_signals ?? [];
-
-  // key_metrics is always empty for deal lenses — use top 4 high-impact signals
-  const metricGrid = sig
-    .filter((s) => s.actual_value != null && s.impact === "high")
-    .slice(0, 4)
-    .map((s) => {
-      const val = s.unit === "Cr"
-        ? `₹${s.actual_value} Cr`
-        : s.unit === "%"
-        ? `${s.actual_value}%`
-        : s.unit
-        ? `${s.actual_value} ${s.unit}`
-        : `${s.actual_value}`;
-      return {
-        label: s.label.replace(/\(.*?\)/, "").trim().toUpperCase().slice(0, 18),
-        value: val,
-        positive: (s.direction === "beat" || s.direction === "tracking") || (s.actual_value ?? 0) > 0,
-      };
-    });
-
-  // Score-derived P/E zone marker
-  const markerPct = Math.min(95, Math.max(5, (lens.score / 100) * 100));
-  const peZone = lens.score >= 70 ? "Fair–Premium" : lens.score >= 50 ? "Fair" : "Discount";
-
-  // Headline — first sentence of takeaway is now a short 2-4 word phrase per backend guidelines
-  const headlineSentence = lens.takeaway?.split(".")[0]?.trim() ?? "";
-  const headline = headlineSentence.length > 0 && headlineSentence.length <= 60
+  const headlineSentence = data.takeaway?.split(".")?.[0]?.trim() ?? "";
+  const headline = headlineSentence.length > 0 && headlineSentence.length <= 80
     ? headlineSentence
-    : (lens.highlights?.[0] ?? lens.description);
+    : (data.highlights?.[0] ?? "Current market perception");
 
   return (
     <div style={{
@@ -169,59 +192,86 @@ function MarketPerceptionPanel({ lens }: { lens: LensDetail }) {
         <h3 style={{ fontSize: 16, fontWeight: 400, color: "var(--qc-ink)", margin: "0 0 8px", lineHeight: 1.35 }}>
           {headline}
         </h3>
-        <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.6 }}>
-          Score: {lens.score}/100 — {lens.status ?? "Moderate"} re-rating signal
-        </p>
+        {currentPe != null && (
+          <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.6 }}>
+            Current P/E: <strong style={{ color: "var(--qc-ink)" }}>{currentPe}x</strong>
+            {data.current_price != null && <> · ₹{data.current_price}</>}
+          </p>
+        )}
       </div>
 
-      {/* Key metrics mini grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, paddingTop: 10, borderTop: "1px solid var(--qc-hair)" }}>
-        {metricGrid.map((m) => (
-          <div key={m.label}>
-            <p style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>{m.label}</p>
-            <p style={{ fontSize: 13, fontWeight: 700, color: m.positive ? "var(--qc-up)" : "var(--qc-ink)", margin: 0 }}>{m.value}</p>
-          </div>
-        ))}
-      </div>
+      {/* 3Y P/E range mini stats */}
+      {pe3y && (
+        <div style={{
+          display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 8, paddingTop: 10, borderTop: "1px solid var(--qc-hair)",
+        }}>
+          {[
+            { label: "3Y Min", value: `${pe3y.min}x` },
+            { label: "3Y Avg", value: `${pe3y.avg}x` },
+            { label: "3Y Max", value: `${pe3y.max}x` },
+          ].map((m) => (
+            <div key={m.label}>
+              <p style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>{m.label}</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>{m.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Fair value zone slider */}
-      <div style={{ paddingTop: 10, borderTop: "1px solid var(--qc-hair)" }}>
-        <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 10px" }}>
-          Fair Value Zone (P/E)
-        </p>
-        <div style={{ position: "relative", height: 8, borderRadius: 99, background: `linear-gradient(to right, var(--qc-up), var(--qc-warn), var(--qc-down))`, marginBottom: 8 }}>
-          <motion.div
-            initial={{ left: 0 }}
-            animate={{ left: `${markerPct}%` }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            style={{
-              position: "absolute", top: "50%", transform: "translate(-50%, -50%)",
-              width: 16, height: 16, borderRadius: "50%",
-              background: "var(--qc-ink)", border: "2px solid var(--qc-card)",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
-            }}
-          />
+      {fvz && (
+        <div style={{ paddingTop: 10, borderTop: "1px solid var(--qc-hair)" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 10px" }}>
+            Fair Value Zone (P/E)
+          </p>
+          <div style={{ position: "relative", height: 8, borderRadius: 99, background: "linear-gradient(to right, var(--qc-up), var(--qc-warn), var(--qc-down))", marginBottom: 8 }}>
+            <motion.div
+              initial={{ left: 0 }}
+              animate={{ left: `${markerPct}%` }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              style={{
+                position: "absolute", top: "50%", transform: "translate(-50%, -50%)",
+                width: 16, height: 16, borderRadius: "50%",
+                background: "var(--qc-ink)", border: "2px solid var(--qc-card)",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+              }}
+            />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+            <span style={{ fontSize: 10, color: "var(--qc-up)" }}>Cheap &lt;{fvz.cheap_below}x</span>
+            <span style={{ fontSize: 10, color: "var(--qc-warn)" }}>Fair {fvz.fair_low}–{fvz.fair_high}x</span>
+            <span style={{ fontSize: 10, color: "var(--qc-down)" }}>Expensive &gt;{fvz.expensive_above}x</span>
+          </div>
+          {currentPe != null && (
+            <span style={{
+              fontSize: 12, fontWeight: 600, color: "var(--qc-ink)",
+              background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+              borderRadius: 6, padding: "4px 12px", display: "inline-block",
+            }}>
+              Current: {currentPe}x
+            </span>
+          )}
+          <span style={{
+            fontSize: 12, fontWeight: 600, color: "var(--qc-ink)",
+            background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+            borderRadius: 6, padding: "4px 12px", display: "inline-block", marginLeft: 8,
+          }}>
+            Zone: {peZone}
+          </span>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-          <span style={{ fontSize: 10, color: "var(--qc-up)" }}>Cheap &lt;18x</span>
-          <span style={{ fontSize: 10, color: "var(--qc-golden-ink, var(--qc-warn))" }}>Fair 20–26x</span>
-          <span style={{ fontSize: 10, color: "var(--qc-down)" }}>Expensive &gt;28x</span>
-        </div>
-        <span style={{
-          fontSize: 12, fontWeight: 600, color: "var(--qc-ink)",
-          background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
-          borderRadius: 6, padding: "4px 12px", display: "inline-block",
-        }}>
-          Zone: {peZone}
-        </span>
-      </div>
+      )}
     </div>
   );
 }
 
-// ─── Center panel: Scenario Engine ───────────────────────────────────────────
+// ─── ScenarioCard ─────────────────────────────────────────────────────────────
 
-function ScenarioCard({ scenario, delay }: { scenario: Scenario; delay: number }) {
+function ScenarioCard({ s, delay }: { s: PeScenario; delay: number }) {
+  const cfg = SCENARIO_CONFIG[s.scenario];
+  const peRange = fmtPe(s.pe_low, s.pe_high);
+  const retRange = fmtReturn(s.return_low, s.return_high);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -229,54 +279,57 @@ function ScenarioCard({ scenario, delay }: { scenario: Scenario; delay: number }
       transition={{ delay, duration: 0.3 }}
       style={{
         flex: 1,
-        border: `1px solid ${scenario.borderColor}`,
+        border: `1px solid ${cfg.borderColor}`,
         borderRadius: 8,
         overflow: "hidden",
-        background: scenario.bg,
+        background: cfg.bg,
         display: "flex",
         flexDirection: "column",
       }}
     >
-      {/* Scenario header */}
-      <div style={{ padding: "10px 12px 8px", borderBottom: `1px solid ${scenario.borderColor}` }}>
+      <div style={{ padding: "10px 12px 8px", borderBottom: `1px solid ${cfg.borderColor}` }}>
         <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 6 }}>
-          <span style={{ fontSize: 13 }}>{scenario.icon}</span>
-          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: scenario.color }}>
-            {scenario.label}
+          <span style={{ fontSize: 13 }}>{cfg.icon}</span>
+          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: cfg.color }}>
+            {cfg.label}
           </span>
         </div>
-        <p style={{ fontSize: 26, fontWeight: 700, color: scenario.color, margin: "0 0 6px", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-          {scenario.peRange}
+        <p style={{ fontSize: 26, fontWeight: 700, color: cfg.color, margin: "0 0 6px", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+          {peRange}
         </p>
-        {/* Return pill */}
         <span style={{
           fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 4,
-          background: scenario.pillBg, color: scenario.pillColor,
+          background: cfg.pillBg, color: cfg.pillColor,
           display: "inline-block", marginBottom: 4,
         }}>
-          {scenario.returnRange}
+          {retRange}
         </span>
-        <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0 }}>{scenario.vsText}</p>
+        <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0 }}>vs current {data_currentPe(s)}</p>
       </div>
 
-      {/* What happens */}
       <div style={{ padding: "10px 12px", flex: 1 }}>
-        <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: scenario.color, margin: "0 0 6px" }}>
+        <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: cfg.color, margin: "0 0 6px" }}>
           What happens?
         </p>
         <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.6 }}>
-          {scenario.narrative}
+          {s.what_happens}
         </p>
       </div>
     </motion.div>
   );
 }
 
-function ScenarioEnginePanel({ lens }: { lens: LensDetail }) {
-  const scenarios = buildScenarios(lens);
+function data_currentPe(_s: PeScenario): string {
+  return "P/E";
+}
 
-  // Context note derived from risks/highlights
-  const footerNote = lens.risks?.[0] ?? lens.description ?? "Re-rating potential depends on execution and macro conditions.";
+function ScenarioEnginePanel({ data }: { data: PeReratingData }) {
+  const bear = data.scenarios.find((s) => s.scenario === "bear");
+  const base = data.scenarios.find((s) => s.scenario === "base");
+  const bull = data.scenarios.find((s) => s.scenario === "bull");
+  const ordered = [bear, base, bull].filter((s): s is PeScenario => s != null);
+
+  const footerNote = data.risks?.[0] ?? "Re-rating potential depends on earnings momentum and market confidence.";
 
   return (
     <div style={{
@@ -296,8 +349,8 @@ function ScenarioEnginePanel({ lens }: { lens: LensDetail }) {
       </div>
 
       <div style={{ display: "flex", gap: 10, flex: 1 }}>
-        {scenarios.map((s, i) => (
-          <ScenarioCard key={s.key} scenario={s} delay={i * 0.08} />
+        {ordered.map((s, i) => (
+          <ScenarioCard key={s.scenario} s={s} delay={i * 0.08} />
         ))}
       </div>
 
@@ -310,23 +363,25 @@ function ScenarioEnginePanel({ lens }: { lens: LensDetail }) {
       }}>
         <span style={{ fontSize: 13 }}>✏️</span>
         <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>
-          {footerNote.length > 120 ? footerNote.slice(0, 117) + "..." : footerNote}
+          {footerNote.length > 140 ? footerNote.slice(0, 137) + "..." : footerNote}
         </p>
       </div>
     </div>
   );
 }
 
-// ─── Right panel: What changes market perception ──────────────────────────────
+// ─── CatalystsPanel ───────────────────────────────────────────────────────────
 
-function CatalystItem({ icon, label, sublabel, positive }: { icon: string; label: string; sublabel: string; positive: boolean }) {
+function CatalystItem({ label, statement, positive }: { label: string; statement: string; positive: boolean }) {
   const [showPopup, setShowPopup] = useState(false);
   const [alignRight, setAlignRight] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
   const color = positive ? "var(--qc-up)" : "var(--qc-down)";
   const bg = positive ? "rgba(31,122,74,0.07)" : "rgba(220,38,38,0.06)";
   const border = positive ? "rgba(31,122,74,0.18)" : "rgba(220,38,38,0.15)";
   const popupBg = positive ? "rgba(31,122,74,0.06)" : "rgba(220,38,38,0.05)";
+  const icon = positive ? "📈" : "⚠️";
 
   const handleMouseEnter = useCallback(() => {
     if (ref.current) {
@@ -361,20 +416,18 @@ function CatalystItem({ icon, label, sublabel, positive }: { icon: string; label
       <p style={{ fontSize: 12, fontWeight: 700, color, margin: 0 }}>{label}</p>
 
       {showPopup && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "calc(100% + 6px)",
-            ...(alignRight ? { right: 0 } : { left: 0 }),
-            zIndex: 50,
-            width: 240,
-            borderRadius: 10,
-            border: `1px solid ${border}`,
-            background: "var(--qc-card)",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
-            overflow: "hidden",
-          }}
-        >
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 6px)",
+          ...(alignRight ? { right: 0 } : { left: 0 }),
+          zIndex: 50,
+          width: 240,
+          borderRadius: 10,
+          border: `1px solid ${border}`,
+          background: "var(--qc-card)",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+          overflow: "hidden",
+        }}>
           <div style={{
             padding: "8px 12px",
             borderBottom: `1px solid ${border}`,
@@ -385,7 +438,7 @@ function CatalystItem({ icon, label, sublabel, positive }: { icon: string; label
             <span style={{ fontSize: 12, fontWeight: 700, color: "var(--qc-ink)" }}>{label}</span>
           </div>
           <div style={{ padding: "10px 12px" }}>
-            <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink-3)", lineHeight: 1.6 }}>{sublabel}</p>
+            <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink-3)", lineHeight: 1.6 }}>{statement}</p>
           </div>
         </div>
       )}
@@ -393,27 +446,9 @@ function CatalystItem({ icon, label, sublabel, positive }: { icon: string; label
   );
 }
 
-function MarketCatalystsPanel({ lens }: { lens: LensDetail }) {
-  // Build positive catalysts from highlights, negative from risks
-  const positives = (lens.highlights ?? []).slice(0, 3).map((h, i) => ({
-    icon: ["📈", "💼", "🚀"][i] ?? "✅",
-    label: h.split(" ").slice(0, 5).join(" "),
-    sublabel: h,
-  }));
-
-  const negatives = (lens.risks ?? []).slice(0, 2).map((r, i) => ({
-    icon: ["⚠️", "🏗️"][i] ?? "⚠️",
-    label: r.split(" ").slice(0, 5).join(" "),
-    sublabel: r,
-  }));
-
-  // Fallbacks if no highlights/risks
-  if (positives.length === 0) {
-    positives.push({ icon: "📈", label: "Strong fundamentals", sublabel: lens.takeaway ?? "Solid operational metrics." });
-  }
-  if (negatives.length === 0) {
-    negatives.push({ icon: "⚠️", label: "Execution risk", sublabel: "Monitor guidance delivery and macro conditions." });
-  }
+function MarketCatalystsPanel({ data }: { data: PeReratingData }) {
+  const positives = data.positive_catalysts.slice(0, 3);
+  const negatives = data.negative_catalysts.slice(0, 3);
 
   return (
     <div style={{
@@ -436,9 +471,12 @@ function MarketCatalystsPanel({ lens }: { lens: LensDetail }) {
           Positive Catalysts
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {positives.map((p) => (
-            <CatalystItem key={p.label} icon={p.icon} label={p.label} sublabel={p.sublabel} positive={true} />
+          {positives.map((c) => (
+            <CatalystItem key={c.label} label={c.label} statement={c.statement} positive={true} />
           ))}
+          {positives.length === 0 && (
+            <CatalystItem label="Strong fundamentals" statement={data.takeaway ?? "Solid operational metrics."} positive={true} />
+          )}
         </div>
       </div>
 
@@ -447,29 +485,32 @@ function MarketCatalystsPanel({ lens }: { lens: LensDetail }) {
           Negative Catalysts
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {negatives.map((n) => (
-            <CatalystItem key={n.label} icon={n.icon} label={n.label} sublabel={n.sublabel} positive={false} />
+          {negatives.map((c) => (
+            <CatalystItem key={c.label} label={c.label} statement={c.statement} positive={false} />
           ))}
+          {negatives.length === 0 && (
+            <CatalystItem label="Execution risk" statement="Monitor guidance delivery and macro conditions." positive={false} />
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Narrative strip ──────────────────────────────────────────────────────────
+// ─── NarrativeStrip ───────────────────────────────────────────────────────────
 
-function NarrativeStrip({ lens }: { lens: LensDetail }) {
-  const markerPct = Math.min(95, Math.max(5, (lens.score / 100) * 100));
-  const narrativeLabel = lens.score >= 70
-    ? "Earnings re-rating candidate"
-    : lens.score >= 50
-    ? "Transition phase, execution watch"
-    : "De-rating risk, narrative weak";
+function NarrativeStrip({ data }: { data: PeReratingData }) {
+  const score = data.narrative?.score ?? data.score;
+  const narrativeLabel = data.narrative?.label ?? (
+    score >= 70 ? "Earnings re-rating candidate"
+    : score >= 50 ? "Transition phase, execution watch"
+    : "De-rating risk, narrative weak"
+  );
+  const markerPct = Math.min(95, Math.max(5, (score / 100) * 100));
 
-  // Derive shift narrative from risks and highlights
-  const shiftNote = lens.risks?.[0]
-    ? `${lens.risks[0].slice(0, 100)}...`
-    : "Narrative can shift if execution on guidance targets improves and macro conditions ease.";
+  const shiftNote = data.narrative?.description
+    ?? data.risks?.[0]
+    ?? "Narrative can shift if execution on guidance targets improves and macro conditions ease.";
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr_220px]" style={{
@@ -518,44 +559,39 @@ function NarrativeStrip({ lens }: { lens: LensDetail }) {
 
       <div style={{ borderLeft: "3px solid var(--qc-blue)", paddingLeft: 16 }}>
         <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.6 }}>
-          {shiftNote}
+          {shiftNote.length > 120 ? shiftNote.slice(0, 117) + "..." : shiftNote}
         </p>
       </div>
     </div>
   );
 }
 
-// ─── Summary footer metrics ───────────────────────────────────────────────────
+// ─── SummaryFooter ────────────────────────────────────────────────────────────
 
-function SummaryFooter({ lens }: { lens: LensDetail }) {
-  const sig = lens.top_signals ?? [];
-  const basePe  = sig.find((s) => s.metric === "SCENARIO_BASE_PE_RANGE");
-  const baseRet = sig.find((s) => s.metric === "SCENARIO_BASE_RETURN");
+function SummaryFooter({ data }: { data: PeReratingData }) {
+  const sb = data.summary_bar;
+  const base = data.scenarios.find((s) => s.scenario === "base");
 
-  const metrics = [
-    {
-      label: "Base Case Exit P/E",
-      value: formatPeRange(basePe?.actual_value, basePe?.guided_value),
-      sub: "Most Probable",
-    },
-    {
-      label: "Implied Upside",
-      value: formatReturnRange(baseRet?.actual_value, baseRet?.guided_value),
-      sub: "vs current multiples",
-    },
-    { label: "Time Horizon", value: "2–3 Years", sub: "Investment View" },
-  ];
+  const basePeStr = sb ? fmtPe(sb.base_pe_low, sb.base_pe_high) : fmtPe(base?.pe_low ?? null, base?.pe_high ?? null);
+  const baseRetStr = fmtReturn(base?.return_low ?? null, base?.return_high ?? null);
+  const years = sb?.holding_years ?? 3;
 
-  const title = lens.score >= 70
-    ? "Solid re-rating potential with positive momentum."
-    : lens.score >= 50
+  const title = data.score >= 70
+    ? "Strong re-rating potential exists."
+    : data.score >= 50
     ? "Moderate re-rating potential exists."
     : "Limited re-rating potential; monitor execution.";
+
+  const metrics = [
+    { label: "Base Case Exit P/E", value: basePeStr, sub: "Most Probable" },
+    { label: "Implied Upside", value: baseRetStr, sub: "vs current P/E" },
+    { label: "Time Horizon", value: `${years} Years`, sub: "Investment View" },
+  ];
 
   return (
     <LensDrawerSummaryCard
       title={title}
-      body={lens.takeaway ?? lens.description}
+      body={data.takeaway ?? data.highlights?.[0] ?? null}
       metrics={metrics}
     />
   );
@@ -563,10 +599,32 @@ function SummaryFooter({ lens }: { lens: LensDetail }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function LensDetailPeRerating({ lens }: Props) {
+interface Props {
+  lens?: LensDetail;
+  ticker?: string;
+}
+
+export function LensDetailPeRerating({ ticker }: Props) {
+  const { data, loading, error } = usePeRerating(ticker);
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 48, color: "var(--qc-ink-3)", fontSize: 13 }}>
+        Loading P/E re-rating analysis…
+      </div>
+    );
+  }
+
+  if (error || !data || !data.available) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 48, color: "var(--qc-ink-3)", fontSize: 13 }}>
+        {error ?? "P/E re-rating analysis not yet available for this ticker."}
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)" }}>
           Valuation Intelligence
@@ -577,15 +635,14 @@ export function LensDetailPeRerating({ lens }: Props) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr]" style={{ gap: 14, alignItems: "stretch" }}>
-        <MarketPerceptionPanel lens={lens} />
-        <ScenarioEnginePanel lens={lens} />
-        <MarketCatalystsPanel lens={lens} />
+        <MarketPerceptionPanel data={data} />
+        <ScenarioEnginePanel data={data} />
+        <MarketCatalystsPanel data={data} />
       </div>
 
-      <NarrativeStrip lens={lens} />
+      <NarrativeStrip data={data} />
 
-      <SummaryFooter lens={lens} />
-
+      <SummaryFooter data={data} />
     </div>
   );
 }

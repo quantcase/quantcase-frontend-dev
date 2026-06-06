@@ -16,11 +16,8 @@ import {
   Tooltip,
 } from "recharts";
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
-import type { Signal } from "@/hooks/useSignals";
-
 interface Props {
   lens: LensDetail;
-  signals: Signal[];
   isBfsi?: boolean;
 }
 
@@ -303,7 +300,7 @@ function ChartPanel({ activeKey, rows, topSignals }: { activeKey: RowKey; rows: 
 
 // ── Main export ──────────────────────────────────────────────────────────────
 
-export function LensDetailFinancial({ lens, signals: _signals, isBfsi }: Props) {
+export function LensDetailFinancial({ lens, isBfsi }: Props) {
   const topSignals: TopSignal[] = dedup(lens.top_signals ?? []);
   const [activeKey, setActiveKey] = useState<RowKey>("primary");
 

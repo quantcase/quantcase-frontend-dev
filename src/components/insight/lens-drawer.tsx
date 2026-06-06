@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LensDetail } from "@/hooks/useLenses";
-import type { Signal } from "@/hooks/useSignals";
 import { LensDetailGuidance } from "@/components/insight/lens-detail-guidance";
 import { LensDetailPromoter } from "@/components/insight/lens-detail-promoter";
 import { LensDetailDisclosure } from "@/components/insight/lens-detail-disclosure";
@@ -19,7 +18,6 @@ import { LensDetailTargetPriceMatrix } from "@/components/insight/lens-detail-ta
 
 interface LensDrawerProps {
   lens: LensDetail | null;
-  signals: Signal[];
   onClose: () => void;
   ticker?: string;
   isBfsi?: boolean;
@@ -42,39 +40,39 @@ function statusBg(status: string | null | undefined) {
 }
 
 
-function LensDetailView({ lens, signals, ticker, isBfsi }: { lens: LensDetail; signals: Signal[]; ticker?: string; isBfsi?: boolean }) {
+function LensDetailView({ lens, ticker, isBfsi }: { lens: LensDetail; ticker?: string; isBfsi?: boolean }) {
   switch (lens.slug) {
     case "guidance-credibility":
       return <LensDetailGuidance lens={lens} />;
     case "promoter-activity":
-      return <LensDetailPromoter lens={lens} signals={signals} />;
+      return <LensDetailPromoter lens={lens} />;
     case "disclosure-honesty":
-      return <LensDetailDisclosure lens={lens} signals={signals} />;
+      return <LensDetailDisclosure lens={lens} />;
     case "capital-allocation":
-      return <LensDetailCapital lens={lens} signals={signals} />;
+      return <LensDetailCapital lens={lens} />;
     case "industry-analysis":
       return <LensDetailIndustry lens={lens} isBfsi={isBfsi} />;
     case "competition":
-      return <LensDetailCompetition lens={lens} signals={signals} ticker={ticker} />;
+      return <LensDetailCompetition lens={lens} ticker={ticker} />;
     case "financial-strength":
-      return <LensDetailFinancial lens={lens} signals={signals} isBfsi={isBfsi} />;
+      return <LensDetailFinancial lens={lens} isBfsi={isBfsi} />;
     case "customer-distribution":
-      return <LensDetailCustomer lens={lens} signals={signals} />;
+      return <LensDetailCustomer lens={lens} />;
     case "eps-engine":
     case "earnings-forecast":
       return <LensDetailEps lens={lens} />;
     case "pe-rerating-potential":
-      return <LensDetailPeRerating lens={lens} signals={signals} />;
+      return <LensDetailPeRerating lens={lens} />;
     case "earning-quality":
-      return <LensDetailEarningQuality lens={lens} signals={signals} />;
+      return <LensDetailEarningQuality lens={lens} />;
     case "target-price-matrix":
-      return <LensDetailTargetPriceMatrix lens={lens} signals={signals} />;
+      return <LensDetailTargetPriceMatrix lens={lens} />;
     default:
       return null;
   }
 }
 
-export function LensDrawer({ lens, signals, onClose, ticker, isBfsi }: LensDrawerProps) {
+export function LensDrawer({ lens, onClose, ticker, isBfsi }: LensDrawerProps) {
   useEffect(() => {
     if (!lens) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -171,7 +169,7 @@ export function LensDrawer({ lens, signals, onClose, ticker, isBfsi }: LensDrawe
             <div className="px-4 sm:px-6 overflow-x-hidden" style={{ flex: 1, paddingTop: 20, paddingBottom: 32, display: "flex", flexDirection: "column", gap: 20 }}>
 
               {/* Lens-specific rich view — or fall back to generic */}
-              <LensDetailView lens={lens} signals={signals} ticker={ticker} isBfsi={isBfsi} />
+              <LensDetailView lens={lens} ticker={ticker} isBfsi={isBfsi} />
 
               {/* Generic fallback: key metrics, highlights, risks */}
               {!["guidance-credibility", "promoter-activity", "disclosure-honesty", "capital-allocation", "industry-analysis", "competition", "financial-strength", "customer-distribution", "eps-engine", "earnings-forecast", "pe-rerating-potential", "earning-quality", "target-price-matrix"].includes(lens.slug) && (

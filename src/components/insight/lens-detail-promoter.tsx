@@ -1,12 +1,10 @@
 "use client";
 
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
-import type { Signal } from "@/hooks/useSignals";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
   lens: LensDetail;
-  signals: Signal[];
 }
 
 function rowIcon(direction: string | null): { icon: string; bg: string; color: string } {
@@ -38,7 +36,7 @@ function formatDelta(delta: number | null | undefined): { text: string; color: s
   return { text, color: delta > 0 ? "#16a34a" : "#dc2626" };
 }
 
-export function LensDetailPromoter({ lens, signals: _signals }: Props) {
+export function LensDetailPromoter({ lens }: Props) {
   const topSignals: TopSignal[] = lens.top_signals ?? [];
 
   const stakeRows = topSignals.filter(

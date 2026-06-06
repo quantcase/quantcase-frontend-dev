@@ -2,12 +2,10 @@
 
 import { motion } from "framer-motion";
 import type { LensDetail } from "@/hooks/useLenses";
-import type { Signal } from "@/hooks/useSignals";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
   lens: LensDetail;
-  signals: Signal[];
 }
 
 // ─── Parse helpers ────────────────────────────────────────────────────────────

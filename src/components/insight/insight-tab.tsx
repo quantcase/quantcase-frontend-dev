@@ -6,7 +6,6 @@ import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { useAnalyzeTrigger } from "@/hooks/useAnalyzeTrigger";
 import { useLenses } from "@/hooks/useLenses";
-import { useSignals } from "@/hooks/useSignals";
 import { useScreenerData } from "@/hooks/useScreenerData";
 import type { ScreenerData } from "@/types/screener";
 
@@ -374,7 +373,6 @@ function InsightDashboard({
 }) {
   const [activeLensSlug, setActiveLensSlug] = useState<string | null>(null);
   const { lenses: lensDetails } = useLenses(ticker);
-  const { signals } = useSignals(ticker);
   const isBfsi = screenerData?.company?.isBfsi ?? false;
 
   const handleLensClick = useCallback((slug: string) => {
@@ -408,7 +406,7 @@ function InsightDashboard({
         </div>
       </div>
 
-      <LensDrawer lens={activeLens} signals={signals} onClose={() => setActiveLensSlug(null)} ticker={ticker} isBfsi={isBfsi} />
+      <LensDrawer lens={activeLens} onClose={() => setActiveLensSlug(null)} ticker={ticker} isBfsi={isBfsi} />
     </>
   );
 }

@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
-import type { Signal } from "@/hooks/useSignals";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 import { BACKEND_URL } from "@/lib/constants";
 
 interface Props {
   lens: LensDetail;
-  signals: Signal[];
   ticker?: string;
 }
 
@@ -670,7 +668,7 @@ function derivePeerSuggestions(peerSignals: TopSignal[], primaryTicker: string):
 
 // ── main export ───────────────────────────────────────────────────────────────
 
-export function LensDetailCompetition({ lens, signals: _signals, ticker }: Props) {
+export function LensDetailCompetition({ lens, ticker }: Props) {
   const [selectedPeers, setSelectedPeers] = useState<string[]>([]);
   const [swotExpanded, setSwotExpanded] = useState(false);
 

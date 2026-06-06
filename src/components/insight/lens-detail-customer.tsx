@@ -1,12 +1,10 @@
 "use client";
 
 import type { LensDetail, TopSignal } from "@/hooks/useLenses";
-import type { Signal } from "@/hooks/useSignals";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
   lens: LensDetail;
-  signals: Signal[];
   ticker?: string;
 }
 

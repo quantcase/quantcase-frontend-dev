@@ -168,9 +168,9 @@ export interface TechnicalsResponse {
   decisionIntelligence?: DecisionIntelligence;
 }
 
-// Raw API envelope — decisionIntelligence is nested one level deeper in the response
+// Raw API envelope — decisionIntelligence may be nested or flat depending on backend version
 export interface TechnicalsApiResponse extends Omit<TechnicalsResponse, "decisionIntelligence"> {
-  decisionIntelligence?: {
+  decisionIntelligence?: DecisionIntelligence | {
     decisionIntelligence?: DecisionIntelligence;
     ruleEngine?: RuleEngine;
     scores?: Record<string, unknown>;

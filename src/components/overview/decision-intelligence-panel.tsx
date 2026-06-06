@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { InsightData } from "@/types/analysis";
@@ -129,14 +129,12 @@ function LinkableCompactCard({
   sentiment?: "positive" | "negative" | "neutral";
   href: string;
 }) {
-  const [hovered, setHovered] = useState(false);
   const bg = sentBg(sentiment);
   const color = sentColor(sentiment);
 
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      className="linkable-compact-card"
       style={{
         position: "relative",
         display: "flex",
@@ -144,9 +142,10 @@ function LinkableCompactCard({
         gap: 3,
         padding: "7px 10px",
         background: bg,
-        border: `1px solid ${hovered ? color : color + "30"}`,
+        border: `1px solid ${color}30`,
         borderRadius: 8,
         transition: "border-color 0.15s ease",
+        ["--lcc-border-hover" as string]: color,
       }}
     >
       <span
@@ -179,6 +178,7 @@ function LinkableCompactCard({
       <Link
         href={href}
         aria-label={`Go to ${label} page`}
+        className="lcc-arrow"
         style={{
           position: "absolute",
           top: 6,
@@ -191,8 +191,8 @@ function LinkableCompactCard({
           borderRadius: "50%",
           background: "var(--qc-ink)",
           color: "var(--qc-card)",
-          opacity: hovered ? 1 : 0,
-          transform: hovered ? "scale(1)" : "scale(0.6)",
+          opacity: 0,
+          transform: "scale(0.6)",
           transition: "opacity 0.15s ease, transform 0.15s ease",
         }}
       >
@@ -296,95 +296,94 @@ export function DecisionIntelligencePanel({
   const fin = screenerData?.financials;
   const ratios = screenerData?.ratios;
 
-  const fundamentalChips: { label: string; value: string; sentiment?: "positive" | "negative" | "neutral" }[] = [];
+  const fundamentalChips = useMemo(() => {
+    const chips: { label: string; value: string; sentiment?: "positive" | "negative" | "neutral" }[] = [];
 
-  if (fin?.eps_cagr_3y != null) {
-    const pct = (fin.eps_cagr_3y * 100).toFixed(0);
-    fundamentalChips.push({
-      label: "Growth",
-      value: fin.eps_cagr_3y_label ?? (Number(pct) >= 10 ? "Growing" : Number(pct) < 0 ? "Declining" : "Moderate"),
-      sentiment:
-        Number(pct) >= 10 ? "positive" : Number(pct) < 0 ? "negative" : "neutral",
-    });
-  } else {
-    fundamentalChips.push({ label: "Growth", value: "—" });
-  }
+    if (fin?.eps_cagr_3y != null) {
+      const pct = (fin.eps_cagr_3y * 100).toFixed(0);
+      chips.push({
+        label: "Growth",
+        value: fin.eps_cagr_3y_label ?? (Number(pct) >= 10 ? "Growing" : Number(pct) < 0 ? "Declining" : "Moderate"),
+        sentiment: Number(pct) >= 10 ? "positive" : Number(pct) < 0 ? "negative" : "neutral",
+      });
+    } else {
+      chips.push({ label: "Growth", value: "—" });
+    }
 
-  if (val?.peValuationLabel) {
-    fundamentalChips.push({
-      label: "Valuation",
-      value: val.peValuationLabel,
-      sentiment: val.peValuationLabel.toLowerCase().includes("cheap") || val.peValuationLabel.toLowerCase().includes("fair")
-        ? "positive"
-        : val.peValuationLabel.toLowerCase().includes("expensive") || val.peValuationLabel.toLowerCase().includes("premium")
-        ? "negative"
-        : "neutral",
-    });
-  } else {
-    fundamentalChips.push({ label: "Valuation", value: "—" });
-  }
-
-  // Balance sheet / debt status
-  const debtStatus = ratios?.debtStatus ?? null;
-  if (debtStatus) {
-    fundamentalChips.push({
-      label: "Bal. Sheet",
-      value: debtStatus,
-      sentiment:
-        debtStatus.toLowerCase().includes("strong") || debtStatus.toLowerCase().includes("debt-free")
+    if (val?.peValuationLabel) {
+      chips.push({
+        label: "Valuation",
+        value: val.peValuationLabel,
+        sentiment: val.peValuationLabel.toLowerCase().includes("cheap") || val.peValuationLabel.toLowerCase().includes("fair")
           ? "positive"
-          : debtStatus.toLowerCase().includes("high") || debtStatus.toLowerCase().includes("stressed")
+          : val.peValuationLabel.toLowerCase().includes("expensive") || val.peValuationLabel.toLowerCase().includes("premium")
           ? "negative"
           : "neutral",
-    });
-  } else if (screenerData?.efficiency?.debtToEquity != null) {
-    const de = screenerData.efficiency.debtToEquity;
-    fundamentalChips.push({
-      label: "Bal. Sheet",
-      value: de < 0.3 ? "Strong" : de < 1.0 ? "Moderate" : "Leveraged",
-      sentiment: de < 0.3 ? "positive" : de < 1.0 ? "neutral" : "negative",
-    });
-  } else {
-    fundamentalChips.push({ label: "Bal. Sheet", value: "—" });
-  }
+      });
+    } else {
+      chips.push({ label: "Valuation", value: "—" });
+    }
 
-  // Profitability
-  const profitMargin = screenerData?.financialPerformance?.profitMargins;
-  if (profitMargin != null) {
-    const pct = profitMargin * 100;
-    fundamentalChips.push({
-      label: "Profit.",
-      value: pct >= 20 ? "Excellent" : pct >= 10 ? "Stable" : pct >= 0 ? "Thin" : "Loss",
-      sentiment: pct >= 10 ? "positive" : pct >= 0 ? "neutral" : "negative",
-    });
-  } else {
-    fundamentalChips.push({ label: "Profit.", value: "—" });
-  }
+    const debtStatus = ratios?.debtStatus ?? null;
+    if (debtStatus) {
+      chips.push({
+        label: "Bal. Sheet",
+        value: debtStatus,
+        sentiment:
+          debtStatus.toLowerCase().includes("strong") || debtStatus.toLowerCase().includes("debt-free")
+            ? "positive"
+            : debtStatus.toLowerCase().includes("high") || debtStatus.toLowerCase().includes("stressed")
+            ? "negative"
+            : "neutral",
+      });
+    } else if (screenerData?.efficiency?.debtToEquity != null) {
+      const de = screenerData.efficiency.debtToEquity;
+      chips.push({
+        label: "Bal. Sheet",
+        value: de < 0.3 ? "Strong" : de < 1.0 ? "Moderate" : "Leveraged",
+        sentiment: de < 0.3 ? "positive" : de < 1.0 ? "neutral" : "negative",
+      });
+    } else {
+      chips.push({ label: "Bal. Sheet", value: "—" });
+    }
 
-  // Cash conversion
-  const cfoPct = fin?.cfo_ebitda_pct;
-  if (cfoPct != null) {
-    fundamentalChips.push({
-      label: "Cash Co.",
-      value: cfoPct >= 0.8 ? "Excellent" : cfoPct >= 0.5 ? "Good" : "Weak",
-      sentiment: cfoPct >= 0.5 ? "positive" : "negative",
-    });
-  } else {
-    fundamentalChips.push({ label: "Cash Co.", value: "—" });
-  }
+    const profitMargin = screenerData?.financialPerformance?.profitMargins;
+    if (profitMargin != null) {
+      const pct = profitMargin * 100;
+      chips.push({
+        label: "Profit.",
+        value: pct >= 20 ? "Excellent" : pct >= 10 ? "Stable" : pct >= 0 ? "Thin" : "Loss",
+        sentiment: pct >= 10 ? "positive" : pct >= 0 ? "neutral" : "negative",
+      });
+    } else {
+      chips.push({ label: "Profit.", value: "—" });
+    }
 
-  // ROCE
-  const roce = screenerData?.ratios?.roce ?? screenerData?.ratios?.roce3yAvg ?? null;
-  if (roce != null) {
-    const rocePct = roce * 100;
-    fundamentalChips.push({
-      label: "ROCE",
-      value: rocePct >= 15 ? "Excellent" : rocePct >= 10 ? "Adequate" : "Weak",
-      sentiment: rocePct >= 15 ? "positive" : rocePct >= 10 ? "neutral" : "negative",
-    });
-  } else {
-    fundamentalChips.push({ label: "ROCE", value: "—" });
-  }
+    const cfoPct = fin?.cfo_ebitda_pct;
+    if (cfoPct != null) {
+      chips.push({
+        label: "Cash Co.",
+        value: cfoPct >= 0.8 ? "Excellent" : cfoPct >= 0.5 ? "Good" : "Weak",
+        sentiment: cfoPct >= 0.5 ? "positive" : "negative",
+      });
+    } else {
+      chips.push({ label: "Cash Co.", value: "—" });
+    }
+
+    const roce = screenerData?.ratios?.roce ?? screenerData?.ratios?.roce3yAvg ?? null;
+    if (roce != null) {
+      const rocePct = roce * 100;
+      chips.push({
+        label: "ROCE",
+        value: rocePct >= 15 ? "Excellent" : rocePct >= 10 ? "Adequate" : "Weak",
+        sentiment: rocePct >= 15 ? "positive" : rocePct >= 10 ? "neutral" : "negative",
+      });
+    } else {
+      chips.push({ label: "ROCE", value: "—" });
+    }
+
+    return chips;
+  }, [fin, val, ratios, screenerData]);
 
   // Technicals rows
   const re = technicalsData?.ruleEngine;

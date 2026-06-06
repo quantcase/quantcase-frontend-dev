@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { usePrices } from "@/hooks/usePrices";
+import { useScreenerInfo } from "@/hooks/useScreenerInfo";
 import {
   analyzeWyckoff,
   calcSMA,
@@ -739,35 +740,42 @@ function WyckoffContent() {
   const symbol = searchParams.get("symbol") ?? "";
 
   const { prices, loading, error } = usePrices(symbol);
+  const { data: screenerInfo } = useScreenerInfo(symbol);
+  const companyInfo = screenerInfo?.company
+    ? { name: screenerInfo.company.name, exchange: screenerInfo.company.exchange, sector: screenerInfo.company.sector, industry: screenerInfo.company.industry }
+    : null;
   const [result, setResult] = useState<WyckoffResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
-
-  useEffect(() => {
-    if (!prices.length) return;
-    setAnalyzing(true);
-    setTimeout(() => {
-      const wyckoffBars: WyckoffBar[] = prices.map((p) => ({
-        date: p.date, open: p.open, high: p.high, low: p.low, close: p.close, volume: p.volume,
-      }));
-      setResult(analyzeWyckoff(wyckoffBars));
-      setAnalyzing(false);
-    }, 50);
-  }, [prices]);
 
   const wyckoffBars: WyckoffBar[] = prices.map((p) => ({
     date: p.date, open: p.open, high: p.high, low: p.low, close: p.close, volume: p.volume,
   }));
 
+  useEffect(() => {
+    if (!wyckoffBars.length) return;
+    setAnalyzing(true);
+    // Use MessageChannel to yield to the browser before running the heavy analysis
+    const ch = new MessageChannel();
+    ch.port1.onmessage = () => {
+      setResult(analyzeWyckoff(wyckoffBars));
+      setAnalyzing(false);
+    };
+    ch.port2.postMessage(null);
+    return () => { ch.port1.onmessage = null; };
+  // wyckoffBars is derived from prices — depend on prices identity
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prices]);
+
   if (!symbol) {
     return (
-      <ScreenerPageShell navItems={[]}>
+      <ScreenerPageShell navItems={[]} companyInfo={companyInfo}>
         <div style={{ padding: "24px 16px", fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-down)" }}>No symbol provided</div>
       </ScreenerPageShell>
     );
   }
 
   return (
-    <ScreenerPageShell navItems={[]}>
+    <ScreenerPageShell navItems={[]} companyInfo={companyInfo}>
       <div style={{
         padding: "20px 20px 48px",
         minHeight: "100vh",

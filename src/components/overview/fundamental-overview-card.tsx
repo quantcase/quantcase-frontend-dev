@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { ScreenerData } from "@/types/screener";
 import type { OverviewAnalysis } from "@/types/overview";
 import { SectionShell, SectionLabel } from "./primitives";
@@ -91,20 +91,22 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
     ? overviewData.snapshot.replace(/\*\*/g, "").split(".").slice(0, 2).join(".") + "."
     : derivedNarrative;
 
-  const getLatestById = (id: string): number | null => {
-    if (!shareholdingData) return null;
+  const shareholdingMap = useMemo(() => {
+    const map = new Map<string, number | null>();
+    if (!shareholdingData) return map;
     for (const s of shareholdingData.sections) {
-      if (s.id === id) return s.data.reduce<number | null>((acc, d) => (d.value != null ? d.value : acc), null);
-      const child = s.children.find((c) => c.id === id);
-      if (child) return child.data.reduce<number | null>((acc, d) => (d.value != null ? d.value : acc), null);
+      map.set(s.id, s.data.reduce<number | null>((acc, d) => (d.value != null ? d.value : acc), null));
+      for (const child of s.children) {
+        map.set(child.id, child.data.reduce<number | null>((acc, d) => (d.value != null ? d.value : acc), null));
+      }
     }
-    return null;
-  };
+    return map;
+  }, [shareholdingData]);
 
-  const promoterPct = getLatestById("promoters") ?? (own.promoter != null ? own.promoter * 100 : null);
-  const fiiPct = getLatestById("npFiis") ?? (own.fii != null ? own.fii * 100 : own.institutions != null ? own.institutions * 100 : null);
-  const diiPct = getLatestById("npMutualFunds") ?? (own.dii != null ? own.dii * 100 : null);
-  const publicPct = getLatestById("npNonInst") ?? (own.public != null ? own.public * 100 : null);
+  const promoterPct = shareholdingMap.get("promoters") ?? (own.promoter != null ? own.promoter * 100 : null);
+  const fiiPct = shareholdingMap.get("npFiis") ?? (own.fii != null ? own.fii * 100 : own.institutions != null ? own.institutions * 100 : null);
+  const diiPct = shareholdingMap.get("npMutualFunds") ?? (own.dii != null ? own.dii * 100 : null);
+  const publicPct = shareholdingMap.get("npNonInst") ?? (own.public != null ? own.public * 100 : null);
 
   const shareholdingSegments = [
     { label: "Promoter", pct: promoterPct, color: "#0F172B" },

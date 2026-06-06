@@ -15,6 +15,7 @@ import { useFinancials } from "@/hooks/useFinancials";
 import { useFinancialsCharts } from "@/hooks/useFinancialsCharts";
 import { useScreenerPeers } from "@/hooks/useScreenerPeers";
 import { useShareholding } from "@/hooks/useShareholding";
+import { useScreenerData } from "@/hooks/useScreenerData";
 import { PeerComparisonDataTable } from "@/components/molecules/peer-comparison-table";
 import { MultiLineBarComboChart } from "@/components/molecules/multi-line-bar-combo-chart";
 import { FinancialDataTable } from "@/components/fundamentals/financial-data-table";
@@ -185,10 +186,14 @@ function FinancialsContent() {
   const { data: chartsData } = useFinancialsCharts(symbol);
   const { data: peersData, loading: peersLoading } = useScreenerPeers(symbol);
   const { data: shareholdingData, loading: shareholdingLoading } = useShareholding(symbol);
+  const { data: screenerData } = useScreenerData(symbol);
+  const companyInfo = screenerData?.company
+    ? { name: screenerData.company.name, exchange: screenerData.company.exchange, sector: screenerData.company.sector, industry: screenerData.company.industry }
+    : null;
 
   if (!symbol) {
     return (
-      <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
+      <ScreenerPageShell navItems={FUNDAMENTALS_NAV} companyInfo={companyInfo}>
         <div style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down)", padding: "24px 16px" }}>
           Error: No symbol provided in query parameters
         </div>
@@ -198,7 +203,7 @@ function FinancialsContent() {
 
   if (error) {
     return (
-      <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
+      <ScreenerPageShell navItems={FUNDAMENTALS_NAV} companyInfo={companyInfo}>
         <div style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down)", padding: "24px 16px" }}>Error: {error}</div>
       </ScreenerPageShell>
     );
@@ -207,7 +212,7 @@ function FinancialsContent() {
   if (loading || !data) {
     return (
       <>
-        <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
+        <ScreenerPageShell navItems={FUNDAMENTALS_NAV} companyInfo={companyInfo}>
           <FundamentalsPageSkeleton />
         </ScreenerPageShell>
         <AssetActionBar ticker={symbol} />
@@ -222,7 +227,7 @@ function FinancialsContent() {
 
   return (
     <>
-    <ScreenerPageShell navItems={FUNDAMENTALS_NAV}>
+    <ScreenerPageShell navItems={FUNDAMENTALS_NAV} companyInfo={companyInfo}>
       <div className="px-4 pt-6 pb-8 space-y-6">
 
         {/* Two-column section: Left (Charts, SWOT, Growth & Returns) + Right (Decision Intelligence) */}
@@ -418,7 +423,13 @@ function FinancialsContent() {
 
 export default function FinancialsPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={
+      <div className="min-h-screen" style={{ background: "var(--qc-bg)" }}>
+        <div className="px-4 pt-6 pb-8">
+          <FundamentalsPageSkeleton />
+        </div>
+      </div>
+    }>
       <FinancialsContent />
     </Suspense>
   );

@@ -595,6 +595,15 @@
   position: relative;
 }
 
+/* LinkableCompactCard hover — avoids JS state re-renders */
+.linkable-compact-card:hover {
+  border-color: var(--lcc-border-hover) !important;
+}
+.linkable-compact-card:hover .lcc-arrow {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
 .skeleton-shimmer::after {
   content: "";
   position: absolute;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { AssetActionBar } from "@/components/molecules/asset-action-bar";
@@ -10,14 +10,11 @@ import { TechnicalsCard, PriceLevelsSection } from "@/components/overview/techni
 import { InvestmentConclusionCard } from "@/components/overview/investment-conclusion-card";
 import { DecisionIntelligencePanel } from "@/components/overview/decision-intelligence-panel";
 import { useScreenerData } from "@/hooks/useScreenerData";
-import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { useTechnicals } from "@/hooks/useTechnicals";
 import { KeyRatioTiles } from "@/components/overview/key-ratio-tiles";
 import { CompanyProfileCard } from "@/components/overview/company-profile-card";
-import { ReanalyzeButton } from "@/components/management/reanalyze-button";
-import { OverviewAnalyzePrompt } from "@/components/overview/overview-analysis";
-import { useOverviewFetch, useOverviewTrigger } from "@/hooks/useOverviewAnalysis";
+import { useOverviewFetch } from "@/hooks/useOverviewAnalysis";
 import {
   KeyRatioTilesSkeleton,
   IMScoreCardSkeleton,
@@ -48,9 +45,6 @@ function OverviewContent() {
 
   const { data, error, loading: screenerLoading } = useScreenerData(symbol);
 
-  const { data: transcriptCalls } = useTranscriptCalls(symbol === "—" ? "" : symbol);
-  const firstCallId = transcriptCalls.length > 0 ? transcriptCalls[0].id : "";
-
   const ticker = symbol === "—" ? "" : symbol;
   const { getInsight, loading: analysisLoading } = useAnalysis(ticker);
   const managementInsight = getInsight("management");
@@ -59,16 +53,7 @@ function OverviewContent() {
   const { data: technicalsData, loading: technicalsLoading } = useTechnicals(symbol === "—" ? "" : symbol);
 
   // Overview analysis
-  const { data: overviewData, refetch: refetchOverview } = useOverviewFetch(firstCallId);
-
-  const handleOverviewComplete = useCallback(() => {
-    refetchOverview();
-  }, [refetchOverview]);
-
-  const { isAnalyzing, analyzeError, jobStatus, progress, trigger } = useOverviewTrigger({
-    callId: firstCallId,
-    onComplete: handleOverviewComplete,
-  });
+  const { data: overviewData } = useOverviewFetch(ticker);
 
   const mScore = managementInsight?.score ?? null;
   const oScore = opportunityInsight?.score ?? null;
@@ -80,11 +65,16 @@ function OverviewContent() {
   if (dScore !== null) { partialSum += dScore; partialCount++; }
   const rating = partialCount > 0 ? getRating((partialSum / partialCount) / 100) : null;
 
+  const companyInfo = data?.company
+    ? { name: data.company.name, exchange: data.company.exchange, sector: data.company.sector, industry: data.company.industry }
+    : null;
+
   return (
     <>
     <ScreenerPageShell
       navItems={OVERVIEW_NAV}
       headerRight={undefined}
+      companyInfo={companyInfo}
     >
       <div className="pb-8 pt-6">
 
@@ -135,21 +125,7 @@ function OverviewContent() {
               )}
             </div>
 
-            {/* Overview Analysis — trigger prompt only; data flows into existing section components */}
-            {!overviewData && firstCallId && (
-              <div id="section-overview-analysis">
-                <OverviewAnalyzePrompt
-                  isAnalyzing={isAnalyzing}
-                  jobStatus={jobStatus}
-                  progress={progress}
-                  analyzeError={analyzeError}
-                  onAnalyze={trigger}
-                  callId={firstCallId}
-                />
-              </div>
-            )}
-
-            {/* Technicals */}
+{/* Technicals */}
             <div id="section-technicals">
               {technicalsLoading ? (
                 <TechnicalsCardSkeleton />
@@ -162,7 +138,7 @@ function OverviewContent() {
 
           {/* ── Right column: Decision Intelligence ── */}
           <div className="lg:sticky lg:top-[60px]">
-            {(screenerLoading || analysisLoading || technicalsLoading) && !data && !technicalsData ? (
+            {screenerLoading && analysisLoading && technicalsLoading ? (
               <DecisionIntelligenceSkeleton />
             ) : (
               <DecisionIntelligencePanel

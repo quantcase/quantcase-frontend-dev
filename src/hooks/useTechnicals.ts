@@ -3,6 +3,12 @@ import { rawFetch } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import type { TechnicalsResponse, TechnicalsApiResponse, TechnicalsDerived } from "@/types/technicals";
 
+function unwrapDI(raw: TechnicalsApiResponse["decisionIntelligence"]): TechnicalsResponse["decisionIntelligence"] {
+  if (!raw) return undefined;
+  if ("decisionIntelligence" in raw) return raw.decisionIntelligence;
+  return raw;
+}
+
 function computeDerived(data: TechnicalsResponse): TechnicalsDerived {
   const supportNum = data.supportResistance.static.support[0] ?? 0;
   const resistanceNum = data.supportResistance.static.resistance[0] ?? 0;
@@ -27,11 +33,7 @@ export function useTechnicals(symbol: string) {
     rawFetch<TechnicalsApiResponse>(`${BACKEND_URL}/api/screener/${symbol}/technicals`, {
       onStart: () => { setLoading(true); setError(null); setData(null); setDerived(null); },
       onSuccess: (raw) => {
-        // Unwrap the nested decisionIntelligence envelope
-        const response: TechnicalsResponse = {
-          ...raw,
-          decisionIntelligence: raw.decisionIntelligence?.decisionIntelligence,
-        };
+        const response: TechnicalsResponse = { ...raw, decisionIntelligence: unwrapDI(raw.decisionIntelligence) };
         setData(response);
         setDerived(computeDerived(response));
         setLoading(false);

@@ -6,6 +6,7 @@ import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { AssetActionBar } from "@/components/molecules/asset-action-bar";
 import { useTechnicals } from "@/hooks/useTechnicals";
 import { usePrices } from "@/hooks/usePrices";
+import { useScreenerData } from "@/hooks/useScreenerData";
 import { CandlestickChart, type ChartMode } from "./_components/CandlestickChart";
 import { DecisionIntelligenceBanner } from "./_components/DecisionIntelligenceBanner";
 import { TechnicalsRuleEngine, type EngineTab } from "./_components/TechnicalsRuleEngine";
@@ -91,10 +92,14 @@ function TechnicalsContent() {
 
   const { data, derived, loading, error } = useTechnicals(symbol);
   const { prices, indicators, loading: pricesLoading, error: pricesError } = usePrices(symbol);
+  const { data: screenerData } = useScreenerData(symbol);
+  const companyInfo = screenerData?.company
+    ? { name: screenerData.company.name, exchange: screenerData.company.exchange, sector: screenerData.company.sector, industry: screenerData.company.industry }
+    : null;
 
   if (!symbol) {
     return (
-      <ScreenerPageShell navItems={TECHNICALS_NAV}>
+      <ScreenerPageShell navItems={TECHNICALS_NAV} companyInfo={companyInfo}>
         <div className="text-sm text-red-600 px-4 pt-6">
           Error: No symbol provided in query parameters
         </div>
@@ -104,7 +109,7 @@ function TechnicalsContent() {
 
   if (error) {
     return (
-      <ScreenerPageShell navItems={TECHNICALS_NAV}>
+      <ScreenerPageShell navItems={TECHNICALS_NAV} companyInfo={companyInfo}>
         <div className="text-sm text-red-600 px-4 pt-6">Error: {error}</div>
       </ScreenerPageShell>
     );
@@ -115,7 +120,7 @@ function TechnicalsContent() {
 
   return (
     <>
-    <ScreenerPageShell navItems={TECHNICALS_NAV}>
+    <ScreenerPageShell navItems={TECHNICALS_NAV} companyInfo={companyInfo}>
       <div className="mb-8 px-4 space-y-[14px] pt-4">
         <div id="section-price-levels">
           {loading ? (

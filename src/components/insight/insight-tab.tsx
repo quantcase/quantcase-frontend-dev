@@ -8,6 +8,7 @@ import { useAnalyzeTrigger } from "@/hooks/useAnalyzeTrigger";
 import { useLenses } from "@/hooks/useLenses";
 import { useSignals } from "@/hooks/useSignals";
 import { useScreenerData } from "@/hooks/useScreenerData";
+import type { ScreenerData } from "@/types/screener";
 
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { AssetActionBar } from "@/components/molecules/asset-action-bar";
@@ -364,15 +365,16 @@ function InsightDashboard({
   insight,
   type,
   ticker,
+  screenerData,
 }: {
   insight: import("@/types/analysis").InsightData;
   type: InsightType;
   ticker: string;
+  screenerData: ScreenerData | null;
 }) {
   const [activeLensSlug, setActiveLensSlug] = useState<string | null>(null);
   const { lenses: lensDetails } = useLenses(ticker);
   const { signals } = useSignals(ticker);
-  const { data: screenerData } = useScreenerData(ticker);
   const isBfsi = screenerData?.company?.isBfsi ?? false;
 
   const handleLensClick = useCallback((slug: string) => {
@@ -420,6 +422,7 @@ function InsightTabContent({ type }: { type: InsightType }) {
   const { data: transcriptCalls, loading: callsLoading, error: callsError } = useTranscriptCalls(symbol);
   const firstCallId = transcriptCalls[0]?.id ?? "";
   const { getInsight, loading: insightLoading } = useAnalysis(symbol);
+  const { data: screenerData } = useScreenerData(symbol);
   const insight = getInsight(type);
 
   const { isAnalyzing, analyzeError, aggregateStatus, progress, trigger } = useAnalyzeTrigger({
@@ -427,6 +430,10 @@ function InsightTabContent({ type }: { type: InsightType }) {
     types: [type],
     onComplete: () => window.location.reload(),
   });
+
+  const companyInfo = screenerData?.company
+    ? { name: screenerData.company.name, exchange: screenerData.company.exchange, sector: screenerData.company.sector, industry: screenerData.company.industry }
+    : null;
 
   if (!symbol) return <CenteredMessage error>No symbol provided</CenteredMessage>;
   if (callsLoading || insightLoading) return (
@@ -454,8 +461,8 @@ function InsightTabContent({ type }: { type: InsightType }) {
 
   return (
     <>
-      <ScreenerPageShell>
-        <InsightDashboard insight={insight} type={type} ticker={symbol} />
+      <ScreenerPageShell companyInfo={companyInfo}>
+        <InsightDashboard insight={insight} type={type} ticker={symbol} screenerData={screenerData} />
       </ScreenerPageShell>
       <AssetActionBar ticker={symbol} />
     </>

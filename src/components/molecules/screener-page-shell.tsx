@@ -7,10 +7,19 @@ import { useScreenerInfo } from "@/hooks/useScreenerInfo";
 import { SimilarStocks } from "@/components/molecules/similar-stocks";
 import type { InPageNavItem } from "@/components/molecules/in-page-nav";
 
+interface CompanyInfo {
+  name: string;
+  exchange?: string;
+  sector?: string;
+  industry?: string;
+}
+
 interface ScreenerPageShellProps {
   navItems?: InPageNavItem[];
   headerRight?: React.ReactNode;
   children: React.ReactNode;
+  /** Pass pre-fetched company info to skip the internal useScreenerInfo request */
+  companyInfo?: CompanyInfo | null;
 }
 
 /* Design-sample chip: .chip style — rounded-full, warm bg, border, small text */
@@ -29,16 +38,18 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps) {
+function ShellInner({ navItems, headerRight, children, companyInfo }: ScreenerPageShellProps) {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") ?? "";
 
-  const { data: screenerInfo, loading } = useScreenerInfo(symbol);
+  // Only fire the info request when the caller hasn't already supplied company data
+  const skip = !!companyInfo;
+  const { data: screenerInfo, loading } = useScreenerInfo(skip ? "" : symbol);
 
-  const companyName = screenerInfo?.company?.name ?? (loading ? "" : symbol);
-  const exchange = screenerInfo?.company?.exchange ?? "NSE";
-  const sector = screenerInfo?.company?.sector;
-  const industry = screenerInfo?.company?.industry;
+  const companyName = companyInfo?.name ?? screenerInfo?.company?.name ?? (loading ? "" : symbol);
+  const exchange = companyInfo?.exchange ?? screenerInfo?.company?.exchange ?? "NSE";
+  const sector = companyInfo?.sector ?? screenerInfo?.company?.sector;
+  const industry = companyInfo?.industry ?? screenerInfo?.company?.industry;
 
   return (
     <div className="min-h-screen" style={{ background: "var(--qc-bg)" }}>
@@ -80,7 +91,7 @@ function ShellInner({ navItems, headerRight, children }: ScreenerPageShellProps)
   );
 }
 
-export function ScreenerPageShell({ navItems, headerRight, children }: ScreenerPageShellProps) {
+export function ScreenerPageShell({ navItems, headerRight, children, companyInfo }: ScreenerPageShellProps) {
   return (
     <Suspense
       fallback={
@@ -91,7 +102,7 @@ export function ScreenerPageShell({ navItems, headerRight, children }: ScreenerP
         </div>
       }
     >
-      <ShellInner navItems={navItems} headerRight={headerRight}>{children}</ShellInner>
+      <ShellInner navItems={navItems} headerRight={headerRight} companyInfo={companyInfo}>{children}</ShellInner>
     </Suspense>
   );
 }

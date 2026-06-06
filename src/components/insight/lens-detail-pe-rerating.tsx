@@ -7,7 +7,6 @@ import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCar
 
 interface Props {
   lens: LensDetail;
-  signals: unknown[];
 }
 
 // ─── Scenario data derived from lens ─────────────────────────────────────────

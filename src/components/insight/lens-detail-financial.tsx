@@ -415,7 +415,7 @@ function ChartPanel({ activeKey, rows, topSignals }: { activeKey: string | null;
 // ── Main export ──────────────────────────────────────────────────────────────
 
 export function LensDetailFinancial({ lens, ticker }: Props) {
-  const { data: fsData } = useFinancialStrength(ticker ?? "");
+  const { data: fsData, loading } = useFinancialStrength(ticker ?? "");
   const [activeKey, setActiveKey] = useState<string | null>(null);
 
   // Prefer timeseries-enriched signals from the dedicated endpoint; fall back to lens signals
@@ -423,11 +423,45 @@ export function LensDetailFinancial({ lens, ticker }: Props) {
   const topSignals: TopSignal[] = dedup(rawSignals);
 
   const rows = buildRows(topSignals);
+  const resolvedKey = activeKey ?? rows[0]?.key ?? null;
   const summaryMetrics = rows.slice(0, 3).map((r) => ({
     label: r.category,
     value: r.current,
     sub: r.vsPrior,
   }));
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* KPI strip skeleton */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: "1px solid var(--qc-hair)", borderRadius: 10, overflow: "hidden" }}>
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} style={{ padding: "14px 16px", background: "var(--qc-section)", borderRight: i < 3 ? "1px solid var(--qc-hair)" : undefined }}>
+              <div style={{ height: 8, width: 80, background: "var(--qc-hair)", borderRadius: 4, marginBottom: 10 }} />
+              <div style={{ height: 22, width: 100, background: "var(--qc-hair)", borderRadius: 4, marginBottom: 8 }} />
+              <div style={{ height: 8, width: 120, background: "var(--qc-hair)", borderRadius: 4 }} />
+            </div>
+          ))}
+        </div>
+        {/* Table + chart skeleton */}
+        <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 10, overflow: "hidden", display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+          <div style={{ borderRight: "1px solid var(--qc-hair)" }}>
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} style={{ display: "flex", gap: 12, padding: "14px 16px", borderBottom: i < 5 ? "1px solid var(--qc-hair)" : undefined, background: "var(--qc-card)" }}>
+                <div style={{ height: 10, width: 56, background: "var(--qc-hair)", borderRadius: 4 }} />
+                <div style={{ flex: 1, height: 10, background: "var(--qc-hair)", borderRadius: 4 }} />
+                <div style={{ height: 10, width: 60, background: "var(--qc-hair)", borderRadius: 4 }} />
+                <div style={{ height: 10, width: 50, background: "var(--qc-hair)", borderRadius: 4 }} />
+              </div>
+            ))}
+          </div>
+          <div style={{ padding: "16px", background: "var(--qc-card)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: "100%", height: 220, background: "var(--qc-section)", borderRadius: 8 }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -469,7 +503,7 @@ export function LensDetailFinancial({ lens, ticker }: Props) {
           )}
 
           {rows.map((row, i) => {
-            const isActive = row.key === activeKey;
+            const isActive = row.key === resolvedKey;
             return (
               <div
                 key={row.key}
@@ -515,7 +549,7 @@ export function LensDetailFinancial({ lens, ticker }: Props) {
 
         {/* Right — chart panel */}
         <div style={{ padding: "16px 16px 12px", background: "var(--qc-card)", display: "flex", flexDirection: "column", minHeight: 320 }}>
-          <ChartPanel activeKey={activeKey} rows={rows} topSignals={topSignals} />
+          <ChartPanel activeKey={resolvedKey} rows={rows} topSignals={topSignals} />
         </div>
       </div>
 

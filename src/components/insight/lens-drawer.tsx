@@ -15,6 +15,7 @@ import { LensDetailEps } from "@/components/insight/lens-detail-eps";
 import { LensDetailPeRerating } from "@/components/insight/lens-detail-pe-rerating";
 import { LensDetailEarningQuality } from "@/components/insight/lens-detail-earning-quality";
 import { LensDetailTargetPriceMatrix } from "@/components/insight/lens-detail-target-price-matrix";
+import { LensDetailEarningsForecast } from "@/components/insight/lens-detail-earnings-forecast";
 
 interface LensDrawerProps {
   lens: LensDetail | null;
@@ -58,13 +59,12 @@ function LensDetailView({ lens, ticker, isBfsi }: { lens: LensDetail; ticker?: s
       return <LensDetailFinancial lens={lens} ticker={ticker} isBfsi={isBfsi} />;
     case "customer-distribution":
       return <LensDetailCustomer lens={lens} />;
-    case "eps-engine":
     case "earnings-forecast":
-      return <LensDetailEps lens={lens} />;
+      return <LensDetailEarningsForecast lens={lens} ticker={ticker} />;
     case "pe-rerating-potential":
       return <LensDetailPeRerating lens={lens} />;
     case "earning-quality":
-      return <LensDetailEarningQuality lens={lens} />;
+      return <LensDetailEarningQuality lens={lens} ticker={ticker} />;
     case "target-price-matrix":
       return <LensDetailTargetPriceMatrix lens={lens} />;
     default:

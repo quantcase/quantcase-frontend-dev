@@ -1,6 +1,16 @@
 import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/constants";
 
+export interface TimeseriesPoint {
+  callId: string | null;
+  period: string;
+  fiscal_year: string;
+  quarter: string;
+  call_date: string | null;
+  value: number;
+  abbrUsed: string;
+}
+
 export interface TopSignal {
   signal_id: string | null;
   metric: string;
@@ -20,6 +30,10 @@ export interface TopSignal {
   impact: string | null;
   statement: string | null;
   original_statement: string | null;
+  timeseries?: {
+    annual: TimeseriesPoint[];
+    latest_quarter: TimeseriesPoint | null;
+  };
 }
 
 export interface LensDetail {
@@ -77,4 +91,51 @@ export function useLenses(ticker: string): UseLensesResult {
   }, [ticker]);
 
   return { lenses, loading, error };
+}
+
+export interface FinancialStrengthData {
+  ticker: string;
+  call_id: string;
+  available: boolean;
+  is_stale: boolean;
+  computed_at: string | null;
+  score: number;
+  status: string | null;
+  z_score: number | null;
+  takeaway: string | null;
+  key_metrics: Record<string, string>;
+  highlights: string[];
+  risks: string[];
+  top_signals: TopSignal[];
+}
+
+interface UseFinancialStrengthResult {
+  data: FinancialStrengthData | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export function useFinancialStrength(ticker: string): UseFinancialStrengthResult {
+  const [data, setData] = useState<FinancialStrengthData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!ticker.trim()) return;
+    setLoading(true);
+    setError(null);
+
+    fetch(`${BACKEND_URL}/api/opportunity/financial-strength?ticker=${ticker}`)
+      .then((r) => r.json())
+      .then((res: { success: boolean; data: FinancialStrengthData }) => {
+        setData(res.data ?? null);
+        setLoading(false);
+      })
+      .catch((e) => {
+        setError(String(e));
+        setLoading(false);
+      });
+  }, [ticker]);
+
+  return { data, loading, error };
 }

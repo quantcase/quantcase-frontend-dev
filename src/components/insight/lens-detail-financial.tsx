@@ -8,16 +8,17 @@ import {
   Area,
   BarChart,
   Bar,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import type { LensDetail, TopSignal } from "@/hooks/useLenses";
+import type { LensDetail, TopSignal, TimeseriesPoint } from "@/hooks/useLenses";
+import { useFinancialStrength } from "@/hooks/useLenses";
+
 interface Props {
   lens: LensDetail;
+  ticker?: string;
   isBfsi?: boolean;
 }
 
@@ -25,10 +26,8 @@ const CHART_UP = "#1F7A4A";
 const CHART_WARN = "#B4731A";
 const CHART_MUTED = "#9A9A92";
 
-type RowKey = "primary" | "secondary" | "tertiary" | "fourth" | "fifth" | "sixth";
-
 interface FinRow {
-  key: RowKey;
+  key: string;
   category: string;
   metric: string;
   sub: string;
@@ -42,11 +41,12 @@ interface FinRow {
 }
 
 function dedup(signals: TopSignal[]): TopSignal[] {
-  const seen = new Set<string>();
+  const seenId = new Set<string>();
+  const seenMetric = new Set<string>();
   return signals.filter((s) => {
-    const key = s.signal_id ?? s.metric;
-    if (seen.has(key)) return false;
-    seen.add(key);
+    if (seenMetric.has(s.metric)) return false;
+    seenMetric.add(s.metric);
+    if (s.signal_id) seenId.add(s.signal_id);
     return true;
   });
 }
@@ -55,11 +55,22 @@ function formatVal(s: TopSignal): string {
   const v = s.actual_value;
   if (v == null) return "—";
   const unit = s.unit ?? "";
-  if (unit === "%") return `${v}%`;
-  if (unit === "Cr") return `₹${v.toLocaleString("en-IN")} Cr`;
-  if (unit === "bps") return `${v} bps`;
-  if (unit === "₹") return `₹${v}`;
-  return `${v}${unit ? ` ${unit}` : ""}`;
+  const fmt = (n: number) => Math.abs(n) >= 100 ? Math.round(n).toLocaleString("en-IN") : parseFloat(n.toPrecision(4)).toString();
+  if (unit === "%") return `${v.toFixed(1)}%`;
+  if (unit === "Cr") return `₹${fmt(v)} Cr`;
+  if (unit === "bps") return `${fmt(v)} bps`;
+  if (unit === "₹") return `₹${fmt(v)}`;
+  if (unit === "x") return `${v.toFixed(2)}x`;
+  return `${fmt(v)}${unit ? ` ${unit}` : ""}`;
+}
+
+function formatSeriesVal(value: number, unit: string | null): string {
+  const fmt = (n: number) => Math.abs(n) >= 100 ? Math.round(n).toLocaleString("en-IN") : parseFloat(n.toPrecision(4)).toString();
+  if (unit === "%") return `${value.toFixed(1)}%`;
+  if (unit === "Cr") return `₹${fmt(value)} Cr`;
+  if (unit === "x") return `${value.toFixed(2)}x`;
+  if (unit === "₹") return `₹${fmt(value)}`;
+  return fmt(value);
 }
 
 function rowStatus(s: TopSignal): { status: string; color: string; bg: string } {
@@ -67,7 +78,7 @@ function rowStatus(s: TopSignal): { status: string; color: string; bg: string } 
   if (dir === "beat" || dir === "above") return { status: "BEAT", color: "var(--qc-up)", bg: "var(--qc-up-soft)" };
   if (dir === "miss" || dir === "below") return { status: "MISS", color: "var(--qc-down)", bg: "var(--qc-down-soft)" };
   if (dir === "tracking") return { status: "ON TRACK", color: "var(--qc-blue)", bg: "var(--qc-blue-soft)" };
-  // Infer from value
+  if (dir === "in_line") return { status: "IN LINE", color: "var(--qc-ink-3)", bg: "var(--qc-section)" };
   if (s.actual_value != null) {
     if (s.metric.toLowerCase().includes("npa") || s.metric.toLowerCase().includes("cost")) {
       return s.actual_value < 2 ? { status: "STRONG", color: "var(--qc-up)", bg: "var(--qc-up-soft)" } : { status: "WATCH", color: "var(--qc-warn)", bg: "var(--qc-warn-soft)" };
@@ -77,32 +88,61 @@ function rowStatus(s: TopSignal): { status: string; color: string; bg: string } 
   return { status: "NEUTRAL", color: "var(--qc-ink-3)", bg: "var(--qc-section)" };
 }
 
-function buildRows(topSignals: TopSignal[]): FinRow[] {
-  const keys: RowKey[] = ["primary", "secondary", "tertiary", "fourth", "fifth", "sixth"];
-  // Prefer high-impact signals first
-  const pool = [
-    ...topSignals.filter((s) => s.impact === "high"),
-    ...topSignals.filter((s) => s.impact !== "high"),
-  ];
-  const picked = pool.slice(0, 6);
+const METRIC_CATEGORY: Record<string, string> = {
+  REV_OP: "Revenue", EBITDA: "EBITDA", PAT: "Profit", PAT_MARGIN: "Margin",
+  CFO: "Cash Flow", ROCE: "Returns", ROE: "Returns", DE: "Leverage",
+  EPS_BASIC: "EPS", ASSET_PPE: "Assets", IC: "Coverage", CAPEX: "CapEx",
+};
 
-  return picked.map((s, i) => {
+function computeYoY(s: TopSignal): { text: string; color: string } {
+  // 1. Prefer guided vs actual delta
+  if (s.guided_value != null && s.actual_value != null) {
+    const diff = s.actual_value - s.guided_value;
+    const pct = s.guided_value !== 0 ? (diff / Math.abs(s.guided_value)) * 100 : 0;
+    const arrow = diff >= 0 ? "↑" : "↓";
+    const color = diff >= 0 ? "var(--qc-up)" : "var(--qc-down)";
+    return { text: `${arrow} ${Math.abs(pct).toFixed(1)}% vs guided`, color };
+  }
+  // 2. Use delta_pct if present
+  if (s.delta_pct != null) {
+    const arrow = s.delta_pct >= 0 ? "↑" : "↓";
+    const color = s.delta_pct >= 0 ? "var(--qc-up)" : "var(--qc-down)";
+    return { text: `${arrow} ${Math.abs(s.delta_pct).toFixed(1)}%`, color };
+  }
+  // 3. Compute from timeseries annual (last two points)
+  const annual = s.timeseries?.annual ?? [];
+  if (annual.length >= 2) {
+    const prev = annual[annual.length - 2].value;
+    const curr = annual[annual.length - 1].value;
+    if (prev !== 0) {
+      const pct = ((curr - prev) / Math.abs(prev)) * 100;
+      const arrow = pct >= 0 ? "↑" : "↓";
+      const color = pct >= 0 ? "var(--qc-up)" : "var(--qc-down)";
+      return { text: `${arrow} ${Math.abs(pct).toFixed(1)}%`, color };
+    }
+  }
+  return { text: "—", color: "var(--qc-ink-3)" };
+}
+
+function buildRows(topSignals: TopSignal[]): FinRow[] {
+  const pool = [
+    ...topSignals.filter((s) => s.impact === "high" && hasTimeseries(s)),
+    ...topSignals.filter((s) => s.impact !== "high" && hasTimeseries(s)),
+  ];
+
+  return pool.map((s) => {
     const { status, color, bg } = rowStatus(s);
-    const hasGuided = s.guided_value != null;
-    const vsPrior = hasGuided
-      ? (s.direction === "beat" ? `↑ +${((s.actual_value ?? 0) - (s.guided_value ?? 0)).toFixed(1)}${s.unit ?? ""}` :
-         s.direction === "miss" ? `↓ ${((s.actual_value ?? 0) - (s.guided_value ?? 0)).toFixed(1)}${s.unit ?? ""}` :
-         `Guided: ${s.guided_value}${s.unit ?? ""}`)
-      : (s.delta_pct != null ? `${s.delta_pct > 0 ? "↑" : "↓"} ${s.delta_pct.toFixed(1)}% YoY` : "—");
+    const { text: vsPrior, color: vsPriorColor } = computeYoY(s);
+    const category = METRIC_CATEGORY[s.metric] ?? s.label.split(" ")[0] ?? "Metric";
 
     return {
-      key: keys[i] ?? "primary",
-      category: s.label.split(" ")[0] ?? "Metric",
+      key: s.signal_id ?? s.metric,
+      category,
       metric: s.label,
-      sub: s.statement?.slice(0, 50) ?? "",
+      sub: s.statement ?? "",
       current: formatVal(s),
       vsPrior,
-      vsPriorColor: s.direction === "beat" || (s.delta_pct ?? 0) > 0 ? "var(--qc-up)" : s.direction === "miss" ? "var(--qc-down)" : "var(--qc-warn)",
+      vsPriorColor,
       status,
       statusColor: color,
       statusBg: bg,
@@ -119,7 +159,6 @@ function KpiStrip({ topSignals, km }: { topSignals: TopSignal[]; km: Record<stri
   const pool = high.length >= 4 ? high : withValue;
   const tiles = pool.slice(0, 4);
 
-  // Pad with key_metrics if needed
   const kmEntries = Object.entries(km);
   let ki = 0;
   while (tiles.length < 4 && ki < kmEntries.length) {
@@ -160,153 +199,230 @@ function KpiStrip({ topSignals, km }: { topSignals: TopSignal[]; km: Record<stri
   );
 }
 
-// ── Chart: generic signal trend (uses actual_value as single point) ───────────
+// ── Helpers for building chart series from timeseries data ────────────────────
 
-function ChartGeneric({ row }: { row: FinRow }) {
-  const s = row.signal;
-  if (!s || s.actual_value == null) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "var(--qc-ink-3)", fontSize: 12 }}>
-        No chart data available
-      </div>
-    );
+function fmtFY(fiscal_year: string): string {
+  // "FY2024" → "FY'24", handles "FY2020" correctly
+  const year = fiscal_year.replace(/^FY/, "");
+  return `FY'${year.slice(-2)}`;
+}
+
+function buildAnnualSeries(signal: TopSignal): { period: string; value: number }[] {
+  const annual = signal.timeseries?.annual ?? [];
+  const latest = signal.timeseries?.latest_quarter;
+
+  const points = annual.map((p: TimeseriesPoint) => ({
+    period: fmtFY(p.fiscal_year),
+    value: p.value,
+  }));
+
+  if (latest) {
+    points.push({ period: fmtFY(latest.fiscal_year) + "*", value: latest.value });
   }
+
+  return points;
+}
+
+function hasTimeseries(signal: TopSignal): boolean {
+  return (signal.timeseries?.annual?.length ?? 0) > 0 || signal.timeseries?.latest_quarter != null;
+}
+
+// ── Chart: timeseries area/bar for a single selected signal ──────────────────
+
+function ChartSignalTimeseries({ row }: { row: FinRow }) {
+  const s = row.signal;
+  if (!s || !hasTimeseries(s)) return null;
 
   const isPositive = row.statusColor === "var(--qc-up)";
   const color = isPositive ? CHART_UP : CHART_WARN;
-  const hasGuided = s.guided_value != null;
-  const data = hasGuided
-    ? [
-        { label: "Guided", value: s.guided_value! },
-        { label: "Actual", value: s.actual_value },
-      ]
-    : [{ label: s.label.slice(0, 12), value: s.actual_value }];
+  const data = buildAnnualSeries(s);
+  const isPct = s.unit === "%";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ marginBottom: 12 }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", margin: "0 0 2px" }}>{s.label}</p>
-        <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "0 0 10px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-          {s.unit ?? ""} · {s.actual_date ?? "Latest"}
-        </p>
-        <div style={{ display: "flex", gap: 20 }}>
-          <div>
-            <p style={{ fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>Actual</p>
-            <p style={{ fontSize: 18, fontWeight: 600, color, margin: 0 }}>{formatVal(s)}</p>
-          </div>
-          {s.guided_value != null && (
-            <div>
-              <p style={{ fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>Guided</p>
-              <p style={{ fontSize: 18, fontWeight: 600, color: CHART_MUTED, margin: 0 }}>{s.guided_value}{s.unit ?? ""}</p>
-            </div>
-          )}
-          {s.direction && (
-            <div>
-              <p style={{ fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>Status</p>
-              <p style={{ fontSize: 18, fontWeight: 600, color, margin: 0, textTransform: "uppercase" }}>{s.direction}</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <ChartHeader signal={s} color={color} />
       <div style={{ flex: 1, minHeight: 160 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--qc-hair)" vertical={false} />
-            <XAxis dataKey="label" tick={{ fontSize: 9, fill: CHART_MUTED }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 9, fill: CHART_MUTED }} axisLine={false} tickLine={false} />
-            <Tooltip
-              contentStyle={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 6, fontSize: 11 }}
-              formatter={(v: number) => [`${v}${s.unit ?? ""}`, row.metric]}
-            />
-            <Bar dataKey="value" fill={color} fillOpacity={0.75} radius={[2, 2, 0, 0]} />
-          </BarChart>
+          {isPct ? (
+            <BarChart data={data} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--qc-hair)" vertical={false} />
+              <XAxis dataKey="period" tick={{ fontSize: 8, fill: CHART_MUTED }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 9, fill: CHART_MUTED }} axisLine={false} tickLine={false}
+                tickFormatter={(v: number) => formatSeriesVal(v, s.unit)} />
+              <Tooltip
+                contentStyle={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 6, fontSize: 11 }}
+                formatter={(v: number) => [formatSeriesVal(v, s.unit), s.label]}
+              />
+              <Bar dataKey="value" fill={color} fillOpacity={0.8} radius={[2, 2, 0, 0]} />
+            </BarChart>
+          ) : (
+            <AreaChart data={data} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
+              <defs>
+                <linearGradient id={`sigGrad-${s.metric}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={color} stopOpacity={0.15} />
+                  <stop offset="95%" stopColor={color} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--qc-hair)" vertical={false} />
+              <XAxis dataKey="period" tick={{ fontSize: 8, fill: CHART_MUTED }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 9, fill: CHART_MUTED }} axisLine={false} tickLine={false}
+                tickFormatter={(v: number) => formatSeriesVal(v, s.unit)} />
+              <Tooltip
+                contentStyle={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 6, fontSize: 11 }}
+                formatter={(v: number) => [formatSeriesVal(v, s.unit), s.label]}
+              />
+              <Area type="monotone" dataKey="value" stroke={color} strokeWidth={2}
+                fill={`url(#sigGrad-${s.metric})`} dot={{ r: 3, fill: color, strokeWidth: 0 }} />
+            </AreaChart>
+          )}
         </ResponsiveContainer>
+      </div>
+      {data.some((d) => d.period.endsWith("*")) && (
+        <p style={{ fontSize: 9, color: "var(--qc-ink-3)", margin: "4px 0 0", textAlign: "right" }}>* latest quarter (annualised)</p>
+      )}
+    </div>
+  );
+}
+
+function ChartHeader({ signal: s, color }: { signal: TopSignal; color: string }) {
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", margin: "0 0 2px" }}>{s.label}</p>
+      <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "0 0 10px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+        {s.unit ?? ""}{s.unit ? " · " : ""}Annual trend
+      </p>
+      <div style={{ display: "flex", gap: 20 }}>
+        {s.actual_value != null && (
+          <div>
+            <p style={{ fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>Latest</p>
+            <p style={{ fontSize: 18, fontWeight: 600, color, margin: 0 }}>{formatVal(s)}</p>
+          </div>
+        )}
+        {s.guided_value != null && (
+          <div>
+            <p style={{ fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>Guided</p>
+            <p style={{ fontSize: 18, fontWeight: 600, color: CHART_MUTED, margin: 0 }}>{s.guided_value}{s.unit ?? ""}</p>
+          </div>
+        )}
+        {s.direction && (
+          <div>
+            <p style={{ fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--qc-ink-3)", margin: "0 0 2px" }}>Status</p>
+            <p style={{ fontSize: 18, fontWeight: 600, color, margin: 0, textTransform: "uppercase" }}>{s.direction.replace("_", " ")}</p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-// ── Chart: signals with guided vs actual as area/line ─────────────────────────
+// ── Chart: multi-signal overview using timeseries (primary / overview panel) ──
 
-function ChartGrowthSignals({ topSignals }: { topSignals: TopSignal[] }) {
-  const growthSigs = topSignals
-    .filter((s) => s.actual_value != null && s.unit === "%")
-    .slice(0, 6);
+function ChartOverview({ topSignals }: { topSignals: TopSignal[] }) {
+  // Pick up to 3 signals that have annual timeseries data, preferring high-impact
+  const candidates = [
+    ...topSignals.filter((s) => s.impact === "high" && hasTimeseries(s)),
+    ...topSignals.filter((s) => s.impact !== "high" && hasTimeseries(s)),
+  ].slice(0, 3);
 
-  if (growthSigs.length === 0) return null;
+  if (candidates.length === 0) return null;
 
-  const data = growthSigs.map((s) => ({
-    name: s.label.slice(0, 14),
-    actual: s.actual_value,
-    guided: s.guided_value,
-  }));
+  // Build a unified period-keyed dataset aligned across all selected signals
+  const periodSet = new Set<string>();
+  candidates.forEach((s) => {
+    buildAnnualSeries(s).forEach((p) => periodSet.add(p.period));
+  });
+  const periods = Array.from(periodSet).sort();
+
+  const data = periods.map((period) => {
+    const row: Record<string, string | number | null> = { period };
+    candidates.forEach((s) => {
+      const pt = buildAnnualSeries(s).find((p) => p.period === period);
+      row[s.metric] = pt?.value ?? null;
+    });
+    return row;
+  });
+
+  const colors = [CHART_UP, "#3A6BEF", CHART_WARN];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ marginBottom: 8 }}>
         <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", margin: "0 0 2px" }}>Key Metrics Overview</p>
         <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-          Actual vs Guided · %
+          Annual trend
         </p>
       </div>
       <div style={{ flex: 1, minHeight: 160 }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
             <defs>
-              <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={CHART_UP} stopOpacity={0.15} />
-                <stop offset="95%" stopColor={CHART_UP} stopOpacity={0} />
-              </linearGradient>
+              {candidates.map((s, i) => (
+                <linearGradient key={s.metric} id={`ovGrad-${s.metric}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={colors[i]} stopOpacity={0.12} />
+                  <stop offset="95%" stopColor={colors[i]} stopOpacity={0} />
+                </linearGradient>
+              ))}
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--qc-hair)" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontSize: 8, fill: CHART_MUTED }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 9, fill: CHART_MUTED }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} />
+            <XAxis dataKey="period" tick={{ fontSize: 8, fill: CHART_MUTED }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 9, fill: CHART_MUTED }} axisLine={false} tickLine={false}
+              tickFormatter={(v: number) => {
+                const primary = candidates[0];
+                return formatSeriesVal(v, primary?.unit ?? null);
+              }} />
             <Tooltip
               contentStyle={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 6, fontSize: 11 }}
-              formatter={(v: number, name: string) => [`${v}%`, name === "actual" ? "Actual" : "Guided"]}
+              formatter={(v: number, name: string) => {
+                const sig = candidates.find((s) => s.metric === name);
+                return [formatSeriesVal(v, sig?.unit ?? null), sig?.label ?? name];
+              }}
             />
-            <Area type="monotone" dataKey="actual" stroke={CHART_UP} strokeWidth={2} fill="url(#actGrad)" />
-            <Line type="monotone" dataKey="guided" stroke={CHART_MUTED} strokeWidth={1.5} strokeDasharray="5 3"
-              dot={(props: { cx: number; cy: number; index: number }) => (
-                <circle key={`g-${props.index}`} cx={props.cx} cy={props.cy} r={2} fill={CHART_MUTED} />
-              )}
-            />
+            {candidates.map((s, i) => (
+              <Area key={s.metric} type="monotone" dataKey={s.metric}
+                stroke={colors[i]} strokeWidth={2}
+                fill={`url(#ovGrad-${s.metric})`}
+                dot={{ r: 2, fill: colors[i], strokeWidth: 0 }}
+                connectNulls
+              />
+            ))}
           </AreaChart>
         </ResponsiveContainer>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <span style={{ display: "inline-block", width: 16, height: 2, background: CHART_UP, borderRadius: 1 }} />
-          <span style={{ fontSize: 9, color: CHART_MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>Actual</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke={CHART_MUTED} strokeWidth="1.5" strokeDasharray="5 3" /></svg>
-          <span style={{ fontSize: 9, color: CHART_MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>Guided</span>
-        </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 8, flexWrap: "wrap" }}>
+        {candidates.map((s, i) => (
+          <div key={s.metric} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ display: "inline-block", width: 16, height: 2, background: colors[i], borderRadius: 1 }} />
+            <span style={{ fontSize: 9, color: CHART_MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              {s.label.slice(0, 20)}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function ChartPanel({ activeKey, rows, topSignals }: { activeKey: RowKey; rows: FinRow[]; topSignals: TopSignal[] }) {
-  if (activeKey === "primary") {
-    const growthSigs = topSignals.filter((s) => s.actual_value != null && s.unit === "%");
-    if (growthSigs.length >= 2) return <ChartGrowthSignals topSignals={topSignals} />;
+function ChartPanel({ activeKey, rows, topSignals }: { activeKey: string | null; rows: FinRow[]; topSignals: TopSignal[] }) {
+  if (activeKey === null) {
+    const overviewSignals = topSignals.filter(hasTimeseries);
+    if (overviewSignals.length >= 2) return <ChartOverview topSignals={overviewSignals} />;
   }
   const row = rows.find((r) => r.key === activeKey);
   if (!row) return null;
-  return <ChartGeneric row={row} />;
+  return <ChartSignalTimeseries row={row} />;
 }
 
 // ── Main export ──────────────────────────────────────────────────────────────
 
-export function LensDetailFinancial({ lens, isBfsi }: Props) {
-  const topSignals: TopSignal[] = dedup(lens.top_signals ?? []);
-  const [activeKey, setActiveKey] = useState<RowKey>("primary");
+export function LensDetailFinancial({ lens, ticker }: Props) {
+  const { data: fsData } = useFinancialStrength(ticker ?? "");
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+
+  // Prefer timeseries-enriched signals from the dedicated endpoint; fall back to lens signals
+  const rawSignals = fsData?.top_signals ?? lens.top_signals ?? [];
+  const topSignals: TopSignal[] = dedup(rawSignals);
 
   const rows = buildRows(topSignals);
-  const activeRow = rows.find((r) => r.key === activeKey) ?? rows[0];
-
   const summaryMetrics = rows.slice(0, 3).map((r) => ({
     label: r.category,
     value: r.current,
@@ -322,16 +438,27 @@ export function LensDetailFinancial({ lens, isBfsi }: Props) {
 
         {/* Left — signal table */}
         <div style={{ borderRight: "1px solid var(--qc-hair)", overflowX: "auto" }}>
+          {/* Header */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "70px 1fr 90px 110px 90px",
-            minWidth: 460,
-            gap: 8, padding: "8px 14px",
+            gridTemplateColumns: "72px 1fr 96px 88px",
+            minWidth: 380,
             background: "var(--qc-section)",
             borderBottom: "1px solid var(--qc-hair)",
           }}>
-            {["SIGNAL", "METRIC", "CURRENT", isBfsi ? "YoY TREND" : "VS GUIDED", "STATUS"].map((h) => (
-              <p key={h} style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", margin: 0 }}>{h}</p>
+            {[
+              { label: "SIGNAL", align: "left" as const },
+              { label: "METRIC", align: "left" as const },
+              { label: "CURRENT", align: "right" as const },
+              { label: "STATUS", align: "left" as const },
+            ].map((h, ci) => (
+              <p key={h.label} style={{
+                fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.10em",
+                color: "var(--qc-ink-3)", margin: 0,
+                padding: "8px 12px",
+                textAlign: h.align,
+                borderRight: ci < 3 ? "1px solid var(--qc-hair)" : undefined,
+              }}>{h.label}</p>
             ))}
           </div>
 
@@ -349,29 +476,38 @@ export function LensDetailFinancial({ lens, isBfsi }: Props) {
                 onClick={() => setActiveKey(row.key)}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "70px 1fr 90px 110px 90px",
-                  minWidth: 460,
-                  gap: 8, alignItems: "center", padding: "11px 14px",
+                  gridTemplateColumns: "72px 1fr 96px 88px",
+                  minWidth: 380,
+                  alignItems: "center",
                   borderBottom: i < rows.length - 1 ? "1px solid var(--qc-hair)" : undefined,
                   background: isActive ? `${row.statusColor}10` : "var(--qc-card)",
                   borderLeft: isActive ? `3px solid ${row.statusColor}` : "3px solid transparent",
                   cursor: "pointer", transition: "background 0.15s",
                 }}
               >
-                <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, fontWeight: 500, lineHeight: 1.3 }}>{row.category.slice(0, 10)}</p>
-                <div>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>{row.metric.slice(0, 30)}</p>
-                  {row.sub && <p style={{ fontSize: 9, color: "var(--qc-ink-3)", margin: "2px 0 0", lineHeight: 1.3 }}>{row.sub}</p>}
+                <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, fontWeight: 500, lineHeight: 1.3, padding: "11px 12px", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", alignItems: "center" }}>{row.category}</p>
+                <div style={{ padding: "11px 12px", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch" }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", margin: 0, lineHeight: 1.4 }}>
+                    {row.metric}
+                  </p>
+                  {row.sub && <p style={{ fontSize: 9, color: "var(--qc-ink-3)", margin: "2px 0 0", lineHeight: 1.4 }}>{row.sub}</p>}
                 </div>
-                <p style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>{row.current}</p>
-                <p style={{ fontSize: 10, fontWeight: 600, color: row.vsPriorColor, margin: 0 }}>{row.vsPrior}</p>
-                <span style={{
-                  fontSize: 8, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
-                  color: row.statusColor, background: row.statusBg,
-                  padding: "2px 6px", borderRadius: 4, whiteSpace: "nowrap",
-                }}>
-                  {row.status}
-                </span>
+                <div style={{ padding: "11px 12px", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", textAlign: "right" }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>{row.current}</p>
+                  {row.vsPrior !== "—" && (
+                    <p style={{ fontSize: 10, fontWeight: 600, color: row.vsPriorColor, margin: "2px 0 0" }}>{row.vsPrior}</p>
+                  )}
+                </div>
+                <div style={{ padding: "11px 12px", display: "flex", alignItems: "center" }}>
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 9, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase",
+                    color: row.statusColor, background: row.statusBg,
+                    padding: "4px 8px", borderRadius: 4, whiteSpace: "nowrap", lineHeight: 1,
+                  }}>
+                    {row.status}
+                  </span>
+                </div>
               </div>
             );
           })}
@@ -386,7 +522,7 @@ export function LensDetailFinancial({ lens, isBfsi }: Props) {
       {/* Summary footer */}
       <LensDrawerSummaryCard
         title={lens.name}
-        body={lens.takeaway}
+        body={fsData?.takeaway ?? lens.takeaway}
         metrics={summaryMetrics}
       />
     </div>

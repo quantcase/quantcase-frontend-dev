@@ -55,7 +55,7 @@ function LensDetailView({ lens, ticker, isBfsi }: { lens: LensDetail; ticker?: s
     case "competition":
       return <LensDetailCompetition lens={lens} ticker={ticker} />;
     case "financial-strength":
-      return <LensDetailFinancial lens={lens} isBfsi={isBfsi} />;
+      return <LensDetailFinancial lens={lens} ticker={ticker} isBfsi={isBfsi} />;
     case "customer-distribution":
       return <LensDetailCustomer lens={lens} />;
     case "eps-engine":

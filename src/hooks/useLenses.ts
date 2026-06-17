@@ -30,6 +30,8 @@ export interface TopSignal {
   impact: string | null;
   statement: string | null;
   original_statement: string | null;
+  source_ref?: string | null;
+  evidence?: PatternEvidence[];
   timeseries?: {
     annual: TimeseriesPoint[];
     latest_quarter: TimeseriesPoint | null;
@@ -44,7 +46,7 @@ export interface PatternEvidence {
 }
 
 export interface Pattern {
-  type: "drumbeat" | "emergence" | "going_quiet" | "tone_divergence" | "narrative_gap" | "street_pressure" | string;
+  pattern_type: "drumbeat" | "emergence" | "going_quiet" | "tone_divergence" | "narrative_gap" | "street_pressure" | string;
   label: string;
   impact: "high" | "medium" | "low" | string;
   direction: "positive" | "negative" | "neutral" | "watch" | string;
@@ -52,6 +54,8 @@ export interface Pattern {
   confidence: number;
   confidence_reason: string;
   evidence: PatternEvidence[];
+  statement?: string | null;
+  source_ref?: string | null;
   shape_data: string | null;
   shape_label: string | null;
 }

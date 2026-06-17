@@ -19,6 +19,7 @@ function directionConfig(direction: string | null, impact: string | null) {
   if (d === "miss") return { label: "MISS", color: "var(--qc-down)", bg: "rgba(220,38,38,0.08)", border: "rgba(220,38,38,0.25)", leftBorder: "var(--qc-down)" };
   if (d === "mediocre" || d === "minor_miss") return { label: d === "minor_miss" ? "MINOR" : "MEDIOCRE", color: "var(--qc-warn)", bg: "rgba(180,115,26,0.08)", border: "rgba(180,115,26,0.25)", leftBorder: "var(--qc-warn)" };
   if (d === "rolled_forward") return { label: "ROLLED FWD", color: "var(--qc-blue)", bg: "rgba(37,99,235,0.08)", border: "rgba(37,99,235,0.25)", leftBorder: "var(--qc-blue)" };
+  if (d === "unresolvable") return { label: "UNRESOLVABLE", color: "var(--qc-ink-3)", bg: "var(--qc-section)", border: "var(--qc-hair)", leftBorder: "var(--qc-hair)" };
   if (d === "tracking") {
     if (imp === "high") return { label: "TRACKING", color: "var(--qc-up)", bg: "rgba(31,122,74,0.08)", border: "rgba(31,122,74,0.25)", leftBorder: "var(--qc-up)" };
     return { label: "TRACKING", color: "var(--qc-ink-2)", bg: "var(--qc-section)", border: "var(--qc-hair)", leftBorder: "var(--qc-hair)" };
@@ -77,84 +78,144 @@ interface TooltipProps {
 }
 
 function SignalTooltip({ signal: s, anchorRect, dirCfg, metricTitle, guidedStr, actualStr, deltaStr, dateLabel }: TooltipProps) {
-  const WIDTH = 420;
+  const WIDTH = 440;
   const GAP = 8;
   const vpW = typeof window !== "undefined" ? window.innerWidth : 1200;
   const vpH = typeof window !== "undefined" ? window.innerHeight : 800;
 
   const left = Math.min(Math.max(anchorRect.left, 8), vpW - WIDTH - 8);
-
-  const ESTIMATED_HEIGHT = 200;
+  const ESTIMATED_HEIGHT = 480;
   const spaceBelow = vpH - anchorRect.bottom - GAP;
   const showAbove = spaceBelow < ESTIMATED_HEIGHT && anchorRect.top > ESTIMATED_HEIGHT;
   const top = showAbove ? anchorRect.top - ESTIMATED_HEIGHT - GAP : anchorRect.bottom + GAP;
 
-  const cells: Array<{ label: string; value: string; accent?: boolean }> = [];
-  if (dateLabel) cells.push({ label: "Period", value: dateLabel });
-  if (s.announcement_date) cells.push({ label: "Announced", value: s.announcement_date });
-  if (guidedStr && guidedStr !== "—") cells.push({ label: "Guided", value: guidedStr, accent: true });
-  if (s.target_date) cells.push({ label: "Target date", value: formatDate(s.target_date) });
-  if (actualStr && actualStr !== "—") cells.push({ label: "Actual", value: actualStr, accent: true });
-  if (s.actual_date) cells.push({ label: "Actual date", value: formatDate(s.actual_date) });
-  if (s.value_at_announcement != null) cells.push({ label: "At announcement", value: `${s.value_at_announcement} ${s.unit ?? ""}`.trim() });
-  if (deltaStr) cells.push({ label: "Delta", value: deltaStr, accent: true });
-  if (s.impact) cells.push({ label: "Impact", value: s.impact });
+  const BG      = "#16181d";
+  const BORDER  = "rgba(255,255,255,0.08)";
+  const DIVIDER = "rgba(255,255,255,0.07)";
+  const MUTED   = "rgba(255,255,255,0.35)";
+  const BODY    = "rgba(255,255,255,0.70)";
+  const WHITE   = "#ffffff";
 
-  // Dark palette constants
-  const BG       = "#16181d";
-  const BORDER   = "rgba(255,255,255,0.08)";
-  const DIVIDER  = "rgba(255,255,255,0.07)";
-  const MUTED    = "rgba(255,255,255,0.38)";
-  const BODY     = "rgba(255,255,255,0.72)";
-  const WHITE    = "#ffffff";
+  const Lbl = ({ children }: { children: React.ReactNode }) => (
+    <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.09em", color: MUTED, display: "block", marginBottom: 3 }}>
+      {children}
+    </span>
+  );
 
   const content = (
     <div style={{
       position: "fixed", top, left, width: WIDTH, zIndex: 9999,
-      background: BG,
-      border: `1px solid ${BORDER}`,
-      borderRadius: 12,
-      boxShadow: "0 16px 48px rgba(0,0,0,0.45)",
-      overflow: "hidden",
-      pointerEvents: "none",
+      background: BG, border: `1px solid ${BORDER}`,
+      borderRadius: 12, boxShadow: "0 20px 56px rgba(0,0,0,0.55)",
+      overflow: "hidden", pointerEvents: "none",
+      fontFamily: "var(--font-ibm-plex-sans, sans-serif)",
     }}>
-      {/* Header */}
-      <div style={{ padding: "12px 16px 11px", borderBottom: `1px solid ${DIVIDER}`, display: "flex", alignItems: "center", gap: 10 }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: WHITE, margin: 0, flex: 1, letterSpacing: "-0.01em" }}>{metricTitle}</p>
+
+      {/* ── Header ── */}
+      <div style={{ padding: "12px 16px", borderBottom: `1px solid ${DIVIDER}`, display: "flex", alignItems: "center", gap: 8 }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: WHITE, margin: 0, flex: 1, letterSpacing: "-0.01em", lineHeight: 1.3 }}>{metricTitle}</p>
         <span style={{
           fontSize: 10, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase",
-          color: dirCfg.color, background: "rgba(255,255,255,0.07)", border: `1px solid rgba(255,255,255,0.12)`,
-          borderRadius: 5, padding: "2px 8px", flexShrink: 0,
+          color: dirCfg.color, background: "rgba(255,255,255,0.06)", border: `1px solid ${dirCfg.color}44`,
+          borderRadius: 5, padding: "3px 9px", flexShrink: 0,
         }}>{dirCfg.label}</span>
-        {deltaStr && <span style={{ fontSize: 13, fontWeight: 600, color: dirCfg.color, flexShrink: 0 }}>{deltaStr}</span>}
+        {deltaStr && <span style={{ fontSize: 14, fontWeight: 700, color: dirCfg.color, flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{deltaStr}</span>}
       </div>
 
-      {/* Statement */}
-      {s.statement && (
-        <div style={{ padding: "10px 16px 11px", borderBottom: `1px solid ${DIVIDER}` }}>
-          <p style={{ fontSize: 12, color: BODY, margin: 0, lineHeight: 1.6 }}>{s.statement}</p>
-        </div>
-      )}
+      {/* ── Guided → Actual → Delta strip ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderBottom: `1px solid ${DIVIDER}` }}>
+        {[
+          { label: "Guided", value: guidedStr !== "—" ? guidedStr : "—" },
+          { label: "Actual", value: actualStr !== "—" ? actualStr : "—" },
+          { label: "Delta", value: deltaStr || "—" },
+        ].map(({ label, value }, i) => (
+          <div key={label} style={{
+            padding: "10px 14px",
+            borderRight: i < 2 ? `1px solid ${DIVIDER}` : undefined,
+          }}>
+            <Lbl>{label}</Lbl>
+            <span style={{ fontSize: 16, fontWeight: 700, color: label === "Delta" && deltaStr ? dirCfg.color : WHITE, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
+              {value}
+            </span>
+          </div>
+        ))}
+      </div>
 
-      {/* Original statement */}
-      {s.original_statement && (
-        <div style={{ padding: "10px 16px 11px", borderBottom: `1px solid ${DIVIDER}` }}>
-          <p style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.09em", color: MUTED, margin: "0 0 4px" }}>Original statement</p>
-          <p style={{ fontSize: 12, color: BODY, margin: 0, lineHeight: 1.6, fontStyle: "italic" }}>{s.original_statement}</p>
-        </div>
-      )}
+      {/* ── Timeline dates ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderBottom: `1px solid ${DIVIDER}` }}>
+        {[
+          { label: "Announced", value: s.announcement_date ? formatDate(s.announcement_date) : "—" },
+          { label: "Target date", value: s.target_date ? formatDate(s.target_date) : "—" },
+          { label: "Actual date", value: s.actual_date ? formatDate(s.actual_date) : "—" },
+        ].map(({ label, value }, i) => (
+          <div key={label} style={{
+            padding: "8px 14px",
+            borderRight: i < 2 ? `1px solid ${DIVIDER}` : undefined,
+          }}>
+            <Lbl>{label}</Lbl>
+            <span style={{ fontSize: 12, fontWeight: 500, color: BODY, fontVariantNumeric: "tabular-nums" }}>{value}</span>
+          </div>
+        ))}
+      </div>
 
-      {/* 2-col data grid */}
-      {cells.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", padding: "12px 16px", gap: "10px 20px" }}>
-          {cells.map(({ label, value, accent }) => (
-            <div key={label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <span style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.09em", color: MUTED }}>{label}</span>
-              <span style={{ fontSize: 13, fontWeight: accent ? 600 : 400, color: accent ? WHITE : BODY, fontVariantNumeric: "tabular-nums", letterSpacing: accent ? "-0.01em" : undefined }}>{value}</span>
+      {/* ── Statement / original statement ── */}
+      {(s.statement || s.original_statement) && (
+        <div style={{ padding: "10px 16px", borderBottom: `1px solid ${DIVIDER}`, display: "flex", flexDirection: "column", gap: 8 }}>
+          {s.statement && (
+            <div>
+              <Lbl>Statement</Lbl>
+              <p style={{ fontSize: 12, color: BODY, margin: 0, lineHeight: 1.6 }}>{s.statement}</p>
             </div>
-          ))}
+          )}
+          {s.original_statement && s.original_statement !== s.statement && (
+            <div>
+              <Lbl>Original quote</Lbl>
+              <p style={{ fontSize: 11, color: BODY, margin: 0, lineHeight: 1.6, fontStyle: "italic", opacity: 0.8 }}>"{s.original_statement}"</p>
+            </div>
+          )}
         </div>
       )}
+
+      {/* ── Evidence quotes ── */}
+      {s.evidence && s.evidence.length > 0 && (
+        <div style={{ padding: "10px 16px 12px" }}>
+          <Lbl>Evidence ({s.evidence.length})</Lbl>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4 }}>
+            {s.evidence.map((ev, i) => (
+              <div key={i} style={{
+                display: "flex", gap: 10, alignItems: "flex-start",
+                background: "rgba(255,255,255,0.04)", borderRadius: 7,
+                padding: "8px 10px", border: `1px solid ${DIVIDER}`,
+              }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap", marginTop: 2, minWidth: 48 }}>
+                  {formatDate(ev.period)}
+                </span>
+                <p style={{ fontSize: 11, color: BODY, margin: 0, lineHeight: 1.55, fontStyle: "italic" }}>"{ev.quote}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Footer metadata ── */}
+      <div style={{
+        padding: "7px 16px", borderTop: `1px solid ${DIVIDER}`,
+        display: "flex", alignItems: "center", gap: 16,
+        background: "rgba(255,255,255,0.02)",
+      }}>
+        {s.source_ref && (
+          <span style={{ fontSize: 10, color: MUTED }}>
+            <span style={{ color: "rgba(255,255,255,0.20)", marginRight: 5 }}>SOURCE</span>{s.source_ref}
+          </span>
+        )}
+        {s.impact && (
+          <span style={{ fontSize: 10, color: MUTED, marginLeft: "auto" }}>
+            <span style={{ color: "rgba(255,255,255,0.20)", marginRight: 5 }}>IMPACT</span>
+            <span style={{ color: s.impact === "high" ? "#facc15" : BODY, fontWeight: 600, textTransform: "uppercase" }}>{s.impact}</span>
+          </span>
+        )}
+      </div>
+
     </div>
   );
 
@@ -163,9 +224,9 @@ function SignalTooltip({ signal: s, anchorRect, dirCfg, metricTitle, guidedStr, 
 
 // ── QC Intuition — pattern recognition table ─────────────────────────────────
 
-function patternTypeConfig(type: string, direction: string) {
-  const d = direction.toLowerCase();
-  const t = type.toLowerCase();
+function patternTypeConfig(type: string | undefined, direction: string | undefined) {
+  const d = (direction ?? "").toLowerCase();
+  const t = (type ?? "").toLowerCase();
 
   const isPositive = d === "positive";
   const isNegative = d === "negative";
@@ -191,25 +252,29 @@ function patternTypeConfig(type: string, direction: string) {
 function PatternSparkline({ shapeData }: { shapeData: string | null }) {
   if (!shapeData) return <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>—</span>;
 
-  let points: Array<{ period: string; value: number }> = [];
+  let values: number[] = [];
   try {
-    points = JSON.parse(shapeData);
+    const parsed = JSON.parse(shapeData);
+    if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === "object") {
+      values = (parsed as Array<{ count?: number; value?: number }>).map((p) => p.count ?? p.value ?? 0);
+    } else if (Array.isArray(parsed)) {
+      values = parsed.map(Number).filter((v) => !isNaN(v));
+    }
   } catch {
-    return <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>—</span>;
+    values = shapeData.split(",").map(Number).filter((v) => !isNaN(v));
   }
 
-  if (points.length < 2) return <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>{points[0]?.value ?? "—"}</span>;
+  if (values.length < 2) return <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>{values[0] ?? "—"}</span>;
 
   const W = 120, H = 36, PAD = 4;
-  const values = points.map((p) => p.value);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
 
-  const coords = points.map((p, i) => {
-    const x = PAD + (i / (points.length - 1)) * (W - PAD * 2);
-    const y = H - PAD - ((p.value - min) / range) * (H - PAD * 2);
-    return { x, y, ...p };
+  const coords = values.map((v, i) => {
+    const x = PAD + (i / (values.length - 1)) * (W - PAD * 2);
+    const y = H - PAD - ((v - min) / range) * (H - PAD * 2);
+    return { x, y };
   });
 
   const pathD = coords.map((c, i) => `${i === 0 ? "M" : "L"}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
@@ -288,7 +353,7 @@ function QCIntuitionTable({ patterns }: { patterns: Pattern[] }) {
       {/* Pattern rows */}
       <div style={{ background: "var(--qc-card)" }}>
         {patterns.map((p, i) => {
-          const cfg = patternTypeConfig(p.type, p.direction);
+          const cfg = patternTypeConfig(p.pattern_type, p.direction);
           const isLast = i === patterns.length - 1;
           const isExpanded = expandedIdx === i;
           const confidencePct = Math.round(p.confidence * 100);
@@ -412,7 +477,7 @@ function QCIntuitionTable({ patterns }: { patterns: Pattern[] }) {
           THE EDGE
         </span>
         <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", margin: 0, lineHeight: 1.6 }}>
-          {patterns.find((p) => p.type === "street_pressure")?.sentence
+          {patterns.find((p) => p.pattern_type === "street_pressure")?.sentence
             ?? patterns[0]?.sentence
             ?? "Patterns extracted from multi-quarter transcript analysis."}
         </p>
@@ -444,7 +509,10 @@ export function LensDetailGuidance({ lens }: Props) {
   const headlineMajorMiss = topSignals.find((s) => s.metric === "HEADLINE_MAJOR_MISS");
   const headlineGuidanceBias = topSignals.find((s) => s.metric === "HEADLINE_GUIDANCE_BIAS");
   const timelineSignals = topSignals.filter(
-    (s) => !["HEADLINE_HIT_RATE", "HEADLINE_MAJOR_MISS", "HEADLINE_GUIDANCE_BIAS", "HEADLINE_ENTRY_COUNT"].includes(s.metric) && s.direction != null
+    (s) => !["HEADLINE_HIT_RATE", "HEADLINE_MAJOR_MISS", "HEADLINE_GUIDANCE_BIAS", "HEADLINE_ENTRY_COUNT"].includes(s.metric)
+      && s.direction != null
+      && (s.direction as string) !== "none"
+      && (s.direction as string) !== "unresolvable"
   );
 
   // Hit Rate tile
@@ -613,29 +681,31 @@ export function LensDetailGuidance({ lens }: Props) {
             const cfg = directionConfig(s.direction, s.impact);
             const isTracking = (s.direction ?? "").toLowerCase() === "tracking";
             // value_targeted / value_at_announcement are the authoritative keys; fall back to guided_value
+            // -1 is the sentinel meaning "no value" from the API
             const guidedRaw = s.value_targeted ?? s.value_at_announcement ?? s.guided_value;
-            const guidedNum = (guidedRaw !== null && guidedRaw !== undefined && (guidedRaw as unknown) !== "undefined") ? guidedRaw : null;
-            const actualNum = (s.actual_value !== null && s.actual_value !== undefined && (s.actual_value as unknown) !== "undefined" && s.actual_value !== 0) ? s.actual_value : null;
+            const guidedNum = (guidedRaw !== null && guidedRaw !== undefined && (guidedRaw as unknown) !== "undefined" && guidedRaw !== -1) ? guidedRaw : null;
+            const actualNum = (s.actual_value !== null && s.actual_value !== undefined && (s.actual_value as unknown) !== "undefined" && s.actual_value !== -1) ? s.actual_value : null;
             const guidedStr = formatValue(guidedNum, s.unit);
             const actualStr = formatValue(actualNum, s.unit, isTracking || actualNum === null);
-            const hasDelta = !isTracking && s.delta_pct != null && guidedNum !== null && actualNum !== null;
+            // Compute delta inline if API doesn't provide it
+            const computedDelta = (guidedNum !== null && actualNum !== null && guidedNum !== 0) ? actualNum - guidedNum : null;
+            const computedDeltaPct = (guidedNum !== null && actualNum !== null && guidedNum !== 0) ? ((actualNum - guidedNum) / Math.abs(guidedNum)) * 100 : null;
+            const effectiveDelta = s.delta ?? computedDelta;
+            const effectiveDeltaPct = s.delta_pct ?? computedDeltaPct;
+            const hasDelta = !isTracking && effectiveDeltaPct != null && guidedNum !== null && actualNum !== null;
             const hasGuidedOrActual = guidedNum !== null || actualNum !== null;
-            // announcement_date is the period label (e.g. "Q3 FY26"); fall back to target_date → guided_date → actual_date
-            const dateLabel = s.announcement_date ?? s.label ?? formatDate(s.target_date ?? s.guided_date ?? s.actual_date);
-            // Extract a clean metric title from the statement (everything before " guided") or fall back to formatted metric key
-            const statementTitle = s.statement
-              ? s.statement.split(/ guided | at | guided at /i)[0].trim()
-              : null;
-            const metricTitle = statementTitle && statementTitle.length <= 40
-              ? statementTitle
-              : s.metric.replace(/_/g, " ");
+            // announcement_date = when guidance was made; target_date = when it was due
+            const announcedLabel = formatDate(s.announcement_date);
+            const targetLabel = formatDate(s.target_date ?? s.actual_date);
+            // label is the clean human-readable signal name; fall back to formatted metric key
+            const metricTitle = (s.label && s.label.length > 0) ? s.label : s.metric.replace(/_/g, " ");
 
             return (
               <div
                 key={s.signal_id ?? `${s.metric}-${i}`}
                 onMouseEnter={(e) => {
                   const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                  showTooltip({ signal: s, rect, metricTitle, guidedStr, actualStr, deltaStr: hasDelta ? deltaLabel(s.delta, s.delta_pct, s.unit) : "", dateLabel });
+                  showTooltip({ signal: s, rect, metricTitle, guidedStr, actualStr, deltaStr: hasDelta ? deltaLabel(effectiveDelta, effectiveDeltaPct, s.unit) : "", dateLabel: announcedLabel });
                 }}
                 onMouseLeave={hideTooltip}
                 style={{
@@ -649,18 +719,24 @@ export function LensDetailGuidance({ lens }: Props) {
                 }}
               >
                 {/* Date / period column */}
+                {/* Date column: announced → due */}
                 <div style={{
                   padding: "14px 10px 14px 12px",
                   borderRight: "1px solid var(--qc-hair)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  alignSelf: "stretch",
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  alignSelf: "stretch", gap: 3,
                 }}>
                   <span style={{ fontSize: 9, fontWeight: 600, color: "var(--qc-ink-3)", textTransform: "uppercase", letterSpacing: "0.06em", textAlign: "center", lineHeight: 1.4 }}>
-                    {dateLabel}
+                    {announcedLabel}
                   </span>
+                  {targetLabel && targetLabel !== announcedLabel && (
+                    <span style={{ fontSize: 8, color: "var(--qc-ink-3)", textTransform: "uppercase", letterSpacing: "0.04em", textAlign: "center", lineHeight: 1.4, opacity: 0.6 }}>
+                      → {targetLabel}
+                    </span>
+                  )}
                 </div>
 
-                {/* Metric name + statement */}
+                {/* Metric name + label */}
                 <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch" }}>
                   <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>
                     {metricTitle}
@@ -692,7 +768,7 @@ export function LensDetailGuidance({ lens }: Props) {
                     fontSize: 13, fontWeight: 600, color: hasDelta ? cfg.color : "var(--qc-ink-3)",
                     fontVariantNumeric: "tabular-nums",
                   }}>
-                    {hasDelta ? deltaLabel(s.delta, s.delta_pct, s.unit) : ""}
+                    {hasDelta ? deltaLabel(effectiveDelta, effectiveDeltaPct, s.unit) : ""}
                   </span>
                 </div>
 

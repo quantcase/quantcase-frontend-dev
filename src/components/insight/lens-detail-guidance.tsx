@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { LensDetail, TopSignal, Pattern } from "@/hooks/useLenses";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
@@ -74,10 +74,9 @@ interface TooltipProps {
   guidedStr: string;
   actualStr: string;
   deltaStr: string;
-  dateLabel: string;
 }
 
-function SignalTooltip({ signal: s, anchorRect, dirCfg, metricTitle, guidedStr, actualStr, deltaStr, dateLabel }: TooltipProps) {
+function SignalTooltip({ signal: s, anchorRect, dirCfg, metricTitle, guidedStr, actualStr, deltaStr }: TooltipProps) {
   const WIDTH = 440;
   const GAP = 8;
   const vpW = typeof window !== "undefined" ? window.innerWidth : 1200;
@@ -243,6 +242,14 @@ function patternTypeConfig(type: string | undefined, direction: string | undefin
     tone_divergence: "TONE SHIFT",
     narrative_gap: "GAP",
     street_pressure: "STREET PRESSURE",
+    voluntary_statutory_ratio: "VOLUNTARY STATUTORY RATIO",
+    granularity_by_segment: "GRANULARITY BY SEGMENT",
+    exceptional_item_framing: "EXCEPTIONAL ITEMS",
+    bad_news_acknowledgement: "REACTIVE",
+    audit_matter_evolution: "AUDIT",
+    says_clearly: "SAYS CLEARLY",
+    says_vaguely: "SAYS VAGUELY",
+    doesnt_say: "DOESN'T SAY",
   };
   const label = labelMap[t] ?? t.replace(/_/g, " ").toUpperCase();
 
@@ -291,8 +298,17 @@ function PatternSparkline({ shapeData }: { shapeData: string | null }) {
   );
 }
 
-function QCIntuitionTable({ patterns }: { patterns: Pattern[] }) {
+function QCIntuitionTable({ patterns, signalCount, title, subtitle }: { patterns: Pattern[]; signalCount?: number; title?: string; subtitle?: React.ReactNode }) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const displayCount = signalCount ?? patterns.reduce((sum, p) => sum + p.evidence.length, 0) * 50;
+  const displayTitle = title ?? "What management is really saying";
+  const displaySubtitle = subtitle ?? (
+    <>
+      Narrative themes extracted from <strong style={{ color: "rgba(255,255,255,0.80)", fontWeight: 600 }}>earnings calls, annual reports &amp; investor decks</strong>.{" "}
+      Each theme tracks how often and how confidently management references it — surfacing strategic pivots{" "}
+      <strong style={{ color: "rgba(255,255,255,0.80)", fontWeight: 600 }}>before they show in the P&amp;L</strong>.
+    </>
+  );
 
   return (
     <div style={{
@@ -319,7 +335,7 @@ function QCIntuitionTable({ patterns }: { patterns: Pattern[] }) {
           </span>
           <div style={{ textAlign: "right" }}>
             <p style={{ fontSize: 20, fontWeight: 700, color: "#ffffff", margin: 0, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-              {patterns.reduce((sum, p) => sum + p.evidence.length, 0) * 50}+
+              {displayCount}+
             </p>
             <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)", margin: "3px 0 0" }}>
               signals parsed
@@ -327,12 +343,10 @@ function QCIntuitionTable({ patterns }: { patterns: Pattern[] }) {
           </div>
         </div>
         <h3 style={{ fontSize: 20, fontWeight: 600, color: "#ffffff", margin: 0, lineHeight: 1.25, letterSpacing: "-0.02em" }}>
-          What management is really saying
+          {displayTitle}
         </h3>
         <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", margin: 0, lineHeight: 1.55 }}>
-          Narrative themes extracted from <strong style={{ color: "rgba(255,255,255,0.80)", fontWeight: 600 }}>earnings calls, annual reports &amp; investor decks</strong>.{" "}
-          Each theme tracks how often and how confidently management references it — surfacing strategic pivots{" "}
-          <strong style={{ color: "rgba(255,255,255,0.80)", fontWeight: 600 }}>before they show in the P&amp;L</strong>.
+          {displaySubtitle}
         </p>
       </div>
 
@@ -343,7 +357,7 @@ function QCIntuitionTable({ patterns }: { patterns: Pattern[] }) {
         borderBottom: "1px solid var(--qc-hair)",
         padding: "0 24px",
       }}>
-        {["THEME", "SIGNAL TREND", "STATUS", "WHAT IT MEANS"].map((h, i) => (
+        {["PATTERN", "SIGNAL TREND", "STATUS", "WHAT IT MEANS"].map((h, i) => (
           <div key={h} style={{ padding: "8px 0", paddingRight: i < 3 ? 12 : 0 }}>
             <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--qc-ink-3)" }}>{h}</span>
           </div>
@@ -486,9 +500,453 @@ function QCIntuitionTable({ patterns }: { patterns: Pattern[] }) {
   );
 }
 
+// ── Section 1: Credibility Over Time scatter ────────────────────────────────
+
+function scatterFY(dateStr: string | null): number | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return d.getMonth() < 3 ? d.getFullYear() : d.getFullYear() + 1;
+}
+
+function CredibilityScatter({ signals }: { signals: TopSignal[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      setWidth(entries[0].contentRect.width);
+    });
+    ro.observe(el);
+    setWidth(el.getBoundingClientRect().width);
+    return () => ro.disconnect();
+  }, []);
+
+  const FY_UP   = "#1f7a4a";
+  const FY_DOWN = "#dc2626";
+  const FY_WARN = "#b4731a";
+
+  type DotKind = "beat" | "miss" | "tracking";
+  interface Dot { fy: number; kind: DotKind; label: string; deltaPct: number | null }
+
+  const dots: Dot[] = signals.map((s) => {
+    const d = (s.direction ?? "").toLowerCase();
+    // Use announcement_date first — it's when the promise was made, giving spread across years.
+    // Fall back to target_date then actual_date if announcement is missing.
+    const fy = scatterFY(s.announcement_date ?? s.target_date ?? s.actual_date);
+    if (!fy) return null;
+    const kind: DotKind = (d === "miss" || d === "major_miss") ? "miss"
+      : (d === "tracking") ? "tracking"
+      : "beat";
+    // Compute delta_pct from values when the backend hasn't populated it
+    const guidedRaw = s.value_targeted ?? s.value_at_announcement ?? s.guided_value;
+    const guidedNum = (guidedRaw !== null && guidedRaw !== undefined && guidedRaw !== -1) ? guidedRaw : null;
+    const actualNum = (s.actual_value !== null && s.actual_value !== undefined && s.actual_value !== -1) ? s.actual_value : null;
+    const computedDeltaPct = (guidedNum !== null && actualNum !== null && guidedNum !== 0)
+      ? ((actualNum - guidedNum) / Math.abs(guidedNum)) * 100
+      : null;
+    const deltaPct = s.delta_pct ?? computedDeltaPct;
+    return { fy, kind, label: s.label ?? "", deltaPct };
+  }).filter(Boolean) as Dot[];
+
+  if (dots.length === 0) return null;
+
+  const fys = dots.map((d) => d.fy);
+  const minFY = Math.min(...fys);
+  const maxFY = Math.max(...fys);
+  const fyRange = Math.max(maxFY - minFY, 1);
+
+  // Layout constants — all in real pixels
+  const SVG_H  = 180;
+  const LABEL_W = 90;   // left column for y-axis text
+  const PAD_R   = 24;   // right padding
+  const PLOT_W  = Math.max(width - LABEL_W - PAD_R, 0);
+  const BEAT_Y  = 52;
+  const MISS_Y  = 122;
+  const TICK_Y  = 162;
+  const MID_Y   = (BEAT_Y + MISS_Y) / 2;
+
+  const fyToX = (fy: number) => LABEL_W + ((fy - minFY) / fyRange) * PLOT_W;
+
+  // Count dots per FY for jitter
+  const fyCount: Record<number, number> = {};
+  const jitteredDots = dots.map((dot) => {
+    fyCount[dot.fy] = (fyCount[dot.fy] ?? 0) + 1;
+    return { ...dot, jitterIdx: fyCount[dot.fy] - 1 };
+  });
+
+  const fyTicks: number[] = [];
+  const step = fyRange <= 4 ? 1 : fyRange <= 8 ? 2 : Math.ceil(fyRange / 5);
+  for (let fy = minFY; fy <= maxFY + 1; fy += step) fyTicks.push(fy);
+
+  const font = "var(--font-ibm-plex-sans, system-ui, sans-serif)";
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
+        <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>
+          CREDIBILITY OVER TIME
+        </p>
+        <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>
+          Is delivery improving or slipping? Recent promises matter most.
+        </p>
+      </div>
+
+      <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", background: "var(--qc-section)", padding: "20px 24px 16px" }}>
+        {/* Measured container — SVG fills this exactly */}
+        <div ref={containerRef} style={{ width: "100%", overflow: "hidden" }}>
+          {width > 0 && (
+            <svg width={width} height={SVG_H} style={{ display: "block" }}>
+              {/* Y-axis labels */}
+              <text x={LABEL_W - 8} y={BEAT_Y} textAnchor="end" dominantBaseline="middle"
+                fontSize={11} fill="var(--qc-ink-3)" fontFamily={font}>
+                Beat / in-line
+              </text>
+              <text x={LABEL_W - 8} y={MISS_Y} textAnchor="end" dominantBaseline="middle"
+                fontSize={11} fill="var(--qc-ink-3)" fontFamily={font}>
+                Missed
+              </text>
+
+              {/* Separator */}
+              <line x1={LABEL_W} x2={width - PAD_R} y1={MID_Y} y2={MID_Y}
+                stroke="var(--qc-hair)" strokeWidth={1} strokeDasharray="4 4" />
+
+              {/* FY tick lines + labels */}
+              {fyTicks.map((fy) => {
+                const x = fyToX(fy);
+                return (
+                  <g key={fy}>
+                    <line x1={x} x2={x} y1={BEAT_Y - 28} y2={MISS_Y + 18}
+                      stroke="var(--qc-hair)" strokeWidth={1} strokeDasharray="2 4" />
+                    <text x={x} y={TICK_Y} textAnchor="middle"
+                      fontSize={10} fill="var(--qc-ink-3)" fontFamily={font}>
+                      FY{String(fy).slice(2)}{fy > maxFY ? "+" : ""}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* Dots */}
+              {jitteredDots.map((dot, i) => {
+                const cx = fyToX(dot.fy) + dot.jitterIdx * 16;
+                const cy = dot.kind === "miss" ? MISS_Y : BEAT_Y;
+                const absPct = dot.deltaPct !== null ? Math.abs(dot.deltaPct) : 0;
+                const r = dot.kind === "miss"
+                  ? Math.min(Math.max(8 + absPct * 0.12, 8), 20)
+                  : 9;
+                const fill   = dot.kind === "beat" ? FY_UP : dot.kind === "miss" ? FY_DOWN : "none";
+                const stroke = dot.kind === "tracking" ? FY_WARN : "none";
+
+                return (
+                  <g key={i}>
+                    <circle cx={cx} cy={cy} r={r}
+                      fill={fill} stroke={stroke}
+                      strokeWidth={dot.kind === "tracking" ? 1.8 : 0}
+                      strokeDasharray={dot.kind === "tracking" ? "4 3" : undefined} />
+                    {(dot.kind === "miss" || dot.kind === "tracking") && dot.label && (
+                      <text x={cx} y={cy - r - 5} textAnchor="middle"
+                        fontSize={9} fontWeight={600}
+                        fill={dot.kind === "miss" ? FY_DOWN : FY_WARN}
+                        fontFamily={font}>
+                        {dot.label}{dot.kind === "miss" && dot.deltaPct !== null
+                          ? ` ${dot.deltaPct > 0 ? "+" : ""}${Math.round(dot.deltaPct)}%`
+                          : ""}
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+          )}
+        </div>
+
+        {/* Legend */}
+        <div style={{ display: "flex", gap: 20, marginTop: 8, paddingTop: 10, borderTop: "1px solid var(--qc-hair)" }}>
+          {[
+            { color: FY_UP,   label: "Beat / in-line",           filled: true  },
+            { color: FY_DOWN, label: "Missed (size = magnitude)", filled: true  },
+            { color: FY_WARN, label: "Tracking, unresolved",      filled: false },
+          ].map(({ color, label, filled }) => (
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width={14} height={14}>
+                <circle cx={7} cy={7} r={5}
+                  fill={filled ? color : "none"}
+                  stroke={filled ? "none" : color}
+                  strokeWidth={1.5}
+                  strokeDasharray={filled ? undefined : "3 2"} />
+              </svg>
+              <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Section 2: Reliability split ────────────────────────────────────────────
+
+interface ReliabilitySplitProps {
+  opLabel: string; opSubtitle: string; opRatio: string; opIsGood: boolean; opSignals: TopSignal[];
+  dmLabel: string; dmSubtitle: string; dmRatio: string; dmIsGood: boolean; dmSignals: TopSignal[];
+  reliabilityRead: string | null;
+}
+
+function ReliabilityBullet({ signal }: { signal: TopSignal }) {
+  const d = (signal.direction ?? "").toLowerCase();
+  const isGood = d === "beat" || d === "beat_early" || d === "beat_costly" || d === "in_line";
+  const isTracking = d === "tracking";
+  const icon = isTracking ? "○" : isGood ? "✓" : "✗";
+  const color = isTracking ? "var(--qc-warn)" : isGood ? "var(--qc-up)" : "var(--qc-down)";
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "5px 0" }}>
+      <span style={{ fontSize: 13, color, flexShrink: 0, marginTop: 1, lineHeight: 1 }}>{icon}</span>
+      <span style={{ fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.4 }}>{signal.label}</span>
+    </div>
+  );
+}
+
+function ReliabilitySplit({ opLabel, opSubtitle, opRatio, opIsGood, opSignals, dmLabel, dmSubtitle, dmRatio, dmIsGood, dmSignals, reliabilityRead }: ReliabilitySplitProps) {
+  const opColor = opIsGood ? "var(--qc-up)" : "var(--qc-down)";
+  const dmColor = dmIsGood ? "var(--qc-up)" : "var(--qc-down)";
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
+        <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>
+          RELIABILITY BY WHAT MANAGEMENT CONTROLS
+        </p>
+        <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>
+          Why the score is "{opIsGood ? "strong" : "weak"}" despite {dmIsGood ? "solid" : "a miss"}
+        </p>
+      </div>
+
+      <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", background: "var(--qc-card)", overflow: "hidden" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: reliabilityRead ? "1px solid var(--qc-hair)" : undefined }}>
+
+          {/* Operational column */}
+          <div style={{ padding: "20px 24px", borderRight: "1px solid var(--qc-hair)" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 6 }}>
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>{opLabel}</p>
+                <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>{opSubtitle}</p>
+              </div>
+              <span style={{ fontSize: 22, fontWeight: 700, color: opColor, fontVariantNumeric: "tabular-nums", flexShrink: 0, marginLeft: 12 }}>{opRatio}</span>
+            </div>
+            {/* Progress bar */}
+            <div style={{ height: 4, borderRadius: 99, background: "var(--qc-hair)", overflow: "hidden", marginBottom: 12 }}>
+              <div style={{ height: "100%", background: opColor, width: opIsGood ? "100%" : "40%", borderRadius: 99 }} />
+            </div>
+            {opSignals.map((s, i) => <ReliabilityBullet key={i} signal={s} />)}
+          </div>
+
+          {/* Demand-led column */}
+          <div style={{ padding: "20px 24px" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 6 }}>
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0 }}>{dmLabel}</p>
+                <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>{dmSubtitle}</p>
+              </div>
+              <span style={{ fontSize: 22, fontWeight: 700, color: dmColor, fontVariantNumeric: "tabular-nums", flexShrink: 0, marginLeft: 12 }}>{dmRatio}</span>
+            </div>
+            {/* Progress bar */}
+            <div style={{ height: 4, borderRadius: 99, background: "var(--qc-hair)", overflow: "hidden", marginBottom: 12 }}>
+              <div style={{ height: "100%", background: dmColor, width: dmIsGood ? "100%" : "40%", borderRadius: 99 }} />
+            </div>
+            {dmSignals.map((s, i) => <ReliabilityBullet key={i} signal={s} />)}
+          </div>
+        </div>
+
+        {/* Read: paragraph */}
+        {reliabilityRead && (
+          <div style={{ padding: "16px 24px" }}>
+            <p style={{ fontSize: 14, color: "var(--qc-ink)", margin: 0, lineHeight: 1.7 }}>
+              <strong style={{ fontWeight: 700 }}>Read:</strong> {reliabilityRead}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Section 3: Open Promises · Watch Next ───────────────────────────────────
+
+function OpenPromises({ signals }: { signals: TopSignal[] }) {
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
+        <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>
+          OPEN PROMISES · WATCH NEXT
+        </p>
+        <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0 }}>
+          Live commitments that resolve in upcoming results — the reason to come back
+        </p>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+        {signals.map((s, i) => {
+          const typeStr = (s.source_ref ?? "").toLowerCase();
+          const typeLabel = typeStr === "controllable" ? "controllable" : typeStr === "demand_led" ? "demand-led" : typeStr || null;
+          const resolveStr = s.original_statement && s.original_statement !== s.label ? s.original_statement : formatDate(s.target_date ?? s.actual_date);
+          return (
+            <div key={i} style={{
+              borderRadius: 10, border: "1px solid var(--qc-warn)33",
+              background: "var(--qc-card)", padding: "16px 20px",
+              borderLeft: "3px solid var(--qc-warn)",
+            }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+                <p style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", margin: 0, lineHeight: 1.3 }}>{s.label}</p>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
+                  color: "var(--qc-warn)", background: "rgba(180,115,26,0.08)",
+                  border: "1px solid rgba(180,115,26,0.25)", borderRadius: 6, padding: "3px 9px", flexShrink: 0,
+                }}>TRACKING</span>
+              </div>
+              <p style={{ fontSize: 13, color: "var(--qc-ink-2)", margin: "0 0 10px", lineHeight: 1.5 }}>{s.statement}</p>
+              <div style={{ display: "flex", gap: 16 }}>
+                {resolveStr && resolveStr !== "—" && (
+                  <span style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>
+                    Resolves: <strong style={{ color: "var(--qc-warn)", fontWeight: 600 }}>{resolveStr}</strong>
+                  </span>
+                )}
+                {typeLabel && (
+                  <span style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>
+                    Type: <strong style={{ color: typeLabel === "controllable" ? "var(--qc-up)" : "var(--qc-down)", fontWeight: 600 }}>{typeLabel}</strong>
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Section 4: Scoring Methodology ──────────────────────────────────────────
+
+function ScoringMethodology() {
+  return (
+    <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", background: "var(--qc-section)", padding: "14px 20px" }}>
+      <p style={{ fontSize: 13, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.7 }}>
+        <strong style={{ fontWeight: 700, color: "var(--qc-ink)" }}>How this score is built.</strong>{" "}
+        Each forward statement is paired to its resolved actual and graded beat / in-line / miss. Misses are weighted by magnitude (a −50% miss counts far more than a flat in-line) and by recency (last 8 quarters weighted higher), then split by whether the outcome is management-controllable or market-dependent. Every row links to its source statement.
+      </p>
+    </div>
+  );
+}
+
+// ── Timeline table (extracted sub-component) ─────────────────────────────────
+
+interface TimelineTableProps {
+  signals: TopSignal[];
+  showTooltip: (state: TooltipState) => void;
+  hideTooltip: () => void;
+}
+
+function TimelineTable({ signals, showTooltip, hideTooltip }: TimelineTableProps) {
+  return (
+    <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
+      <div style={{
+        padding: "10px 16px", background: "var(--qc-section)",
+        borderBottom: "1px solid var(--qc-hair)",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <div>
+          <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>
+            GUIDANCE VS ACTUALS · TIMELINE
+          </p>
+          <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>Each row: forecast → reality → delta</p>
+        </div>
+        <span style={{ fontSize: 11, fontWeight: 500, color: "var(--qc-ink-2)", background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 99, padding: "2px 10px" }}>
+          {signals.length} entries
+        </span>
+      </div>
+
+      {/* Column headers */}
+      <div style={{ display: "grid", gridTemplateColumns: "56px 1fr 90px 90px 80px 90px", gap: 0, borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-section)", borderLeft: "3px solid transparent" }}>
+        <div style={{ padding: "6px 10px 6px 12px", borderRight: "1px solid var(--qc-hair)" }} />
+        <div style={{ padding: "6px 16px", borderRight: "1px solid var(--qc-hair)" }}>
+          <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>METRIC</span>
+        </div>
+        <div style={{ padding: "6px 12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)" }}>
+          <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>GUIDED</span>
+        </div>
+        <div style={{ padding: "6px 12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)" }}>
+          <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>ACTUAL</span>
+        </div>
+        <div style={{ padding: "6px 12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)" }}>
+          <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>DELTA</span>
+        </div>
+        <div style={{ padding: "6px 14px 6px 12px", textAlign: "right" }}>
+          <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>STATUS</span>
+        </div>
+      </div>
+
+      {signals.map((s, i) => {
+        const isLast = i === signals.length - 1;
+        const cfg = directionConfig(s.direction, s.impact);
+        const isTracking = (s.direction ?? "").toLowerCase() === "tracking";
+        const guidedRaw = s.value_targeted ?? s.value_at_announcement ?? s.guided_value;
+        const guidedNum = (guidedRaw !== null && guidedRaw !== undefined && (guidedRaw as unknown) !== "undefined" && guidedRaw !== -1) ? guidedRaw : null;
+        const actualNum = (s.actual_value !== null && s.actual_value !== undefined && (s.actual_value as unknown) !== "undefined" && s.actual_value !== -1) ? s.actual_value : null;
+        const guidedStr = formatValue(guidedNum, s.unit);
+        const actualStr = formatValue(actualNum, s.unit, isTracking || actualNum === null);
+        const computedDelta = (guidedNum !== null && actualNum !== null && guidedNum !== 0) ? actualNum - guidedNum : null;
+        const computedDeltaPct = (guidedNum !== null && actualNum !== null && guidedNum !== 0) ? ((actualNum - guidedNum) / Math.abs(guidedNum)) * 100 : null;
+        const effectiveDelta = s.delta ?? computedDelta;
+        const effectiveDeltaPct = s.delta_pct ?? computedDeltaPct;
+        const hasDelta = !isTracking && effectiveDeltaPct != null && guidedNum !== null && actualNum !== null;
+        const hasGuidedOrActual = guidedNum !== null || actualNum !== null;
+        const announcedLabel = formatDate(s.announcement_date);
+        const targetLabel = formatDate(s.target_date ?? s.actual_date);
+        const metricTitle = (s.label && s.label.length > 0) ? s.label : s.metric.replace(/_/g, " ");
+
+        return (
+          <div
+            key={s.signal_id ?? `${s.metric}-${i}`}
+            onMouseEnter={(e) => {
+              const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+              showTooltip({ signal: s, rect, metricTitle, guidedStr, actualStr, deltaStr: hasDelta ? deltaLabel(effectiveDelta, effectiveDeltaPct, s.unit) : "" });
+            }}
+            onMouseLeave={hideTooltip}
+            style={{ display: "grid", gridTemplateColumns: "56px 1fr 90px 90px 80px 90px", gap: 0, borderBottom: !isLast ? "1px solid var(--qc-hair)" : undefined, borderLeft: `3px solid ${cfg.leftBorder}`, background: "var(--qc-card)", alignItems: "center" }}
+          >
+            <div style={{ padding: "14px 10px 14px 12px", borderRight: "1px solid var(--qc-hair)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", alignSelf: "stretch", gap: 3 }}>
+              <span style={{ fontSize: 9, fontWeight: 600, color: "var(--qc-ink-3)", textTransform: "uppercase", letterSpacing: "0.06em", textAlign: "center", lineHeight: 1.4 }}>{announcedLabel}</span>
+              {targetLabel && targetLabel !== announcedLabel && (
+                <span style={{ fontSize: 8, color: "var(--qc-ink-3)", textTransform: "uppercase", letterSpacing: "0.04em", textAlign: "center", lineHeight: 1.4, opacity: 0.6 }}>→ {targetLabel}</span>
+              )}
+            </div>
+            <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch" }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>{metricTitle}</p>
+              {s.statement && <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: "3px 0 0", lineHeight: 1.4 }}>{s.statement.slice(0, 120)}{s.statement.length > 120 ? "…" : ""}</p>}
+            </div>
+            <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>{hasGuidedOrActual ? guidedStr : "—"}</span>
+            </div>
+            <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>{hasGuidedOrActual ? actualStr : ""}</span>
+            </div>
+            <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: hasDelta ? cfg.color : "var(--qc-ink-3)", fontVariantNumeric: "tabular-nums" }}>{hasDelta ? deltaLabel(effectiveDelta, effectiveDeltaPct, s.unit) : ""}</span>
+            </div>
+            <div style={{ padding: "12px 14px 12px 12px", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`, borderRadius: 6, padding: "3px 9px", whiteSpace: "nowrap" }}>{cfg.label}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Main component ───────────────────────────────────────────────────────────
 
-type TooltipState = { signal: TopSignal; rect: DOMRect; metricTitle: string; guidedStr: string; actualStr: string; deltaStr: string; dateLabel: string };
+type TooltipState = { signal: TopSignal; rect: DOMRect; metricTitle: string; guidedStr: string; actualStr: string; deltaStr: string };
 
 export function LensDetailGuidance({ lens }: Props) {
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -504,47 +962,77 @@ export function LensDetailGuidance({ lens }: Props) {
     hideTimer.current = setTimeout(() => setTooltip(null), 120);
   }, []);
 
-  // Split headline tiles from timeline signals
+  const HEADLINE_KEYS = [
+    "HEADLINE_HIT_RATE", "HEADLINE_DELIVERS_ON", "HEADLINE_SLIPS_ON",
+    "HEADLINE_OPERATIONAL_SCORE", "HEADLINE_DEMAND_SCORE", "HEADLINE_RELIABILITY_READ",
+    "HEADLINE_MAJOR_MISS", "HEADLINE_GUIDANCE_BIAS", "HEADLINE_ENTRY_COUNT",
+  ];
+
+  // Headline tiles
   const headlineHitRate = topSignals.find((s) => s.metric === "HEADLINE_HIT_RATE");
-  const headlineMajorMiss = topSignals.find((s) => s.metric === "HEADLINE_MAJOR_MISS");
-  const headlineGuidanceBias = topSignals.find((s) => s.metric === "HEADLINE_GUIDANCE_BIAS");
+  const headlineDeliversOn = topSignals.find((s) => s.metric === "HEADLINE_DELIVERS_ON");
+  const headlineSlipsOn = topSignals.find((s) => s.metric === "HEADLINE_SLIPS_ON");
+  const headlineOperational = topSignals.find((s) => s.metric === "HEADLINE_OPERATIONAL_SCORE");
+  const headlineDemand = topSignals.find((s) => s.metric === "HEADLINE_DEMAND_SCORE");
+  const headlineReliabilityRead = topSignals.find((s) => s.metric === "HEADLINE_RELIABILITY_READ");
+
+  // All non-headline timeline signals with a real direction
   const timelineSignals = topSignals.filter(
-    (s) => !["HEADLINE_HIT_RATE", "HEADLINE_MAJOR_MISS", "HEADLINE_GUIDANCE_BIAS", "HEADLINE_ENTRY_COUNT"].includes(s.metric)
+    (s) => !HEADLINE_KEYS.includes(s.metric)
+      && (s as unknown as { kind?: string }).kind !== "pattern"
       && s.direction != null
       && (s.direction as string) !== "none"
       && (s.direction as string) !== "unresolvable"
   );
 
-  // Hit Rate tile
-  const hitRateValue = headlineHitRate?.label ?? `${headlineHitRate?.actual_value ?? "—"}`;
+  // Hit Rate tile — actual_value / value_targeted
+  const hitRateNumer = headlineHitRate?.actual_value ?? null;
+  const hitRateDenom = headlineHitRate?.value_targeted ?? null;
+  const hitRateValue = (hitRateNumer !== null && hitRateNumer !== -1 && hitRateDenom !== null && hitRateDenom !== -1)
+    ? `${hitRateNumer} / ${hitRateDenom}`
+    : (headlineHitRate?.label ?? "—");
   const hitRateSub = headlineHitRate?.statement ?? "Guidance commitments evaluated";
 
-  // Major Miss tile — direction "beat" means no major miss (positive), "miss" means bad
-  const majorMissValue = headlineMajorMiss?.label ?? "—";
-  const majorMissSub = headlineMajorMiss?.statement ?? "Largest single guidance gap";
-  const majorMissDir = (headlineMajorMiss?.direction ?? "").toLowerCase();
-  const majorMissIsBeat = majorMissDir === "beat";
-  const majorMissColor = majorMissIsBeat ? "var(--qc-up)" : "var(--qc-down)";
-  const majorMissTileBg = majorMissIsBeat ? "rgba(31,122,74,0.06)" : "rgba(220,38,38,0.06)";
-  const majorMissDotColor = majorMissIsBeat ? "var(--qc-up)" : "var(--qc-down)";
+  // Delivers On tile
+  const deliversOnValue = headlineDeliversOn?.label ?? "—";
+  const deliversOnSub = headlineDeliversOn?.statement ?? "";
+  const deliversOnDir = (headlineDeliversOn?.direction ?? "beat").toLowerCase();
+  const deliversOnColor = deliversOnDir === "beat" || deliversOnDir === "beat_early" ? "var(--qc-up)" : deliversOnDir === "miss" ? "var(--qc-down)" : "var(--qc-warn)";
+  const deliversOnTileBg = deliversOnDir === "beat" || deliversOnDir === "beat_early" ? "rgba(31,122,74,0.06)" : deliversOnDir === "miss" ? "rgba(220,38,38,0.06)" : "rgba(180,115,26,0.06)";
 
-  // Guidance Bias tile
-  const guidanceBiasValue = (headlineGuidanceBias?.label) ?? (lens.status || "—");
-  const guidanceBiasSub = headlineGuidanceBias?.statement ?? "Guidance posture assessment";
-  const gbLabel = (headlineGuidanceBias?.label ?? "").toLowerCase();
-  const guidanceBiasColor = gbLabel.includes("conservative") ? "var(--qc-up)"
-    : gbLabel.includes("aggressive") ? "var(--qc-down)"
-    : gbLabel.includes("balanced") ? "var(--qc-blue, #2563eb)"
-    : "var(--qc-ink-2)";
-  const guidanceBiasTileBg = gbLabel.includes("conservative") ? "rgba(31,122,74,0.06)"
-    : gbLabel.includes("aggressive") ? "rgba(220,38,38,0.06)"
-    : "rgba(37,99,235,0.06)";
+  // Slips On tile
+  const slipsOnValue = headlineSlipsOn?.label ?? "—";
+  const slipsOnSub = headlineSlipsOn?.statement ?? "";
+  const slipsOnDir = (headlineSlipsOn?.direction ?? "miss").toLowerCase();
+  const slipsOnColor = slipsOnDir === "miss" || slipsOnDir === "major_miss" ? "var(--qc-down)" : slipsOnDir === "beat" ? "var(--qc-up)" : "var(--qc-warn)";
+  const slipsOnTileBg = slipsOnDir === "miss" || slipsOnDir === "major_miss" ? "rgba(220,38,38,0.06)" : "rgba(180,115,26,0.06)";
+
+  // Section 2 — Reliability split
+  const opNumer = headlineOperational?.actual_value ?? null;
+  const opDenom = headlineOperational?.value_targeted ?? null;
+  const opRatio = (opNumer !== null && opNumer !== -1 && opDenom !== null && opDenom !== -1) ? `${opNumer} / ${opDenom}` : "—";
+  const opLabel = headlineOperational?.label ?? "Operational";
+  const opSubtitle = headlineOperational?.statement ?? "Outcome is within management's control";
+  const opIsGood = (headlineOperational?.direction ?? "beat").toLowerCase() !== "miss";
+
+  const dmNumer = headlineDemand?.actual_value ?? null;
+  const dmDenom = headlineDemand?.value_targeted ?? null;
+  const dmRatio = (dmNumer !== null && dmNumer !== -1 && dmDenom !== null && dmDenom !== -1) ? `${dmNumer} / ${dmDenom}` : "—";
+  const dmLabel = headlineDemand?.label ?? "Demand-Led";
+  const dmSubtitle = headlineDemand?.statement ?? "Outcome depends on the market";
+  const dmIsGood = (headlineDemand?.direction ?? "miss").toLowerCase() !== "miss";
+
+  const reliabilityRead = headlineReliabilityRead?.sentence ?? headlineReliabilityRead?.statement ?? null;
+
+  const controllableSignals = timelineSignals.filter((s) => (s.source_ref ?? "") === "controllable");
+  const demandLedSignals = timelineSignals.filter((s) => (s.source_ref ?? "") === "demand_led");
+  const trackingSignals = timelineSignals.filter((s) => (s.direction ?? "").toLowerCase() === "tracking");
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 
-      {/* Section header */}
-      <div style={{ paddingBottom: 4 }}>
+      {/* ── Section header ── */}
+      <div style={{ paddingBottom: 0 }}>
         <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: "0 0 4px" }}>
           HEADLINE METRICS
         </p>
@@ -553,249 +1041,86 @@ export function LensDetailGuidance({ lens }: Props) {
         )}
       </div>
 
-      {/* Headline KPI strip */}
+      {/* ── Headline KPI strip ── */}
       <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
         <div className="grid grid-cols-3" style={{ gap: 0 }}>
 
-          {/* Hit Rate tile — always green tint */}
-          <div style={{
-            padding: "18px 16px",
-            background: "rgba(31,122,74,0.06)",
-            borderRight: "1px solid var(--qc-hair)",
-            display: "flex", flexDirection: "column", gap: 6,
-          }}>
+          {/* Hit Rate — always green */}
+          <div style={{ padding: "18px 16px", background: "rgba(31,122,74,0.06)", borderRight: "1px solid var(--qc-hair)", display: "flex", flexDirection: "column", gap: 6 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--qc-up)", flexShrink: 0 }} />
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>
-                HIT RATE
-              </p>
+              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>HIT RATE</p>
             </div>
-            <p style={{ fontSize: 36, fontWeight: 700, color: "var(--qc-up)", margin: "2px 0 0", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-              {hitRateValue}
-            </p>
-            <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>
-              {hitRateSub}
-            </p>
+            <p style={{ fontSize: 36, fontWeight: 700, color: "var(--qc-up)", margin: "2px 0 0", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{hitRateValue}</p>
+            <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>{hitRateSub}</p>
           </div>
 
-          {/* Major Miss tile */}
-          <div style={{
-            padding: "18px 16px",
-            background: majorMissTileBg,
-            borderRight: "1px solid var(--qc-hair)",
-            display: "flex", flexDirection: "column", gap: 6,
-          }}>
+          {/* Delivers On */}
+          <div style={{ padding: "18px 16px", background: deliversOnTileBg, borderRight: "1px solid var(--qc-hair)", display: "flex", flexDirection: "column", gap: 6 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: majorMissDotColor, flexShrink: 0 }} />
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>
-                MAJOR MISS
-              </p>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: deliversOnColor, flexShrink: 0 }} />
+              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>DELIVERS ON</p>
             </div>
-            <p style={{ fontSize: 24, fontWeight: 700, color: majorMissColor, margin: "2px 0 0", lineHeight: 1.2 }}>
-              {majorMissValue}
-            </p>
-            <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>
-              {majorMissSub}
-            </p>
+            <p style={{ fontSize: 22, fontWeight: 700, color: deliversOnColor, margin: "2px 0 0", lineHeight: 1.2 }}>{deliversOnValue}</p>
+            <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>{deliversOnSub}</p>
           </div>
 
-          {/* Guidance Bias tile */}
-          <div style={{
-            padding: "18px 16px",
-            background: guidanceBiasTileBg,
-            display: "flex", flexDirection: "column", gap: 6,
-          }}>
+          {/* Slips On */}
+          <div style={{ padding: "18px 16px", background: slipsOnTileBg, display: "flex", flexDirection: "column", gap: 6 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: guidanceBiasColor, flexShrink: 0 }} />
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>
-                GUIDANCE BIAS
-              </p>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: slipsOnColor, flexShrink: 0 }} />
+              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>SLIPS ON</p>
             </div>
-            <p style={{ fontSize: 24, fontWeight: 700, color: guidanceBiasColor, margin: "2px 0 0", lineHeight: 1.2 }}>
-              {guidanceBiasValue}
-            </p>
-            <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>
-              {guidanceBiasSub}
-            </p>
+            <p style={{ fontSize: 22, fontWeight: 700, color: slipsOnColor, margin: "2px 0 0", lineHeight: 1.2 }}>{slipsOnValue}</p>
+            <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>{slipsOnSub}</p>
           </div>
         </div>
       </div>
 
-      {/* QC Intuition — pattern recognition table */}
+      {/* ── QC Intuition — pattern recognition table ── */}
       {lens.patterns && lens.patterns.length > 0 && (
         <QCIntuitionTable patterns={lens.patterns} />
       )}
 
-      {/* Guidance vs Actuals timeline table */}
+      {/* ── Guidance vs Actuals full timeline table ── */}
       {timelineSignals.length > 0 && (
-        <div style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
-          <div style={{
-            padding: "10px 16px", background: "var(--qc-section)",
-            borderBottom: "1px solid var(--qc-hair)",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-          }}>
-            <div>
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--qc-ink-3)", margin: 0 }}>
-                GUIDANCE VS ACTUALS · TIMELINE
-              </p>
-              <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: "2px 0 0" }}>Each row: forecast → reality → delta</p>
-            </div>
-            <span style={{
-              fontSize: 11, fontWeight: 500, color: "var(--qc-ink-2)",
-              background: "var(--qc-card)", border: "1px solid var(--qc-hair)",
-              borderRadius: 99, padding: "2px 10px",
-            }}>
-              {timelineSignals.length} entries
-            </span>
-          </div>
-
-          {/* Column header row */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "56px 1fr 90px 90px 80px 90px",
-            gap: 0,
-            borderBottom: "1px solid var(--qc-hair)",
-            background: "var(--qc-section)",
-            borderLeft: "3px solid transparent",
-          }}>
-            <div style={{ padding: "6px 10px 6px 12px", borderRight: "1px solid var(--qc-hair)" }} />
-            <div style={{ padding: "6px 16px", borderRight: "1px solid var(--qc-hair)" }}>
-              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>METRIC</span>
-            </div>
-            <div style={{ padding: "6px 12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)" }}>
-              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>GUIDED</span>
-            </div>
-            <div style={{ padding: "6px 12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)" }}>
-              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>ACTUAL</span>
-            </div>
-            <div style={{ padding: "6px 12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)" }}>
-              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>DELTA</span>
-            </div>
-            <div style={{ padding: "6px 14px 6px 12px", textAlign: "right" }}>
-              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)" }}>STATUS</span>
-            </div>
-          </div>
-
-          {timelineSignals.map((s, i) => {
-            const isLast = i === timelineSignals.length - 1;
-            const cfg = directionConfig(s.direction, s.impact);
-            const isTracking = (s.direction ?? "").toLowerCase() === "tracking";
-            // value_targeted / value_at_announcement are the authoritative keys; fall back to guided_value
-            // -1 is the sentinel meaning "no value" from the API
-            const guidedRaw = s.value_targeted ?? s.value_at_announcement ?? s.guided_value;
-            const guidedNum = (guidedRaw !== null && guidedRaw !== undefined && (guidedRaw as unknown) !== "undefined" && guidedRaw !== -1) ? guidedRaw : null;
-            const actualNum = (s.actual_value !== null && s.actual_value !== undefined && (s.actual_value as unknown) !== "undefined" && s.actual_value !== -1) ? s.actual_value : null;
-            const guidedStr = formatValue(guidedNum, s.unit);
-            const actualStr = formatValue(actualNum, s.unit, isTracking || actualNum === null);
-            // Compute delta inline if API doesn't provide it
-            const computedDelta = (guidedNum !== null && actualNum !== null && guidedNum !== 0) ? actualNum - guidedNum : null;
-            const computedDeltaPct = (guidedNum !== null && actualNum !== null && guidedNum !== 0) ? ((actualNum - guidedNum) / Math.abs(guidedNum)) * 100 : null;
-            const effectiveDelta = s.delta ?? computedDelta;
-            const effectiveDeltaPct = s.delta_pct ?? computedDeltaPct;
-            const hasDelta = !isTracking && effectiveDeltaPct != null && guidedNum !== null && actualNum !== null;
-            const hasGuidedOrActual = guidedNum !== null || actualNum !== null;
-            // announcement_date = when guidance was made; target_date = when it was due
-            const announcedLabel = formatDate(s.announcement_date);
-            const targetLabel = formatDate(s.target_date ?? s.actual_date);
-            // label is the clean human-readable signal name; fall back to formatted metric key
-            const metricTitle = (s.label && s.label.length > 0) ? s.label : s.metric.replace(/_/g, " ");
-
-            return (
-              <div
-                key={s.signal_id ?? `${s.metric}-${i}`}
-                onMouseEnter={(e) => {
-                  const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                  showTooltip({ signal: s, rect, metricTitle, guidedStr, actualStr, deltaStr: hasDelta ? deltaLabel(effectiveDelta, effectiveDeltaPct, s.unit) : "", dateLabel: announcedLabel });
-                }}
-                onMouseLeave={hideTooltip}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "56px 1fr 90px 90px 80px 90px",
-                  gap: 0,
-                  borderBottom: !isLast ? "1px solid var(--qc-hair)" : undefined,
-                  borderLeft: `3px solid ${cfg.leftBorder}`,
-                  background: "var(--qc-card)",
-                  alignItems: "center",
-                }}
-              >
-                {/* Date / period column */}
-                {/* Date column: announced → due */}
-                <div style={{
-                  padding: "14px 10px 14px 12px",
-                  borderRight: "1px solid var(--qc-hair)",
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                  alignSelf: "stretch", gap: 3,
-                }}>
-                  <span style={{ fontSize: 9, fontWeight: 600, color: "var(--qc-ink-3)", textTransform: "uppercase", letterSpacing: "0.06em", textAlign: "center", lineHeight: 1.4 }}>
-                    {announcedLabel}
-                  </span>
-                  {targetLabel && targetLabel !== announcedLabel && (
-                    <span style={{ fontSize: 8, color: "var(--qc-ink-3)", textTransform: "uppercase", letterSpacing: "0.04em", textAlign: "center", lineHeight: 1.4, opacity: 0.6 }}>
-                      → {targetLabel}
-                    </span>
-                  )}
-                </div>
-
-                {/* Metric name + label */}
-                <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch" }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", margin: 0 }}>
-                    {metricTitle}
-                  </p>
-                  {s.statement && (
-                    <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: "3px 0 0", lineHeight: 1.4 }}>
-                      {s.statement.slice(0, 120)}{s.statement.length > 120 ? "…" : ""}
-                    </p>
-                  )}
-                </div>
-
-                {/* GUIDED column */}
-                <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>
-                    {hasGuidedOrActual ? guidedStr : "—"}
-                  </span>
-                </div>
-
-                {/* ACTUAL column */}
-                <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontVariantNumeric: "tabular-nums" }}>
-                    {hasGuidedOrActual ? actualStr : ""}
-                  </span>
-                </div>
-
-                {/* Delta column */}
-                <div style={{ padding: "12px", textAlign: "right", borderRight: "1px solid var(--qc-hair)", alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  <span style={{
-                    fontSize: 13, fontWeight: 600, color: hasDelta ? cfg.color : "var(--qc-ink-3)",
-                    fontVariantNumeric: "tabular-nums",
-                  }}>
-                    {hasDelta ? deltaLabel(effectiveDelta, effectiveDeltaPct, s.unit) : ""}
-                  </span>
-                </div>
-
-                {/* Status badge column */}
-                <div style={{ padding: "12px 14px 12px 12px", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-                  <span style={{
-                    fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
-                    color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
-                    borderRadius: 6, padding: "3px 9px", whiteSpace: "nowrap",
-                  }}>
-                    {cfg.label}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <TimelineTable signals={timelineSignals} showTooltip={showTooltip} hideTooltip={hideTooltip} />
       )}
 
-      {/* Takeaway */}
+      {/* ── Takeaway ── */}
       {lens.takeaway && (
-        <LensDrawerSummaryCard
-          title={lens.name}
-          body={lens.takeaway}
-          metrics={[]}
+        <LensDrawerSummaryCard title={lens.name} body={lens.takeaway} metrics={[]} />
+      )}
+
+      {/* ── Section 1: Credibility Over Time scatter ── */}
+      {timelineSignals.length > 0 && (
+        <CredibilityScatter signals={timelineSignals} />
+      )}
+
+      {/* ── Section 2: Reliability by what management controls ── */}
+      {(headlineOperational || headlineDemand) && (
+        <ReliabilitySplit
+          opLabel={opLabel}
+          opSubtitle={opSubtitle}
+          opRatio={opRatio}
+          opIsGood={opIsGood}
+          opSignals={controllableSignals}
+          dmLabel={dmLabel}
+          dmSubtitle={dmSubtitle}
+          dmRatio={dmRatio}
+          dmIsGood={dmIsGood}
+          dmSignals={demandLedSignals}
+          reliabilityRead={reliabilityRead}
         />
       )}
+
+      {/* ── Section 3: Open Promises · Watch Next ── */}
+      {trackingSignals.length > 0 && (
+        <OpenPromises signals={trackingSignals} />
+      )}
+
+      {/* ── Section 4: Scoring Methodology ── */}
+      <ScoringMethodology />
 
       {/* Signal detail tooltip */}
       {tooltip && (
@@ -807,7 +1132,6 @@ export function LensDetailGuidance({ lens }: Props) {
           guidedStr={tooltip.guidedStr}
           actualStr={tooltip.actualStr}
           deltaStr={tooltip.deltaStr}
-          dateLabel={tooltip.dateLabel}
         />
       )}
     </div>

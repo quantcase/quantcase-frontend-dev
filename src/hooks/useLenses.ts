@@ -28,6 +28,7 @@ export interface TopSignal {
   delta_pct: number | null;
   direction: string | null;
   impact: string | null;
+  sentence?: string | null;
   statement: string | null;
   original_statement: string | null;
   source_ref?: string | null;

@@ -16,7 +16,8 @@ function patternTypeConfig(type: string | undefined, direction: string | undefin
   const labelMap: Record<string, string> = {
     drumbeat: "DRUMBEAT", emergence: "RISING", going_quiet: "GOING QUIET",
     tone_divergence: "TONE SHIFT", narrative_gap: "GAP", street_pressure: "STREET PRESSURE",
-    exceptional_item_framing: "EXCEPTIONAL ITEMS", bad_news_acknowledgement: "REACTIVE",
+    voluntary_statutory_ratio: "VOLUNTARY", granularity_by_segment: "GRANULAR",
+    exceptional_item_framing: "ONE-OFFS", bad_news_acknowledgement: "REACTIVE",
     audit_matter_evolution: "AUDIT", says_clearly: "CONSISTENT", says_vaguely: "VAGUE", doesnt_say: "ABSENT",
   };
   const label = labelMap[t] ?? t.replace(/_/g, " ").toUpperCase();
@@ -62,13 +63,19 @@ interface Props {
 
 // ── Headline tile config ──────────────────────────────────────────────────────
 
-function indTileConfig(metric: string, direction: string | null) {
+function indTileConfig(metric: string, direction: string | null, actualValue: number | null) {
   const d = (direction ?? "").toLowerCase();
   const up   = { color: "var(--qc-up)",    dot: "var(--qc-up)",    bg: "rgba(31,122,74,0.06)"  };
   const down = { color: "var(--qc-down)",  dot: "var(--qc-down)",  bg: "rgba(220,38,38,0.06)"  };
   const warn = { color: "var(--qc-warn)",  dot: "var(--qc-warn)",  bg: "rgba(180,115,26,0.06)" };
   const neut = { color: "var(--qc-ink-2)", dot: "var(--qc-ink-3)", bg: "var(--qc-section)"     };
 
+  // Deflections: 0 = good (green), any positive = bad
+  if (metric === "IND_DEFLECTIONS") {
+    if (actualValue === 0) return up;
+    if (actualValue !== null && actualValue > 0) return down;
+    return neut;
+  }
   if (d === "beat") return up;
   if (d === "miss") return down;
   if (d === "tracking" || d === "in_line") return neut;
@@ -108,11 +115,10 @@ const ANALYSIS_CONFIG: Record<string, { label: string; icon: string; iconBg: str
 
 // ── QC Intuition table (reused pattern from guidance) ────────────────────────
 
-function DisclosurePatternTable({ patterns }: { patterns: Pattern[] }) {
+function DisclosurePatternTable({ patterns, signalCount: lensSignalCount }: { patterns: Pattern[]; signalCount?: number }) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
-  // Derive source counts from pattern evidence and source_refs
-  const signalCount = patterns.reduce((s, p) => s + p.evidence.length, 0);
+  const signalCount = lensSignalCount ?? patterns.reduce((s, p) => s + p.evidence.length, 0);
 
   return (
     <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid var(--qc-hair)" }}>
@@ -148,7 +154,7 @@ function DisclosurePatternTable({ patterns }: { patterns: Pattern[] }) {
 
       {/* Column headers */}
       <div style={{
-        display: "grid", gridTemplateColumns: "1fr 140px 120px 1fr",
+        display: "grid", gridTemplateColumns: "1fr 140px 160px 1fr",
         background: "var(--qc-section)", borderBottom: "1px solid var(--qc-hair)", padding: "0 24px",
       }}>
         {["PATTERN", "SIGNAL TREND", "STATUS", "WHAT IT MEANS"].map((h, i) => (
@@ -171,7 +177,7 @@ function DisclosurePatternTable({ patterns }: { patterns: Pattern[] }) {
               <div
                 onClick={() => setExpandedIdx(isExpanded ? null : i)}
                 style={{
-                  display: "grid", gridTemplateColumns: "1fr 140px 120px 1fr",
+                  display: "grid", gridTemplateColumns: "1fr 140px 160px 1fr",
                   padding: "16px 24px",
                   borderBottom: !isLast || isExpanded ? "1px solid var(--qc-hair)" : undefined,
                   cursor: "pointer", transition: "background 0.15s",
@@ -294,10 +300,11 @@ function AnalysisSection({ patterns }: { patterns: Pattern[] }) {
   const cols = ANALYSIS_TYPES.map((type) => ({
     type,
     cfg: ANALYSIS_CONFIG[type],
-    pattern: patterns.find((p) => p.pattern_type === type),
+    // Collect all matching patterns (e.g. multiple says_clearly)
+    matchingPatterns: patterns.filter((p) => p.pattern_type === type),
   }));
 
-  const hasAny = cols.some((c) => c.pattern);
+  const hasAny = cols.some((c) => c.matchingPatterns.length > 0);
   if (!hasAny) return null;
 
   return (
@@ -312,59 +319,62 @@ function AnalysisSection({ patterns }: { patterns: Pattern[] }) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, border: "1px solid var(--qc-hair)", borderRadius: 10, overflow: "hidden" }}>
-        {cols.map(({ type, cfg, pattern }) => (
-          <div key={type} style={{ background: "var(--qc-card)", padding: "16px" }}>
-            {/* Column header */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-              <span style={{
-                width: 24, height: 24, borderRadius: 5, flexShrink: 0,
-                background: cfg.iconBg,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 12, fontWeight: 700, color: cfg.iconColor,
-              }}>
-                {cfg.icon}
-              </span>
-              <div>
-                <p style={{ fontSize: 12, fontWeight: 700, color: "var(--qc-ink)", margin: 0, lineHeight: 1.2 }}>{cfg.label}</p>
-                <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.3 }}>{cfg.subLabel}</p>
+        {cols.map(({ type, cfg, matchingPatterns }) => {
+          const allEvidence: Pattern["evidence"] = matchingPatterns.flatMap((p) => p.evidence);
+          return (
+            <div key={type} style={{ background: "var(--qc-card)", padding: "16px" }}>
+              {/* Column header */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <span style={{
+                  width: 24, height: 24, borderRadius: 5, flexShrink: 0,
+                  background: cfg.iconBg,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 12, fontWeight: 700, color: cfg.iconColor,
+                }}>
+                  {cfg.icon}
+                </span>
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: "var(--qc-ink)", margin: 0, lineHeight: 1.2 }}>{cfg.label}</p>
+                  <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.3 }}>{cfg.subLabel}</p>
+                </div>
               </div>
-            </div>
 
-            {/* Divider */}
-            <div style={{ height: 1, background: "var(--qc-hair)", marginBottom: 12 }} />
+              {/* Divider */}
+              <div style={{ height: 1, background: "var(--qc-hair)", marginBottom: 12 }} />
 
-            {/* Evidence bullets */}
-            {pattern ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {pattern.evidence.length > 0
-                  ? pattern.evidence.map((ev, i) => (
-                    <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                      <span style={{
-                        width: 6, height: 6, borderRadius: "50%",
-                        background: cfg.dotColor, flexShrink: 0, marginTop: 5,
-                      }} />
-                      <div>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)", margin: 0, lineHeight: 1.3 }}>
-                          {ev.signal_id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                        </p>
-                        <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: "2px 0 0", lineHeight: 1.4 }}>
-                          {ev.quote.slice(0, 80)}{ev.quote.length > 80 ? "…" : ""}
-                        </p>
+              {/* Evidence bullets — collected across all matching patterns */}
+              {matchingPatterns.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {allEvidence.length > 0
+                    ? allEvidence.slice(0, 4).map((ev, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                        <span style={{
+                          width: 6, height: 6, borderRadius: "50%",
+                          background: cfg.dotColor, flexShrink: 0, marginTop: 5,
+                        }} />
+                        <div>
+                          <p style={{ fontSize: 11, fontWeight: 600, color: "var(--qc-ink)", margin: 0, lineHeight: 1.3 }}>
+                            {ev.period}
+                          </p>
+                          <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: "2px 0 0", lineHeight: 1.4 }}>
+                            {ev.quote.slice(0, 100)}{ev.quote.length > 100 ? "…" : ""}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))
-                  : (
-                    <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>
-                      {pattern.sentence}
-                    </p>
-                  )
-                }
-              </div>
-            ) : (
-              <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>No data</p>
-            )}
-          </div>
-        ))}
+                    ))
+                    : (
+                      <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>
+                        {matchingPatterns[0].sentence}
+                      </p>
+                    )
+                  }
+                </div>
+              ) : (
+                <p style={{ fontSize: 12, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.5 }}>No data</p>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -414,12 +424,11 @@ export function LensDetailDisclosure({ lens }: Props) {
   const topSignals = lens.top_signals ?? [];
   const patterns = lens.patterns ?? [];
 
-  // Headline IND_ signals (3-col strip)
-  const indSignals = topSignals.filter((s) => s.metric.startsWith("IND_")).slice(0, 3);
+  // Headline IND_ signals (all 4)
+  const indSignals = topSignals.filter((s) => s.metric.startsWith("IND_"));
 
   // META_POSTURE for sources bar
   const metaPosture = topSignals.find((s) => s.metric === "META_POSTURE");
-  const metaVerdict = topSignals.find((s) => s.metric === "META_VERDICT");
 
   // Split patterns: behavioral (for QC intuition table) vs analysis columns
   const analysisTypes = new Set(ANALYSIS_TYPES as readonly string[]);
@@ -442,7 +451,7 @@ export function LensDetailDisclosure({ lens }: Props) {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: `repeat(${indSignals.length}, 1fr)`, borderRadius: 10, border: "1px solid var(--qc-hair)", overflow: "hidden" }}>
             {indSignals.map((s, i) => {
-              const cfg = indTileConfig(s.metric, s.direction);
+              const cfg = indTileConfig(s.metric, s.direction, s.actual_value);
               return (
                 <div key={s.signal_id} style={{
                   padding: "18px 16px", background: cfg.bg,
@@ -473,7 +482,7 @@ export function LensDetailDisclosure({ lens }: Props) {
 
       {/* ── QC Intuition patterns table ── */}
       {behavioralPatterns.length > 0 && (
-        <DisclosurePatternTable patterns={behavioralPatterns} />
+        <DisclosurePatternTable patterns={behavioralPatterns} signalCount={lens.signal_count} />
       )}
 
       {/* ── Sources bar ── */}

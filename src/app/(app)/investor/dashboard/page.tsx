@@ -17,6 +17,7 @@ import { DiscoverScreens } from "@/components/investor/discover-screens";
 import type { DiscoverScreen } from "@/components/investor/discover-screens";
 import { ResearchLibraryBanner } from "@/components/investor/research-library-banner";
 import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
+import { CompleteJournalModal } from "@/components/investor/complete-journal-modal";
 import { useShadowPortfolio } from "@/hooks/useShadowPortfolio";
 import { useUserPortfolio } from "@/hooks/useUserPortfolio";
 
@@ -213,6 +214,7 @@ export default function InvestorDashboardPage() {
   const todayMeta = getTodayMeta();
   const [modDrawerOpen, setModDrawerOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [journalModalOpen, setJournalModalOpen] = useState(false);
 
   const { holdings: shadowHoldings, loading: shadowLoading, notFound: shadowNotFound } = useShadowPortfolio();
   const { data: userPortfolio, loading: portfolioLoading } = useUserPortfolio();
@@ -407,6 +409,7 @@ export default function InvestorDashboardPage() {
             catalystsNext30Days={5}
             subtitle="DRHP verdicts, management commentary & thesis updates"
             href="/screener/home"
+            onOpenJournal={() => setJournalModalOpen(true)}
           />
         </section>
       </main>
@@ -421,6 +424,11 @@ export default function InvestorDashboardPage() {
         open={uploadModalOpen}
         onClose={() => setUploadModalOpen(false)}
         onSuccess={() => { setUploadModalOpen(false); window.location.reload(); }}
+      />
+
+      <CompleteJournalModal
+        open={journalModalOpen}
+        onClose={() => setJournalModalOpen(false)}
       />
     </div>
   );

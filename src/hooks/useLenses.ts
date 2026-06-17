@@ -36,6 +36,26 @@ export interface TopSignal {
   };
 }
 
+export interface PatternEvidence {
+  quote: string;
+  value: number;
+  period: string;
+  signal_id: string;
+}
+
+export interface Pattern {
+  type: "drumbeat" | "emergence" | "going_quiet" | "tone_divergence" | "narrative_gap" | "street_pressure" | string;
+  label: string;
+  impact: "high" | "medium" | "low" | string;
+  direction: "positive" | "negative" | "neutral" | "watch" | string;
+  sentence: string;
+  confidence: number;
+  confidence_reason: string;
+  evidence: PatternEvidence[];
+  shape_data: string | null;
+  shape_label: string | null;
+}
+
 export interface LensDetail {
   slug: string;
   name: string;
@@ -52,6 +72,7 @@ export interface LensDetail {
   signal_count: number;
   computed_at: string | null;
   top_signals?: TopSignal[];
+  patterns?: Pattern[];
 }
 
 export type LensCategory = "management" | "opportunity" | "deal";

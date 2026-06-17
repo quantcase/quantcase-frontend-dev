@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantcase · Complete Your Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F5F0;
+  --surface: #FFFFFF;
+  --ink: #1C1917;
+  --ink-2: #44403C;
+  --ink-3: #78716C;
+  --ink-4: #A8A29E;
+  --rule: #E7E4DC;
+  --rule-2: #D6D0C4;
+  --mgmt: #166534; --mgmt-bg: #DCFCE7; --mgmt-mid: #16A34A;
+  --opp:  #1D4ED8; --opp-bg:  #DBEAFE; --opp-mid:  #2563EB;
+  --deal: #7C3AED; --deal-bg: #EDE9FE;
+  --good: #15803D; --good-bg: #F0FDF4;
+  --warn: #B45309; --warn-bg: #FFFBEB;
+  --bad:  #B91C1C; --bad-bg:  #FEF2F2;
+  --gold: #D97706;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+
+/* ─── MODAL SHELL ─── */
+.modal-bg {
+  position:fixed;inset:0;
+  background:rgba(28,25,23,0.6);
+  backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;
+  z-index:200;
+  padding:20px;
+}
+.modal {
+  background:var(--surface);
+  border-radius:20px;
+  width:100%;
+  max-width:760px;
+  max-height:90vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,0.2);
+  position:relative;
+}
+
+/* ─── MODAL HEADER ─── */
+.modal-head {
+  padding:20px 28px 16px;
+  border-bottom:1px solid var(--rule);
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  flex-shrink:0;
+}
+.modal-head-left {}
+.modal-eyebrow {
+  font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:600;margin-bottom:6px;
+  display:flex;align-items:center;gap:8px;
+}
+.modal-eyebrow .fire { font-size:14px; }
+.modal-title {
+  font-family:'Instrument Serif',serif;
+  font-size:22px;font-weight:400;letter-spacing:-0.015em;line-height:1.1;
+}
+.modal-close {
+  background:var(--bg);border:1px solid var(--rule-2);
+  width:32px;height:32px;border-radius:8px;
+  font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink-2);flex-shrink:0;
+}
+
+/* ─── OVERALL PROGRESS ─── */
+.overall-progress {
+  padding:12px 28px;
+  border-bottom:1px solid var(--rule);
+  background:var(--bg);
+  flex-shrink:0;
+}
+.op-row {
+  display:flex;gap:8px;align-items:center;
+}
+.op-step {
+  flex:1;display:flex;flex-direction:column;gap:5px;align-items:center;
+  position:relative;
+}
+.op-step::after {
+  content:'';
+  position:absolute;
+  left:calc(50% + 18px);right:calc(-50% + 18px);
+  top:14px;height:1px;
+  background:var(--rule-2);
+}
+.op-step:last-child::after { display:none; }
+.op-dot {
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;
+  position:relative;z-index:1;
+  transition:all 0.3s ease;
+}
+.op-dot.done   { background:var(--ink);color:#fff; }
+.op-dot.active { background:var(--deal);color:#fff;box-shadow:0 0 0 4px #EDE9FE; }
+.op-dot.empty  { background:var(--surface);color:var(--ink-3);border:1.5px solid var(--rule-2); }
+.op-label {
+  font-size:9px;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:600;text-align:center;
+}
+.op-label.active { color:var(--deal); }
+.op-label.done   { color:var(--ink-2); }
+
+/* ─── SCROLL BODY ─── */
+.modal-body {
+  flex:1;overflow-y:auto;padding:0;
+}
+
+/* ─── STOCK IDENTITY BAR ─── */
+.stock-bar {
+  padding:18px 28px 14px;
+  border-bottom:1px solid var(--rule);
+  display:grid;
+  grid-template-columns:auto 1fr auto auto;
+  gap:16px;align-items:center;
+  background:var(--bg);
+}
+.stock-logo {
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Instrument Serif',serif;font-size:22px;font-style:italic;
+  font-weight:400;color:#fff;
+}
+.sb-name { font-size:18px;font-weight:700;letter-spacing:0.01em; }
+.sb-meta { font-size:12px;color:var(--ink-3);margin-top:2px; }
+.sb-price-block { text-align:right; }
+.sb-price {
+  font-family:'JetBrains Mono',monospace;
+  font-size:18px;font-weight:600;
+}
+.sb-delta {
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;margin-top:1px;
+}
+.sb-delta.pos { color:var(--good); }
+.sb-delta.neg { color:var(--bad); }
+
+/* MOD snapshot */
+.mod-snapshot {
+  display:flex;flex-direction:column;gap:4px;align-items:flex-end;
+}
+.ms-row {
+  display:flex;gap:8px;align-items:center;
+}
+.ms-letter {
+  font-family:'Instrument Serif',serif;
+  font-style:italic;font-size:15px;font-weight:400;width:14px;text-align:center;
+}
+.ms-track {
+  width:48px;height:4px;background:var(--rule);border-radius:2px;overflow:hidden;
+}
+.ms-fill { height:100%;border-radius:2px; }
+.ms-val {
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:600;width:20px;text-align:right;
+}
+
+/* ─── CONTENT SECTIONS ─── */
+.section-pad { padding:20px 28px; }
+.section-divider {
+  border-top:1px solid var(--rule);
+  padding:20px 28px;
+}
+
+.section-eyebrow {
+  font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+  font-weight:700;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.step-num {
+  width:20px;height:20px;border-radius:50%;
+  background:var(--ink);color:#fff;
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  font-family:'DM Sans',sans-serif;
+  letter-spacing:0;
+  text-transform:none;
+}
+
+/* ─── MOD DIMENSION PICKER ─── */
+.dim-grid {
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  margin-bottom:14px;
+}
+.dim-card {
+  border:1.5px solid var(--rule-2);border-radius:12px;
+  padding:14px 16px;cursor:pointer;
+  transition:all 0.2s ease;
+  display:flex;flex-direction:column;gap:8px;
+  background:var(--surface);
+}
+.dim-card:hover { border-color:var(--ink-3);transform:translateY(-1px); }
+.dim-card.selected-mgmt { border-color:var(--mgmt-mid);background:var(--mgmt-bg); }
+.dim-card.selected-opp  { border-color:var(--opp-mid);background:var(--opp-bg); }
+.dim-card.selected-deal { border-color:var(--deal);background:var(--deal-bg); }
+.dim-letter {
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:32px;font-weight:400;line-height:1;
+}
+.dim-card.selected-mgmt .dim-letter { color:var(--mgmt); }
+.dim-card.selected-opp  .dim-letter { color:var(--opp-mid); }
+.dim-card.selected-deal .dim-letter { color:var(--deal); }
+.dim-name {
+  font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+  font-weight:700;color:var(--ink-2);
+}
+.dim-question {
+  font-size:12px;color:var(--ink-3);line-height:1.4;
+}
+.dim-score-preview {
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  font-weight:600;
+}
+
+/* ─── SUB-FACTOR CHIPS ─── */
+.sub-chips { display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px; }
+.sfchip {
+  padding:6px 12px;border-radius:999px;
+  border:1.5px solid var(--rule-2);
+  font-size:11px;font-weight:500;
+  cursor:pointer;background:var(--surface);
+  color:var(--ink-2);
+  transition:all 0.15s;
+  display:flex;align-items:center;gap:5px;
+}
+.sfchip:hover { border-color:var(--ink-3); }
+.sfchip.sel-mgmt { background:var(--mgmt-bg);border-color:var(--mgmt-mid);color:var(--mgmt); }
+.sfchip.sel-opp  { background:var(--opp-bg);border-color:var(--opp-mid);color:var(--opp); }
+.sfchip.sel-deal { background:var(--deal-bg);border-color:var(--deal);color:var(--deal); }
+.sfchip .check { font-size:9px;font-weight:700; }
+.sfchip-hint { font-size:11px;color:var(--ink-3);line-height:1.4;padding:8px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--rule); display:none; }
+.sfchip-hint.visible { display:block; }
+
+/* ─── AI CONTEXT BOX ─── */
+.ai-box {
+  background:linear-gradient(135deg,#EDE9FE,#F5F3FF);
+  border:1px solid #DDD6FE;border-radius:10px;
+  padding:14px 16px;
+  display:flex;gap:12px;
+}
+.ai-icon {
+  width:28px;height:28px;background:white;border-radius:7px;
+  border:1px solid #DDD6FE;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+}
+.ai-content {}
+.ai-lbl {
+  font-size:9px;letter-spacing:0.14em;text-transform:uppercase;
+  font-weight:700;color:#6D28D9;margin-bottom:5px;
+}
+.ai-text { font-size:12px;color:#4C1D95;line-height:1.55; }
+.ai-text strong { color:#2E1065;font-weight:600; }
+.ai-text .good { color:var(--good);font-weight:600; }
+.ai-text .bad  { color:var(--bad);font-weight:600; }
+.ai-text .neu  { color:var(--ink-2); }
+
+/* ─── THESIS TEXTAREA ─── */
+.thesis-area-wrap { position:relative; }
+.thesis-area {
+  width:100%;min-height:80px;
+  border:1.5px solid var(--rule-2);border-radius:10px;
+  padding:14px 16px;
+  font-family:'Instrument Serif',serif;
+  font-size:15px;font-style:italic;
+  color:var(--ink);line-height:1.55;
+  background:var(--surface);
+  resize:none;
+  transition:border-color 0.2s;
+  outline:none;
+}
+.thesis-area:focus { border-color:var(--deal); }
+.thesis-area::placeholder { color:var(--ink-4);font-style:italic; }
+.char-count {
+  position:absolute;bottom:10px;right:12px;
+  font-size:10px;color:var(--ink-4);
+  font-family:'JetBrains Mono',monospace;
+}
+.thesis-prompts {
+  display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;
+}
+.tprompt {
+  font-size:11px;color:var(--deal);background:var(--deal-bg);
+  border:1px solid #DDD6FE;border-radius:6px;
+  padding:3px 9px;cursor:pointer;
+  transition:background 0.12s;
+}
+.tprompt:hover { background:#D8D2F5; }
+
+/* ─── CONVICTION PICKER ─── */
+.conviction-grid {
+  display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
+}
+.conv-level {
+  border:1.5px solid var(--rule-2);border-radius:10px;
+  padding:12px 10px;text-align:center;cursor:pointer;
+  transition:all 0.2s;background:var(--surface);
+}
+.conv-level:hover { border-color:var(--gold);transform:translateY(-1px); }
+.conv-level.selected { border-color:var(--gold);background:#FFFBEB;transform:translateY(-2px);box-shadow:0 4px 12px rgba(217,119,6,0.15); }
+.conv-dots {
+  display:flex;gap:3px;justify-content:center;margin-bottom:6px;
+}
+.c-dot {
+  width:10px;height:10px;border-radius:50%;
+  background:var(--gold);
+}
+.c-dot.empty { background:var(--rule);border:1px solid var(--ink-4); }
+.conv-label {
+  font-size:10px;font-weight:700;color:var(--ink-2);letter-spacing:0.04em;
+  margin-bottom:3px;
+}
+.conv-desc {
+  font-size:9px;color:var(--ink-3);line-height:1.3;
+}
+
+/* ─── CONTEXT SIGNALS ─── */
+.signal-row {
+  display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;
+}
+.sig-chip {
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:7px;
+  font-size:11px;font-weight:500;
+}
+.sig-chip.green { background:var(--good-bg);color:var(--good);border:1px solid #86EFAC; }
+.sig-chip.amber { background:#FFFBEB;color:var(--warn);border:1px solid #FCD34D; }
+.sig-chip.red   { background:var(--bad-bg);color:var(--bad);border:1px solid #FCA5A5; }
+.sig-chip.neutral { background:var(--bg);color:var(--ink-2);border:1px solid var(--rule-2); }
+
+/* ─── MODAL FOOTER ─── */
+.modal-foot {
+  padding:14px 28px;
+  border-top:1px solid var(--rule);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-shrink:0;background:var(--surface);
+}
+.foot-left { display:flex;gap:8px;align-items:center; }
+.foot-skip {
+  font-size:12px;color:var(--ink-3);cursor:pointer;
+  background:none;border:none;font-family:inherit;
+}
+.foot-skip:hover { color:var(--ink-2); }
+.foot-right { display:flex;gap:8px;align-items:center; }
+
+.btn-ghost {
+  background:var(--surface);color:var(--ink-2);
+  border:1px solid var(--rule-2);padding:9px 18px;
+  border-radius:9px;font-size:13px;font-weight:500;
+  cursor:pointer;font-family:inherit;
+}
+.btn-ghost:hover { background:var(--bg); }
+.btn-primary {
+  background:var(--ink);color:#fff;
+  border:none;padding:9px 22px;
+  border-radius:9px;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:6px;
+  transition:background 0.15s;
+}
+.btn-primary:hover { background:#2C2820; }
+.btn-primary:disabled { opacity:0.4;cursor:not-allowed; }
+
+/* ─── COMPLETION STATE ─── */
+.completion {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 28px;text-align:center;
+  min-height:400px;
+}
+.completion-icon { font-size:56px;margin-bottom:20px;line-height:1; }
+.completion-title {
+  font-family:'Instrument Serif',serif;
+  font-size:32px;font-weight:400;letter-spacing:-0.02em;
+  margin-bottom:10px;
+}
+.completion-title em { font-style:italic;color:var(--deal); }
+.completion-body {
+  font-size:15px;color:var(--ink-2);line-height:1.55;
+  max-width:440px;margin-bottom:28px;
+}
+.completion-stats {
+  display:flex;gap:24px;margin-bottom:32px;
+  background:var(--bg);border-radius:12px;padding:16px 28px;
+  border:1px solid var(--rule);
+}
+.cs-item { text-align:center; }
+.cs-num {
+  font-family:'Instrument Serif',serif;
+  font-size:28px;font-weight:400;letter-spacing:-0.02em;
+  line-height:1;display:block;
+}
+.cs-lbl {
+  font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:600;margin-top:4px;
+}
+
+/* ─── SLIDE TRANSITIONS ─── */
+.slide-enter { animation: slideIn 0.35s ease forwards; }
+@keyframes slideIn {
+  from { opacity:0;transform:translateX(24px); }
+  to   { opacity:1;transform:translateX(0); }
+}
+
+/* ─── INLINE DEMO TRIGGER ─── */
+.trigger-btn {
+  background:var(--ink);color:#fff;
+  border:none;padding:14px 28px;
+  border-radius:12px;font-size:15px;font-weight:500;
+  cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:8px;
+}
+.trigger-btn:hover { background:#2C2820; }
+</style>
+</head>
+<body>
+
+<!-- Demo trigger -->
+<div style="text-align:center">
+  <div style="font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;color:var(--ink-3);margin-bottom:20px">Quantcase · Complete Journal flow</div>
+  <button class="trigger-btn" onclick="openModal()">
+    📓 Complete journal (4 remaining)
+    <span style="font-size:18px">→</span>
+  </button>
+  <div style="font-size:12px;color:var(--ink-3);margin-top:12px">RELIANCE · SBIN · KPIGREEN · TATASTEEL</div>
+</div>
+
+<!-- ═══════ MODAL ═══════ -->
+<div class="modal-bg" id="modal-bg" style="display:none" onclick="handleBgClick(event)">
+<div class="modal" id="modal">
+
+  <!-- HEAD -->
+  <div class="modal-head">
+    <div class="modal-head-left">
+      <div class="modal-eyebrow">
+        <span class="fire">🔥</span>
+        Complete your investment journal
+      </div>
+      <div class="modal-title" id="modal-title">4 holdings need a thesis</div>
+    </div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+
+  <!-- OVERALL PROGRESS -->
+  <div class="overall-progress">
+    <div class="op-row" id="op-row">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- SCROLLABLE BODY -->
+  <div class="modal-body" id="modal-body">
+    <!-- rendered by JS -->
+  </div>
+
+  <!-- FOOTER -->
+  <div class="modal-foot">
+    <div class="foot-left">
+      <button class="foot-skip" onclick="skipHolding()">Skip this stock →</button>
+    </div>
+    <div class="foot-right" id="foot-right">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+/* ──── DATA ──── */
+const stocks = [
+  {
+    id: 'RELIANCE',
+    name: 'Reliance Industries',
+    sector: 'Energy',
+    cap: 'Large Cap',
+    color: '#1A6B35',
+    price: '₹2,891',
+    delta: '+16.5%',
+    deltaDir: 'pos',
+    mod: { M:74, O:80, D:72 },
+    signals: [
+      { label:'Jio subscriber growth steady', type:'green' },
+      { label:'Retail expansion on track', type:'green' },
+      { label:'Petchem margins under pressure', type:'amber' },
+      { label:'O2C business headwinds', type:'amber' },
+    ],
+    aiContext: {
+      M: 'Management has delivered on Jio KPIs for 6 consecutive quarters. Capital allocation across verticals (Retail, Jio, O2C) is complex — <strong>Guidance Accuracy score: 74</strong>, dragged by O2C margin miss in Q2.',
+      O: 'Jio has <strong class="good">35%+ market share</strong> and the retail expansion story is real — 4,200+ stores added YoY. O2C is cyclical and under pressure. <span class="neu">The opportunity thesis depends on which segment you\'re buying.</span>',
+      D: 'At 1.4× P/B and 22× P/E — <strong>not cheap, but not stretched</strong>. SOTP valuation gives meaningful upside if Jio is valued as a standalone digital business. The deal thesis is complex. <span class="neu">P/E re-rating potential is moderate.</span>',
+    },
+    subFactors: {
+      M: ['Guidance Accuracy','Capital Allocation','Disclosure Honesty'],
+      O: ['Industry Tailwind','Distribution Strength','Competitive Edge','TAM Expansion'],
+      D: ['Valuation','Earnings Growth/Quality','P/E Re-rating Potential','Risk-Reward'],
+    },
+    prompts: [
+      'Buying for Jio value unlock...',
+      'Retail expansion undervalued by market...',
+      'Conglomerate discount will narrow...',
+    ]
+  },
+  {
+    id: 'SBIN',
+    name: 'State Bank of India',
+    sector: 'PSU Banks',
+    cap: 'Large Cap',
+    color: '#1D4ED8',
+    price: '₹812.40',
+    delta: '+12.8%',
+    deltaDir: 'pos',
+    mod: { M:76, O:80, D:68 },
+    signals: [
+      { label:'NPA cycle largely behind', type:'green' },
+      { label:'ROE consistently above 15%', type:'green' },
+      { label:'Government ownership — policy risk', type:'amber' },
+      { label:'CASA ratio stable', type:'green' },
+    ],
+    aiContext: {
+      M: '<strong>Guidance accuracy has improved significantly</strong> over 4 years. The NPA cleanup was transparent and disciplined. Capital allocation has been rational — no aggressive lending cycles. Promoter is government, which introduces political risk but also capital support.',
+      O: 'India\'s largest lender by assets — <strong class="good">distribution moat is unrivalled</strong> with 22,000+ branches. Credit cycle is supportive. The PSU banking sector tailwind is real, particularly for infrastructure financing.',
+      D: '<span class="neu">Trades at 1.3× P/B — below most private peers.</span> P/E re-rating potential is the classic PSU thesis. <strong>ROE > 16% sustained for 3 years justifies rerating</strong>. Risk-reward is attractive at current valuation.',
+    },
+    subFactors: {
+      M: ['Guidance Accuracy','Capital Allocation','Disclosure Honesty'],
+      O: ['Industry Tailwind','Distribution Strength','Competitive Edge','TAM Expansion'],
+      D: ['Valuation','Earnings Growth/Quality','P/E Re-rating Potential','Risk-Reward'],
+    },
+    prompts: [
+      'PSU re-rating thesis — P/B discount vs private peers...',
+      'Credit cycle recovery and ROE expansion...',
+      'Distribution moat is unmatched in Indian banking...',
+    ]
+  },
+  {
+    id: 'KPIGREEN',
+    name: 'KPI Green Energy',
+    sector: 'Renewable Energy',
+    cap: 'Small Cap',
+    color: '#065F46',
+    price: '₹594.20',
+    delta: '−12.6%',
+    deltaDir: 'neg',
+    mod: { M:62, O:74, D:48 },
+    signals: [
+      { label:'India solar capacity target +10× by 2030', type:'green' },
+      { label:'Order book growing 40% YoY', type:'green' },
+      { label:'Working capital cycle stretched', type:'amber' },
+      { label:'Small cap — liquidity risk', type:'amber' },
+    ],
+    aiContext: {
+      M: 'Guidance accuracy score is <strong class="bad">62 — the weakest dimension</strong>. Promoter has walked back two execution timelines. However, disclosure quality is improving QoQ. Small management team — key-man risk exists.',
+      O: '<strong class="good">Secular tailwind is very strong</strong> — India\'s solar capacity must grow 10× to meet 2030 targets. KPI Green has an order book growing 40% YoY. Competitive edge is strong in Gujarat solar corridors. The opportunity is real.',
+      D: '<span class="bad">Current valuations (P/E 38×) imply high execution — downside is significant if management misses again.</span> Risk-reward is the concern. However, for a 3-5 year holding, the opportunity size justifies a speculative position.',
+    },
+    subFactors: {
+      M: ['Guidance Accuracy','Capital Allocation','Disclosure Honesty'],
+      O: ['Industry Tailwind','Distribution Strength','Competitive Edge','TAM Expansion'],
+      D: ['Valuation','Earnings Growth/Quality','P/E Re-rating Potential','Risk-Reward'],
+    },
+    prompts: [
+      'Buying the India solar secular theme...',
+      'Order book growth justifies premium...',
+      'High risk, high reward — sized accordingly...',
+    ]
+  },
+  {
+    id: 'TATASTEEL',
+    name: 'Tata Steel',
+    sector: 'Metals',
+    cap: 'Large Cap',
+    color: '#1E3A5F',
+    price: '₹162.40',
+    delta: '+9.7%',
+    deltaDir: 'pos',
+    mod: { M:68, O:64, D:72 },
+    signals: [
+      { label:'Europe operations turning cash positive', type:'green' },
+      { label:'India volumes growing 8% YoY', type:'green' },
+      { label:'Steel cycle at mid-cycle, not peak', type:'neutral' },
+      { label:'Debt reduction ongoing', type:'green' },
+    ],
+    aiContext: {
+      M: '<strong>Tata Steel management has been transparent</strong> about Europe struggles and has consistently delivered on debt reduction targets. Capital allocation decision to stay in Europe was controversial but appears to be playing out. Guidance accuracy: 68 — reasonable for a cyclical business.',
+      O: '<span class="neu">India steel demand is structural — infrastructure, housing, auto.</span> Europe recovery is the optionality. The sector tailwind is moderate (mid-cycle), not a screaming buy. <strong>Competitive edge in Indian operations is strong.</strong>',
+      D: '<strong class="good">Valuation is attractive</strong> — trading at 0.9× replacement cost. Debt reduction gives earnings leverage. P/E re-rating potential exists as Europe losses shrink. <span class="neu">Risk-reward is favourable at this price.</span>',
+    },
+    subFactors: {
+      M: ['Guidance Accuracy','Capital Allocation','Disclosure Honesty'],
+      O: ['Industry Tailwind','Distribution Strength','Competitive Edge','TAM Expansion'],
+      D: ['Valuation','Earnings Growth/Quality','P/E Re-rating Potential','Risk-Reward'],
+    },
+    prompts: [
+      'Cyclical recovery play — buying at trough valuation...',
+      'Europe optionality not priced in...',
+      'India steel demand structural over 5 years...',
+    ]
+  },
+];
+
+/* ──── STATE ──── */
+let cur = 0;       // current stock index
+let states = stocks.map(() => ({
+  dim: null,          // 'M' | 'O' | 'D'
+  subFactors: [],     // selected sub-factors
+  thesis: '',
+  conviction: 0,
+  done: false,
+}));
+
+const convLabels = [
+  { label:'Watching', desc:'Not yet decided' },
+  { label:'Interested', desc:'Early signals positive' },
+  { label:'Moderate', desc:'Core thesis in place' },
+  { label:'High', desc:'Strong conviction' },
+  { label:'Highest', desc:'Maximum conviction' },
+];
+
+/* ──── MODAL OPEN / CLOSE ──── */
+function openModal() {
+  document.getElementById('modal-bg').style.display = 'flex';
+  renderStep();
+}
+function closeModal() {
+  document.getElementById('modal-bg').style.display = 'none';
+}
+function handleBgClick(e) {
+  if (e.target === document.getElementById('modal-bg')) closeModal();
+}
+
+/* ──── SKIP ──── */
+function skipHolding() {
+  states[cur].done = true;
+  advance();
+}
+
+/* ──── ADVANCE ──── */
+function advance() {
+  const nextIdx = states.findIndex((s, i) => !s.done && i > cur);
+  if (nextIdx === -1) {
+    // Check if everything is done or skipped
+    const remaining = states.filter(s => !s.done);
+    if (remaining.length === 0) {
+      showCompletion();
+    } else {
+      // wrap to first undone
+      cur = states.findIndex(s => !s.done);
+      renderStep();
+    }
+  } else {
+    cur = nextIdx;
+    renderStep();
+  }
+}
+
+/* ──── SAVE & NEXT ──── */
+function saveAndNext() {
+  states[cur].done = true;
+  advance();
+}
+
+/* ──── OVERALL PROGRESS BAR ──── */
+function renderProgress() {
+  const row = document.getElementById('op-row');
+  row.innerHTML = stocks.map((s, i) => {
+    const st = states[i];
+    const cls = st.done ? 'done' : (i === cur ? 'active' : 'empty');
+    const icon = st.done ? '✓' : (i + 1);
+    return `
+      <div class="op-step">
+        <div class="op-dot ${cls}">${icon}</div>
+        <div class="op-label ${cls}">${s.id}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ──── DIMENSION SELECTION ──── */
+function selectDim(dim) {
+  states[cur].dim = dim;
+  states[cur].subFactors = []; // reset sub-factors
+  renderStep();
+}
+
+/* ──── SUB-FACTOR TOGGLE ──── */
+function toggleSubFactor(sf) {
+  const arr = states[cur].subFactors;
+  const idx = arr.indexOf(sf);
+  if (idx === -1) arr.push(sf);
+  else arr.splice(idx, 1);
+  renderSubFactors();
+  renderHint(sf);
+}
+
+function renderSubFactors() {
+  const s = stocks[cur];
+  const st = states[cur];
+  const dim = st.dim;
+  if (!dim) return;
+  const container = document.getElementById('sf-container');
+  if (!container) return;
+  const sfs = s.subFactors[dim];
+  const selClass = dim === 'M' ? 'sel-mgmt' : dim === 'O' ? 'sel-opp' : 'sel-deal';
+  container.innerHTML = sfs.map(sf => {
+    const sel = st.subFactors.includes(sf);
+    return `<div class="sfchip ${sel ? selClass : ''}" onclick="toggleSubFactor('${sf}')">
+      ${sel ? '<span class="check">✓</span>' : ''} ${sf}
+    </div>`;
+  }).join('');
+}
+
+const sfHints = {
+  'Guidance Accuracy': 'Management has consistently delivered on forward guidance — or consistently missed. Check how closely revenue/margin actuals tracked what was said.',
+  'Capital Allocation': 'Where does surplus cash go — buybacks, dividends, acquisitions, or capex? Compounders allocate capital to highest-return uses.',
+  'Disclosure Honesty': 'Does management acknowledge headwinds early, or bury negatives? Tone in concalls, change in auditor, related-party transactions.',
+  'Industry Tailwind': 'Is demand for this product/service structurally growing? Is this a sunrise sector or a sunset one with temporary revival?',
+  'Distribution Strength': 'How deep is the reach — geographically and across customer segments? A strong distribution moat is hard to replicate.',
+  'Competitive Edge': 'What stops competitors from taking share? Brand, switching costs, network effects, patents, regulatory moats.',
+  'TAM Expansion': 'Is the total addressable market growing through new geographies, new customer segments, or adjacent products?',
+  'Pricing Power': 'Can the company raise prices without losing customers? FMCG, pharma, and premium brands often have this.',
+  'Valuation': 'Is the stock cheap vs intrinsic value, vs sector peers, and vs its own historical multiples?',
+  'Earnings Growth/Quality': 'Is EPS growing — and is that growth real (operating leverage, volume) vs manufactured (buybacks, one-offs)?',
+  'P/E Re-rating Potential': 'Is there a specific trigger — debt paydown, margin improvement, sector rotation — that could cause the multiple to expand?',
+  'Risk-Reward': 'At the current price, what do you make in the bull case vs what you lose in the bear case? Is the skew favourable?',
+  'Entry Timing': 'Have you identified a specific entry trigger — a pullback, a results catalyst, a sector event — rather than buying indiscriminately?',
+};
+
+function renderHint(sf) {
+  const box = document.getElementById('sf-hint-box');
+  if (!box) return;
+  const hint = sfHints[sf];
+  if (hint) {
+    box.textContent = hint;
+    box.classList.add('visible');
+  }
+}
+
+/* ──── CONVICTION ──── */
+function setConviction(level) {
+  states[cur].conviction = level;
+  renderConviction();
+  updateFooter();
+}
+
+function renderConviction() {
+  const container = document.getElementById('conv-container');
+  if (!container) return;
+  const cv = states[cur].conviction;
+  container.innerHTML = convLabels.map((c, i) => {
+    const n = i + 1;
+    const sel = cv === n;
+    const dots = Array(5).fill(0).map((_, d) =>
+      `<div class="c-dot ${d < n ? '' : 'empty'}"></div>`
+    ).join('');
+    return `<div class="conv-level ${sel ? 'selected' : ''}" onclick="setConviction(${n})">
+      <div class="conv-dots">${dots}</div>
+      <div class="conv-label">${c.label}</div>
+      <div class="conv-desc">${c.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ──── THESIS TEXT ──── */
+function usePrompt(text) {
+  const ta = document.getElementById('thesis-ta');
+  if (!ta) return;
+  ta.value = text;
+  ta.focus();
+  ta.setSelectionRange(ta.value.length, ta.value.length);
+  states[cur].thesis = text;
+  updateFooter();
+}
+
+/* ──── FOOTER CTA ──── */
+function updateFooter() {
+  const st = states[cur];
+  const canSave = st.dim && st.thesis.trim().length > 10 && st.conviction > 0;
+  const btn = document.getElementById('save-btn');
+  if (btn) btn.disabled = !canSave;
+}
+
+/* ──── STEP RENDERER ──── */
+function renderStep() {
+  renderProgress();
+  const s = stocks[cur];
+  const st = states[cur];
+  const dim = st.dim;
+
+  document.getElementById('modal-title').textContent =
+    `${cur + 1} of ${stocks.length} — ${s.id}`;
+
+  const modBarColor = dim => dim === 'M' ? 'var(--mgmt-mid)' : dim === 'O' ? 'var(--opp-mid)' : 'var(--deal)';
+
+  // AI context for selected dim, or generic
+  const aiText = dim
+    ? s.aiContext[dim]
+    : `Quantcase scores <strong>${s.id}</strong> at MOD ${s.mod.M}/${s.mod.O}/${s.mod.D} across Management / Opportunity / Deal. Select a dimension below to see what the data says about each.`;
+
+  // Sub-factors section (only if dim selected)
+  const sfSection = dim ? `
+    <div class="section-divider slide-enter">
+      <div class="section-eyebrow" style="color:${dim==='M'?'var(--mgmt)':dim==='O'?'var(--opp-mid)':'var(--deal)'}">
+        <div class="step-num">2</div>
+        What specifically drove your view?
+      </div>
+      <p style="font-size:13px;color:var(--ink-2);margin-bottom:12px;line-height:1.5">
+        Pick the sub-factors that resonated — these become searchable tags on your journal entry.
+      </p>
+      <div class="sub-chips" id="sf-container"><!-- rendered --></div>
+      <div class="sfchip-hint" id="sf-hint-box"></div>
+    </div>` : '';
+
+  // Thesis section (only if dim selected)
+  const thesisSection = dim ? `
+    <div class="section-divider slide-enter">
+      <div class="section-eyebrow" style="color:var(--ink-2)">
+        <div class="step-num">3</div>
+        Write your thesis in one or two sentences
+      </div>
+      <p style="font-size:13px;color:var(--ink-2);margin-bottom:10px;line-height:1.5">
+        Why do you own this? What has to be true for it to work? Use your own words — prompts below if you're stuck.
+      </p>
+      <div class="thesis-area-wrap">
+        <textarea
+          id="thesis-ta"
+          class="thesis-area"
+          placeholder="e.g. Buying for the Jio value unlock — the sum-of-parts hasn't been recognised by the market yet..."
+          oninput="states[${cur}].thesis=this.value;updateCharCount(this);updateFooter()"
+          maxlength="300"
+        >${st.thesis}</textarea>
+        <div class="char-count" id="char-count">${st.thesis.length}/300</div>
+      </div>
+      <div class="thesis-prompts">
+        <span style="font-size:11px;color:var(--ink-3);margin-right:4px">Prompts:</span>
+        ${s.prompts.map(p => `<div class="tprompt" onclick="usePrompt('${p}')">${p}</div>`).join('')}
+      </div>
+    </div>` : '';
+
+  // Conviction section (only if thesis written)
+  const convSection = dim ? `
+    <div class="section-divider slide-enter">
+      <div class="section-eyebrow" style="color:var(--ink-2)">
+        <div class="step-num">4</div>
+        How much conviction do you have?
+      </div>
+      <p style="font-size:13px;color:var(--ink-2);margin-bottom:12px;line-height:1.5">
+        Conviction determines how we weight this holding in your journal insights — and how aggressively we nudge you when things change.
+      </p>
+      <div class="conviction-grid" id="conv-container"><!-- rendered --></div>
+    </div>` : '';
+
+  document.getElementById('modal-body').innerHTML = `
+    <!-- STOCK BAR -->
+    <div class="stock-bar">
+      <div class="stock-logo" style="background:${s.color}">${s.id[0]}</div>
+      <div>
+        <div class="sb-name">${s.name}</div>
+        <div class="sb-meta">${s.sector} · ${s.cap}</div>
+      </div>
+      <div class="sb-price-block">
+        <div class="sb-price">${s.price}</div>
+        <div class="sb-delta ${s.deltaDir}">${s.delta}</div>
+      </div>
+      <div class="mod-snapshot">
+        ${['M','O','D'].map(d => `
+          <div class="ms-row">
+            <div class="ms-letter" style="color:${d==='M'?'var(--mgmt)':d==='O'?'var(--opp-mid)':'var(--deal)'}">${d}</div>
+            <div class="ms-track"><div class="ms-fill" style="width:${s.mod[d]}%;background:${d==='M'?'var(--mgmt-mid)':d==='O'?'var(--opp-mid)':'var(--deal)'}"></div></div>
+            <div class="ms-val">${s.mod[d]}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- CONTEXT SIGNALS -->
+    <div class="section-pad" style="padding-bottom:14px">
+      <div class="section-eyebrow" style="color:var(--ink-3);margin-bottom:8px">
+        What the data is saying about ${s.id}
+      </div>
+      <div class="signal-row">
+        ${s.signals.map(sig => `<div class="sig-chip ${sig.type}">
+          ${sig.type==='green'?'✓':sig.type==='amber'?'⚡':sig.type==='red'?'✕':'—'} ${sig.label}
+        </div>`).join('')}
+      </div>
+      <div class="ai-box">
+        <div class="ai-icon">🤖</div>
+        <div class="ai-content">
+          <div class="ai-lbl">Quantcase context — ${dim ? dim==='M'?'Management':'O'==='O'?'Opportunity':'Deal' : 'overview'}</div>
+          <div class="ai-text">${aiText}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIM PICKER -->
+    <div class="section-divider">
+      <div class="section-eyebrow" style="color:var(--ink-2)">
+        <div class="step-num">1</div>
+        Which dimension drove your decision to buy?
+      </div>
+      <div class="dim-grid">
+        ${[
+          { key:'M', name:'Management', q:'Do they do what they say?', selClass:'selected-mgmt', letterColor:'var(--mgmt)' },
+          { key:'O', name:'Opportunity', q:'Is the business worth owning?', selClass:'selected-opp', letterColor:'var(--opp-mid)' },
+          { key:'D', name:'Deal', q:'Is the price actually fair?', selClass:'selected-deal', letterColor:'var(--deal)' },
+        ].map(d => `
+          <div class="dim-card ${dim===d.key?d.selClass:''}" onclick="selectDim('${d.key}')">
+            <div class="dim-letter" style="${dim===d.key?'':'color:var(--ink-3)'}">${d.key}</div>
+            <div class="dim-name">${d.name}</div>
+            <div class="dim-question">${d.q}</div>
+            <div class="dim-score-preview" style="color:${dim===d.key?(d.key==='M'?'var(--mgmt)':d.key==='O'?'var(--opp-mid)':'var(--deal)'):'var(--ink-4)'}">
+              Score: ${s.mod[d.key]}/100
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    ${sfSection}
+    ${thesisSection}
+    ${convSection}
+
+    <div style="height:16px"></div>
+  `;
+
+  // Post-render
+  if (dim) {
+    renderSubFactors();
+    renderConviction();
+  }
+  updateFooter();
+  renderFooter();
+}
+
+/* ──── FOOTER RENDER ──── */
+function renderFooter() {
+  const isLast = states.filter(s => !s.done).length <= 1;
+  document.getElementById('foot-right').innerHTML = `
+    <button class="btn-ghost" onclick="closeModal()">Save for later</button>
+    <button class="btn-primary" id="save-btn" onclick="saveAndNext()" disabled>
+      ${isLast ? 'Complete journal 🎉' : 'Save & next →'}
+    </button>`;
+}
+
+/* ──── COMPLETION ──── */
+function showCompletion() {
+  document.getElementById('modal-title').textContent = 'Journal complete';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="completion">
+      <div class="completion-icon">🎉</div>
+      <div class="completion-title">Your journal is <em>complete</em>.</div>
+      <div class="completion-body">
+        All 12 holdings now have an investment thesis. Quantcase will monitor each one against your stated reasoning and alert you when the data contradicts it.
+      </div>
+      <div class="completion-stats">
+        <div class="cs-item">
+          <span class="cs-num" style="color:var(--good)">12</span>
+          <span class="cs-lbl">Holdings journalled</span>
+        </div>
+        <div class="cs-item">
+          <span class="cs-num" style="color:var(--deal)">100%</span>
+          <span class="cs-lbl">Journal complete</span>
+        </div>
+        <div class="cs-item">
+          <span class="cs-num" style="color:var(--gold)">4</span>
+          <span class="cs-lbl">AI monitors active</span>
+        </div>
+      </div>
+      <button class="btn-primary" style="font-size:15px;padding:12px 28px" onclick="closeModal()">
+        Return to portfolio →
+      </button>
+    </div>`;
+  document.getElementById('foot-right').innerHTML = '';
+  document.querySelector('.foot-skip').style.display = 'none';
+  renderProgress();
+}
+
+/* ──── UTILS ──── */
+function updateCharCount(ta) {
+  const cc = document.getElementById('char-count');
+  if(cc) cc.textContent = ta.value.length + '/300';
+}
+</script>
+</body>
+</html>

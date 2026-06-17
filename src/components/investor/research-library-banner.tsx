@@ -7,6 +7,7 @@ interface ResearchLibraryBannerProps {
   catalystsNext30Days: number;
   subtitle: string;
   href: string;
+  onOpenJournal?: () => void;
 }
 
 export function ResearchLibraryBanner({
@@ -14,10 +15,12 @@ export function ResearchLibraryBanner({
   catalystsNext30Days,
   subtitle,
   href,
+  onOpenJournal,
 }: ResearchLibraryBannerProps) {
   return (
     <Link
-      href={href}
+      href={onOpenJournal ? "#" : href}
+      onClick={onOpenJournal ? (e) => { e.preventDefault(); onOpenJournal(); } : undefined}
       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       style={{
         background: "#0F172B",
@@ -138,7 +141,7 @@ export function ResearchLibraryBanner({
             letterSpacing: "var(--qc-track-pill)",
           }}
         >
-          Open library →
+          Open journal →
         </div>
       </div>
     </Link>

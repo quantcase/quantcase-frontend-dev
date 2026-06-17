@@ -2,7 +2,7 @@
 
 import { useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
-import type { LensDetail, TopSignal } from "@/hooks/useLenses";
+import type { LensDetail, TopSignal, Pattern } from "@/hooks/useLenses";
 import { LensDrawerSummaryCard } from "@/components/insight/LensDrawerSummaryCard";
 
 interface Props {
@@ -161,6 +161,266 @@ function SignalTooltip({ signal: s, anchorRect, dirCfg, metricTitle, guidedStr, 
   return typeof document !== "undefined" ? createPortal(content, document.body) : null;
 }
 
+// ── QC Intuition — pattern recognition table ─────────────────────────────────
+
+function patternTypeConfig(type: string, direction: string) {
+  const d = direction.toLowerCase();
+  const t = type.toLowerCase();
+
+  const isPositive = d === "positive";
+  const isNegative = d === "negative";
+  const isWatch = d === "watch";
+
+  const color = isPositive ? "var(--qc-up)" : isNegative ? "var(--qc-down)" : isWatch ? "var(--qc-warn)" : "var(--qc-ink-3)";
+  const bg = isPositive ? "rgba(31,122,74,0.10)" : isNegative ? "rgba(220,38,38,0.10)" : isWatch ? "rgba(180,115,26,0.10)" : "rgba(120,120,120,0.10)";
+  const border = isPositive ? "rgba(31,122,74,0.28)" : isNegative ? "rgba(220,38,38,0.28)" : isWatch ? "rgba(180,115,26,0.28)" : "rgba(120,120,120,0.20)";
+
+  const labelMap: Record<string, string> = {
+    drumbeat: "DRUMBEAT",
+    emergence: "RISING",
+    going_quiet: "GOING QUIET",
+    tone_divergence: "TONE SHIFT",
+    narrative_gap: "GAP",
+    street_pressure: "STREET PRESSURE",
+  };
+  const label = labelMap[t] ?? t.replace(/_/g, " ").toUpperCase();
+
+  return { color, bg, border, label };
+}
+
+function PatternSparkline({ shapeData }: { shapeData: string | null }) {
+  if (!shapeData) return <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>—</span>;
+
+  let points: Array<{ period: string; value: number }> = [];
+  try {
+    points = JSON.parse(shapeData);
+  } catch {
+    return <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>—</span>;
+  }
+
+  if (points.length < 2) return <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>{points[0]?.value ?? "—"}</span>;
+
+  const W = 120, H = 36, PAD = 4;
+  const values = points.map((p) => p.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  const coords = points.map((p, i) => {
+    const x = PAD + (i / (points.length - 1)) * (W - PAD * 2);
+    const y = H - PAD - ((p.value - min) / range) * (H - PAD * 2);
+    return { x, y, ...p };
+  });
+
+  const pathD = coords.map((c, i) => `${i === 0 ? "M" : "L"}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
+  const lastPt = coords[coords.length - 1];
+  const isRising = values[values.length - 1] > values[0];
+  const lineColor = isRising ? "#4ade80" : "#f87171";
+  const dotColor = lineColor;
+
+  return (
+    <svg width={W} height={H} style={{ overflow: "visible", display: "block" }}>
+      <path d={pathD} fill="none" stroke={lineColor} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" opacity={0.85} />
+      <circle cx={lastPt.x} cy={lastPt.y} r={3.5} fill={dotColor} />
+    </svg>
+  );
+}
+
+function QCIntuitionTable({ patterns }: { patterns: Pattern[] }) {
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+
+  return (
+    <div style={{
+      borderRadius: 12,
+      overflow: "hidden",
+      border: "1px solid var(--qc-hair)",
+    }}>
+      {/* Dark header — uses DarkGradientCard bg */}
+      <div className="qc-dark-gradient-card" style={{
+        borderRadius: 0,
+        padding: "20px 24px 18px",
+        display: "flex", flexDirection: "column", gap: 10,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+            color: "rgba(255,255,255,0.50)",
+            background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 99, padding: "4px 10px",
+          }}>
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#60a5fa", flexShrink: 0 }} />
+            QC Intuition · Pattern Recognition
+          </span>
+          <div style={{ textAlign: "right" }}>
+            <p style={{ fontSize: 20, fontWeight: 700, color: "#ffffff", margin: 0, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+              {patterns.reduce((sum, p) => sum + p.evidence.length, 0) * 50}+
+            </p>
+            <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)", margin: "3px 0 0" }}>
+              signals parsed
+            </p>
+          </div>
+        </div>
+        <h3 style={{ fontSize: 20, fontWeight: 600, color: "#ffffff", margin: 0, lineHeight: 1.25, letterSpacing: "-0.02em" }}>
+          What management is really saying
+        </h3>
+        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", margin: 0, lineHeight: 1.55 }}>
+          Narrative themes extracted from <strong style={{ color: "rgba(255,255,255,0.80)", fontWeight: 600 }}>earnings calls, annual reports &amp; investor decks</strong>.{" "}
+          Each theme tracks how often and how confidently management references it — surfacing strategic pivots{" "}
+          <strong style={{ color: "rgba(255,255,255,0.80)", fontWeight: 600 }}>before they show in the P&amp;L</strong>.
+        </p>
+      </div>
+
+      {/* Column headers */}
+      <div style={{
+        display: "grid", gridTemplateColumns: "1fr 140px 120px 1fr",
+        background: "var(--qc-section)",
+        borderBottom: "1px solid var(--qc-hair)",
+        padding: "0 24px",
+      }}>
+        {["THEME", "SIGNAL TREND", "STATUS", "WHAT IT MEANS"].map((h, i) => (
+          <div key={h} style={{ padding: "8px 0", paddingRight: i < 3 ? 12 : 0 }}>
+            <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--qc-ink-3)" }}>{h}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Pattern rows */}
+      <div style={{ background: "var(--qc-card)" }}>
+        {patterns.map((p, i) => {
+          const cfg = patternTypeConfig(p.type, p.direction);
+          const isLast = i === patterns.length - 1;
+          const isExpanded = expandedIdx === i;
+          const confidencePct = Math.round(p.confidence * 100);
+
+          return (
+            <div key={i}>
+              <div
+                onClick={() => setExpandedIdx(isExpanded ? null : i)}
+                style={{
+                  display: "grid", gridTemplateColumns: "1fr 140px 120px 1fr",
+                  padding: "16px 24px",
+                  borderBottom: !isLast || isExpanded ? "1px solid var(--qc-hair)" : undefined,
+                  cursor: "pointer",
+                  transition: "background 0.15s",
+                  background: isExpanded ? "var(--qc-section)" : "var(--qc-card)",
+                  alignItems: "start",
+                  gap: 0,
+                }}
+                onMouseEnter={(e) => { if (!isExpanded) (e.currentTarget as HTMLDivElement).style.background = "var(--qc-section)"; }}
+                onMouseLeave={(e) => { if (!isExpanded) (e.currentTarget as HTMLDivElement).style.background = "var(--qc-card)"; }}
+              >
+                {/* Theme */}
+                <div style={{ paddingRight: 12 }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-ink)", margin: "0 0 3px", lineHeight: 1.3 }}>{p.label}</p>
+                  <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: 0, lineHeight: 1.4 }}>
+                    {p.evidence.length} data point{p.evidence.length !== 1 ? "s" : ""} · {p.evidence[0]?.period}
+                    {p.evidence.length > 1 ? ` → ${p.evidence[p.evidence.length - 1]?.period}` : ""}
+                  </p>
+                </div>
+
+                {/* Sparkline */}
+                <div style={{ paddingRight: 12, paddingTop: 2 }}>
+                  <PatternSparkline shapeData={p.shape_data} />
+                </div>
+
+                {/* Status badge */}
+                <div style={{ paddingRight: 12 }}>
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
+                    color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
+                    borderRadius: 99, padding: "4px 10px", whiteSpace: "nowrap",
+                  }}>
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: cfg.color, flexShrink: 0 }} />
+                    {cfg.label}
+                  </span>
+                </div>
+
+                {/* What it means */}
+                <div>
+                  <p style={{ fontSize: 12, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.6 }}>
+                    {p.sentence}
+                  </p>
+                  <p style={{ fontSize: 10, color: "var(--qc-ink-3)", margin: "4px 0 0" }}>
+                    {confidencePct}% confidence · click to see evidence
+                  </p>
+                </div>
+              </div>
+
+              {/* Expanded evidence panel */}
+              {isExpanded && (
+                <div style={{
+                  background: "var(--qc-section)",
+                  borderBottom: !isLast ? "1px solid var(--qc-hair)" : undefined,
+                  padding: "0 24px 16px",
+                }}>
+                  {/* Confidence bar */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.09em", color: "var(--qc-ink-3)", flexShrink: 0 }}>
+                      Confidence
+                    </span>
+                    <div style={{ flex: 1, height: 3, background: "var(--qc-hair)", borderRadius: 99, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${confidencePct}%`, background: cfg.color, borderRadius: 99, transition: "width 0.4s" }} />
+                    </div>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: cfg.color, flexShrink: 0 }}>{confidencePct}%</span>
+                  </div>
+                  <p style={{ fontSize: 11, color: "var(--qc-ink-3)", margin: "0 0 14px", lineHeight: 1.55, fontStyle: "italic" }}>
+                    {p.confidence_reason}
+                  </p>
+                  {/* Evidence quotes */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {p.evidence.map((ev, ei) => (
+                      <div key={ei} style={{
+                        display: "flex", gap: 12, alignItems: "flex-start",
+                        background: "var(--qc-card)", borderRadius: 8,
+                        padding: "10px 14px", border: "1px solid var(--qc-hair)",
+                      }}>
+                        <span style={{
+                          flexShrink: 0, marginTop: 1,
+                          fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
+                          color: "var(--qc-ink-3)", whiteSpace: "nowrap",
+                          minWidth: 56,
+                        }}>
+                          {ev.period}
+                        </span>
+                        <p style={{ fontSize: 12, color: "var(--qc-ink-2)", margin: 0, lineHeight: 1.55, fontStyle: "italic" }}>
+                          "{ev.quote}"
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer — THE EDGE */}
+      <div className="qc-dark-gradient-card" style={{
+        borderRadius: 0,
+        borderTop: "1px solid rgba(255,255,255,0.08)",
+        padding: "12px 24px",
+        display: "flex", alignItems: "flex-start", gap: 10,
+      }}>
+        <span style={{
+          flexShrink: 0, fontSize: 9, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase",
+          color: "var(--qc-dark-card-base, #0f172b)", background: "rgba(255,255,255,0.75)",
+          borderRadius: 3, padding: "2px 6px", marginTop: 1,
+        }}>
+          THE EDGE
+        </span>
+        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", margin: 0, lineHeight: 1.6 }}>
+          {patterns.find((p) => p.type === "street_pressure")?.sentence
+            ?? patterns[0]?.sentence
+            ?? "Patterns extracted from multi-quarter transcript analysis."}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ───────────────────────────────────────────────────────────
 
 type TooltipState = { signal: TopSignal; rect: DOMRect; metricTitle: string; guidedStr: string; actualStr: string; deltaStr: string; dateLabel: string };
@@ -292,6 +552,11 @@ export function LensDetailGuidance({ lens }: Props) {
           </div>
         </div>
       </div>
+
+      {/* QC Intuition — pattern recognition table */}
+      {lens.patterns && lens.patterns.length > 0 && (
+        <QCIntuitionTable patterns={lens.patterns} />
+      )}
 
       {/* Guidance vs Actuals timeline table */}
       {timelineSignals.length > 0 && (

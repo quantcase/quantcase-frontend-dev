@@ -1,0 +1,280 @@
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import { AlertCircle, X, Play, RefreshCw, Loader2, Save, Circle, ChevronDown } from "lucide-react";
+import { BACKEND_URL } from "@/lib/constants";
+import { HtmlSkill, TestTicker, FAVORITE_TICKERS, SignalType, CATEGORY_LABELS } from "./_components/types";
+import { TickerSearch, TickerOption } from "./_components/TickerSearch";
+import type { StocksApiResponse } from "@/types/screener";
+import { SkillDetail, SkillDetailHandle } from "./_components/SkillDetail";
+import { PreviewPane, PreviewControls } from "./_components/PreviewPane";
+import { SignalsModal } from "./_components/SignalsModal";
+
+export default function HtmlSkillsPage() {
+  const [skills, setSkills] = useState<HtmlSkill[]>([]);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<HtmlSkill | null>(null);
+
+  const [ticker, setTicker] = useState<TestTicker>("HDFCBANK");
+  const [tickerOptions, setTickerOptions] = useState<TickerOption[]>([]);
+  const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
+  const [signalCounts, setSignalCounts] = useState<Record<string, number>>({});
+  const [selectedSignalTypes, setSelectedSignalTypes] = useState<SignalType[]>([]);
+  const [showSignals, setShowSignals] = useState(false);
+  const [skillDirty, setSkillDirty] = useState(false);
+  const skillDetailRef = useRef<SkillDetailHandle>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // ── Load skill list ────────────────────────────────────────────────────────
+
+  const loadSkills = useCallback(() => {
+    setLoading(true);
+    fetch(`${BACKEND_URL}/api/html-skills?includeInactive=true`)
+      .then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
+        setSkills(json.skills ?? []);
+        if (!selectedSlug && json.skills?.length > 0) {
+          setSelectedSlug(json.skills[0].slug);
+        }
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { loadSkills(); }, [loadSkills]);
+
+  // ── Load stocks for ticker search ──────────────────────────────────────────
+
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/api/transcript/stocks`)
+      .then(async (res) => {
+        const json: StocksApiResponse = await res.json();
+        setTickerOptions(
+          (json.data ?? []).map((s) => ({ symbol: s.company, name: s.company_name }))
+        );
+      })
+      .catch(() => {});
+  }, []);
+
+  // ── Load single skill (with prompt) when selection changes ─────────────────
+
+  useEffect(() => {
+    setSkillDirty(false);
+    if (!selectedSlug) { setSelectedSkill(null); return; }
+    fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}`)
+      .then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
+        setSelectedSkill(json);
+      })
+      .catch((err) => setError(err.message));
+  }, [selectedSlug]);
+
+  // ── Save skill ─────────────────────────────────────────────────────────────
+
+  function handleSave(updates: Partial<Omit<HtmlSkill, "id" | "created_at" | "updated_at">>) {
+    if (!selectedSlug) return;
+    setSaving(true);
+    setSaveError(null);
+    fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    })
+      .then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
+        setSelectedSkill(json);
+        setSkills((prev) => prev.map((s) => (s.slug === selectedSlug ? { ...s, ...json } : s)));
+      })
+      .catch((err) => setSaveError(err.message))
+      .finally(() => setSaving(false));
+  }
+
+  const byCategory = skills.reduce<Record<string, HtmlSkill[]>>((acc, skill) => {
+    const cat = skill.category;
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(skill);
+    return acc;
+  }, {});
+
+  return (
+    <div className="flex h-screen overflow-hidden">
+      {/* Main area — full width, no sidebar */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Two-column header — mirrors the split panel below */}
+        <div className="flex shrink-0 border-b border-[var(--qc-border-default)] bg-[var(--qc-card)]">
+
+          {/* Left column: skill selector dropdown + save (480px, matches detail panel) */}
+          <div className="w-[480px] shrink-0 flex items-center gap-2 px-4 py-3 border-r border-[var(--qc-border-default)]">
+            {/* Skill selector dropdown */}
+            <div className="relative flex-1 min-w-0">
+              <select
+                value={selectedSlug ?? ""}
+                onChange={(e) => setSelectedSlug(e.target.value || null)}
+                disabled={loading}
+                className="w-full appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-3 pr-8 py-1.5 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
+              >
+                {loading && <option value="">Loading…</option>}
+                {!loading && skills.length === 0 && <option value="">No skills</option>}
+                {Object.entries(byCategory).map(([cat, catSkills]) => (
+                  <optgroup key={cat} label={CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ?? cat}>
+                    {catSkills.map((s) => (
+                      <option key={s.slug} value={s.slug}>{s.name}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[#888888]" />
+            </div>
+
+            {/* Active indicator + slug */}
+            {selectedSkill && (
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Circle className={`size-1.5 ${selectedSkill.is_active ? "fill-emerald-500 text-emerald-500" : "fill-zinc-300 text-zinc-300"}`} />
+              </div>
+            )}
+
+            {saveError && <span className="text-[11px] text-red-600 shrink-0">{saveError}</span>}
+            {selectedSkill && (
+              <button
+                onClick={() => skillDetailRef.current?.save()}
+                disabled={saving || !skillDirty}
+                className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
+              >
+                {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
+                Save
+              </button>
+            )}
+          </div>
+
+          {/* Right column: ticker toggle + signals link + run controls */}
+          <div className="flex flex-1 items-center gap-3 px-5 py-3">
+            {selectedSkill && (
+              <>
+                {/* Ticker search */}
+                <TickerSearch
+                  value={ticker}
+                  onChange={setTicker}
+                  options={tickerOptions}
+                  favorites={[...FAVORITE_TICKERS]}
+                />
+
+                <div className="flex-1" />
+
+                {/* Selected signal total */}
+                {(() => {
+                  const total = selectedSignalTypes.reduce((sum, t) => sum + (signalCounts[t] ?? 0), 0);
+                  return total > 0 ? (
+                    <button
+                      onClick={() => setShowSignals(true)}
+                      className="text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                    >
+                      {total.toLocaleString()} signals
+                    </button>
+                  ) : null;
+                })()}
+
+                {/* Run metadata */}
+                {previewControls?.result && (
+                  <span className={`text-[10px] font-medium rounded-sm px-2 py-0.5 shrink-0 ${
+                    previewControls.result.cached ? "bg-zinc-100 text-zinc-500" : "bg-emerald-50 text-emerald-700"
+                  }`}>
+                    {previewControls.result.cached ? "cached" : "fresh"}
+                  </span>
+                )}
+                {previewControls?.result?.output && (
+                  <span className="text-[10px] text-[#888888] shrink-0">
+                    {previewControls.result.output.input_tokens + previewControls.result.output.output_tokens} tok
+                    {" · "}${previewControls.result.output.cost_usd.toFixed(5)}
+                  </span>
+                )}
+
+                {/* Force re-run */}
+                <button
+                  onClick={() => previewControls?.run(true)}
+                  disabled={previewControls?.running}
+                  title="Force re-run (bypass cache)"
+                  className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
+                >
+                  {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+                </button>
+
+                {/* Run */}
+                <button
+                  onClick={() => previewControls?.run(false)}
+                  disabled={previewControls?.running}
+                  className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
+                >
+                  {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
+                  Run
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Global error */}
+        {error && (
+          <div className="flex items-center gap-2 mx-5 mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-2.5 text-[12px] text-red-700 shrink-0">
+            <AlertCircle className="size-4 shrink-0" />
+            <span className="flex-1">{error}</span>
+            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700">
+              <X className="size-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Split panel */}
+        {selectedSkill ? (
+          <div className="flex flex-1 overflow-hidden">
+            {/* Left: skill detail */}
+            <div className="w-[480px] shrink-0 border-r border-[var(--qc-border-default)] overflow-hidden">
+              <SkillDetail
+                key={selectedSkill.slug}
+                ref={skillDetailRef}
+                skill={selectedSkill}
+                ticker={ticker}
+                saving={saving}
+                saveError={saveError}
+                hideHeader
+                onSave={(updates) => { handleSave(updates); setSkillDirty(false); }}
+                onDirtyChange={setSkillDirty}
+                onSignalCountsChange={(counts, types) => {
+                  setSignalCounts(counts);
+                  setSelectedSignalTypes(types);
+                }}
+              />
+            </div>
+
+            {/* Right: preview */}
+            <div className="flex-1 overflow-hidden">
+              <PreviewPane
+                key={selectedSkill.slug}
+                slug={selectedSkill.slug}
+                ticker={ticker}
+                onControls={setPreviewControls}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-1 items-center justify-center text-[13px] text-[#888888]">
+            {loading ? "Loading skills…" : "Select a skill to edit"}
+          </div>
+        )}
+      </div>
+
+      {showSignals && selectedSkill && (
+        <SignalsModal
+          slug={selectedSkill.slug}
+          ticker={ticker}
+          onClose={() => setShowSignals(false)}
+        />
+      )}
+    </div>
+  );
+}

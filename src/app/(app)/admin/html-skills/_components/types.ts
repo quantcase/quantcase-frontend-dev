@@ -52,6 +52,28 @@ export interface RunResponse {
   output: HtmlSkillOutput;
 }
 
+export interface HtmlSkillJob {
+  id: string;
+  slug: string;
+  ticker: string;
+  type: string;
+  status: "pending" | "active" | "completed" | "failed";
+}
+
+export interface RunJobResponse {
+  success: boolean;
+  message: string;
+  job: HtmlSkillJob;
+}
+
+export interface JobStatusResponse {
+  success: boolean;
+  data: {
+    status: "pending" | "active" | "completed" | "failed";
+    failedReason?: string;
+  };
+}
+
 export const FAVORITE_TICKERS = ["HDFCBANK", "RELIANCE", "ASIANPAINT", "IEX", "MSUMI"] as const;
 export type TestTicker = string;
 

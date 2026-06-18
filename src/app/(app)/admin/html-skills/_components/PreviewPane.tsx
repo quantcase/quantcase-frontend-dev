@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Play, RefreshCw, Loader2, AlertCircle } from "lucide-react";
-import { TestTicker, RunResponse } from "./types";
+import { useState, useEffect, useRef } from "react";
+import { Play, Loader2, AlertCircle } from "lucide-react";
+import { TestTicker, RunResponse, RunJobResponse, JobStatusResponse } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
 
 export interface PreviewControls {
@@ -25,6 +25,7 @@ export function PreviewPane({ slug, ticker, onControls }: Props) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunResponse | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // On mount (or slug/ticker change): load the latest saved output
   useEffect(() => {
@@ -32,17 +33,30 @@ export function PreviewPane({ slug, ticker, onControls }: Props) {
     setError(null);
     fetch(`${BACKEND_URL}/api/html-skills/${slug}/outputs/${ticker}`)
       .then(async (res) => {
-        if (res.status === 404) return; // no prior output — stay empty
+        if (res.status === 404) return;
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
         const output = json as RunResponse["output"];
         output.raw_html = stripHtmlFences(output.raw_html);
         setResult({ cached: true, output });
       })
-      .catch(() => {}); // silently ignore — user can still Run
+      .catch(() => {});
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
   }, [slug, ticker]);
 
+  async function fetchOutput() {
+    const res = await fetch(`${BACKEND_URL}/api/html-skills/${slug}/outputs/${ticker}`);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
+    const output = json as RunResponse["output"];
+    output.raw_html = stripHtmlFences(output.raw_html);
+    return output;
+  }
+
   function runSkill(force = false) {
+    if (pollRef.current) clearInterval(pollRef.current);
     setRunning(true);
     setError(null);
 
@@ -54,12 +68,37 @@ export function PreviewPane({ slug, ticker, onControls }: Props) {
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
-        const r = json as RunResponse;
-        r.output.raw_html = stripHtmlFences(r.output.raw_html);
-        setResult(r);
+        const { job } = json as RunJobResponse;
+
+        pollRef.current = setInterval(async () => {
+          try {
+            const statusRes = await fetch(`${BACKEND_URL}/api/jobs/${job.id}`);
+            const statusJson: JobStatusResponse = await statusRes.json();
+            const status = statusJson.data?.status;
+            if (status === "completed") {
+              clearInterval(pollRef.current!);
+              pollRef.current = null;
+              const output = await fetchOutput();
+              setResult({ cached: false, output });
+              setRunning(false);
+            } else if (status === "failed") {
+              clearInterval(pollRef.current!);
+              pollRef.current = null;
+              setError(statusJson.data?.failedReason ?? "Run failed");
+              setRunning(false);
+            }
+          } catch (err) {
+            clearInterval(pollRef.current!);
+            pollRef.current = null;
+            setError(err instanceof Error ? err.message : "Failed to check job status");
+            setRunning(false);
+          }
+        }, 2000);
       })
-      .catch((err) => setError(err.message ?? "Run failed"))
-      .finally(() => setRunning(false));
+      .catch((err) => {
+        setError(err.message ?? "Run failed");
+        setRunning(false);
+      });
   }
 
   useEffect(() => {

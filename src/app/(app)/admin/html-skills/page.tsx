@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { AlertCircle, X, Play, RefreshCw, Loader2, Save, Circle, ChevronDown } from "lucide-react";
+import { AlertCircle, X, Play, RefreshCw, Loader2, Save, Circle, ChevronDown, FileDown } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
 import { HtmlSkill, TestTicker, FAVORITE_TICKERS, SignalType, CATEGORY_LABELS } from "./_components/types";
 import { TickerSearch, TickerOption } from "./_components/TickerSearch";
@@ -93,6 +93,33 @@ export default function HtmlSkillsPage() {
       })
       .catch((err) => setSaveError(err.message))
       .finally(() => setSaving(false));
+  }
+
+  const [exportingPrompt, setExportingPrompt] = useState(false);
+
+  async function handleExportPrompt() {
+    if (!selectedSlug) return;
+    setExportingPrompt(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}/prompt/${ticker}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
+
+      const { slug, ticker: t, systemPrompt, userPrompt } = json;
+      const md = `${systemPrompt}\n\n${userPrompt}`;
+
+      const blob = new Blob([md], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${slug}__${t}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setExportingPrompt(false);
+    }
   }
 
   const byCategory = skills.reduce<Record<string, HtmlSkill[]>>((acc, skill) => {
@@ -193,6 +220,16 @@ export default function HtmlSkillsPage() {
                     {" · "}${previewControls.result.output.cost_usd.toFixed(5)}
                   </span>
                 )}
+
+                {/* Export full prompt */}
+                <button
+                  onClick={handleExportPrompt}
+                  disabled={exportingPrompt}
+                  title="Export full prompt as .md"
+                  className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
+                >
+                  {exportingPrompt ? <Loader2 className="size-3.5 animate-spin" /> : <FileDown className="size-3.5" />}
+                </button>
 
                 {/* Force re-run */}
                 <button

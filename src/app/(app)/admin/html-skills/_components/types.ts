@@ -26,6 +26,8 @@ export interface HtmlSkill {
   category: PluginCategory;
   model: string;
   max_tokens: number;
+  max_transcript_qtrs: number | null;
+  max_annual_report_years: number | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;

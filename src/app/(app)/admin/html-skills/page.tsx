@@ -20,6 +20,7 @@ export default function HtmlSkillsPage() {
   const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
   const [signalCounts, setSignalCounts] = useState<Record<string, number>>({});
   const [selectedSignalTypes, setSelectedSignalTypes] = useState<SignalType[]>([]);
+  const [trimmedSignalCount, setTrimmedSignalCount] = useState<number | null>(null);
   const [showSignals, setShowSignals] = useState(false);
   const [skillDirty, setSkillDirty] = useState(false);
   const skillDetailRef = useRef<SkillDetailHandle>(null);
@@ -64,12 +65,15 @@ export default function HtmlSkillsPage() {
 
   useEffect(() => {
     setSkillDirty(false);
+    setTrimmedSignalCount(null);
+    setPendingLimits({ maxQtrs: null, maxAnnualYears: null });
     if (!selectedSlug) { setSelectedSkill(null); return; }
     fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
         setSelectedSkill(json);
+        setPendingLimits({ maxQtrs: json.max_transcript_qtrs ?? null, maxAnnualYears: json.max_annual_report_years ?? null });
       })
       .catch((err) => setError(err.message));
   }, [selectedSlug]);
@@ -94,6 +98,29 @@ export default function HtmlSkillsPage() {
       .catch((err) => setSaveError(err.message))
       .finally(() => setSaving(false));
   }
+
+  // Tracks the current (possibly unsaved) limits as edited in SkillDetail
+  const [pendingLimits, setPendingLimits] = useState<{ maxQtrs: number | null; maxAnnualYears: number | null }>({ maxQtrs: null, maxAnnualYears: null });
+
+  function handleLimitsChange(maxQtrs: number | null, maxAnnualYears: number | null) {
+    setPendingLimits({ maxQtrs, maxAnnualYears });
+  }
+
+  useEffect(() => {
+    if (!selectedSlug || (!pendingLimits.maxQtrs && !pendingLimits.maxAnnualYears)) {
+      setTrimmedSignalCount(null);
+      return;
+    }
+    fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}/prompt/${ticker}`)
+      .then(async (res) => {
+        if (!res.ok) return;
+        const json = await res.json();
+        if (typeof json.signal_count === "number") {
+          setTrimmedSignalCount(json.signal_count);
+        }
+      })
+      .catch(() => {});
+  }, [selectedSlug, ticker, pendingLimits]);
 
   const [exportingPrompt, setExportingPrompt] = useState(false);
 
@@ -195,13 +222,14 @@ export default function HtmlSkillsPage() {
 
                 {/* Selected signal total */}
                 {(() => {
-                  const total = selectedSignalTypes.reduce((sum, t) => sum + (signalCounts[t] ?? 0), 0);
-                  return total > 0 ? (
+                  const rawTotal = selectedSignalTypes.reduce((sum, t) => sum + (signalCounts[t] ?? 0), 0);
+                  const displayTotal = trimmedSignalCount ?? rawTotal;
+                  return displayTotal > 0 ? (
                     <button
                       onClick={() => setShowSignals(true)}
                       className="text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
                     >
-                      {total.toLocaleString()} signals
+                      {displayTotal.toLocaleString()} signals
                     </button>
                   ) : null;
                 })()}
@@ -285,6 +313,7 @@ export default function HtmlSkillsPage() {
                   setSignalCounts(counts);
                   setSelectedSignalTypes(types);
                 }}
+                onLimitsChange={handleLimitsChange}
               />
             </div>
 

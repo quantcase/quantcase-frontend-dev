@@ -24,6 +24,7 @@ interface Props {
   saveError: string | null;
   onSave: (updates: Partial<Omit<HtmlSkill, "id" | "created_at" | "updated_at">>) => void;
   onSignalCountsChange?: (counts: Record<string, number>, selectedTypes: SignalType[]) => void;
+  onLimitsChange?: (maxQtrs: number | null, maxAnnualYears: number | null) => void;
   onDirtyChange?: (dirty: boolean) => void;
   hideHeader?: boolean;
 }
@@ -32,8 +33,26 @@ export interface SkillDetailHandle {
   save: () => void;
 }
 
+const QTR_OPTIONS: { label: string; value: number | null }[] = [
+  { label: "No limit", value: null },
+  { label: "2 qtrs", value: 2 },
+  { label: "4 qtrs", value: 4 },
+  { label: "8 qtrs", value: 8 },
+  { label: "12 qtrs", value: 12 },
+  { label: "16 qtrs", value: 16 },
+  { label: "20 qtrs", value: 20 },
+];
+
+const ANNUAL_OPTIONS: { label: string; value: number | null }[] = [
+  { label: "No limit", value: null },
+  { label: "1 yr", value: 1 },
+  { label: "2 yrs", value: 2 },
+  { label: "3 yrs", value: 3 },
+  { label: "5 yrs", value: 5 },
+];
+
 export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDetail(
-  { skill, ticker, saving, saveError, onSave, onSignalCountsChange, onDirtyChange, hideHeader },
+  { skill, ticker, saving, saveError, onSave, onSignalCountsChange, onLimitsChange, onDirtyChange, hideHeader },
   ref
 ) {
   const [name, setName] = useState(skill.name);
@@ -42,6 +61,8 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [signalTypes, setSignalTypes] = useState<SignalType[]>(skill.signal_types);
   const [model, setModel] = useState(skill.model);
   const [maxTokens, setMaxTokens] = useState(skill.max_tokens);
+  const [maxTranscriptQtrs, setMaxTranscriptQtrs] = useState<number | null>(skill.max_transcript_qtrs);
+  const [maxAnnualReportYears, setMaxAnnualReportYears] = useState<number | null>(skill.max_annual_report_years);
   const [isActive, setIsActive] = useState(skill.is_active);
   const [dirty, setDirty] = useState(false);
   const [signalCounts, setSignalCounts] = useState<Record<string, number>>({});
@@ -53,6 +74,8 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
     setSignalTypes(skill.signal_types);
     setModel(skill.model);
     setMaxTokens(skill.max_tokens);
+    setMaxTranscriptQtrs(skill.max_transcript_qtrs);
+    setMaxAnnualReportYears(skill.max_annual_report_years);
     setIsActive(skill.is_active);
     setDirty(false);
   }, [skill.slug]);
@@ -77,6 +100,10 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
     onSignalCountsChange?.(signalCounts, signalTypes);
   }, [signalTypes, signalCounts]);
 
+  useEffect(() => {
+    onLimitsChange?.(maxTranscriptQtrs, maxAnnualReportYears);
+  }, [maxTranscriptQtrs, maxAnnualReportYears]);
+
   function mark() { setDirty(true); onDirtyChange?.(true); }
 
   function toggleSignal(type: SignalType) {
@@ -87,7 +114,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   }
 
   function handleSave() {
-    onSave({ name, skill_prompt: prompt, category, signal_types: signalTypes, model, max_tokens: maxTokens, is_active: isActive });
+    onSave({ name, skill_prompt: prompt, category, signal_types: signalTypes, model, max_tokens: maxTokens, max_transcript_qtrs: maxTranscriptQtrs, max_annual_report_years: maxAnnualReportYears, is_active: isActive });
     setDirty(false);
     onDirtyChange?.(false);
   }
@@ -158,6 +185,34 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
               onChange={(e) => { setMaxTokens(Number(e.target.value)); mark(); }}
               className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
             />
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+              Transcript Qtrs
+            </label>
+            <select
+              value={maxTranscriptQtrs ?? ""}
+              onChange={(e) => { setMaxTranscriptQtrs(e.target.value === "" ? null : Number(e.target.value)); mark(); }}
+              className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+            >
+              {QTR_OPTIONS.map((o) => (
+                <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+              Annual Report Yrs
+            </label>
+            <select
+              value={maxAnnualReportYears ?? ""}
+              onChange={(e) => { setMaxAnnualReportYears(e.target.value === "" ? null : Number(e.target.value)); mark(); }}
+              className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+            >
+              {ANNUAL_OPTIONS.map((o) => (
+                <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+              ))}
+            </select>
           </div>
         </div>
 

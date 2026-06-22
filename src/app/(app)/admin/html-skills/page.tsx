@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
-import { HtmlSkill, TestTicker, FAVORITE_TICKERS, SignalType, CATEGORY_LABELS, LiveSkillConfig } from "./_components/types";
+import { HtmlSkill, TestTicker, FAVORITE_TICKERS, CATEGORY_LABELS, LiveSkillConfig } from "./_components/types";
 import { TickerSearch, TickerOption } from "./_components/TickerSearch";
 import type { StocksApiResponse } from "@/types/screener";
 import { SkillDetail, SkillDetailHandle } from "./_components/SkillDetail";
@@ -30,8 +30,7 @@ function HtmlSkillsPage() {
   const [ticker, setTicker] = useState<TestTicker | null>(() => (searchParams.get("ticker") as TestTicker) ?? null);
   const [tickerOptions, setTickerOptions] = useState<TickerOption[]>([]);
   const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
-  const [signalCounts, setSignalCounts] = useState<Record<string, number>>({});
-  const [selectedSignalTypes, setSelectedSignalTypes] = useState<SignalType[]>([]);
+  const [signalTotal, setSignalTotal] = useState(0);
   const [liveConfig, setLiveConfig] = useState<LiveSkillConfig | null>(null);
   const [showSignals, setShowSignals] = useState(false);
   const [skillDirty, setSkillDirty] = useState(false);
@@ -222,18 +221,15 @@ function HtmlSkillsPage() {
 
                 <div className="flex-1" />
 
-                {/* Selected signal total */}
-                {(() => {
-                  const displayTotal = selectedSignalTypes.reduce((sum, t) => sum + (signalCounts[t] ?? 0), 0);
-                  return displayTotal > 0 ? (
-                    <button
-                      onClick={() => setShowSignals(true)}
-                      className="text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
-                    >
-                      {displayTotal.toLocaleString()} signals
-                    </button>
-                  ) : null;
-                })()}
+                {/* Signal total from API */}
+                {signalTotal > 0 && (
+                  <button
+                    onClick={() => setShowSignals(true)}
+                    className="text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                  >
+                    {signalTotal.toLocaleString()} signals
+                  </button>
+                )}
 
                 {/* Run metadata */}
                 {previewControls?.result && (
@@ -300,9 +296,8 @@ function HtmlSkillsPage() {
                 hideHeader
                 onSave={(updates) => { handleSave(updates); setSkillDirty(false); }}
                 onDirtyChange={setSkillDirty}
-                onSignalCountsChange={(counts, types) => {
-                  setSignalCounts(counts);
-                  setSelectedSignalTypes(types);
+                onSignalCountsChange={(_counts, _types, total) => {
+                  setSignalTotal(total);
                 }}
                 onConfigChange={setLiveConfig}
               />

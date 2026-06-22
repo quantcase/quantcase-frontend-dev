@@ -31,7 +31,7 @@ interface Props {
   saving: boolean;
   saveError: string | null;
   onSave: (updates: Partial<Omit<HtmlSkill, "id" | "created_at" | "updated_at">>) => void;
-  onSignalCountsChange?: (counts: Record<string, number>, selectedTypes: SignalType[]) => void;
+  onSignalCountsChange?: (counts: Record<string, number>, selectedTypes: SignalType[], total: number) => void;
   onLimitsChange?: (maxQtrs: number | null, maxPptQtrs: number | null, maxAnnualYears: number | null) => void;
   onConfigChange?: (config: LiveSkillConfig) => void;
   onDirtyChange?: (dirty: boolean) => void;
@@ -82,6 +82,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [transcriptCounts, setTranscriptCounts] = useState<Record<string, number>>({});
   const [pptCounts, setPptCounts] = useState<Record<string, number>>({});
   const [annualReportCounts, setAnnualReportCounts] = useState<Record<string, number>>({});
+  const [signalTotal, setSignalTotal] = useState(0);
 
   useEffect(() => {
     setName(skill.name);
@@ -103,10 +104,14 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
     setTranscriptCounts({});
     setPptCounts({});
     setAnnualReportCounts({});
+    setSignalTotal(0);
     const params = new URLSearchParams();
     if (maxTranscriptQtrs !== null) params.set("max_transcript_qtrs", String(maxTranscriptQtrs));
     if (maxPptQtrs !== null) params.set("max_ppt_qtrs", String(maxPptQtrs));
     if (maxAnnualReportYears !== null) params.set("max_annual_report_years", String(maxAnnualReportYears));
+    if (transcriptSignalTypes.length) params.set("transcript_signal_types", transcriptSignalTypes.join(","));
+    if (pptSignalTypes.length) params.set("ppt_signal_types", pptSignalTypes.join(","));
+    if (annualReportSignalTypes.length) params.set("annual_report_signal_types", annualReportSignalTypes.join(","));
     fetch(`${BACKEND_URL}/api/html-skills/signals/count/${ticker}?${params}`)
       .then(async (res) => {
         if (!res.ok) return;
@@ -122,18 +127,19 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
         setTranscriptCounts(tMap);
         setPptCounts(pMap);
         setAnnualReportCounts(aMap);
+        setSignalTotal(json.total);
       })
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticker, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
+  }, [ticker, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes]);
 
   // Re-notify parent whenever counts or selected types change
   useEffect(() => {
     const allCounts = { ...annualReportCounts, ...pptCounts, ...transcriptCounts };
     const allSelected = [...new Set([...transcriptSignalTypes, ...pptSignalTypes, ...annualReportSignalTypes])] as SignalType[];
-    onSignalCountsChange?.(allCounts, allSelected);
+    onSignalCountsChange?.(allCounts, allSelected, signalTotal);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transcriptCounts, pptCounts, annualReportCounts, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes]);
+  }, [transcriptCounts, pptCounts, annualReportCounts, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes, signalTotal]);
 
   useEffect(() => {
     onLimitsChange?.(maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears);

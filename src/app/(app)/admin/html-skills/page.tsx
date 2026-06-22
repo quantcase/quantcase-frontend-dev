@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, X, Play, RefreshCw, Loader2, Save, Circle, ChevronDown, FileDown } from "lucide-react";
+import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
 import { HtmlSkill, TestTicker, FAVORITE_TICKERS, SignalType, CATEGORY_LABELS, LiveSkillConfig } from "./_components/types";
 import { TickerSearch, TickerOption } from "./_components/TickerSearch";
@@ -252,19 +252,9 @@ function HtmlSkillsPage() {
                   {exportingPrompt ? <Loader2 className="size-3.5 animate-spin" /> : <FileDown className="size-3.5" />}
                 </button>
 
-                {/* Force re-run */}
-                <button
-                  onClick={() => previewControls?.run(true)}
-                  disabled={previewControls?.running}
-                  title="Force re-run (bypass cache)"
-                  className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
-                >
-                  {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
-                </button>
-
                 {/* Run */}
                 <button
-                  onClick={() => previewControls?.run(false)}
+                  onClick={() => previewControls?.run(true)}
                   disabled={previewControls?.running}
                   className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
                 >

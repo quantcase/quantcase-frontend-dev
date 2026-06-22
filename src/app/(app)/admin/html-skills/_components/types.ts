@@ -75,6 +75,7 @@ export interface JobStatusResponse {
     status: "pending" | "active" | "completed" | "failed";
     type?: string;
     failedReason?: string;
+    error?: string;
     output?: {
       raw_html: string;
       input_tokens: number;

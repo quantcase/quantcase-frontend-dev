@@ -118,7 +118,7 @@ export function PreviewPane({ slug, ticker, liveConfig, onControls }: Props) {
             } else if (status === "failed") {
               clearInterval(pollRef.current!);
               pollRef.current = null;
-              setError(statusJson.data?.failedReason ?? "Run failed");
+              setError(statusJson.data?.error ?? statusJson.data?.failedReason ?? "Run failed — context too long (reduce signals being sent)");
               setRunning(false);
             }
           } catch (err) {
@@ -130,7 +130,7 @@ export function PreviewPane({ slug, ticker, liveConfig, onControls }: Props) {
         }, 2000);
       })
       .catch((err) => {
-        setError(err.message ?? "Run failed");
+        setError(err.message ?? "Run failed — context too long (reduce signals being sent)");
         setRunning(false);
       });
   }

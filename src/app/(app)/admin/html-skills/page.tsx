@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, X, Play, RefreshCw, Loader2, Save, Circle, ChevronDown, FileDown } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
@@ -11,7 +11,15 @@ import { SkillDetail, SkillDetailHandle } from "./_components/SkillDetail";
 import { PreviewPane, PreviewControls } from "./_components/PreviewPane";
 import { SignalsModal } from "./_components/SignalsModal";
 
-export default function HtmlSkillsPage() {
+export default function HtmlSkillsPageWrapper() {
+  return (
+    <Suspense>
+      <HtmlSkillsPage />
+    </Suspense>
+  );
+}
+
+function HtmlSkillsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 

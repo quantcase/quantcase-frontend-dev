@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, X, Play, RefreshCw, Loader2, Save, Circle, ChevronDown, FileDown } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
-import { HtmlSkill, TestTicker, FAVORITE_TICKERS, SignalType, CATEGORY_LABELS } from "./_components/types";
+import { HtmlSkill, TestTicker, FAVORITE_TICKERS, SignalType, CATEGORY_LABELS, LiveSkillConfig } from "./_components/types";
 import { TickerSearch, TickerOption } from "./_components/TickerSearch";
 import type { StocksApiResponse } from "@/types/screener";
 import { SkillDetail, SkillDetailHandle } from "./_components/SkillDetail";
@@ -11,16 +12,19 @@ import { PreviewPane, PreviewControls } from "./_components/PreviewPane";
 import { SignalsModal } from "./_components/SignalsModal";
 
 export default function HtmlSkillsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [skills, setSkills] = useState<HtmlSkill[]>([]);
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(() => searchParams.get("skill"));
   const [selectedSkill, setSelectedSkill] = useState<HtmlSkill | null>(null);
 
-  const [ticker, setTicker] = useState<TestTicker>("HDFCBANK");
+  const [ticker, setTicker] = useState<TestTicker | null>(() => (searchParams.get("ticker") as TestTicker) ?? null);
   const [tickerOptions, setTickerOptions] = useState<TickerOption[]>([]);
   const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
   const [signalCounts, setSignalCounts] = useState<Record<string, number>>({});
   const [selectedSignalTypes, setSelectedSignalTypes] = useState<SignalType[]>([]);
-  const [trimmedSignalCount, setTrimmedSignalCount] = useState<number | null>(null);
+  const [liveConfig, setLiveConfig] = useState<LiveSkillConfig | null>(null);
   const [showSignals, setShowSignals] = useState(false);
   const [skillDirty, setSkillDirty] = useState(false);
   const skillDetailRef = useRef<SkillDetailHandle>(null);
@@ -38,15 +42,21 @@ export default function HtmlSkillsPage() {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
         setSkills(json.skills ?? []);
-        if (!selectedSlug && json.skills?.length > 0) {
-          setSelectedSlug(json.skills[0].slug);
-        }
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { loadSkills(); }, [loadSkills]);
+
+  // ── Sync selectedSlug + ticker → URL ──────────────────────────────────────
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (selectedSlug) params.set("skill", selectedSlug); else params.delete("skill");
+    if (ticker) params.set("ticker", ticker); else params.delete("ticker");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }, [selectedSlug, ticker]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Load stocks for ticker search ──────────────────────────────────────────
 
@@ -65,15 +75,13 @@ export default function HtmlSkillsPage() {
 
   useEffect(() => {
     setSkillDirty(false);
-    setTrimmedSignalCount(null);
-    setPendingLimits({ maxQtrs: null, maxAnnualYears: null });
+    setLiveConfig(null);
     if (!selectedSlug) { setSelectedSkill(null); return; }
     fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
         setSelectedSkill(json);
-        setPendingLimits({ maxQtrs: json.max_transcript_qtrs ?? null, maxAnnualYears: json.max_annual_report_years ?? null });
       })
       .catch((err) => setError(err.message));
   }, [selectedSlug]);
@@ -99,33 +107,10 @@ export default function HtmlSkillsPage() {
       .finally(() => setSaving(false));
   }
 
-  // Tracks the current (possibly unsaved) limits as edited in SkillDetail
-  const [pendingLimits, setPendingLimits] = useState<{ maxQtrs: number | null; maxAnnualYears: number | null }>({ maxQtrs: null, maxAnnualYears: null });
-
-  function handleLimitsChange(maxQtrs: number | null, maxAnnualYears: number | null) {
-    setPendingLimits({ maxQtrs, maxAnnualYears });
-  }
-
-  useEffect(() => {
-    if (!selectedSlug || (!pendingLimits.maxQtrs && !pendingLimits.maxAnnualYears)) {
-      setTrimmedSignalCount(null);
-      return;
-    }
-    fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}/prompt/${ticker}`)
-      .then(async (res) => {
-        if (!res.ok) return;
-        const json = await res.json();
-        if (typeof json.signal_count === "number") {
-          setTrimmedSignalCount(json.signal_count);
-        }
-      })
-      .catch(() => {});
-  }, [selectedSlug, ticker, pendingLimits]);
-
   const [exportingPrompt, setExportingPrompt] = useState(false);
 
   async function handleExportPrompt() {
-    if (!selectedSlug) return;
+    if (!selectedSlug || !ticker) return;
     setExportingPrompt(true);
     try {
       const res = await fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}/prompt/${ticker}`);
@@ -171,10 +156,11 @@ export default function HtmlSkillsPage() {
                 value={selectedSlug ?? ""}
                 onChange={(e) => setSelectedSlug(e.target.value || null)}
                 disabled={loading}
-                className="w-full appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-3 pr-8 py-1.5 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
+                className={`w-full appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-3 pr-8 py-1.5 text-[13px] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer ${selectedSlug ? "text-[var(--qc-ink)]" : "text-[#888888]"}`}
               >
-                {loading && <option value="">Loading…</option>}
-                {!loading && skills.length === 0 && <option value="">No skills</option>}
+                <option value="" disabled={skills.length > 0}>
+                  {loading ? "Loading…" : skills.length === 0 ? "No skills" : "Select a skill…"}
+                </option>
                 {Object.entries(byCategory).map(([cat, catSkills]) => (
                   <optgroup key={cat} label={CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ?? cat}>
                     {catSkills.map((s) => (
@@ -222,8 +208,7 @@ export default function HtmlSkillsPage() {
 
                 {/* Selected signal total */}
                 {(() => {
-                  const rawTotal = selectedSignalTypes.reduce((sum, t) => sum + (signalCounts[t] ?? 0), 0);
-                  const displayTotal = trimmedSignalCount ?? rawTotal;
+                  const displayTotal = selectedSignalTypes.reduce((sum, t) => sum + (signalCounts[t] ?? 0), 0);
                   return displayTotal > 0 ? (
                     <button
                       onClick={() => setShowSignals(true)}
@@ -295,15 +280,15 @@ export default function HtmlSkillsPage() {
         )}
 
         {/* Split panel */}
-        {selectedSkill ? (
-          <div className="flex flex-1 overflow-hidden">
-            {/* Left: skill detail */}
-            <div className="w-[480px] shrink-0 border-r border-[var(--qc-border-default)] overflow-hidden">
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left: skill detail or empty state */}
+          <div className="w-[480px] shrink-0 border-r border-[var(--qc-border-default)] overflow-hidden">
+            {selectedSkill ? (
               <SkillDetail
                 key={selectedSkill.slug}
                 ref={skillDetailRef}
                 skill={selectedSkill}
-                ticker={ticker}
+                ticker={ticker ?? ""}
                 saving={saving}
                 saveError={saveError}
                 hideHeader
@@ -313,28 +298,35 @@ export default function HtmlSkillsPage() {
                   setSignalCounts(counts);
                   setSelectedSignalTypes(types);
                 }}
-                onLimitsChange={handleLimitsChange}
+                onConfigChange={setLiveConfig}
               />
-            </div>
+            ) : (
+              <div className="flex h-full items-center justify-center text-[13px] text-[#888888]">
+                {loading ? "Loading skills…" : "Select a skill to edit"}
+              </div>
+            )}
+          </div>
 
-            {/* Right: preview */}
-            <div className="flex-1 overflow-hidden">
+          {/* Right: preview or empty state */}
+          <div className="flex-1 overflow-hidden">
+            {selectedSkill && ticker ? (
               <PreviewPane
                 key={selectedSkill.slug}
                 slug={selectedSkill.slug}
                 ticker={ticker}
+                liveConfig={liveConfig}
                 onControls={setPreviewControls}
               />
-            </div>
+            ) : (
+              <div className="flex h-full items-center justify-center text-[13px] text-[#888888]">
+                {!selectedSkill ? "Select a skill to preview" : "Select a ticker to preview"}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="flex flex-1 items-center justify-center text-[13px] text-[#888888]">
-            {loading ? "Loading skills…" : "Select a skill to edit"}
-          </div>
-        )}
+        </div>
       </div>
 
-      {showSignals && selectedSkill && (
+      {showSignals && selectedSkill && ticker && (
         <SignalsModal
           slug={selectedSkill.slug}
           ticker={ticker}

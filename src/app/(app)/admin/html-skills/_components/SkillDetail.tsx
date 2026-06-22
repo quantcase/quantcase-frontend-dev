@@ -11,6 +11,7 @@ import {
   MODEL_OPTIONS,
   TestTicker,
   SignalCountsResponse,
+  LiveSkillConfig,
 } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
 
@@ -24,7 +25,8 @@ interface Props {
   saveError: string | null;
   onSave: (updates: Partial<Omit<HtmlSkill, "id" | "created_at" | "updated_at">>) => void;
   onSignalCountsChange?: (counts: Record<string, number>, selectedTypes: SignalType[]) => void;
-  onLimitsChange?: (maxQtrs: number | null, maxAnnualYears: number | null) => void;
+  onLimitsChange?: (maxQtrs: number | null, maxPptQtrs: number | null, maxAnnualYears: number | null) => void;
+  onConfigChange?: (config: LiveSkillConfig) => void;
   onDirtyChange?: (dirty: boolean) => void;
   hideHeader?: boolean;
 }
@@ -41,6 +43,7 @@ const QTR_OPTIONS: { label: string; value: number | null }[] = [
   { label: "12 qtrs", value: 12 },
   { label: "16 qtrs", value: 16 },
   { label: "20 qtrs", value: 20 },
+  { label: "None", value: 0 },
 ];
 
 const ANNUAL_OPTIONS: { label: string; value: number | null }[] = [
@@ -49,10 +52,11 @@ const ANNUAL_OPTIONS: { label: string; value: number | null }[] = [
   { label: "2 yrs", value: 2 },
   { label: "3 yrs", value: 3 },
   { label: "5 yrs", value: 5 },
+  { label: "None", value: 0 },
 ];
 
 export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDetail(
-  { skill, ticker, saving, saveError, onSave, onSignalCountsChange, onLimitsChange, onDirtyChange, hideHeader },
+  { skill, ticker, saving, saveError, onSave, onSignalCountsChange, onLimitsChange, onConfigChange, onDirtyChange, hideHeader },
   ref
 ) {
   const [name, setName] = useState(skill.name);
@@ -62,6 +66,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [model, setModel] = useState(skill.model);
   const [maxTokens, setMaxTokens] = useState(skill.max_tokens);
   const [maxTranscriptQtrs, setMaxTranscriptQtrs] = useState<number | null>(skill.max_transcript_qtrs);
+  const [maxPptQtrs, setMaxPptQtrs] = useState<number | null>(skill.max_ppt_qtrs);
   const [maxAnnualReportYears, setMaxAnnualReportYears] = useState<number | null>(skill.max_annual_report_years);
   const [isActive, setIsActive] = useState(skill.is_active);
   const [dirty, setDirty] = useState(false);
@@ -75,6 +80,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
     setModel(skill.model);
     setMaxTokens(skill.max_tokens);
     setMaxTranscriptQtrs(skill.max_transcript_qtrs);
+    setMaxPptQtrs(skill.max_ppt_qtrs);
     setMaxAnnualReportYears(skill.max_annual_report_years);
     setIsActive(skill.is_active);
     setDirty(false);
@@ -82,7 +88,12 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
 
   useEffect(() => {
     setSignalCounts({});
-    fetch(`${BACKEND_URL}/api/html-skills/signals/count/${ticker}`)
+    const params = new URLSearchParams();
+    if (signalTypes.length > 0) params.set("signal_types", signalTypes.join(","));
+    if (maxTranscriptQtrs !== null) params.set("max_transcript_qtrs", String(maxTranscriptQtrs));
+    if (maxPptQtrs !== null) params.set("max_ppt_qtrs", String(maxPptQtrs));
+    if (maxAnnualReportYears !== null) params.set("max_annual_report_years", String(maxAnnualReportYears));
+    fetch(`${BACKEND_URL}/api/html-skills/signals/count/${ticker}?${params}`)
       .then(async (res) => {
         if (!res.ok) return;
         const json: SignalCountsResponse = await res.json();
@@ -94,15 +105,16 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
         onSignalCountsChange?.(map, signalTypes);
       })
       .catch(() => {});
-  }, [ticker]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticker, signalTypes, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
 
   useEffect(() => {
-    onSignalCountsChange?.(signalCounts, signalTypes);
-  }, [signalTypes, signalCounts]);
+    onLimitsChange?.(maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears);
+  }, [maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
 
   useEffect(() => {
-    onLimitsChange?.(maxTranscriptQtrs, maxAnnualReportYears);
-  }, [maxTranscriptQtrs, maxAnnualReportYears]);
+    onConfigChange?.({ prompt, signalTypes, model, maxTokens, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears });
+  }, [prompt, signalTypes, model, maxTokens, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
 
   function mark() { setDirty(true); onDirtyChange?.(true); }
 
@@ -114,7 +126,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   }
 
   function handleSave() {
-    onSave({ name, skill_prompt: prompt, category, signal_types: signalTypes, model, max_tokens: maxTokens, max_transcript_qtrs: maxTranscriptQtrs, max_annual_report_years: maxAnnualReportYears, is_active: isActive });
+    onSave({ name, skill_prompt: prompt, category, signal_types: signalTypes, model, max_tokens: maxTokens, max_transcript_qtrs: maxTranscriptQtrs, max_ppt_qtrs: maxPptQtrs, max_annual_report_years: maxAnnualReportYears, is_active: isActive });
     setDirty(false);
     onDirtyChange?.(false);
   }
@@ -193,6 +205,20 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
             <select
               value={maxTranscriptQtrs ?? ""}
               onChange={(e) => { setMaxTranscriptQtrs(e.target.value === "" ? null : Number(e.target.value)); mark(); }}
+              className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+            >
+              {QTR_OPTIONS.map((o) => (
+                <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+              PPT Qtrs
+            </label>
+            <select
+              value={maxPptQtrs ?? ""}
+              onChange={(e) => { setMaxPptQtrs(e.target.value === "" ? null : Number(e.target.value)); mark(); }}
               className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
             >
               {QTR_OPTIONS.map((o) => (

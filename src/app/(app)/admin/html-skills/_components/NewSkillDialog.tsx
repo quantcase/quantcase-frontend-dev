@@ -11,6 +11,9 @@ export interface NewSkillForm {
   category: PluginCategory;
   model: string;
   max_tokens: number;
+  max_transcript_qtrs: number | null;
+  max_ppt_qtrs: number | null;
+  max_annual_report_years: number | null;
 }
 
 interface Props {
@@ -21,6 +24,26 @@ interface Props {
   onCreate: (form: NewSkillForm) => void;
 }
 
+const QTR_OPTIONS: { label: string; value: number | null }[] = [
+  { label: "No limit", value: null },
+  { label: "2 qtrs", value: 2 },
+  { label: "4 qtrs", value: 4 },
+  { label: "8 qtrs", value: 8 },
+  { label: "12 qtrs", value: 12 },
+  { label: "16 qtrs", value: 16 },
+  { label: "20 qtrs", value: 20 },
+  { label: "None", value: 0 },
+];
+
+const ANNUAL_OPTIONS: { label: string; value: number | null }[] = [
+  { label: "No limit", value: null },
+  { label: "1 yr", value: 1 },
+  { label: "2 yrs", value: 2 },
+  { label: "3 yrs", value: 3 },
+  { label: "5 yrs", value: 5 },
+  { label: "None", value: 0 },
+];
+
 const DEFAULT: NewSkillForm = {
   slug: "",
   name: "",
@@ -28,6 +51,9 @@ const DEFAULT: NewSkillForm = {
   category: "management",
   model: MODEL_OPTIONS[0].value,
   max_tokens: 16000,
+  max_transcript_qtrs: null,
+  max_ppt_qtrs: null,
+  max_annual_report_years: null,
 };
 
 export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Props) {
@@ -123,6 +149,51 @@ export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Pro
                 onChange={(e) => set("max_tokens", Number(e.target.value))}
                 className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+                Transcript Qtrs
+              </label>
+              <select
+                value={form.max_transcript_qtrs ?? ""}
+                onChange={(e) => set("max_transcript_qtrs", e.target.value === "" ? null : Number(e.target.value))}
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              >
+                {QTR_OPTIONS.map((o) => (
+                  <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+                PPT Qtrs
+              </label>
+              <select
+                value={form.max_ppt_qtrs ?? ""}
+                onChange={(e) => set("max_ppt_qtrs", e.target.value === "" ? null : Number(e.target.value))}
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              >
+                {QTR_OPTIONS.map((o) => (
+                  <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+                Annual Report Yrs
+              </label>
+              <select
+                value={form.max_annual_report_years ?? ""}
+                onChange={(e) => set("max_annual_report_years", e.target.value === "" ? null : Number(e.target.value))}
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              >
+                {ANNUAL_OPTIONS.map((o) => (
+                  <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+                ))}
+              </select>
             </div>
           </div>
 

@@ -27,6 +27,7 @@ export interface HtmlSkill {
   model: string;
   max_tokens: number;
   max_transcript_qtrs: number | null;
+  max_ppt_qtrs: number | null;
   max_annual_report_years: number | null;
   is_active: boolean;
   created_at: string;
@@ -72,8 +73,37 @@ export interface JobStatusResponse {
   success: boolean;
   data: {
     status: "pending" | "active" | "completed" | "failed";
+    type?: string;
     failedReason?: string;
+    output?: {
+      raw_html: string;
+      input_tokens: number;
+      output_tokens: number;
+      cost_usd: number;
+    };
   };
+}
+
+export interface PreviewRunRequest {
+  ticker: string;
+  skill_prompt: string;
+  signal_types: SignalType[];
+  model: string;
+  max_tokens: number;
+  max_transcript_qtrs: number | null;
+  max_ppt_qtrs: number | null;
+  max_annual_report_years: number | null;
+  force: boolean;
+}
+
+export interface LiveSkillConfig {
+  prompt: string;
+  signalTypes: SignalType[];
+  model: string;
+  maxTokens: number;
+  maxTranscriptQtrs: number | null;
+  maxPptQtrs: number | null;
+  maxAnnualReportYears: number | null;
 }
 
 export const FAVORITE_TICKERS = ["HDFCBANK", "RELIANCE", "ASIANPAINT", "IEX", "MSUMI"] as const;
@@ -119,4 +149,5 @@ export const CATEGORY_LABELS: Record<PluginCategory, string> = {
 export const MODEL_OPTIONS: { label: string; value: string }[] = [
   { label: "Haiku", value: "~anthropic/claude-haiku-latest" },
   { label: "Sonnet", value: "~anthropic/claude-sonnet-latest" },
+  { label: "MiMo-2.5", value: "xiaomi/mimo-v2.5" },
 ];

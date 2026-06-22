@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Play, Loader2, AlertCircle } from "lucide-react";
-import { TestTicker, RunResponse, RunJobResponse, JobStatusResponse } from "./types";
+import { TestTicker, RunResponse, RunJobResponse, JobStatusResponse, LiveSkillConfig } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
 
 export interface PreviewControls {
@@ -14,6 +14,7 @@ export interface PreviewControls {
 interface Props {
   slug: string;
   ticker: TestTicker;
+  liveConfig: LiveSkillConfig | null;
   onControls: (controls: PreviewControls) => void;
 }
 
@@ -21,7 +22,7 @@ function stripHtmlFences(raw: string): string {
   return raw.replace(/^```html\s*/i, "").replace(/\s*```\s*$/, "").trim();
 }
 
-export function PreviewPane({ slug, ticker, onControls }: Props) {
+export function PreviewPane({ slug, ticker, liveConfig, onControls }: Props) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunResponse | null>(null);
@@ -60,10 +61,28 @@ export function PreviewPane({ slug, ticker, onControls }: Props) {
     setRunning(true);
     setError(null);
 
-    fetch(`${BACKEND_URL}/api/html-skills/${slug}/run`, {
+    const isPreview = liveConfig !== null;
+    const url = isPreview
+      ? `${BACKEND_URL}/api/html-skills/run-preview`
+      : `${BACKEND_URL}/api/html-skills/${slug}/run`;
+    const body = isPreview
+      ? {
+          ticker,
+          force,
+          skill_prompt: liveConfig.prompt,
+          signal_types: liveConfig.signalTypes,
+          model: liveConfig.model,
+          max_tokens: liveConfig.maxTokens,
+          max_transcript_qtrs: liveConfig.maxTranscriptQtrs,
+          max_ppt_qtrs: liveConfig.maxPptQtrs,
+          max_annual_report_years: liveConfig.maxAnnualReportYears,
+        }
+      : { ticker, force };
+
+    fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ticker, force }),
+      body: JSON.stringify(body),
     })
       .then(async (res) => {
         const json = await res.json();
@@ -78,8 +97,23 @@ export function PreviewPane({ slug, ticker, onControls }: Props) {
             if (status === "completed") {
               clearInterval(pollRef.current!);
               pollRef.current = null;
-              const output = await fetchOutput();
-              setResult({ cached: false, output });
+              if (statusJson.data?.output) {
+                // Preview job — output is embedded in the job status response
+                const embeddedOutput = statusJson.data.output;
+                setResult({
+                  cached: false,
+                  output: {
+                    ...embeddedOutput,
+                    raw_html: stripHtmlFences(embeddedOutput.raw_html),
+                    id: "", skill_id: "", ticker, fiscal_year: null, quarter: null,
+                    prompt_v: "", model: "", created_at: "", updated_at: "",
+                  },
+                });
+              } else {
+                // Saved-skill job — fetch output separately
+                const output = await fetchOutput();
+                setResult({ cached: false, output });
+              }
               setRunning(false);
             } else if (status === "failed") {
               clearInterval(pollRef.current!);

@@ -9,7 +9,7 @@ export interface TickerOption {
 }
 
 interface TickerSearchProps {
-  value: string;
+  value: string | null;
   onChange: (ticker: string) => void;
   options: TickerOption[];
   favorites: string[];

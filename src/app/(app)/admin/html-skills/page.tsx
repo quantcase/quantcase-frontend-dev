@@ -121,7 +121,15 @@ function HtmlSkillsPage() {
     if (!selectedSlug || !ticker) return;
     setExportingPrompt(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}/prompt/${ticker}`);
+      const params = new URLSearchParams();
+      if (liveConfig?.maxTranscriptQtrs != null) params.set("max_transcript_qtrs", String(liveConfig.maxTranscriptQtrs));
+      if (liveConfig?.maxPptQtrs != null) params.set("max_ppt_qtrs", String(liveConfig.maxPptQtrs));
+      if (liveConfig?.maxAnnualReportYears != null) params.set("max_annual_report_years", String(liveConfig.maxAnnualReportYears));
+      if (liveConfig?.transcriptSignalTypes?.length) params.set("transcript_signal_types", liveConfig.transcriptSignalTypes.join(","));
+      if (liveConfig?.pptSignalTypes?.length) params.set("ppt_signal_types", liveConfig.pptSignalTypes.join(","));
+      if (liveConfig?.annualReportSignalTypes?.length) params.set("annual_report_signal_types", liveConfig.annualReportSignalTypes.join(","));
+      const qs = params.toString();
+      const res = await fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}/prompt/${ticker}${qs ? `?${qs}` : ""}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
 

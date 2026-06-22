@@ -4,9 +4,14 @@ import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Save, Loader2 } from "lucide-react";
 import {
   HtmlSkill,
+  TranscriptSignalType,
+  PptSignalType,
+  AnnualReportSignalType,
   SignalType,
   PluginCategory,
-  SIGNAL_TYPE_LABELS,
+  TRANSCRIPT_SIGNAL_TYPE_LABELS,
+  PPT_SIGNAL_TYPE_LABELS,
+  ANNUAL_REPORT_SIGNAL_TYPE_LABELS,
   CATEGORY_LABELS,
   MODEL_OPTIONS,
   TestTicker,
@@ -15,7 +20,9 @@ import {
 } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
 
-const ALL_SIGNAL_TYPES = Object.keys(SIGNAL_TYPE_LABELS) as SignalType[];
+const ALL_TRANSCRIPT_SIGNAL_TYPES = Object.keys(TRANSCRIPT_SIGNAL_TYPE_LABELS) as TranscriptSignalType[];
+const ALL_PPT_SIGNAL_TYPES = Object.keys(PPT_SIGNAL_TYPE_LABELS) as PptSignalType[];
+const ALL_ANNUAL_REPORT_SIGNAL_TYPES = Object.keys(ANNUAL_REPORT_SIGNAL_TYPE_LABELS) as AnnualReportSignalType[];
 const ALL_CATEGORIES = Object.keys(CATEGORY_LABELS) as PluginCategory[];
 
 interface Props {
@@ -62,7 +69,9 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [name, setName] = useState(skill.name);
   const [prompt, setPrompt] = useState(skill.skill_prompt ?? "");
   const [category, setCategory] = useState<PluginCategory>(skill.category);
-  const [signalTypes, setSignalTypes] = useState<SignalType[]>(skill.signal_types);
+  const [transcriptSignalTypes, setTranscriptSignalTypes] = useState<TranscriptSignalType[]>(skill.transcript_signal_types);
+  const [pptSignalTypes, setPptSignalTypes] = useState<PptSignalType[]>(skill.ppt_signal_types);
+  const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>(skill.annual_report_signal_types);
   const [model, setModel] = useState(skill.model);
   const [maxTokens, setMaxTokens] = useState(skill.max_tokens);
   const [maxTranscriptQtrs, setMaxTranscriptQtrs] = useState<number | null>(skill.max_transcript_qtrs);
@@ -70,13 +79,17 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [maxAnnualReportYears, setMaxAnnualReportYears] = useState<number | null>(skill.max_annual_report_years);
   const [isActive, setIsActive] = useState(skill.is_active);
   const [dirty, setDirty] = useState(false);
-  const [signalCounts, setSignalCounts] = useState<Record<string, number>>({});
+  const [transcriptCounts, setTranscriptCounts] = useState<Record<string, number>>({});
+  const [pptCounts, setPptCounts] = useState<Record<string, number>>({});
+  const [annualReportCounts, setAnnualReportCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setName(skill.name);
     setPrompt(skill.skill_prompt ?? "");
     setCategory(skill.category);
-    setSignalTypes(skill.signal_types);
+    setTranscriptSignalTypes(skill.transcript_signal_types);
+    setPptSignalTypes(skill.ppt_signal_types);
+    setAnnualReportSignalTypes(skill.annual_report_signal_types);
     setModel(skill.model);
     setMaxTokens(skill.max_tokens);
     setMaxTranscriptQtrs(skill.max_transcript_qtrs);
@@ -87,9 +100,10 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   }, [skill.slug]);
 
   useEffect(() => {
-    setSignalCounts({});
+    setTranscriptCounts({});
+    setPptCounts({});
+    setAnnualReportCounts({});
     const params = new URLSearchParams();
-    if (signalTypes.length > 0) params.set("signal_types", signalTypes.join(","));
     if (maxTranscriptQtrs !== null) params.set("max_transcript_qtrs", String(maxTranscriptQtrs));
     if (maxPptQtrs !== null) params.set("max_ppt_qtrs", String(maxPptQtrs));
     if (maxAnnualReportYears !== null) params.set("max_annual_report_years", String(maxAnnualReportYears));
@@ -97,36 +111,57 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
       .then(async (res) => {
         if (!res.ok) return;
         const json: SignalCountsResponse = await res.json();
-        const map: Record<string, number> = {};
-        for (const { signal_type, count } of json.signal_counts) {
-          map[signal_type] = count;
-        }
-        setSignalCounts(map);
-        onSignalCountsChange?.(map, signalTypes);
+        const toMap = (counts: SignalCountsResponse["by_source"]["transcript"]["signal_counts"]) => {
+          const m: Record<string, number> = {};
+          for (const { signal_type, count } of counts) m[signal_type] = count;
+          return m;
+        };
+        const tMap = toMap(json.by_source.transcript.signal_counts);
+        const pMap = toMap(json.by_source.ppt.signal_counts);
+        const aMap = toMap(json.by_source.annual_report.signal_counts);
+        setTranscriptCounts(tMap);
+        setPptCounts(pMap);
+        setAnnualReportCounts(aMap);
       })
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticker, signalTypes, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
+  }, [ticker, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
+
+  // Re-notify parent whenever counts or selected types change
+  useEffect(() => {
+    const allCounts = { ...annualReportCounts, ...pptCounts, ...transcriptCounts };
+    const allSelected = [...new Set([...transcriptSignalTypes, ...pptSignalTypes, ...annualReportSignalTypes])] as SignalType[];
+    onSignalCountsChange?.(allCounts, allSelected);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transcriptCounts, pptCounts, annualReportCounts, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes]);
 
   useEffect(() => {
     onLimitsChange?.(maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears);
   }, [maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
 
   useEffect(() => {
-    onConfigChange?.({ prompt, signalTypes, model, maxTokens, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears });
-  }, [prompt, signalTypes, model, maxTokens, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
+    onConfigChange?.({ prompt, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes, model, maxTokens, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears });
+  }, [prompt, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes, model, maxTokens, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
 
   function mark() { setDirty(true); onDirtyChange?.(true); }
 
-  function toggleSignal(type: SignalType) {
-    setSignalTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    );
+  function toggleTranscriptSignal(type: TranscriptSignalType) {
+    setTranscriptSignalTypes((prev) => prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]);
+    mark();
+  }
+
+  function togglePptSignal(type: PptSignalType) {
+    setPptSignalTypes((prev) => prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]);
+    mark();
+  }
+
+  function toggleAnnualReportSignal(type: AnnualReportSignalType) {
+    setAnnualReportSignalTypes((prev) => prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]);
     mark();
   }
 
   function handleSave() {
-    onSave({ name, skill_prompt: prompt, category, signal_types: signalTypes, model, max_tokens: maxTokens, max_transcript_qtrs: maxTranscriptQtrs, max_ppt_qtrs: maxPptQtrs, max_annual_report_years: maxAnnualReportYears, is_active: isActive });
+    onSave({ name, skill_prompt: prompt, category, transcript_signal_types: transcriptSignalTypes, ppt_signal_types: pptSignalTypes, annual_report_signal_types: annualReportSignalTypes, model, max_tokens: maxTokens, max_transcript_qtrs: maxTranscriptQtrs, max_ppt_qtrs: maxPptQtrs, max_annual_report_years: maxAnnualReportYears, is_active: isActive });
     setDirty(false);
     onDirtyChange?.(false);
   }
@@ -242,40 +277,135 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
           </div>
         </div>
 
-        {/* Signal types */}
-        <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-2">
-            Signal Types
-          </label>
-          <div className="flex flex-wrap gap-1.5">
-            {ALL_SIGNAL_TYPES.map((type) => {
-              const active = signalTypes.includes(type);
-              const count = signalCounts[type];
-              return (
-                <button
-                  key={type}
-                  onClick={() => toggleSignal(type)}
-                  className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
-                    active
-                      ? "bg-[#0F172B] text-white border-[#0F172B]"
-                      : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:border-[#0F172B] hover:text-[#0F172B]"
-                  }`}
-                >
-                  {SIGNAL_TYPE_LABELS[type]}
-                  {count !== undefined && (
-                    <span
-                      className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${
-                        active
-                          ? "bg-white/20 text-white"
-                          : "bg-[#E2E2E2] text-[#888888]"
-                      }`}
-                    >
-                      {count.toLocaleString()}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+        {/* Signal types — three source-specific sections */}
+        <div className="space-y-3">
+          {/* Transcript */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888]">
+                Transcript Signal Types
+              </label>
+              <button
+                onClick={() => {
+                  const allSelected = ALL_TRANSCRIPT_SIGNAL_TYPES.every((t) => transcriptSignalTypes.includes(t));
+                  setTranscriptSignalTypes(allSelected ? [] : [...ALL_TRANSCRIPT_SIGNAL_TYPES]);
+                  mark();
+                }}
+                className="text-[10px] font-medium text-[#888888] hover:text-[#0F172B] transition-colors"
+              >
+                {ALL_TRANSCRIPT_SIGNAL_TYPES.every((t) => transcriptSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_TRANSCRIPT_SIGNAL_TYPES.map((type) => {
+                const active = transcriptSignalTypes.includes(type);
+                const count = transcriptCounts[type];
+                return (
+                  <button
+                    key={type}
+                    onClick={() => toggleTranscriptSignal(type)}
+                    className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
+                      active
+                        ? "bg-[#0F172B] text-white border-[#0F172B]"
+                        : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:border-[#0F172B] hover:text-[#0F172B]"
+                    }`}
+                  >
+                    {TRANSCRIPT_SIGNAL_TYPE_LABELS[type]}
+                    {count !== undefined && (
+                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-white" : "bg-[#E2E2E2] text-[#888888]"}`}>
+                        {count.toLocaleString()}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* PPT */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888]">
+                PPT Signal Types
+              </label>
+              <button
+                onClick={() => {
+                  const allSelected = ALL_PPT_SIGNAL_TYPES.every((t) => pptSignalTypes.includes(t));
+                  setPptSignalTypes(allSelected ? [] : [...ALL_PPT_SIGNAL_TYPES]);
+                  mark();
+                }}
+                className="text-[10px] font-medium text-[#888888] hover:text-[#0F172B] transition-colors"
+              >
+                {ALL_PPT_SIGNAL_TYPES.every((t) => pptSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_PPT_SIGNAL_TYPES.map((type) => {
+                const active = pptSignalTypes.includes(type);
+                const count = pptCounts[type];
+                return (
+                  <button
+                    key={type}
+                    onClick={() => togglePptSignal(type)}
+                    className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
+                      active
+                        ? "bg-[#0F172B] text-white border-[#0F172B]"
+                        : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:border-[#0F172B] hover:text-[#0F172B]"
+                    }`}
+                  >
+                    {PPT_SIGNAL_TYPE_LABELS[type]}
+                    {count !== undefined && (
+                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-white" : "bg-[#E2E2E2] text-[#888888]"}`}>
+                        {count.toLocaleString()}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Annual Report */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888]">
+                Annual Report Signal Types
+              </label>
+              <button
+                onClick={() => {
+                  const allSelected = ALL_ANNUAL_REPORT_SIGNAL_TYPES.every((t) => annualReportSignalTypes.includes(t));
+                  setAnnualReportSignalTypes(allSelected ? [] : [...ALL_ANNUAL_REPORT_SIGNAL_TYPES]);
+                  mark();
+                }}
+                className="text-[10px] font-medium text-[#888888] hover:text-[#0F172B] transition-colors"
+              >
+                {ALL_ANNUAL_REPORT_SIGNAL_TYPES.every((t) => annualReportSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_ANNUAL_REPORT_SIGNAL_TYPES.map((type) => {
+                const active = annualReportSignalTypes.includes(type);
+                const count = annualReportCounts[type];
+                return (
+                  <button
+                    key={type}
+                    onClick={() => toggleAnnualReportSignal(type)}
+                    className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
+                      active
+                        ? "bg-[#0F172B] text-white border-[#0F172B]"
+                        : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:border-[#0F172B] hover:text-[#0F172B]"
+                    }`}
+                  >
+                    {ANNUAL_REPORT_SIGNAL_TYPE_LABELS[type]}
+                    {count !== undefined && (
+                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-white" : "bg-[#E2E2E2] text-[#888888]"}`}>
+                        {count.toLocaleString()}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 

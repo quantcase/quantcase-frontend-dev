@@ -242,7 +242,7 @@ function HtmlSkillsPage() {
                 {previewControls?.result?.output && (
                   <span className="text-[10px] text-[#888888] shrink-0">
                     {previewControls.result.output.input_tokens + previewControls.result.output.output_tokens} tok
-                    {" · "}${previewControls.result.output.cost_usd.toFixed(5)}
+                    {" · "}${previewControls.result.output.cost_usd?.toFixed(5) ?? "—"}
                   </span>
                 )}
 

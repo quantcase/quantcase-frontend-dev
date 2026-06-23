@@ -53,8 +53,9 @@ function FormField({
   );
 }
 
-export function SignInForm() {
+export function RegisterForm() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -63,61 +64,36 @@ export function SignInForm() {
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/signin`, {
+      const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.detail || data?.message || "Invalid credentials");
+        setError(data?.detail || data?.message || data?.error || "Registration failed. Please try again.");
         return;
       }
 
       localStorage.setItem("qc_at", data.access_token);
       localStorage.setItem("qc_rt", data.refresh_token);
+      localStorage.setItem("qc_onboarding_completed", "false");
 
       const acctType: string | undefined = data?.accountType ?? data?.account_type;
-
-      // Persist so AuthGuard and UserContext can read it synchronously on the next page
       if (acctType) localStorage.setItem("qc_account_type", acctType);
 
-      // Always fetch /api/auth/me to get onboarding state and resolve accountType if missing
-      const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${data.access_token}` },
-      });
-
-      if (meRes.ok) {
-        const me = await meRes.json();
-        const resolvedType: string | undefined = me?.accountType ?? me?.account_type ?? acctType;
-        if (resolvedType) localStorage.setItem("qc_account_type", resolvedType);
-
-        const onboardingDone: boolean = me?.onboarding_completed ?? true;
-        localStorage.setItem("qc_onboarding_completed", String(onboardingDone));
-
-        if (!onboardingDone) {
-          router.push("/onboarding");
-          return;
-        }
-
-        if (resolvedType === "investor") {
-          router.push("/investor/dashboard");
-        } else {
-          router.push("/dashboard");
-        }
-      } else {
-        // Fallback: route based on signin response accountType
-        if (acctType === "investor") {
-          router.push("/investor/dashboard");
-        } else {
-          router.push("/dashboard");
-        }
-      }
+      router.push("/onboarding");
     } catch {
       setError("Unable to reach server. Please try again.");
     } finally {
@@ -142,13 +118,22 @@ export function SignInForm() {
       </div>
 
       <h1 style={{ fontSize: 28, fontWeight: 500, color: "#0F172B", marginBottom: 6, letterSpacing: "-0.02em" }}>
-        Welcome back
+        Create your account
       </h1>
       <p style={{ fontSize: 14, color: "#888888", marginBottom: 36, lineHeight: 1.5 }}>
-        Sign in to your research workspace.
+        Start your 7-day free trial. No credit card required.
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <FormField
+          id="name"
+          label="Full name"
+          type="text"
+          value={name}
+          onChange={setName}
+          placeholder="Jane Smith"
+          autoComplete="name"
+        />
         <FormField
           id="email"
           label="Email address"
@@ -164,8 +149,8 @@ export function SignInForm() {
           type="password"
           value={password}
           onChange={setPassword}
-          placeholder="••••••••"
-          autoComplete="current-password"
+          placeholder="Min. 8 characters"
+          autoComplete="new-password"
         />
 
         {error && (
@@ -191,15 +176,19 @@ export function SignInForm() {
             boxShadow: loading ? "none" : "0 2px 8px rgba(15,23,43,0.25)",
           }}
         >
-          {loading ? "Signing in…" : "Sign in"}
+          {loading ? "Creating account…" : "Create account"}
         </button>
       </form>
 
-      <p style={{ fontSize: 12, color: "rgba(18,18,18,0.40)", marginTop: 32, textAlign: "center", lineHeight: 1.6 }}>
-        Don&apos;t have an account?{" "}
-        <Link href="/register" style={{ color: "#0F172B", fontWeight: 500, textDecoration: "none" }}>
-          Create one
+      <p style={{ fontSize: 12, color: "rgba(18,18,18,0.40)", marginTop: 24, textAlign: "center", lineHeight: 1.6 }}>
+        Already have an account?{" "}
+        <Link href="/signin" style={{ color: "#0F172B", fontWeight: 500, textDecoration: "none" }}>
+          Sign in
         </Link>
+      </p>
+
+      <p style={{ fontSize: 11, color: "rgba(18,18,18,0.30)", marginTop: 12, textAlign: "center", lineHeight: 1.6 }}>
+        By creating an account you agree to our Terms of Service and Privacy Policy.
       </p>
     </div>
   );

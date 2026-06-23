@@ -4,14 +4,18 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { BACKEND_URL } from "@/lib/constants";
 import { useUser } from "@/components/providers/UserContext";
+import type { MeResponse } from "@/types/auth";
+
+const PUBLIC_PATHS = ["/signin", "/", "/register"];
+const ONBOARDING_PATH = "/onboarding";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { setAccountType } = useUser();
+  const { setAccountType, setFromMe } = useUser();
 
   useEffect(() => {
-    if (pathname === "/signin" || pathname === "/") return;
+    if (PUBLIC_PATHS.includes(pathname)) return;
 
     const token = localStorage.getItem("qc_at");
     if (!token) {
@@ -19,8 +23,14 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Synchronous guard: if accountType is already in localStorage, redirect immediately
-    // without waiting for the network — this prevents the dashboard flash on login
+    // Synchronous guard: check cached onboarding state before network call
+    const cachedOnboarding = localStorage.getItem("qc_onboarding_completed");
+    if (cachedOnboarding === "false" && pathname !== ONBOARDING_PATH) {
+      router.replace(ONBOARDING_PATH);
+      return;
+    }
+
+    // Synchronous guard: redirect investor from manager dashboard immediately
     const cachedType = localStorage.getItem("qc_account_type");
     if (cachedType === "investor" && pathname === "/dashboard") {
       router.replace("/investor/dashboard");
@@ -35,23 +45,39 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           localStorage.removeItem("qc_at");
           localStorage.removeItem("qc_rt");
           localStorage.removeItem("qc_account_type");
+          localStorage.removeItem("qc_onboarding_completed");
           router.push("/signin");
           return;
         }
         if (!res.ok) return;
 
-        const data = await res.json();
-        const acctType: "manager" | "investor" | null =
-          data?.accountType ?? data?.account_type ?? null;
+        const data: MeResponse = await res.json();
 
-        if (acctType) setAccountType(acctType);
+        // Never downgrade a locally-confirmed completed state with a potentially
+        // stale backend response (race between PATCH completion and this GET).
+        const localFlag = localStorage.getItem("qc_onboarding_completed");
+        if (localFlag === "true") {
+          data.onboarding_completed = true;
+        }
 
+        setFromMe(data);
+
+        // Onboarding redirect — only if both local cache and network agree
+        if (!data.onboarding_completed && pathname !== ONBOARDING_PATH) {
+          router.replace(ONBOARDING_PATH);
+          return;
+        }
+
+        const acctType = data.accountType ?? data.account_type ?? null;
+
+        // Investor on manager dashboard
         if (acctType === "investor" && pathname === "/dashboard") {
           router.replace("/investor/dashboard");
         }
       })
       .catch(() => {});
-  }, [pathname, router, setAccountType]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, router, setAccountType, setFromMe]);
 
   return <>{children}</>;
 }

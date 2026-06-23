@@ -34,7 +34,7 @@ const investorNavItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { accountType } = useUser();
+  const { accountType, subscription } = useUser();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => { setMounted(true); }, []);
 
@@ -45,6 +45,8 @@ export function AppSidebar() {
 
   if (pathname === "/signin") return null;
   const navItems = mounted && accountType === "investor" ? investorNavItems : managerNavItems;
+
+  const showTrialDot = subscription?.status === "trialing" && (subscription.days_remaining ?? 0) > 0;
 
   const navIconLink = (label: string, href: string, Icon: React.ElementType, active: boolean, tooltipSide: "right" | "top" = "right") => (
     <TooltipRoot key={label}>
@@ -57,6 +59,7 @@ export function AppSidebar() {
             height: 40,
             background: active ? "var(--qc-ink)" : "transparent",
             color: active ? "var(--qc-on-dark)" : "var(--qc-ink-3)",
+            position: "relative",
           }}
           onMouseEnter={(e) => {
             if (!active) {
@@ -72,6 +75,20 @@ export function AppSidebar() {
           }}
         >
           <Icon size={18} strokeWidth={1.8} />
+          {showTrialDot && label === "Settings" && (
+            <span
+              style={{
+                position: "absolute",
+                top: 7,
+                right: 7,
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#c8952a",
+                border: "1.5px solid var(--qc-card)",
+              }}
+            />
+          )}
         </Link>
       </TooltipTrigger>
       <TooltipContent side={tooltipSide}>{label}</TooltipContent>
@@ -108,6 +125,26 @@ export function AppSidebar() {
             )}
           </nav>
         </TooltipProvider>
+
+        {subscription?.status === "trialing" && (subscription.days_remaining ?? 0) > 0 && (
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              color: "#c8952a",
+              background: "#fdf6e3",
+              border: "1px solid #EFD6A0",
+              borderRadius: 4,
+              padding: "3px 6px",
+              textAlign: "center",
+              marginBottom: 4,
+              lineHeight: 1.4,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {subscription.days_remaining}d trial
+          </div>
+        )}
 
         <TooltipProvider delayDuration={300}>
           <TooltipRoot>

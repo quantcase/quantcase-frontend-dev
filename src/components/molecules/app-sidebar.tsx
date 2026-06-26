@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, LogOut, BarChart2, Code2 } from "lucide-react";
+import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, LogOut, BarChart2, Code2, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TooltipProvider,
@@ -19,8 +19,9 @@ const managerNavItems = [
   { label: "WealthOS", href: "/wealthos/dashboard", icon: Briefcase,  isActive: (p: string) => p.startsWith("/wealthos") },
   { label: "Models",   href: "/model-builder",      icon: TrendingUp, isActive: (p: string) => p === "/model-builder" || p.startsWith("/model-builder/") || p === "/model-analytics" },
   { label: "Settings", href: "/settings",           icon: Settings,   isActive: (p: string) => p.startsWith("/settings") },
-  { label: "HTML Skills", href: "/admin/html-skills", icon: Code2,  isActive: (p: string) => p.startsWith("/admin/html-skills") },
-  { label: "Admin",       href: "/admin/pipelines",   icon: Shield, isActive: (p: string) => p.startsWith("/admin") && !p.startsWith("/admin/html-skills") },
+  { label: "HTML Skills", href: "/admin/html-skills",  icon: Code2,    isActive: (p: string) => p.startsWith("/admin/html-skills") },
+  { label: "Coverage",   href: "/admin/coverage",     icon: Activity, isActive: (p: string) => p.startsWith("/admin/coverage") },
+  { label: "Admin",      href: "/admin/pipelines",    icon: Shield,   isActive: (p: string) => p.startsWith("/admin") && !p.startsWith("/admin/html-skills") && !p.startsWith("/admin/coverage") },
 ];
 
 const investorNavItems = [
@@ -29,6 +30,7 @@ const investorNavItems = [
   { label: "Portfolio",   href: "/investor/portfolio",   icon: BarChart2, isActive: (p: string) => p.startsWith("/investor/portfolio") },
   { label: "Settings",    href: "/settings",             icon: Settings,  isActive: (p: string) => p.startsWith("/settings") },
   { label: "HTML Skills", href: "/admin/html-skills",    icon: Code2,     isActive: (p: string) => p.startsWith("/admin/html-skills") },
+  { label: "Coverage",   href: "/admin/coverage",       icon: Activity,  isActive: (p: string) => p.startsWith("/admin/coverage") },
 ];
 
 export function AppSidebar() {

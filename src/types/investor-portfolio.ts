@@ -29,11 +29,13 @@ export interface Holding {
 }
 
 export interface UserPortfolio {
-  id: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
+  id: string | null;
+  user_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
   holdings: Holding[];
+  empty?: boolean;
+  portfolio?: null;
 }
 
 export interface ShadowPortfolioData {

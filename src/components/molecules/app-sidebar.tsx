@@ -36,7 +36,7 @@ const investorNavItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { accountType, subscription } = useUser();
+  const { accountType, subscription, openPaywall } = useUser();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => { setMounted(true); }, []);
 
@@ -129,7 +129,8 @@ export function AppSidebar() {
         </TooltipProvider>
 
         {subscription?.status === "trialing" && (subscription.days_remaining ?? 0) > 0 && (
-          <div
+          <button
+            onClick={openPaywall}
             style={{
               fontSize: 10,
               fontWeight: 600,
@@ -142,10 +143,11 @@ export function AppSidebar() {
               marginBottom: 4,
               lineHeight: 1.4,
               whiteSpace: "nowrap",
+              cursor: "pointer",
             }}
           >
             {subscription.days_remaining}d trial
-          </div>
+          </button>
         )}
 
         <TooltipProvider delayDuration={300}>

@@ -15,16 +15,17 @@ export interface MeResponse {
 
 export interface BillingPrice {
   id: string;
-  price_id: string;
+  plan_type: "monthly" | "annual";
   amount: number;
   currency: string;
-  interval: "monthly" | "annual";
-  label: string;
+  interval_months: number;
+  razorpay_plan_id: string | null;
 }
 
 export interface BillingProduct {
   id: string;
   name: string;
   description: string;
+  is_active: boolean;
   prices: BillingPrice[];
 }

@@ -20,7 +20,13 @@ export function useUserPortfolio() {
     apiAuthGet<{ success: boolean; data: UserPortfolio }>(
       `${BACKEND_URL}/api/portfolio/user`,
       {
-        onSuccess: (res) => setState({ data: res.data, loading: false, error: null, notFound: false }),
+        onSuccess: (res) => {
+          if (res.data?.empty) {
+            setState({ data: null, loading: false, error: null, notFound: true });
+          } else {
+            setState({ data: res.data, loading: false, error: null, notFound: false });
+          }
+        },
         onError: (err) => {
           const notFound = err.includes("404") || err.toLowerCase().includes("no portfolio");
           setState({ data: null, loading: false, error: notFound ? null : err, notFound });

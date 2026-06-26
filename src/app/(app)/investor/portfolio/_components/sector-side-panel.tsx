@@ -14,16 +14,27 @@ export function SectorSidePanel({ holdings }: { holdings: Holding[] }) {
     sectorMap.set(h.sector, { value: cur.value + h.currentValue, modSum: cur.modSum + h.modScore, count: cur.count + 1, alert: cur.alert || !!h.alert });
   }
   const total = holdings.reduce((s, h) => s + h.currentValue, 0);
-  const sectors = [...sectorMap.entries()]
-    .map(([sector, d]) => ({ sector, value: d.value, pct: (d.value / total) * 100, avgMod: Math.round(d.modSum / d.count), alert: d.alert }))
-    .sort((a, b) => b.value - a.value);
+  const sectors = total > 0
+    ? [...sectorMap.entries()]
+        .map(([sector, d]) => ({ sector, value: d.value, pct: (d.value / total) * 100, avgMod: Math.round(d.modSum / d.count), alert: d.alert }))
+        .sort((a, b) => b.value - a.value)
+    : [];
 
   const strong    = holdings.filter(h => h.modScore >= 80);
   const fair      = holdings.filter(h => h.modScore >= 60 && h.modScore < 80);
   const stretched = holdings.filter(h => h.modScore < 60);
-  const strongPct = Math.round((strong.reduce((s, h) => s + h.currentValue, 0) / total) * 100);
-  const fairPct   = Math.round((fair.reduce((s, h)   => s + h.currentValue, 0) / total) * 100);
-  const weakPct   = Math.round((stretched.reduce((s, h) => s + h.currentValue, 0) / total) * 100);
+  const strongPct = total > 0 ? Math.round((strong.reduce((s, h) => s + h.currentValue, 0) / total) * 100) : 0;
+  const fairPct   = total > 0 ? Math.round((fair.reduce((s, h)   => s + h.currentValue, 0) / total) * 100) : 0;
+  const weakPct   = total > 0 ? Math.round((stretched.reduce((s, h) => s + h.currentValue, 0) / total) * 100) : 0;
+
+  if (!holdings.length) {
+    return (
+      <div style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 12, padding: "32px 20px", textAlign: "center" }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600, color: "var(--qc-ink-3)", marginBottom: 12 }}>Sector MOD Overlay</div>
+        <div style={{ fontSize: 13, color: "var(--qc-ink-3)" }}>Connect your broker or upload a CSV to see sector breakdown.</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 12, overflow: "hidden" }}>

@@ -13,6 +13,9 @@ interface UserContextValue {
   onboardingStep: number;
   isAccessBlocked: boolean;
   setFromMe: (data: MeResponse) => void;
+  paywallOpen: boolean;
+  openPaywall: () => void;
+  closePaywall: () => void;
 }
 
 const UserContext = createContext<UserContextValue>({
@@ -23,6 +26,9 @@ const UserContext = createContext<UserContextValue>({
   onboardingStep: 0,
   isAccessBlocked: false,
   setFromMe: () => {},
+  paywallOpen: false,
+  openPaywall: () => {},
+  closePaywall: () => {},
 });
 
 export function UserProvider({ children }: { children: ReactNode }) {
@@ -44,8 +50,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const [onboardingStep, setOnboardingStep] = useState<number>(0);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   const isAccessBlocked = subscription?.is_access_blocked ?? false;
+
+  const openPaywall = useCallback(() => setPaywallOpen(true), []);
+  const closePaywall = useCallback(() => setPaywallOpen(false), []);
 
   const setAccountType = useCallback((t: AccountType) => {
     setAccountTypeState(t);
@@ -74,6 +84,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       onboardingStep,
       isAccessBlocked,
       setFromMe,
+      paywallOpen,
+      openPaywall,
+      closePaywall,
     }}>
       {children}
     </UserContext.Provider>

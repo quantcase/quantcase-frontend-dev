@@ -17,9 +17,11 @@ import { DiscoverScreens } from "@/components/investor/discover-screens";
 import type { DiscoverScreen } from "@/components/investor/discover-screens";
 import { ResearchLibraryBanner } from "@/components/investor/research-library-banner";
 import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
+import { ConnectPortfolioModal } from "@/components/investor/connect-portfolio-modal";
 import { CompleteJournalModal } from "@/components/investor/complete-journal-modal";
 import { useShadowPortfolio } from "@/hooks/useShadowPortfolio";
 import { useUserPortfolio } from "@/hooks/useUserPortfolio";
+import { useJournalPending } from "@/hooks/useJournalPending";
 
 // ── Static placeholder data ───────────────────────────────────────────────────
 
@@ -213,11 +215,13 @@ export default function InvestorDashboardPage() {
   const greeting = getGreeting();
   const todayMeta = getTodayMeta();
   const [modDrawerOpen, setModDrawerOpen] = useState(false);
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [journalModalOpen, setJournalModalOpen] = useState(false);
 
   const { holdings: shadowHoldings, loading: shadowLoading, notFound: shadowNotFound } = useShadowPortfolio();
-  const { data: userPortfolio, loading: portfolioLoading } = useUserPortfolio();
+  const { data: userPortfolio, loading: portfolioLoading, refetch: refetchUserPortfolio } = useUserPortfolio();
+  const { data: pendingData, loading: pendingLoading, refetch: refetchPending } = useJournalPending();
 
   const apiShadowStocks: ShadowStock[] = useMemo(
     () =>
@@ -326,7 +330,7 @@ export default function InvestorDashboardPage() {
             draggingSymbols={["ACC", "HFCL"]}
             onOpenBreakdown={() => setModDrawerOpen(true)}
             isShadow={isUserPortfolioMissing}
-            onUploadPortfolio={() => setUploadModalOpen(true)}
+            onUploadPortfolio={() => setConnectModalOpen(true)}
           />
 
           <HoldingsPanel
@@ -349,7 +353,7 @@ export default function InvestorDashboardPage() {
               { label: "FMCG",        value: "₹8.5 L",  count: 2, pct: 15, color: "#71717a" },
             ]}
             isShadow={isUserPortfolioMissing}
-            onUploadPortfolio={() => setUploadModalOpen(true)}
+            onUploadPortfolio={() => setConnectModalOpen(true)}
           />
         </section>
 
@@ -420,6 +424,13 @@ export default function InvestorDashboardPage() {
         onClose={() => setModDrawerOpen(false)}
       />
 
+      <ConnectPortfolioModal
+        open={connectModalOpen}
+        onClose={() => setConnectModalOpen(false)}
+        onOpenCsvUpload={() => setUploadModalOpen(true)}
+        onConnected={() => { setConnectModalOpen(false); refetchUserPortfolio(); }}
+      />
+
       <UploadPortfolioModal
         open={uploadModalOpen}
         onClose={() => setUploadModalOpen(false)}
@@ -429,6 +440,10 @@ export default function InvestorDashboardPage() {
       <CompleteJournalModal
         open={journalModalOpen}
         onClose={() => setJournalModalOpen(false)}
+        onComplete={refetchPending}
+        holdings={pendingData?.holdings ?? []}
+        totalHoldings={pendingData?.totalHoldings}
+        loadingHoldings={pendingLoading}
       />
     </div>
   );

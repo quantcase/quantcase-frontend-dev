@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LensDetail } from "@/hooks/useLenses";
+import { LensHtmlPreview } from "@/components/insight/lens-html-preview";
 import { LensDetailGuidance } from "@/components/insight/lens-detail-guidance";
 import { LensDetailPromoter } from "@/components/insight/lens-detail-promoter";
 import { LensDetailDisclosure } from "@/components/insight/lens-detail-disclosure";
@@ -111,7 +112,7 @@ export function LensDrawer({ lens, onClose, ticker, isBfsi }: LensDrawerProps) {
               position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 70,
               background: "var(--qc-card)",
               borderLeft: "1px solid var(--qc-hair)",
-              overflowY: "auto",
+              overflow: "hidden",
               display: "flex",
               flexDirection: "column",
             }}
@@ -165,13 +166,20 @@ export function LensDrawer({ lens, onClose, ticker, isBfsi }: LensDrawerProps) {
               </button>
             </div>
 
-            {/* Body */}
+            {/* Body — iframe-based HTML skill output */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
+              {ticker ? (
+                <LensHtmlPreview slug={lens.slug} ticker={ticker} />
+              ) : (
+                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ color: "var(--qc-ink-3)", fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)" }}>No ticker selected</span>
+                </div>
+              )}
+            </div>
+
+            {/* --- Legacy lens detail components (kept for future reuse) ---
             <div className="px-4 sm:px-6 overflow-x-hidden" style={{ flex: 1, paddingTop: 20, paddingBottom: 32, display: "flex", flexDirection: "column", gap: 20 }}>
-
-              {/* Lens-specific rich view — or fall back to generic */}
               <LensDetailView lens={lens} ticker={ticker} isBfsi={isBfsi} />
-
-              {/* Generic fallback: key metrics, highlights, risks */}
               {!["guidance-credibility", "promoter-activity", "disclosure-honesty", "capital-allocation", "industry-analysis", "competition", "financial-strength", "customer-distribution", "eps-engine", "earnings-forecast", "pe-rerating-potential", "earning-quality", "target-price-matrix"].includes(lens.slug) && (
                 <>
                   {Object.keys(lens.key_metrics).length > 0 && (
@@ -189,7 +197,6 @@ export function LensDrawer({ lens, onClose, ticker, isBfsi }: LensDrawerProps) {
                       </div>
                     </div>
                   )}
-
                   {lens.highlights.length > 0 && (
                     <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
                       <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-up)", margin: "0 0 10px", fontFamily: "var(--qc-font-sans)" }}>
@@ -205,7 +212,6 @@ export function LensDrawer({ lens, onClose, ticker, isBfsi }: LensDrawerProps) {
                       </ul>
                     </div>
                   )}
-
                   {lens.risks.length > 0 && (
                     <div style={{ padding: "14px 16px", background: "var(--qc-section)", borderRadius: 10, border: "1px solid var(--qc-hair)" }}>
                       <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-down)", margin: "0 0 10px", fontFamily: "var(--qc-font-sans)" }}>
@@ -223,12 +229,11 @@ export function LensDrawer({ lens, onClose, ticker, isBfsi }: LensDrawerProps) {
                   )}
                 </>
               )}
-
-              {/* Footer meta */}
               <p style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-3)", margin: 0, textAlign: "right", fontFamily: "var(--qc-font-sans)" }}>
                 {lens.computed_at && <>Computed {new Date(lens.computed_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</>}
               </p>
             </div>
+            --- End legacy --- */}
           </motion.div>
         </>
       )}

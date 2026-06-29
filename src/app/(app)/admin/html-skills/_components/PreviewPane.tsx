@@ -73,11 +73,13 @@ export function PreviewPane({ slug, ticker, liveConfig, onControls }: Props) {
           transcript_signal_types: liveConfig.transcriptSignalTypes,
           ppt_signal_types: liveConfig.pptSignalTypes,
           annual_report_signal_types: liveConfig.annualReportSignalTypes,
+          market_data_signal_types: liveConfig.marketDataSignalTypes,
           model: liveConfig.model,
           max_tokens: liveConfig.maxTokens,
           max_transcript_qtrs: liveConfig.maxTranscriptQtrs,
           max_ppt_qtrs: liveConfig.maxPptQtrs,
           max_annual_report_years: liveConfig.maxAnnualReportYears,
+          max_market_data_months: liveConfig.maxMarketDataMonths,
         }
       : { ticker, force };
 

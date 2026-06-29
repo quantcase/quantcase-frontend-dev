@@ -7,11 +7,13 @@ import {
   TranscriptSignalType,
   PptSignalType,
   AnnualReportSignalType,
+  MarketDataSignalType,
   SignalType,
   PluginCategory,
   TRANSCRIPT_SIGNAL_TYPE_LABELS,
   PPT_SIGNAL_TYPE_LABELS,
   ANNUAL_REPORT_SIGNAL_TYPE_LABELS,
+  MARKET_DATA_SIGNAL_TYPE_LABELS,
   CATEGORY_LABELS,
   MODEL_OPTIONS,
   TestTicker,
@@ -23,6 +25,7 @@ import { BACKEND_URL } from "@/lib/constants";
 const ALL_TRANSCRIPT_SIGNAL_TYPES = Object.keys(TRANSCRIPT_SIGNAL_TYPE_LABELS) as TranscriptSignalType[];
 const ALL_PPT_SIGNAL_TYPES = Object.keys(PPT_SIGNAL_TYPE_LABELS) as PptSignalType[];
 const ALL_ANNUAL_REPORT_SIGNAL_TYPES = Object.keys(ANNUAL_REPORT_SIGNAL_TYPE_LABELS) as AnnualReportSignalType[];
+const ALL_MARKET_DATA_SIGNAL_TYPES = Object.keys(MARKET_DATA_SIGNAL_TYPE_LABELS) as MarketDataSignalType[];
 const ALL_CATEGORIES = Object.keys(CATEGORY_LABELS) as PluginCategory[];
 
 interface Props {
@@ -62,6 +65,15 @@ const ANNUAL_OPTIONS: { label: string; value: number | null }[] = [
   { label: "None", value: 0 },
 ];
 
+const MARKET_DATA_MONTHS_OPTIONS: { label: string; value: number | null }[] = [
+  { label: "No limit", value: null },
+  { label: "6 mo", value: 6 },
+  { label: "12 mo", value: 12 },
+  { label: "24 mo", value: 24 },
+  { label: "36 mo", value: 36 },
+  { label: "None", value: 0 },
+];
+
 export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDetail(
   { skill, ticker, saving, saveError, onSave, onSignalCountsChange, onLimitsChange, onConfigChange, onDirtyChange, hideHeader },
   ref
@@ -72,11 +84,13 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [transcriptSignalTypes, setTranscriptSignalTypes] = useState<TranscriptSignalType[]>(skill.transcript_signal_types);
   const [pptSignalTypes, setPptSignalTypes] = useState<PptSignalType[]>(skill.ppt_signal_types);
   const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>(skill.annual_report_signal_types);
+  const [marketDataSignalTypes, setMarketDataSignalTypes] = useState<MarketDataSignalType[]>(skill.market_data_signal_types ?? []);
   const [model, setModel] = useState(skill.model);
   const [maxTokens, setMaxTokens] = useState(skill.max_tokens);
   const [maxTranscriptQtrs, setMaxTranscriptQtrs] = useState<number | null>(skill.max_transcript_qtrs);
   const [maxPptQtrs, setMaxPptQtrs] = useState<number | null>(skill.max_ppt_qtrs);
   const [maxAnnualReportYears, setMaxAnnualReportYears] = useState<number | null>(skill.max_annual_report_years);
+  const [maxMarketDataMonths, setMaxMarketDataMonths] = useState<number | null>(skill.max_market_data_months ?? null);
   const [isActive, setIsActive] = useState(skill.is_active);
   const [dirty, setDirty] = useState(false);
   const [transcriptCounts, setTranscriptCounts] = useState<Record<string, number>>({});
@@ -91,11 +105,13 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
     setTranscriptSignalTypes(skill.transcript_signal_types);
     setPptSignalTypes(skill.ppt_signal_types);
     setAnnualReportSignalTypes(skill.annual_report_signal_types);
+    setMarketDataSignalTypes(skill.market_data_signal_types ?? []);
     setModel(skill.model);
     setMaxTokens(skill.max_tokens);
     setMaxTranscriptQtrs(skill.max_transcript_qtrs);
     setMaxPptQtrs(skill.max_ppt_qtrs);
     setMaxAnnualReportYears(skill.max_annual_report_years);
+    setMaxMarketDataMonths(skill.max_market_data_months ?? null);
     setIsActive(skill.is_active);
     setDirty(false);
   }, [skill.slug]);
@@ -146,8 +162,8 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   }, [maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
 
   useEffect(() => {
-    onConfigChange?.({ prompt, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes, model, maxTokens, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears });
-  }, [prompt, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes, model, maxTokens, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears]);
+    onConfigChange?.({ prompt, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes, marketDataSignalTypes, model, maxTokens, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears, maxMarketDataMonths });
+  }, [prompt, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes, marketDataSignalTypes, model, maxTokens, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears, maxMarketDataMonths]);
 
   function mark() { setDirty(true); onDirtyChange?.(true); }
 
@@ -166,8 +182,13 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
     mark();
   }
 
+  function toggleMarketDataSignal(type: MarketDataSignalType) {
+    setMarketDataSignalTypes((prev) => prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]);
+    mark();
+  }
+
   function handleSave() {
-    onSave({ name, skill_prompt: prompt, category, transcript_signal_types: transcriptSignalTypes, ppt_signal_types: pptSignalTypes, annual_report_signal_types: annualReportSignalTypes, model, max_tokens: maxTokens, max_transcript_qtrs: maxTranscriptQtrs, max_ppt_qtrs: maxPptQtrs, max_annual_report_years: maxAnnualReportYears, is_active: isActive });
+    onSave({ name, skill_prompt: prompt, category, transcript_signal_types: transcriptSignalTypes, ppt_signal_types: pptSignalTypes, annual_report_signal_types: annualReportSignalTypes, market_data_signal_types: marketDataSignalTypes, model, max_tokens: maxTokens, max_transcript_qtrs: maxTranscriptQtrs, max_ppt_qtrs: maxPptQtrs, max_annual_report_years: maxAnnualReportYears, max_market_data_months: maxMarketDataMonths, is_active: isActive });
     setDirty(false);
     onDirtyChange?.(false);
   }
@@ -198,7 +219,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-        {/* Category + Model + Max tokens */}
+        {/* Category + Model + Max tokens + data limits */}
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
@@ -281,9 +302,23 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
               ))}
             </select>
           </div>
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+              Market Data Months
+            </label>
+            <select
+              value={maxMarketDataMonths ?? ""}
+              onChange={(e) => { setMaxMarketDataMonths(e.target.value === "" ? null : Number(e.target.value)); mark(); }}
+              className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+            >
+              {MARKET_DATA_MONTHS_OPTIONS.map((o) => (
+                <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Signal types — three source-specific sections */}
+        {/* Signal types — four source-specific sections */}
         <div className="space-y-3">
           {/* Transcript */}
           <div>
@@ -408,6 +443,43 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                         {count.toLocaleString()}
                       </span>
                     )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Market Data */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888]">
+                Market Data Signal Types
+              </label>
+              <button
+                onClick={() => {
+                  const allSelected = ALL_MARKET_DATA_SIGNAL_TYPES.every((t) => marketDataSignalTypes.includes(t));
+                  setMarketDataSignalTypes(allSelected ? [] : [...ALL_MARKET_DATA_SIGNAL_TYPES]);
+                  mark();
+                }}
+                className="text-[10px] font-medium text-[#888888] hover:text-[#0F172B] transition-colors"
+              >
+                {ALL_MARKET_DATA_SIGNAL_TYPES.every((t) => marketDataSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_MARKET_DATA_SIGNAL_TYPES.map((type) => {
+                const active = marketDataSignalTypes.includes(type);
+                return (
+                  <button
+                    key={type}
+                    onClick={() => toggleMarketDataSignal(type)}
+                    className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
+                      active
+                        ? "bg-[#0F172B] text-white border-[#0F172B]"
+                        : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:border-[#0F172B] hover:text-[#0F172B]"
+                    }`}
+                  >
+                    {MARKET_DATA_SIGNAL_TYPE_LABELS[type]}
                   </button>
                 );
               })}

@@ -38,6 +38,8 @@ export type AnnualReportSignalType =
   | "earnings_quality"
   | "guidance_revision";
 
+export type MarketDataSignalType = "pe" | "cmp";
+
 // Union of all signal types (for the count endpoint which accepts a flat list)
 export type SignalType = TranscriptSignalType | AnnualReportSignalType;
 
@@ -51,12 +53,14 @@ export interface HtmlSkill {
   transcript_signal_types: TranscriptSignalType[];
   ppt_signal_types: PptSignalType[];
   annual_report_signal_types: AnnualReportSignalType[];
+  market_data_signal_types: MarketDataSignalType[];
   category: PluginCategory;
   model: string;
   max_tokens: number;
   max_transcript_qtrs: number | null;
   max_ppt_qtrs: number | null;
   max_annual_report_years: number | null;
+  max_market_data_months: number | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -119,11 +123,13 @@ export interface PreviewRunRequest {
   transcript_signal_types: TranscriptSignalType[];
   ppt_signal_types: PptSignalType[];
   annual_report_signal_types: AnnualReportSignalType[];
+  market_data_signal_types: MarketDataSignalType[];
   model: string;
   max_tokens: number;
   max_transcript_qtrs: number | null;
   max_ppt_qtrs: number | null;
   max_annual_report_years: number | null;
+  max_market_data_months: number | null;
   force: boolean;
 }
 
@@ -132,11 +138,13 @@ export interface LiveSkillConfig {
   transcriptSignalTypes: TranscriptSignalType[];
   pptSignalTypes: PptSignalType[];
   annualReportSignalTypes: AnnualReportSignalType[];
+  marketDataSignalTypes: MarketDataSignalType[];
   model: string;
   maxTokens: number;
   maxTranscriptQtrs: number | null;
   maxPptQtrs: number | null;
   maxAnnualReportYears: number | null;
+  maxMarketDataMonths: number | null;
 }
 
 export const FAVORITE_TICKERS = ["HDFCBANK", "RELIANCE", "ASIANPAINT", "IEX", "MSUMI"] as const;
@@ -204,6 +212,11 @@ export const ANNUAL_REPORT_SIGNAL_TYPE_LABELS: Record<AnnualReportSignalType, st
   disclosure_quality: "Disclosure Quality",
   earnings_quality: "Earnings Quality",
   guidance_revision: "Guidance Revision",
+};
+
+export const MARKET_DATA_SIGNAL_TYPE_LABELS: Record<MarketDataSignalType, string> = {
+  pe: "P/E",
+  cmp: "CMP",
 };
 
 // Combined map for the count endpoint (flat signal_types query param, still unchanged)

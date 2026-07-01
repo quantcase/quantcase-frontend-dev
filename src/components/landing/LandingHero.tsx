@@ -113,7 +113,7 @@ export default function LandingHero() {
         >
           <span className="inline-flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full animate-pulse-soft" style={{ background: "#B98A3E" }} />
-            Indian &amp; US Equities
+            Indian Equities
           </span>
         </motion.div>
       </div>

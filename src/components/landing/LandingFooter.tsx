@@ -12,7 +12,7 @@ export default function LandingFooter() {
           <div className="md:col-span-5">
             <div className="text-2xl" style={{ ...serif, color: "#0E1A2B", fontWeight: 400 }}>Quantcase</div>
             <p className="mt-3 max-w-sm text-sm" style={{ ...sans, color: "#3A4B61" }}>
-              The algorithm behind every great investor. Indian &amp; US equities, scored on Management, Opportunity, Deal.
+              The algorithm behind every great investor. Indian equities, scored on Management, Opportunity, Deal.
             </p>
             <div className="mt-5 flex flex-wrap gap-2 text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.55)" }}>
               <span className="rounded-full px-3 py-1.5" style={{ border: "1px solid rgba(14,26,43,0.08)" }}>AI calibrated</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 const links = [
   { label: "Framework", href: "#framework" },
@@ -26,10 +27,23 @@ export default function LandingNavbar() {
       <div className="mx-auto flex max-w-[1280px] items-center justify-between px-8 py-4 md:px-12">
         <a
           href="#top"
-          className="text-xl tracking-tight"
-          style={{ fontFamily: "var(--font-instrument-serif, 'Instrument Serif', serif)", color: "#0E1A2B", textDecoration: "none" }}
+          className="flex items-center gap-2.5"
+          style={{ textDecoration: "none" }}
         >
-          Quantcase
+          <Image
+            src="/qc-logo-dark.png"
+            alt="Quantcase"
+            width={28}
+            height={28}
+            className="h-7 w-7"
+            priority
+          />
+          <span
+            className="text-[26px] font-medium leading-none tracking-tight"
+            style={{ fontFamily: "var(--font-instrument-serif, 'Instrument Serif', serif)", color: "#0E1A2B" }}
+          >
+            Quantcase
+          </span>
         </a>
 
         <nav className="hidden items-center gap-10 md:flex">

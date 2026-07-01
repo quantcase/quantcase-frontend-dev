@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { BookmarkPlus, StickyNote, Check, Trash2, Pencil, X, Loader2, Search, ShoppingCart } from "lucide-react";
+import { BookmarkPlus, StickyNote, PenLine, Check, Trash2, Pencil, X, Loader2, Search, ShoppingCart } from "lucide-react";
 import { useShadowPortfolio } from "@/hooks/useShadowPortfolio";
 import { apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
@@ -626,7 +626,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
             className="px-3 py-2 sm:px-4 sm:py-[7px]"
           >
             <Check size={13} />
-            <span className="hidden sm:inline">In Trackers</span>
+            <span className="hidden sm:inline">Tracking</span>
           </div>
         ) : (
           <button
@@ -650,7 +650,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
             className="px-3 py-2 sm:px-4 sm:py-[7px]"
           >
             {justAdded ? <Check size={13} /> : <BookmarkPlus size={13} />}
-            <span className="hidden sm:inline">{justAdded ? "Added!" : "Add to Trackers"}</span>
+            <span className="hidden sm:inline">{justAdded ? "Added!" : "Track"}</span>
           </button>
         )}
 
@@ -699,7 +699,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
           }}
           className="px-3 py-2 sm:px-4 sm:py-[7px]"
         >
-          <StickyNote size={13} />
+          <PenLine size={13} />
           <span className="hidden sm:inline">Journal</span>
           {noteCount > 0 && (
             <span

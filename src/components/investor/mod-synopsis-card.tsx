@@ -71,7 +71,7 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
       {/* Header — mono label + optional upload button */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <MonoLabel size={10} tracking="0.14em" color="rgba(255,255,255,0.45)">
-          {isShadow ? "Shadow Portfolio · MOD Synopsis" : "Your Portfolio · MOD Synopsis"}
+          {isShadow ? "Trackers · MOD Synopsis" : "Holdings · MOD Synopsis"}
         </MonoLabel>
         {isShadow && onUploadPortfolio && (
           <button

@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Home, Monitor, Briefcase, TrendingUp, Settings, Shield, LogOut, BarChart2, Code2, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -111,13 +112,17 @@ export function AppSidebar() {
       >
         {/* Logo mark */}
         <div
-          className="mb-2 flex items-center justify-center rounded-full"
-          style={{ width: 40, height: 40, background: "var(--qc-ink)" }}
+          className="mb-2 flex items-center justify-center overflow-hidden rounded-[10px]"
+          style={{ width: 40, height: 40 }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--qc-on-dark)" strokeWidth="2">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-          </svg>
+          <Image
+            src="/qc-logo-dark.png"
+            alt="QuantCase"
+            width={40}
+            height={40}
+            priority
+            className="h-full w-full object-cover"
+          />
         </div>
 
         <TooltipProvider delayDuration={300}>

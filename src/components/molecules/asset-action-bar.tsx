@@ -1,9 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { BookmarkPlus, StickyNote, Check, Trash2, Pencil, X, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { BookmarkPlus, StickyNote, Check, Trash2, Pencil, X, Loader2, Search, ShoppingCart } from "lucide-react";
 import { useShadowPortfolio } from "@/hooks/useShadowPortfolio";
+import { apiCall } from "@/lib/api";
+import { BACKEND_URL } from "@/lib/constants";
+import { ConnectPortfolioModal } from "@/components/investor/connect-portfolio-modal";
+import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
 import type { HoldingNote } from "@/types/investor-portfolio";
+import type { StocksApiResponse } from "@/types/screener";
 
 // ─── Add-to-Shadow dialog ──────────────────────────────────────────────────────
 
@@ -51,7 +57,7 @@ function AddShadowDialog({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <p style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", textTransform: "uppercase", letterSpacing: "0.10em", color: "var(--qc-ink-3)", marginBottom: 2 }}>
-              Shadow Portfolio
+              Trackers
             </p>
             <h3 style={{ fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", margin: 0 }}>
               Add {ticker}
@@ -64,7 +70,7 @@ function AddShadowDialog({
 
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <p style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", margin: 0 }}>
-            Add <strong style={{ color: "var(--qc-ink)" }}>{ticker}</strong> to your Shadow Portfolio to track it alongside your research.
+            Add <strong style={{ color: "var(--qc-ink)" }}>{ticker}</strong> to your Trackers to track it alongside your research.
           </p>
 
           {err && <p style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-down, #dc2626)", margin: 0 }}>{err}</p>}
@@ -90,7 +96,7 @@ function AddShadowDialog({
             }}
           >
             {mutating ? <Loader2 size={14} className="animate-spin" /> : null}
-            {mutating ? "Adding..." : "Add to Shadow Portfolio"}
+            {mutating ? "Adding..." : "Add to Trackers"}
           </button>
         </form>
       </div>
@@ -98,7 +104,7 @@ function AddShadowDialog({
   );
 }
 
-// ─── Notes panel (slide-up from bar) ──────────────────────────────────────────
+// ─── Journal panel (slide-up from bar) ────────────────────────────────────────
 
 function NoteItem({
   note,
@@ -168,7 +174,7 @@ function NoteItem({
   );
 }
 
-function NotesPanel({
+function JournalPanel({
   ticker,
   onClose,
 }: {
@@ -252,7 +258,7 @@ function NotesPanel({
                 fontWeight: "var(--qc-w-medium)",
               }}
             >
-              Research Notes
+              Research Journal
             </span>
             {notes.length > 0 && (
               <span
@@ -354,7 +360,7 @@ function NotesPanel({
 
           {!loading && notes.length === 0 && (
             <p style={{ fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3, #888)", margin: 0 }}>
-              {inPortfolio ? "No notes yet. Add your first observation below." : "Write a note — the stock will be added to your Shadow Portfolio automatically."}
+              {inPortfolio ? "No journal entries yet. Add your first observation below." : "Add a journal entry — the stock will be added to your Trackers automatically."}
             </p>
           )}
 
@@ -363,7 +369,7 @@ function NotesPanel({
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Add a research note…"
+              placeholder="Add a journal entry…"
               rows={3}
               style={{
                 width: "100%",
@@ -401,7 +407,7 @@ function NotesPanel({
               }}
             >
               {mutating ? <Loader2 size={12} className="animate-spin" /> : null}
-              Save note
+              Save entry
             </button>
           </form>}
         </div>
@@ -421,18 +427,98 @@ interface AssetActionBarProps {
 
 /**
  * Sticky footer bar shown on all screener asset pages.
- * Shows "Add to Shadow Portfolio" + "Notes" with live state from the API.
+ * Shows stock search + "Add to Trackers" + "Buy" + "Journal" with live state from the API.
  */
 export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
+  const router = useRouter();
   const { isInShadowPortfolio, getHolding, loading } = useShadowPortfolio();
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showNotes, setShowNotes] = useState(false);
+  const [showJournal, setShowJournal] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const [showCsvUpload, setShowCsvUpload] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const justAddedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Inline stock search ──────────────────────────────────────────────────
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchIndex, setSearchIndex] = useState(-1);
+  const [stockOptions, setStockOptions] = useState<{ value: string; label: string; subtitle?: string }[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const inPortfolio = !loading && isInShadowPortfolio(ticker);
   const holding = getHolding(ticker);
   const noteCount = holding?.notes.length ?? 0;
+
+  // Fetch the stock list once (same source as the screener home hero)
+  useEffect(() => {
+    apiCall<StocksApiResponse>(`${BACKEND_URL}/api/transcript/stocks`, {
+      onSuccess: (response) =>
+        setStockOptions(
+          response.data.map((s) => ({ value: s.company, label: s.company_name, subtitle: s.basic_industry }))
+        ),
+      onError: (err) => console.error("Failed to fetch stocks:", err),
+    });
+  }, []);
+
+  // Close search on outside click
+  useEffect(() => {
+    if (!searchOpen) return;
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      const inSearch = searchRef.current?.contains(target);
+      const inDropdown = dropdownRef.current?.contains(target);
+      if (!inSearch && !inDropdown) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [searchOpen]);
+
+  const searchResults = searchQuery.trim()
+    ? stockOptions
+        .filter((o) => {
+          const t = searchQuery.toLowerCase();
+          return (
+            o.label?.toLowerCase().includes(t) ||
+            o.value?.toLowerCase().includes(t) ||
+            o.subtitle?.toLowerCase().includes(t)
+          );
+        })
+        .slice(0, 6)
+    : [];
+
+  useEffect(() => { setSearchIndex(-1); }, [searchResults.length]);
+
+  function goToStock(symbol: string) {
+    if (!symbol) return;
+    setSearchOpen(false);
+    setSearchQuery("");
+    router.push(`/screener/overview?symbol=${encodeURIComponent(symbol)}`);
+  }
+
+  function handleSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setSearchIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : prev));
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setSearchIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        break;
+      case "Escape":
+        setSearchOpen(false);
+        break;
+      case "Enter":
+        e.preventDefault();
+        goToStock(searchIndex >= 0 ? searchResults[searchIndex].value : searchQuery);
+        break;
+    }
+  }
 
   // Flash "Added!" feedback
   function handleAdded() {
@@ -461,7 +547,68 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
         }}
         className="qc-dark-gradient-card bottom-[calc(60px+env(safe-area-inset-bottom)+12px)] md:bottom-6"
       >
-        {/* Shadow Portfolio button */}
+        {/* Inline stock search */}
+        <div ref={searchRef} style={{ position: "relative", display: "flex", alignItems: "center" }}>
+          {searchOpen ? (
+            <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+              <Search size={13} style={{ position: "absolute", left: 12, color: "rgba(255,255,255,0.55)", pointerEvents: "none" }} />
+              <input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Search a stock…"
+                autoComplete="off"
+                style={{
+                  width: 180,
+                  borderRadius: 9999,
+                  border: "1px solid rgba(255,255,255,0.16)",
+                  background: "rgba(255,255,255,0.10)",
+                  color: "#fff",
+                  fontSize: "var(--qc-fz-12)",
+                  fontFamily: "var(--qc-font-sans)",
+                  padding: "7px 12px 7px 30px",
+                  outline: "none",
+                }}
+              />
+              <button
+                onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                style={{ position: "absolute", right: 8, background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", padding: 2 }}
+                aria-label="Close search"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => { setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 0); }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                borderRadius: 9999,
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.08)",
+                fontSize: "var(--qc-fz-12)",
+                fontWeight: "var(--qc-w-medium)",
+                fontFamily: "var(--qc-font-sans)",
+                color: "rgba(255,255,255,0.90)",
+                cursor: "pointer",
+                transition: "background 0.15s",
+              }}
+              className="px-3 py-2 sm:px-4 sm:py-[7px]"
+              aria-label="Search stocks"
+            >
+              <Search size={13} />
+              <span className="hidden sm:inline">Search</span>
+            </button>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.12)", flexShrink: 0 }} />
+
+        {/* Trackers button */}
         {inPortfolio ? (
           <div
             style={{
@@ -479,7 +626,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
             className="px-3 py-2 sm:px-4 sm:py-[7px]"
           >
             <Check size={13} />
-            <span className="hidden sm:inline">In Shadow Portfolio</span>
+            <span className="hidden sm:inline">In Trackers</span>
           </div>
         ) : (
           <button
@@ -503,16 +650,39 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
             className="px-3 py-2 sm:px-4 sm:py-[7px]"
           >
             {justAdded ? <Check size={13} /> : <BookmarkPlus size={13} />}
-            <span className="hidden sm:inline">{justAdded ? "Added!" : "Add to Shadow Portfolio"}</span>
+            <span className="hidden sm:inline">{justAdded ? "Added!" : "Add to Trackers"}</span>
           </button>
         )}
 
         {/* Divider */}
         <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.12)", flexShrink: 0 }} />
 
-        {/* Notes button */}
+        {/* Buy button — opens the smallcase / broker connect flow */}
         <button
-          onClick={() => setShowNotes(true)}
+          onClick={() => setShowBuyModal(true)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            borderRadius: 9999,
+            border: "1px solid rgba(134,239,172,0.25)",
+            background: "rgba(134,239,172,0.14)",
+            fontSize: "var(--qc-fz-12)",
+            fontWeight: "var(--qc-w-semi)",
+            fontFamily: "var(--qc-font-sans)",
+            color: "#86efac",
+            cursor: "pointer",
+            transition: "background 0.15s",
+          }}
+          className="px-3 py-2 sm:px-4 sm:py-[7px]"
+        >
+          <ShoppingCart size={13} />
+          <span className="hidden sm:inline">Buy</span>
+        </button>
+
+        {/* Journal button */}
+        <button
+          onClick={() => setShowJournal(true)}
           style={{
             display: "flex",
             alignItems: "center",
@@ -530,7 +700,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
           className="px-3 py-2 sm:px-4 sm:py-[7px]"
         >
           <StickyNote size={13} />
-          <span className="hidden sm:inline">Notes</span>
+          <span className="hidden sm:inline">Journal</span>
           {noteCount > 0 && (
             <span
               style={{
@@ -553,6 +723,68 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
         {extra}
       </div>
 
+      {/* Search results dropdown — rendered as a sibling of the bar so it is
+          not clipped by the bar's `overflow:hidden` / `isolation:isolate`.
+          Sits above the bar and re-uses the bar's fixed/centered positioning. */}
+      {searchOpen && searchResults.length > 0 && (
+        <div
+          ref={dropdownRef}
+          style={{
+            position: "fixed",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 51,
+            width: 300,
+            maxWidth: "calc(100vw - 24px)",
+            borderRadius: 10,
+            background: "var(--qc-card, #fff)",
+            border: "1px solid var(--qc-hair, #E2E2E2)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+            overflow: "hidden",
+            maxHeight: 300,
+            overflowY: "auto",
+          }}
+          className="bottom-[calc(60px+env(safe-area-inset-bottom)+12px+56px)] md:bottom-[calc(1.5rem+56px)]"
+        >
+          {searchResults.map((option, index) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => goToStock(option.value)}
+              style={{
+                width: "100%",
+                textAlign: "left",
+                padding: "10px 12px",
+                border: "none",
+                borderBottom: "1px solid var(--qc-hair-2, #eee)",
+                cursor: "pointer",
+                background: searchIndex === index ? "var(--qc-section, #F5F5F5)" : "transparent",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 8,
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--qc-section, #F5F5F5)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = searchIndex === index ? "var(--qc-section, #F5F5F5)" : "transparent")}
+            >
+              <span style={{ minWidth: 0, flex: 1 }}>
+                <span style={{ display: "block", fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink, #0F172B)", fontFamily: "var(--qc-font-sans)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {option.label}
+                </span>
+                {option.subtitle && (
+                  <span style={{ display: "block", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-3, #888)", fontFamily: "var(--qc-font-sans)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1 }}>
+                    {option.subtitle}
+                  </span>
+                )}
+              </span>
+              <span style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-3, #888)", fontFamily: "var(--qc-font-mono)", flexShrink: 0 }}>
+                {option.value}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Dialogs */}
       {showAddDialog && (
         <AddShadowDialog
@@ -561,12 +793,24 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
           onAdded={handleAdded}
         />
       )}
-      {showNotes && (
-        <NotesPanel
+      {showJournal && (
+        <JournalPanel
           ticker={ticker}
-          onClose={() => setShowNotes(false)}
+          onClose={() => setShowJournal(false)}
         />
       )}
+
+      {/* Buy → smallcase / broker connect flow */}
+      <ConnectPortfolioModal
+        open={showBuyModal}
+        onClose={() => setShowBuyModal(false)}
+        onOpenCsvUpload={() => setShowCsvUpload(true)}
+      />
+      <UploadPortfolioModal
+        open={showCsvUpload}
+        onClose={() => setShowCsvUpload(false)}
+        onSuccess={() => setShowCsvUpload(false)}
+      />
     </>
   );
 }

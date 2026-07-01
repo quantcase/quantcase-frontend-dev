@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { BACKEND_URL } from "@/lib/constants";
 import { apiAuthPost, apiAuthPatch, apiAuthDelete, apiAuthGet } from "@/lib/api";
+import { inlineMarkdownToHtml } from "@/lib/utils";
+import { NIFTY50_TICKERS, DEFAULT_THESIS_PROMPTS } from "@/app/(app)/investor/portfolio/_components/tracker-ideas";
 import type {
   JournalPendingHolding,
   JournalEntryItem,
@@ -26,6 +28,7 @@ interface CompleteJournalModalProps {
   open: boolean;
   onClose: () => void;
   onComplete?: () => void;
+  onConnect?: () => void;
   holdings?: JournalPendingHolding[];
   totalHoldings?: number;
   loadingHoldings?: boolean;
@@ -90,6 +93,14 @@ function thesisHealthConfig(h: string) {
   return                      { label: "No thesis", color: "#9A9A92", bg: "#F7F5F0", border: "#D6D0C4",  icon: "○" };
 }
 
+// Trim a long backend prompt to a concise, clickable label. The full text is
+// still used to fill the thesis on click — only the displayed chip is shortened.
+function concisePrompt(p: string, max = 42): string {
+  const firstClause = p.split(/[.;–—]/)[0].trim();
+  const base = firstClause.length >= 12 ? firstClause : p.trim();
+  return base.length > max ? `${base.slice(0, max - 1).trimEnd()}…` : base;
+}
+
 // ── Step number bubble ────────────────────────────────────────────────────────
 
 function StepNum({ n }: { n: number }) {
@@ -142,7 +153,7 @@ function WizardForm({
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: "#1C1917" }}>{displayName}</div>
             {s.portfolioType === "shadow" && (
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE" }}>Shadow Portfolio</span>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE" }}>Trackers</span>
             )}
           </div>
           <div style={{ fontSize: 12, color: "#78716C", marginTop: 2 }}>
@@ -168,26 +179,34 @@ function WizardForm({
         </div>
       </div>
 
-      {/* AI context + signals */}
-      <div style={{ padding: "20px 28px 14px" }}>
-        <div style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, color: "#78716C", marginBottom: 8 }}>
-          What the data is saying about {s.symbol}
-        </div>
-        {s.signals.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+      {/* Cross-check signals — markdown-formatted, prominent at top */}
+      {s.signals.length > 0 && (
+        <div style={{ padding: "16px 28px 4px" }}>
+          <div style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, color: "#44403C", marginBottom: 10 }}>
+            Cross-check signals for {s.symbol}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {s.signals.map((sig, i) => (
               <div key={i} style={{
-                display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 7, fontSize: 11, fontWeight: 500,
+                display: "flex", alignItems: "center", gap: 6, padding: "7px 13px", borderRadius: 7, fontSize: 11.5, fontWeight: 500, lineHeight: 1.4,
                 ...(sig.type === "green"   ? { background: "#F0FDF4", color: "#15803D", border: "1px solid #86EFAC" } :
                     sig.type === "amber"   ? { background: "#FFFBEB", color: "#B45309", border: "1px solid #FCD34D" } :
                     sig.type === "red"     ? { background: "#FEF2F2", color: "#B91C1C", border: "1px solid #FCA5A5" } :
                                             { background: "#F7F5F0", color: "#44403C", border: "1px solid #D6D0C4" }),
               }}>
-                {signalIcon(sig.type)} {sig.label}
+                <span style={{ flexShrink: 0 }}>{signalIcon(sig.type)}</span>
+                <span dangerouslySetInnerHTML={{ __html: inlineMarkdownToHtml(sig.label) }} />
               </div>
             ))}
           </div>
-        )}
+        </div>
+      )}
+
+      {/* AI context */}
+      <div style={{ padding: "16px 28px 14px" }}>
+        <div style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, color: "#78716C", marginBottom: 8 }}>
+          What the data is saying about {s.symbol}
+        </div>
         <div style={{ background: "linear-gradient(135deg,#EDE9FE,#F5F3FF)", border: "1px solid #DDD6FE", borderRadius: 10, padding: "14px 16px", display: "flex", gap: 12 }}>
           <div style={{ width: 28, height: 28, background: "#fff", borderRadius: 7, border: "1px solid #DDD6FE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>🤖</div>
           <div>
@@ -273,16 +292,19 @@ function WizardForm({
               {st.thesis.length}/300
             </div>
           </div>
-          {s.prompts.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8, alignItems: "center" }}>
-              <span style={{ fontSize: 11, color: "#78716C", marginRight: 4 }}>Prompts:</span>
-              {s.prompts.map(p => (
-                <div key={p} onClick={() => onUsePrompt(p)} style={{ fontSize: 11, color: "#7C3AED", background: "#EDE9FE", border: "1px solid #DDD6FE", borderRadius: 6, padding: "3px 9px", cursor: "pointer" }}>
-                  {p}
-                </div>
-              ))}
-            </div>
-          )}
+          {(() => {
+            const promptList = s.prompts.length > 0 ? s.prompts : DEFAULT_THESIS_PROMPTS;
+            return (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8, alignItems: "center" }}>
+                <span style={{ fontSize: 11, color: "#78716C", marginRight: 4 }}>Prompts:</span>
+                {promptList.map(p => (
+                  <div key={p} onClick={() => onUsePrompt(p)} title={p} style={{ fontSize: 11, color: "#7C3AED", background: "#EDE9FE", border: "1px solid #DDD6FE", borderRadius: 6, padding: "3px 9px", cursor: "pointer" }}>
+                    {concisePrompt(p)}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -324,27 +346,51 @@ function JournalListView({
   loading,
   error,
   pendingCount,
+  portfolioFilter,
   onAdd,
   onEdit,
   onDelete,
+  onConnect,
 }: {
   entries: JournalEntryItem[];
   loading: boolean;
   error: string | null;
   pendingCount: number;
+  portfolioFilter: PortfolioType;
   onAdd: () => void;
   onEdit: (item: JournalEntryItem) => void;
   onDelete: (item: JournalEntryItem) => void;
+  onConnect?: () => void;
 }) {
-  const withThesis  = entries.filter(e => e.journal !== null);
-  const withoutThesis = entries.filter(e => e.journal === null);
+  const scoped = entries.filter(e => e.portfolioType === portfolioFilter);
+  const withThesis  = scoped.filter(e => e.journal !== null);
+  const withoutThesis = scoped.filter(e => e.journal === null);
+
+  // Holdings tab with no linked holdings → prompt to connect a portfolio.
+  if (!loading && !error && portfolioFilter === "user" && scoped.length === 0) {
+    return (
+      <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "56px 32px", textAlign: "center", minHeight: 340 }}>
+        <div style={{ fontSize: 40, marginBottom: 16 }}>🔗</div>
+        <div style={{ fontSize: 20, fontWeight: 400, color: "#1C1917", marginBottom: 8 }}>Connect your portfolio</div>
+        <div style={{ fontSize: 14, color: "#78716C", marginBottom: 24, lineHeight: 1.6, maxWidth: 420 }}>
+          Link your holdings via smallcase to build an investment thesis for each stock you own — Quantcase will then monitor them for you.
+        </div>
+        <button
+          onClick={onConnect}
+          style={{ background: "#1C1917", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+        >
+          Connect portfolio →
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ flex: 1, overflowY: "auto" }}>
       {/* Toolbar */}
       <div style={{ padding: "16px 28px", borderBottom: "1px solid #E7E4DC", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F7F5F0" }}>
         <div style={{ fontSize: 13, color: "#44403C" }}>
-          <strong style={{ color: "#1C1917" }}>{withThesis.length}</strong> of <strong style={{ color: "#1C1917" }}>{entries.length}</strong> holdings have a thesis
+          <strong style={{ color: "#1C1917" }}>{withThesis.length}</strong> of <strong style={{ color: "#1C1917" }}>{scoped.length}</strong> {portfolioFilter === "shadow" ? "trackers" : "holdings"} have a thesis
           {pendingCount > 0 && (
             <span style={{ marginLeft: 8, fontSize: 11, color: "#7C3AED", fontWeight: 600 }}>· {pendingCount} pending</span>
           )}
@@ -385,7 +431,7 @@ function JournalListView({
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: "0.02em", color: "#1C1917" }}>{item.symbol}</div>
                     {item.portfolioType === "shadow" && (
-                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE" }}>Shadow Portfolio</span>
+                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE" }}>Trackers</span>
                     )}
                     {item.name && <div style={{ fontSize: 11, color: "#78716C" }}>{item.name}</div>}
                   </div>
@@ -456,7 +502,7 @@ function JournalListView({
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: "#1C1917" }}>{item.symbol}</div>
                     {item.portfolioType === "shadow" && (
-                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE" }}>Shadow Portfolio</span>
+                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE" }}>Trackers</span>
                     )}
                     {item.name && <div style={{ fontSize: 11, color: "#78716C" }}>{item.name}</div>}
                   </div>
@@ -471,13 +517,49 @@ function JournalListView({
             </>
           )}
 
-          {entries.length === 0 && !loading && (
+          {scoped.length === 0 && !loading && (
             <div style={{ textAlign: "center", padding: "48px 20px", color: "#78716C", fontSize: 14 }}>
-              No holdings found. Connect your portfolio to get started.
+              {portfolioFilter === "shadow" ? "No trackers yet. Add a stock to research it alongside your holdings." : "No holdings found. Connect your portfolio to get started."}
             </div>
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Tracker ideas empty state ─────────────────────────────────────────────────
+// Shown when the Trackers filter has no holdings — surfaces a rotating window of
+// 5 Nifty50 tickers as starting ideas, with "See more ideas" to advance.
+
+function TrackerIdeasEmptyState({ onPickIdea }: { onPickIdea: (symbol: string) => void }) {
+  const [offset, setOffset] = useState(0);
+  const window = Array.from({ length: 5 }, (_, i) => NIFTY50_TICKERS[(offset + i) % NIFTY50_TICKERS.length]);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 32px", textAlign: "center", minHeight: 300 }}>
+      <div style={{ fontSize: 36, marginBottom: 12 }}>🔭</div>
+      <div style={{ fontSize: 20, fontWeight: 400, color: "#1C1917", marginBottom: 6 }}>No trackers yet</div>
+      <div style={{ fontSize: 13, color: "#78716C", marginBottom: 20, lineHeight: 1.6, maxWidth: 420 }}>
+        Track a stock to research it alongside your holdings. Here are a few Nifty50 ideas to start with.
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginBottom: 18, maxWidth: 460 }}>
+        {window.map(sym => (
+          <button
+            key={sym}
+            onClick={() => onPickIdea(sym)}
+            style={{ display: "flex", alignItems: "center", gap: 6, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE", padding: "8px 14px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#7C3AED" }}>+</span> {sym}
+          </button>
+        ))}
+      </div>
+      <button
+        onClick={() => setOffset(o => (o + 5) % NIFTY50_TICKERS.length)}
+        style={{ background: "transparent", border: "1px solid #D6D0C4", color: "#44403C", padding: "8px 18px", borderRadius: 9, fontSize: 12, fontWeight: 500, cursor: "pointer" }}
+      >
+        See more ideas →
+      </button>
     </div>
   );
 }
@@ -488,13 +570,14 @@ export function CompleteJournalModal({
   open,
   onClose,
   onComplete,
+  onConnect,
   holdings = [],
   totalHoldings,
   loadingHoldings,
   targetSymbol,
 }: CompleteJournalModalProps) {
   const [view, setView] = useState<ModalView>("list");
-  const [portfolioFilter, setPortfolioFilter] = useState<PortfolioType>("user");
+  const [portfolioFilter, setPortfolioFilter] = useState<PortfolioType>("shadow");
 
   // Add-wizard state
   const [cur, setCur] = useState(0);
@@ -750,7 +833,7 @@ export function CompleteJournalModal({
 
         {/* ── Header ── */}
         <div style={{ padding: "20px 28px 16px", borderBottom: "1px solid #E7E4DC", flexShrink: 0 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
             <div>
               <div style={{ fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#78716C", fontWeight: 600, marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
                 {view === "list" ? (
@@ -765,33 +848,36 @@ export function CompleteJournalModal({
                 {titleText}
               </div>
             </div>
-            <button
-              onClick={onClose}
-              style={{ background: "#F7F5F0", border: "1px solid #D6D0C4", width: 32, height: 32, borderRadius: 8, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#44403C", flexShrink: 0 }}
-            >
-              ✕
-            </button>
-          </div>
 
-          {/* Portfolio type toggle — always visible */}
-          <div style={{ display: "inline-flex", borderRadius: 8, border: "1px solid #D6D0C4", overflow: "hidden", background: "#F7F5F0" }}>
-            {([
-              { key: "user"   as const, label: "User Portfolio",   count: userCount },
-              { key: "shadow" as const, label: "Shadow Portfolio", count: shadowCount },
-            ]).map(opt => (
+            {/* Top-right controls: portfolio toggle + close button */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+              {/* Portfolio type toggle — always visible */}
+              <div style={{ display: "inline-flex", borderRadius: 8, border: "1px solid #D6D0C4", overflow: "hidden", background: "#F7F5F0" }}>
+                {([
+                  { key: "shadow" as const, label: "Trackers", count: shadowCount },
+                  { key: "user"   as const, label: "Holdings", count: userCount },
+                ]).map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => { setPortfolioFilter(opt.key); setCur(0); setWizCompleted(false); }}
+                    style={{ padding: "6px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", border: "none", background: portfolioFilter === opt.key ? "#1C1917" : "transparent", color: portfolioFilter === opt.key ? "#fff" : "#78716C", display: "flex", alignItems: "center", gap: 6, transition: "all 0.15s" }}
+                  >
+                    {opt.label}
+                    {opt.count > 0 && (
+                      <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 999, background: portfolioFilter === opt.key ? "rgba(255,255,255,0.2)" : "#E7E4DC", color: portfolioFilter === opt.key ? "#fff" : "#44403C", fontWeight: 700 }}>
+                        {opt.count}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
               <button
-                key={opt.key}
-                onClick={() => { setPortfolioFilter(opt.key); setCur(0); setWizCompleted(false); }}
-                style={{ padding: "6px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", border: "none", background: portfolioFilter === opt.key ? "#1C1917" : "transparent", color: portfolioFilter === opt.key ? "#fff" : "#78716C", display: "flex", alignItems: "center", gap: 6, transition: "all 0.15s" }}
+                onClick={onClose}
+                style={{ background: "#F7F5F0", border: "1px solid #D6D0C4", width: 32, height: 32, borderRadius: 8, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#44403C", flexShrink: 0 }}
               >
-                {opt.label}
-                {opt.count > 0 && (
-                  <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 999, background: portfolioFilter === opt.key ? "rgba(255,255,255,0.2)" : "#E7E4DC", color: portfolioFilter === opt.key ? "#fff" : "#44403C", fontWeight: 700 }}>
-                    {opt.count}
-                  </span>
-                )}
+                ✕
               </button>
-            ))}
+            </div>
           </div>
         </div>
 
@@ -830,10 +916,12 @@ export function CompleteJournalModal({
               entries={allEntries}
               loading={entriesLoading}
               error={entriesError}
-              pendingCount={holdings.length}
+              pendingCount={filteredHoldings.length}
+              portfolioFilter={portfolioFilter}
               onAdd={() => setView("add")}
               onEdit={startEdit}
               onDelete={(item) => { setDeleteTarget(item); setEditError(null); }}
+              onConnect={() => { onClose(); onConnect?.(); }}
             />
           )}
 
@@ -857,12 +945,15 @@ export function CompleteJournalModal({
                   </button>
                 </div>
               </div>
+            ) : filteredHoldings.length === 0 && portfolioFilter === "shadow" ? (
+              // Trackers empty → rotating Nifty50 ideas
+              <TrackerIdeasEmptyState onPickIdea={sym => { onClose(); window.location.href = `/screener/management?symbol=${sym}`; }} />
             ) : filteredHoldings.length === 0 && (totalHoldings ?? 1) === 0 ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "48px 32px", textAlign: "center", minHeight: 300 }}>
                 <div style={{ fontSize: 40, marginBottom: 16 }}>📂</div>
-                <div style={{ fontSize: 20, fontWeight: 400, color: "#1C1917", marginBottom: 8 }}>No portfolio linked yet</div>
+                <div style={{ fontSize: 20, fontWeight: 400, color: "#1C1917", marginBottom: 8 }}>No holdings linked yet</div>
                 <div style={{ fontSize: 14, color: "#78716C", marginBottom: 24, lineHeight: 1.6 }}>
-                  Add stocks to your portfolio or shadow portfolio first.
+                  Add stocks to your holdings or trackers first.
                 </div>
                 <button onClick={() => { onClose(); window.location.href = "/investor/portfolio"; }} style={{ background: "#1C1917", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
                   Add holdings →
@@ -871,7 +962,7 @@ export function CompleteJournalModal({
             ) : filteredHoldings.length === 0 ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "48px 32px", textAlign: "center", minHeight: 300 }}>
                 <div style={{ fontSize: 40, marginBottom: 16 }}>✓</div>
-                <div style={{ fontSize: 20, fontWeight: 400, color: "#1C1917", marginBottom: 8 }}>All {portfolioFilter === "shadow" ? "Shadow Portfolio" : "User Portfolio"} holdings have a thesis</div>
+                <div style={{ fontSize: 20, fontWeight: 400, color: "#1C1917", marginBottom: 8 }}>All {portfolioFilter === "shadow" ? "Trackers" : "Holdings"} have a thesis</div>
                 <button onClick={() => setView("list")} style={{ background: "#1C1917", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 9, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>View journal →</button>
               </div>
             ) : wizS ? (

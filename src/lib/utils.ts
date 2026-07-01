@@ -53,6 +53,21 @@ export function fmtDealNum(raw?: string): string {
   });
 }
 
+// Minimal inline-markdown → HTML for short labels (signals, prompts).
+// Escapes HTML first, then renders **bold**, *italic*, and `code`.
+// Safe to feed into dangerouslySetInnerHTML — no raw HTML survives escaping.
+export function inlineMarkdownToHtml(input: string | null | undefined): string {
+  if (!input) return "";
+  const escaped = input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  return escaped
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
+}
+
 // Date formatting
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);

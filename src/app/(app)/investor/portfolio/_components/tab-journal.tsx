@@ -37,7 +37,7 @@ function JournalCard({ item, onAddThesis }: { item: JournalEntryItem; onAddThesi
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: "0.02em", color: "var(--qc-ink)" }}>{item.symbol}</div>
           {item.portfolioType === "shadow" && (
-            <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE" }}>Shadow Portfolio</span>
+            <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE" }}>Trackers</span>
           )}
           {(item.name || item.sector || item.capType) && (
             <div style={{ fontSize: 10, color: "var(--qc-ink-3)" }}>
@@ -127,7 +127,7 @@ function NoThesisRow({ item, onAddThesis }: { item: JournalEntryItem; onAddThesi
           <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--qc-ink)" }}>{item.symbol}</div>
             {item.portfolioType === "shadow" && (
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE" }}>Shadow Portfolio</span>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, background: "#EDE9FE", color: "#6D28D9", border: "1px solid #DDD6FE" }}>Trackers</span>
             )}
           </div>
           <div style={{ fontSize: 11, color: "var(--qc-ink-3)", marginTop: 2 }}>
@@ -208,10 +208,6 @@ export function JournalTab({ entries, summary, loading, error, onAddThesis }: Jo
               </>
             )}
           </div>
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button style={{ background: "var(--qc-card)", color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)", padding: "7px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Filter by thesis health</button>
-          <button style={{ background: "var(--qc-ink)", color: "#fff", border: "none", padding: "7px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Export journal PDF</button>
         </div>
       </div>
 

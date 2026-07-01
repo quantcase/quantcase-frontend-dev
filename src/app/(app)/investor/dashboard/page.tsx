@@ -7,18 +7,16 @@ import { HoldingsPanel } from "@/components/investor/holdings-panel";
 import { WhatsMovingFeed } from "@/components/investor/whats-moving-feed";
 import type { MovingItem } from "@/components/investor/whats-moving-feed";
 import { IndustrySignalsGrid } from "@/components/investor/industry-signals-grid";
-import { MarketViewCard } from "@/components/investor/market-view-card";
-import type { MarketMetric } from "@/components/investor/market-view-card";
-import { EventsMovingMarket } from "@/components/investor/events-moving-market";
-import type { MacroRegime } from "@/components/investor/events-moving-market";
 import { ShadowPortfolio } from "@/components/investor/shadow-portfolio";
 import type { ShadowStock } from "@/components/investor/shadow-portfolio";
+import { HoldingsTracker } from "@/components/investor/holdings-tracker";
 import { DiscoverScreens } from "@/components/investor/discover-screens";
 import type { DiscoverScreen } from "@/components/investor/discover-screens";
 import { ResearchLibraryBanner } from "@/components/investor/research-library-banner";
 import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
 import { ConnectPortfolioModal } from "@/components/investor/connect-portfolio-modal";
 import { CompleteJournalModal } from "@/components/investor/complete-journal-modal";
+import { HeaderStockSearch } from "@/components/investor/header-stock-search";
 import { useShadowPortfolio } from "@/hooks/useShadowPortfolio";
 import { useUserPortfolio } from "@/hooks/useUserPortfolio";
 import { useJournalPending } from "@/hooks/useJournalPending";
@@ -88,69 +86,6 @@ const MOVING_ITEMS: MovingItem[] = [
   },
 ];
 
-
-const MARKET_METRICS: MarketMetric[] = [
-  { label: "F&O Put/Call Ratio", value: "↑ 1.24", annotation: "Bullish",  annotationPositive: true  },
-  { label: "FII Net Flow (₹Cr)", value: "+2,842",  annotation: "",         annotationPositive: true  },
-  { label: "VIX (India)",        value: "13.2",    annotation: "Low",      annotationPositive: true  },
-  { label: "Advance/Decline",    value: "2.1x",    annotation: "",         annotationPositive: true  },
-  { label: "52W Highs vs Lows",  value: "184 / 21",annotation: "",         annotationPositive: true  },
-];
-
-const MACRO_REGIMES: MacroRegime[] = [
-  {
-    category: "COMMODITY",
-    title: "Crude",
-    arrow: "↑",
-    subtitle: "Input Cost Inflation",
-    sectors: [
-      { name: "Paints",   direction: "down", metric: "margin", basketId: "paints"   },
-      { name: "Tyres",    direction: "down", metric: "margin", basketId: "tyres"    },
-      { name: "Aviation", direction: "down", metric: "cost",   basketId: "aviation" },
-    ],
-  },
-  {
-    category: "FISCAL",
-    title: "Defense Spending",
-    arrow: "↑",
-    subtitle: "Expansion",
-    sectors: [
-      { name: "Defense",     direction: "up", metric: "capex",  basketId: "defense"     },
-      { name: "Industrials", direction: "up", metric: "orders", basketId: "industrials" },
-      { name: "Electronics", direction: "up", metric: "local",  basketId: "electronics" },
-    ],
-  },
-  {
-    category: "ACTIVITY",
-    title: "PMI Expansion",
-    arrow: "↑",
-    subtitle: "Momentum",
-    sectors: [
-      { name: "Cap Goods",   direction: "up", metric: "orders",   basketId: "capital-goods" },
-      { name: "Industrials", direction: "up", metric: "activity", basketId: "industrials"   },
-      { name: "Logistics",   direction: "up", metric: "volume",   basketId: "logistics"     },
-    ],
-  },
-  {
-    category: "MONETARY",
-    title: "Rate Hold",
-    arrow: "→",
-    subtitle: "Policy Pause",
-    sectors: [
-      { name: "Banks",       direction: "up",   metric: "NIM stable", basketId: "private-banks" },
-      { name: "Real Estate", direction: "down", metric: "demand",     basketId: "real-estate"   },
-      { name: "Utilities",   direction: "down", metric: "cap cost",   basketId: "utilities"     },
-    ],
-  },
-];
-
-const SHADOW_STOCKS: ShadowStock[] = [
-  { symbol: "MSUMI",      name: "Motherson Sumi Wiring", ltp: "₹62.40",    change1d: "+1.1%", changePositive: true,  qcScore: 76, thesisTags: ["OPPORTUNITY"], whyInvested: "EV Wiring Tailwind",    conviction: "POSITIVE", href: "/screener/management?symbol=MSUMI"      },
-  { symbol: "HINDUNILVR", name: "Hindustan Unilever",    ltp: "₹2,318.60", change1d: "+0.9%", changePositive: true,  qcScore: 79, thesisTags: ["MANAGEMENT"],  whyInvested: "Disclosure Quality",    conviction: "POSITIVE", href: "/screener/management?symbol=HINDUNILVR" },
-  { symbol: "ACC",        name: "ACC Ltd",               ltp: "₹1,874.30", change1d: "-2.1%", changePositive: false, qcScore: 61, thesisTags: ["DEAL"],        whyInvested: "Valuation Reset",       conviction: "WATCH",    href: "/screener/management?symbol=ACC",       thesisDrift: true },
-  { symbol: "HFCL",       name: "HFCL Ltd",              ltp: "₹128.75",   change1d: "-1.4%", changePositive: false, qcScore: 64, thesisTags: ["OPPORTUNITY"], whyInvested: "BharatNet Exposure",    conviction: "NEUTRAL",  href: "/screener/management?symbol=HFCL"       },
-  { symbol: "POWERGRID",  name: "Power Grid Corp",       ltp: "₹318.40",   change1d: "+0.6%", changePositive: true,  qcScore: 73, thesisTags: ["MANAGEMENT"],  whyInvested: "Regulated Asset Base",  conviction: "POSITIVE", href: "/screener/management?symbol=POWERGRID"  },
-];
 
 const DISCOVER_SCREENS: DiscoverScreen[] = [
   {
@@ -248,22 +183,15 @@ export default function InvestorDashboardPage() {
     [shadowHoldings]
   );
 
-  // Use real holdings if available, otherwise fall back to static sample
-  const shadowStocksToShow = shadowLoading
-    ? []
-    : shadowNotFound || apiShadowStocks.length === 0
-    ? SHADOW_STOCKS
-    : apiShadowStocks;
+  // Trackers (shadow portfolio) — drive the empty state off the API
+  const shadowEmpty = shadowNotFound || apiShadowStocks.length === 0;
+  const shadowStocksToShow = shadowLoading || shadowEmpty ? [] : apiShadowStocks;
+  const shadowCount = apiShadowStocks.length;
 
-  const shadowCount = shadowLoading
-    ? 5
-    : shadowNotFound || apiShadowStocks.length === 0
-    ? SHADOW_STOCKS.length
-    : apiShadowStocks.length;
-
-  // User portfolio — derive stock count for HoldingsPanel
-  const userStockCount = portfolioLoading ? 12 : userPortfolio?.holdings.length ?? 12;
-  const isUserPortfolioMissing = !portfolioLoading && !userPortfolio;
+  // Holdings (user portfolio)
+  const userHoldings = userPortfolio?.holdings ?? [];
+  const userStockCount = userHoldings.length;
+  const isUserPortfolioMissing = !portfolioLoading && (!userPortfolio || userHoldings.length === 0);
 
   return (
     <div style={{ background: "var(--qc-bg, #F5F5F5)", minHeight: "100vh" }}>
@@ -275,7 +203,11 @@ export default function InvestorDashboardPage() {
         }}
       >
         {/* ── Page header ───────────────────────────────────────────────── */}
-        <header style={{ marginBottom: 22 }}>
+        <header
+          className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+          style={{ marginBottom: 22 }}
+        >
+          <div>
           <h1
             style={{
               fontSize: "var(--qc-fz-30)",
@@ -310,6 +242,11 @@ export default function InvestorDashboardPage() {
               <span style={{ color: "var(--qc-up)", fontWeight: "var(--qc-w-medium)" }}>79,712</span>
               <span style={{ color: "var(--qc-up)" }}> +0.38%</span>
             </span>
+          </div>
+          </div>
+
+          <div className="sm:pt-1 sm:shrink-0">
+            <HeaderStockSearch />
           </div>
         </header>
 
@@ -368,32 +305,21 @@ export default function InvestorDashboardPage() {
         </section>
 
         {/* ════════════════════════════════════════════════════════════
-            ROW 3 — Market View (left narrow) + Events Moving Market (right wide)
+            ROW 4 — Trackers (left half) + Holdings (right half)
         ═══════════════════════════════════════════════════════════════ */}
-        <section
-          className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-3.5 mb-3.5 items-stretch"
-        >
-          <MarketViewCard
-            score={72}
-            sentiment="GREED"
-            metrics={MARKET_METRICS}
-            updatedTime="09:31 IST"
-          />
-          <EventsMovingMarket
-            regimes={MACRO_REGIMES}
-            totalSectorSignals={12}
-            refreshedTime="09:31 IST"
-            refreshedDate="20 May 2026"
-          />
-        </section>
-
-        {/* ════════════════════════════════════════════════════════════
-            ROW 4 — Shadow Portfolio (full width)
-        ═══════════════════════════════════════════════════════════════ */}
-        <section className="mb-3.5">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 mb-3.5 items-stretch">
           <ShadowPortfolio
             count={shadowCount}
             stocks={shadowStocksToShow}
+            loading={shadowLoading}
+            empty={shadowEmpty}
+          />
+          <HoldingsTracker
+            holdings={userHoldings}
+            count={userStockCount}
+            loading={portfolioLoading}
+            empty={isUserPortfolioMissing}
+            onConnect={() => setConnectModalOpen(true)}
           />
         </section>
 
@@ -441,6 +367,7 @@ export default function InvestorDashboardPage() {
         open={journalModalOpen}
         onClose={() => setJournalModalOpen(false)}
         onComplete={refetchPending}
+        onConnect={() => setConnectModalOpen(true)}
         holdings={pendingData?.holdings ?? []}
         totalHoldings={pendingData?.totalHoldings}
         loadingHoldings={pendingLoading}

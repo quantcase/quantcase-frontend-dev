@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { HOLDINGS, MUTUAL_FUNDS, NEWS_ITEMS, fmtLakhs } from "./_components/portfolio-data";
-import { SectorSidePanel } from "./_components/sector-side-panel";
-import { MutualFundsTab } from "./_components/tab-mutual-funds";
-import { NewsTab } from "./_components/tab-news";
+import { HOLDINGS, MUTUAL_FUNDS, fmtLakhs } from "./_components/portfolio-data";
 import { JournalTab } from "./_components/tab-journal";
 import { CompleteJournalModal } from "@/components/investor/complete-journal-modal";
+import { ConnectPortfolioModal } from "@/components/investor/connect-portfolio-modal";
+import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
 import { useJournalEntries } from "@/hooks/useJournalEntries";
 import { useJournalPending } from "@/hooks/useJournalPending";
 import { useUserPortfolio } from "@/hooks/useUserPortfolio";
@@ -45,7 +44,7 @@ function ThesisTagPills({ tags }: { tags: string[] }) {
   );
 }
 
-function UserHoldingsCard({ holdings, loading, empty }: { holdings: ApiHolding[]; loading: boolean; empty: boolean }) {
+function UserHoldingsCard({ holdings, loading, empty, onConnect }: { holdings: ApiHolding[]; loading: boolean; empty: boolean; onConnect: () => void }) {
   if (loading) {
     return (
       <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 12, overflow: "hidden" }}>
@@ -68,16 +67,16 @@ function UserHoldingsCard({ holdings, loading, empty }: { holdings: ApiHolding[]
         <div style={{ fontSize: 13, color: "var(--qc-ink-3)", marginBottom: 20 }}>
           Connect your broker or upload a CSV to see your holdings here.
         </div>
-        <Link
-          href="/investor/dashboard"
+        <button
+          onClick={onConnect}
           style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             background: "var(--qc-ink)", color: "#fff", borderRadius: 8,
-            padding: "9px 18px", fontSize: 13, fontWeight: 500, textDecoration: "none",
+            padding: "9px 18px", fontSize: 13, fontWeight: 500, border: "none", cursor: "pointer",
           }}
         >
-          ← Back to Dashboard
-        </Link>
+          Connect your portfolio
+        </button>
       </div>
     );
   }
@@ -205,20 +204,17 @@ function AlertBand() {
   );
 }
 
-// ── Tab definitions ───────────────────────────────────────────────────────────
-
-type Tab = "holdings" | "mf" | "news" | "sector" | "journal";
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function InvestorPortfolioPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("holdings");
   const [journalModalOpen, setJournalModalOpen] = useState(false);
   const [journalTargetSymbol, setJournalTargetSymbol] = useState<string | undefined>();
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
   const { data: journalData, loading: journalLoading, error: journalError, refetch: refetchJournal } = useJournalEntries();
   const { data: pendingData, loading: pendingLoading, refetch: refetchPending } = useJournalPending();
-  const { data: userPortfolio, loading: portfolioLoading, notFound: portfolioEmpty } = useUserPortfolio();
+  const { data: userPortfolio, loading: portfolioLoading, notFound: portfolioEmpty, refetch: refetchUserPortfolio } = useUserPortfolio();
 
   const summary = journalData?.summary;
   const withThesisCount = summary ? (summary.intact + summary.partial + summary.broken) : 0;
@@ -229,7 +225,6 @@ export default function InvestorPortfolioPage() {
   const apiHoldings: ApiHolding[] = userPortfolio?.holdings ?? [];
   const totalInvested   = apiHoldings.reduce((s, h) => s + h.amount_invested, 0);
   const totalMF         = MUTUAL_FUNDS.reduce((s, f) => s + f.currentValue, 0);
-  const totalMFInvested = MUTUAL_FUNDS.reduce((s, f) => s + f.invested, 0);
   const totalPortfolio  = totalInvested + totalMF;
 
   const qcScores = apiHoldings.map(h => h.market_data?.qc_score).filter((v): v is number => v != null);
@@ -246,14 +241,6 @@ export default function InvestorPortfolioPage() {
     refetchJournal();
     refetchPending();
   }
-
-  const TABS: { id: Tab; label: string; shortLabel?: string; badge?: string }[] = [
-    { id: "holdings", label: "Equity Holdings",    shortLabel: "Holdings" },
-    { id: "mf",       label: "Mutual Funds",        shortLabel: "MF" },
-    { id: "news",     label: "News & MOD Impact",   shortLabel: "News", badge: `${NEWS_ITEMS.length} new` },
-    { id: "sector",   label: "Sector Overlay",      shortLabel: "Sector" },
-    { id: "journal",  label: "📓 Investment Journal", shortLabel: "📓 Journal", badge: summary ? `${withThesisCount}/${totalCount}` : undefined },
-  ];
 
   return (
     <div style={{ background: "var(--qc-bg)", minHeight: "100vh", fontFamily: "var(--qc-font-sans)" }}>
@@ -280,8 +267,7 @@ export default function InvestorPortfolioPage() {
             </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button style={{ background: "var(--qc-card)", color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)", padding: "7px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Export PDF</button>
-            <button style={{ background: "var(--qc-ink)", color: "#fff", border: "none", padding: "7px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>+ Add holding</button>
+            <button onClick={() => setConnectModalOpen(true)} style={{ background: "var(--qc-ink)", color: "#fff", border: "none", padding: "7px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>+ Add holdings</button>
           </div>
         </div>
 
@@ -320,7 +306,7 @@ export default function InvestorPortfolioPage() {
         </div>
 
         {/* ── Stats row ───────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-2.5 mb-5">
           <StatCard
             label="Total Portfolio"
             value={portfolioLoading ? "…" : totalPortfolio > 0 ? fmtLakhs(totalPortfolio) : "—"}
@@ -328,23 +314,10 @@ export default function InvestorPortfolioPage() {
             accentColor="linear-gradient(90deg,var(--qc-ink),#44403C)"
           />
           <StatCard
-            label="Invested (Equity)"
-            value={portfolioLoading ? "…" : portfolioEmpty ? "—" : fmtLakhs(totalInvested)}
-            sub={portfolioEmpty ? "Upload CSV to get started" : `${stockCount} holding${stockCount !== 1 ? "s" : ""}`}
-            accentColor="linear-gradient(90deg,var(--qc-up),#4ADE80)"
-          />
-          <StatCard
             label="Total P&L"
             value="—"
             sub="Connect broker for live P&L"
             accentColor="linear-gradient(90deg,var(--qc-blue),#60A5FA)"
-          />
-          <StatCard
-            label="Mutual Funds"
-            value={fmtLakhs(totalMF)}
-            sub={`+${fmtLakhs(totalMF - totalMFInvested)} gain`}
-            subColor="var(--qc-up)"
-            accentColor="linear-gradient(90deg,#7C3AED,#A78BFA)"
           />
           <StatCard
             label="Avg QC Score"
@@ -357,44 +330,36 @@ export default function InvestorPortfolioPage() {
         {/* ── Alert band ──────────────────────────────────────────── */}
         <AlertBand />
 
-        {/* ── Tabs ────────────────────────────────────────────────── */}
-        <div style={{ display: "flex", borderBottom: "1px solid var(--qc-hair)", marginBottom: 22, overflowX: "auto" }}>
-          {TABS.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              style={{ padding: "10px 14px", fontSize: 12, fontWeight: 500, cursor: "pointer", background: "transparent", border: "none", color: activeTab === t.id ? "var(--qc-ink)" : "var(--qc-ink-3)", borderBottom: `2px solid ${activeTab === t.id ? "var(--qc-ink)" : "transparent"}`, marginBottom: -1, transition: "color 0.15s", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}
-            >
-              <span className="hidden sm:inline">{t.label}</span>
-              <span className="sm:hidden">{t.shortLabel ?? t.label}</span>
-              {t.badge && (
-                <span style={{ fontSize: 10, background: t.id === "journal" ? "#EDE9FE" : "#FEF2F2", color: t.id === "journal" ? "#6D28D9" : "#B91C1C", padding: "1px 6px", borderRadius: 3, fontWeight: 600 }}>
-                  {t.badge}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+        {/* ── Split layout: holdings (+ sub-tabs) left · journal right ─ */}
+        <div className="grid grid-cols-1 gap-6 items-start lg:grid-cols-[1fr_minmax(420px,40%)]">
 
-        {/* ── Tab content ─────────────────────────────────────────── */}
-        {activeTab === "holdings" && (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4 items-start">
-            <UserHoldingsCard holdings={apiHoldings} loading={portfolioLoading} empty={portfolioEmpty} />
-            <SectorSidePanel holdings={[]} />
+          {/* Left column — equity holdings */}
+          <div>
+            <div style={{ borderBottom: "1px solid var(--qc-hair)", marginBottom: 22 }}>
+              <div style={{ padding: "10px 0", fontSize: 12, fontWeight: 500, color: "var(--qc-ink)", borderBottom: "2px solid var(--qc-ink)", display: "inline-block", marginBottom: -1 }}>
+                Equity Holdings
+              </div>
+            </div>
+
+            <UserHoldingsCard
+              holdings={apiHoldings}
+              loading={portfolioLoading}
+              empty={portfolioEmpty}
+              onConnect={() => setConnectModalOpen(true)}
+            />
           </div>
-        )}
-        {activeTab === "mf"     && <MutualFundsTab funds={MUTUAL_FUNDS} />}
-        {activeTab === "news"   && <NewsTab items={NEWS_ITEMS} />}
-        {activeTab === "sector" && <div style={{ maxWidth: 700 }}><SectorSidePanel holdings={HOLDINGS} /></div>}
-        {activeTab === "journal" && (
-          <JournalTab
-            entries={journalData?.entries ?? []}
-            summary={journalData?.summary ?? { intact: 0, partial: 0, broken: 0, none: 0, total: 0 }}
-            loading={journalLoading}
-            error={journalError}
-            onAddThesis={openJournalModal}
-          />
-        )}
+
+          {/* Right column — investment journal, sticky on desktop */}
+          <div className="lg:sticky" style={{ top: 24 }}>
+            <JournalTab
+              entries={journalData?.entries ?? []}
+              summary={journalData?.summary ?? { intact: 0, partial: 0, broken: 0, none: 0, total: 0 }}
+              loading={journalLoading}
+              error={journalError}
+              onAddThesis={openJournalModal}
+            />
+          </div>
+        </div>
 
       </main>
 
@@ -402,10 +367,24 @@ export default function InvestorPortfolioPage() {
         open={journalModalOpen}
         onClose={() => setJournalModalOpen(false)}
         onComplete={handleJournalComplete}
+        onConnect={() => setConnectModalOpen(true)}
         holdings={pendingData?.holdings ?? []}
         totalHoldings={pendingData?.totalHoldings}
         loadingHoldings={pendingLoading}
         targetSymbol={journalTargetSymbol}
+      />
+
+      <ConnectPortfolioModal
+        open={connectModalOpen}
+        onClose={() => setConnectModalOpen(false)}
+        onOpenCsvUpload={() => setUploadModalOpen(true)}
+        onConnected={() => { setConnectModalOpen(false); refetchUserPortfolio(); }}
+      />
+
+      <UploadPortfolioModal
+        open={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        onSuccess={() => { setUploadModalOpen(false); window.location.reload(); }}
       />
     </div>
   );

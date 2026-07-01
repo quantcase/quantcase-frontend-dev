@@ -503,18 +503,20 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
   const r1 = sr.static.resistance[0] ?? null;
   const s1 = sr.static.support[0] ?? null;
 
-  const adx = trend.adx14;
-  const adxLabel = adx >= 25 ? `${adx.toFixed(1)} — Strong` : `${adx.toFixed(1)} — Weak`;
+  const adx = trend.adx14 ?? null;
+  const adxLabel = adx == null
+    ? "—"
+    : adx >= 25 ? `${adx.toFixed(1)} — Strong` : `${adx.toFixed(1)} — Weak`;
   const trendQuality = re?.trendEngine?.trendQuality ?? null;
   const diLabel = trendQuality?.condition
     ? humanize(trendQuality.condition)
-    : adx >= 25 ? "Bears dominant" : null;
+    : adx != null && adx >= 25 ? "Bears dominant" : null;
   const mfiValue = momentum.macd?.histogram ?? null;
   const mfiLabel = mfiValue != null
     ? (mfiValue > 0 ? "Positive flow" : "Negative flow")
     : null;
 
-  const rsiValue = re?.timingEngine?.momentum?.rsi ?? momentum.rsi.value;
+  const rsiValue = re?.timingEngine?.momentum?.rsi ?? momentum.rsi.value ?? null;
   const rsiZone = re?.timingEngine?.momentum?.rsiZone ?? momentum.rsi.zone ?? "Neutral";
   const macdCross = momentum.macd?.crossover ?? null;
   const stochastic = momentum.stochastic ?? null;
@@ -542,11 +544,11 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
     (aboveSMA50 ? "SMA 50 holding as support." : "No SMA 50 support yet.");
 
   const trendDesc =
-    `ADX ${adx >= 25 ? "above 25 confirms active trend" : "below 25 — weak trend"}. ` +
+    `${adx == null ? "ADX unavailable" : adx >= 25 ? "ADX above 25 confirms active trend" : "ADX below 25 — weak trend"}. ` +
     (mfiLabel ? `Money flow: ${mfiLabel.toLowerCase()}.` : "");
 
   const timingDesc =
-    `RSI at ${rsiValue.toFixed(0)} is ${rsiValue > 70 ? "overbought" : rsiValue < 30 ? "oversold" : "neither overbought nor oversold"}. ` +
+    `${rsiValue == null ? "RSI unavailable" : `RSI at ${rsiValue.toFixed(0)} is ${rsiValue > 70 ? "overbought" : rsiValue < 30 ? "oversold" : "neither overbought nor oversold"}`}. ` +
     (macdCross ? `MACD ${humanize(macdCross).toLowerCase()} signals near-term ${macdCross.toLowerCase().includes("bull") ? "strength" : "weakness"}.` : "");
 
   const rsDesc =
@@ -554,9 +556,9 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
 
   const pos52w = Math.round(((cmp - low52w) / (high52w - low52w || 1)) * 100);
   // ADX bar: 0–50 scale, cap at 100
-  const adxBarPct = Math.min(100, (adx / 50) * 100);
+  const adxBarPct = adx == null ? 0 : Math.min(100, (adx / 50) * 100);
   // RSI bar: 0–100 directly
-  const rsiBarPct = Math.min(100, Math.max(0, rsiValue));
+  const rsiBarPct = rsiValue == null ? 0 : Math.min(100, Math.max(0, rsiValue));
   // RS bar: signals → approximate pct (outperform ~75, underperform ~25, neutral ~50)
   const rsBarPct = rsSentiment === "up" ? 75 : rsSentiment === "down" ? 20 : 50;
 
@@ -574,12 +576,12 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
         },
         {
           label: "vs SMA 50",
-          value: `${(((cmp - ma.sma[50]) / ma.sma[50]) * 100).toFixed(1)}%`,
+          value: ma.sma[50] ? `${(((cmp - ma.sma[50]) / ma.sma[50]) * 100).toFixed(1)}%` : "—",
           valueSentiment: aboveSMA50 ? "up" as const : "down" as const,
         },
         {
           label: "vs SMA 200",
-          value: `${(((cmp - ma.sma[200]) / ma.sma[200]) * 100).toFixed(1)}%`,
+          value: ma.sma[200] ? `${(((cmp - ma.sma[200]) / ma.sma[200]) * 100).toFixed(1)}%` : "—",
           valueSentiment: aboveSMA200 ? "up" as const : "down" as const,
         },
       ],
@@ -616,7 +618,7 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
       rows: [
         {
           label: "RSI (14)",
-          value: `${rsiValue.toFixed(0)} — ${humanize(rsiZone)}`,
+          value: rsiValue == null ? "—" : `${rsiValue.toFixed(0)} — ${humanize(rsiZone)}`,
           valueSentiment: "neutral" as const,
           barPct: rsiBarPct,
         },

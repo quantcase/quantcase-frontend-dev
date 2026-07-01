@@ -24,7 +24,7 @@ export default function ScreenerHomePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [stockOptions, setStockOptions] = useState<AutocompleteOption[]>([]);
-  const [activeTab, setActiveTab] = useState<AssetTab>("Indian Stocks");
+  const [activeTab] = useState<AssetTab>("Indian Stocks");
 
   useEffect(() => {
     apiCall<StocksApiResponse>(`${BACKEND_URL}/api/transcript/stocks`, {
@@ -49,19 +49,7 @@ export default function ScreenerHomePage() {
           </p>
         </div>
 
-        {/* Tab selector */}
-        <div className="flex items-center gap-1 rounded-full border p-1 overflow-x-auto max-w-full" style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}>
-          {ASSET_TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className="px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap"
-              style={activeTab === tab ? { background: "var(--qc-ink)", color: "var(--qc-on-dark)" } : { color: "var(--qc-ink-2)" }}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        {/* Tab selector — hidden for now; locked to Indian Stocks mode */}
 
         {/* Search / hero content per tab */}
         {activeTab === "PE / Pre-IPO" && (

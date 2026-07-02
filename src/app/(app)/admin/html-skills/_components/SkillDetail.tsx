@@ -8,7 +8,6 @@ import {
   PptSignalType,
   AnnualReportSignalType,
   MarketDataSignalType,
-  SignalType,
   PluginCategory,
   TRANSCRIPT_SIGNAL_TYPE_LABELS,
   PPT_SIGNAL_TYPE_LABELS,
@@ -18,6 +17,7 @@ import {
   MODEL_OPTIONS,
   TestTicker,
   SignalCountsResponse,
+  API_BASE,
 } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
 
@@ -34,7 +34,6 @@ interface Props {
   saving: boolean;
   saveError: string | null;
   onSave: (updates: Partial<Omit<HtmlSkill, "id" | "created_at" | "updated_at">>) => void;
-  onSignalCountsChange?: (counts: Record<string, number>, selectedTypes: SignalType[], total: number) => void;
   onDirtyChange?: (dirty: boolean) => void;
   hideHeader?: boolean;
 }
@@ -73,7 +72,7 @@ const MARKET_DATA_MONTHS_OPTIONS: { label: string; value: number | null }[] = [
 ];
 
 export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDetail(
-  { skill, ticker, historic, saving, saveError, onSave, onSignalCountsChange, onDirtyChange, hideHeader },
+  { skill, ticker, historic, saving, saveError, onSave, onDirtyChange, hideHeader },
   ref
 ) {
   const [name, setName] = useState(skill.name);
@@ -100,45 +99,36 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [transcriptCounts, setTranscriptCounts] = useState<Record<string, number>>({});
   const [pptCounts, setPptCounts] = useState<Record<string, number>>({});
   const [annualReportCounts, setAnnualReportCounts] = useState<Record<string, number>>({});
-  const [signalTotal, setSignalTotal] = useState(0);
+  const [countsBaseMissing, setCountsBaseMissing] = useState(false);
 
-  useEffect(() => {
-    setName(skill.name);
-    setPrompt(skill.skill_prompt ?? "");
-    setCategory(skill.category);
-    setTranscriptSignalTypes(skill.transcript_signal_types);
-    setPptSignalTypes(skill.ppt_signal_types);
-    setAnnualReportSignalTypes(skill.annual_report_signal_types);
-    setMarketDataSignalTypes(skill.market_data_signal_types ?? []);
-    setModel(skill.model);
-    setMaxTokens(skill.max_tokens);
-    setMaxTranscriptQtrs(skill.max_transcript_qtrs);
-    setMaxPptQtrs(skill.max_ppt_qtrs);
-    setMaxAnnualReportYears(skill.max_annual_report_years);
-    setMaxMarketDataMonths(skill.max_market_data_months ?? null);
-    setHistoricMaxTranscriptQtrs(skill.historic_max_transcript_qtrs);
-    setHistoricMaxPptQtrs(skill.historic_max_ppt_qtrs);
-    setHistoricMaxAnnualReportYears(skill.historic_max_annual_report_years);
-    setHistoricMaxMarketDataMonths(skill.historic_max_market_data_months);
-    setStripHtml(skill.strip_html);
-    setMaxBaseAnalyses(skill.max_base_analyses);
-    setIsActive(skill.is_active);
-    setDirty(false);
-  }, [skill.slug]);
+  // No reset-on-skill-change effect needed — the parent remounts this component via key={skill.slug},
+  // so the useState(skill.xxx) initializers above already run fresh for every skill.
 
+  // Per-type breakdown badges next to each signal toggle. /signals/count/:ticker previews counts within
+  // the currently-edited window (historic_max_* in Historic, base max_* in Incremental). Passing
+  // slug + historic=false makes it pin/base-aware for Incremental; omitting historic defaults to the
+  // unscoped historic-style count.
   useEffect(() => {
     setTranscriptCounts({});
     setPptCounts({});
     setAnnualReportCounts({});
-    setSignalTotal(0);
+    setCountsBaseMissing(false);
+
+    const effTranscriptQtrs = historic ? historicMaxTranscriptQtrs : maxTranscriptQtrs;
+    const effPptQtrs = historic ? historicMaxPptQtrs : maxPptQtrs;
+    const effAnnualYears = historic ? historicMaxAnnualReportYears : maxAnnualReportYears;
     const params = new URLSearchParams();
-    if (maxTranscriptQtrs !== null) params.set("max_transcript_qtrs", String(maxTranscriptQtrs));
-    if (maxPptQtrs !== null) params.set("max_ppt_qtrs", String(maxPptQtrs));
-    if (maxAnnualReportYears !== null) params.set("max_annual_report_years", String(maxAnnualReportYears));
+    if (effTranscriptQtrs !== null) params.set("max_transcript_qtrs", String(effTranscriptQtrs));
+    if (effPptQtrs !== null) params.set("max_ppt_qtrs", String(effPptQtrs));
+    if (effAnnualYears !== null) params.set("max_annual_report_years", String(effAnnualYears));
     if (transcriptSignalTypes.length) params.set("transcript_signal_types", transcriptSignalTypes.join(","));
     if (pptSignalTypes.length) params.set("ppt_signal_types", pptSignalTypes.join(","));
     if (annualReportSignalTypes.length) params.set("annual_report_signal_types", annualReportSignalTypes.join(","));
-    fetch(`${BACKEND_URL}/api/html-skills/signals/count/${ticker}?${params}`)
+    if (!historic) {
+      params.set("slug", skill.slug);
+      params.set("historic", "false");
+    }
+    fetch(`${BACKEND_URL}${API_BASE}/signals/count/${ticker}?${params}`)
       .then(async (res) => {
         if (!res.ok) return;
         const json: SignalCountsResponse = await res.json();
@@ -147,24 +137,13 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
           for (const { signal_type, count } of counts) m[signal_type] = count;
           return m;
         };
-        const tMap = toMap(json.by_source.transcript.signal_counts);
-        const pMap = toMap(json.by_source.ppt.signal_counts);
-        const aMap = toMap(json.by_source.annual_report.signal_counts);
-        setTranscriptCounts(tMap);
-        setPptCounts(pMap);
-        setAnnualReportCounts(aMap);
-        setSignalTotal(json.total);
+        setTranscriptCounts(toMap(json.by_source.transcript.signal_counts));
+        setPptCounts(toMap(json.by_source.ppt.signal_counts));
+        setAnnualReportCounts(toMap(json.by_source.annual_report.signal_counts));
+        setCountsBaseMissing(!!json.base_missing);
       })
       .catch(() => {});
-  }, [ticker, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes]);
-
-  // Re-notify parent whenever counts or selected types change
-  useEffect(() => {
-    const allCounts = { ...annualReportCounts, ...pptCounts, ...transcriptCounts };
-    const allSelected = [...new Set([...transcriptSignalTypes, ...pptSignalTypes, ...annualReportSignalTypes])] as SignalType[];
-    onSignalCountsChange?.(allCounts, allSelected, signalTotal);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transcriptCounts, pptCounts, annualReportCounts, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes, signalTotal]);
+  }, [ticker, historic, skill.slug, maxTranscriptQtrs, maxPptQtrs, maxAnnualReportYears, historicMaxTranscriptQtrs, historicMaxPptQtrs, historicMaxAnnualReportYears, transcriptSignalTypes, pptSignalTypes, annualReportSignalTypes]);
 
   function mark() { setDirty(true); onDirtyChange?.(true); }
 
@@ -283,6 +262,9 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
             <span className={`rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${historic ? "bg-amber-50 text-amber-700" : "bg-zinc-100 text-zinc-500"}`}>
               editing {historic ? "historic" : "incremental"} config
             </span>
+            {!historic && countsBaseMissing && (
+              <span className="text-[11px] text-amber-700">No base yet — run Historic first</span>
+            )}
           </div>
           <div className="grid grid-cols-4 gap-3">
             <div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown, Pin } from "lucide-react";
+import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown, Pin, Radio } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
 import { HtmlSkill, TestTicker, FAVORITE_TICKERS, CATEGORY_LABELS, API_BASE, PromptDryRunResponse } from "./_components/types";
 import { TickerSearch, TickerOption } from "./_components/TickerSearch";
@@ -39,7 +39,6 @@ function HtmlSkillsPage() {
   const [historic, setHistoric] = useState(true);
 
   const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
-  const [signalTotal, setSignalTotal] = useState(0);
   const [showSignals, setShowSignals] = useState(false);
   const [showPinnedModal, setShowPinnedModal] = useState(false);
   const [skillDirty, setSkillDirty] = useState(false);
@@ -83,6 +82,19 @@ function HtmlSkillsPage() {
     if (!calls.some((c) => c.id === callId)) setCallId(calls[0].id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticker, calls]);
+
+  // ── Incremental needs a base to build on — force Historic until one exists ─
+
+  useEffect(() => {
+    if (previewControls?.hasBase === false) setHistoric(true);
+  }, [previewControls?.hasBase]);
+
+  // ── Incremental always anchors on the latest call — drop any manually-picked historic period on switch ─
+
+  useEffect(() => {
+    if (!historic && calls.length > 0) setCallId(calls[0].id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historic]);
 
   // ── Load stocks for ticker search ──────────────────────────────────────────
 
@@ -136,6 +148,10 @@ function HtmlSkillsPage() {
 
   async function handleExportPrompt() {
     if (!selectedSlug || !ticker || !callId) return;
+    if (!historic && previewControls?.hasBase === false) {
+      setError("No base output exists for this ticker yet — run Historic first");
+      return;
+    }
     setExportingPrompt(true);
     try {
       const params = new URLSearchParams({ callId });
@@ -160,6 +176,8 @@ function HtmlSkillsPage() {
       setExportingPrompt(false);
     }
   }
+
+  const selectedCall = calls.find((c) => c.id === callId) ?? null;
 
   const byCategory = skills.reduce<Record<string, HtmlSkill[]>>((acc, skill) => {
     const cat = skill.category;
@@ -231,26 +249,50 @@ function HtmlSkillsPage() {
                   favorites={[...FAVORITE_TICKERS]}
                 />
 
-                {/* Historic / Incremental — prominent, defaults to Historic (original behavior) */}
+                {/* Historic / Incremental — prominent, defaults to Historic (original behavior).
+                    Incremental needs a base to build on, so it's unavailable until a first output exists. */}
                 {ticker && (
                   <TabToggle
                     variant="outline"
-                    options={["Historic", "Incremental"]}
+                    options={previewControls?.hasBase === false ? ["Historic"] : ["Historic", "Incremental"]}
                     value={historic ? "Historic" : "Incremental"}
                     onChange={(v) => setHistoric(v === "Historic")}
                     className="shrink-0"
                   />
                 )}
+                {ticker && previewControls?.hasBase === false && (
+                  <span className="text-[11px] text-amber-700 shrink-0">No base yet — run Historic first</span>
+                )}
+
+                {/* Historic runs can target any past period — pick the fiscal year/quarter that resolves to callId */}
+                {ticker && historic && (
+                  <div className="relative shrink-0">
+                    <select
+                      value={callId ?? ""}
+                      onChange={(e) => setCallId(e.target.value || null)}
+                      disabled={calls.length === 0}
+                      title="Fiscal year / quarter for this historic run"
+                      className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
+                    >
+                      {calls.length === 0 && <option value="">No calls</option>}
+                      {calls.map((c) => (
+                        <option key={c.id} value={c.id}>{c.quarter} {c.fiscal_year}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-[#888888]" />
+                  </div>
+                )}
 
                 <div className="flex-1" />
 
-                {/* Signal total from API */}
-                {signalTotal > 0 && (
+                {/* Inspect the exact signals feeding this run — count is fetched inside the modal (mode/base-aware, too heavy to preview here) */}
+                {ticker && (
                   <button
                     onClick={() => setShowSignals(true)}
-                    className="text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                    className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
                   >
-                    {signalTotal.toLocaleString()} signals
+                    <Radio className="size-3" />
+                    Signals
                   </button>
                 )}
 
@@ -332,9 +374,6 @@ function HtmlSkillsPage() {
                 hideHeader
                 onSave={(updates) => { handleSave(updates); setSkillDirty(false); }}
                 onDirtyChange={setSkillDirty}
-                onSignalCountsChange={(_counts, _types, total) => {
-                  setSignalTotal(total);
-                }}
               />
             ) : (
               <div className="flex h-full items-center justify-center text-[13px] text-[#888888]">
@@ -351,6 +390,8 @@ function HtmlSkillsPage() {
                 slug={selectedSkill.slug}
                 ticker={ticker}
                 callId={callId}
+                fiscalYear={selectedCall?.fiscal_year ?? null}
+                quarter={selectedCall?.quarter ?? null}
                 historic={historic}
                 onControls={setPreviewControls}
               />
@@ -367,6 +408,7 @@ function HtmlSkillsPage() {
         <SignalsModal
           slug={selectedSkill.slug}
           ticker={ticker}
+          historic={historic}
           onClose={() => setShowSignals(false)}
         />
       )}

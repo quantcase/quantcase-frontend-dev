@@ -8,6 +8,7 @@ import { BACKEND_URL } from "@/lib/constants";
 export interface PreviewControls {
   running: boolean;
   result: RunResponse | null;
+  hasBase: boolean | null; // null = unknown/checking, false = no output exists yet for this ticker in any mode
   run: (force?: boolean) => void;
 }
 
@@ -15,6 +16,8 @@ interface Props {
   slug: string;
   ticker: TestTicker;
   callId: string | null;
+  fiscalYear: string | null;
+  quarter: string | null;
   historic: boolean;
   onControls: (controls: PreviewControls) => void;
 }
@@ -23,17 +26,29 @@ function stripHtmlFences(raw: string): string {
   return raw.replace(/^```html\s*/i, "").replace(/\s*```\s*$/, "").trim();
 }
 
-export function PreviewPane({ slug, ticker, callId, historic, onControls }: Props) {
+export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, historic, onControls }: Props) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunResponse | null>(null);
+  const [hasBase, setHasBase] = useState<boolean | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Mode-scoped fetch of the output to display — historic and incremental runs are independent rows
+  // Unscoped existence check — does *any* output (historic or incremental) exist yet for this ticker?
+  // Incremental runs need a base to build on; without one they'd just produce a confusing, context-free output.
+  useEffect(() => {
+    setHasBase(null);
+    fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}`)
+      .then((res) => setHasBase(res.status !== 404))
+      .catch(() => {});
+  }, [slug, ticker]);
+
+  // Exact-period fetch of the output to display — scoped to the selected call's fiscal_year/quarter,
+  // not just "latest for this mode". 404 (no analysis for this exact period yet) means an empty preview.
   useEffect(() => {
     setResult(null);
     setError(null);
-    fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}?historic=${historic}`)
+    if (!fiscalYear || !quarter) return;
+    fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}/${fiscalYear}/${quarter}?historic=${historic}`)
       .then(async (res) => {
         if (res.status === 404) return;
         const json = await res.json();
@@ -46,10 +61,10 @@ export function PreviewPane({ slug, ticker, callId, historic, onControls }: Prop
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [slug, ticker, historic]);
+  }, [slug, ticker, historic, fiscalYear, quarter]);
 
   async function fetchOutput() {
-    const res = await fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}?historic=${historic}`);
+    const res = await fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}/${fiscalYear}/${quarter}?historic=${historic}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
     const output = json as RunResponse["output"];
@@ -60,6 +75,10 @@ export function PreviewPane({ slug, ticker, callId, historic, onControls }: Prop
   function runSkill(force = false) {
     if (!callId) {
       setError("Select a call/period first");
+      return;
+    }
+    if (!historic && hasBase === false) {
+      setError("No base output exists for this ticker yet — run Historic first");
       return;
     }
     if (pollRef.current) clearInterval(pollRef.current);
@@ -86,6 +105,7 @@ export function PreviewPane({ slug, ticker, callId, historic, onControls }: Prop
               pollRef.current = null;
               const output = await fetchOutput();
               setResult({ cached: false, output });
+              setHasBase(true);
               setRunning(false);
             } else if (status === "failed") {
               clearInterval(pollRef.current!);
@@ -108,9 +128,9 @@ export function PreviewPane({ slug, ticker, callId, historic, onControls }: Prop
   }
 
   useEffect(() => {
-    onControls({ running, result, run: runSkill });
+    onControls({ running, result, hasBase, run: runSkill });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running, result, callId, historic]);
+  }, [running, result, hasBase, callId, historic, fiscalYear, quarter]);
 
   const html = result?.output?.raw_html ?? null;
 

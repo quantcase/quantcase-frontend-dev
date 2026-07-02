@@ -186,6 +186,8 @@ export interface SignalCountsResponse {
     ppt: SignalCountSource;
     annual_report: SignalCountSource;
   };
+  base_context_count?: number;
+  base_missing?: boolean;
 }
 
 export const TRANSCRIPT_SIGNAL_TYPE_LABELS: Record<TranscriptSignalType, string> = {

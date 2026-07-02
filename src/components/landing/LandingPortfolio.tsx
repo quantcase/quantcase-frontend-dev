@@ -19,6 +19,19 @@ const integrations = [
   { code: "+", title: "Add manually", subtitle: "Enter tickers yourself" },
 ];
 
+const brokers = [
+  { name: "Zerodha", domain: "zerodha.com" },
+  { name: "Groww", domain: "groww.in" },
+  { name: "Upstox", domain: "upstox.com" },
+  { name: "Angel One", domain: "angelone.in" },
+  { name: "5paisa", domain: "5paisa.com" },
+  { name: "ICICI Direct", domain: "icicidirect.com" },
+  { name: "HDFC Sky", domain: "hdfcsky.com" },
+  { name: "Kotak Securities", domain: "kotaksecurities.com" },
+  { name: "Paytm Money", domain: "paytmmoney.com" },
+  { name: "Sharekhan", domain: "sharekhan.com" },
+];
+
 function scoreColor(score: number) {
   if (score >= 75) return "#D4A95F";
   if (score >= 60) return "#F5F0E6";
@@ -87,7 +100,7 @@ export default function LandingPortfolio() {
 
           </div>
 
-          {/* Right: ranked portfolio preview */}
+          {/* Right: ranked portfolio preview + broker compatibility */}
           <div className="lg:col-span-6">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -102,12 +115,12 @@ export default function LandingPortfolio() {
                 boxShadow: "0 30px 80px rgba(14,26,43,0.18)",
               }}
             >
-              <div className="flex items-center justify-between px-8 py-5" style={{ borderBottom: "1px solid rgba(245,240,230,0.10)" }}>
+              <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid rgba(245,240,230,0.10)" }}>
                 <div>
                   <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(245,240,230,0.55)" }}>
                     Your portfolio · MOD ranked
                   </div>
-                  <div className="mt-1 text-2xl" style={{ ...serif, color: "#F5F0E6", fontWeight: 400 }}>Preview</div>
+                  <div className="mt-1 text-xl" style={{ ...serif, color: "#F5F0E6", fontWeight: 400 }}>Preview</div>
                 </div>
                 <span
                   className="rounded-full px-3 py-1 text-[10px] uppercase"
@@ -121,7 +134,7 @@ export default function LandingPortfolio() {
                 {holdings.map((h) => (
                   <li
                     key={h.ticker}
-                    className="grid grid-cols-12 items-center gap-4 px-8 py-5 transition-colors hover:bg-white/[0.03]"
+                    className="grid grid-cols-12 items-center gap-4 px-6 py-3 transition-colors hover:bg-white/[0.03]"
                     style={{ borderBottom: "1px solid rgba(245,240,230,0.10)", listStyleType: "none", marginLeft: 0 }}
                   >
                     <span className="col-span-1 text-xs" style={{ ...mono, color: "rgba(245,240,230,0.40)" }}>
@@ -135,7 +148,7 @@ export default function LandingPortfolio() {
                       M · O · D
                     </div>
                     <div className="col-span-2 text-right">
-                      <span className="text-3xl" style={{ ...serif, color: scoreColor(h.score), fontWeight: 400 }}>{h.score}</span>
+                      <span className="text-2xl" style={{ ...serif, color: scoreColor(h.score), fontWeight: 400 }}>{h.score}</span>
                     </div>
                     <span className="col-span-1 text-right text-sm" style={{ ...mono, color: "rgba(245,240,230,0.60)" }}>
                       {h.signal}
@@ -144,7 +157,7 @@ export default function LandingPortfolio() {
                 ))}
               </ul>
 
-              <div className="flex items-center justify-between px-8 py-5" style={{ borderTop: "1px solid rgba(245,240,230,0.10)" }}>
+              <div className="flex items-center justify-between px-6 py-4" style={{ borderTop: "1px solid rgba(245,240,230,0.10)" }}>
                 <span className="text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(245,240,230,0.55)" }}>
                   2 holdings need review
                 </span>
@@ -153,6 +166,48 @@ export default function LandingPortfolio() {
                 </a>
               </div>
             </motion.div>
+
+            <p className="mt-6 text-xs" style={{ ...sans, color: "rgba(14,26,43,0.45)" }}>
+              Once linked, act on every signal without leaving your broker — buy, sell, or set alerts directly.
+            </p>
+
+            <div className="mt-5">
+              <div className="mb-4 text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.40)" }}>
+                Works with every major broker
+              </div>
+              <div
+                className="relative overflow-hidden py-1"
+                style={{
+                  maskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
+                  WebkitMaskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
+                }}
+              >
+                <div className="marquee-track gap-3">
+                  {[...brokers, ...brokers].map((b, i) => (
+                    <span
+                      key={`${b.name}-${i}`}
+                      className="inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs"
+                      style={{
+                        ...sans,
+                        color: "#3A4B61",
+                        border: "1px solid rgba(14,26,43,0.08)",
+                        background: "#EFE8D8",
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`https://www.google.com/s2/favicons?domain=${b.domain}&sz=64`}
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="h-4 w-4 rounded-sm"
+                      />
+                      {b.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

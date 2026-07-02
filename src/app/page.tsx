@@ -5,6 +5,7 @@ import LandingModFramework from "@/components/landing/LandingModFramework";
 import LandingPoweredByAi from "@/components/landing/LandingPoweredByAi";
 import LandingLiveExample from "@/components/landing/LandingLiveExample";
 import LandingPortfolio from "@/components/landing/LandingPortfolio";
+import LandingJournal from "@/components/landing/LandingJournal";
 import LandingFinalCta from "@/components/landing/LandingFinalCta";
 import LandingFooter from "@/components/landing/LandingFooter";
 
@@ -19,6 +20,7 @@ export default function HomePage() {
         <LandingPoweredByAi />
         <LandingLiveExample />
         <LandingPortfolio />
+        <LandingJournal />
         <LandingFinalCta />
       </main>
       <LandingFooter />

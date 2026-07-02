@@ -1,24 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Brain, TrendingUp } from "lucide-react";
 import type { DecisionIntelligence, DecisionIntelligenceIndicator } from "@/types/technicals";
+import { SignalCard, type SignalSentiment } from "@/components/overview/signal-card";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function sentimentDot(sentiment: DecisionIntelligenceIndicator["sentiment"]) {
-  if (sentiment === "positive") return "var(--qc-up)";
-  if (sentiment === "negative") return "var(--qc-down)";
-  if (sentiment === "transitional") return "var(--qc-warn)";
-  return "var(--qc-ink-2)";
-}
-
-function sentimentTile(sentiment: DecisionIntelligenceIndicator["sentiment"]) {
-  if (sentiment === "positive") return { border: "rgba(31,122,74,0.25)", bg: "var(--qc-up-soft)" };
-  if (sentiment === "negative") return { border: "rgba(178,58,47,0.25)", bg: "var(--qc-down-soft)" };
-  if (sentiment === "transitional") return { border: "rgba(180,115,26,0.25)", bg: "var(--qc-warn-soft)" };
-  return { border: "var(--qc-hair)", bg: "var(--qc-section)" };
+function toSignalSentiment(sentiment: DecisionIntelligenceIndicator["sentiment"]): SignalSentiment {
+  if (sentiment === "positive") return "positive";
+  if (sentiment === "negative") return "negative";
+  return "neutral"; // "transitional" / "neutral" both render as amber
 }
 
 function tagColor(tag: string): string {
@@ -46,41 +38,23 @@ function convictionBarColor(level: string | undefined): string {
 // ─── Signal tile ──────────────────────────────────────────────────────────────
 
 function SignalTile({ indicator }: { indicator: DecisionIntelligenceIndicator }) {
-  const [tip, setTip] = useState(false);
-  const dot = sentimentDot(indicator.sentiment);
-  const tile = sentimentTile(indicator.sentiment);
   const watchout = indicator.growthWatchout || indicator.valueWatchout;
 
   return (
-    <div
-      className="relative rounded-[8px] border px-3 py-2.5 cursor-default"
-      style={{ borderColor: tile.border, background: tile.bg }}
-      onMouseEnter={() => setTip(true)}
-      onMouseLeave={() => setTip(false)}
-    >
-      <div className="flex items-center gap-1.5 mb-1">
-        <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{indicator.name}</p>
-      </div>
-      <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: dot, fontFamily: "var(--qc-font-sans)", lineHeight: 1.3 }}>{indicator.tag}</p>
-      {tip && (
-        <div
-          className="absolute bottom-full left-0 mb-1.5 z-50 w-60 rounded-[10px] border shadow-lg overflow-hidden"
-          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
-        >
-          <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--qc-hair)", background: tile.bg }}>
-            <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>{indicator.name}</p>
-          </div>
-          <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
-            <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.55, fontFamily: "var(--qc-font-sans)" }}>{indicator.explanation}</p>
-            {watchout && (
-              <p style={{ margin: 0, fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", lineHeight: 1.45, fontFamily: "var(--qc-font-sans)" }}>
-                <span style={{ fontWeight: "var(--qc-w-semi)" }}>Watch: </span>{watchout}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+    <SignalCard
+      label={indicator.name}
+      value={indicator.tag}
+      sentiment={toSignalSentiment(indicator.sentiment)}
+      tooltip={
+        indicator.explanation
+          ? {
+              title: indicator.name,
+              description: indicator.explanation,
+              watch: watchout ?? undefined,
+            }
+          : undefined
+      }
+    />
   );
 }
 

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   FileText, Zap, MessageSquareQuote,
   Newspaper, BarChart2, Users, LineChart, Presentation, Mic, ScrollText,
-  Radar, Fingerprint, GitBranch, Compass,
+  Radar, Fingerprint, Compass,
 } from "lucide-react";
 
 const serif: React.CSSProperties = { fontFamily: "var(--font-instrument-serif, 'Instrument Serif', serif)" };
@@ -33,21 +33,19 @@ const outputs = [
     label: "Signals",
     desc: "Discrete, trackable events pulled from raw disclosure.",
     Icon: Radar,
+    Preview: SignalsPreview,
   },
   {
     label: "QC Intuition",
     desc: "Pattern-weighted judgement calibrated against outcomes.",
     Icon: Fingerprint,
-  },
-  {
-    label: "Patterns",
-    desc: "Recurring behaviour across quarters, peers, and cycles.",
-    Icon: GitBranch,
+    Preview: QcIntuitionPreview,
   },
   {
     label: "Decision Intelligence",
     desc: "A single, decisive verdict — not another dashboard.",
     Icon: Compass,
+    Preview: DecisionPreview,
   },
 ];
 
@@ -109,11 +107,10 @@ function CalibrationBar({ value, delay = 0, inView }: { value: number; delay?: n
 
 type Pt = { x: number; y: number };
 
-// Cubic bezier from a card's right edge (or left edge, for outputs) into the engine rim.
-// Anchors are real measured pixel positions, so the line always touches the card exactly.
-function flowCurve(from: Pt, to: Pt) {
-  const dx = (to.x - from.x) * 0.55;
-  return `M ${from.x} ${from.y} C ${from.x + dx} ${from.y} ${to.x - dx} ${to.y} ${to.x} ${to.y}`;
+// Straight line from a card's edge to the engine rim, using real measured pixel
+// positions so it always touches the card exactly.
+function flowLine(from: Pt, to: Pt) {
+  return `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
 }
 
 // One flowing dot per path, driven by native SVG <animateMotion> so it always follows
@@ -142,6 +139,109 @@ function FlowDot({ d, delay, period, color, size }: { d: string; delay: number; 
   );
 }
 
+// Skeletal preview of the Signals grid UI: a bank of small status pills, half
+// "achieved" (emerald), half "watch/missed" (red), mirroring the real product's
+// two-column signal card layout.
+function SignalsPreview() {
+  const rows = [
+    { tag: "PROFITABILITY", good: true },
+    { tag: "PROFITABILITY", good: false },
+    { tag: "MARGIN QUALITY", good: true },
+    { tag: "PORTFOLIO", good: false },
+  ];
+  return (
+    <div className="grid grid-cols-2 gap-1.5">
+      {rows.map((r, i) => (
+        <div
+          key={i}
+          className="rounded-md px-2 py-1.5"
+          style={{
+            background: r.good ? "rgba(45,122,79,0.07)" : "rgba(192,57,43,0.07)",
+            border: `1px solid ${r.good ? "rgba(45,122,79,0.16)" : "rgba(192,57,43,0.16)"}`,
+          }}
+        >
+          <div
+            className="text-[7px] uppercase leading-none"
+            style={{ ...mono, letterSpacing: "0.08em", color: "rgba(14,26,43,0.32)" }}
+          >
+            {r.tag}
+          </div>
+          <div
+            className="mt-1 h-1.5 w-3/4 rounded-full"
+            style={{ background: r.good ? "#2D7A4F" : "#C0392B", opacity: 0.55 }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Skeletal preview of the QC Intuition UI: a dark headline panel (mirroring the
+// "What the ... signals reveal" narrative header) followed by table-row bars.
+function QcIntuitionPreview() {
+  return (
+    <div className="overflow-hidden rounded-md" style={{ border: "1px solid rgba(14,26,43,0.10)" }}>
+      <div
+        className="px-2.5 py-2"
+        style={{ background: "linear-gradient(135deg, #16283F 0%, #0A1220 100%)" }}
+      >
+        <div
+          className="inline-block rounded-full px-1.5 py-0.5 text-[6.5px] uppercase leading-none"
+          style={{ ...mono, letterSpacing: "0.08em", color: "rgba(212,169,95,0.85)", background: "rgba(212,169,95,0.14)" }}
+        >
+          Pattern recognition
+        </div>
+        <div className="mt-1.5 h-1.5 w-4/5 rounded-full" style={{ background: "rgba(245,240,230,0.55)" }} />
+        <div className="mt-1 h-1.5 w-1/2 rounded-full" style={{ background: "rgba(245,240,230,0.30)" }} />
+      </div>
+      <div className="space-y-1 px-2.5 py-2" style={{ background: "#FBF9F4" }}>
+        {[0.9, 0.7, 0.8].map((w, i) => (
+          <div key={i} className="flex items-center gap-1.5">
+            <div className="h-1.5 flex-1 rounded-full" style={{ background: "rgba(14,26,43,0.08)", maxWidth: `${w * 100}%` }} />
+            <div className="h-2.5 w-6 flex-shrink-0 rounded-sm" style={{ background: "rgba(185,138,62,0.18)" }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Skeletal preview of the Decision Intelligence UI: a rating chip + verdict bars,
+// then a small framework grid of tinted tiles (green/amber/red), mirroring the
+// real "QuantCase Framework" score breakdown.
+function DecisionPreview() {
+  const tiles = [
+    { good: "pos" }, { good: "pos" }, { good: "warn" },
+    { good: "pos" }, { good: "warn" }, { good: "neg" },
+  ];
+  const tileColor: Record<string, string> = {
+    pos: "rgba(45,122,79,0.14)",
+    warn: "rgba(185,138,62,0.16)",
+    neg: "rgba(192,57,43,0.14)",
+  };
+  return (
+    <div>
+      <div className="flex items-center justify-between rounded-md px-2.5 py-2" style={{ background: "#FBF9F4", border: "1px solid rgba(14,26,43,0.10)" }}>
+        <div className="flex-1 space-y-1">
+          <div className="h-1.5 w-3/4 rounded-full" style={{ background: "#B98A3E", opacity: 0.6 }} />
+          <div className="h-1.5 w-1/2 rounded-full" style={{ background: "rgba(14,26,43,0.12)" }} />
+        </div>
+        <div
+          className="ml-2 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[7px] leading-none"
+          style={{ ...mono, background: "rgba(45,122,79,0.14)", color: "#2D7A4F" }}
+        >
+          77
+        </div>
+      </div>
+      <div className="mt-1.5 grid grid-cols-3 gap-1">
+        {tiles.map((t, i) => (
+          <div key={i} className="h-4 rounded-sm" style={{ background: tileColor[t.good] }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function EngineDiagram() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<HTMLDivElement>(null);
@@ -149,7 +249,9 @@ function EngineDiagram() {
   const outputRefs = useRef<(HTMLDivElement | null)[]>([]);
   const inView = useInView(wrapRef, { once: true, margin: "-100px" });
   const [activeOutput, setActiveOutput] = useState(0);
-  const [geometry, setGeometry] = useState<{ w: number; h: number; sources: Pt[]; outputs: Pt[]; engine: Pt; engineR: number } | null>(null);
+  type Geometry = { w: number; h: number; sources: Pt[]; outputs: Pt[]; engine: Pt; engineR: number };
+  const [geometry, setGeometry] = useState<Geometry | null>(null);
+  const measureRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     function measure() {
@@ -174,6 +276,7 @@ function EngineDiagram() {
       setGeometry({ w: wrapBox.width, h: wrapBox.height, sources, outputs: outputsPts, engine, engineR: eb.width / 2 });
     }
 
+    measureRef.current = measure;
     measure();
     const ro = new ResizeObserver(measure);
     if (wrapRef.current) ro.observe(wrapRef.current);
@@ -184,14 +287,30 @@ function EngineDiagram() {
     };
   }, []);
 
+  // Re-measure every animation frame while an output card is expanding/collapsing, so
+  // connector lines track the card's edge continuously instead of jumping once the
+  // (batched, lower-frequency) ResizeObserver callback eventually fires.
+  useEffect(() => {
+    let raf = 0;
+    const start = performance.now();
+    const durationMs = 550; // slightly longer than the card's 0.45s expand transition
+    function tick(now: number) {
+      measureRef.current();
+      if (now - start < durationMs) {
+        raf = requestAnimationFrame(tick);
+      }
+    }
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [activeOutput]);
+
   useEffect(() => {
     if (!inView) return;
-    const id = setInterval(() => setActiveOutput((v) => (v + 1) % outputs.length), 2200);
+    const id = setInterval(() => setActiveOutput((v) => (v + 1) % outputs.length), 3400);
     return () => clearInterval(id);
   }, [inView]);
 
   const n = inputSources.length;
-  const m = outputs.length;
 
   return (
     <div ref={wrapRef} className="relative">
@@ -226,16 +345,23 @@ function EngineDiagram() {
         {/* Center: engine node (connector lines are drawn in the shared overlay SVG below) */}
         <div className="order-1 lg:order-2 mx-auto flex items-center justify-center py-6 lg:py-0" style={{ width: 168, height: 168 }}>
           <div ref={engineRef} className="relative flex items-center justify-center" style={{ width: 96, height: 96 }}>
-            {/* Expanding pulse rings (HTML, since they're purely decorative and don't need pixel-perfect anchoring) */}
+            {/* Expanding pulse rings (HTML, since they're purely decorative and don't need pixel-perfect anchoring).
+                Keyframe arrays (rather than a single initial->animate tween) so the loop eases back to its
+                start state instead of snapping once it hits the outer scale. */}
             {inView &&
               [0, 1].map((k) => (
                 <motion.span
                   key={`pulse-${k}`}
                   className="absolute inset-0 rounded-full"
                   style={{ border: "1px solid #B98A3E" }}
-                  initial={{ opacity: 0.55, scale: 1 }}
-                  animate={{ opacity: 0, scale: 2.1 }}
-                  transition={{ duration: 2.8, repeat: Infinity, ease: "easeOut", delay: k * 1.4 }}
+                  animate={{ opacity: [0.55, 0, 0], scale: [1, 2.1, 1] }}
+                  transition={{
+                    duration: 2.8,
+                    repeat: Infinity,
+                    ease: ["easeOut", "linear"],
+                    times: [0, 1, 1],
+                    delay: k * 1.4,
+                  }}
                 />
               ))}
             {/* Rotating dashed rings */}
@@ -295,7 +421,7 @@ function EngineDiagram() {
                 initial={{ opacity: 0, x: 16 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.3 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 flex items-start gap-3 rounded-xl px-4 py-3.5 overflow-hidden"
+                className="relative z-10 rounded-xl px-4 py-3.5 overflow-hidden"
                 style={{
                   border: isActive ? "1px solid rgba(185,138,62,0.45)" : "1px solid rgba(14,26,43,0.09)",
                   background: isActive ? "#F3E9D8" : "#EEEAE0",
@@ -303,117 +429,141 @@ function EngineDiagram() {
                   transition: "border-color 0.5s ease, background 0.5s ease, box-shadow 0.5s ease",
                 }}
               >
-                <AnimatePresence>
+                <div className="flex items-start gap-3">
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.span
+                        layoutId="output-active-dot"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute left-0 top-0 h-full w-[3px]"
+                        style={{ background: "#B98A3E" }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  <div
+                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
+                    style={{
+                      background: isActive ? "rgba(185,138,62,0.16)" : "rgba(14,26,43,0.05)",
+                      color: isActive ? "#B98A3E" : "rgba(14,26,43,0.45)",
+                      transition: "background 0.5s ease, color 0.5s ease",
+                    }}
+                  >
+                    <o.Icon size={16} strokeWidth={1.6} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[13.5px]" style={{ ...sans, color: "#0E1A2B", fontWeight: 500 }}>
+                      {o.label}
+                    </div>
+                    <div className="mt-0.5 text-[11.5px] leading-snug" style={{ ...sans, color: "rgba(14,26,43,0.45)" }}>
+                      {o.desc}
+                    </div>
+                  </div>
+                </div>
+
+                <AnimatePresence initial={false}>
                   {isActive && (
-                    <motion.span
-                      layoutId="output-active-dot"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="absolute left-0 top-0 h-full w-[3px]"
-                      style={{ background: "#B98A3E" }}
-                    />
+                    <motion.div
+                      key="preview"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="ml-12 mt-3 pt-3" style={{ borderTop: "1px solid rgba(14,26,43,0.08)" }}>
+                        <o.Preview />
+                      </div>
+                    </motion.div>
                   )}
                 </AnimatePresence>
-                <div
-                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
-                  style={{
-                    background: isActive ? "rgba(185,138,62,0.16)" : "rgba(14,26,43,0.05)",
-                    color: isActive ? "#B98A3E" : "rgba(14,26,43,0.45)",
-                    transition: "background 0.5s ease, color 0.5s ease",
-                  }}
-                >
-                  <o.Icon size={16} strokeWidth={1.6} />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[13.5px]" style={{ ...sans, color: "#0E1A2B", fontWeight: 500 }}>
-                    {o.label}
-                  </div>
-                  <div className="mt-0.5 text-[11.5px] leading-snug" style={{ ...sans, color: "rgba(14,26,43,0.45)" }}>
-                    {o.desc}
-                  </div>
-                </div>
               </motion.div>
             );
           })}
         </div>
       </div>
 
-      {/* Shared overlay SVG: connector lines from measured card positions to/from the engine rim */}
-      {geometry && (
-        <svg
-          className="pointer-events-none absolute inset-0"
-          width={geometry.w}
-          height={geometry.h}
-          viewBox={`0 0 ${geometry.w} ${geometry.h}`}
-          aria-hidden
-        >
-          {/* Static base paths */}
-          {geometry.sources.map((p, i) => (
-            <path key={`in-static-${i}`} d={flowCurve(p, { x: geometry.engine.x - geometry.engineR, y: geometry.engine.y })} fill="none" stroke="rgba(14,26,43,0.10)" strokeWidth={1.5} />
-          ))}
-          {geometry.outputs.map((p, i) => (
-            <path key={`out-static-${i}`} d={flowCurve({ x: geometry.engine.x + geometry.engineR, y: geometry.engine.y }, p)} fill="none" stroke="rgba(14,26,43,0.10)" strokeWidth={1.5} />
-          ))}
+      {/* Shared overlay SVG: connector lines from measured card positions to/from the engine rim.
+          `geometry` is re-measured every animation frame while a card expands/collapses
+          (see the rAF effect above), so lines track the card's edge continuously. */}
+      {geometry && (() => {
+        const g = geometry;
+        return (
+          <svg
+            className="pointer-events-none absolute inset-0"
+            width={g.w}
+            height={g.h}
+            viewBox={`0 0 ${g.w} ${g.h}`}
+            aria-hidden
+          >
+            {/* Static base paths */}
+            {g.sources.map((p, i) => (
+              <path key={`in-static-${i}`} d={flowLine(p, { x: g.engine.x - g.engineR, y: g.engine.y })} fill="none" stroke="rgba(14,26,43,0.10)" strokeWidth={1.5} />
+            ))}
+            {g.outputs.map((p, i) => (
+              <path key={`out-static-${i}`} d={flowLine({ x: g.engine.x + g.engineR, y: g.engine.y }, p)} fill="none" stroke="rgba(14,26,43,0.10)" strokeWidth={1.5} />
+            ))}
 
-          {inView && (
-            <>
-              {/* Animated draw-in — inputs */}
-              {geometry.sources.map((p, i) => (
-                <motion.path
-                  key={`in-draw-${i}`}
-                  d={flowCurve(p, { x: geometry.engine.x - geometry.engineR, y: geometry.engine.y })}
-                  fill="none"
-                  stroke="#B98A3E"
-                  strokeWidth={1.5}
-                  strokeOpacity={0.55}
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1, delay: 0.15 + i * 0.05, ease: [0.16, 1, 0.3, 1] }}
-                />
-              ))}
-              {/* Animated draw-in — outputs */}
-              {geometry.outputs.map((p, i) => (
-                <motion.path
-                  key={`out-draw-${i}`}
-                  d={flowCurve({ x: geometry.engine.x + geometry.engineR, y: geometry.engine.y }, p)}
-                  fill="none"
-                  stroke="#B98A3E"
-                  strokeWidth={1.5}
-                  strokeOpacity={activeOutput === i ? 0.85 : 0.4}
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 0.9, delay: 1.2 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                  style={{ transition: "stroke-opacity 0.5s ease" }}
-                />
-              ))}
+            {inView && (
+              <>
+                {/* Animated draw-in — inputs */}
+                {g.sources.map((p, i) => (
+                  <motion.path
+                    key={`in-draw-${i}`}
+                    d={flowLine(p, { x: g.engine.x - g.engineR, y: g.engine.y })}
+                    fill="none"
+                    stroke="#B98A3E"
+                    strokeWidth={1.5}
+                    strokeOpacity={0.55}
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1, delay: 0.15 + i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                ))}
+                {/* Animated draw-in — outputs */}
+                {g.outputs.map((p, i) => (
+                  <motion.path
+                    key={`out-draw-${i}`}
+                    d={flowLine({ x: g.engine.x + g.engineR, y: g.engine.y }, p)}
+                    fill="none"
+                    stroke="#B98A3E"
+                    strokeWidth={1.5}
+                    strokeOpacity={activeOutput === i ? 0.85 : 0.4}
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 0.9, delay: 1.2 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ transition: "stroke-opacity 0.5s ease" }}
+                  />
+                ))}
 
-              {/* Flowing particles — inputs into engine */}
-              {geometry.sources.map((p, i) => (
-                <FlowDot
-                  key={`in-dot-${i}`}
-                  d={flowCurve(p, { x: geometry.engine.x - geometry.engineR, y: geometry.engine.y })}
-                  delay={1.2 + i * (2.4 / n)}
-                  period={2.4}
-                  color="#D4A95F"
-                  size={2.6}
-                />
-              ))}
-              {/* Flowing particles — engine into outputs */}
-              {geometry.outputs.map((p, i) => (
-                <FlowDot
-                  key={`out-dot-${i}`}
-                  d={flowCurve({ x: geometry.engine.x + geometry.engineR, y: geometry.engine.y }, p)}
-                  delay={2.1 + i * 0.55}
-                  period={1.5}
-                  color="#B98A3E"
-                  size={3}
-                />
-              ))}
-            </>
-          )}
-        </svg>
-      )}
+                {/* Flowing particles — inputs into engine */}
+                {g.sources.map((p, i) => (
+                  <FlowDot
+                    key={`in-dot-${i}`}
+                    d={flowLine(p, { x: g.engine.x - g.engineR, y: g.engine.y })}
+                    delay={1.2 + i * (2.4 / n)}
+                    period={2.4}
+                    color="#D4A95F"
+                    size={2.6}
+                  />
+                ))}
+                {/* Flowing particles — engine into outputs */}
+                {g.outputs.map((p, i) => (
+                  <FlowDot
+                    key={`out-dot-${i}`}
+                    d={flowLine({ x: g.engine.x + g.engineR, y: g.engine.y }, p)}
+                    delay={2.1 + i * 0.55}
+                    period={1.5}
+                    color="#B98A3E"
+                    size={3}
+                  />
+                ))}
+              </>
+            )}
+          </svg>
+        );
+      })()}
     </div>
   );
 }

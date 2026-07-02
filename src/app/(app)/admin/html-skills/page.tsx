@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown, Pin, Radio } from "lucide-react";
+import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown, History, Radio } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
 import { HtmlSkill, TestTicker, FAVORITE_TICKERS, CATEGORY_LABELS, API_BASE, PromptDryRunResponse } from "./_components/types";
 import { TickerSearch, TickerOption } from "./_components/TickerSearch";
@@ -10,7 +10,7 @@ import type { StocksApiResponse } from "@/types/screener";
 import { SkillDetail, SkillDetailHandle } from "./_components/SkillDetail";
 import { PreviewPane, PreviewControls } from "./_components/PreviewPane";
 import { SignalsModal } from "./_components/SignalsModal";
-import { PinnedBaseModal } from "./_components/PinnedBaseModal";
+import { OutputHistoryModal } from "./_components/OutputHistoryModal";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { TabToggle } from "@/components/molecules/tab-toggle";
 
@@ -33,14 +33,17 @@ function HtmlSkillsPage() {
   const [ticker, setTicker] = useState<TestTicker | null>(() => (searchParams.get("ticker") as TestTicker) ?? null);
   const [tickerOptions, setTickerOptions] = useState<TickerOption[]>([]);
 
-  const [callId, setCallId] = useState<string | null>(() => searchParams.get("callId"));
+  // Historic and Incremental each remember their own selected period independently
+  const [historicCallId, setHistoricCallId] = useState<string | null>(() => searchParams.get("callId"));
+  const [incrementalCallId, setIncrementalCallId] = useState<string | null>(null);
   const { data: calls } = useTranscriptCalls(ticker ?? "");
   // Default true — mirrors the original (pre-incremental) behavior; flip off to opt into incremental base-context mode
   const [historic, setHistoric] = useState(true);
+  const callId = historic ? historicCallId : incrementalCallId;
 
   const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
   const [showSignals, setShowSignals] = useState(false);
-  const [showPinnedModal, setShowPinnedModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [skillDirty, setSkillDirty] = useState(false);
   const skillDetailRef = useRef<SkillDetailHandle>(null);
   const [loading, setLoading] = useState(false);
@@ -74,12 +77,13 @@ function HtmlSkillsPage() {
     router.replace(`?${params.toString()}`, { scroll: false });
   }, [selectedSlug, ticker, callId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Resolve callId from the ticker's call list (default to most recent) ────
+  // ── Resolve each mode's callId from the ticker's call list (default to most recent, independently) ─
 
   useEffect(() => {
-    if (!ticker) { setCallId(null); return; }
+    if (!ticker) { setHistoricCallId(null); setIncrementalCallId(null); return; }
     if (calls.length === 0) return;
-    if (!calls.some((c) => c.id === callId)) setCallId(calls[0].id);
+    if (!calls.some((c) => c.id === historicCallId)) setHistoricCallId(calls[0].id);
+    if (!calls.some((c) => c.id === incrementalCallId)) setIncrementalCallId(calls[0].id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticker, calls]);
 
@@ -88,13 +92,6 @@ function HtmlSkillsPage() {
   useEffect(() => {
     if (previewControls?.hasBase === false) setHistoric(true);
   }, [previewControls?.hasBase]);
-
-  // ── Incremental always anchors on the latest call — drop any manually-picked historic period on switch ─
-
-  useEffect(() => {
-    if (!historic && calls.length > 0) setCallId(calls[0].id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [historic]);
 
   // ── Load stocks for ticker search ──────────────────────────────────────────
 
@@ -264,14 +261,17 @@ function HtmlSkillsPage() {
                   <span className="text-[11px] text-amber-700 shrink-0">No base yet — run Historic first</span>
                 )}
 
-                {/* Historic runs can target any past period — pick the fiscal year/quarter that resolves to callId */}
-                {ticker && historic && (
+                {/* Pick the fiscal year/quarter that resolves to callId — Historic and Incremental each keep their own selection */}
+                {ticker && (
                   <div className="relative shrink-0">
                     <select
                       value={callId ?? ""}
-                      onChange={(e) => setCallId(e.target.value || null)}
+                      onChange={(e) => {
+                        const v = e.target.value || null;
+                        if (historic) setHistoricCallId(v); else setIncrementalCallId(v);
+                      }}
                       disabled={calls.length === 0}
-                      title="Fiscal year / quarter for this historic run"
+                      title={`Fiscal year / quarter for this ${historic ? "historic" : "incremental"} run`}
                       className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
                     >
                       {calls.length === 0 && <option value="">No calls</option>}
@@ -296,15 +296,15 @@ function HtmlSkillsPage() {
                   </button>
                 )}
 
-                {/* Manage pinned base output for this ticker */}
+                {/* Browse past outputs for this ticker — the base pin itself is set skill-wide in the editor */}
                 {ticker && (
                   <button
-                    onClick={() => setShowPinnedModal(true)}
-                    title="Pin a specific output as the permanent base context for this ticker"
+                    onClick={() => setShowHistoryModal(true)}
+                    title="Browse past outputs for this ticker"
                     className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
                   >
-                    <Pin className="size-3" />
-                    Pin base
+                    <History className="size-3" />
+                    History
                   </button>
                 )}
 
@@ -413,11 +413,18 @@ function HtmlSkillsPage() {
         />
       )}
 
-      {showPinnedModal && selectedSkill && ticker && (
-        <PinnedBaseModal
+      {showHistoryModal && selectedSkill && ticker && (
+        <OutputHistoryModal
           slug={selectedSkill.slug}
           ticker={ticker}
-          onClose={() => setShowPinnedModal(false)}
+          pinnedFiscalYear={selectedSkill.pinned_fiscal_year}
+          pinnedQuarter={selectedSkill.pinned_quarter}
+          pinnedHistoric={selectedSkill.pinned_historic}
+          pinning={saving}
+          onPin={(fiscalYear, quarter, historicPin) => {
+            handleSave({ pinned_fiscal_year: fiscalYear, pinned_quarter: quarter, pinned_historic: historicPin });
+          }}
+          onClose={() => setShowHistoryModal(false)}
         />
       )}
     </div>

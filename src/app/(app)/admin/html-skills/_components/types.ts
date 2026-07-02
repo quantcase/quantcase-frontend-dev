@@ -72,6 +72,10 @@ export interface HtmlSkill {
   historic_max_ppt_qtrs: number | null;
   historic_max_annual_report_years: number | null;
   historic_max_market_data_months: number | null;
+  // Global base pin — skill-wide, applies to every ticker (replaces the old per-ticker pin)
+  pinned_fiscal_year: string | null;
+  pinned_quarter: string | null;
+  pinned_historic: boolean | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -146,7 +150,6 @@ export interface OutputHistoryRow {
   fiscal_year: string | null;
   quarter: string | null;
   is_historic: boolean;
-  is_pinned_base: boolean;
   model: string;
   input_tokens: number;
   output_tokens: number;

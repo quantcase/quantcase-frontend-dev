@@ -45,6 +45,9 @@ export type SignalType = TranscriptSignalType | AnnualReportSignalType;
 
 export type PluginCategory = "management" | "deal" | "opportunity";
 
+// Base path for the HTML Incremental Skills API (upgrade of the old /api/html-skills)
+export const API_BASE = "/api/html-incremental-skills";
+
 export interface HtmlSkill {
   id: string;
   slug: string;
@@ -61,6 +64,14 @@ export interface HtmlSkill {
   max_ppt_qtrs: number | null;
   max_annual_report_years: number | null;
   max_market_data_months: number | null;
+  // Incremental base-context behavior
+  strip_html: boolean;
+  max_base_analyses: number;
+  // Historic-mode window overrides — null falls back to the fields above
+  historic_max_transcript_qtrs: number | null;
+  historic_max_ppt_qtrs: number | null;
+  historic_max_annual_report_years: number | null;
+  historic_max_market_data_months: number | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -70,14 +81,18 @@ export interface HtmlSkillOutput {
   id: string;
   skill_id: string;
   ticker: string;
+  call_id: string;
   fiscal_year: string | null;
   quarter: string | null;
   raw_html: string;
+  text_summary: string;
   prompt_v: string;
   model: string;
   input_tokens: number;
   output_tokens: number;
   cost_usd: number;
+  is_historic: boolean;
+  is_pinned_base: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -108,43 +123,44 @@ export interface JobStatusResponse {
     type?: string;
     failedReason?: string;
     error?: string;
-    output?: {
-      raw_html: string;
-      input_tokens: number;
-      output_tokens: number;
-      cost_usd: number;
-    };
   };
 }
 
-export interface PreviewRunRequest {
+export interface PromptDryRunResponse {
+  slug: string;
   ticker: string;
-  skill_prompt: string;
-  transcript_signal_types: TranscriptSignalType[];
-  ppt_signal_types: PptSignalType[];
-  annual_report_signal_types: AnnualReportSignalType[];
-  market_data_signal_types: MarketDataSignalType[];
-  model: string;
-  max_tokens: number;
-  max_transcript_qtrs: number | null;
-  max_ppt_qtrs: number | null;
-  max_annual_report_years: number | null;
-  max_market_data_months: number | null;
-  force: boolean;
+  systemPrompt: string;
+  userPrompt: string;
+  historic: boolean;
+  signal_count: number;
+  raw_signal_count: number;
+  base_context_count: number;
+  fiscal_year: string | null;
+  quarter: string | null;
 }
 
-export interface LiveSkillConfig {
-  prompt: string;
-  transcriptSignalTypes: TranscriptSignalType[];
-  pptSignalTypes: PptSignalType[];
-  annualReportSignalTypes: AnnualReportSignalType[];
-  marketDataSignalTypes: MarketDataSignalType[];
+export interface OutputHistoryRow {
+  id: string;
+  ticker: string;
+  call_id: string;
+  fiscal_year: string | null;
+  quarter: string | null;
+  is_historic: boolean;
+  is_pinned_base: boolean;
   model: string;
-  maxTokens: number;
-  maxTranscriptQtrs: number | null;
-  maxPptQtrs: number | null;
-  maxAnnualReportYears: number | null;
-  maxMarketDataMonths: number | null;
+  input_tokens: number;
+  output_tokens: number;
+  cost_usd: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OutputHistoryResponse {
+  ticker: string;
+  rows: OutputHistoryRow[];
+  page: number;
+  size: number;
+  total: number;
 }
 
 export const FAVORITE_TICKERS = ["HDFCBANK", "RELIANCE", "ASIANPAINT", "IEX", "MSUMI"] as const;

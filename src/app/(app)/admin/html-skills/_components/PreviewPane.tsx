@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Play, Loader2, AlertCircle } from "lucide-react";
-import { TestTicker, RunResponse, RunJobResponse, JobStatusResponse, LiveSkillConfig } from "./types";
+import { TestTicker, RunResponse, RunJobResponse, JobStatusResponse, API_BASE } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
 
 export interface PreviewControls {
@@ -14,7 +14,8 @@ export interface PreviewControls {
 interface Props {
   slug: string;
   ticker: TestTicker;
-  liveConfig: LiveSkillConfig | null;
+  callId: string | null;
+  historic: boolean;
   onControls: (controls: PreviewControls) => void;
 }
 
@@ -22,17 +23,17 @@ function stripHtmlFences(raw: string): string {
   return raw.replace(/^```html\s*/i, "").replace(/\s*```\s*$/, "").trim();
 }
 
-export function PreviewPane({ slug, ticker, liveConfig, onControls }: Props) {
+export function PreviewPane({ slug, ticker, callId, historic, onControls }: Props) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunResponse | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // On mount (or slug/ticker change): load the latest saved output
+  // Mode-scoped fetch of the output to display — historic and incremental runs are independent rows
   useEffect(() => {
     setResult(null);
     setError(null);
-    fetch(`${BACKEND_URL}/api/html-skills/${slug}/outputs/${ticker}`)
+    fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}?historic=${historic}`)
       .then(async (res) => {
         if (res.status === 404) return;
         const json = await res.json();
@@ -45,10 +46,10 @@ export function PreviewPane({ slug, ticker, liveConfig, onControls }: Props) {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [slug, ticker]);
+  }, [slug, ticker, historic]);
 
   async function fetchOutput() {
-    const res = await fetch(`${BACKEND_URL}/api/html-skills/${slug}/outputs/${ticker}`);
+    const res = await fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}?historic=${historic}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
     const output = json as RunResponse["output"];
@@ -57,36 +58,18 @@ export function PreviewPane({ slug, ticker, liveConfig, onControls }: Props) {
   }
 
   function runSkill(force = false) {
+    if (!callId) {
+      setError("Select a call/period first");
+      return;
+    }
     if (pollRef.current) clearInterval(pollRef.current);
     setRunning(true);
     setError(null);
 
-    const isPreview = liveConfig !== null;
-    const url = isPreview
-      ? `${BACKEND_URL}/api/html-skills/run-preview`
-      : `${BACKEND_URL}/api/html-skills/${slug}/run`;
-    const body = isPreview
-      ? {
-          ticker,
-          force,
-          skill_prompt: liveConfig.prompt,
-          transcript_signal_types: liveConfig.transcriptSignalTypes,
-          ppt_signal_types: liveConfig.pptSignalTypes,
-          annual_report_signal_types: liveConfig.annualReportSignalTypes,
-          market_data_signal_types: liveConfig.marketDataSignalTypes,
-          model: liveConfig.model,
-          max_tokens: liveConfig.maxTokens,
-          max_transcript_qtrs: liveConfig.maxTranscriptQtrs,
-          max_ppt_qtrs: liveConfig.maxPptQtrs,
-          max_annual_report_years: liveConfig.maxAnnualReportYears,
-          max_market_data_months: liveConfig.maxMarketDataMonths,
-        }
-      : { ticker, force };
-
-    fetch(url, {
+    fetch(`${BACKEND_URL}${API_BASE}/${slug}/run`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ticker, callId, force, historic }),
     })
       .then(async (res) => {
         const json = await res.json();
@@ -101,23 +84,8 @@ export function PreviewPane({ slug, ticker, liveConfig, onControls }: Props) {
             if (status === "completed") {
               clearInterval(pollRef.current!);
               pollRef.current = null;
-              if (statusJson.data?.output) {
-                // Preview job — output is embedded in the job status response
-                const embeddedOutput = statusJson.data.output;
-                setResult({
-                  cached: false,
-                  output: {
-                    ...embeddedOutput,
-                    raw_html: stripHtmlFences(embeddedOutput.raw_html),
-                    id: "", skill_id: "", ticker, fiscal_year: null, quarter: null,
-                    prompt_v: "", model: "", created_at: "", updated_at: "",
-                  },
-                });
-              } else {
-                // Saved-skill job — fetch output separately
-                const output = await fetchOutput();
-                setResult({ cached: false, output });
-              }
+              const output = await fetchOutput();
+              setResult({ cached: false, output });
               setRunning(false);
             } else if (status === "failed") {
               clearInterval(pollRef.current!);
@@ -142,7 +110,7 @@ export function PreviewPane({ slug, ticker, liveConfig, onControls }: Props) {
   useEffect(() => {
     onControls({ running, result, run: runSkill });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running, result]);
+  }, [running, result, callId, historic]);
 
   const html = result?.output?.raw_html ?? null;
 

@@ -15,7 +15,7 @@ import {
   FilterFn,
   PaginationState,
 } from "@tanstack/react-table";
-import { SIGNAL_TYPE_LABELS, SignalType } from "./types";
+import { SIGNAL_TYPE_LABELS, SignalType, API_BASE } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
 
 interface SignalMeasure {
@@ -92,7 +92,7 @@ export function SignalsModal({ slug, ticker, onClose }: Props) {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`${BACKEND_URL}/api/html-skills/${slug}/signals/${ticker}`)
+    fetch(`${BACKEND_URL}${API_BASE}/${slug}/signals/${ticker}`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);

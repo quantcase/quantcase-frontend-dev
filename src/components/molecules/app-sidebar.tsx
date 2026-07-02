@@ -116,7 +116,7 @@ export function AppSidebar() {
           style={{ width: 40, height: 40 }}
         >
           <Image
-            src="/qc-logo-dark.png"
+            src="/logos/logo-dark.png"
             alt="QuantCase"
             width={40}
             height={40}

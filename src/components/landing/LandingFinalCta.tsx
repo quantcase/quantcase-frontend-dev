@@ -54,7 +54,7 @@ export default function LandingFinalCta() {
             <span className="inline-block transition-transform group-hover:translate-x-1">↗</span>
           </a>
           <span className="text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>
-            Free during preview
+            Start 7-Day Free Trial
           </span>
         </div>
 

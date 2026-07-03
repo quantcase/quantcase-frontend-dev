@@ -52,6 +52,12 @@ export function HelpModal({ onClose }: Props) {
               <p className="text-[var(--qc-ink)] font-medium mb-0.5">Strip Base HTML / Max Base Analyses</p>
               <p>Leave Strip Base HTML on — it sends the prior analysis as plain text instead of raw HTML, cheaper with no loss of information. Max Base Analyses only matters when no pin is set — it&rsquo;s how many of a ticker&rsquo;s own past outputs get stitched together as its base.</p>
             </div>
+
+            <div>
+              <p className="text-[var(--qc-ink)] font-medium mb-0.5">Saved Configs</p>
+              <p>A skill can have named, alternate settings bundles — e.g. one tuned for tickers that only have PPT data, another for annual-report-only. Manage them via the <span className="font-medium text-[var(--qc-ink)]">Configs</span> button. Nothing changes unless you pick one from the <span className="font-medium text-[var(--qc-ink)]">Use config</span> dropdown on the run screen — leaving it on &ldquo;Default config&rdquo; runs the skill exactly as its own top-level settings define it.</p>
+              <p>Each config is a full, independent bundle — its signal windows and type filters don&rsquo;t inherit from the skill&rsquo;s own settings, so leave a field unset only if you actually want &ldquo;no cap&rdquo; for that source. Only Model, Max Tokens, and Strip HTML fall back to the skill&rsquo;s defaults when left blank.</p>
+            </div>
           </section>
 
           <div className="border-t border-[var(--qc-border-default)]" />

@@ -4,6 +4,7 @@ import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Save, Loader2 } from "lucide-react";
 import {
   HtmlSkill,
+  HtmlSkillConfig,
   TranscriptSignalType,
   PptSignalType,
   AnnualReportSignalType,
@@ -18,6 +19,9 @@ import {
   TestTicker,
   SignalCountsResponse,
   API_BASE,
+  QTR_OPTIONS,
+  ANNUAL_OPTIONS,
+  MARKET_DATA_MONTHS_OPTIONS,
 } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
 
@@ -29,11 +33,14 @@ const ALL_CATEGORIES = Object.keys(CATEGORY_LABELS) as PluginCategory[];
 
 interface Props {
   skill: HtmlSkill;
+  // When set, this panel edits & saves this saved config bundle instead of the skill's own top-level
+  // fields — driven by whichever config is picked in the run screen's "Use config" dropdown.
+  config: HtmlSkillConfig | null;
   ticker: TestTicker;
   historic: boolean;
   saving: boolean;
   saveError: string | null;
-  onSave: (updates: Partial<Omit<HtmlSkill, "id" | "created_at" | "updated_at">>) => void;
+  onSave: (updates: Record<string, unknown>) => void;
   onDirtyChange?: (dirty: boolean) => void;
   hideHeader?: boolean;
 }
@@ -42,57 +49,29 @@ export interface SkillDetailHandle {
   save: () => void;
 }
 
-const QTR_OPTIONS: { label: string; value: number | null }[] = [
-  { label: "No limit", value: null },
-  { label: "2 qtrs", value: 2 },
-  { label: "4 qtrs", value: 4 },
-  { label: "8 qtrs", value: 8 },
-  { label: "12 qtrs", value: 12 },
-  { label: "16 qtrs", value: 16 },
-  { label: "20 qtrs", value: 20 },
-  { label: "None", value: 0 },
-];
-
-const ANNUAL_OPTIONS: { label: string; value: number | null }[] = [
-  { label: "No limit", value: null },
-  { label: "1 yr", value: 1 },
-  { label: "2 yrs", value: 2 },
-  { label: "3 yrs", value: 3 },
-  { label: "5 yrs", value: 5 },
-  { label: "None", value: 0 },
-];
-
-const MARKET_DATA_MONTHS_OPTIONS: { label: string; value: number | null }[] = [
-  { label: "No limit", value: null },
-  { label: "6 mo", value: 6 },
-  { label: "12 mo", value: 12 },
-  { label: "24 mo", value: 24 },
-  { label: "36 mo", value: 36 },
-  { label: "None", value: 0 },
-];
-
 export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDetail(
-  { skill, ticker, historic, saving, saveError, onSave, onDirtyChange, hideHeader },
+  { skill, config, ticker, historic, saving, saveError, onSave, onDirtyChange, hideHeader },
   ref
 ) {
-  const [name, setName] = useState(skill.name);
-  const [prompt, setPrompt] = useState(skill.skill_prompt ?? "");
+  const isConfig = config !== null;
+  const [name, setName] = useState(isConfig ? config.name : skill.name);
+  const [prompt, setPrompt] = useState(isConfig ? config.skill_prompt : (skill.skill_prompt ?? ""));
   const [category, setCategory] = useState<PluginCategory>(skill.category);
-  const [transcriptSignalTypes, setTranscriptSignalTypes] = useState<TranscriptSignalType[]>(skill.transcript_signal_types);
-  const [pptSignalTypes, setPptSignalTypes] = useState<PptSignalType[]>(skill.ppt_signal_types);
-  const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>(skill.annual_report_signal_types);
-  const [marketDataSignalTypes, setMarketDataSignalTypes] = useState<MarketDataSignalType[]>(skill.market_data_signal_types ?? []);
-  const [model, setModel] = useState(skill.model);
-  const [maxTokens, setMaxTokens] = useState(skill.max_tokens);
-  const [maxTranscriptQtrs, setMaxTranscriptQtrs] = useState<number | null>(skill.max_transcript_qtrs);
-  const [maxPptQtrs, setMaxPptQtrs] = useState<number | null>(skill.max_ppt_qtrs);
-  const [maxAnnualReportYears, setMaxAnnualReportYears] = useState<number | null>(skill.max_annual_report_years);
-  const [maxMarketDataMonths, setMaxMarketDataMonths] = useState<number | null>(skill.max_market_data_months ?? null);
-  const [historicMaxTranscriptQtrs, setHistoricMaxTranscriptQtrs] = useState<number | null>(skill.historic_max_transcript_qtrs);
-  const [historicMaxPptQtrs, setHistoricMaxPptQtrs] = useState<number | null>(skill.historic_max_ppt_qtrs);
-  const [historicMaxAnnualReportYears, setHistoricMaxAnnualReportYears] = useState<number | null>(skill.historic_max_annual_report_years);
-  const [historicMaxMarketDataMonths, setHistoricMaxMarketDataMonths] = useState<number | null>(skill.historic_max_market_data_months);
-  const [stripHtml, setStripHtml] = useState(skill.strip_html);
+  const [transcriptSignalTypes, setTranscriptSignalTypes] = useState<TranscriptSignalType[]>(isConfig ? config.transcript_signal_types : skill.transcript_signal_types);
+  const [pptSignalTypes, setPptSignalTypes] = useState<PptSignalType[]>(isConfig ? config.ppt_signal_types : skill.ppt_signal_types);
+  const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>(isConfig ? config.annual_report_signal_types : skill.annual_report_signal_types);
+  const [marketDataSignalTypes, setMarketDataSignalTypes] = useState<MarketDataSignalType[]>((isConfig ? config.market_data_signal_types : skill.market_data_signal_types) ?? []);
+  const [model, setModel] = useState<string | null>(isConfig ? config.model : skill.model);
+  const [maxTokens, setMaxTokens] = useState<number | null>(isConfig ? config.max_tokens : skill.max_tokens);
+  const [maxTranscriptQtrs, setMaxTranscriptQtrs] = useState<number | null>(isConfig ? config.max_transcript_qtrs : skill.max_transcript_qtrs);
+  const [maxPptQtrs, setMaxPptQtrs] = useState<number | null>(isConfig ? config.max_ppt_qtrs : skill.max_ppt_qtrs);
+  const [maxAnnualReportYears, setMaxAnnualReportYears] = useState<number | null>(isConfig ? config.max_annual_report_years : skill.max_annual_report_years);
+  const [maxMarketDataMonths, setMaxMarketDataMonths] = useState<number | null>((isConfig ? config.max_market_data_months : skill.max_market_data_months) ?? null);
+  const [historicMaxTranscriptQtrs, setHistoricMaxTranscriptQtrs] = useState<number | null>(isConfig ? config.historic_max_transcript_qtrs : skill.historic_max_transcript_qtrs);
+  const [historicMaxPptQtrs, setHistoricMaxPptQtrs] = useState<number | null>(isConfig ? config.historic_max_ppt_qtrs : skill.historic_max_ppt_qtrs);
+  const [historicMaxAnnualReportYears, setHistoricMaxAnnualReportYears] = useState<number | null>(isConfig ? config.historic_max_annual_report_years : skill.historic_max_annual_report_years);
+  const [historicMaxMarketDataMonths, setHistoricMaxMarketDataMonths] = useState<number | null>(isConfig ? config.historic_max_market_data_months : skill.historic_max_market_data_months);
+  const [stripHtml, setStripHtml] = useState<boolean | null>(isConfig ? config.strip_html : skill.strip_html);
   const [maxBaseAnalyses, setMaxBaseAnalyses] = useState(skill.max_base_analyses);
   const [isActive, setIsActive] = useState(skill.is_active);
   const [dirty, setDirty] = useState(false);
@@ -101,8 +80,9 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [annualReportCounts, setAnnualReportCounts] = useState<Record<string, number>>({});
   const [countsBaseMissing, setCountsBaseMissing] = useState(false);
 
-  // No reset-on-skill-change effect needed — the parent remounts this component via key={skill.slug},
-  // so the useState(skill.xxx) initializers above already run fresh for every skill.
+  // No reset-on-skill/config-change effect needed — the parent remounts this component via
+  // key={`${skill.slug}::${configKey}`}, so the useState initializers above already run fresh
+  // whenever the skill or the selected config changes.
 
   // Per-type breakdown badges next to each signal toggle. /signals/count/:ticker previews counts within
   // the currently-edited window (historic_max_* in Historic, base max_* in Incremental). Passing
@@ -168,18 +148,27 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   }
 
   function handleSave() {
-    onSave({
-      name, skill_prompt: prompt, category,
+    const windowFields = {
       transcript_signal_types: transcriptSignalTypes, ppt_signal_types: pptSignalTypes,
       annual_report_signal_types: annualReportSignalTypes, market_data_signal_types: marketDataSignalTypes,
-      model, max_tokens: maxTokens,
       max_transcript_qtrs: maxTranscriptQtrs, max_ppt_qtrs: maxPptQtrs,
       max_annual_report_years: maxAnnualReportYears, max_market_data_months: maxMarketDataMonths,
       historic_max_transcript_qtrs: historicMaxTranscriptQtrs, historic_max_ppt_qtrs: historicMaxPptQtrs,
       historic_max_annual_report_years: historicMaxAnnualReportYears, historic_max_market_data_months: historicMaxMarketDataMonths,
-      strip_html: stripHtml, max_base_analyses: maxBaseAnalyses,
-      is_active: isActive,
-    });
+    };
+    if (isConfig) {
+      onSave({
+        name, skill_prompt: prompt, ...windowFields,
+        model, max_tokens: maxTokens, strip_html: stripHtml,
+      });
+    } else {
+      onSave({
+        name, skill_prompt: prompt, category, ...windowFields,
+        model, max_tokens: maxTokens,
+        strip_html: stripHtml ?? true, max_base_analyses: maxBaseAnalyses,
+        is_active: isActive,
+      });
+    }
     setDirty(false);
     onDirtyChange?.(false);
   }
@@ -210,31 +199,64 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-        {/* Category + Model + Max Tokens — same regardless of run mode */}
-        <div className="grid grid-cols-3 gap-3">
-          <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
-              Category
-            </label>
-            <select
-              value={category}
-              onChange={(e) => { setCategory(e.target.value as PluginCategory); mark(); }}
-              className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
-            >
-              {ALL_CATEGORIES.map((c) => (
-                <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
-              ))}
-            </select>
+        {/* Key + Name — config mode only; key is immutable once created */}
+        {isConfig && (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+                Key <span className="normal-case font-normal text-[10px] text-[#888888]">(immutable)</span>
+              </label>
+              <input
+                type="text"
+                value={config.key}
+                disabled
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-[#F5F5F5] px-3 py-2 text-[13px] font-mono text-[#888888] outline-none cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+                Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => { setName(e.target.value); mark(); }}
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              />
+            </div>
           </div>
+        )}
+
+        {/* Category (skill only) + Model + Max Tokens — Model/Max Tokens fall back to the skill's own value when left "Default" in config mode */}
+        <div className={isConfig ? "grid grid-cols-2 gap-3" : "grid grid-cols-3 gap-3"}>
+          {!isConfig && (
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+                Category
+              </label>
+              <select
+                value={category}
+                onChange={(e) => { setCategory(e.target.value as PluginCategory); mark(); }}
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              >
+                {ALL_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
               Model
             </label>
             <select
-              value={model}
-              onChange={(e) => { setModel(e.target.value); mark(); }}
+              value={model ?? ""}
+              onChange={(e) => { setModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
               className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
             >
+              {isConfig && (
+                <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.model)?.label ?? skill.model})</option>
+              )}
               {MODEL_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
@@ -246,8 +268,13 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
             </label>
             <input
               type="number"
-              value={maxTokens}
-              onChange={(e) => { setMaxTokens(Number(e.target.value)); mark(); }}
+              value={maxTokens ?? ""}
+              placeholder={isConfig ? `Default (${skill.max_tokens})` : undefined}
+              onChange={(e) => {
+                if (isConfig) setMaxTokens(e.target.value === "" ? null : Number(e.target.value));
+                else setMaxTokens(Number(e.target.value));
+                mark();
+              }}
               className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
             />
           </div>
@@ -260,7 +287,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
               Signal Windows
             </span>
             <span className={`rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${historic ? "bg-amber-50 text-amber-700" : "bg-zinc-100 text-zinc-500"}`}>
-              editing {historic ? "historic" : "incremental"} config
+              editing {historic ? "historic" : "incremental"} window
             </span>
             {!historic && countsBaseMissing && (
               <span className="text-[11px] text-amber-700">No base yet — run Historic first</span>
@@ -336,34 +363,56 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
 
         {/* Incremental base-context options — only relevant when previewing/running in incremental mode */}
         {!historic && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className={isConfig ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-3"}>
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
                 Strip Base HTML
               </label>
-              <button
-                onClick={() => { setStripHtml(!stripHtml); mark(); }}
-                className={`w-full rounded-md border px-3 py-2 text-[13px] text-left transition-colors ${
-                  stripHtml
-                    ? "border-[#0F172B] bg-[#0F172B] text-white"
-                    : "border-[var(--qc-border-default)] bg-white text-[#888888]"
-                }`}
-              >
-                {stripHtml ? "On — plain text" : "Off — raw HTML"}
-              </button>
+              {isConfig ? (
+                <div className="flex rounded-md border border-[var(--qc-border-default)] overflow-hidden">
+                  {[
+                    { label: `Default (${skill.strip_html ? "on" : "off"})`, value: null },
+                    { label: "On", value: true },
+                    { label: "Off", value: false },
+                  ].map((o) => (
+                    <button
+                      key={String(o.value)}
+                      onClick={() => { setStripHtml(o.value); mark(); }}
+                      className={`flex-1 px-2 py-2 text-[12px] font-medium transition-colors ${
+                        stripHtml === o.value ? "bg-[#0F172B] text-white" : "bg-white text-[#888888] hover:text-[#0F172B]"
+                      }`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setStripHtml(!stripHtml); mark(); }}
+                  className={`w-full rounded-md border px-3 py-2 text-[13px] text-left transition-colors ${
+                    stripHtml
+                      ? "border-[#0F172B] bg-[#0F172B] text-white"
+                      : "border-[var(--qc-border-default)] bg-white text-[#888888]"
+                  }`}
+                >
+                  {stripHtml ? "On — plain text" : "Off — raw HTML"}
+                </button>
+              )}
             </div>
-            <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
-                Max Base Analyses
-              </label>
-              <input
-                type="number"
-                min={0}
-                value={maxBaseAnalyses}
-                onChange={(e) => { setMaxBaseAnalyses(Number(e.target.value)); mark(); }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
-              />
-            </div>
+            {!isConfig && (
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+                  Max Base Analyses
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={maxBaseAnalyses}
+                  onChange={(e) => { setMaxBaseAnalyses(Number(e.target.value)); mark(); }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                />
+              </div>
+            )}
           </div>
         )}
 

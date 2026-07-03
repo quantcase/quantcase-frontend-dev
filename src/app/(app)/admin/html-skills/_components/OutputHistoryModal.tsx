@@ -133,6 +133,11 @@ export function OutputHistoryModal({ slug, ticker, pinnedFiscalYear, pinnedQuart
                               <Pin className="size-2.5" /> PINNED
                             </span>
                           )}
+                          {row.config_key && (
+                            <span className="rounded-sm px-2 py-0.5 text-[10px] font-medium whitespace-nowrap bg-blue-50 text-blue-700">
+                              {row.config_key}
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-4 py-2.5 whitespace-nowrap text-[#888888]">{formatDate(row.created_at)}</td>

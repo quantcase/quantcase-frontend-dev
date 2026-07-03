@@ -19,6 +19,7 @@ interface Props {
   fiscalYear: string | null;
   quarter: string | null;
   historic: boolean;
+  configKey: string | null;
   onControls: (controls: PreviewControls) => void;
 }
 
@@ -26,7 +27,7 @@ function stripHtmlFences(raw: string): string {
   return raw.replace(/^```html\s*/i, "").replace(/\s*```\s*$/, "").trim();
 }
 
-export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, historic, onControls }: Props) {
+export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, historic, configKey, onControls }: Props) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunResponse | null>(null);
@@ -88,7 +89,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
     fetch(`${BACKEND_URL}${API_BASE}/${slug}/run`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ticker, callId, force, historic }),
+      body: JSON.stringify({ ticker, callId, force, historic, ...(configKey ? { configKey } : {}) }),
     })
       .then(async (res) => {
         const json = await res.json();
@@ -130,7 +131,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
   useEffect(() => {
     onControls({ running, result, hasBase, run: runSkill });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running, result, hasBase, callId, historic, fiscalYear, quarter]);
+  }, [running, result, hasBase, callId, historic, fiscalYear, quarter, configKey]);
 
   const html = result?.output?.raw_html ?? null;
 

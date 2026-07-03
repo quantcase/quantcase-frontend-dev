@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown, History, Radio } from "lucide-react";
+import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown, History, Radio, HelpCircle } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
 import { HtmlSkill, TestTicker, FAVORITE_TICKERS, CATEGORY_LABELS, API_BASE, PromptDryRunResponse } from "./_components/types";
 import { TickerSearch, TickerOption } from "./_components/TickerSearch";
@@ -11,6 +11,7 @@ import { SkillDetail, SkillDetailHandle } from "./_components/SkillDetail";
 import { PreviewPane, PreviewControls } from "./_components/PreviewPane";
 import { SignalsModal } from "./_components/SignalsModal";
 import { OutputHistoryModal } from "./_components/OutputHistoryModal";
+import { HelpModal } from "./_components/HelpModal";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { TabToggle } from "@/components/molecules/tab-toggle";
 
@@ -44,6 +45,7 @@ function HtmlSkillsPage() {
   const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
   const [showSignals, setShowSignals] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [skillDirty, setSkillDirty] = useState(false);
   const skillDetailRef = useRef<SkillDetailHandle>(null);
   const [loading, setLoading] = useState(false);
@@ -232,6 +234,15 @@ function HtmlSkillsPage() {
                 Save
               </button>
             )}
+
+            {/* Always available — explains Historic/Incremental, the global pin, and every field on this page */}
+            <button
+              onClick={() => setShowHelp(true)}
+              title="Help"
+              className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors shrink-0"
+            >
+              <HelpCircle className="size-3.5" />
+            </button>
           </div>
 
           {/* Right column: ticker toggle + signals link + run controls */}
@@ -344,6 +355,7 @@ function HtmlSkillsPage() {
                 </button>
               </>
             )}
+
           </div>
         </div>
 
@@ -427,6 +439,8 @@ function HtmlSkillsPage() {
           onClose={() => setShowHistoryModal(false)}
         />
       )}
+
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
     </div>
   );
 }

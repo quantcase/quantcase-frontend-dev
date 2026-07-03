@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { BACKEND_URL } from "@/lib/constants";
 
@@ -104,17 +105,14 @@ export function RegisterForm() {
   return (
     <div className="w-full max-w-[360px]">
       {/* Mobile-only logo */}
-      <div className="flex items-center gap-2.5 mb-10 lg:hidden">
-        <div
-          className="flex items-center justify-center rounded-full flex-shrink-0"
-          style={{ width: 34, height: 34, background: "#0F172B" }}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-          </svg>
-        </div>
-        <span style={{ fontSize: 15, fontWeight: 600, color: "#0F172B" }}>QuantCase</span>
+      <div className="mb-10 lg:hidden">
+        <Image
+          src="/logos/logo-text-dark.png"
+          alt="QuantCase"
+          width={139}
+          height={32}
+          className="h-6 w-auto"
+        />
       </div>
 
       <h1 style={{ fontSize: 28, fontWeight: 500, color: "#0F172B", marginBottom: 6, letterSpacing: "-0.02em" }}>

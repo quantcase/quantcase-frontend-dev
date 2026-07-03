@@ -31,19 +31,13 @@ export default function LandingNavbar() {
           style={{ textDecoration: "none" }}
         >
           <Image
-            src="/qc-logo-dark.png"
+            src="/logos/logo-text-dark.png"
             alt="Quantcase"
-            width={28}
-            height={28}
-            className="h-7 w-7"
+            width={169}
+            height={39}
+            className="h-[30px] w-auto"
             priority
           />
-          <span
-            className="text-[26px] font-medium leading-none tracking-tight"
-            style={{ fontFamily: "var(--font-instrument-serif, 'Instrument Serif', serif)", color: "#0E1A2B" }}
-          >
-            Quantcase
-          </span>
         </a>
 
         <nav className="hidden items-center gap-10 md:flex">

@@ -1,7 +1,8 @@
 "use client";
 
 import type { InsightSignalMapItem } from "@/types/analysis";
-import { SignalTile, SectionHeader } from "@/components/ds";
+import { SectionHeader } from "@/components/ds";
+import { SignalCard } from "@/components/overview/signal-card";
 
 interface InsightSignalMapProps {
   signals: InsightSignalMapItem[];
@@ -25,12 +26,12 @@ export function InsightSignalMap({ signals, heading }: InsightSignalMapProps) {
       >
         <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 10 }}>
           {signals.map((s, i) => (
-            <SignalTile
+            <SignalCard
               key={i}
               label={(s.category ?? s.label ?? "Signal").toUpperCase()}
               value={s.summary ?? s.signal}
               sentiment={s.sentiment}
-              detail={s.signal}
+              tooltip={s.signal ? { description: s.signal } : undefined}
             />
           ))}
         </div>

@@ -1,13 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import type { InsightData } from "@/types/analysis";
 import type { TechnicalsResponse } from "@/types/technicals";
 import type { ScreenerData } from "@/types/screener";
 import type { OverviewAnalysis } from "@/types/overview";
 import { MonoEyebrow } from "./primitives";
+import { SignalCard, type SignalTooltip } from "./signal-card";
 
 interface Props {
   management: InsightData | null;
@@ -32,18 +31,6 @@ function scoreBg(score: number): string {
   return "var(--qc-down-soft, #FDECEA)";
 }
 
-function sentColor(s: "positive" | "negative" | "neutral" | "transitional"): string {
-  if (s === "positive") return "var(--qc-up, #1F7A4A)";
-  if (s === "negative") return "var(--qc-down, #B23A2F)";
-  return "var(--qc-warn, #B4731A)";
-}
-
-function sentBg(s: "positive" | "negative" | "neutral" | "transitional"): string {
-  if (s === "positive") return "var(--qc-up-soft, #EAF4EE)";
-  if (s === "negative") return "var(--qc-down-soft, #FDECEA)";
-  return "var(--qc-warn-soft, #FEF3E2)";
-}
-
 function ratingKey(rating: string | null): "buy" | "strong-buy" | "hold" | "sell" | "underperform" {
   if (!rating) return "hold";
   const r = rating.toLowerCase().replace(/\s+/g, "-");
@@ -57,149 +44,6 @@ function ratingKey(rating: string | null): "buy" | "strong-buy" | "hold" | "sell
 function humanize(val: string | null | undefined): string {
   if (!val) return "—";
   return val.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-// ─── Compact Card (shared by MOD, Fundamentals, Technicals) ──────────────────
-
-function CompactCard({
-  label,
-  value,
-  sentiment = "neutral",
-}: {
-  label: string;
-  value: string;
-  sentiment?: "positive" | "negative" | "neutral";
-}) {
-  const bg = sentBg(sentiment);
-  const color = sentColor(sentiment);
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 3,
-        padding: "7px 10px",
-        background: bg,
-        border: `1px solid ${color}30`,
-        borderRadius: 8,
-      }}
-    >
-      <span
-        style={{
-          fontFamily: "var(--qc-font-mono)",
-          fontSize: "var(--qc-fz-9)",
-          letterSpacing: ".12em",
-          textTransform: "uppercase",
-          color: "var(--qc-ink-2)",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-      >
-        {label}
-      </span>
-      <span
-        style={{
-          fontFamily: "var(--qc-font-sans)",
-          fontSize: "var(--qc-fz-12)",
-          fontWeight: "var(--qc-w-semi)",
-          color,
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-// ─── Linkable Compact Card (for QuantCase Framework) ─────────────────────────
-
-function LinkableCompactCard({
-  label,
-  value,
-  sentiment = "neutral",
-  href,
-}: {
-  label: string;
-  value: string;
-  sentiment?: "positive" | "negative" | "neutral";
-  href: string;
-}) {
-  const bg = sentBg(sentiment);
-  const color = sentColor(sentiment);
-
-  return (
-    <div
-      className="linkable-compact-card"
-      style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        gap: 3,
-        padding: "7px 10px",
-        background: bg,
-        border: `1px solid ${color}30`,
-        borderRadius: 8,
-        transition: "border-color 0.15s ease",
-        ["--lcc-border-hover" as string]: color,
-      }}
-    >
-      <span
-        style={{
-          fontFamily: "var(--qc-font-mono)",
-          fontSize: "var(--qc-fz-9)",
-          letterSpacing: ".12em",
-          textTransform: "uppercase",
-          color: "var(--qc-ink-2)",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-      >
-        {label}
-      </span>
-      <span
-        style={{
-          fontFamily: "var(--qc-font-sans)",
-          fontSize: "var(--qc-fz-12)",
-          fontWeight: "var(--qc-w-semi)",
-          color,
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-      >
-        {value}
-      </span>
-      <Link
-        href={href}
-        aria-label={`Go to ${label} page`}
-        className="lcc-arrow"
-        style={{
-          position: "absolute",
-          top: 6,
-          right: 6,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 18,
-          height: 18,
-          borderRadius: "50%",
-          background: "var(--qc-ink)",
-          color: "var(--qc-card)",
-          opacity: 0,
-          transform: "scale(0.6)",
-          transition: "opacity 0.15s ease, transform 0.15s ease",
-        }}
-      >
-        <ArrowUpRight size={10} strokeWidth={2.5} />
-      </Link>
-    </div>
-  );
 }
 
 // ─── Key Alert Row ────────────────────────────────────────────────────────────
@@ -402,6 +246,21 @@ export function DecisionIntelligencePanel({
     if (v.includes("UPTREND") || v.includes("STRONG") || v.includes("OUTPERFORM") || v.includes("MID RANGE") || v.includes("ABOVE") || v.includes("HIGH")) return "positive";
     if (v.includes("DOWNTREND") || v.includes("WEAK") || v.includes("UNDERPERFORM") || v.includes("BELOW")) return "negative";
     return "neutral";
+  }
+
+  // Optional hover tooltips for the Technicals cards, sourced from the
+  // decision-intelligence indicators (explanation + watchout) when available.
+  const techIndicators = technicalsData?.decisionIntelligence?.indicators ?? [];
+  function techTip(...keywords: string[]): SignalTooltip | undefined {
+    const ind = techIndicators.find((i) =>
+      keywords.some((k) => i.name.toLowerCase().includes(k.toLowerCase()))
+    );
+    if (!ind?.explanation) return undefined;
+    return {
+      title: ind.name,
+      description: ind.explanation,
+      watch: ind.growthWatchout ?? ind.valueWatchout ?? undefined,
+    };
   }
 
   // Key alerts — simple source + one-line text
@@ -617,19 +476,19 @@ export function DecisionIntelligencePanel({
         <div>
           <MonoEyebrow style={{ marginBottom: 6 }}>QuantCase Framework</MonoEyebrow>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
-            <LinkableCompactCard
+            <SignalCard
               label="Management"
               value={mVerdict ? humanize(mVerdict) : "—"}
               sentiment={mScore !== null ? (mScore >= 70 ? "positive" : mScore >= 50 ? "neutral" : "negative") : "neutral"}
               href={`/screener/management?symbol=${encodeURIComponent(symbol)}`}
             />
-            <LinkableCompactCard
+            <SignalCard
               label="Opportunity"
               value={oVerdict ? humanize(oVerdict) : "—"}
               sentiment={oScore !== null ? (oScore >= 70 ? "positive" : oScore >= 50 ? "neutral" : "negative") : "neutral"}
               href={`/screener/opportunity?symbol=${encodeURIComponent(symbol)}`}
             />
-            <LinkableCompactCard
+            <SignalCard
               label="Deal"
               value={dVerdict ? humanize(dVerdict) : "—"}
               sentiment={dScore !== null ? (dScore >= 70 ? "positive" : dScore >= 50 ? "neutral" : "negative") : "neutral"}
@@ -646,7 +505,7 @@ export function DecisionIntelligencePanel({
           <MonoEyebrow style={{ marginBottom: 6 }}>Fundamentals</MonoEyebrow>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
             {fundamentalChips.map(({ label, value, sentiment = "neutral" }) => (
-              <CompactCard key={label} label={label} value={value} sentiment={sentiment} />
+              <SignalCard key={label} label={label} value={value} sentiment={sentiment} />
             ))}
           </div>
         </div>
@@ -658,14 +517,30 @@ export function DecisionIntelligencePanel({
         <div>
           <MonoEyebrow style={{ marginBottom: 6 }}>Technicals</MonoEyebrow>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 5 }}>
-            <CompactCard label="Structure" value={structureZone} sentiment={techSent(structureZone)} />
-            <CompactCard label="Trend" value={trendDir} sentiment={techSent(trendDir)} />
-            <CompactCard
+            <SignalCard
+              label="Structure"
+              value={structureZone}
+              sentiment={techSent(structureZone)}
+              tooltip={techTip("structure", "trend quality")}
+            />
+            <SignalCard
+              label="Trend"
+              value={trendDir}
+              sentiment={techSent(trendDir)}
+              tooltip={techTip("trend")}
+            />
+            <SignalCard
               label="Timing"
               value={`RSI ${technicalsData?.momentum?.rsi?.value != null ? Math.round(technicalsData.momentum.rsi.value) : "—"}`}
               sentiment="neutral"
+              tooltip={techTip("timing", "momentum", "rsi")}
             />
-            <CompactCard label="Rel. Str." value={rsNifty} sentiment={techSent(rsNifty)} />
+            <SignalCard
+              label="Rel. Str."
+              value={rsNifty}
+              sentiment={techSent(rsNifty)}
+              tooltip={techTip("relative strength", "rel. str", "leadership")}
+            />
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { SignInPreviewCard } from "./SignInPreviewCard";
 
@@ -101,18 +102,16 @@ export function SignInHeroPanel() {
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         {/* Logo + Wordmark + Headline stacked */}
-        <Link href="/" className="flex items-center gap-4">
-          <div
-            className="flex items-center justify-center rounded-full flex-shrink-0"
-            style={{ width: 52, height: 52, background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.18)" }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8">
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3.5-3.5" />
-            </svg>
-          </div>
+        <Link href="/" className="flex flex-col items-start gap-3">
+          <Image
+            src="/logos/logo-text-white.png"
+            alt="QuantCase"
+            width={187}
+            height={43}
+            className="h-9 w-auto"
+            priority
+          />
           <div className="flex flex-col justify-center">
-            <span style={{ fontSize: 28, fontWeight: 700, color: "white", letterSpacing: "-0.03em", lineHeight: 1.1 }}>QuantCase</span>
             <h1 style={{ fontSize: 20, fontWeight: 300, color: "lightgray", letterSpacing: "-0.02em", lineHeight: 1.2, margin: 0, paddingTop: 4 }}>
               Enterprise-grade research across{" "}
               <AnimatePresence mode="wait">

@@ -2,7 +2,7 @@
 
 import { Brain, AlertTriangle, Zap } from "lucide-react";
 import type { FundamentalsIntelligence } from "@/types/financials";
-import { SignalTile } from "@/components/ds";
+import { SignalCard } from "@/components/overview/signal-card";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -182,7 +182,7 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
               hints.some((h) => m.name.toLowerCase().includes(h.toLowerCase()))
             );
             return (
-              <SignalTile
+              <SignalCard
                 key={key}
                 label={SIGNAL_LABELS[key] ?? key}
                 value={value}

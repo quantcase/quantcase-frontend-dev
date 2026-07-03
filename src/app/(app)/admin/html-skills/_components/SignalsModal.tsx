@@ -15,7 +15,7 @@ import {
   FilterFn,
   PaginationState,
 } from "@tanstack/react-table";
-import { SIGNAL_TYPE_LABELS, SignalType } from "./types";
+import { SIGNAL_TYPE_LABELS, SignalType, API_BASE } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
 
 interface SignalMeasure {
@@ -63,11 +63,15 @@ interface SignalsResponse {
   slug: string;
   total: number;
   signals: Signal[];
+  historic: boolean;
+  base_context_count: number;
+  base_missing: boolean;
 }
 
 interface Props {
   slug: string;
   ticker: string;
+  historic: boolean;
   onClose: () => void;
 }
 
@@ -79,7 +83,7 @@ const exactFilter: FilterFn<Signal> = (row, columnId, filterValue) => {
 
 const columnHelper = createColumnHelper<Signal>();
 
-export function SignalsModal({ slug, ticker, onClose }: Props) {
+export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
   const [data, setData] = useState<SignalsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +96,7 @@ export function SignalsModal({ slug, ticker, onClose }: Props) {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`${BACKEND_URL}/api/html-skills/${slug}/signals/${ticker}`)
+    fetch(`${BACKEND_URL}${API_BASE}/${slug}/signals/${ticker}?historic=${historic}`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
@@ -100,7 +104,7 @@ export function SignalsModal({ slug, ticker, onClose }: Props) {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [slug, ticker]);
+  }, [slug, ticker, historic]);
 
   // Unique values for dropdown filters
   const uniqueFiscalYears = useMemo(
@@ -294,11 +298,19 @@ export function SignalsModal({ slug, ticker, onClose }: Props) {
           <div className="flex items-center gap-3">
             <h3 className="text-[14px] font-medium text-[var(--qc-ink)]">Signals</h3>
             <span className="text-[11px] text-[#888888] font-mono">{slug} · {ticker}</span>
-            {data && (
+            <span className={`rounded-sm px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${historic ? "bg-amber-50 text-amber-700" : "bg-zinc-100 text-zinc-500"}`}>
+              {historic ? "Historic" : "Incremental"}
+            </span>
+            {data && !data.base_missing && (
               <span className="rounded-sm bg-[#F5F5F5] px-2 py-0.5 text-[11px] font-medium text-[#888888]">
                 {filteredCount < total
                   ? `${filteredCount.toLocaleString()} of ${total.toLocaleString()}`
                   : `${total.toLocaleString()} total`}
+              </span>
+            )}
+            {data && !historic && !data.base_missing && (
+              <span className="text-[11px] text-[#888888]">
+                {data.base_context_count} base {data.base_context_count === 1 ? "analysis" : "analyses"} included
               </span>
             )}
           </div>
@@ -311,7 +323,7 @@ export function SignalsModal({ slug, ticker, onClose }: Props) {
         </div>
 
         {/* ── Toolbar: search + filter dropdowns ── */}
-        {data && (
+        {data && !data.base_missing && (
           <div className="flex items-center gap-2 border-b border-[var(--qc-border-default)] px-5 py-2.5 shrink-0 bg-[#FAFAFA]">
             {/* Global search */}
             <div className="relative">
@@ -434,7 +446,15 @@ export function SignalsModal({ slug, ticker, onClose }: Props) {
             </div>
           )}
 
-          {!loading && data && (
+          {!loading && data?.base_missing && (
+            <div className="flex flex-col items-center justify-center h-48 gap-2 text-[#888888]">
+              <AlertCircle className="size-6 text-amber-600" />
+              <p className="text-[13px]">No base output exists for this ticker yet.</p>
+              <p className="text-[12px]">Run Historic first to build a base for incremental signals.</p>
+            </div>
+          )}
+
+          {!loading && data && !data.base_missing && (
             <table className="w-full text-[12px] table-fixed">
               <colgroup>
                 {table.getAllColumns().map((col) => (
@@ -484,13 +504,13 @@ export function SignalsModal({ slug, ticker, onClose }: Props) {
             </table>
           )}
 
-          {!loading && data && filteredCount === 0 && (
+          {!loading && data && !data.base_missing && filteredCount === 0 && (
             <p className="text-center py-10 text-[13px] text-[#888888]">No signals match the current filters.</p>
           )}
         </div>
 
         {/* ── Pagination footer ── */}
-        {!loading && data && filteredCount > 0 && (
+        {!loading && data && !data.base_missing && filteredCount > 0 && (
           <div className="flex items-center justify-between border-t border-[var(--qc-border-default)] px-5 py-2.5 shrink-0 bg-[#FAFAFA]">
             <span className="text-[11px] text-[#888888]">
               {(() => {

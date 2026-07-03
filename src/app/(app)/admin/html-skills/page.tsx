@@ -2,14 +2,17 @@
 
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown } from "lucide-react";
+import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown, History, Radio } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
-import { HtmlSkill, TestTicker, FAVORITE_TICKERS, CATEGORY_LABELS, LiveSkillConfig } from "./_components/types";
+import { HtmlSkill, TestTicker, FAVORITE_TICKERS, CATEGORY_LABELS, API_BASE, PromptDryRunResponse } from "./_components/types";
 import { TickerSearch, TickerOption } from "./_components/TickerSearch";
 import type { StocksApiResponse } from "@/types/screener";
 import { SkillDetail, SkillDetailHandle } from "./_components/SkillDetail";
 import { PreviewPane, PreviewControls } from "./_components/PreviewPane";
 import { SignalsModal } from "./_components/SignalsModal";
+import { OutputHistoryModal } from "./_components/OutputHistoryModal";
+import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
+import { TabToggle } from "@/components/molecules/tab-toggle";
 
 export default function HtmlSkillsPageWrapper() {
   return (
@@ -29,10 +32,18 @@ function HtmlSkillsPage() {
 
   const [ticker, setTicker] = useState<TestTicker | null>(() => (searchParams.get("ticker") as TestTicker) ?? null);
   const [tickerOptions, setTickerOptions] = useState<TickerOption[]>([]);
+
+  // Historic and Incremental each remember their own selected period independently
+  const [historicCallId, setHistoricCallId] = useState<string | null>(() => searchParams.get("callId"));
+  const [incrementalCallId, setIncrementalCallId] = useState<string | null>(null);
+  const { data: calls } = useTranscriptCalls(ticker ?? "");
+  // Default true — mirrors the original (pre-incremental) behavior; flip off to opt into incremental base-context mode
+  const [historic, setHistoric] = useState(true);
+  const callId = historic ? historicCallId : incrementalCallId;
+
   const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
-  const [signalTotal, setSignalTotal] = useState(0);
-  const [liveConfig, setLiveConfig] = useState<LiveSkillConfig | null>(null);
   const [showSignals, setShowSignals] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [skillDirty, setSkillDirty] = useState(false);
   const skillDetailRef = useRef<SkillDetailHandle>(null);
   const [loading, setLoading] = useState(false);
@@ -44,7 +55,7 @@ function HtmlSkillsPage() {
 
   const loadSkills = useCallback(() => {
     setLoading(true);
-    fetch(`${BACKEND_URL}/api/html-skills?includeInactive=true`)
+    fetch(`${BACKEND_URL}${API_BASE}?includeInactive=true`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
@@ -56,14 +67,31 @@ function HtmlSkillsPage() {
 
   useEffect(() => { loadSkills(); }, [loadSkills]);
 
-  // ── Sync selectedSlug + ticker → URL ──────────────────────────────────────
+  // ── Sync selectedSlug + ticker + callId → URL ─────────────────────────────
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
     if (selectedSlug) params.set("skill", selectedSlug); else params.delete("skill");
     if (ticker) params.set("ticker", ticker); else params.delete("ticker");
+    if (callId) params.set("callId", callId); else params.delete("callId");
     router.replace(`?${params.toString()}`, { scroll: false });
-  }, [selectedSlug, ticker]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedSlug, ticker, callId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Resolve each mode's callId from the ticker's call list (default to most recent, independently) ─
+
+  useEffect(() => {
+    if (!ticker) { setHistoricCallId(null); setIncrementalCallId(null); return; }
+    if (calls.length === 0) return;
+    if (!calls.some((c) => c.id === historicCallId)) setHistoricCallId(calls[0].id);
+    if (!calls.some((c) => c.id === incrementalCallId)) setIncrementalCallId(calls[0].id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticker, calls]);
+
+  // ── Incremental needs a base to build on — force Historic until one exists ─
+
+  useEffect(() => {
+    if (previewControls?.hasBase === false) setHistoric(true);
+  }, [previewControls?.hasBase]);
 
   // ── Load stocks for ticker search ──────────────────────────────────────────
 
@@ -82,9 +110,8 @@ function HtmlSkillsPage() {
 
   useEffect(() => {
     setSkillDirty(false);
-    setLiveConfig(null);
     if (!selectedSlug) { setSelectedSkill(null); return; }
-    fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}`)
+    fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
@@ -99,7 +126,7 @@ function HtmlSkillsPage() {
     if (!selectedSlug) return;
     setSaving(true);
     setSaveError(null);
-    fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}`, {
+    fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),
@@ -117,29 +144,27 @@ function HtmlSkillsPage() {
   const [exportingPrompt, setExportingPrompt] = useState(false);
 
   async function handleExportPrompt() {
-    if (!selectedSlug || !ticker) return;
+    if (!selectedSlug || !ticker || !callId) return;
+    if (!historic && previewControls?.hasBase === false) {
+      setError("No base output exists for this ticker yet — run Historic first");
+      return;
+    }
     setExportingPrompt(true);
     try {
-      const params = new URLSearchParams();
-      if (liveConfig?.maxTranscriptQtrs != null) params.set("max_transcript_qtrs", String(liveConfig.maxTranscriptQtrs));
-      if (liveConfig?.maxPptQtrs != null) params.set("max_ppt_qtrs", String(liveConfig.maxPptQtrs));
-      if (liveConfig?.maxAnnualReportYears != null) params.set("max_annual_report_years", String(liveConfig.maxAnnualReportYears));
-      if (liveConfig?.transcriptSignalTypes?.length) params.set("transcript_signal_types", liveConfig.transcriptSignalTypes.join(","));
-      if (liveConfig?.pptSignalTypes?.length) params.set("ppt_signal_types", liveConfig.pptSignalTypes.join(","));
-      if (liveConfig?.annualReportSignalTypes?.length) params.set("annual_report_signal_types", liveConfig.annualReportSignalTypes.join(","));
-      const qs = params.toString();
-      const res = await fetch(`${BACKEND_URL}/api/html-skills/${selectedSlug}/prompt/${ticker}${qs ? `?${qs}` : ""}`);
+      const params = new URLSearchParams({ callId });
+      if (historic) params.set("historic", "true");
+      const res = await fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/prompt/${ticker}?${params}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
 
-      const { slug, ticker: t, systemPrompt, userPrompt } = json;
+      const { slug, ticker: t, systemPrompt, userPrompt } = json as PromptDryRunResponse;
       const md = `${systemPrompt}\n\n${userPrompt}`;
 
       const blob = new Blob([md], { type: "text/markdown" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${slug}__${t}.md`;
+      a.download = `${slug}__${t}${historic ? "__historic" : ""}.md`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -148,6 +173,8 @@ function HtmlSkillsPage() {
       setExportingPrompt(false);
     }
   }
+
+  const selectedCall = calls.find((c) => c.id === callId) ?? null;
 
   const byCategory = skills.reduce<Record<string, HtmlSkill[]>>((acc, skill) => {
     const cat = skill.category;
@@ -219,15 +246,65 @@ function HtmlSkillsPage() {
                   favorites={[...FAVORITE_TICKERS]}
                 />
 
+                {/* Historic / Incremental — prominent, defaults to Historic (original behavior).
+                    Incremental needs a base to build on, so it's unavailable until a first output exists. */}
+                {ticker && (
+                  <TabToggle
+                    variant="outline"
+                    options={previewControls?.hasBase === false ? ["Historic"] : ["Historic", "Incremental"]}
+                    value={historic ? "Historic" : "Incremental"}
+                    onChange={(v) => setHistoric(v === "Historic")}
+                    className="shrink-0"
+                  />
+                )}
+                {ticker && previewControls?.hasBase === false && (
+                  <span className="text-[11px] text-amber-700 shrink-0">No base yet — run Historic first</span>
+                )}
+
+                {/* Pick the fiscal year/quarter that resolves to callId — Historic and Incremental each keep their own selection */}
+                {ticker && (
+                  <div className="relative shrink-0">
+                    <select
+                      value={callId ?? ""}
+                      onChange={(e) => {
+                        const v = e.target.value || null;
+                        if (historic) setHistoricCallId(v); else setIncrementalCallId(v);
+                      }}
+                      disabled={calls.length === 0}
+                      title={`Fiscal year / quarter for this ${historic ? "historic" : "incremental"} run`}
+                      className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
+                    >
+                      {calls.length === 0 && <option value="">No calls</option>}
+                      {calls.map((c) => (
+                        <option key={c.id} value={c.id}>{c.quarter} {c.fiscal_year}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-[#888888]" />
+                  </div>
+                )}
+
                 <div className="flex-1" />
 
-                {/* Signal total from API */}
-                {signalTotal > 0 && (
+                {/* Inspect the exact signals feeding this run — count is fetched inside the modal (mode/base-aware, too heavy to preview here) */}
+                {ticker && (
                   <button
                     onClick={() => setShowSignals(true)}
-                    className="text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                    className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
                   >
-                    {signalTotal.toLocaleString()} signals
+                    <Radio className="size-3" />
+                    Signals
+                  </button>
+                )}
+
+                {/* Browse past outputs for this ticker — the base pin itself is set skill-wide in the editor */}
+                {ticker && (
+                  <button
+                    onClick={() => setShowHistoryModal(true)}
+                    title="Browse past outputs for this ticker"
+                    className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                  >
+                    <History className="size-3" />
+                    History
                   </button>
                 )}
 
@@ -249,7 +326,7 @@ function HtmlSkillsPage() {
                 {/* Export full prompt */}
                 <button
                   onClick={handleExportPrompt}
-                  disabled={exportingPrompt}
+                  disabled={exportingPrompt || !callId}
                   title="Export full prompt as .md"
                   className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
                 >
@@ -259,7 +336,7 @@ function HtmlSkillsPage() {
                 {/* Run */}
                 <button
                   onClick={() => previewControls?.run(true)}
-                  disabled={previewControls?.running}
+                  disabled={previewControls?.running || !callId}
                   className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
                 >
                   {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
@@ -291,15 +368,12 @@ function HtmlSkillsPage() {
                 ref={skillDetailRef}
                 skill={selectedSkill}
                 ticker={ticker ?? ""}
+                historic={historic}
                 saving={saving}
                 saveError={saveError}
                 hideHeader
                 onSave={(updates) => { handleSave(updates); setSkillDirty(false); }}
                 onDirtyChange={setSkillDirty}
-                onSignalCountsChange={(_counts, _types, total) => {
-                  setSignalTotal(total);
-                }}
-                onConfigChange={setLiveConfig}
               />
             ) : (
               <div className="flex h-full items-center justify-center text-[13px] text-[#888888]">
@@ -315,7 +389,10 @@ function HtmlSkillsPage() {
                 key={selectedSkill.slug}
                 slug={selectedSkill.slug}
                 ticker={ticker}
-                liveConfig={liveConfig}
+                callId={callId}
+                fiscalYear={selectedCall?.fiscal_year ?? null}
+                quarter={selectedCall?.quarter ?? null}
+                historic={historic}
                 onControls={setPreviewControls}
               />
             ) : (
@@ -331,7 +408,23 @@ function HtmlSkillsPage() {
         <SignalsModal
           slug={selectedSkill.slug}
           ticker={ticker}
+          historic={historic}
           onClose={() => setShowSignals(false)}
+        />
+      )}
+
+      {showHistoryModal && selectedSkill && ticker && (
+        <OutputHistoryModal
+          slug={selectedSkill.slug}
+          ticker={ticker}
+          pinnedFiscalYear={selectedSkill.pinned_fiscal_year}
+          pinnedQuarter={selectedSkill.pinned_quarter}
+          pinnedHistoric={selectedSkill.pinned_historic}
+          pinning={saving}
+          onPin={(fiscalYear, quarter, historicPin) => {
+            handleSave({ pinned_fiscal_year: fiscalYear, pinned_quarter: quarter, pinned_historic: historicPin });
+          }}
+          onClose={() => setShowHistoryModal(false)}
         />
       )}
     </div>

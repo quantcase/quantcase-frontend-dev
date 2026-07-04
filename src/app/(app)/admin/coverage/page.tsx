@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { Layers, ArrowRight } from "lucide-react";
 import { L1MultiDispatchTab } from "./_components/L1MultiDispatchTab";
+import { L2MultiDispatchTab } from "./_components/L2MultiDispatchTab";
+import { DailyRunsTab } from "./_components/DailyRunsTab";
 
-type CoverageTab = "l1" | "l2" | "l3";
+type CoverageTab = "l1" | "l2" | "l3" | "daily";
 
 const TABS: { id: CoverageTab; label: string }[] = [
   { id: "l1", label: "L1" },
   { id: "l2", label: "L2" },
   { id: "l3", label: "L3" },
+  { id: "daily", label: "Daily Runs" },
 ];
 
 function ComingSoon({ label }: { label: string }) {
@@ -31,6 +36,25 @@ export default function CoveragePage() {
         </p>
       </div>
 
+      {/* Manage Company Groups — prominent, top of page: manual ticker lists and live filters
+          reusable across L1/L2/L3, managed in one place regardless of which lens tab is open. */}
+      <Link
+        href="/admin/company-groups"
+        className="flex items-center gap-4 rounded-[10px] border border-[#E2E2E2] bg-white px-5 py-4 hover:border-[#0F172B] transition-colors group"
+      >
+        <div className="flex size-10 items-center justify-center rounded-[8px] bg-[#0F172B] shrink-0">
+          <Layers className="size-5 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[14px] font-semibold text-[#0F172B]">Company Groups</p>
+          <p className="text-[12px] text-[#888888] mt-0.5">
+            Manual ticker lists and live filters, reusable across L1, L2, and L3 dispatch — create,
+            edit, and tag them here.
+          </p>
+        </div>
+        <ArrowRight className="size-4 text-[#888888] group-hover:text-[#0F172B] transition-colors shrink-0" />
+      </Link>
+
       {/* Tab strip */}
       <div className="flex border-b border-[#E2E2E2]">
         {TABS.map((tab) => (
@@ -49,8 +73,9 @@ export default function CoveragePage() {
       </div>
 
       {activeTab === "l1" && <L1MultiDispatchTab />}
-      {activeTab === "l2" && <ComingSoon label="L2" />}
+      {activeTab === "l2" && <L2MultiDispatchTab />}
       {activeTab === "l3" && <ComingSoon label="L3" />}
+      {activeTab === "daily" && <DailyRunsTab />}
     </div>
   );
 }

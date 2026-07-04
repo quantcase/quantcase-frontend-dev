@@ -6,41 +6,66 @@ import { rawFetch, rawPost, rawPostDownload } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { CheckboxField } from "@/components/molecules/checkbox-field";
 import { CompanySourcePicker } from "./CompanySourcePicker";
+import { GroupConfigTag } from "./GroupConfigTag";
 import {
   TickerSource,
-  L1DispatchOptions,
-  L1OptionsResponse,
-  L1CompanyGroupOption,
-  L1PreviewResponse,
-  L1PreviewTicker,
-  L1RunTriggerResponse,
-  L1Run,
-  L1RunsResponse,
+  L2DispatchOptions,
+  L2OptionsResponse,
+  L2Skill,
+  L2ConfigKeyOption,
+  L2CompanyGroupOption,
+  L2PreviewResponse,
+  L2PreviewTickerRow,
+  L2RunTriggerResponse,
+  L2Run,
+  L2RunsResponse,
 } from "./types";
 
-interface ResolveCountResponse {
-  data: { tickers: string[]; count: number };
-}
+type L2SortSource = "transcript" | "ppt" | "annual_report";
+const SORT_LABEL: Record<L2SortSource, string> = {
+  transcript: "Transcript",
+  ppt: "PPT",
+  annual_report: "Annual Report",
+};
 
-const BASE = `${BACKEND_URL}/admin/pipeline-dispatch/l1-multi`;
+const BASE = `${BACKEND_URL}/admin/pipeline-dispatch/l2-multi`;
 
 const INPUT_CLS =
   "rounded-md border border-[#E2E2E2] px-3 py-2 text-sm font-mono text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]";
 const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5";
 
-// ── Small shared cells ───────────────────────────────────────────────────────
+// ── Preview per-ticker row — signal-availability report (one query for the whole batch) ─────
 
-function BoolTick({ value }: { value: boolean }) {
+function PreviewSourceBlock({ label, cov, hasQuarter }: { label: string; cov: L2PreviewTickerRow["transcript"]; hasQuarter: boolean }) {
+  if (cov.periods.length === 0) return null;
   return (
-    <span className={`text-[11px] font-medium ${value ? "text-emerald-600" : "text-red-600"}`}>
-      {value ? "✓" : "✗"}
-    </span>
+    <div>
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">{label}</div>
+      <div className="rounded-md border border-[#E2E2E2] overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
+              <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Year</th>
+              {hasQuarter && <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Quarter</th>}
+              <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Count</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#F0F0F0] bg-white">
+            {cov.periods.map((p, i) => (
+              <tr key={i}>
+                <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{p.fiscal_year}</td>
+                {hasQuarter && <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{p.quarter}</td>}
+                <td className="px-3 py-1.5 text-center text-[11px] font-medium text-[#0F172B]">{p.count}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
-// ── Preview per-ticker row ───────────────────────────────────────────────────
-
-function PreviewTickerRow({ t }: { t: L1PreviewTicker }) {
+function PreviewTickerRow({ row }: { row: L2PreviewTickerRow }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="rounded-[8px] border border-[#F0F0F0] bg-white overflow-hidden">
@@ -48,79 +73,24 @@ function PreviewTickerRow({ t }: { t: L1PreviewTicker }) {
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center gap-4 px-3 py-2 hover:bg-[#FAFAFA] transition-colors text-left"
       >
-        <span className="font-mono text-[12px] font-medium text-[#0F172B] w-24 shrink-0">{t.symbol}</span>
+        <span className="font-mono text-[12px] font-medium text-[#0F172B] w-24 shrink-0">{row.ticker}</span>
         <span className="text-[11px] text-[#888888]">
-          Calls: <span className="text-[#0F172B] font-medium">{t.calls.shown}</span>/{t.calls.total}
+          Transcript: <span className="text-[#0F172B] font-medium">{row.transcript.total}</span>
         </span>
         <span className="text-[11px] text-[#888888]">
-          Annual: <span className="text-[#0F172B] font-medium">{t.annualReports.shown}</span>/{t.annualReports.total}
+          PPT: <span className="text-[#0F172B] font-medium">{row.ppt.total}</span>
+        </span>
+        <span className="text-[11px] text-[#888888]">
+          Annual: <span className="text-[#0F172B] font-medium">{row.annual_report.total}</span>
         </span>
         <ChevronDown className={`size-3.5 text-[#888888] ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
         <div className="border-t border-[#F0F0F0] px-3 py-3 bg-[#FAFAFA] space-y-3">
-          {t.calls.items.length > 0 && (
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">Calls</div>
-              <div className="rounded-md border border-[#E2E2E2] overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="bg-[#F5F5F5] border-b border-[#F0F0F0]">
-                      <th className="px-3 py-1 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]" rowSpan={2}>Year</th>
-                      <th className="px-3 py-1 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]" rowSpan={2}>Quarter</th>
-                      <th className="px-3 py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]" colSpan={2}>Transcript</th>
-                      <th className="px-3 py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]" colSpan={2}>PPT</th>
-                    </tr>
-                    <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-[#888888]">Doc</th>
-                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-[#888888]">Signal</th>
-                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-[#888888]">Doc</th>
-                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-[#888888]">Signal</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#F0F0F0] bg-white">
-                    {t.calls.items.map((c) => (
-                      <tr key={c.id}>
-                        <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{c.fiscal_year}</td>
-                        <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{c.quarter}</td>
-                        <td className="px-3 py-1.5 text-center"><BoolTick value={c.hasTranscript} /></td>
-                        <td className="px-3 py-1.5 text-center"><BoolTick value={c.hasTranscriptSignal} /></td>
-                        <td className="px-3 py-1.5 text-center"><BoolTick value={c.hasPpt} /></td>
-                        <td className="px-3 py-1.5 text-center"><BoolTick value={c.hasPptSignal} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {t.annualReports.items.length > 0 && (
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">Annual Reports</div>
-              <div className="rounded-md border border-[#E2E2E2] overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-                      <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Year</th>
-                      <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">URL</th>
-                      <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Signal</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#F0F0F0] bg-white">
-                    {t.annualReports.items.map((a) => (
-                      <tr key={a.id}>
-                        <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{a.fiscal_year}</td>
-                        <td className="px-3 py-1.5 text-center"><BoolTick value={a.hasUrl} /></td>
-                        <td className="px-3 py-1.5 text-center"><BoolTick value={a.hasSignal} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          <PreviewSourceBlock label="Transcript" cov={row.transcript} hasQuarter />
+          <PreviewSourceBlock label="PPT" cov={row.ppt} hasQuarter />
+          <PreviewSourceBlock label="Annual Report" cov={row.annual_report} hasQuarter={false} />
         </div>
       )}
     </div>
@@ -129,7 +99,7 @@ function PreviewTickerRow({ t }: { t: L1PreviewTicker }) {
 
 // ── Run status badge ─────────────────────────────────────────────────────────
 
-function RunStatusBadge({ status }: { status: L1Run["status"] }) {
+function RunStatusBadge({ status }: { status: L2Run["status"] }) {
   if (status === "completed") {
     return (
       <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
@@ -153,7 +123,7 @@ function RunStatusBadge({ status }: { status: L1Run["status"] }) {
 
 // ── Run history row ───────────────────────────────────────────────────────────
 
-function RunHistoryRow({ run }: { run: L1Run }) {
+function RunHistoryRow({ run }: { run: L2Run }) {
   const [open, setOpen] = useState(false);
   const hasMeta = !!run.metadata;
 
@@ -163,7 +133,7 @@ function RunHistoryRow({ run }: { run: L1Run }) {
         onClick={() => hasMeta && setOpen((v) => !v)}
         className={`w-full flex items-center gap-4 px-3 py-2 text-left transition-colors ${hasMeta ? "hover:bg-[#FAFAFA]" : ""}`}
       >
-        <span className="font-mono text-[11px] text-[#888888] w-40 truncate shrink-0">{run.id}</span>
+        <span className="font-mono text-[11px] text-[#888888] w-40 truncate shrink-0">{run.job_id}</span>
         <RunStatusBadge status={run.status} />
         <span className="text-[11px] text-[#888888]">
           {run.records_processed != null ? `${run.records_processed} queued` : "—"}
@@ -175,17 +145,19 @@ function RunHistoryRow({ run }: { run: L1Run }) {
       </button>
 
       {run.status === "failed" && run.error && (
-        <div className="border-t border-[#F0F0F0] px-3 py-2 text-[11px] text-red-700 bg-red-50">
-          {run.error}
-          <span className="block text-red-500 mt-0.5">Partial progress before the failure was not rolled back.</span>
-        </div>
+        <div className="border-t border-[#F0F0F0] px-3 py-2 text-[11px] text-red-700 bg-red-50">{run.error}</div>
       )}
 
       {open && run.metadata && (
         <div className="border-t border-[#F0F0F0] px-3 py-3 bg-[#FAFAFA] space-y-2">
+          <p className="flex items-start gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1.5">
+            <AlertCircle className="size-3.5 shrink-0 mt-px" />
+            Queued/failed here only mean dispatch succeeded — config resolution happens per-job,
+            later, inside the worker. A ticker can show &ldquo;queued&rdquo; here and still fail
+            once picked up; check the job/Bull Board flow for the real per-ticker outcome.
+          </p>
           <div className="flex gap-4 text-[11px] text-[#888888]">
             <span>Queued: <span className="text-[#0F172B] font-medium">{run.metadata.queued}</span></span>
-            <span>Skipped: <span className="text-[#0F172B] font-medium">{run.metadata.skipped}</span></span>
             <span>No source: <span className="text-[#0F172B] font-medium">{run.metadata.noSource}</span></span>
             <span>Failed: <span className="text-[#0F172B] font-medium">{run.metadata.failed}</span></span>
           </div>
@@ -195,20 +167,16 @@ function RunHistoryRow({ run }: { run: L1Run }) {
                 <thead>
                   <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
                     <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Ticker</th>
-                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Queued</th>
-                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Skipped</th>
-                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">No Source</th>
-                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Failed</th>
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Status</th>
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Job ID</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0F0F0] bg-white">
                   {run.metadata.perTicker.map((p) => (
-                    <tr key={p.symbol}>
-                      <td className="px-3 py-1.5 font-mono text-[11px] text-[#0F172B]">{p.symbol}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.queued}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.skipped}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.noSource}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-red-600">{p.failed}</td>
+                    <tr key={p.ticker}>
+                      <td className="px-3 py-1.5 font-mono text-[11px] text-[#0F172B]">{p.ticker}</td>
+                      <td className="px-3 py-1.5 text-[11px] text-[#888888]">{p.status ?? "—"}</td>
+                      <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{p.jobId ?? "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -221,35 +189,38 @@ function RunHistoryRow({ run }: { run: L1Run }) {
   );
 }
 
+interface ResolveCountResponse {
+  data: { tickers: string[]; count: number };
+}
+
 // ── Main tab ───────────────────────────────────────────────────────────────
 
-export function L1MultiDispatchTab() {
-  // Picker options
-  const [defaultTickers, setDefaultTickers] = useState<string[]>([]);
+export function L2MultiDispatchTab() {
+  // Picker options — L2-specific (skills, config keys, groups-with-config_key)
+  const [skills, setSkills] = useState<L2Skill[]>([]);
+  const [skillSlug, setSkillSlug] = useState("");
+  const [configKeys, setConfigKeys] = useState<L2ConfigKeyOption[]>([]);
   const [companies, setCompanies] = useState<string[]>([]);
-  const [companyGroups, setCompanyGroups] = useState<L1CompanyGroupOption[]>([]);
+  const [companyGroups, setCompanyGroups] = useState<L2CompanyGroupOption[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [optionsError, setOptionsError] = useState<string | null>(null);
 
   // Company selection — owned by this tab only
   const [source, setSource] = useState<TickerSource>("default");
   const [tickers, setTickers] = useState<string[]>([]);
-  const [groupSlug, setGroupSlug] = useState<string>("");
+  const [groupSlug, setGroupSlug] = useState("");
   const [groupCounts, setGroupCounts] = useState<Record<string, number | "loading" | "error">>({});
 
   // Form state
-  const [startFrom, setStartFrom] = useState("");
-  const [limit, setLimit] = useState("");
-  const [latest, setLatest] = useState("");
+  const [historic, setHistoric] = useState(false);
   const [force, setForce] = useState(false);
-  const [arOnly, setArOnly] = useState(false);
-  const [noAr, setNoAr] = useState(false);
 
   // Preview
-  const [preview, setPreview] = useState<L1PreviewResponse | null>(null);
+  const [preview, setPreview] = useState<L2PreviewResponse | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewedKey, setPreviewedKey] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<L2SortSource>("transcript");
 
   // CSV export
   const [csvLoading, setCsvLoading] = useState(false);
@@ -262,19 +233,19 @@ export function L1MultiDispatchTab() {
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
 
   // Run history
-  const [runs, setRuns] = useState<L1Run[]>([]);
+  const [runs, setRuns] = useState<L2Run[]>([]);
   const [runsLoading, setRunsLoading] = useState(false);
   const [runsError, setRunsError] = useState<string | null>(null);
 
-  // ── Load picker options ──────────────────────────────────────────────────
-
   useEffect(() => {
-    rawFetch<L1OptionsResponse>(`${BASE}/options`, {
+    rawFetch<L2OptionsResponse>(`${BASE}/options`, {
       onStart: () => { setOptionsLoading(true); setOptionsError(null); },
       onSuccess: (res) => {
-        setDefaultTickers(res.defaultTickers ?? []);
+        setSkills(res.skills ?? []);
+        setConfigKeys(res.configKeys ?? []);
         setCompanies(res.companies ?? []);
         setCompanyGroups(res.companyGroups ?? []);
+        if ((res.skills ?? []).length > 0) setSkillSlug((res.skills ?? [])[0].slug);
       },
       onError: setOptionsError,
       onComplete: () => setOptionsLoading(false),
@@ -295,10 +266,8 @@ export function L1MultiDispatchTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source, companyGroups]);
 
-  // ── Run history ──────────────────────────────────────────────────────────
-
   const loadRuns = useCallback(() => {
-    rawFetch<L1RunsResponse>(`${BASE}/runs?limit=20`, {
+    rawFetch<L2RunsResponse>(`${BASE}/runs?limit=20`, {
       onStart: () => setRunsLoading(true),
       onSuccess: (res) => setRuns(res.runs ?? []),
       onError: setRunsError,
@@ -308,43 +277,35 @@ export function L1MultiDispatchTab() {
 
   useEffect(() => { loadRuns(); }, [loadRuns]);
 
-  const activeRun = runs.find((r) => r.id === activeRunId) ?? null;
-  // Still "live" until the polled history confirms the run has left the running state
+  const activeRun = runs.find((r) => r.job_id === activeRunId) ?? null;
   const isRunLive = !!activeRunId && (!activeRun || activeRun.status === "running");
 
-  // Poll while a run is live
   useEffect(() => {
     if (!isRunLive) return;
     const iv = setInterval(loadRuns, 2000);
     return () => clearInterval(iv);
   }, [isRunLive, loadRuns]);
 
-  // ── Options body ─────────────────────────────────────────────────────────
+  const sourceUsable = source !== "default"; // L2 has no default ticker list
+  const selectedGroup = companyGroups.find((g) => g.slug === groupSlug);
 
-  const body = useMemo<L1DispatchOptions>(() => {
-    const b: L1DispatchOptions = {};
-    if (source === "all") {
-      b.all = true;
-    } else if (source === "group" && groupSlug) {
-      b.groupSlug = groupSlug;
-    } else if (source === "manual" && tickers.length > 0) {
-      b.tickers = tickers;
-    }
-    if (startFrom.trim()) b.startFrom = startFrom.trim().toUpperCase();
-    if (limit.trim()) b.limit = Number(limit);
-    if (latest.trim()) b.latest = Number(latest);
+  const body = useMemo<L2DispatchOptions>(() => {
+    const b: L2DispatchOptions = { slug: skillSlug };
+    if (source === "all") b.all = true;
+    else if (source === "group" && groupSlug) b.groupSlug = groupSlug;
+    else if (source === "manual" && tickers.length > 0) b.tickers = tickers;
+    if (historic) b.historic = true;
     if (force) b.force = true;
-    if (arOnly) b.arOnly = true;
-    if (noAr) b.noAr = true;
     return b;
-  }, [source, groupSlug, tickers, startFrom, limit, latest, force, arOnly, noAr]);
+  }, [skillSlug, source, groupSlug, tickers, historic, force]);
 
   const bodyKey = JSON.stringify(body);
-  const canRun = previewedKey === bodyKey && !previewLoading && !triggering && !isRunLive;
+  const canPreview = sourceUsable && !!skillSlug && !previewLoading;
+  const canRun = sourceUsable && !!skillSlug && previewedKey === bodyKey && !previewLoading && !triggering && !isRunLive;
 
   function doPreview() {
     const key = bodyKey;
-    rawPost<L1PreviewResponse>(`${BASE}/preview`, {
+    rawPost<L2PreviewResponse>(`${BASE}/preview`, {
       onStart: () => { setPreviewLoading(true); setPreviewError(null); },
       onSuccess: (res) => { setPreview(res); setPreviewedKey(key); },
       onError: setPreviewError,
@@ -357,12 +318,12 @@ export function L1MultiDispatchTab() {
       onStart: () => { setCsvLoading(true); setCsvError(null); },
       onError: setCsvError,
       onComplete: () => setCsvLoading(false),
-    }, body, "l1-preview.csv");
+    }, body, `l2-preview-${skillSlug || "coverage"}.csv`);
   }
 
   function handleRunClick() {
     if (!confirmArmed) { setConfirmArmed(true); return; }
-    rawPost<L1RunTriggerResponse>(`${BASE}/run`, {
+    rawPost<L2RunTriggerResponse>(`${BASE}/run`, {
       onStart: () => { setTriggering(true); setRunError(null); },
       onSuccess: (res) => { setActiveRunId(res.run_id); setConfirmArmed(false); loadRuns(); },
       onError: setRunError,
@@ -370,16 +331,23 @@ export function L1MultiDispatchTab() {
     }, body);
   }
 
+  // Ascending = least-covered first, i.e. the most critical gap for the chosen source
+  const rows = useMemo(
+    () => [...(preview?.perTicker ?? [])].sort((a, b) => a[sortBy].total - b[sortBy].total),
+    [preview, sortBy]
+  );
+
   return (
     <div className="space-y-5 max-w-4xl">
       {/* Intro */}
       <div className="rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
-        <p className="text-[13px] text-[#0F172B] font-medium">On-demand L1 extraction</p>
+        <p className="text-[13px] text-[#0F172B] font-medium">On-demand L2 skill dispatch</p>
         <p className="text-[12px] text-[#888888] mt-1 leading-relaxed">
-          Transcript, PPT, and annual-report signal extraction, triggered manually for a chosen
-          ticker set. There is no cron/auto mode here — every run is one-off and explicit. Always
-          Preview before Run; Preview is read-only and free to repeat, Run actually dispatches
-          real (billable) LLM extraction jobs.
+          Runs a skill (e.g. guidance-credibility) against the chosen ticker set. Every ticker
+          resolves its config automatically from whichever tagged company group covers it — an
+          untagged ticker hard-fails with a 400. Preview is a fast signal-availability report (one
+          batched query, not per-ticker) — it doesn&rsquo;t reflect Historic/Force, which only
+          affect Run. Always Preview before Run.
         </p>
       </div>
 
@@ -395,71 +363,59 @@ export function L1MultiDispatchTab() {
         tickers={tickers}
         onTickersChange={setTickers}
         companies={companies}
-        defaultTickerCount={defaultTickers.length}
+        defaultTickerCount={0}
         groupSlug={groupSlug}
         onGroupSlugChange={setGroupSlug}
         companyGroups={companyGroups}
         groupCounts={groupCounts}
         loading={optionsLoading}
+        noDefault
       />
 
-      {/* L1-specific extraction options */}
+      {/* Config tag for the group selected above — full width, always editable even if already tagged */}
+      {source === "group" && selectedGroup && (
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Group Config Tag</span>
+          <GroupConfigTag
+            group={selectedGroup}
+            configKeys={configKeys}
+            onTagged={(slug, configKey) =>
+              setCompanyGroups((gs) => gs.map((gg) => (gg.slug === slug ? { ...gg, config_key: configKey } : gg)))
+            }
+          />
+        </div>
+      )}
+
+      {/* Options form */}
       <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-4 space-y-4">
-        <div className="grid grid-cols-3 gap-3">
-          <div>
-            <label className={LABEL_CLS}>Start From</label>
-            <input
-              value={startFrom}
-              onChange={(e) => setStartFrom(e.target.value.toUpperCase())}
-              placeholder="e.g. MSUMI"
-              className={`${INPUT_CLS} w-full uppercase`}
-            />
-            <p className="text-[11px] text-[#888888] mt-1">Alphabetical cursor — resume a long run.</p>
-          </div>
-          <div>
-            <label className={LABEL_CLS}>Limit</label>
-            <input
-              type="number"
-              min={1}
-              value={limit}
-              onChange={(e) => setLimit(e.target.value)}
-              placeholder="all history"
-              className={`${INPUT_CLS} w-full`}
-            />
-            <p className="text-[11px] text-[#888888] mt-1">Most-recent calls/reports considered.</p>
-          </div>
-          <div>
-            <label className={LABEL_CLS}>Latest</label>
-            <input
-              type="number"
-              min={1}
-              value={latest}
-              onChange={(e) => setLatest(e.target.value)}
-              placeholder="—"
-              className={`${INPUT_CLS} w-full`}
-            />
-            <p className="text-[11px] text-[#888888] mt-1">Takes precedence over Limit if both set.</p>
-          </div>
+        <div>
+          <label className={LABEL_CLS}>
+            Skill {optionsLoading && <span className="normal-case tracking-normal font-normal">— loading…</span>}
+          </label>
+          <select
+            value={skillSlug}
+            onChange={(e) => setSkillSlug(e.target.value)}
+            className={`${INPUT_CLS} w-full max-w-sm`}
+          >
+            {skills.length === 0 && <option value="">No skills available</option>}
+            {skills.map((s) => (
+              <option key={s.slug} value={s.slug}>{s.name}</option>
+            ))}
+          </select>
         </div>
 
         <div className="flex flex-wrap gap-6 pt-1 border-t border-[#F0F0F0]">
           <CheckboxField
+            checked={historic}
+            onChange={setHistoric}
+            label="Historic mode"
+            hint="Runs the full base-context build instead of incremental. Run only — ignored by Preview."
+          />
+          <CheckboxField
             checked={force}
             onChange={setForce}
-            label="Force re-extract"
-            hint="Re-run tickers that already have extracted signals (discards the old ones). Off by default."
-          />
-          <CheckboxField
-            checked={arOnly}
-            onChange={(v) => { setArOnly(v); if (v) setNoAr(false); }}
-            label="Annual reports only"
-            hint="Skips transcript and PPT entirely."
-          />
-          <CheckboxField
-            checked={noAr}
-            onChange={(v) => { setNoAr(v); if (v) setArOnly(false); }}
-            label="Skip annual reports"
-            hint="Skips annual reports entirely."
+            label="Force"
+            hint="Bypasses cache on Run. Run only — ignored by Preview."
           />
         </div>
       </div>
@@ -485,7 +441,7 @@ export function L1MultiDispatchTab() {
       <div className="flex items-center gap-3 flex-wrap">
         <button
           onClick={doPreview}
-          disabled={previewLoading}
+          disabled={!canPreview}
           className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40"
         >
           {previewLoading && <Loader2 className="size-3.5 animate-spin" />}
@@ -494,7 +450,7 @@ export function L1MultiDispatchTab() {
 
         <button
           onClick={doExportCsv}
-          disabled={csvLoading}
+          disabled={!sourceUsable || !skillSlug || csvLoading}
           className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40"
         >
           {csvLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
@@ -513,47 +469,58 @@ export function L1MultiDispatchTab() {
         </button>
 
         {confirmArmed && (
-          <button
-            onClick={() => setConfirmArmed(false)}
-            className="text-sm text-[#888888] hover:text-[#0F172B]"
-          >
+          <button onClick={() => setConfirmArmed(false)} className="text-sm text-[#888888] hover:text-[#0F172B]">
             Cancel
           </button>
         )}
 
         <span className="text-[11px] text-[#888888]">
           {confirmArmed
-            ? "This queues real extraction jobs and can't be cancelled once started."
+            ? "This queues real jobs and can't be cancelled once started."
             : previewedKey === bodyKey
             ? "Preview matches current options — Run is enabled."
             : "Preview before running — options changed since the last preview."}
         </span>
       </div>
-      <p className="text-[11px] text-[#888888] -mt-3">
-        CSV export always covers full uncapped history — Limit, Latest, AR-only, and Skip AR are
-        ignored for the export.
-      </p>
+
+      {previewLoading && (
+        <div className="flex items-center gap-2 text-[12px] text-[#888888]">
+          <Loader2 className="size-3.5 animate-spin" />
+          Previewing…
+        </div>
+      )}
 
       {/* Active run banner */}
       {activeRun && (
         <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
           <Loader2 className="size-4 shrink-0 animate-spin" />
-          Dispatching run {activeRun.id}… this can take a while for large ticker sets. You can
-          navigate away — check back under Run History.
+          Dispatching run {activeRun.job_id}… check back under Run History.
         </div>
       )}
 
       {/* Preview results */}
       {preview && (
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Preview</span>
-            <span className="text-[10px] text-[#C8C8C8]">{preview.tickerCount} tickers</span>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Preview</span>
+              <span className="text-[10px] text-[#C8C8C8]">{preview.tickerCount} tickers</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-[#888888]">Sort by least covered:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as L2SortSource)}
+                className="rounded-md border border-[#E2E2E2] px-2 py-1 text-[11px] text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]"
+              >
+                {(Object.keys(SORT_LABEL) as L2SortSource[]).map((s) => (
+                  <option key={s} value={s}>{SORT_LABEL[s]}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="space-y-1.5">
-            {preview.perTicker.map((t) => (
-              <PreviewTickerRow key={t.symbol} t={t} />
-            ))}
+            {rows.map((row) => <PreviewTickerRow key={row.ticker} row={row} />)}
           </div>
         </div>
       )}
@@ -583,9 +550,7 @@ export function L1MultiDispatchTab() {
         )}
 
         <div className="space-y-1.5">
-          {runs.map((run) => (
-            <RunHistoryRow key={run.id} run={run} />
-          ))}
+          {runs.map((run) => <RunHistoryRow key={run.job_id} run={run} />)}
         </div>
       </div>
     </div>

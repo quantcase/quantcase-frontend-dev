@@ -1,17 +1,22 @@
 // ── Company Groups — shapes per "Company Groups — Admin Guide" ──────────────
 
 export type FilterType = "manual" | "dynamic";
-export type MatchMode = "any" | "all";
 
 export interface ManualFilterConfig {
   tickers: string[];
 }
 
-export interface CoverageFilter {
-  transcript?: boolean;
-  ppt?: boolean;
-  annualReport?: boolean;
-  match: MatchMode;
+export interface NameRangeFilter {
+  from: string;
+  to: string;
+}
+
+export type DocStatus = "present" | "pending" | "extracted";
+
+export interface DocFilter {
+  status: DocStatus;
+  /** Restricts the check to each company's own N most recent periods. Omit for all-time. */
+  lastN?: number;
 }
 
 export interface MarketCapFilter {
@@ -19,9 +24,12 @@ export interface MarketCapFilter {
   max: number | null;
 }
 
+// All present keys are ANDed together — there is no OR between filters.
 export interface DynamicFilterConfig {
-  coverage?: CoverageFilter;
-  pendingExtraction?: CoverageFilter;
+  nameRange?: NameRangeFilter;
+  transcript?: DocFilter;
+  ppt?: DocFilter;
+  annualReport?: DocFilter;
   marketCap?: MarketCapFilter;
   industries?: string[];
 }
@@ -35,6 +43,8 @@ export interface CompanyGroup {
   description?: string | null;
   filter_type: FilterType;
   filter_config: FilterConfig;
+  /** L2 skill config this group resolves to automatically (e.g. "t1"), or null if untagged. */
+  config_key?: string | null;
   created_at: string;
   updated_at: string;
 }

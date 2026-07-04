@@ -20,10 +20,12 @@ function FilterSummary({ group }: { group: CompanyGroup }) {
   }
   const cfg = group.filter_config as Record<string, unknown>;
   const parts: string[] = [];
-  if (cfg.coverage) parts.push("has documents");
-  if (cfg.pendingExtraction) parts.push("pending L1");
+  if (cfg.nameRange) parts.push("alphabet range");
+  if (cfg.transcript) parts.push("transcript");
+  if (cfg.ppt) parts.push("ppt");
+  if (cfg.annualReport) parts.push("annual report");
   if (cfg.marketCap) parts.push("market cap");
-  if (Array.isArray(cfg.industries) && cfg.industries.length > 0) parts.push("industries");
+  if (Array.isArray(cfg.industries) && cfg.industries.length > 0) parts.push("industry");
   return <span className="text-[12px] text-[#888888]">{parts.length > 0 ? parts.join(" · ") : "no filters — empty"}</span>;
 }
 
@@ -55,6 +57,11 @@ function GroupRow({
           <span className="text-[10px] uppercase tracking-wider font-semibold text-[#888888] bg-[#F5F5F5] rounded-sm px-1.5 py-0.5">
             {group.filter_type}
           </span>
+          {group.config_key && (
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#0F172B] bg-emerald-50 border border-emerald-200 rounded-sm px-1.5 py-0.5">
+              config: {group.config_key}
+            </span>
+          )}
         </div>
         {group.description && <p className="text-[12px] text-[#888888] mt-0.5">{group.description}</p>}
         <div className="mt-1"><FilterSummary group={group} /></div>

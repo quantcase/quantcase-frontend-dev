@@ -9,8 +9,8 @@ import { CheckboxField } from "@/components/molecules/checkbox-field";
 import {
   CompanyGroup,
   FilterType,
-  CoverageFilter,
-  MatchMode,
+  DocFilter,
+  DocStatus,
   DynamicFilterConfig,
   FilterConfig,
   ResolveResult,
@@ -22,7 +22,7 @@ const INPUT_CLS =
   "w-full rounded-md border border-[#E2E2E2] px-3 py-2 text-sm text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]";
 const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5";
 
-const EMPTY_COVERAGE: CoverageFilter = { transcript: false, ppt: false, annualReport: false, match: "any" };
+const EMPTY_DOC_FILTER: DocFilter = { status: "present" };
 
 interface Props {
   open: boolean;
@@ -32,62 +32,69 @@ interface Props {
   onSaved: () => void;
 }
 
-function MatchToggle({ value, onChange }: { value: MatchMode; onChange: (v: MatchMode) => void }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-[11px] text-[#888888]">Match:</span>
-      <div className="inline-flex rounded-md border border-[#E2E2E2] p-0.5 bg-[#F5F5F5]">
-        {(["any", "all"] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => onChange(m)}
-            className={`px-2.5 py-1 text-[11px] font-medium rounded-[4px] transition-colors ${
-              value === m ? "bg-white text-[#0F172B] shadow-sm" : "text-[#888888] hover:text-[#0F172B]"
-            }`}
-          >
-            {m === "any" ? "Match any of these" : "Match all of these"}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function CoverageFilterBlock({
+// Transcript / PPT / Annual report all use the same present/pending/extracted + "latest N" shape
+function DocFilterBlock({
   label,
   hint,
+  periodLabel,
   enabled,
   onEnabledChange,
   value,
   onChange,
+  restrictToPresent,
 }: {
   label: string;
   hint: string;
+  periodLabel: string;
   enabled: boolean;
   onEnabledChange: (v: boolean) => void;
-  value: CoverageFilter;
-  onChange: (v: CoverageFilter) => void;
+  value: DocFilter;
+  onChange: (v: DocFilter) => void;
+  /** Known backend timeout — pending/extracted disabled for this doc type until fixed. */
+  restrictToPresent?: boolean;
 }) {
   return (
     <div className="rounded-md border border-[#E2E2E2] p-3">
       <CheckboxField checked={enabled} onChange={onEnabledChange} label={label} hint={hint} />
       {enabled && (
         <div className="mt-3 pl-5 space-y-3">
-          <div className="flex gap-5">
-            {(["transcript", "ppt", "annualReport"] as const).map((key) => (
-              <label key={key} className="flex items-center gap-1.5 text-[12px] text-[#0F172B] cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={!!value[key]}
-                  onChange={(e) => onChange({ ...value, [key]: e.target.checked })}
-                  className="size-3.5 accent-[#0F172B]"
-                />
-                {key === "annualReport" ? "Annual Report" : key === "ppt" ? "PPT" : "Transcript"}
-              </label>
-            ))}
+          <div>
+            <label className="text-[10px] text-[#888888] block mb-1">Status</label>
+            <select
+              value={value.status}
+              onChange={(e) => onChange({ ...value, status: e.target.value as DocStatus })}
+              className={`${INPUT_CLS} w-64`}
+            >
+              <option value="present">Present</option>
+              <option value="pending" disabled={restrictToPresent}>
+                Not yet extracted{restrictToPresent ? " — unavailable (times out; backend fix pending)" : ""}
+              </option>
+              <option value="extracted" disabled={restrictToPresent}>
+                Already extracted{restrictToPresent ? " — unavailable (times out; backend fix pending)" : ""}
+              </option>
+            </select>
           </div>
-          <MatchToggle value={value.match} onChange={(m) => onChange({ ...value, match: m })} />
+
+          <div>
+            <label className="text-[10px] text-[#888888] block mb-1">
+              Only look at the N most recent {periodLabel}
+            </label>
+            <input
+              type="number"
+              min={1}
+              value={value.lastN ?? ""}
+              onChange={(e) => onChange({ ...value, lastN: e.target.value ? Number(e.target.value) : undefined })}
+              placeholder="All history"
+              className={`${INPUT_CLS} w-40`}
+            />
+          </div>
+
+          {!restrictToPresent && value.status !== "present" && !value.lastN && (
+            <p className="flex items-center gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1.5">
+              <AlertCircle className="size-3.5 shrink-0" />
+              Recommend setting &ldquo;most recent N&rdquo; — unscoped {value.status} checks can time out.
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -107,11 +114,18 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
     group && isManualConfig(group) ? group.filter_config.tickers ?? [] : []
   );
 
-  const [coverageEnabled, setCoverageEnabled] = useState(!!dyn?.coverage);
-  const [coverage, setCoverage] = useState<CoverageFilter>(dyn?.coverage ?? EMPTY_COVERAGE);
+  const [nameRangeEnabled, setNameRangeEnabled] = useState(!!dyn?.nameRange);
+  const [nameFrom, setNameFrom] = useState(dyn?.nameRange?.from ?? "");
+  const [nameTo, setNameTo] = useState(dyn?.nameRange?.to ?? "");
 
-  const [pendingEnabled, setPendingEnabled] = useState(!!dyn?.pendingExtraction);
-  const [pending, setPending] = useState<CoverageFilter>(dyn?.pendingExtraction ?? EMPTY_COVERAGE);
+  const [transcriptEnabled, setTranscriptEnabled] = useState(!!dyn?.transcript);
+  const [transcript, setTranscript] = useState<DocFilter>(dyn?.transcript ?? EMPTY_DOC_FILTER);
+
+  const [pptEnabled, setPptEnabled] = useState(!!dyn?.ppt);
+  const [ppt, setPpt] = useState<DocFilter>(dyn?.ppt ?? EMPTY_DOC_FILTER);
+
+  const [annualReportEnabled, setAnnualReportEnabled] = useState(!!dyn?.annualReport);
+  const [annualReport, setAnnualReport] = useState<DocFilter>(dyn?.annualReport ?? EMPTY_DOC_FILTER);
 
   const [marketCapEnabled, setMarketCapEnabled] = useState(!!dyn?.marketCap);
   const [marketCapMin, setMarketCapMin] = useState(dyn?.marketCap?.min != null ? String(dyn.marketCap.min) : "");
@@ -131,8 +145,10 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
   function buildFilterConfig(): FilterConfig {
     if (filterType === "manual") return { tickers: manualTickers };
     const cfg: DynamicFilterConfig = {};
-    if (coverageEnabled) cfg.coverage = coverage;
-    if (pendingEnabled) cfg.pendingExtraction = pending;
+    if (nameRangeEnabled) cfg.nameRange = { from: nameFrom.trim().toUpperCase() || "A", to: nameTo.trim().toUpperCase() || "Z" };
+    if (transcriptEnabled) cfg.transcript = transcript;
+    if (pptEnabled) cfg.ppt = ppt;
+    if (annualReportEnabled) cfg.annualReport = annualReport;
     if (marketCapEnabled) {
       cfg.marketCap = {
         min: marketCapMin.trim() ? Number(marketCapMin) : null,
@@ -144,7 +160,13 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
   }
 
   const isEmptyDynamic =
-    filterType === "dynamic" && !coverageEnabled && !pendingEnabled && !marketCapEnabled && !(industriesEnabled && industries.length > 0);
+    filterType === "dynamic" &&
+    !nameRangeEnabled &&
+    !transcriptEnabled &&
+    !pptEnabled &&
+    !annualReportEnabled &&
+    !marketCapEnabled &&
+    !(industriesEnabled && industries.length > 0);
 
   function doResolve(slug: string) {
     apiCall<{ success: boolean; data: ResolveResult }>(`${BASE}/${slug}/resolve`, {
@@ -237,7 +259,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
             <p className="text-[11px] text-[#888888] mt-1.5">
               {filterType === "manual"
                 ? "A fixed ticker list — static until you edit it."
-                : "Recomputed live every time this group is used — never a frozen snapshot."}
+                : "Recomputed live every time this group is used — never a frozen snapshot. Every filter below is ANDed together; there's no OR — if you need that, make two groups."}
             </p>
           </div>
 
@@ -250,21 +272,67 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
 
           {filterType === "dynamic" && (
             <div className="space-y-3">
-              <CoverageFilterBlock
-                label="Has these documents"
-                hint="Companies with the checked document types present in the DB."
-                enabled={coverageEnabled}
-                onEnabledChange={setCoverageEnabled}
-                value={coverage}
-                onChange={setCoverage}
+              <div className="rounded-md border border-[#E2E2E2] p-3">
+                <CheckboxField
+                  checked={nameRangeEnabled}
+                  onChange={setNameRangeEnabled}
+                  label="Alphabet range"
+                  hint="Ticker starts with a letter in this inclusive range."
+                />
+                {nameRangeEnabled && (
+                  <div className="mt-3 pl-5 flex items-center gap-3">
+                    <div>
+                      <label className="text-[10px] text-[#888888] block mb-1">From</label>
+                      <input
+                        value={nameFrom}
+                        onChange={(e) => setNameFrom(e.target.value.toUpperCase())}
+                        placeholder="A"
+                        className={`${INPUT_CLS} w-20 uppercase`}
+                      />
+                    </div>
+                    <span className="text-[#888888] mt-4">–</span>
+                    <div>
+                      <label className="text-[10px] text-[#888888] block mb-1">To</label>
+                      <input
+                        value={nameTo}
+                        onChange={(e) => setNameTo(e.target.value.toUpperCase())}
+                        placeholder="Z"
+                        className={`${INPUT_CLS} w-20 uppercase`}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <DocFilterBlock
+                label="Transcript"
+                hint="Filter by transcript document status."
+                periodLabel="quarters"
+                enabled={transcriptEnabled}
+                onEnabledChange={setTranscriptEnabled}
+                value={transcript}
+                onChange={setTranscript}
               />
-              <CoverageFilterBlock
-                label="Pending L1 extraction"
-                hint="Has the document, but it hasn't been extracted yet (the L1 backlog)."
-                enabled={pendingEnabled}
-                onEnabledChange={setPendingEnabled}
-                value={pending}
-                onChange={setPending}
+
+              <DocFilterBlock
+                label="PPT"
+                hint="Filter by earnings-call PPT document status."
+                periodLabel="quarters"
+                enabled={pptEnabled}
+                onEnabledChange={setPptEnabled}
+                value={ppt}
+                onChange={setPpt}
+              />
+
+              <DocFilterBlock
+                label="Annual report"
+                hint="Filter by annual report document status."
+                periodLabel="years"
+                enabled={annualReportEnabled}
+                onEnabledChange={setAnnualReportEnabled}
+                value={annualReport}
+                onChange={setAnnualReport}
+                restrictToPresent
               />
 
               <div className="rounded-md border border-[#E2E2E2] p-3">
@@ -305,7 +373,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                 <CheckboxField
                   checked={industriesEnabled}
                   onChange={setIndustriesEnabled}
-                  label="Industries"
+                  label="Industry"
                   hint="Sector / basic-industry match."
                 />
                 {industriesEnabled && (

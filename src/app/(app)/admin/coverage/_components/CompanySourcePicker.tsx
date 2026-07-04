@@ -65,7 +65,7 @@ export function CompanySourcePicker({
       </div>
 
       <div className="inline-flex rounded-md border border-[#E2E2E2] p-0.5 bg-[#F5F5F5]">
-        {SOURCE_OPTIONS.map((opt) => (
+        {SOURCE_OPTIONS.filter((opt) => opt.id !== "default" || !noDefault).map((opt) => (
           <button
             key={opt.id}
             type="button"
@@ -80,11 +80,9 @@ export function CompanySourcePicker({
       </div>
 
       <div className="mt-3">
-        {source === "default" && (
-          <p className={`text-[12px] ${noDefault ? "text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2" : "text-[#888888]"}`}>
-            {noDefault
-              ? "This lens has no default ticker list — pick Manual tickers, a Saved group, or All companies."
-              : `Falls back to the backend's default ticker list (${defaultTickerCount} tickers).`}
+        {source === "default" && !noDefault && (
+          <p className="text-[12px] text-[#888888]">
+            Falls back to the backend&rsquo;s default ticker list ({defaultTickerCount} tickers).
           </p>
         )}
 

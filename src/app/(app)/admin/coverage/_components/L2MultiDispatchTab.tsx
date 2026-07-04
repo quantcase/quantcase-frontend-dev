@@ -31,7 +31,7 @@ const SORT_LABEL: Record<L2SortSource, string> = {
 const BASE = `${BACKEND_URL}/admin/pipeline-dispatch/l2-multi`;
 
 const INPUT_CLS =
-  "rounded-md border border-[#E2E2E2] px-3 py-2 text-sm font-mono text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]";
+  "rounded-md border border-[#E2E2E2] px-3 py-2 text-sm text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]";
 const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5";
 
 // ── Preview per-ticker row — signal-availability report (one query for the whole batch) ─────
@@ -205,8 +205,8 @@ export function L2MultiDispatchTab() {
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [optionsError, setOptionsError] = useState<string | null>(null);
 
-  // Company selection — owned by this tab only
-  const [source, setSource] = useState<TickerSource>("default");
+  // Company selection — owned by this tab only. L2 has no default ticker list, so start on Manual.
+  const [source, setSource] = useState<TickerSource>("manual");
   const [tickers, setTickers] = useState<string[]>([]);
   const [groupSlug, setGroupSlug] = useState("");
   const [groupCounts, setGroupCounts] = useState<Record<string, number | "loading" | "error">>({});
@@ -342,12 +342,9 @@ export function L2MultiDispatchTab() {
       {/* Intro */}
       <div className="rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
         <p className="text-[13px] text-[#0F172B] font-medium">On-demand L2 skill dispatch</p>
-        <p className="text-[12px] text-[#888888] mt-1 leading-relaxed">
-          Runs a skill (e.g. guidance-credibility) against the chosen ticker set. Every ticker
-          resolves its config automatically from whichever tagged company group covers it — an
-          untagged ticker hard-fails with a 400. Preview is a fast signal-availability report (one
-          batched query, not per-ticker) — it doesn&rsquo;t reflect Historic/Force, which only
-          affect Run. Always Preview before Run.
+        <p className="text-[12px] text-[#888888] mt-1">
+          Runs a skill against the chosen ticker set — an untagged ticker hard-fails with a 400.
+          Always Preview before Run. See Help (top right) for the full flow.
         </p>
       </div>
 

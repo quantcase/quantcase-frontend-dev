@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Layers, ArrowRight } from "lucide-react";
+import { Layers, ArrowRight, HelpCircle } from "lucide-react";
 import { L1MultiDispatchTab } from "./_components/L1MultiDispatchTab";
 import { L2MultiDispatchTab } from "./_components/L2MultiDispatchTab";
 import { DailyRunsTab } from "./_components/DailyRunsTab";
+import { HelpModal } from "./_components/HelpModal";
 
 type CoverageTab = "l1" | "l2" | "l3" | "daily";
 
@@ -26,14 +27,26 @@ function ComingSoon({ label }: { label: string }) {
 
 export default function CoveragePage() {
   const [activeTab, setActiveTab] = useState<CoverageTab>("l1");
+  const [showHelp, setShowHelp] = useState(false);
 
   return (
     <div className="p-6 space-y-4">
-      <div>
-        <h1 className="text-[22px] font-[400] text-[var(--qc-ink)]">Pipeline Coverage</h1>
-        <p className="text-[14px] text-[var(--qc-ink-2)] mt-0.5">
-          On-demand pipeline dispatch and coverage, by extraction level
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-[22px] font-[400] text-[var(--qc-ink)]">Pipeline Coverage</h1>
+          <p className="text-[14px] text-[var(--qc-ink-2)] mt-0.5">
+            On-demand pipeline dispatch and coverage, by extraction level
+          </p>
+        </div>
+
+        {/* Always available — explains the flow and every option across L1, L2, Daily Runs, and Company Groups */}
+        <button
+          onClick={() => setShowHelp(true)}
+          title="Help"
+          className="flex items-center justify-center size-7 rounded border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] transition-colors shrink-0"
+        >
+          <HelpCircle className="size-3.5" />
+        </button>
       </div>
 
       {/* Manage Company Groups — prominent, top of page: manual ticker lists and live filters
@@ -76,6 +89,8 @@ export default function CoveragePage() {
       {activeTab === "l2" && <L2MultiDispatchTab />}
       {activeTab === "l3" && <ComingSoon label="L3" />}
       {activeTab === "daily" && <DailyRunsTab />}
+
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
     </div>
   );
 }

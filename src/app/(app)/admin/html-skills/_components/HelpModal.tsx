@@ -55,8 +55,14 @@ export function HelpModal({ onClose }: Props) {
 
             <div>
               <p className="text-[var(--qc-ink)] font-medium mb-0.5">Saved Configs</p>
-              <p>A skill can have named, alternate settings bundles — e.g. one tuned for tickers that only have PPT data, another for annual-report-only. Manage them via the <span className="font-medium text-[var(--qc-ink)]">Configs</span> button. Nothing changes unless you pick one from the <span className="font-medium text-[var(--qc-ink)]">Use config</span> dropdown on the run screen — leaving it on &ldquo;Default config&rdquo; runs the skill exactly as its own top-level settings define it.</p>
+              <p>A skill can have named, alternate settings bundles — e.g. one tuned for tickers that only have PPT data, another for annual-report-only. Manage them via the <span className="font-medium text-[var(--qc-ink)]">Configs</span> button (highlighted in blue on the run screen). Nothing changes unless you pick one from the <span className="font-medium text-[var(--qc-ink)]">Use config</span> dropdown next to it — leaving it on &ldquo;Default config&rdquo; runs the skill exactly as its own top-level settings define it.</p>
               <p>Each config is a full, independent bundle — its signal windows and type filters don&rsquo;t inherit from the skill&rsquo;s own settings, so leave a field unset only if you actually want &ldquo;no cap&rdquo; for that source. Only Model, Max Tokens, and Strip HTML fall back to the skill&rsquo;s defaults when left blank.</p>
+            </div>
+
+            <div>
+              <p className="text-[var(--qc-ink)] font-medium mb-0.5">From one config to bulk L2 runs</p>
+              <p>This page is where you build and try a config — pick it from the <span className="font-medium text-[var(--qc-ink)]">Use config</span> dropdown and Run it against a handful of representative tickers until you&rsquo;re happy with the output.</p>
+              <p>Once it&rsquo;s ready, go to <span className="font-medium text-[var(--qc-ink)]">Coverage → L2</span> and pin that config&rsquo;s key to a Company Group (create one first if the tickers you want aren&rsquo;t grouped yet). From then on, every L2 bulk dispatch run resolves each ticker&rsquo;s config automatically from whichever tagged group covers it — no per-ticker setup needed. A ticker that isn&rsquo;t covered by any tagged group hard-fails L2 with a 400, so tag groups before relying on them for bulk runs.</p>
             </div>
           </section>
 

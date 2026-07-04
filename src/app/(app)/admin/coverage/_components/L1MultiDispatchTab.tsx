@@ -375,11 +375,9 @@ export function L1MultiDispatchTab() {
       {/* Intro */}
       <div className="rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
         <p className="text-[13px] text-[#0F172B] font-medium">On-demand L1 extraction</p>
-        <p className="text-[12px] text-[#888888] mt-1 leading-relaxed">
-          Transcript, PPT, and annual-report signal extraction, triggered manually for a chosen
-          ticker set. There is no cron/auto mode here — every run is one-off and explicit. Always
-          Preview before Run; Preview is read-only and free to repeat, Run actually dispatches
-          real (billable) LLM extraction jobs.
+        <p className="text-[12px] text-[#888888] mt-1">
+          Transcript, PPT, and annual-report signal extraction for a chosen ticker set. Preview is
+          free to repeat; Run dispatches real, billable jobs. See Help (top right) for the full flow.
         </p>
       </div>
 

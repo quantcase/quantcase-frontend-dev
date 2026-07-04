@@ -367,147 +367,158 @@ function HtmlSkillsPage() {
             </button>
           </div>
 
-          {/* Right column: ticker toggle + signals link + run controls */}
-          <div className="flex flex-1 items-center gap-3 px-5 py-3">
+          {/* Right column: two stacked rows — "what to run" on top, "config + inspect + results" below.
+              Splitting it this way (rather than one long row) is what keeps it from overflowing off-screen
+              once the config picker and result badges are all present at once. */}
+          <div className="flex flex-1 flex-col gap-2 px-5 py-2.5 min-w-0">
             {selectedSkill && (
               <>
-                {/* Ticker search */}
-                <TickerSearch
-                  value={ticker}
-                  onChange={setTicker}
-                  options={tickerOptions}
-                  favorites={[...FAVORITE_TICKERS]}
-                />
-
-                {/* Historic / Incremental — prominent, defaults to Historic (original behavior).
-                    Incremental needs a base to build on, so it's unavailable until a first output exists. */}
-                {ticker && (
-                  <TabToggle
-                    variant="outline"
-                    options={previewControls?.hasBase === false ? ["Historic"] : ["Historic", "Incremental"]}
-                    value={historic ? "Historic" : "Incremental"}
-                    onChange={(v) => setHistoric(v === "Historic")}
-                    className="shrink-0"
+                {/* Row 1 — what to run, and go */}
+                <div className="flex items-center gap-3 min-w-0 overflow-x-auto">
+                  <TickerSearch
+                    value={ticker}
+                    onChange={setTicker}
+                    options={tickerOptions}
+                    favorites={[...FAVORITE_TICKERS]}
                   />
-                )}
-                {ticker && previewControls?.hasBase === false && (
-                  <span className="text-[11px] text-amber-700 shrink-0">No base yet — run Historic first</span>
-                )}
 
-                {/* Pick the fiscal year/quarter that resolves to callId — Historic and Incremental each keep their own selection */}
-                {ticker && (
-                  <div className="relative shrink-0">
-                    <select
-                      value={callId ?? ""}
-                      onChange={(e) => {
-                        const v = e.target.value || null;
-                        if (historic) setHistoricCallId(v); else setIncrementalCallId(v);
-                      }}
-                      disabled={calls.length === 0}
-                      title={`Fiscal year / quarter for this ${historic ? "historic" : "incremental"} run`}
-                      className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
-                    >
-                      {calls.length === 0 && <option value="">No calls</option>}
-                      {calls.map((c) => (
-                        <option key={c.id} value={c.id}>{c.quarter} {c.fiscal_year}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-[#888888]" />
-                  </div>
-                )}
+                  {/* Historic / Incremental — prominent, defaults to Historic (original behavior).
+                      Incremental needs a base to build on, so it's unavailable until a first output exists. */}
+                  {ticker && (
+                    <TabToggle
+                      variant="outline"
+                      options={previewControls?.hasBase === false ? ["Historic"] : ["Historic", "Incremental"]}
+                      value={historic ? "Historic" : "Incremental"}
+                      onChange={(v) => setHistoric(v === "Historic")}
+                      className="shrink-0"
+                    />
+                  )}
+                  {ticker && previewControls?.hasBase === false && (
+                    <span className="text-[11px] text-amber-700 shrink-0">No base yet — run Historic first</span>
+                  )}
 
-                {/* Optional saved config override — omit for the skill's own top-level fields (default behavior) */}
-                {ticker && configs.length > 0 && (
-                  <div className="relative shrink-0">
-                    <select
-                      value={configKey ?? ""}
-                      onChange={(e) => setConfigKey(e.target.value || null)}
-                      title="Use a saved config bundle for this run"
-                      className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] cursor-pointer"
-                    >
-                      <option value="">Default config</option>
-                      {configs.map((c) => (
-                        <option key={c.key} value={c.key}>{c.name}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-[#888888]" />
-                  </div>
-                )}
+                  {/* Pick the fiscal year/quarter that resolves to callId — Historic and Incremental each keep their own selection */}
+                  {ticker && (
+                    <div className="relative shrink-0">
+                      <select
+                        value={callId ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value || null;
+                          if (historic) setHistoricCallId(v); else setIncrementalCallId(v);
+                        }}
+                        disabled={calls.length === 0}
+                        title={`Fiscal year / quarter for this ${historic ? "historic" : "incremental"} run`}
+                        className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
+                      >
+                        {calls.length === 0 && <option value="">No calls</option>}
+                        {calls.map((c) => (
+                          <option key={c.id} value={c.id}>{c.quarter} {c.fiscal_year}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-[#888888]" />
+                    </div>
+                  )}
 
-                {/* Manage saved config bundles for this skill — doesn't require a ticker */}
-                <button
-                  onClick={() => setShowConfigsModal(true)}
-                  title="Manage saved configs"
-                  className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
-                >
-                  <Layers className="size-3" />
-                  Configs
-                </button>
+                  <div className="flex-1" />
 
-                <div className="flex-1" />
-
-                {/* Inspect the exact signals feeding this run — count is fetched inside the modal (mode/base-aware, too heavy to preview here) */}
-                {ticker && (
+                  {/* Export full prompt */}
                   <button
-                    onClick={() => setShowSignals(true)}
-                    className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                    onClick={handleExportPrompt}
+                    disabled={exportingPrompt || !callId}
+                    title="Export full prompt as .md"
+                    className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
                   >
-                    <Radio className="size-3" />
-                    Signals
+                    {exportingPrompt ? <Loader2 className="size-3.5 animate-spin" /> : <FileDown className="size-3.5" />}
                   </button>
-                )}
 
-                {/* Browse past outputs for this ticker — the base pin itself is set skill-wide in the editor */}
-                {ticker && (
+                  {/* Run */}
                   <button
-                    onClick={() => setShowHistoryModal(true)}
-                    title="Browse past outputs for this ticker"
-                    className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                    onClick={() => previewControls?.run(true)}
+                    disabled={previewControls?.running || !callId}
+                    className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
                   >
-                    <History className="size-3" />
-                    History
+                    {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
+                    Run
                   </button>
-                )}
+                </div>
 
-                {/* Run metadata */}
-                {previewControls?.result && (
-                  <span className={`text-[10px] font-medium rounded-sm px-2 py-0.5 shrink-0 ${
-                    previewControls.result.cached ? "bg-zinc-100 text-zinc-500" : "bg-emerald-50 text-emerald-700"
-                  }`}>
-                    {previewControls.result.cached ? "cached" : "fresh"}
-                  </span>
-                )}
-                {previewControls?.result?.output && (
-                  <span className="text-[10px] text-[#888888] shrink-0">
-                    {previewControls.result.output.input_tokens + previewControls.result.output.output_tokens} tok
-                    {" · "}${previewControls.result.output.cost_usd?.toFixed(5) ?? "—"}
-                  </span>
-                )}
-                {previewControls?.result?.output?.config_key && (
-                  <span className="text-[10px] font-medium rounded-sm px-2 py-0.5 bg-blue-50 text-blue-700 shrink-0">
-                    config: {previewControls.result.output.config_key}
-                  </span>
-                )}
+                {/* Row 2 — config selection + inspection tools + last-run metadata */}
+                <div className="flex items-center gap-3 min-w-0 overflow-x-auto">
+                  {/* Config selection — kept visually distinct because it's the entry point to the wider flow:
+                      try a config here against various tickers, then pin it to a Company Group in
+                      Coverage → L2 so bulk L2 dispatch resolves it automatically per ticker. */}
+                  <div className="flex items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50/60 px-1.5 py-1 shrink-0">
+                    {ticker && configs.length > 0 && (
+                      <div className="relative">
+                        <select
+                          value={configKey ?? ""}
+                          onChange={(e) => setConfigKey(e.target.value || null)}
+                          title="Use a saved config bundle for this run — pin one to a Company Group in Coverage → L2 to scale it up"
+                          className="appearance-none rounded-md border border-blue-200 bg-white pl-2.5 pr-7 py-1 text-[12px] font-medium text-blue-800 outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer"
+                        >
+                          <option value="">Default config</option>
+                          {configs.map((c) => (
+                            <option key={c.key} value={c.key}>{c.name}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-blue-400" />
+                      </div>
+                    )}
+                    <button
+                      onClick={() => setShowConfigsModal(true)}
+                      title="Create, edit, and try saved configs — then pin one to a Company Group in Coverage → L2 for bulk dispatch"
+                      className="flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-blue-700 transition-colors shrink-0"
+                    >
+                      <Layers className="size-3" />
+                      Configs
+                    </button>
+                  </div>
 
-                {/* Export full prompt */}
-                <button
-                  onClick={handleExportPrompt}
-                  disabled={exportingPrompt || !callId}
-                  title="Export full prompt as .md"
-                  className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
-                >
-                  {exportingPrompt ? <Loader2 className="size-3.5 animate-spin" /> : <FileDown className="size-3.5" />}
-                </button>
+                  {/* Inspect the exact signals feeding this run — count is fetched inside the modal (mode/base-aware, too heavy to preview here) */}
+                  {ticker && (
+                    <button
+                      onClick={() => setShowSignals(true)}
+                      className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                    >
+                      <Radio className="size-3" />
+                      Signals
+                    </button>
+                  )}
 
-                {/* Run */}
-                <button
-                  onClick={() => previewControls?.run(true)}
-                  disabled={previewControls?.running || !callId}
-                  className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
-                >
-                  {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
-                  Run
-                </button>
+                  {/* Browse past outputs for this ticker — the base pin itself is set skill-wide in the editor */}
+                  {ticker && (
+                    <button
+                      onClick={() => setShowHistoryModal(true)}
+                      title="Browse past outputs for this ticker"
+                      className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                    >
+                      <History className="size-3" />
+                      History
+                    </button>
+                  )}
+
+                  <div className="flex-1" />
+
+                  {/* Run metadata */}
+                  {previewControls?.result && (
+                    <span className={`text-[10px] font-medium rounded-sm px-2 py-0.5 shrink-0 ${
+                      previewControls.result.cached ? "bg-zinc-100 text-zinc-500" : "bg-emerald-50 text-emerald-700"
+                    }`}>
+                      {previewControls.result.cached ? "cached" : "fresh"}
+                    </span>
+                  )}
+                  {previewControls?.result?.output && (
+                    <span className="text-[10px] text-[#888888] shrink-0">
+                      {previewControls.result.output.input_tokens + previewControls.result.output.output_tokens} tok
+                      {" · "}${previewControls.result.output.cost_usd?.toFixed(5) ?? "—"}
+                    </span>
+                  )}
+                  {previewControls?.result?.output?.config_key && (
+                    <span className="text-[10px] font-medium rounded-sm px-2 py-0.5 bg-blue-50 text-blue-700 shrink-0">
+                      config: {previewControls.result.output.config_key}
+                    </span>
+                  )}
+                </div>
               </>
             )}
 

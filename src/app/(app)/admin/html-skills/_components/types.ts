@@ -97,8 +97,43 @@ export interface HtmlSkillOutput {
   cost_usd: number;
   is_historic: boolean;
   is_pinned_base: boolean;
+  config_key: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// A named, alternate settings bundle for a skill (e.g. "ppt_only", "transcript_and_ppt").
+// Selected explicitly per-run via configKey — never auto-detected. Omitting configKey on a run
+// means the skill's own top-level fields are used, exactly as before configs existed.
+export interface HtmlSkillConfig {
+  id?: string;
+  skill_id?: string;
+  key: string;
+  name: string;
+  skill_prompt: string;
+  transcript_signal_types: TranscriptSignalType[];
+  ppt_signal_types: PptSignalType[];
+  annual_report_signal_types: AnnualReportSignalType[];
+  market_data_signal_types: MarketDataSignalType[];
+  max_transcript_qtrs: number | null;
+  max_ppt_qtrs: number | null;
+  max_annual_report_years: number | null;
+  max_market_data_months: number | null;
+  historic_max_transcript_qtrs: number | null;
+  historic_max_ppt_qtrs: number | null;
+  historic_max_annual_report_years: number | null;
+  historic_max_market_data_months: number | null;
+  // null on these three (only these three) falls back to the skill's own value — execution knobs, not analysis behavior
+  model: string | null;
+  max_tokens: number | null;
+  strip_html: boolean | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConfigListResponse {
+  configs: HtmlSkillConfig[];
 }
 
 export interface RunResponse {
@@ -141,7 +176,39 @@ export interface PromptDryRunResponse {
   base_context_count: number;
   fiscal_year: string | null;
   quarter: string | null;
+  config_key?: string | null;
 }
+
+// Shared window-size option lists — used by both the skill's own editor (SkillDetail)
+// and per-config editors (ConfigsModal), so the two stay in lockstep.
+export const QTR_OPTIONS: { label: string; value: number | null }[] = [
+  { label: "No limit", value: null },
+  { label: "2 qtrs", value: 2 },
+  { label: "4 qtrs", value: 4 },
+  { label: "8 qtrs", value: 8 },
+  { label: "12 qtrs", value: 12 },
+  { label: "16 qtrs", value: 16 },
+  { label: "20 qtrs", value: 20 },
+  { label: "None", value: 0 },
+];
+
+export const ANNUAL_OPTIONS: { label: string; value: number | null }[] = [
+  { label: "No limit", value: null },
+  { label: "1 yr", value: 1 },
+  { label: "2 yrs", value: 2 },
+  { label: "3 yrs", value: 3 },
+  { label: "5 yrs", value: 5 },
+  { label: "None", value: 0 },
+];
+
+export const MARKET_DATA_MONTHS_OPTIONS: { label: string; value: number | null }[] = [
+  { label: "No limit", value: null },
+  { label: "6 mo", value: 6 },
+  { label: "12 mo", value: 12 },
+  { label: "24 mo", value: 24 },
+  { label: "36 mo", value: 36 },
+  { label: "None", value: 0 },
+];
 
 export interface OutputHistoryRow {
   id: string;
@@ -150,6 +217,7 @@ export interface OutputHistoryRow {
   fiscal_year: string | null;
   quarter: string | null;
   is_historic: boolean;
+  config_key: string | null;
   model: string;
   input_tokens: number;
   output_tokens: number;

@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown, History, Radio, HelpCircle } from "lucide-react";
+import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown, History, Radio, HelpCircle, Layers, Trash2 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
-import { HtmlSkill, TestTicker, FAVORITE_TICKERS, CATEGORY_LABELS, API_BASE, PromptDryRunResponse } from "./_components/types";
+import { HtmlSkill, TestTicker, FAVORITE_TICKERS, CATEGORY_LABELS, API_BASE, PromptDryRunResponse, HtmlSkillConfig, ConfigListResponse } from "./_components/types";
 import { TickerSearch, TickerOption } from "./_components/TickerSearch";
 import type { StocksApiResponse } from "@/types/screener";
 import { SkillDetail, SkillDetailHandle } from "./_components/SkillDetail";
@@ -12,6 +12,7 @@ import { PreviewPane, PreviewControls } from "./_components/PreviewPane";
 import { SignalsModal } from "./_components/SignalsModal";
 import { OutputHistoryModal } from "./_components/OutputHistoryModal";
 import { HelpModal } from "./_components/HelpModal";
+import { ConfigsModal } from "./_components/ConfigsModal";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { TabToggle } from "@/components/molecules/tab-toggle";
 
@@ -46,6 +47,12 @@ function HtmlSkillsPage() {
   const [showSignals, setShowSignals] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showConfigsModal, setShowConfigsModal] = useState(false);
+
+  // Saved config bundles for the selected skill — feeds the "Use config" run-screen dropdown.
+  // Omitting configKey on a run means the skill's own top-level fields are used, same as before configs existed.
+  const [configs, setConfigs] = useState<HtmlSkillConfig[]>([]);
+  const [configKey, setConfigKey] = useState<string | null>(null);
   const [skillDirty, setSkillDirty] = useState(false);
   const skillDetailRef = useRef<SkillDetailHandle>(null);
   const [loading, setLoading] = useState(false);
@@ -68,6 +75,29 @@ function HtmlSkillsPage() {
   }, []);
 
   useEffect(() => { loadSkills(); }, [loadSkills]);
+
+  // ── Load saved configs for the selected skill ──────────────────────────────
+
+  const loadConfigs = useCallback((slug: string) => {
+    fetch(`${BACKEND_URL}${API_BASE}/${slug}/configs`)
+      .then(async (res) => {
+        const json: ConfigListResponse = await res.json();
+        if (!res.ok) throw new Error((json as unknown as { error?: string })?.error ?? `${res.status}`);
+        setConfigs(json.configs ?? []);
+      })
+      .catch(() => setConfigs([]));
+  }, []);
+
+  useEffect(() => {
+    setConfigKey(null);
+    if (!selectedSlug) { setConfigs([]); return; }
+    loadConfigs(selectedSlug);
+  }, [selectedSlug, loadConfigs]);
+
+  // Drop the selected config if it was deleted/renamed out from under the dropdown
+  useEffect(() => {
+    if (configKey && !configs.some((c) => c.key === configKey)) setConfigKey(null);
+  }, [configs, configKey]);
 
   // ── Sync selectedSlug + ticker + callId → URL ─────────────────────────────
 
@@ -124,7 +154,7 @@ function HtmlSkillsPage() {
 
   // ── Save skill ─────────────────────────────────────────────────────────────
 
-  function handleSave(updates: Partial<Omit<HtmlSkill, "id" | "created_at" | "updated_at">>) {
+  function handleSaveSkill(updates: Partial<Omit<HtmlSkill, "id" | "created_at" | "updated_at">>) {
     if (!selectedSlug) return;
     setSaving(true);
     setSaveError(null);
@@ -143,6 +173,80 @@ function HtmlSkillsPage() {
       .finally(() => setSaving(false));
   }
 
+  // ── Save / create / delete a config bundle ──────────────────────────────────
+
+  function handleSaveConfig(key: string, updates: Record<string, unknown>) {
+    if (!selectedSlug) return;
+    setSaving(true);
+    setSaveError(null);
+    fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs/${key}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    })
+      .then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
+        setConfigs((prev) => prev.map((c) => (c.key === key ? { ...c, ...json } : c)));
+      })
+      .catch((err) => setSaveError(err.message))
+      .finally(() => setSaving(false));
+  }
+
+  function handleCreateConfig(key: string, name: string) {
+    if (!selectedSlug || !selectedSkill) return;
+    setSaving(true);
+    setSaveError(null);
+    // Seed the new config as an explicit copy of the skill's current settings — a starting point to
+    // tweak from, not an "inherit" relationship (configs never fall back to the skill except for
+    // model/max_tokens/strip_html).
+    const payload = {
+      key, name,
+      skill_prompt: selectedSkill.skill_prompt ?? "",
+      transcript_signal_types: selectedSkill.transcript_signal_types,
+      ppt_signal_types: selectedSkill.ppt_signal_types,
+      annual_report_signal_types: selectedSkill.annual_report_signal_types,
+      market_data_signal_types: selectedSkill.market_data_signal_types,
+      max_transcript_qtrs: selectedSkill.max_transcript_qtrs,
+      max_ppt_qtrs: selectedSkill.max_ppt_qtrs,
+      max_annual_report_years: selectedSkill.max_annual_report_years,
+      max_market_data_months: selectedSkill.max_market_data_months,
+      historic_max_transcript_qtrs: selectedSkill.historic_max_transcript_qtrs,
+      historic_max_ppt_qtrs: selectedSkill.historic_max_ppt_qtrs,
+      historic_max_annual_report_years: selectedSkill.historic_max_annual_report_years,
+      historic_max_market_data_months: selectedSkill.historic_max_market_data_months,
+      model: null, max_tokens: null, strip_html: null,
+    };
+    fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
+        loadConfigs(selectedSlug);
+        setConfigKey(json.key ?? key);
+        setShowConfigsModal(false);
+      })
+      .catch((err) => setSaveError(err.message))
+      .finally(() => setSaving(false));
+  }
+
+  function handleDeleteConfig(key: string) {
+    if (!selectedSlug) return;
+    fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs/${key}`, { method: "DELETE" })
+      .then(async (res) => {
+        if (!res.ok) {
+          const json = await res.json().catch(() => null);
+          throw new Error(json?.error ?? `${res.status}`);
+        }
+        if (configKey === key) setConfigKey(null);
+        loadConfigs(selectedSlug);
+      })
+      .catch((err) => setError(err.message));
+  }
+
   const [exportingPrompt, setExportingPrompt] = useState(false);
 
   async function handleExportPrompt() {
@@ -155,6 +259,7 @@ function HtmlSkillsPage() {
     try {
       const params = new URLSearchParams({ callId });
       if (historic) params.set("historic", "true");
+      if (configKey) params.set("configKey", configKey);
       const res = await fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/prompt/${ticker}?${params}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
@@ -166,7 +271,7 @@ function HtmlSkillsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${slug}__${t}${historic ? "__historic" : ""}.md`;
+      a.download = `${slug}__${t}${historic ? "__historic" : ""}${configKey ? `__${configKey}` : ""}.md`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -177,6 +282,7 @@ function HtmlSkillsPage() {
   }
 
   const selectedCall = calls.find((c) => c.id === callId) ?? null;
+  const selectedConfig = configs.find((c) => c.key === configKey) ?? null;
 
   const byCategory = skills.reduce<Record<string, HtmlSkill[]>>((acc, skill) => {
     const cat = skill.category;
@@ -223,6 +329,13 @@ function HtmlSkillsPage() {
               </div>
             )}
 
+            {/* Which settings the panel below is currently editing — the skill's own defaults, or a saved config */}
+            {selectedSkill && configKey && (
+              <span className="shrink-0 whitespace-nowrap rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide bg-blue-50 text-blue-700">
+                editing: {selectedConfig?.name ?? configKey}
+              </span>
+            )}
+
             {saveError && <span className="text-[11px] text-red-600 shrink-0">{saveError}</span>}
             {selectedSkill && (
               <button
@@ -232,6 +345,15 @@ function HtmlSkillsPage() {
               >
                 {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
                 Save
+              </button>
+            )}
+            {selectedSkill && configKey && (
+              <button
+                onClick={() => handleDeleteConfig(configKey)}
+                title="Delete this config"
+                className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-red-600 hover:border-red-300 transition-colors shrink-0"
+              >
+                <Trash2 className="size-3.5" />
               </button>
             )}
 
@@ -245,114 +367,158 @@ function HtmlSkillsPage() {
             </button>
           </div>
 
-          {/* Right column: ticker toggle + signals link + run controls */}
-          <div className="flex flex-1 items-center gap-3 px-5 py-3">
+          {/* Right column: two stacked rows — "what to run" on top, "config + inspect + results" below.
+              Splitting it this way (rather than one long row) is what keeps it from overflowing off-screen
+              once the config picker and result badges are all present at once. */}
+          <div className="flex flex-1 flex-col gap-2 px-5 py-2.5 min-w-0">
             {selectedSkill && (
               <>
-                {/* Ticker search */}
-                <TickerSearch
-                  value={ticker}
-                  onChange={setTicker}
-                  options={tickerOptions}
-                  favorites={[...FAVORITE_TICKERS]}
-                />
-
-                {/* Historic / Incremental — prominent, defaults to Historic (original behavior).
-                    Incremental needs a base to build on, so it's unavailable until a first output exists. */}
-                {ticker && (
-                  <TabToggle
-                    variant="outline"
-                    options={previewControls?.hasBase === false ? ["Historic"] : ["Historic", "Incremental"]}
-                    value={historic ? "Historic" : "Incremental"}
-                    onChange={(v) => setHistoric(v === "Historic")}
-                    className="shrink-0"
+                {/* Row 1 — what to run, and go */}
+                <div className="flex items-center gap-3 min-w-0 overflow-x-auto">
+                  <TickerSearch
+                    value={ticker}
+                    onChange={setTicker}
+                    options={tickerOptions}
+                    favorites={[...FAVORITE_TICKERS]}
                   />
-                )}
-                {ticker && previewControls?.hasBase === false && (
-                  <span className="text-[11px] text-amber-700 shrink-0">No base yet — run Historic first</span>
-                )}
 
-                {/* Pick the fiscal year/quarter that resolves to callId — Historic and Incremental each keep their own selection */}
-                {ticker && (
-                  <div className="relative shrink-0">
-                    <select
-                      value={callId ?? ""}
-                      onChange={(e) => {
-                        const v = e.target.value || null;
-                        if (historic) setHistoricCallId(v); else setIncrementalCallId(v);
-                      }}
-                      disabled={calls.length === 0}
-                      title={`Fiscal year / quarter for this ${historic ? "historic" : "incremental"} run`}
-                      className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
+                  {/* Historic / Incremental — prominent, defaults to Historic (original behavior).
+                      Incremental needs a base to build on, so it's unavailable until a first output exists. */}
+                  {ticker && (
+                    <TabToggle
+                      variant="outline"
+                      options={previewControls?.hasBase === false ? ["Historic"] : ["Historic", "Incremental"]}
+                      value={historic ? "Historic" : "Incremental"}
+                      onChange={(v) => setHistoric(v === "Historic")}
+                      className="shrink-0"
+                    />
+                  )}
+                  {ticker && previewControls?.hasBase === false && (
+                    <span className="text-[11px] text-amber-700 shrink-0">No base yet — run Historic first</span>
+                  )}
+
+                  {/* Pick the fiscal year/quarter that resolves to callId — Historic and Incremental each keep their own selection */}
+                  {ticker && (
+                    <div className="relative shrink-0">
+                      <select
+                        value={callId ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value || null;
+                          if (historic) setHistoricCallId(v); else setIncrementalCallId(v);
+                        }}
+                        disabled={calls.length === 0}
+                        title={`Fiscal year / quarter for this ${historic ? "historic" : "incremental"} run`}
+                        className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
+                      >
+                        {calls.length === 0 && <option value="">No calls</option>}
+                        {calls.map((c) => (
+                          <option key={c.id} value={c.id}>{c.quarter} {c.fiscal_year}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-[#888888]" />
+                    </div>
+                  )}
+
+                  <div className="flex-1" />
+
+                  {/* Export full prompt */}
+                  <button
+                    onClick={handleExportPrompt}
+                    disabled={exportingPrompt || !callId}
+                    title="Export full prompt as .md"
+                    className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
+                  >
+                    {exportingPrompt ? <Loader2 className="size-3.5 animate-spin" /> : <FileDown className="size-3.5" />}
+                  </button>
+
+                  {/* Run */}
+                  <button
+                    onClick={() => previewControls?.run(true)}
+                    disabled={previewControls?.running || !callId}
+                    className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
+                  >
+                    {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
+                    Run
+                  </button>
+                </div>
+
+                {/* Row 2 — config selection + inspection tools + last-run metadata */}
+                <div className="flex items-center gap-3 min-w-0 overflow-x-auto">
+                  {/* Config selection — kept visually distinct because it's the entry point to the wider flow:
+                      try a config here against various tickers, then pin it to a Company Group in
+                      Coverage → L2 so bulk L2 dispatch resolves it automatically per ticker. */}
+                  <div className="flex items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50/60 px-1.5 py-1 shrink-0">
+                    {ticker && configs.length > 0 && (
+                      <div className="relative">
+                        <select
+                          value={configKey ?? ""}
+                          onChange={(e) => setConfigKey(e.target.value || null)}
+                          title="Use a saved config bundle for this run — pin one to a Company Group in Coverage → L2 to scale it up"
+                          className="appearance-none rounded-md border border-blue-200 bg-white pl-2.5 pr-7 py-1 text-[12px] font-medium text-blue-800 outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer"
+                        >
+                          <option value="">Default config</option>
+                          {configs.map((c) => (
+                            <option key={c.key} value={c.key}>{c.name}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-blue-400" />
+                      </div>
+                    )}
+                    <button
+                      onClick={() => setShowConfigsModal(true)}
+                      title="Create, edit, and try saved configs — then pin one to a Company Group in Coverage → L2 for bulk dispatch"
+                      className="flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-blue-700 transition-colors shrink-0"
                     >
-                      {calls.length === 0 && <option value="">No calls</option>}
-                      {calls.map((c) => (
-                        <option key={c.id} value={c.id}>{c.quarter} {c.fiscal_year}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-[#888888]" />
+                      <Layers className="size-3" />
+                      Configs
+                    </button>
                   </div>
-                )}
 
-                <div className="flex-1" />
+                  {/* Inspect the exact signals feeding this run — count is fetched inside the modal (mode/base-aware, too heavy to preview here) */}
+                  {ticker && (
+                    <button
+                      onClick={() => setShowSignals(true)}
+                      className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                    >
+                      <Radio className="size-3" />
+                      Signals
+                    </button>
+                  )}
 
-                {/* Inspect the exact signals feeding this run — count is fetched inside the modal (mode/base-aware, too heavy to preview here) */}
-                {ticker && (
-                  <button
-                    onClick={() => setShowSignals(true)}
-                    className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
-                  >
-                    <Radio className="size-3" />
-                    Signals
-                  </button>
-                )}
+                  {/* Browse past outputs for this ticker — the base pin itself is set skill-wide in the editor */}
+                  {ticker && (
+                    <button
+                      onClick={() => setShowHistoryModal(true)}
+                      title="Browse past outputs for this ticker"
+                      className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                    >
+                      <History className="size-3" />
+                      History
+                    </button>
+                  )}
 
-                {/* Browse past outputs for this ticker — the base pin itself is set skill-wide in the editor */}
-                {ticker && (
-                  <button
-                    onClick={() => setShowHistoryModal(true)}
-                    title="Browse past outputs for this ticker"
-                    className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
-                  >
-                    <History className="size-3" />
-                    History
-                  </button>
-                )}
+                  <div className="flex-1" />
 
-                {/* Run metadata */}
-                {previewControls?.result && (
-                  <span className={`text-[10px] font-medium rounded-sm px-2 py-0.5 shrink-0 ${
-                    previewControls.result.cached ? "bg-zinc-100 text-zinc-500" : "bg-emerald-50 text-emerald-700"
-                  }`}>
-                    {previewControls.result.cached ? "cached" : "fresh"}
-                  </span>
-                )}
-                {previewControls?.result?.output && (
-                  <span className="text-[10px] text-[#888888] shrink-0">
-                    {previewControls.result.output.input_tokens + previewControls.result.output.output_tokens} tok
-                    {" · "}${previewControls.result.output.cost_usd?.toFixed(5) ?? "—"}
-                  </span>
-                )}
-
-                {/* Export full prompt */}
-                <button
-                  onClick={handleExportPrompt}
-                  disabled={exportingPrompt || !callId}
-                  title="Export full prompt as .md"
-                  className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
-                >
-                  {exportingPrompt ? <Loader2 className="size-3.5 animate-spin" /> : <FileDown className="size-3.5" />}
-                </button>
-
-                {/* Run */}
-                <button
-                  onClick={() => previewControls?.run(true)}
-                  disabled={previewControls?.running || !callId}
-                  className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
-                >
-                  {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
-                  Run
-                </button>
+                  {/* Run metadata */}
+                  {previewControls?.result && (
+                    <span className={`text-[10px] font-medium rounded-sm px-2 py-0.5 shrink-0 ${
+                      previewControls.result.cached ? "bg-zinc-100 text-zinc-500" : "bg-emerald-50 text-emerald-700"
+                    }`}>
+                      {previewControls.result.cached ? "cached" : "fresh"}
+                    </span>
+                  )}
+                  {previewControls?.result?.output && (
+                    <span className="text-[10px] text-[#888888] shrink-0">
+                      {previewControls.result.output.input_tokens + previewControls.result.output.output_tokens} tok
+                      {" · "}${previewControls.result.output.cost_usd?.toFixed(5) ?? "—"}
+                    </span>
+                  )}
+                  {previewControls?.result?.output?.config_key && (
+                    <span className="text-[10px] font-medium rounded-sm px-2 py-0.5 bg-blue-50 text-blue-700 shrink-0">
+                      config: {previewControls.result.output.config_key}
+                    </span>
+                  )}
+                </div>
               </>
             )}
 
@@ -376,15 +542,20 @@ function HtmlSkillsPage() {
           <div className="w-[480px] shrink-0 border-r border-[var(--qc-border-default)] overflow-hidden">
             {selectedSkill ? (
               <SkillDetail
-                key={selectedSkill.slug}
+                key={`${selectedSkill.slug}::${configKey ?? "__default__"}`}
                 ref={skillDetailRef}
                 skill={selectedSkill}
+                config={selectedConfig}
                 ticker={ticker ?? ""}
                 historic={historic}
                 saving={saving}
                 saveError={saveError}
                 hideHeader
-                onSave={(updates) => { handleSave(updates); setSkillDirty(false); }}
+                onSave={(updates) => {
+                  if (configKey) handleSaveConfig(configKey, updates);
+                  else handleSaveSkill(updates as Partial<Omit<HtmlSkill, "id" | "created_at" | "updated_at">>);
+                  setSkillDirty(false);
+                }}
                 onDirtyChange={setSkillDirty}
               />
             ) : (
@@ -405,6 +576,7 @@ function HtmlSkillsPage() {
                 fiscalYear={selectedCall?.fiscal_year ?? null}
                 quarter={selectedCall?.quarter ?? null}
                 historic={historic}
+                configKey={configKey}
                 onControls={setPreviewControls}
               />
             ) : (
@@ -434,13 +606,23 @@ function HtmlSkillsPage() {
           pinnedHistoric={selectedSkill.pinned_historic}
           pinning={saving}
           onPin={(fiscalYear, quarter, historicPin) => {
-            handleSave({ pinned_fiscal_year: fiscalYear, pinned_quarter: quarter, pinned_historic: historicPin });
+            handleSaveSkill({ pinned_fiscal_year: fiscalYear, pinned_quarter: quarter, pinned_historic: historicPin });
           }}
           onClose={() => setShowHistoryModal(false)}
         />
       )}
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+
+      {showConfigsModal && selectedSkill && (
+        <ConfigsModal
+          configs={configs}
+          onSelect={(key) => { setConfigKey(key); setShowConfigsModal(false); }}
+          onCreate={handleCreateConfig}
+          onDelete={handleDeleteConfig}
+          onClose={() => setShowConfigsModal(false)}
+        />
+      )}
     </div>
   );
 }

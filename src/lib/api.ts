@@ -149,6 +149,60 @@ export function rawFetch<T>(url: string, callbacks: ApiCallbacks<T>): void {
 }
 
 /**
+ * POST without success/data envelope validation — for endpoints that return raw JSON
+ */
+export function rawPost<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknown): void {
+  const { onStart, onSuccess, onError, onComplete } = callbacks;
+
+  onStart?.();
+
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+      return res.json();
+    })
+    .then((data: T) => onSuccess(data))
+    .catch((err) => onError(err.message || 'Failed to complete request'))
+    .finally(() => onComplete?.());
+}
+
+interface DownloadCallbacks {
+  onStart?: () => void;
+  onError: (error: string) => void;
+  onComplete?: () => void;
+}
+
+/**
+ * POST that downloads the response as a file (e.g. CSV export) instead of parsing JSON.
+ */
+export function rawPostDownload(url: string, callbacks: DownloadCallbacks, body: unknown, filename: string): void {
+  const { onStart, onError, onComplete } = callbacks;
+
+  onStart?.();
+
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+    .then(async (res) => {
+      if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    })
+    .catch((err) => onError(err.message || 'Failed to download file'))
+    .finally(() => onComplete?.());
+}
+
+/**
  * Simple network utility for PUT API calls with callbacks
  */
 export function apiPut<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknown): void {

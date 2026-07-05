@@ -374,7 +374,7 @@ function HtmlSkillsPage() {
             {selectedSkill && (
               <>
                 {/* Row 1 — what to run, and go */}
-                <div className="flex items-center gap-3 min-w-0 overflow-x-auto">
+                <div className="flex items-center gap-3 min-w-0">
                   <TickerSearch
                     value={ticker}
                     onChange={setTicker}
@@ -443,7 +443,7 @@ function HtmlSkillsPage() {
                 </div>
 
                 {/* Row 2 — config selection + inspection tools + last-run metadata */}
-                <div className="flex items-center gap-3 min-w-0 overflow-x-auto">
+                <div className="flex items-center gap-3 min-w-0">
                   {/* Config selection — kept visually distinct because it's the entry point to the wider flow:
                       try a config here against various tickers, then pin it to a Company Group in
                       Coverage → L2 so bulk L2 dispatch resolves it automatically per ticker. */}

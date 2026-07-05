@@ -93,6 +93,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
     setPptCounts({});
     setAnnualReportCounts({});
     setCountsBaseMissing(false);
+    if (!ticker) return;
 
     const effTranscriptQtrs = historic ? historicMaxTranscriptQtrs : maxTranscriptQtrs;
     const effPptQtrs = historic ? historicMaxPptQtrs : maxPptQtrs;

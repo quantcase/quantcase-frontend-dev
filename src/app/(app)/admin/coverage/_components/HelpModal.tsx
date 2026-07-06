@@ -156,7 +156,7 @@ export function HelpModal({ onClose }: Props) {
 
                 <div>
                   <p className="text-[#0F172B] font-medium mb-0.5">Transcript / PPT recency window</p>
-                  <p>Two optional numbers: &ldquo;N most recent quarters&rdquo; (window) and &ldquo;at least this many must match&rdquo; (minCount). Leave both blank to check all-time history; set only window to require all N consecutively; set both to allow gaps — e.g. 8 and 4 means &ldquo;at least 4 of the last 8 quarters.&rdquo; Annual Report keeps the simpler single &ldquo;latest N years&rdquo; field, unscoped by consecutiveness.</p>
+                  <p>Each rule has three optional numbers: &ldquo;N most recent quarters&rdquo; (window), &ldquo;at least this many must match&rdquo; (minCount), and &ldquo;no more than this many&rdquo; (maxCount). Leave all blank to check all-time history; set only window to require all N consecutively (no gaps); lower minCount to tolerate gaps — e.g. 8 and 4 means &ldquo;at least 4 of the last 8 quarters.&rdquo; Add maxCount to turn it into a range (12–16 of the last 16), or set minCount to 0 with a low maxCount to find sparse coverage instead of good coverage. Click &ldquo;+ Add another rule&rdquo; to AND multiple such clauses together. Annual Report keeps the simpler single &ldquo;latest N years&rdquo; field, unscoped by consecutiveness.</p>
                 </div>
 
                 <div>

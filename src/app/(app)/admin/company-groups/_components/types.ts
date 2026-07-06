@@ -20,23 +20,27 @@ export interface DocFilter {
 }
 
 // Transcript / PPT filters: look at the N most recent known quarters (a missing quarter still
-// counts as one of the N slots), and require at least minCount of them to satisfy `status`.
-// Omitting minCount defaults to `window` itself (all of them — "N consecutive"). Omitting both
-// defaults to 1 ("ever, at least once").
+// counts as one of the N slots), and require between minCount and maxCount of them to satisfy
+// `status`. Omitting minCount defaults to `window` itself (all of them — "N consecutive").
+// Omitting both window and minCount defaults to 1 ("ever, at least once"). maxCount is an optional
+// ceiling on top of that floor — omit for no cap, or set minCount:0 + a low maxCount to find sparse
+// coverage instead of good coverage (a backlog/gap finder).
 export interface WindowedRule {
   window?: number;
   minCount?: number;
+  maxCount?: number;
 }
 
 export interface WindowedDocFilter {
   status: DocStatus;
   window?: number;
   minCount?: number;
+  maxCount?: number;
   /**
-   * Optional compound form: multiple {window, minCount} clauses, ANDed together, for conditions a
-   * single window/minCount pair can't express (e.g. "4 of last 8" AND "6 ever"). No UI for this yet
-   * — the flat window/minCount fields above are shorthand for a single-clause rules array under the
-   * hood. Set directly via PUT /:slug in the meantime if an admin needs a compound rule.
+   * Optional compound form: multiple {window, minCount, maxCount} clauses, ANDed together, for
+   * conditions a single window/minCount/maxCount triple can't express (e.g. "4 of last 8" AND "6
+   * ever"). The flat fields above are shorthand for a single-clause rules array under the hood —
+   * the UI (WindowedDocFilterBlock) always edits/serializes via `rules`, never the flat shape.
    */
   rules?: WindowedRule[];
 }

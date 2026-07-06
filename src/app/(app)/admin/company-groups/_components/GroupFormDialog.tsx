@@ -182,10 +182,23 @@ function WindowedDocFilterBlock({
                     </label>
                     <input
                       type="number"
-                      min={1}
+                      min={0}
                       value={row.minCount ?? ""}
                       onChange={(e) => updateRow(idx, { minCount: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="All of them"
+                      className={`${INPUT_CLS} w-40 bg-white`}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-[#888888] block mb-1">
+                      …but no more than this many
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={row.maxCount ?? ""}
+                      onChange={(e) => updateRow(idx, { maxCount: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="No limit"
                       className={`${INPUT_CLS} w-40 bg-white`}
                     />
                   </div>
@@ -200,7 +213,12 @@ function WindowedDocFilterBlock({
 
           <p className="text-[11px] text-[#888888]">
             Each additional rule must ALSO be true (AND). E.g. rule 1 = &ldquo;8 and 4&rdquo; plus rule 2 =
-            just &ldquo;6&rdquo; means: at least 4 of the last 8 quarters, AND at least 6 ever.
+            just &ldquo;6&rdquo; means: at least 4 of the last 8 quarters, AND at least 6 ever. Set
+            minCount:0 with a low maxCount to find sparse coverage instead of good coverage (e.g. a
+            backlog/gap finder).
+          </p>
+          <p className="text-[11px] text-[#888888]">
+            Leave minCount/maxCount blank to require all N, no gaps. Lower minCount to tolerate some gaps.
           </p>
         </div>
       )}

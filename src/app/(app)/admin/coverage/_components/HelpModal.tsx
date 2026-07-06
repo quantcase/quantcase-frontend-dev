@@ -151,7 +151,12 @@ export function HelpModal({ onClose }: Props) {
 
                 <div>
                   <p className="text-[#0F172B] font-medium mb-0.5">Manual vs Dynamic</p>
-                  <p><span className="font-medium text-[#0F172B]">Manual</span> is a fixed, explicit list of tickers. <span className="font-medium text-[#0F172B]">Dynamic</span> resolves live from a flat set of filters — Alphabet range, Transcript/PPT/Annual Report status (present, not yet extracted, or already extracted, with an optional &ldquo;latest N periods&rdquo;), Market cap, and Industries. Every enabled filter is ANDed together — there&rsquo;s no any/all toggle.</p>
+                  <p><span className="font-medium text-[#0F172B]">Manual</span> is a fixed, explicit list of tickers. <span className="font-medium text-[#0F172B]">Dynamic</span> resolves live from a flat set of filters — Alphabet range, Transcript/PPT/Annual Report status (present, not yet extracted, or already extracted), Market cap, and Industries. Every enabled filter is ANDed together — there&rsquo;s no any/all toggle.</p>
+                </div>
+
+                <div>
+                  <p className="text-[#0F172B] font-medium mb-0.5">Transcript / PPT recency window</p>
+                  <p>Two optional numbers: &ldquo;N most recent quarters&rdquo; (window) and &ldquo;at least this many must match&rdquo; (minCount). Leave both blank to check all-time history; set only window to require all N consecutively; set both to allow gaps — e.g. 8 and 4 means &ldquo;at least 4 of the last 8 quarters.&rdquo; Annual Report keeps the simpler single &ldquo;latest N years&rdquo; field, unscoped by consecutiveness.</p>
                 </div>
 
                 <div>

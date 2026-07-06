@@ -11,6 +11,8 @@ import {
   FilterType,
   DocFilter,
   DocStatus,
+  WindowedDocFilter,
+  WindowedRule,
   DynamicFilterConfig,
   FilterConfig,
   ResolveResult,
@@ -24,6 +26,14 @@ const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text
 
 const EMPTY_DOC_FILTER: DocFilter = { status: "present" };
 
+// Always represented in the UI as {status, rules} — a saved flat {window, minCount} (or no rules
+// at all) is normalized into a single-clause rules array on load; we never re-emit the flat shape.
+function initWindowedFilter(f?: WindowedDocFilter): WindowedDocFilter {
+  if (!f) return { status: "present", rules: [{}] };
+  const rules = f.rules && f.rules.length > 0 ? f.rules : [{ window: f.window, minCount: f.minCount }];
+  return { status: f.status, rules };
+}
+
 interface Props {
   open: boolean;
   group: CompanyGroup | null;
@@ -32,7 +42,7 @@ interface Props {
   onSaved: () => void;
 }
 
-// Transcript / PPT / Annual report all use the same present/pending/extracted + "latest N" shape
+// Annual report: present/pending/extracted + single "latest N years" field.
 function DocFilterBlock({
   label,
   hint,
@@ -41,7 +51,6 @@ function DocFilterBlock({
   onEnabledChange,
   value,
   onChange,
-  restrictToPresent,
 }: {
   label: string;
   hint: string;
@@ -50,8 +59,6 @@ function DocFilterBlock({
   onEnabledChange: (v: boolean) => void;
   value: DocFilter;
   onChange: (v: DocFilter) => void;
-  /** Known backend timeout — pending/extracted disabled for this doc type until fixed. */
-  restrictToPresent?: boolean;
 }) {
   return (
     <div className="rounded-md border border-[#E2E2E2] p-3">
@@ -66,12 +73,8 @@ function DocFilterBlock({
               className={`${INPUT_CLS} w-64`}
             >
               <option value="present">Present</option>
-              <option value="pending" disabled={restrictToPresent}>
-                Not yet extracted{restrictToPresent ? " — unavailable (times out; backend fix pending)" : ""}
-              </option>
-              <option value="extracted" disabled={restrictToPresent}>
-                Already extracted{restrictToPresent ? " — unavailable (times out; backend fix pending)" : ""}
-              </option>
+              <option value="pending">Not yet extracted</option>
+              <option value="extracted">Already extracted</option>
             </select>
           </div>
 
@@ -88,13 +91,117 @@ function DocFilterBlock({
               className={`${INPUT_CLS} w-40`}
             />
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
-          {!restrictToPresent && value.status !== "present" && !value.lastN && (
-            <p className="flex items-center gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1.5">
-              <AlertCircle className="size-3.5 shrink-0" />
-              Recommend setting &ldquo;most recent N&rdquo; — unscoped {value.status} checks can time out.
-            </p>
-          )}
+// Transcript / PPT: present/pending/extracted + a repeatable list of {window, minCount} rules,
+// ANDed together. Always serialized as `rules` — starts with exactly 1 row so existing groups
+// look unchanged.
+function WindowedDocFilterBlock({
+  label,
+  hint,
+  enabled,
+  onEnabledChange,
+  value,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  enabled: boolean;
+  onEnabledChange: (v: boolean) => void;
+  value: WindowedDocFilter;
+  onChange: (v: WindowedDocFilter) => void;
+}) {
+  const rows = value.rules && value.rules.length > 0 ? value.rules : [{}];
+
+  function updateRow(idx: number, patch: Partial<WindowedRule>) {
+    onChange({ ...value, rules: rows.map((r, i) => (i === idx ? { ...r, ...patch } : r)) });
+  }
+
+  function addRow() {
+    onChange({ ...value, rules: [...rows, {}] });
+  }
+
+  function removeRow(idx: number) {
+    onChange({ ...value, rules: rows.filter((_, i) => i !== idx) });
+  }
+
+  return (
+    <div className="rounded-md border border-[#E2E2E2] p-3">
+      <CheckboxField checked={enabled} onChange={onEnabledChange} label={label} hint={hint} />
+      {enabled && (
+        <div className="mt-3 pl-5 space-y-3">
+          <div>
+            <label className="text-[10px] text-[#888888] block mb-1">Status</label>
+            <select
+              value={value.status}
+              onChange={(e) => onChange({ ...value, status: e.target.value as DocStatus })}
+              className={`${INPUT_CLS} w-64`}
+            >
+              <option value="present">Present</option>
+              <option value="pending">Not yet extracted</option>
+              <option value="extracted">Already extracted</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            {rows.map((row, idx) => (
+              <div key={idx} className="rounded-md border border-[#E2E2E2] bg-[#F5F5F5] p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Rule {idx + 1}</p>
+                  {idx > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => removeRow(idx)}
+                      className="flex items-center justify-center size-5 rounded text-[#888888] hover:text-[#0F172B] transition-colors"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-start gap-3">
+                  <div>
+                    <label className="text-[10px] text-[#888888] block mb-1">
+                      Only look at the N most recent quarters
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={row.window ?? ""}
+                      onChange={(e) => updateRow(idx, { window: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="All history"
+                      className={`${INPUT_CLS} w-40 bg-white`}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-[#888888] block mb-1">
+                      …of which at least this many must match
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={row.minCount ?? ""}
+                      onChange={(e) => updateRow(idx, { minCount: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="All of them"
+                      className={`${INPUT_CLS} w-40 bg-white`}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button type="button" onClick={addRow} className="text-[12px] font-medium text-[#0F172B] hover:underline">
+            + Add another rule (AND)
+          </button>
+
+          <p className="text-[11px] text-[#888888]">
+            Each additional rule must ALSO be true (AND). E.g. rule 1 = &ldquo;8 and 4&rdquo; plus rule 2 =
+            just &ldquo;6&rdquo; means: at least 4 of the last 8 quarters, AND at least 6 ever.
+          </p>
         </div>
       )}
     </div>
@@ -119,10 +226,10 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
   const [nameTo, setNameTo] = useState(dyn?.nameRange?.to ?? "");
 
   const [transcriptEnabled, setTranscriptEnabled] = useState(!!dyn?.transcript);
-  const [transcript, setTranscript] = useState<DocFilter>(dyn?.transcript ?? EMPTY_DOC_FILTER);
+  const [transcript, setTranscript] = useState<WindowedDocFilter>(initWindowedFilter(dyn?.transcript));
 
   const [pptEnabled, setPptEnabled] = useState(!!dyn?.ppt);
-  const [ppt, setPpt] = useState<DocFilter>(dyn?.ppt ?? EMPTY_DOC_FILTER);
+  const [ppt, setPpt] = useState<WindowedDocFilter>(initWindowedFilter(dyn?.ppt));
 
   const [annualReportEnabled, setAnnualReportEnabled] = useState(!!dyn?.annualReport);
   const [annualReport, setAnnualReport] = useState<DocFilter>(dyn?.annualReport ?? EMPTY_DOC_FILTER);
@@ -304,20 +411,18 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                 )}
               </div>
 
-              <DocFilterBlock
+              <WindowedDocFilterBlock
                 label="Transcript"
                 hint="Filter by transcript document status."
-                periodLabel="quarters"
                 enabled={transcriptEnabled}
                 onEnabledChange={setTranscriptEnabled}
                 value={transcript}
                 onChange={setTranscript}
               />
 
-              <DocFilterBlock
+              <WindowedDocFilterBlock
                 label="PPT"
                 hint="Filter by earnings-call PPT document status."
-                periodLabel="quarters"
                 enabled={pptEnabled}
                 onEnabledChange={setPptEnabled}
                 value={ppt}
@@ -332,7 +437,6 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                 onEnabledChange={setAnnualReportEnabled}
                 value={annualReport}
                 onChange={setAnnualReport}
-                restrictToPresent
               />
 
               <div className="rounded-md border border-[#E2E2E2] p-3">

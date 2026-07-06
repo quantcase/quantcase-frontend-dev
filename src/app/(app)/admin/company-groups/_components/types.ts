@@ -19,6 +19,28 @@ export interface DocFilter {
   lastN?: number;
 }
 
+// Transcript / PPT filters: look at the N most recent known quarters (a missing quarter still
+// counts as one of the N slots), and require at least minCount of them to satisfy `status`.
+// Omitting minCount defaults to `window` itself (all of them — "N consecutive"). Omitting both
+// defaults to 1 ("ever, at least once").
+export interface WindowedRule {
+  window?: number;
+  minCount?: number;
+}
+
+export interface WindowedDocFilter {
+  status: DocStatus;
+  window?: number;
+  minCount?: number;
+  /**
+   * Optional compound form: multiple {window, minCount} clauses, ANDed together, for conditions a
+   * single window/minCount pair can't express (e.g. "4 of last 8" AND "6 ever"). No UI for this yet
+   * — the flat window/minCount fields above are shorthand for a single-clause rules array under the
+   * hood. Set directly via PUT /:slug in the meantime if an admin needs a compound rule.
+   */
+  rules?: WindowedRule[];
+}
+
 export interface MarketCapFilter {
   min: number | null;
   max: number | null;
@@ -27,8 +49,8 @@ export interface MarketCapFilter {
 // All present keys are ANDed together — there is no OR between filters.
 export interface DynamicFilterConfig {
   nameRange?: NameRangeFilter;
-  transcript?: DocFilter;
-  ppt?: DocFilter;
+  transcript?: WindowedDocFilter;
+  ppt?: WindowedDocFilter;
   annualReport?: DocFilter;
   marketCap?: MarketCapFilter;
   industries?: string[];

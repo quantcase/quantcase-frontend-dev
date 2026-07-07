@@ -80,6 +80,11 @@ export function HelpModal({ onClose }: Props) {
                   <p className="text-[#0F172B] font-medium mb-0.5">Export CSV</p>
                   <p>Downloads the full picture as a spreadsheet — always covers complete, uncapped history. Limit, Latest, AR-only, and Skip AR are ignored for the export, and the export is never paginated (always all companies in one file).</p>
                 </div>
+
+                <div>
+                  <p className="text-[#0F172B] font-medium mb-0.5">Run History errors</p>
+                  <p>When a ticker&rsquo;s per-ticker row in Run History shows a non-zero <span className="font-medium text-[#0F172B]">Failed</span> count, that count becomes a clickable expander revealing the specific document(s) that failed — source (transcript/PPT/annual report), fiscal year/quarter, and the error message. A ticker can fail on more than one document in the same run.</p>
+                </div>
               </section>
 
               <div className="border-t border-[#E2E2E2]" />
@@ -89,7 +94,7 @@ export function HelpModal({ onClose }: Props) {
 
                 <div>
                   <p className="text-[#0F172B] font-medium mb-0.5">What it does</p>
-                  <p>Runs a specific analysis skill (e.g. guidance-credibility) against a ticker set. There&rsquo;s no default ticker list here — pick Manual tickers, a Saved group, or All companies. Every ticker resolves its skill config automatically from whichever tagged Company Group covers it; an untagged ticker hard-fails with a 400 on Run.</p>
+                  <p>Runs a specific analysis skill (e.g. guidance-credibility) against a ticker set. There&rsquo;s no default ticker list here — pick Manual tickers, a Saved group, or All companies. Every ticker resolves its skill config automatically from whichever tagged Company Group covers it; an untagged ticker hard-fails with a 400 on Run. If a ticker sits in more than one tagged group, the most recently updated group wins — see Overlapping groups below.</p>
                 </div>
 
                 <div>
@@ -177,6 +182,11 @@ export function HelpModal({ onClose }: Props) {
                 <div>
                   <p className="text-[#0F172B] font-medium mb-0.5">config_key</p>
                   <p>Ties a group to the skill config its tickers should resolve to for L2 runs. Tag it either inline from the L2 tab while dispatching, or from the group&rsquo;s row on the Company Groups page.</p>
+                </div>
+
+                <div>
+                  <p className="text-[#0F172B] font-medium mb-0.5">Overlapping groups</p>
+                  <p>A ticker can belong to more than one tagged group at once — there&rsquo;s no exclusivity check when you save a group. When that happens, the config from whichever of those groups was <span className="font-medium text-[#0F172B]">most recently updated</span> wins for that ticker, not any fixed priority order. If a ticker&rsquo;s L2 results don&rsquo;t match the group you expect, check whether it also sits in another tagged group that was edited more recently.</p>
                 </div>
               </section>
             </>

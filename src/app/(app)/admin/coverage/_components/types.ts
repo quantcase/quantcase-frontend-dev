@@ -66,12 +66,26 @@ export interface L1RunTriggerResponse {
   run_id: string;
 }
 
+export interface L1RunTickerError {
+  source: "transcript" | "ppt" | "annual_report";
+  /** Present for transcript/ppt errors. */
+  callId?: string;
+  /** Present for annual_report errors instead of callId. */
+  reportId?: string;
+  fiscal_year: string;
+  /** Absent for annual_report errors. */
+  quarter?: string;
+  error: string;
+}
+
 export interface L1RunTickerSummary {
   symbol: string;
   queued: number;
   skipped: number;
   noSource: number;
   failed: number;
+  /** Omitted entirely when this ticker had no failures — check `.length`, don't assume the key exists. */
+  errors?: L1RunTickerError[];
 }
 
 export interface L1RunMetadata {

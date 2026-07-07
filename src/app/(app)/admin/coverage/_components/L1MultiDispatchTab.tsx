@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { Fragment, useState, useEffect, useCallback, useMemo } from "react";
 import { Loader2, AlertCircle, ChevronDown, CheckCircle2, XCircle, Clock, RefreshCw, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { rawFetch, rawPost, rawPostDownload } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
@@ -15,6 +15,7 @@ import {
   L1PreviewTicker,
   L1RunTriggerResponse,
   L1Run,
+  L1RunTickerError,
   L1RunsResponse,
 } from "./types";
 
@@ -153,8 +154,27 @@ function RunStatusBadge({ status }: { status: L1Run["status"] }) {
 
 // ── Run history row ───────────────────────────────────────────────────────────
 
+function TickerErrorDetail({ errors }: { errors: L1RunTickerError[] }) {
+  return (
+    <div className="space-y-1.5">
+      {errors.map((e, i) => (
+        <div key={i} className="text-[11px] text-red-700">
+          <span className="font-mono font-medium">
+            {e.source}
+            {e.quarter ? ` ${e.quarter}` : ""} {e.fiscal_year}
+          </span>
+          {" — "}
+          {e.error}
+          <span className="block font-mono text-red-400">{e.source === "annual_report" ? e.reportId : e.callId}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function RunHistoryRow({ run }: { run: L1Run }) {
   const [open, setOpen] = useState(false);
+  const [expandedTicker, setExpandedTicker] = useState<string | null>(null);
   const hasMeta = !!run.metadata;
 
   return (
@@ -202,15 +222,41 @@ function RunHistoryRow({ run }: { run: L1Run }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0F0F0] bg-white">
-                  {run.metadata.perTicker.map((p) => (
-                    <tr key={p.symbol}>
-                      <td className="px-3 py-1.5 font-mono text-[11px] text-[#0F172B]">{p.symbol}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.queued}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.skipped}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.noSource}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-red-600">{p.failed}</td>
-                    </tr>
-                  ))}
+                  {run.metadata.perTicker.map((p) => {
+                    const hasErrors = !!p.errors?.length;
+                    const rowOpen = expandedTicker === p.symbol;
+                    return (
+                      <Fragment key={p.symbol}>
+                        <tr>
+                          <td className="px-3 py-1.5 font-mono text-[11px] text-[#0F172B]">{p.symbol}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.queued}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.skipped}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.noSource}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px]">
+                            {hasErrors ? (
+                              <button
+                                onClick={() => setExpandedTicker(rowOpen ? null : p.symbol)}
+                                title="Click to view error details"
+                                className="inline-flex items-center gap-0.5 font-medium text-red-600 hover:underline"
+                              >
+                                {p.failed}
+                                <ChevronDown className={`size-3 transition-transform duration-150 ${rowOpen ? "rotate-180" : ""}`} />
+                              </button>
+                            ) : (
+                              <span className="text-red-600">{p.failed}</span>
+                            )}
+                          </td>
+                        </tr>
+                        {rowOpen && hasErrors && (
+                          <tr>
+                            <td colSpan={5} className="border-t border-red-100 bg-red-50 px-3 py-2">
+                              <TickerErrorDetail errors={p.errors!} />
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

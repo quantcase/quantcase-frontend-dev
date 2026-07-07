@@ -51,7 +51,11 @@ export interface L1PreviewTicker {
 }
 
 export interface L1PreviewResponse {
+  /** Total across ALL pages — not tickers.length (that's just this page). */
   tickerCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
   tickers: string[];
   perTicker: L1PreviewTicker[];
 }
@@ -151,7 +155,11 @@ export interface L2PreviewTickerRow {
 
 export interface L2PreviewResponse {
   slug: string;
+  /** Total across ALL pages — not perTicker.length (that's just this page). */
   tickerCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
   perTicker: L2PreviewTickerRow[];
 }
 

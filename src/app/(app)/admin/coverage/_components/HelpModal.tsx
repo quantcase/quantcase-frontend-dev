@@ -68,12 +68,17 @@ export function HelpModal({ onClose }: Props) {
 
                 <div>
                   <p className="text-[#0F172B] font-medium mb-0.5">Extraction options</p>
-                  <p><span className="font-medium text-[#0F172B]">Start From</span> is an alphabetical cursor to resume a long run. <span className="font-medium text-[#0F172B]">Limit</span> and <span className="font-medium text-[#0F172B]">Latest</span> both cap to the N most-recent calls/reports per ticker — Latest wins if both are set. <span className="font-medium text-[#0F172B]">Force re-extract</span> re-runs tickers that already have signals, discarding the old ones (off by default, so already-extracted tickers are normally skipped). <span className="font-medium text-[#0F172B]">Annual reports only</span> and <span className="font-medium text-[#0F172B]">Skip annual reports</span> are mutually exclusive toggles for which source types run.</p>
+                  <p><span className="font-medium text-[#0F172B]">Start From</span> is an alphabetical cursor to resume a long run. <span className="font-medium text-[#0F172B]">Limit</span> and <span className="font-medium text-[#0F172B]">Latest</span> both cap to the N most-recent calls/reports per ticker — Latest wins if both are set. Leave both blank and Preview shows only the 20 most recent calls per ticker (the true total is still shown alongside) — set either one to look further back. <span className="font-medium text-[#0F172B]">Force re-extract</span> re-runs tickers that already have signals, discarding the old ones (off by default, so already-extracted tickers are normally skipped). <span className="font-medium text-[#0F172B]">Annual reports only</span> and <span className="font-medium text-[#0F172B]">Skip annual reports</span> are mutually exclusive toggles for which source types run.</p>
+                </div>
+
+                <div>
+                  <p className="text-[#0F172B] font-medium mb-0.5">Preview pagination</p>
+                  <p>Once a preview spans more than one page of companies, Page controls appear next to the tickers-total count. Paging never invalidates Run — pagination only affects which slice of companies Preview displays, not what a subsequent Run dispatches.</p>
                 </div>
 
                 <div>
                   <p className="text-[#0F172B] font-medium mb-0.5">Export CSV</p>
-                  <p>Downloads the full picture as a spreadsheet — always covers complete, uncapped history. Limit, Latest, AR-only, and Skip AR are ignored for the export.</p>
+                  <p>Downloads the full picture as a spreadsheet — always covers complete, uncapped history. Limit, Latest, AR-only, and Skip AR are ignored for the export, and the export is never paginated (always all companies in one file).</p>
                 </div>
               </section>
 
@@ -93,13 +98,23 @@ export function HelpModal({ onClose }: Props) {
                 </div>
 
                 <div>
+                  <p className="text-[#0F172B] font-medium mb-0.5">Multiple skills</p>
+                  <p>The Skill field is a checkbox list, not a single picker — check as many as you want, or use <span className="font-medium text-[#0F172B]">Select all</span>. Preview always queries just the first selected skill (one <code>/preview</code> call, since it only accepts a single slug). Run fans out to every selected skill at once — one <code>/run</code> POST per skill, fired concurrently, not one at a time — and each gets its own row in Run History.</p>
+                </div>
+
+                <div>
                   <p className="text-[#0F172B] font-medium mb-0.5">Historic mode / Force</p>
                   <p>Both are <span className="font-medium text-[#0F172B]">Run only</span> — Preview ignores them entirely. <span className="font-medium text-[#0F172B]">Historic</span> runs the full base-context build instead of incremental; <span className="font-medium text-[#0F172B]">Force</span> bypasses the cache.</p>
                 </div>
 
                 <div>
                   <p className="text-[#0F172B] font-medium mb-0.5">Preview</p>
-                  <p>A fast, single-query signal-availability report — not a per-ticker prompt build, so it&rsquo;s quick even for large groups. Shows transcript/PPT/annual-report totals per ticker, expandable to a per fiscal-year/quarter breakdown. Use <span className="font-medium text-[#0F172B]">Sort by least covered</span> to surface the biggest coverage gaps for a given source first.</p>
+                  <p>A fast, single-query signal-availability report — not a per-ticker prompt build, so it&rsquo;s quick even for large groups. Shows transcript/PPT/annual-report totals per ticker, expandable to a per fiscal-year/quarter breakdown. Use <span className="font-medium text-[#0F172B]">Sort by least covered</span> to surface the biggest coverage gaps for a given source first — note this only sorts within the current page, not across the whole ticker set. Page controls appear once a preview spans more than one page; paging doesn&rsquo;t affect Run.</p>
+                </div>
+
+                <div>
+                  <p className="text-[#0F172B] font-medium mb-0.5">Export CSV vs JSON Preview</p>
+                  <p>CSV numbers won&rsquo;t exactly match the JSON preview above: CSV reports total signal coverage of any type per period, while the JSON preview only counts signals relevant to the selected skill&rsquo;s whitelist. This is a deliberate tradeoff to keep broad-whitelist CSV exports fast.</p>
                 </div>
 
                 <div>
@@ -249,10 +264,19 @@ export function HelpModal({ onClose }: Props) {
                     <tr>
                       <td className="py-1 pr-2 text-[#0F172B]">CSV export scope</td>
                       <td className="py-1 pr-2">Full uncapped history, ignores Limit/Latest/AR flags</td>
-                      <td className="py-1">Same body as Preview</td>
+                      <td className="py-1">Same filters as Preview, but total coverage (any type), not skill-whitelisted</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1 pr-2 text-[#0F172B]">Pagination</td>
+                      <td className="py-1 pr-2" colSpan={2}><code>page</code>/<code>pageSize</code> on <code>/preview</code> only — never on <code>/run</code> or <code>/preview/csv</code>. <code>tickerCount</code> is the total across all pages; <code>perTicker</code>/<code>tickers</code> is just the current page.</td>
                     </tr>
                   </tbody>
                 </table>
+              </div>
+
+              <div>
+                <p className="text-[#0F172B] font-medium mb-0.5">Preview/CSV response caching</p>
+                <p>Both <code>/preview</code> (~60s) and <code>/preview/csv</code> (~180s) responses may be served from a server-side cache — an identical request shortly after the first can return near-instantly. No contract-visible difference, just faster repeats. <code>/run</code> is never cached.</p>
               </div>
 
               <div>

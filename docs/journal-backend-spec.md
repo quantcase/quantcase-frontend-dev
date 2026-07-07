@@ -2,7 +2,7 @@
 
 > **Audience:** Backend team  
 > **Frontend status:** UI is fully built with static/dummy data. All data must come from the APIs below once implemented.  
-> **Base URL:** `https://qc-backend.mach33.club` (existing backend)  
+> **Base URL:** `https://api-dev.quantcase.ai` (existing backend)  
 > **Auth:** All endpoints require authenticated user session (existing auth mechanism).
 
 ---

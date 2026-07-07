@@ -29,7 +29,7 @@ Navigation passes state via URL query params (e.g., `?symbol=AAPL`, `?callId=123
 
 ### API Layer
 
-**Backend URL:** `https://qc-backend.mach33.club` (defined in [src/lib/constants.ts](src/lib/constants.ts))
+**Backend URL:** `https://api-dev.quantcase.ai` (defined in [src/lib/constants.ts](src/lib/constants.ts))
 
 All API calls go through two utility functions in [src/lib/api.ts](src/lib/api.ts):
 - `apiCall<T>(url, callbacks)` — GET requests

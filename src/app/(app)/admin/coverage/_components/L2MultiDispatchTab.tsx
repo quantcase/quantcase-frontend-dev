@@ -291,7 +291,8 @@ export function L2MultiDispatchTab() {
   const [groupCounts, setGroupCounts] = useState<Record<string, number | "loading" | "error">>({});
 
   // Form state
-  const [historic, setHistoric] = useState(false);
+  // Incremental (unchecked) is disabled for now — Historic mode is forced on and the checkbox is locked.
+  const [historic, setHistoric] = useState(true);
   const [force, setForce] = useState(false);
 
   // Preview
@@ -517,8 +518,9 @@ export function L2MultiDispatchTab() {
           <CheckboxField
             checked={historic}
             onChange={setHistoric}
+            disabled
             label="Historic mode"
-            hint="Runs the full base-context build instead of incremental. Run only — ignored by Preview."
+            hint="Runs the full base-context build instead of incremental. Run only — ignored by Preview. Incremental bulk dispatch is disabled for now, so this is locked on."
           />
           <CheckboxField
             checked={force}

@@ -109,7 +109,7 @@ export function HelpModal({ onClose }: Props) {
 
                 <div>
                   <p className="text-[#0F172B] font-medium mb-0.5">Historic mode / Force</p>
-                  <p>Both are <span className="font-medium text-[#0F172B]">Run only</span> — Preview ignores them entirely. <span className="font-medium text-[#0F172B]">Historic</span> runs the full base-context build instead of incremental; <span className="font-medium text-[#0F172B]">Force</span> bypasses the cache.</p>
+                  <p>Both are <span className="font-medium text-[#0F172B]">Run only</span> — Preview ignores them entirely. <span className="font-medium text-[#0F172B]">Historic</span> runs the full base-context build instead of incremental; <span className="font-medium text-[#0F172B]">Force</span> bypasses the cache. Historic mode is currently locked on (checked and disabled) — incremental bulk dispatch is disabled for now.</p>
                 </div>
 
                 <div>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { Loader2, AlertCircle, ChevronDown, CheckCircle2, XCircle, Clock, RefreshCw, Download } from "lucide-react";
+import { Fragment, useState, useEffect, useCallback, useMemo } from "react";
+import { Loader2, AlertCircle, ChevronDown, CheckCircle2, XCircle, Clock, RefreshCw, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { rawFetch, rawPost, rawPostDownload } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { CheckboxField } from "@/components/molecules/checkbox-field";
@@ -15,6 +15,7 @@ import {
   L1PreviewTicker,
   L1RunTriggerResponse,
   L1Run,
+  L1RunTickerError,
   L1RunsResponse,
 } from "./types";
 
@@ -153,8 +154,27 @@ function RunStatusBadge({ status }: { status: L1Run["status"] }) {
 
 // ── Run history row ───────────────────────────────────────────────────────────
 
+function TickerErrorDetail({ errors }: { errors: L1RunTickerError[] }) {
+  return (
+    <div className="space-y-1.5">
+      {errors.map((e, i) => (
+        <div key={i} className="text-[11px] text-red-700">
+          <span className="font-mono font-medium">
+            {e.source}
+            {e.quarter ? ` ${e.quarter}` : ""} {e.fiscal_year}
+          </span>
+          {" — "}
+          {e.error}
+          <span className="block font-mono text-red-400">{e.source === "annual_report" ? e.reportId : e.callId}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function RunHistoryRow({ run }: { run: L1Run }) {
   const [open, setOpen] = useState(false);
+  const [expandedTicker, setExpandedTicker] = useState<string | null>(null);
   const hasMeta = !!run.metadata;
 
   return (
@@ -202,15 +222,41 @@ function RunHistoryRow({ run }: { run: L1Run }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0F0F0] bg-white">
-                  {run.metadata.perTicker.map((p) => (
-                    <tr key={p.symbol}>
-                      <td className="px-3 py-1.5 font-mono text-[11px] text-[#0F172B]">{p.symbol}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.queued}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.skipped}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.noSource}</td>
-                      <td className="px-3 py-1.5 text-center text-[11px] text-red-600">{p.failed}</td>
-                    </tr>
-                  ))}
+                  {run.metadata.perTicker.map((p) => {
+                    const hasErrors = !!p.errors?.length;
+                    const rowOpen = expandedTicker === p.symbol;
+                    return (
+                      <Fragment key={p.symbol}>
+                        <tr>
+                          <td className="px-3 py-1.5 font-mono text-[11px] text-[#0F172B]">{p.symbol}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.queued}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.skipped}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.noSource}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px]">
+                            {hasErrors ? (
+                              <button
+                                onClick={() => setExpandedTicker(rowOpen ? null : p.symbol)}
+                                title="Click to view error details"
+                                className="inline-flex items-center gap-0.5 font-medium text-red-600 hover:underline"
+                              >
+                                {p.failed}
+                                <ChevronDown className={`size-3 transition-transform duration-150 ${rowOpen ? "rotate-180" : ""}`} />
+                              </button>
+                            ) : (
+                              <span className="text-red-600">{p.failed}</span>
+                            )}
+                          </td>
+                        </tr>
+                        {rowOpen && hasErrors && (
+                          <tr>
+                            <td colSpan={5} className="border-t border-red-100 bg-red-50 px-3 py-2">
+                              <TickerErrorDetail errors={p.errors!} />
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -250,6 +296,7 @@ export function L1MultiDispatchTab() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewedKey, setPreviewedKey] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   // CSV export
   const [csvLoading, setCsvLoading] = useState(false);
@@ -342,14 +389,17 @@ export function L1MultiDispatchTab() {
   const bodyKey = JSON.stringify(body);
   const canRun = previewedKey === bodyKey && !previewLoading && !triggering && !isRunLive;
 
-  function doPreview() {
+  // page is separate from `body`/`bodyKey` — it only affects this /preview request, never /run or
+  // /preview/csv, so paging back and forth never invalidates the Run-enabling previewedKey match.
+  function doPreview(targetPage = 1) {
     const key = bodyKey;
+    const reqBody = targetPage > 1 ? { ...body, page: targetPage } : body;
     rawPost<L1PreviewResponse>(`${BASE}/preview`, {
       onStart: () => { setPreviewLoading(true); setPreviewError(null); },
-      onSuccess: (res) => { setPreview(res); setPreviewedKey(key); },
+      onSuccess: (res) => { setPreview(res); setPreviewedKey(key); setPage(targetPage); },
       onError: setPreviewError,
       onComplete: () => setPreviewLoading(false),
-    }, body);
+    }, reqBody);
   }
 
   function doExportCsv() {
@@ -439,6 +489,10 @@ export function L1MultiDispatchTab() {
             <p className="text-[11px] text-[#888888] mt-1">Takes precedence over Limit if both set.</p>
           </div>
         </div>
+        <p className="text-[11px] text-[#888888]">
+          Leave Limit and Latest blank and Preview shows only the 20 most recent calls per ticker
+          (the total count is still shown alongside) — set either one explicitly to look further back.
+        </p>
 
         <div className="flex flex-wrap gap-6 pt-1 border-t border-[#F0F0F0]">
           <CheckboxField
@@ -482,7 +536,7 @@ export function L1MultiDispatchTab() {
       {/* Actions */}
       <div className="flex items-center gap-3 flex-wrap">
         <button
-          onClick={doPreview}
+          onClick={() => doPreview(1)}
           disabled={previewLoading}
           className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40"
         >
@@ -544,9 +598,30 @@ export function L1MultiDispatchTab() {
       {/* Preview results */}
       {preview && (
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Preview</span>
-            <span className="text-[10px] text-[#C8C8C8]">{preview.tickerCount} tickers</span>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Preview</span>
+              <span className="text-[10px] text-[#C8C8C8]">{preview.tickerCount} companies total</span>
+            </div>
+            {preview.totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => doPreview(page - 1)}
+                  disabled={page <= 1 || previewLoading || previewedKey !== bodyKey}
+                  className="flex items-center justify-center size-6 rounded border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] disabled:opacity-40 disabled:hover:border-[#E2E2E2] disabled:hover:text-[#888888] transition-colors"
+                >
+                  <ChevronLeft className="size-3.5" />
+                </button>
+                <span className="text-[11px] text-[#888888]">Page {preview.page} of {preview.totalPages}</span>
+                <button
+                  onClick={() => doPreview(page + 1)}
+                  disabled={page >= preview.totalPages || previewLoading || previewedKey !== bodyKey}
+                  className="flex items-center justify-center size-6 rounded border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] disabled:opacity-40 disabled:hover:border-[#E2E2E2] disabled:hover:text-[#888888] transition-colors"
+                >
+                  <ChevronRight className="size-3.5" />
+                </button>
+              </div>
+            )}
           </div>
           <div className="space-y-1.5">
             {preview.perTicker.map((t) => (

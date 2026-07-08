@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, Loader2, AlertCircle } from "lucide-react";
+import { useRef, useState } from "react";
+import { X, Loader2, AlertCircle, Upload } from "lucide-react";
 import { apiCall, apiPost, apiPut } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { TagMultiPicker } from "@/components/molecules/tag-multi-picker";
@@ -238,6 +238,8 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
   const [manualTickers, setManualTickers] = useState<string[]>(
     group && isManualConfig(group) ? group.filter_config.tickers ?? [] : []
   );
+  const [csvUnmatched, setCsvUnmatched] = useState<string[] | null>(null);
+  const csvInputRef = useRef<HTMLInputElement>(null);
 
   const [nameRangeEnabled, setNameRangeEnabled] = useState(!!dyn?.nameRange);
   const [nameFrom, setNameFrom] = useState(dyn?.nameRange?.from ?? "");
@@ -292,6 +294,38 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
     !annualReportEnabled &&
     !marketCapEnabled &&
     !(industriesEnabled && industries.length > 0);
+
+  // Every non-empty comma/newline-separated token is treated as a candidate ticker (a handful of
+  // common header labels are dropped so a "ticker"/"symbol" column header doesn't show up as a
+  // false mismatch). Matched against the same `companies` universe TagMultiPicker autocompletes
+  // against — there's no separate validation endpoint, this list IS the source of truth.
+  function handleCsvFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const HEADER_WORDS = new Set(["TICKER", "SYMBOL", "STOCK", "COMPANY", "NAME"]);
+      const tokens = String(reader.result ?? "")
+        .split(/[\r\n,]+/)
+        .map((t) => t.trim().replace(/^"|"$/g, "").toUpperCase())
+        .filter((t) => t.length > 0 && !HEADER_WORDS.has(t));
+      const candidates = Array.from(new Set(tokens));
+
+      const known = new Set(companies.map((c) => c.toUpperCase()));
+      const matched = candidates.filter((t) => known.has(t));
+      const unmatched = candidates.filter((t) => !known.has(t));
+
+      setCsvUnmatched(unmatched.length > 0 ? unmatched : null);
+      if (matched.length > 0) {
+        setManualTickers((prev) => Array.from(new Set([...prev, ...matched])));
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function handleCsvInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) handleCsvFile(file);
+    e.target.value = "";
+  }
 
   function doResolve(slug: string) {
     apiCall<{ success: boolean; data: ResolveResult }>(`${BASE}/${slug}/resolve`, {
@@ -390,8 +424,34 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
 
           {filterType === "manual" && (
             <div>
-              <label className={LABEL_CLS}>Tickers</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Tickers</label>
+                <button
+                  type="button"
+                  onClick={() => csvInputRef.current?.click()}
+                  className="flex items-center gap-1 text-[11px] font-medium text-[#0F172B] hover:underline"
+                >
+                  <Upload className="size-3" /> Upload CSV
+                </button>
+                <input
+                  ref={csvInputRef}
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="hidden"
+                  onChange={handleCsvInputChange}
+                />
+              </div>
               <TagMultiPicker options={companies} selected={manualTickers} onChange={setManualTickers} placeholder="Add a ticker…" />
+              {csvUnmatched && csvUnmatched.length > 0 && (
+                <div className="mt-2 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+                  <AlertCircle className="size-3.5 shrink-0 mt-px" />
+                  <span>
+                    {csvUnmatched.length} ticker{csvUnmatched.length === 1 ? "" : "s"} from the CSV didn&apos;t
+                    match a known company and {csvUnmatched.length === 1 ? "wasn't" : "weren't"} added:{" "}
+                    {csvUnmatched.join(", ")}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 

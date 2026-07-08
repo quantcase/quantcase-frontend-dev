@@ -5,16 +5,18 @@ interface CheckboxFieldProps {
   onChange: (v: boolean) => void;
   label: string;
   hint?: string;
+  disabled?: boolean;
 }
 
-export function CheckboxField({ checked, onChange, label, hint }: CheckboxFieldProps) {
+export function CheckboxField({ checked, onChange, label, hint, disabled }: CheckboxFieldProps) {
   return (
-    <label className="flex items-start gap-2 cursor-pointer select-none">
+    <label className={`flex items-start gap-2 select-none ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
       <input
         type="checkbox"
         checked={checked}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 size-3.5 accent-[#0F172B]"
+        className="mt-0.5 size-3.5 accent-[#0F172B] disabled:cursor-not-allowed"
       />
       <span>
         <span className="block text-[13px] text-[#0F172B] font-medium">{label}</span>

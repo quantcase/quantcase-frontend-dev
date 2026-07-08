@@ -11,7 +11,10 @@ import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-mod
 import { useJournalEntries } from "@/hooks/useJournalEntries";
 import { useJournalPending } from "@/hooks/useJournalPending";
 import { useUserPortfolio } from "@/hooks/useUserPortfolio";
+import { useSmallcaseHoldings } from "@/hooks/useSmallcaseHoldings";
+import { useSmallcaseOrders } from "@/hooks/useSmallcaseOrders";
 import type { Holding as ApiHolding } from "@/types/investor-portfolio";
+import type { SmallcaseHolding, SmallcaseOrder, SmallcaseOrderStatus } from "@/types/smallcase";
 
 // ── User holdings (real API data) ────────────────────────────────────────────
 
@@ -160,6 +163,143 @@ function UserHoldingsCard({ holdings, loading, empty, onConnect }: { holdings: A
   );
 }
 
+// ── Live broker holdings (smallcase) ─────────────────────────────────────────
+
+function fmtInr(n: number) {
+  return `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+}
+
+function fmtSignedInr(n: number) {
+  const sign = n >= 0 ? "+" : "−";
+  return `${sign}₹${Math.abs(n).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+}
+
+function fmtPct(n: number) {
+  const sign = n >= 0 ? "+" : "−";
+  return `${sign}${Math.abs(n).toFixed(2)}%`;
+}
+
+function pnlColor(n: number) {
+  return n >= 0 ? "var(--qc-up, #1F7A4A)" : "var(--qc-down, #dc2626)";
+}
+
+function SmallcaseHoldingsCard({ holdings }: { holdings: SmallcaseHolding[] }) {
+  if (!holdings.length) {
+    return (
+      <div style={{ border: "1px dashed var(--qc-hair)", borderRadius: 12, padding: "32px", textAlign: "center", fontSize: 13, color: "var(--qc-ink-3)" }}>
+        No holdings found in your connected broker account yet.
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 12, overflow: "hidden" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr 1fr 1fr 1fr", gap: 12, padding: "10px 18px", background: "var(--qc-bg)", borderBottom: "1px solid var(--qc-hair)" }}>
+        {["TICKER", "QTY", "AVG · LTP", "VALUE", "P&L"].map(h => (
+          <div key={h} style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--qc-ink-3)" }}>{h}</div>
+        ))}
+      </div>
+
+      {holdings.map((h, i) => (
+        <div
+          key={h.id ?? `${h.ticker}-${i}`}
+          style={{
+            display: "grid", gridTemplateColumns: "1.6fr 1fr 1fr 1fr 1fr",
+            gap: 12, padding: "14px 18px",
+            borderBottom: i < holdings.length - 1 ? "1px solid var(--qc-hair)" : "none",
+            alignItems: "center",
+          }}
+        >
+          {/* Ticker + exchange */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--qc-ink)", letterSpacing: "0.02em" }}>{h.ticker}</span>
+            <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>{h.exchange}</span>
+          </div>
+
+          {/* Quantity */}
+          <div style={{ fontSize: 13, color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{h.quantity}</div>
+
+          {/* Avg · LTP */}
+          <div style={{ fontSize: 12, color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)" }}>
+            <div>{fmtInr(h.avg_price)}</div>
+            <div style={{ color: "var(--qc-ink-3)", marginTop: 2 }}>{fmtInr(h.current_price)}</div>
+          </div>
+
+          {/* Current value */}
+          <div style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>
+            {fmtInr(h.current_value)}
+          </div>
+
+          {/* P&L */}
+          <div style={{ fontSize: 13, fontWeight: 600, color: pnlColor(h.pnl), fontFamily: "var(--qc-font-mono)" }}>
+            <div>{fmtSignedInr(h.pnl)}</div>
+            <div style={{ fontSize: 11, marginTop: 2 }}>{fmtPct(h.pnl_pct)}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Broker orders (smallcase) ────────────────────────────────────────────────
+
+const ORDER_STATUS_STYLE: Record<SmallcaseOrderStatus, { bg: string; color: string }> = {
+  pending:   { bg: "rgba(37,99,235,0.10)",  color: "var(--qc-blue, #2563eb)" },
+  placed:    { bg: "rgba(37,99,235,0.10)",  color: "var(--qc-blue, #2563eb)" },
+  completed: { bg: "rgba(31,122,74,0.10)",  color: "var(--qc-up, #1F7A4A)" },
+  failed:    { bg: "rgba(220,38,38,0.10)",  color: "var(--qc-down, #dc2626)" },
+  cancelled: { bg: "#F5F5F5",               color: "#888" },
+};
+
+function OrderStatusBadge({ status }: { status: SmallcaseOrderStatus }) {
+  const s = ORDER_STATUS_STYLE[status] ?? ORDER_STATUS_STYLE.pending;
+  return (
+    <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 3, letterSpacing: "0.05em", textTransform: "uppercase", background: s.bg, color: s.color }}>
+      {status}
+    </span>
+  );
+}
+
+function fmtOrderDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+function SmallcaseOrdersSection({ orders }: { orders: SmallcaseOrder[] }) {
+  if (!orders.length) return null;
+  return (
+    <div style={{ marginTop: 28 }}>
+      <div style={{ borderBottom: "1px solid var(--qc-hair)", marginBottom: 16 }}>
+        <div style={{ padding: "10px 0", fontSize: 12, fontWeight: 500, color: "var(--qc-ink)", borderBottom: "2px solid var(--qc-ink)", display: "inline-block", marginBottom: -1 }}>
+          Recent Orders
+        </div>
+      </div>
+      <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 12, overflow: "hidden" }}>
+        {orders.map((o, i) => (
+          <div
+            key={o.order_id}
+            style={{
+              display: "grid", gridTemplateColumns: "auto 1fr auto auto", gap: 12,
+              padding: "12px 18px", alignItems: "center",
+              borderBottom: i < orders.length - 1 ? "1px solid var(--qc-hair)" : "none",
+            }}
+          >
+            <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)" }}>
+              {o.type}
+            </span>
+            <span style={{ fontSize: 13, color: "var(--qc-ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {o.smallcase_name ?? o.order_id}
+            </span>
+            <span style={{ fontSize: 11, color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-mono)" }}>
+              {fmtOrderDate(o.placed_at)}
+            </span>
+            <OrderStatusBadge status={o.status} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Summary stat card ─────────────────────────────────────────────────────────
 
 function StatCard({ label, value, sub, subColor, accentColor }: {
@@ -215,6 +355,12 @@ export default function InvestorPortfolioPage() {
   const { data: journalData, loading: journalLoading, error: journalError, refetch: refetchJournal } = useJournalEntries();
   const { data: pendingData, loading: pendingLoading, refetch: refetchPending } = useJournalPending();
   const { data: userPortfolio, loading: portfolioLoading, notFound: portfolioEmpty, refetch: refetchUserPortfolio } = useUserPortfolio();
+  const { data: smallcaseData, notConnected: brokerNotConnected, refetch: refetchSmallcase } = useSmallcaseHoldings();
+  const { orders: brokerOrders, refetch: refetchOrders } = useSmallcaseOrders();
+
+  const brokerPortfolio = smallcaseData?.portfolio ?? null;
+  const brokerHoldings = smallcaseData?.holdings ?? [];
+  const brokerConnected = !brokerNotConnected && !!brokerPortfolio;
 
   const summary = journalData?.summary;
   const withThesisCount = summary ? (summary.intact + summary.partial + summary.broken) : 0;
@@ -309,14 +455,19 @@ export default function InvestorPortfolioPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-2.5 mb-5">
           <StatCard
             label="Total Portfolio"
-            value={portfolioLoading ? "…" : totalPortfolio > 0 ? fmtLakhs(totalPortfolio) : "—"}
-            sub={portfolioEmpty ? "No portfolio connected" : "Invested + Mutual Funds"}
+            value={
+              brokerConnected
+                ? fmtLakhs(brokerPortfolio!.total_value)
+                : portfolioLoading ? "…" : totalPortfolio > 0 ? fmtLakhs(totalPortfolio) : "—"
+            }
+            sub={brokerConnected ? "Live broker value" : portfolioEmpty ? "No portfolio connected" : "Invested + Mutual Funds"}
             accentColor="linear-gradient(90deg,var(--qc-ink),#44403C)"
           />
           <StatCard
             label="Total P&L"
-            value="—"
-            sub="Connect broker for live P&L"
+            value={brokerConnected ? fmtSignedInr(brokerPortfolio!.total_pnl) : "—"}
+            sub={brokerConnected ? fmtPct(brokerPortfolio!.total_pnl_pct) : "Connect broker for live P&L"}
+            subColor={brokerConnected ? pnlColor(brokerPortfolio!.total_pnl) : undefined}
             accentColor="linear-gradient(90deg,var(--qc-blue),#60A5FA)"
           />
           <StatCard
@@ -335,18 +486,29 @@ export default function InvestorPortfolioPage() {
 
           {/* Left column — equity holdings */}
           <div>
-            <div style={{ borderBottom: "1px solid var(--qc-hair)", marginBottom: 22 }}>
+            <div className="flex items-center justify-between" style={{ borderBottom: "1px solid var(--qc-hair)", marginBottom: 22 }}>
               <div style={{ padding: "10px 0", fontSize: 12, fontWeight: 500, color: "var(--qc-ink)", borderBottom: "2px solid var(--qc-ink)", display: "inline-block", marginBottom: -1 }}>
                 Equity Holdings
               </div>
+              {brokerConnected && (
+                <span style={{ fontSize: 10, background: "var(--qc-up, #1F7A4A)", color: "#fff", padding: "3px 8px", borderRadius: 999, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                  Live · smallcase
+                </span>
+              )}
             </div>
 
-            <UserHoldingsCard
-              holdings={apiHoldings}
-              loading={portfolioLoading}
-              empty={portfolioEmpty}
-              onConnect={() => setConnectModalOpen(true)}
-            />
+            {brokerConnected ? (
+              <SmallcaseHoldingsCard holdings={brokerHoldings} />
+            ) : (
+              <UserHoldingsCard
+                holdings={apiHoldings}
+                loading={portfolioLoading}
+                empty={portfolioEmpty}
+                onConnect={() => setConnectModalOpen(true)}
+              />
+            )}
+
+            {brokerConnected && <SmallcaseOrdersSection orders={brokerOrders} />}
           </div>
 
           {/* Right column — investment journal, sticky on desktop */}
@@ -378,7 +540,7 @@ export default function InvestorPortfolioPage() {
         open={connectModalOpen}
         onClose={() => setConnectModalOpen(false)}
         onOpenCsvUpload={() => setUploadModalOpen(true)}
-        onConnected={() => { setConnectModalOpen(false); refetchUserPortfolio(); }}
+        onConnected={() => { setConnectModalOpen(false); refetchUserPortfolio(); refetchSmallcase(); refetchOrders(); }}
       />
 
       <UploadPortfolioModal

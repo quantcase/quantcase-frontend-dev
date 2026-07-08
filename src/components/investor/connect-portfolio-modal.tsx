@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { BACKEND_URL } from "@/lib/constants";
-import { apiAuthPost } from "@/lib/api";
-import type { SmallcaseConnectionStatus, SmallcaseSyncResult } from "@/types/smallcase";
+import { useEffect } from "react";
+import { useSmallcaseConnect, type ConnectStep } from "@/hooks/useSmallcaseConnect";
 
 interface ConnectPortfolioModalProps {
   open: boolean;
@@ -13,6 +11,18 @@ interface ConnectPortfolioModalProps {
 }
 
 type Step = "intro" | "connecting" | "syncing" | "done" | "error";
+
+// Map the connect hook's fine-grained step to the modal's visual step.
+function toModalStep(step: ConnectStep): Step {
+  switch (step) {
+    case "idle":         return "intro";
+    case "creating":     return "connecting";
+    case "awaiting_sdk": return "connecting";
+    case "confirming":   return "syncing";
+    case "done":         return "done";
+    case "error":        return "error";
+  }
+}
 
 const BROKERS = [
   { name: "Zerodha",    logo: "Z",  bg: "#387ED1", color: "#fff" },
@@ -34,14 +44,27 @@ const BENEFITS = [
 ];
 
 export function ConnectPortfolioModal({ open, onClose, onOpenCsvUpload, onConnected }: ConnectPortfolioModalProps) {
-  const [step, setStep] = useState<Step>("intro");
-  const [errorMsg, setErrorMsg] = useState("");
+  // The real smallcase Gateway connect flow lives in useSmallcaseConnect:
+  //   POST /connect → SDK triggerTransaction → POST /transactions/:id/confirm.
+  const { step: connectStep, error, connect, reset } = useSmallcaseConnect({
+    onConnected: () => onConnected?.(),
+  });
+
+  const step = toModalStep(connectStep);
+  const errorMsg = error ?? "";
+
+  // On success the modal lingers on the "done" state briefly, then closes.
+  useEffect(() => {
+    if (connectStep !== "done") return;
+    const t = setTimeout(() => handleClose(), 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectStep]);
 
   if (!open) return null;
 
   function handleClose() {
-    setStep("intro");
-    setErrorMsg("");
+    reset();
     onClose();
   }
 
@@ -50,41 +73,8 @@ export function ConnectPortfolioModal({ open, onClose, onOpenCsvUpload, onConnec
     onOpenCsvUpload();
   }
 
-  // TODO: Replace auth_token placeholder once Smallcase SDK is integrated.
-  // The SDK runs a browser-side OAuth flow and hands back a real auth_token.
-  // For now we call the endpoint with a placeholder to wire the API path.
   function handleConnect() {
-    setStep("connecting");
-    setErrorMsg("");
-    apiAuthPost<{ success: boolean; data: SmallcaseConnectionStatus }>(
-      `${BACKEND_URL}/api/smallcase/auth`,
-      {
-        onSuccess: () => {
-          setStep("syncing");
-          apiAuthPost<{ success: boolean; data: SmallcaseSyncResult }>(
-            `${BACKEND_URL}/api/smallcase/sync`,
-            {
-              onSuccess: () => {
-                setStep("done");
-                setTimeout(() => {
-                  onConnected?.();
-                  handleClose();
-                }, 1500);
-              },
-              onError: (err) => {
-                setStep("error");
-                setErrorMsg(err);
-              },
-            }
-          );
-        },
-        onError: (err) => {
-          setStep("error");
-          setErrorMsg(err);
-        },
-      },
-      { auth_token: "sdk_placeholder", broker: "", broker_client_id: "", smallcase_user_id: "" }
-    );
+    connect();
   }
 
   const isInProgress = step === "connecting" || step === "syncing";

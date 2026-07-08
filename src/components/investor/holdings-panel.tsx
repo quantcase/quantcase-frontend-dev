@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -93,6 +93,16 @@ function AllocationDonut({
   // Add 4px padding so active slice expansion isn't clipped
   const pad = 4;
   const total = size + pad * 2;
+
+  // Recharts derives clip-path IDs from a module-level counter that isn't stable
+  // between the server and client render, which triggers a hydration mismatch.
+  // Render the chart only after mount so the SSR markup carries no Recharts IDs.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) {
+    return <div style={{ width: total, height: total, flexShrink: 0 }} aria-hidden />;
+  }
+
   return (
     <PieChart width={total} height={total}>
       <Pie

@@ -132,10 +132,10 @@ export function useSmallcaseOrders({ onPlaced }: UseSmallcaseOrdersOptions = {})
       `${BACKEND_URL}/api/smallcase/orders`,
       {
         onSuccess: async (res) => {
-          const { transactionId } = res.data;
+          const { transactionId, smallcaseAuthToken } = res.data;
           setPlaceStep("awaiting_sdk");
           try {
-            await triggerTransaction(transactionId);
+            await triggerTransaction(transactionId, smallcaseAuthToken);
           } catch (sdkErr) {
             placeFail(sdkErr instanceof Error ? sdkErr.message : "Order was cancelled.");
             return;

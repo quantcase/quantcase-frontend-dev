@@ -102,10 +102,10 @@ export function useSmallcaseConnect({ onConnected }: UseSmallcaseConnectOptions 
       `${BACKEND_URL}/api/smallcase/connect`,
       {
         onSuccess: async (res) => {
-          const { transactionId } = res.data;
+          const { transactionId, smallcaseAuthToken } = res.data;
           setStep("awaiting_sdk");
           try {
-            await triggerTransaction(transactionId);
+            await triggerTransaction(transactionId, smallcaseAuthToken);
           } catch (sdkErr) {
             fail(sdkErr instanceof Error ? sdkErr.message : "Broker connection failed.");
             return;

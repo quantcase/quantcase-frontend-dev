@@ -45,6 +45,8 @@ export type SmallcaseIntent = "HOLDINGS_IMPORT" | "TRANSACTION" | "CONNECT";
 /** POST /connect → creates a HOLDINGS_IMPORT transaction */
 export interface SmallcaseConnectTransaction {
   transactionId: string;
+  /** Session token to seed the SDK with; minted fresh per transaction */
+  smallcaseAuthToken: string;
   gateway: string;
   expireAt: string;
   intent: SmallcaseIntent;
@@ -89,6 +91,8 @@ export interface SmallcasePlaceOrderInput {
 /** POST /orders → transaction to run in the SDK */
 export interface SmallcaseOrderTransaction {
   transactionId: string;
+  /** Session token to seed the SDK with; minted fresh per transaction */
+  smallcaseAuthToken: string;
   gateway: string;
   expireAt: string;
 }

@@ -29,6 +29,8 @@ declare global {
 
   interface ScDKInstance {
     triggerTransaction(params: ScDKTriggerParams): Promise<ScDKTransactionResponse>;
+    /** Swap the session token on an existing instance (token is minted fresh per transaction) */
+    setSmallcaseAuthToken?(smallcaseAuthToken: string): void;
     brokerLogout?(): Promise<unknown>;
     showOrders?(): Promise<unknown>;
   }

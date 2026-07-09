@@ -385,17 +385,13 @@ export function L2MultiDispatchTab() {
     return b;
   }, [source, groupSlug, tickers]);
 
-  // Two independent concepts, deliberately decoupled:
-  //  - "preview mode" (previewKey): exactly what Preview queried — ticker scope + the first
-  //    selected skill only, since /preview accepts one slug and ignores Historic/Force entirely.
-  //    This is the ONLY thing that gates Run — toggling Historic/Force or picking additional skills
-  //    never invalidates an already-matching preview.
-  //  - "run mode" (skillSlugs + historic + force): every skill Run will actually dispatch to,
-  //    concurrently, plus the Run-only flags.
+  // "preview mode" (previewKey): exactly what Preview queried — ticker scope + the first selected
+  // skill only, since /preview accepts one slug and ignores Historic/Force entirely. Kept only to
+  // flag a stale Preview page (see pagination below) — it no longer gates Run.
   const previewSlug = skillSlugs[0];
   const previewKey = JSON.stringify({ ...tickerBody, previewSlug });
   const canPreview = sourceUsable && skillSlugs.length > 0 && !previewLoading;
-  const canRun = sourceUsable && skillSlugs.length > 0 && previewedKey === previewKey && !previewLoading && !triggering && !isRunLive;
+  const canRun = sourceUsable && skillSlugs.length > 0 && !previewLoading && !triggering && !isRunLive;
 
   function doPreview(targetPage = 1) {
     if (!previewSlug) return;
@@ -466,7 +462,7 @@ export function L2MultiDispatchTab() {
         <p className="text-[13px] text-[#0F172B] font-medium">On-demand L2 skill dispatch</p>
         <p className="text-[12px] text-[#888888] mt-1">
           Runs a skill against the chosen ticker set — an untagged ticker hard-fails with a 400.
-          Always Preview before Run. See Help (top right) for the full flow.
+          Preview is optional. See Help (top right) for the full flow.
         </p>
       </div>
 
@@ -603,9 +599,7 @@ export function L2MultiDispatchTab() {
         <span className="text-[11px] text-[#888888]">
           {confirmArmed
             ? `This queues real jobs for ${skillSlugs.length} skill${skillSlugs.length === 1 ? "" : "s"} concurrently and can't be cancelled once started.`
-            : previewedKey === previewKey
-            ? "Preview matches current options — Run is enabled."
-            : "Preview before running — options changed since the last preview."}
+            : "Preview is optional — Run dispatches with the current options whether or not you've previewed them."}
         </span>
       </div>
       <p className="text-[11px] text-[#888888] -mt-3">

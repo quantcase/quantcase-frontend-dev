@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Loader2, AlertCircle, CheckCircle2, XCircle, Clock, RefreshCw, ExternalLink } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  RefreshCw,
+  ExternalLink,
+  Upload,
+  ChevronDown,
+} from "lucide-react";
 import { rawFetch, rawPost } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import {
@@ -13,6 +23,8 @@ import {
   BseDiscoveryApproveBody,
   BseDiscoveryApproveResponse,
 } from "./types";
+import { UploadPdfModal, UploadPrefill } from "./UploadPdfModal";
+import { BsePreviewModal } from "./BsePreviewModal";
 
 const BASE = `${BACKEND_URL}/admin/bse-discovery`;
 
@@ -94,6 +106,8 @@ interface RowStatus {
   loading: boolean;
   error?: string;
   success?: boolean;
+  /** Armed after a first click on an overwrite-warning row — second click actually approves. */
+  armed?: boolean;
 }
 
 function rowKey(u: BseDiscoveredUrl, idx: number): string {
@@ -106,24 +120,42 @@ function UrlRow({
   status,
   onEdit,
   onApprove,
+  onUploadInstead,
 }: {
   u: BseDiscoveredUrl;
   edit: RowEdit;
   status: RowStatus | undefined;
   onEdit: (field: keyof RowEdit, value: string) => void;
   onApprove: () => void;
+  onUploadInstead: () => void;
 }) {
   const isAnnual = u.doc_type === "annual_report";
   const canApprove =
     edit.company.trim() !== "" && edit.fiscal_year.trim() !== "" && (isAnnual || edit.quarter.trim() !== "");
 
+  const armed = !!status?.armed;
+  const needsOverwriteConfirm = u.willOverwrite && !status?.success;
+  const buttonLabel = status?.success && !status?.loading
+    ? "Approved"
+    : needsOverwriteConfirm && armed
+    ? "Confirm Overwrite"
+    : "Approve";
+
+  // On-demand preview — opened in a modal only when the admin clicks it, never upfront.
+  const [previewOpen, setPreviewOpen] = useState(false);
+
   return (
-    <div className="rounded-[8px] border border-[#F0F0F0] bg-white p-3 space-y-2.5">
+    <div className={`rounded-[8px] border border-[#F0F0F0] bg-white p-3 space-y-2.5 ${u.alreadyApproved ? "opacity-60" : ""}`}>
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[13px] font-medium text-[#0F172B]">{u.company_name}</span>
         <span className="text-[11px] text-[#888888] font-mono">#{u.scrip_cd}</span>
         <Badge>{DOC_TYPE_LABEL[u.doc_type]}</Badge>
         <Badge>{SOURCE_LABEL[u.source]}</Badge>
+        {u.alreadyApproved && (
+          <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-sm px-1.5 py-0.5">
+            <CheckCircle2 className="size-3" /> Already Approved
+          </span>
+        )}
         <span className="text-[11px] text-[#888888]">{u.scrape_date}</span>
         <a
           href={u.url}
@@ -134,6 +166,35 @@ function UrlRow({
           View PDF <ExternalLink className="size-3" />
         </a>
       </div>
+
+      <button
+        onClick={() => setPreviewOpen(true)}
+        className="flex items-center gap-1 text-[11px] text-[#888888] hover:text-[#0F172B] transition-colors"
+      >
+        <ChevronDown className="size-3" /> Preview PDF text
+      </button>
+
+      {previewOpen && (
+        <BsePreviewModal
+          url={u.url}
+          title={`${u.company_name} — ${DOC_TYPE_LABEL[u.doc_type]}`}
+          onClose={() => setPreviewOpen(false)}
+        />
+      )}
+
+      {u.willOverwrite && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 space-y-1">
+          <p className="flex items-center gap-1.5 text-[11px] font-medium text-amber-700">
+            <AlertCircle className="size-3.5 shrink-0" /> This will overwrite the existing stored URL for this slot.
+          </p>
+          <p className="text-[11px] text-amber-700 font-mono break-all">
+            <span className="text-amber-600 font-sans font-normal">old: </span>{u.existingUrl}
+          </p>
+          <p className="text-[11px] text-amber-700 font-mono break-all">
+            <span className="text-amber-600 font-sans font-normal">new: </span>{u.url}
+          </p>
+        </div>
+      )}
 
       <div className="flex items-end gap-3 flex-wrap">
         <div>
@@ -169,18 +230,24 @@ function UrlRow({
         <button
           onClick={onApprove}
           disabled={!canApprove || status?.loading}
-          className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-4 py-2 text-[13px] font-medium text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+          className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-[13px] font-medium text-white transition-opacity disabled:opacity-40 disabled:cursor-not-allowed ${
+            needsOverwriteConfirm && armed ? "bg-red-600 hover:opacity-90" : "bg-[#0F172B] hover:opacity-90"
+          }`}
         >
           {status?.loading && <Loader2 className="size-3.5 animate-spin" />}
           {status?.success && !status.loading && <CheckCircle2 className="size-3.5" />}
-          {status?.success && !status.loading ? "Approved" : "Approve"}
+          {buttonLabel}
         </button>
       </div>
 
       {u.suggested.company === null && (
         <p className="flex items-center gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1.5">
           <AlertCircle className="size-3.5 shrink-0" />
-          Couldn&rsquo;t match this to an existing ticker — enter it manually.
+          Couldn&rsquo;t match this to an existing ticker — enter it manually, or{" "}
+          <button onClick={onUploadInstead} className="underline font-medium hover:text-amber-900">
+            upload the PDF instead
+          </button>
+          .
         </p>
       )}
       {status?.error && <p className="text-[11px] text-red-600">{status.error}</p>}
@@ -204,6 +271,7 @@ export function BseDiscoveryPanel() {
 
   // Discovered URLs
   const [urlsDays, setUrlsDays] = useState("14");
+  const [hideApproved, setHideApproved] = useState(false);
   const [urls, setUrls] = useState<BseDiscoveredUrl[]>([]);
   const [urlsLoading, setUrlsLoading] = useState(false);
   const [urlsError, setUrlsError] = useState<string | null>(null);
@@ -211,6 +279,10 @@ export function BseDiscoveryPanel() {
   // Per-row edit state and approve status, keyed by rowKey()
   const [edits, setEdits] = useState<Record<string, RowEdit>>({});
   const [approveStatus, setApproveStatus] = useState<Record<string, RowStatus>>({});
+
+  // "Upload PDF instead" modal — undefined prefill means the standalone/global trigger
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadPrefill, setUploadPrefill] = useState<UploadPrefill | undefined>(undefined);
 
   const loadRuns = useCallback(() => {
     rawFetch<BseDiscoveryRunsResponse>(`${BASE}/runs?limit=20`, {
@@ -225,13 +297,14 @@ export function BseDiscoveryPanel() {
 
   const loadUrls = useCallback(() => {
     const days = urlsDays.trim() || "14";
-    rawFetch<BseDiscoveryUrlsResponse>(`${BASE}/urls?days=${days}`, {
+    const params = new URLSearchParams({ days, hideApproved: String(hideApproved) });
+    rawFetch<BseDiscoveryUrlsResponse>(`${BASE}/urls?${params}`, {
       onStart: () => { setUrlsLoading(true); setUrlsError(null); },
       onSuccess: (res) => setUrls(res.urls ?? []),
       onError: setUrlsError,
       onComplete: () => setUrlsLoading(false),
     });
-  }, [urlsDays]);
+  }, [urlsDays, hideApproved]);
 
   useEffect(() => { loadUrls(); }, [loadUrls]);
 
@@ -292,6 +365,21 @@ export function BseDiscoveryPanel() {
     }, body);
   }
 
+  // Rows that would overwrite an existing URL need one extra click ("arm" then confirm) before
+  // the real approve() call fires — everything else approves on the first click, as before.
+  function handleApproveClick(u: BseDiscoveredUrl, key: string) {
+    if (u.willOverwrite && !approveStatus[key]?.armed) {
+      setApproveStatus((prev) => ({ ...prev, [key]: { ...(prev[key] ?? { loading: false }), armed: true } }));
+      return;
+    }
+    approve(u, key);
+  }
+
+  function openUploadModal(prefill?: UploadPrefill) {
+    setUploadPrefill(prefill);
+    setUploadModalOpen(true);
+  }
+
   const rowsWithKeys = useMemo(() => urls.map((u, idx) => ({ u, key: rowKey(u, idx) })), [urls]);
 
   return (
@@ -327,6 +415,12 @@ export function BseDiscoveryPanel() {
           >
             {(triggering || isRunLive) && <Loader2 className="size-3.5 animate-spin" />}
             Run Discovery
+          </button>
+          <button
+            onClick={() => openUploadModal()}
+            className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] bg-white px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors"
+          >
+            <Upload className="size-3.5" /> Upload PDF Instead
           </button>
         </div>
 
@@ -377,7 +471,15 @@ export function BseDiscoveryPanel() {
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">
             Discovered URLs {urlsLoading && <span className="normal-case tracking-normal font-normal">— loading…</span>}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-wrap">
+            <label className="flex items-center gap-1.5 text-[11px] text-[#888888]">
+              <input
+                type="checkbox"
+                checked={hideApproved}
+                onChange={(e) => setHideApproved(e.target.checked)}
+              />
+              Hide approved
+            </label>
             <label className="text-[11px] text-[#888888]">Last</label>
             <input
               type="number"
@@ -416,11 +518,25 @@ export function BseDiscoveryPanel() {
               edit={getEdit(u, key)}
               status={approveStatus[key]}
               onEdit={(field, value) => setEditField(u, key, field, value)}
-              onApprove={() => approve(u, key)}
+              onApprove={() => handleApproveClick(u, key)}
+              onUploadInstead={() =>
+                openUploadModal({
+                  docType: u.doc_type,
+                  fiscalYear: u.suggested.fiscal_year ?? undefined,
+                  quarter: u.suggested.quarter ?? undefined,
+                })
+              }
             />
           ))}
         </div>
       </div>
+
+      {uploadModalOpen && (
+        <UploadPdfModal
+          prefill={uploadPrefill}
+          onClose={() => { setUploadModalOpen(false); setUploadPrefill(undefined); }}
+        />
+      )}
     </div>
   );
 }

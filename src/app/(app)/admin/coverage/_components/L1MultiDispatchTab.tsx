@@ -6,6 +6,7 @@ import { rawFetch, rawPost, rawPostDownload } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { CheckboxField } from "@/components/molecules/checkbox-field";
 import { CompanySourcePicker } from "./CompanySourcePicker";
+import { KpiCleanupModal } from "./KpiCleanupModal";
 import {
   TickerSource,
   L1DispatchOptions,
@@ -270,6 +271,8 @@ function RunHistoryRow({ run }: { run: L1Run }) {
 // ── Main tab ───────────────────────────────────────────────────────────────
 
 export function L1MultiDispatchTab() {
+  const [showKpiCleanup, setShowKpiCleanup] = useState(false);
+
   // Picker options
   const [defaultTickers, setDefaultTickers] = useState<string[]>([]);
   const [companies, setCompanies] = useState<string[]>([]);
@@ -387,10 +390,13 @@ export function L1MultiDispatchTab() {
   }, [source, groupSlug, tickers, startFrom, limit, latest, force, arOnly, noAr]);
 
   const bodyKey = JSON.stringify(body);
-  const canRun = previewedKey === bodyKey && !previewLoading && !triggering && !isRunLive;
+  // Run no longer requires a matching Preview first — it's enabled as soon as nothing else is in
+  // flight. `previewedKey`/`bodyKey` are kept only to flag a stale Preview page (see pagination
+  // below), not to gate Run.
+  const canRun = !previewLoading && !triggering && !isRunLive;
 
   // page is separate from `body`/`bodyKey` — it only affects this /preview request, never /run or
-  // /preview/csv, so paging back and forth never invalidates the Run-enabling previewedKey match.
+  // /preview/csv.
   function doPreview(targetPage = 1) {
     const key = bodyKey;
     const reqBody = targetPage > 1 ? { ...body, page: targetPage } : body;
@@ -423,12 +429,20 @@ export function L1MultiDispatchTab() {
   return (
     <div className="space-y-5 max-w-4xl">
       {/* Intro */}
-      <div className="rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
-        <p className="text-[13px] text-[#0F172B] font-medium">On-demand L1 extraction</p>
-        <p className="text-[12px] text-[#888888] mt-1">
-          Transcript, PPT, and annual-report signal extraction for a chosen ticker set. Preview is
-          free to repeat; Run dispatches real, billable jobs. See Help (top right) for the full flow.
-        </p>
+      <div className="flex items-start justify-between gap-3 rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
+        <div>
+          <p className="text-[13px] text-[#0F172B] font-medium">On-demand L1 extraction</p>
+          <p className="text-[12px] text-[#888888] mt-1">
+            Transcript, PPT, and annual-report signal extraction for a chosen ticker set. Preview is
+            free to repeat; Run dispatches real, billable jobs. See Help (top right) for the full flow.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowKpiCleanup(true)}
+          className="shrink-0 rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-[12px] font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors"
+        >
+          KPI Cleanup
+        </button>
       </div>
 
       {optionsError && !optionsLoading && (
@@ -576,9 +590,7 @@ export function L1MultiDispatchTab() {
         <span className="text-[11px] text-[#888888]">
           {confirmArmed
             ? "This queues real extraction jobs and can't be cancelled once started."
-            : previewedKey === bodyKey
-            ? "Preview matches current options — Run is enabled."
-            : "Preview before running — options changed since the last preview."}
+            : "Preview is optional — Run dispatches with the current options whether or not you've previewed them."}
         </span>
       </div>
       <p className="text-[11px] text-[#888888] -mt-3">
@@ -661,6 +673,8 @@ export function L1MultiDispatchTab() {
           ))}
         </div>
       </div>
+
+      {showKpiCleanup && <KpiCleanupModal onClose={() => setShowKpiCleanup(false)} />}
     </div>
   );
 }

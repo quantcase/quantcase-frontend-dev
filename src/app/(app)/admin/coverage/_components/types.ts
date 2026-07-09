@@ -260,11 +260,25 @@ export interface BseDiscoveredUrl {
   url: string;
   source: BseUrlSource;
   suggested: BseSuggested;
+  /** This exact URL is already saved in earnings_calls/annual_reports. */
+  alreadyApproved: boolean;
+  /** What's currently stored for (company, fiscal_year, quarter), if anything. Null if nothing's there yet or suggested.company couldn't be matched. */
+  existingUrl: string | null;
+  /** Whether approving this candidate would replace existingUrl. */
+  willOverwrite: boolean;
 }
 
 export interface BseDiscoveryUrlsResponse {
   count: number;
   urls: BseDiscoveredUrl[];
+}
+
+/** GET /admin/bse-discovery/preview?url=<candidateUrl>&page=<n> — fetched on-demand per row. */
+export interface BsePreviewResponse {
+  url: string;
+  page: number;
+  totalPages: number;
+  text: string;
 }
 
 export interface BseDiscoveryApproveBody {
@@ -280,4 +294,42 @@ export interface BseDiscoveryApproveBody {
 export interface BseDiscoveryApproveResponse {
   success: true;
   record: Record<string, unknown>;
+}
+
+// ── Manual PDF upload (no crawlable URL) ─────────────────────────────────────
+
+export interface DocumentUploadResponse {
+  success: true;
+  url: string;
+  record: Record<string, unknown>;
+}
+
+// ── KPI Dedup — Phase 6 (per-industry cap) ──────────────────────────────────
+
+export interface KpiPhase6Industry {
+  industry: string;
+  companyCount: number;
+  /** Current total KPIs tagged to this industry. */
+  kpiCount: number;
+  cap: number;
+  /** Over cap in this industry alone — informational only, not what actually gets deleted. */
+  overCapCount: number;
+  /** What will actually be deleted, after excluding KPIs protected by other industries. */
+  actualDeleteCount: number;
+  /** kpiCount - actualDeleteCount — the "after" number for this industry. */
+  remainingCount: number;
+}
+
+export interface KpiPhase6Result {
+  dryRun: boolean;
+  industriesProcessed: number;
+  totalOverCapSlots: number;
+  totalKpisBefore: number;
+  deletableCount: number;
+  remainingCount: number;
+  /** First 50 deletable KPI abbrs, for spot-checking. */
+  deletableSample: string[];
+  industries: KpiPhase6Industry[];
+  /** Only present on the /run response, once deletes actually happened. */
+  deletedCount?: number;
 }

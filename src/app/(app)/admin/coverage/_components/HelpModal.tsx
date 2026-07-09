@@ -58,7 +58,7 @@ export function HelpModal({ onClose }: Props) {
 
                 <div>
                   <p className="text-[#0F172B] font-medium mb-0.5">What it does</p>
-                  <p>On-demand, one-off signal extraction — there&rsquo;s no cron/auto mode, every run is triggered manually for a chosen ticker set. <span className="font-medium text-[#0F172B]">Preview</span> is read-only and free to repeat. <span className="font-medium text-[#0F172B]">Run</span> dispatches real, billable LLM extraction jobs, so it stays disabled until Preview matches the exact options you&rsquo;re about to run.</p>
+                  <p>On-demand, one-off signal extraction — there&rsquo;s no cron/auto mode, every run is triggered manually for a chosen ticker set. <span className="font-medium text-[#0F172B]">Preview</span> is read-only and free to repeat, but it&rsquo;s optional — <span className="font-medium text-[#0F172B]">Run</span> is enabled from the start and dispatches real, billable LLM extraction jobs with whatever options are currently set, whether or not you&rsquo;ve previewed them.</p>
                 </div>
 
                 <div>
@@ -242,7 +242,7 @@ export function HelpModal({ onClose }: Props) {
 
               <div>
                 <p className="text-[#0F172B] font-medium mb-0.5">Q: I edited a dynamic (filter-based) group&rsquo;s filters after already running Preview — do I need to Preview again before Run?</p>
-                <p>Yes. A dynamic group&rsquo;s resolved ticker set can change the moment its filters change, so Preview may no longer reflect reality. Run stays disabled until Preview matches the exact current options anyway, so re-running Preview is required either way.</p>
+                <p>Not required, but recommended. A dynamic group&rsquo;s resolved ticker set can change the moment its filters change, so a stale Preview may no longer reflect reality. Run is never blocked on this — it always dispatches against the group&rsquo;s live filters at run time — but re-running Preview first is the only way to see what that will actually resolve to beforehand.</p>
               </div>
             </section>
           )}

@@ -11,6 +11,15 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { formatINR } from "@/lib/utils";
+import type { AllocationSegment, ValueTrendPoint } from "@/types/investor-dashboard";
+
+// Design-system allocation palette — assigned by segment order (backend sends no colors).
+const SEGMENT_COLORS = ["#0F172B", "#7c3aed", "#d97706", "#0891b2", "#71717a", "#be123c"];
+
+function segmentColor(i: number): string {
+  return SEGMENT_COLORS[i % SEGMENT_COLORS.length];
+}
 
 interface Segment {
   label: string;
@@ -23,32 +32,32 @@ interface Segment {
 interface HoldingsPanelProps {
   stockCount: number;
   fundCount: number;
+  /** Human-friendly relative time, e.g. "2 min ago". Falls back to a dash when unknown. */
   syncedAgo: string;
-  equityValue: string;
-  todayChange: string;
-  ytdChange: string;
-  capSegments: Segment[];
-  industrySegments: Segment[];
+  /** Current market value, ₹ (raw number). */
+  equityValue: number;
+  /** Total cost basis, ₹ (raw number). */
+  investedValue: number;
+  /** ₹ P/L today. null for first-party portfolios that lack share quantity. */
+  todayChangeValue: number | null;
+  todayChangePct: number | null;
+  ytdChangePct: number | null;
+  return6mPct: number | null;
+  valueTrend: ValueTrendPoint[];
+  capSegments: AllocationSegment[];
+  industrySegments: AllocationSegment[];
+  /** true when figures are approximated (first-party CSV portfolio, no share qty). */
+  approximate?: boolean;
   isShadow?: boolean;
   onUploadPortfolio?: () => void;
 }
 
-// Static portfolio value trend — replace with real data when API is ready
-const _RAW = [
-  { period: "Nov", display: 41.2 },
-  { period: "Dec", display: 43.8 },
-  { period: "Jan", display: 42.1 },
-  { period: "Feb", display: 46.5 },
-  { period: "Mar", display: 48.9 },
-  { period: "Apr", display: 51.2 },
-  { period: "May", display: 56.8 },
-];
-const _min = Math.min(..._RAW.map((d) => d.display));
-const _max = Math.max(..._RAW.map((d) => d.display));
-const EQUITY_TREND_NORM = _RAW.map((d) => ({
-  ...d,
-  norm: (_max - _min) === 0 ? 0.5 : (d.display - _min) / (_max - _min),
-}));
+// Short month label from an ISO date, e.g. "2026-01-31" → "Jan"
+function trendLabel(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-US", { month: "short" });
+}
 
 function EquityTooltip({
   active,
@@ -56,7 +65,7 @@ function EquityTooltip({
   label,
 }: {
   active?: boolean;
-  payload?: { payload: { display: number } }[];
+  payload?: { payload: { value: number } }[];
   label?: string;
 }) {
   if (!active || !payload?.length) return null;
@@ -74,9 +83,23 @@ function EquityTooltip({
       }}
     >
       <div style={{ opacity: 0.6, marginBottom: 2 }}>{label}</div>
-      <div style={{ fontWeight: "var(--qc-w-semi)" }}>₹{payload[0].payload.display} L</div>
+      <div style={{ fontWeight: "var(--qc-w-semi)" }}>{formatINR(payload[0].payload.value)}</div>
     </div>
   );
+}
+
+// Percentage → signed display string, e.g. 14.2 → "+14.2%", -2.1 → "-2.1%"
+function fmtPct(pct: number | null | undefined): string {
+  if (pct == null) return "—";
+  const sign = pct >= 0 ? "+" : "";
+  return `${sign}${pct.toFixed(1)}%`;
+}
+
+// Signed ₹ change, e.g. 38200 → "+₹38,200", -1200 → "-₹1,200"
+function fmtSignedINR(value: number | null | undefined): string {
+  if (value == null) return "—";
+  const sign = value >= 0 ? "+" : "-";
+  return `${sign}₹${Math.abs(value).toLocaleString("en-IN")}`;
 }
 
 function AllocationDonut({
@@ -136,16 +159,49 @@ export function HoldingsPanel({
   fundCount,
   syncedAgo,
   equityValue,
-  todayChange,
-  ytdChange,
+  investedValue,
+  todayChangeValue,
+  todayChangePct,
+  ytdChangePct,
+  return6mPct,
+  valueTrend,
   capSegments,
   industrySegments,
+  approximate,
   isShadow,
   onUploadPortfolio,
 }: HoldingsPanelProps) {
   const [activeTab, setActiveTab] = useState<"cap" | "industry">("cap");
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
-  const segments = activeTab === "cap" ? capSegments : industrySegments;
+
+  // Attach display strings + design-system colors to the raw API segments.
+  const toDisplaySegments = (raw: AllocationSegment[]): Segment[] =>
+    raw.map((s, i) => ({
+      label: s.label,
+      value: formatINR(s.value),
+      count: s.count,
+      pct: Math.round(s.pct),
+      color: segmentColor(i),
+    }));
+
+  const capDisplay = toDisplaySegments(capSegments);
+  const industryDisplay = toDisplaySegments(industrySegments);
+  const segments = activeTab === "cap" ? capDisplay : industryDisplay;
+
+  // Normalize the trend series for the area chart (0–1 within its own min/max range).
+  const trendVals = valueTrend.map((p) => p.value);
+  const trendMin = trendVals.length ? Math.min(...trendVals) : 0;
+  const trendMax = trendVals.length ? Math.max(...trendVals) : 0;
+  const trendData = valueTrend.map((p) => ({
+    period: trendLabel(p.date),
+    value: p.value,
+    norm: trendMax - trendMin === 0 ? 0.5 : (p.value - trendMin) / (trendMax - trendMin),
+  }));
+
+  const todayPositive = (todayChangeValue ?? 0) >= 0;
+  const todayColor = todayChangeValue == null
+    ? "var(--qc-ink-3)"
+    : todayPositive ? "var(--qc-up)" : "var(--qc-down)";
 
   return (
     <div
@@ -189,7 +245,9 @@ export function HoldingsPanel({
               color: "var(--qc-ink-3)",
             }}
           >
-            {stockCount} stocks · {fundCount} mutual funds · synced {syncedAgo}
+            {stockCount} stocks
+            {fundCount > 0 && ` · ${fundCount} mutual funds`}
+            {syncedAgo && ` · synced ${syncedAgo}`}
           </div>
         </div>
 
@@ -310,22 +368,38 @@ export function HoldingsPanel({
                 lineHeight: 1,
               }}
             >
-              {equityValue}
+              {formatINR(equityValue)}
             </div>
             <div
               style={{
                 fontSize: "var(--qc-fz-11)",
                 fontFamily: "var(--qc-font-sans)",
-                color: "var(--qc-up)",
+                color: todayColor,
                 marginTop: 3,
                 display: "flex",
                 alignItems: "center",
                 gap: 5,
+                flexWrap: "wrap",
               }}
             >
-              <span>{todayChange} today</span>
-              <span style={{ color: "var(--qc-ink-3)" }}>·</span>
-              <span>{ytdChange} YTD</span>
+              {todayChangeValue != null && (
+                <>
+                  <span>
+                    {fmtSignedINR(todayChangeValue)}
+                    {todayChangePct != null && ` (${fmtPct(todayChangePct)})`} today
+                  </span>
+                  <span style={{ color: "var(--qc-ink-3)" }}>·</span>
+                </>
+              )}
+              <span style={{ color: ytdChangePct == null ? "var(--qc-ink-3)" : todayColor }}>
+                {fmtPct(ytdChangePct)} YTD
+              </span>
+              {approximate && (
+                <>
+                  <span style={{ color: "var(--qc-ink-3)" }}>·</span>
+                  <span style={{ color: "var(--qc-ink-3)", fontStyle: "italic" }}>approx.</span>
+                </>
+              )}
             </div>
           </div>
 
@@ -335,8 +409,12 @@ export function HoldingsPanel({
             style={{ flexDirection: "column", gap: 4, alignItems: "flex-end" }}
           >
             {[
-              { label: "6M RETURN", value: "+38.3%", positive: true },
-              { label: "INVESTED", value: "₹49.6 L", positive: null },
+              {
+                label: "6M RETURN",
+                value: fmtPct(return6mPct),
+                positive: return6mPct == null ? null : return6mPct >= 0,
+              },
+              { label: "INVESTED", value: formatINR(investedValue), positive: null },
             ].map((s) => (
               <div
                 key={s.label}
@@ -382,7 +460,7 @@ export function HoldingsPanel({
         <div style={{ position: "relative", zIndex: 1, marginTop: 4 }}>
           <ResponsiveContainer width="100%" height={68}>
             <AreaChart
-              data={EQUITY_TREND_NORM}
+              data={trendData}
               margin={{ top: 4, right: 0, bottom: 0, left: 0 }}
             >
               <defs>

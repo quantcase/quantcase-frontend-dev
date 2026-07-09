@@ -6,6 +6,10 @@ export interface Subscription {
 }
 
 export interface MeResponse {
+  id?: string;
+  email?: string | null;
+  display_name?: string | null;
+  display_picture?: string | null;
   accountType?: "manager" | "investor" | null;
   account_type?: "manager" | "investor" | null;
   onboarding_completed: boolean;

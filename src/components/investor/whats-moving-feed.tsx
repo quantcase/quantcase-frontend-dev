@@ -3,37 +3,22 @@
 import Link from "next/link";
 import { TrendingUp } from "lucide-react";
 import { MonoLabel, LimeCountPip } from "@/components/ds";
-
-export type MovingItemKind = "score_upgrade" | "score_downgrade" | "earnings";
-
-export interface MovingItem {
-  id: string;
-  symbol: string;
-  price: string;
-  priceChange: string;
-  priceChangePositive: boolean;
-  kind: MovingItemKind;
-  headlineLabel: string;
-  headlineDetail: string;
-  body: string;
-  holdingDetail: string;
-  qcScore: number;
-  ctaLabel: string;
-  ctaHref: string;
-}
+import { formatPrice } from "@/lib/utils";
+import type { WhatsMovingItem, WhatsMovingKind } from "@/types/investor-dashboard";
 
 interface WhatsMovingFeedProps {
   count: number;
-  items: MovingItem[];
+  items: WhatsMovingItem[];
+  loading?: boolean;
 }
 
-const kindColors: Record<MovingItemKind, string> = {
+const kindColors: Record<WhatsMovingKind, string> = {
   score_upgrade:   "var(--qc-up,  #22c55e)",
   score_downgrade: "var(--qc-down, #ef4444)",
   earnings:        "var(--qc-warn, #f59e0b)",
 };
 
-const kindBorderColors: Record<MovingItemKind, string> = {
+const kindBorderColors: Record<WhatsMovingKind, string> = {
   score_upgrade:   "var(--qc-up,  #22c55e)",
   score_downgrade: "var(--qc-down, #ef4444)",
   earnings:        "var(--qc-warn, #f59e0b)",
@@ -45,7 +30,13 @@ function scoreColor(score: number) {
   return "var(--qc-down, #ef4444)";
 }
 
-export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
+// Signed percent for the price delta, e.g. 0.9 → "↑0.9%", -1.4 → "↓1.4%"
+function fmtPriceChange(pct: number): string {
+  const arrow = pct >= 0 ? "↑" : "↓";
+  return `${arrow}${Math.abs(pct).toFixed(1)}%`;
+}
+
+export function WhatsMovingFeed({ count, items, loading }: WhatsMovingFeedProps) {
   return (
     <div
       className="rounded-[10px] p-2"
@@ -67,10 +58,23 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
 
       {/* Inner white card */}
       <div className="rounded-[10px] overflow-hidden" style={{ background: "var(--qc-card)" }}>
+        {items.length === 0 && (
+          <div
+            style={{
+              padding: "28px 18px",
+              textAlign: "center",
+              fontSize: "var(--qc-fz-12)",
+              fontFamily: "var(--qc-font-sans)",
+              color: "var(--qc-ink-3)",
+            }}
+          >
+            {loading ? "Loading…" : "Nothing moving in your stocks right now."}
+          </div>
+        )}
         {items.map((item, idx) => (
           <Link
             key={item.id}
-            href={item.ctaHref}
+            href={item.href}
             style={{ textDecoration: "none", display: "block" }}
             className="moving-feed-row"
           >
@@ -98,19 +102,19 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                   <div style={{
                     fontSize: "var(--qc-fz-11)",
                     fontFamily: "var(--qc-font-mono)",
-                    color: item.priceChangePositive ? "var(--qc-up)" : "var(--qc-down)",
+                    color: item.price_change_pct >= 0 ? "var(--qc-up)" : "var(--qc-down)",
                     marginTop: 3,
                     letterSpacing: "0.01em",
                   }}>
-                    {item.price}
-                    <span style={{ marginLeft: 4, opacity: 0.85 }}>{item.priceChange}</span>
+                    {formatPrice(item.price)}
+                    <span style={{ marginLeft: 4, opacity: 0.85 }}>{fmtPriceChange(item.price_change_pct)}</span>
                   </div>
                 </div>
                 {/* QC score inline on mobile */}
                 <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", flexShrink: 0 }}>
                   <span style={{
                     width: 6, height: 6, borderRadius: "50%",
-                    background: scoreColor(item.qcScore),
+                    background: scoreColor(item.qc_score),
                     display: "inline-block", flexShrink: 0,
                   }} />
                   <span style={{
@@ -119,7 +123,7 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                     color: "var(--qc-ink)",
                     fontFamily: "var(--qc-font-mono)",
                   }}>
-                    {item.qcScore}
+                    {item.qc_score}
                   </span>
                 </div>
               </div>
@@ -148,12 +152,12 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                   <div style={{
                     fontSize: "var(--qc-fz-11)",
                     fontFamily: "var(--qc-font-mono)",
-                    color: item.priceChangePositive ? "var(--qc-up)" : "var(--qc-down)",
+                    color: item.price_change_pct >= 0 ? "var(--qc-up)" : "var(--qc-down)",
                     marginTop: 3,
                     letterSpacing: "0.01em",
                   }}>
-                    {item.price}
-                    <span style={{ marginLeft: 4, opacity: 0.85 }}>{item.priceChange}</span>
+                    {formatPrice(item.price)}
+                    <span style={{ marginLeft: 4, opacity: 0.85 }}>{fmtPriceChange(item.price_change_pct)}</span>
                   </div>
                 </div>
 
@@ -167,16 +171,16 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                       color: kindColors[item.kind],
                       whiteSpace: "nowrap",
                     }}>
-                      {item.headlineLabel}
+                      {item.headline_label}
                     </span>
-                    {item.headlineDetail && (
+                    {item.headline_detail && (
                       <span style={{
                         fontSize: "var(--qc-fz-12)",
                         fontFamily: "var(--qc-font-mono)",
                         color: "var(--qc-ink-2)",
                         fontWeight: "var(--qc-w-regular)",
                       }}>
-                        {item.headlineDetail}
+                        {item.headline_detail}
                       </span>
                     )}
                   </div>
@@ -199,7 +203,7 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                     color: "var(--qc-ink-3)",
                     letterSpacing: "0.01em",
                   }}>
-                    {item.holdingDetail}
+                    {item.holding_detail}
                   </div>
                 </div>
 
@@ -218,7 +222,7 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                   <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                     <span style={{
                       width: 6, height: 6, borderRadius: "50%",
-                      background: scoreColor(item.qcScore),
+                      background: scoreColor(item.qc_score),
                       display: "inline-block", flexShrink: 0,
                     }} />
                     <span style={{
@@ -227,7 +231,7 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                       color: "var(--qc-ink)",
                       fontFamily: "var(--qc-font-mono)",
                     }}>
-                      {item.qcScore}
+                      {item.qc_score}
                     </span>
                   </div>
                 </div>
@@ -243,16 +247,16 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                     color: kindColors[item.kind],
                     whiteSpace: "nowrap",
                   }}>
-                    {item.headlineLabel}
+                    {item.headline_label}
                   </span>
-                  {item.headlineDetail && (
+                  {item.headline_detail && (
                     <span style={{
                       fontSize: "var(--qc-fz-12)",
                       fontFamily: "var(--qc-font-mono)",
                       color: "var(--qc-ink-2)",
                       fontWeight: "var(--qc-w-regular)",
                     }}>
-                      {item.headlineDetail}
+                      {item.headline_detail}
                     </span>
                   )}
                 </div>
@@ -275,7 +279,7 @@ export function WhatsMovingFeed({ count, items }: WhatsMovingFeedProps) {
                   color: "var(--qc-ink-3)",
                   letterSpacing: "0.01em",
                 }}>
-                  {item.holdingDetail}
+                  {item.holding_detail}
                 </div>
               </div>
             </div>

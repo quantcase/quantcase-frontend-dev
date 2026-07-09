@@ -1,134 +1,23 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { MODSynopsisCard } from "@/components/investor/mod-synopsis-card";
 import { MODBreakdownDrawer } from "@/components/investor/mod-breakdown-drawer";
 import { HoldingsPanel } from "@/components/investor/holdings-panel";
 import { WhatsMovingFeed } from "@/components/investor/whats-moving-feed";
-import type { MovingItem } from "@/components/investor/whats-moving-feed";
-import { IndustrySignalsGrid } from "@/components/investor/industry-signals-grid";
-import { ShadowPortfolio } from "@/components/investor/shadow-portfolio";
-import type { ShadowStock } from "@/components/investor/shadow-portfolio";
-import { HoldingsTracker } from "@/components/investor/holdings-tracker";
 import { DiscoverScreens } from "@/components/investor/discover-screens";
-import type { DiscoverScreen } from "@/components/investor/discover-screens";
-import { ResearchLibraryBanner } from "@/components/investor/research-library-banner";
+import { ResearchHero } from "@/components/investor/research-hero";
 import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
 import { ConnectPortfolioModal } from "@/components/investor/connect-portfolio-modal";
-import { CompleteJournalModal } from "@/components/investor/complete-journal-modal";
 import { HeaderStockSearch } from "@/components/investor/header-stock-search";
-import { useShadowPortfolio } from "@/hooks/useShadowPortfolio";
 import { useUserPortfolio } from "@/hooks/useUserPortfolio";
-import { useJournalPending } from "@/hooks/useJournalPending";
-
-// ── Static placeholder data ───────────────────────────────────────────────────
-
-const MOVING_ITEMS: MovingItem[] = [
-  {
-    id: "1",
-    symbol: "HINDUNILVR",
-    price: "₹2,318.60",
-    priceChange: "↑0.9%",
-    priceChangePositive: true,
-    kind: "score_upgrade",
-    headlineLabel: "Management score upgraded",
-    headlineDetail: "74 → 79",
-    body: "Q4 concall: rural volume recovery accelerated; pricing power maintained despite commodity headwinds. Disclosure quality flagged as improving.",
-    holdingDetail: "You hold 14 shares · 5.8% of equity book.",
-    qcScore: 79,
-    ctaLabel: "Open",
-    ctaHref: "/screener/management?symbol=HINDUNILVR",
-  },
-  {
-    id: "2",
-    symbol: "ACC",
-    price: "₹1,874.30",
-    priceChange: "↓2.1%",
-    priceChangePositive: false,
-    kind: "score_downgrade",
-    headlineLabel: "Management score downgraded",
-    headlineDetail: "68 → 61",
-    body: "Capacity utilisation guidance walked back; blended realisation under pressure from South India pricing war. Capital allocation under review.",
-    holdingDetail: "You hold 6 shares · 2.0% of equity book.",
-    qcScore: 61,
-    ctaLabel: "Open",
-    ctaHref: "/screener/management?symbol=ACC",
-  },
-  {
-    id: "3",
-    symbol: "POWERGRID",
-    price: "₹318.40",
-    priceChange: "↑0.6%",
-    priceChangePositive: true,
-    kind: "earnings",
-    headlineLabel: "Earnings tonight · 17:30",
-    headlineDetail: "your watchlist position",
-    body: "Street expects ₹4,680 Cr revenue; transmission asset capitalisation pace is the key swing factor. Stock up 5% into the print.",
-    holdingDetail: "Watching · not held.",
-    qcScore: 73,
-    ctaLabel: "Brief",
-    ctaHref: "/screener/management?symbol=POWERGRID",
-  },
-  {
-    id: "4",
-    symbol: "HFCL",
-    price: "₹128.75",
-    priceChange: "↓1.4%",
-    priceChangePositive: false,
-    kind: "score_downgrade",
-    headlineLabel: "Guidance revision flagged",
-    headlineDetail: "Optical fibre order pipeline cut",
-    body: "Management trimmed FY26 revenue guidance by 6% citing slower government rollout of BharatNet Phase III. QC Insight flags execution risk.",
-    holdingDetail: "You hold 120 shares · 2.8% of equity book.",
-    qcScore: 64,
-    ctaLabel: "Open",
-    ctaHref: "/screener/management?symbol=HFCL",
-  },
-];
-
-
-const DISCOVER_SCREENS: DiscoverScreen[] = [
-  {
-    id: "promoter-buying",
-    iconSvg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>`,
-    badgeLabel: "+12 THIS WEEK",
-    badgeColor: "#d97706",
-    title: "Promoter buying – material disclosures",
-    description: "Promoters bought ₹100 Cr+ of own stock in the last 30 days. Historically a strong signal at small/mid caps.",
-    stats: [
-      { value: 23, label: "NAMES"          },
-      { value: 7,  label: "QC SCORE >75"   },
-      { value: 4,  label: "IN YOUR SECTORS"},
-    ],
-    href: "/screener/home",
-  },
-  {
-    id: "cash-rich",
-    iconSvg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
-    badgeLabel: "NEW",
-    badgeColor: "#7c3aed",
-    title: "Cash-rich, debt-free, & growing",
-    description: "Net cash > 20% of market cap, ROCE > 18%, sales growth > 15% over 3 years. Quality compounders trading at fair value.",
-    stats: [
-      { value: 18, label: "NAMES"        },
-      { value: 11, label: "QC SCORE >70" },
-      { value: 2,  label: "YOU HOLD"     },
-    ],
-    href: "/screener/home",
-  },
-  {
-    id: "52w-lows",
-    iconSvg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
-    title: "52-week lows · QC Score still high",
-    description: "Stocks at 52-week lows where management quality and capital allocation scores remain strong. Mean reversion candidates.",
-    stats: [
-      { value: 14, label: "NAMES"         },
-      { value: 5,  label: "AVG DISC > 25%"},
-      { value: 1,  label: "YOU WATCH"     },
-    ],
-    href: "/screener/home",
-  },
-];
+import { useUser } from "@/components/providers/UserContext";
+import { useModSynopsis } from "@/hooks/useModSynopsis";
+import { usePortfolioSummary } from "@/hooks/usePortfolioSummary";
+import { useWhatsMoving } from "@/hooks/useWhatsMoving";
+import { useDiscoverScreens } from "@/hooks/useDiscoverScreens";
+import { useMarketIndices } from "@/hooks/useMarketIndices";
+import type { ModPillar, ModSubScore } from "@/types/investor-dashboard";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -144,54 +33,112 @@ function getTodayMeta(): string {
   return d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
 }
 
+// Title-case display label for a MOD pillar, e.g. "management" → "Management"
+function pillarLabel(pillar: ModPillar | null | undefined): string {
+  if (!pillar) return "";
+  return pillar.charAt(0).toUpperCase() + pillar.slice(1);
+}
+
+// Map API sub-scores → the card's { label, score, rating } shape, always in M/O/D order.
+function toCardSubScores(subs: ModSubScore[]): { label: string; score: number; rating: ModSubScore["rating"] }[] {
+  const order: ModPillar[] = ["management", "opportunity", "deal"];
+  return order
+    .map((p) => subs.find((s) => s.pillar === p))
+    .filter((s): s is ModSubScore => Boolean(s))
+    .map((s) => ({ label: pillarLabel(s.pillar), score: s.score, rating: s.rating }));
+}
+
+// Build the serif headline for the MOD synopsis card from the overall score + weakest pillar.
+function buildModHeadline(overall: number, subs: ModSubScore[], weakest: ModPillar | null): string {
+  const gold = (t: string) => `<span style="color:#7C3AED;font-style:italic">${t}</span>`;
+  const strongest = [...subs].sort((a, b) => b.score - a.score)[0];
+  const strongText = strongest ? `strong on ${strongest.pillar}` : "";
+  if (!weakest) {
+    return strongText
+      ? `Your book scores ${gold(`${overall}/100`)} — ${strongText}.`
+      : `Your book scores ${gold(`${overall}/100`)}.`;
+  }
+  const weakSub = subs.find((s) => s.pillar === weakest);
+  const weakText = weakSub && weakSub.rating === "STRETCHED"
+    ? `${gold(`stretched on ${weakest}`)}.`
+    : `${gold(`soft on ${weakest}`)}.`;
+  return `Your book scores ${gold(`${overall}/100`)} — ${strongText}, ${weakText}`;
+}
+
+// Relative "synced" label from an ISO timestamp, e.g. "2 min ago". Empty when unknown.
+function timeAgo(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+  const secs = Math.max(0, Math.floor((Date.now() - then) / 1000));
+  if (secs < 60) return "just now";
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} hr ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+// Format a market index value, e.g. 24318 → "24,318"
+function fmtIndex(v: number): string {
+  return v.toLocaleString("en-IN");
+}
+
+// Signed percent, e.g. 0.42 → "+0.42%"
+function fmtIndexPct(pct: number): string {
+  return `${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`;
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function InvestorDashboardPage() {
   const greeting = getGreeting();
   const todayMeta = getTodayMeta();
+  const { displayName } = useUser();
+  const firstName = displayName?.trim().split(/\s+/)[0] ?? "";
   const [modDrawerOpen, setModDrawerOpen] = useState(false);
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const [journalModalOpen, setJournalModalOpen] = useState(false);
 
-  const { holdings: shadowHoldings, loading: shadowLoading, notFound: shadowNotFound } = useShadowPortfolio();
   const { data: userPortfolio, loading: portfolioLoading, refetch: refetchUserPortfolio } = useUserPortfolio();
-  const { data: pendingData, loading: pendingLoading, refetch: refetchPending } = useJournalPending();
 
-  const apiShadowStocks: ShadowStock[] = useMemo(
-    () =>
-      shadowHoldings.map((h) => {
-        const md = h.market_data;
-        const ltp = md?.ltp != null ? `₹${md.ltp.toLocaleString("en-IN")}` : "—";
-        const changePct = md?.change_percent;
-        const change1d = changePct != null
-          ? `${changePct >= 0 ? "+" : ""}${changePct.toFixed(2)}%`
-          : "—";
-        return {
-          symbol: h.ticker,
-          name: h.ticker,
-          ltp,
-          change1d,
-          changePositive: (changePct ?? 0) >= 0,
-          qcScore: md?.qc_score ?? 0,
-          thesisTags: (md?.thesis_tags ?? []) as ShadowStock["thesisTags"],
-          whyInvested: `₹${h.amount_invested.toLocaleString("en-IN")} invested`,
-          conviction: (md?.conviction ?? "NEUTRAL") as ShadowStock["conviction"],
-          href: `/screener/management?symbol=${h.ticker}`,
-        };
-      }),
-    [shadowHoldings]
-  );
-
-  // Trackers (shadow portfolio) — drive the empty state off the API
-  const shadowEmpty = shadowNotFound || apiShadowStocks.length === 0;
-  const shadowStocksToShow = shadowLoading || shadowEmpty ? [] : apiShadowStocks;
-  const shadowCount = apiShadowStocks.length;
+  // Dashboard widget data
+  const { data: modSynopsis } = useModSynopsis();
+  const { data: summary } = usePortfolioSummary();
+  const { data: whatsMoving, loading: whatsMovingLoading } = useWhatsMoving(4);
+  const { data: discover } = useDiscoverScreens();
+  const { data: indices } = useMarketIndices();
 
   // Holdings (user portfolio)
   const userHoldings = userPortfolio?.holdings ?? [];
   const userStockCount = userHoldings.length;
   const isUserPortfolioMissing = !portfolioLoading && (!userPortfolio || userHoldings.length === 0);
+
+  // ── MOD synopsis (portfolio-level) ──────────────────────────────────────────
+  const modSubScores = modSynopsis ? toCardSubScores(modSynopsis.sub_scores) : [];
+  const modHeadline = modSynopsis
+    ? buildModHeadline(modSynopsis.overall_score, modSynopsis.sub_scores, modSynopsis.weakest_pillar)
+    : "";
+  const modBreakdown = (modSynopsis?.breakdown ?? []).map((row) => ({
+    symbol: row.symbol,
+    name: row.name,
+    pct: row.weight_pct,
+    management: row.management,
+    opportunity: row.opportunity,
+    deal: row.deal,
+  }));
+
+  // ── Holdings summary ────────────────────────────────────────────────────────
+  const syncedAgoLabel = timeAgo(summary?.synced_at);
+
+  // ── Whats-moving & discover ─────────────────────────────────────────────────
+  const movingItems = whatsMoving?.items ?? [];
+  const discoverScreens = discover?.screens ?? [];
+
+  // ── Market indices (header) ─────────────────────────────────────────────────
+  const nifty = indices?.indices.find((i) => i.symbol.toUpperCase() === "NIFTY");
+  const sensex = indices?.indices.find((i) => i.symbol.toUpperCase() === "SENSEX");
 
   return (
     <div style={{ background: "var(--qc-bg, #F5F5F5)", minHeight: "100vh" }}>
@@ -219,7 +166,12 @@ export default function InvestorDashboardPage() {
               fontFamily: "var(--qc-font-sans)",
             }}
           >
-            {greeting}, <span style={{ fontWeight: "var(--qc-w-medium)" }}>Raj</span>
+            {greeting}
+            {firstName && (
+              <>
+                , <span style={{ fontWeight: "var(--qc-w-medium)" }}>{firstName}</span>
+              </>
+            )}
           </h1>
           <div
             className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5"
@@ -230,18 +182,27 @@ export default function InvestorDashboardPage() {
             }}
           >
             <span>{todayMeta}</span>
-            <span style={{ color: "var(--qc-ink-3)" }}>·</span>
-            <span>
-              NIFTY{" "}
-              <span style={{ color: "var(--qc-up)", fontWeight: "var(--qc-w-medium)" }}>24,318</span>
-              <span style={{ color: "var(--qc-up)" }}> +0.42%</span>
-            </span>
-            <span style={{ color: "var(--qc-ink-3)" }}>·</span>
-            <span>
-              SENSEX{" "}
-              <span style={{ color: "var(--qc-up)", fontWeight: "var(--qc-w-medium)" }}>79,712</span>
-              <span style={{ color: "var(--qc-up)" }}> +0.38%</span>
-            </span>
+            {[
+              { label: "NIFTY", idx: nifty },
+              { label: "SENSEX", idx: sensex },
+            ]
+              .filter((e) => e.idx)
+              .map((e) => {
+                const up = (e.idx!.change_pct ?? 0) >= 0;
+                const color = up ? "var(--qc-up)" : "var(--qc-down)";
+                return (
+                  <span key={e.label} className="flex items-center gap-x-2">
+                    <span style={{ color: "var(--qc-ink-3)" }}>·</span>
+                    <span>
+                      {e.label}{" "}
+                      <span style={{ color, fontWeight: "var(--qc-w-medium)" }}>
+                        {fmtIndex(e.idx!.value)}
+                      </span>
+                      <span style={{ color }}> {fmtIndexPct(e.idx!.change_pct)}</span>
+                    </span>
+                  </span>
+                );
+              })}
           </div>
           </div>
 
@@ -257,96 +218,60 @@ export default function InvestorDashboardPage() {
           className="grid grid-cols-1 lg:grid-cols-[5fr_6fr] gap-3.5 mb-3.5 items-stretch"
         >
           <MODSynopsisCard
-            overallScore={72}
-            headline={`Your book scores <span style="color:#C8A84B;font-style:italic">72/100</span> — strong on management, <span style="color:#C8A84B;font-style:italic">stretched on deal.</span>`}
-            subScores={[
-              { label: "Management", score: 81, rating: "STRONG"    },
-              { label: "Opportunity", score: 74, rating: "FAIR"      },
-              { label: "Deal",        score: 58, rating: "STRETCHED" },
-            ]}
-            draggingSymbols={["ACC", "HFCL"]}
+            overallScore={modSynopsis?.overall_score ?? 0}
+            headline={modHeadline}
+            subScores={modSubScores}
+            draggingSymbols={modSynopsis?.dragging_symbols ?? []}
+            draggingLabel={modSynopsis?.weakest_pillar ? pillarLabel(modSynopsis.weakest_pillar) : undefined}
             onOpenBreakdown={() => setModDrawerOpen(true)}
             isShadow={isUserPortfolioMissing}
             onUploadPortfolio={() => setConnectModalOpen(true)}
           />
 
           <HoldingsPanel
-            stockCount={userStockCount}
-            fundCount={5}
-            syncedAgo="2 min ago"
-            equityValue="₹56.8 L"
-            todayChange="+₹38,200"
-            ytdChange="+14.2%"
-            capSegments={[
-              { label: "Large cap",  value: "₹29.5 L", count: 6, pct: 52, color: "#0F172B" },
-              { label: "Mid cap",    value: "₹17.6 L", count: 4, pct: 31, color: "#7c3aed" },
-              { label: "Small cap",  value: "₹9.7 L",  count: 2, pct: 17, color: "#d97706" },
-            ]}
-            industrySegments={[
-              { label: "Financials",  value: "₹18.2 L", count: 3, pct: 32, color: "#0F172B" },
-              { label: "Technology",  value: "₹12.5 L", count: 3, pct: 22, color: "#7c3aed" },
-              { label: "Industrials", value: "₹9.1 L",  count: 2, pct: 16, color: "#d97706" },
-              { label: "Healthcare",  value: "₹8.5 L",  count: 2, pct: 15, color: "#0891b2" },
-              { label: "FMCG",        value: "₹8.5 L",  count: 2, pct: 15, color: "#71717a" },
-            ]}
+            stockCount={summary?.stock_count ?? userStockCount}
+            fundCount={summary?.fund_count ?? 0}
+            syncedAgo={syncedAgoLabel}
+            equityValue={summary?.equity_value ?? 0}
+            investedValue={summary?.invested_value ?? 0}
+            todayChangeValue={summary?.today_change_value ?? null}
+            todayChangePct={summary?.today_change_pct ?? null}
+            ytdChangePct={summary?.ytd_change_pct ?? null}
+            return6mPct={summary?.return_6m_pct ?? null}
+            valueTrend={summary?.value_trend ?? []}
+            capSegments={summary?.cap_segments ?? []}
+            industrySegments={summary?.industry_segments ?? []}
+            approximate={summary?.source === "firstparty"}
             isShadow={isUserPortfolioMissing}
             onUploadPortfolio={() => setConnectModalOpen(true)}
           />
         </section>
 
         {/* ════════════════════════════════════════════════════════════
-            ROW 2 — What's Moving (left) + Industry Signals (right)
-        ═══════════════════════════════════════════════════════════════ */}
-        <section
-          className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3.5 mb-3.5 items-start"
-        >
-          <WhatsMovingFeed count={4} items={MOVING_ITEMS} />
-          <IndustrySignalsGrid />
-        </section>
-
-        {/* ════════════════════════════════════════════════════════════
-            ROW 4 — Trackers (left half) + Holdings (right half)
-        ═══════════════════════════════════════════════════════════════ */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 mb-3.5 items-stretch">
-          <ShadowPortfolio
-            count={shadowCount}
-            stocks={shadowStocksToShow}
-            loading={shadowLoading}
-            empty={shadowEmpty}
-          />
-          <HoldingsTracker
-            holdings={userHoldings}
-            count={userStockCount}
-            loading={portfolioLoading}
-            empty={isUserPortfolioMissing}
-            onConnect={() => setConnectModalOpen(true)}
-          />
-        </section>
-
-        {/* ════════════════════════════════════════════════════════════
-            ROW 6 — Discover Screens (full width)
+            ROW 2 — Research hero (full width)
         ═══════════════════════════════════════════════════════════════ */}
         <section className="mb-3.5">
-          <DiscoverScreens screens={DISCOVER_SCREENS} />
+          <ResearchHero />
         </section>
 
         {/* ════════════════════════════════════════════════════════════
-            ROW 7 — Research Library Banner (full width)
+            ROW 3 — What's Moving (full width)
         ═══════════════════════════════════════════════════════════════ */}
         <section className="mb-3.5">
-          <ResearchLibraryBanner
-            newIcNotes={3}
-            catalystsNext30Days={5}
-            subtitle="DRHP verdicts, management commentary & thesis updates"
-            href="/screener/home"
-            onOpenJournal={() => setJournalModalOpen(true)}
-          />
+          <WhatsMovingFeed count={movingItems.length} items={movingItems} loading={whatsMovingLoading} />
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════
+            ROW 4 — Discover Screens (full width)
+        ═══════════════════════════════════════════════════════════════ */}
+        <section className="mb-3.5">
+          <DiscoverScreens screens={discoverScreens} />
         </section>
       </main>
 
       <MODBreakdownDrawer
         open={modDrawerOpen}
-        stocks={[]}
+        stocks={modBreakdown}
         onClose={() => setModDrawerOpen(false)}
       />
 
@@ -361,16 +286,6 @@ export default function InvestorDashboardPage() {
         open={uploadModalOpen}
         onClose={() => setUploadModalOpen(false)}
         onSuccess={() => { setUploadModalOpen(false); window.location.reload(); }}
-      />
-
-      <CompleteJournalModal
-        open={journalModalOpen}
-        onClose={() => setJournalModalOpen(false)}
-        onComplete={refetchPending}
-        onConnect={() => setConnectModalOpen(true)}
-        holdings={pendingData?.holdings ?? []}
-        totalHoldings={pendingData?.totalHoldings}
-        loadingHoldings={pendingLoading}
       />
     </div>
   );

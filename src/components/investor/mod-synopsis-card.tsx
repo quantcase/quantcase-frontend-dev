@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { DarkGradientCard, MonoLabel } from "@/components/ds";
+import { CardShell, MonoLabel } from "@/components/ds";
 
 interface SubScore {
   label: string;
@@ -14,16 +14,21 @@ interface MODSynopsisCardProps {
   headline: string;
   subScores: SubScore[];
   draggingSymbols: string[];
+  /** Pillar the dragging symbols weigh on, e.g. "Deal". Defaults to "Deal". */
+  draggingLabel?: string;
   onOpenBreakdown?: () => void;
   isShadow?: boolean;
   onUploadPortfolio?: () => void;
 }
 
+// Violet accent used for the headline emphasis + interactive links on the light card.
+const ACCENT = "#7C3AED";
+
 const RATING_META: Record<SubScore["rating"], { color: string; bg: string; border: string; barColor: string }> = {
-  STRONG:    { color: "var(--qc-up,#1F7A4A)",   bg: "rgba(31,122,74,0.18)",   border: "rgba(31,122,74,0.5)",   barColor: "var(--qc-up,#1F7A4A)"    },
-  FAIR:      { color: "var(--qc-warn,#B4731A)",  bg: "rgba(180,115,26,0.18)",  border: "rgba(180,115,26,0.5)",  barColor: "var(--qc-warn,#B4731A)"   },
-  STRETCHED: { color: "var(--qc-down,#DC2626)",  bg: "rgba(220,38,38,0.18)",   border: "rgba(220,38,38,0.5)",   barColor: "var(--qc-down,#DC2626)"   },
-  WEAK:      { color: "var(--qc-down,#DC2626)",  bg: "rgba(220,38,38,0.18)",   border: "rgba(220,38,38,0.5)",   barColor: "var(--qc-down,#DC2626)"   },
+  STRONG:    { color: "var(--qc-up,#1F7A4A)",   bg: "var(--qc-up-soft,#E3F1E8)",   border: "rgba(31,122,74,0.30)",  barColor: "var(--qc-up,#1F7A4A)"    },
+  FAIR:      { color: "var(--qc-warn,#B4731A)",  bg: "var(--qc-warn-soft,#FAF0D8)", border: "rgba(180,115,26,0.30)", barColor: "var(--qc-warn,#B4731A)"  },
+  STRETCHED: { color: "var(--qc-warn,#B4731A)",  bg: "var(--qc-warn-soft,#FAF0D8)", border: "rgba(180,115,26,0.30)", barColor: "var(--qc-warn,#B4731A)"  },
+  WEAK:      { color: "var(--qc-down,#B23A2F)",  bg: "var(--qc-down-soft,#F7E6E3)", border: "rgba(178,58,47,0.30)",  barColor: "var(--qc-down,#B23A2F)"  },
 };
 
 function ScoreTile({ label, score, rating }: SubScore) {
@@ -31,8 +36,8 @@ function ScoreTile({ label, score, rating }: SubScore) {
   return (
     <div
       style={{
-        background: "rgba(255,255,255,0.06)",
-        border: "1px solid rgba(255,255,255,0.10)",
+        background: "#fff",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 10,
         padding: "14px 16px 12px",
         flex: 1,
@@ -42,10 +47,10 @@ function ScoreTile({ label, score, rating }: SubScore) {
         gap: 0,
       }}
     >
-      <MonoLabel size={9} tracking="0.12em" color="rgba(255,255,255,0.40)">
+      <MonoLabel size={9} tracking="0.12em" color="var(--qc-ink-3)">
         {label}
       </MonoLabel>
-      <div style={{ fontSize: "var(--qc-fz-26)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-on-dark)", lineHeight: 1, margin: "6px 0 6px" }}>
+      <div style={{ fontSize: "var(--qc-fz-26)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", lineHeight: 1, margin: "6px 0 6px" }}>
         {score}
       </div>
       <span style={{
@@ -57,30 +62,30 @@ function ScoreTile({ label, score, rating }: SubScore) {
       }}>
         {rating}
       </span>
-      <div style={{ marginTop: 10, height: 3, background: "rgba(255,255,255,0.12)", borderRadius: 2 }}>
+      <div style={{ marginTop: 10, height: 3, background: "var(--qc-hair)", borderRadius: 2 }}>
         <div style={{ height: "100%", width: `${score}%`, background: meta.barColor, borderRadius: 2 }} />
       </div>
     </div>
   );
 }
 
-export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBreakdown, isShadow, onUploadPortfolio }: MODSynopsisCardProps) {
+export function MODSynopsisCard({ headline, subScores, draggingSymbols, draggingLabel = "Deal", onOpenBreakdown, isShadow, onUploadPortfolio }: MODSynopsisCardProps) {
   return (
-    <DarkGradientCard radius={14} style={{ padding: "24px 24px 20px", display: "flex", flexDirection: "column", gap: 16, height: "100%" }}>
+    <CardShell radius={14} style={{ padding: "24px 24px 20px", display: "flex", flexDirection: "column", gap: 16, height: "100%" }}>
 
       {/* Header — mono label + optional upload button */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <MonoLabel size={10} tracking="0.14em" color="rgba(255,255,255,0.45)">
-          {isShadow ? "Trackers · MOD Synopsis" : "Holdings · MOD Synopsis"}
+        <MonoLabel size={10} tracking="0.14em" color="var(--qc-ink-3)">
+          {isShadow ? "Trackers · MOD Synopsis" : "Your Portfolio · MOD Synopsis"}
         </MonoLabel>
         {isShadow && onUploadPortfolio && (
           <button
             onClick={onUploadPortfolio}
             style={{
               display: "inline-flex", alignItems: "center", gap: 5,
-              fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-ink)",
+              fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-on-dark)",
               fontFamily: "var(--qc-font-sans)",
-              background: "#fff", border: "none",
+              background: "var(--qc-ink)", border: "none",
               borderRadius: 6, padding: "4px 10px",
               cursor: "pointer", whiteSpace: "nowrap",
               letterSpacing: "var(--qc-track-pill)",
@@ -100,7 +105,7 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
       <p
         style={{
           fontSize: "var(--qc-fz-26)", fontWeight: "var(--qc-w-regular)", lineHeight: 1.35,
-          color: "var(--qc-on-dark)", margin: 0,
+          color: "var(--qc-ink)", margin: 0,
           fontFamily: "var(--qc-font-serif)",
           letterSpacing: "var(--qc-track-display)",
         }}
@@ -114,49 +119,43 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
         ))}
       </div>
 
-      {/* Footer — dragging signal pills + breakdown link */}
+      {/* Footer — dragging signal + breakdown link */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           paddingTop: 12,
-          borderTop: "1px solid rgba(255,255,255,0.08)",
+          borderTop: "1px solid var(--qc-hair)",
           gap: 12,
           flexWrap: "wrap",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           {draggingSymbols.length > 0 && (
-            <span style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-sans)", color: "rgba(255,255,255,0.45)" }}>
-              Dragging Deal score:
+            <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>
+              {draggingSymbols.length} holding{draggingSymbols.length === 1 ? "" : "s"} dragging your {draggingLabel} score ·{" "}
+              {draggingSymbols.map((s, i) => (
+                <span key={s}>
+                  <Link
+                    href={`/screener/management?symbol=${s}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: ACCENT, fontWeight: "var(--qc-w-medium)", textDecoration: "none" }}
+                  >
+                    {s}
+                  </Link>
+                  {i < draggingSymbols.length - 1 ? ", " : ""}
+                </span>
+              ))}
             </span>
           )}
-          {draggingSymbols.map((s) => (
-            <Link
-              key={s}
-              href={`/screener/management?symbol=${s}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 7,
-                background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.14)",
-                borderRadius: 999, padding: "5px 12px",
-                fontSize: "var(--qc-fz-12)", color: "rgba(255,255,255,0.88)",
-                fontFamily: "var(--qc-font-sans)",
-                textDecoration: "none",
-              }}
-            >
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--qc-down,#DC2626)", flexShrink: 0 }} />
-              {s}
-            </Link>
-          ))}
         </div>
         <button
           onClick={onOpenBreakdown}
           style={{
-            fontSize: "var(--qc-fz-11)", color: "rgba(139,180,248,0.9)", background: "none",
-            fontFamily: "var(--qc-font-sans)",
+            fontSize: "var(--qc-fz-12)", color: ACCENT, background: "none",
+            fontFamily: "var(--qc-font-sans)", fontWeight: "var(--qc-w-medium)",
             border: "none", cursor: "pointer", padding: 0, whiteSpace: "nowrap",
             letterSpacing: "var(--qc-track-pill)",
           }}
@@ -164,6 +163,6 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, onOpenBr
           Open MOD breakdown →
         </button>
       </div>
-    </DarkGradientCard>
+    </CardShell>
   );
 }

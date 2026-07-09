@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { X, CheckCircle2, Zap, Shield, BarChart2, Clock } from "lucide-react";
-import { BACKEND_URL } from "@/lib/constants";
-import type { BillingProduct } from "@/types/auth";
+import type { BillingConfig, BillingProduct } from "@/types/auth";
+import { getBillingConfig, getProducts } from "@/lib/billing";
+import { useRazorpayCheckout } from "@/hooks/useRazorpayCheckout";
 import { useUser } from "@/components/providers/UserContext";
 
 interface PaywallDialogProps {
@@ -22,30 +23,31 @@ const FEATURE_LIST = [
 export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) {
   const { subscription } = useUser();
   const [products, setProducts] = useState<BillingProduct[]>([]);
+  const [config, setConfig] = useState<BillingConfig | null>(null);
   const [billingInterval, setBillingInterval] = useState<"monthly" | "annual">("monthly");
   const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [fetchingProducts, setFetchingProducts] = useState(true);
-  const [error, setError] = useState("");
+
+  // Shared subscribe → open Razorpay → verify → unlock flow (see useRazorpayCheckout).
+  // On a verified { status: "active" } we reload so AuthGuard re-fetches /auth/me and
+  // refreshes the subscription in UserContext (clearing the paywall).
+  const { startCheckout, loading, error, reset } = useRazorpayCheckout({
+    onSuccess: () => window.location.reload(),
+  });
 
   useEffect(() => {
     if (!open) return;
-    const token = localStorage.getItem("qc_at");
-    if (!token) return;
 
-    fetch(`${BACKEND_URL}/api/billing/products`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) return;
-        const data = await res.json();
-        const list: BillingProduct[] = data?.data ?? data ?? [];
+    getProducts()
+      .then((list) => {
         setProducts(list);
         const firstMonthly = list.flatMap((p) => p.prices).find((pr) => pr.plan_type === "monthly");
         if (firstMonthly) setSelectedPriceId(firstMonthly.id);
       })
       .catch(() => {})
       .finally(() => setFetchingProducts(false));
+
+    getBillingConfig().then(setConfig).catch(() => {});
   }, [open]);
 
   const visiblePrices = products.flatMap((product) =>
@@ -61,59 +63,10 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
     return `$${(amount / 100).toFixed(2)}`;
   }
 
-  async function handleSubscribe() {
+  function handleSubscribe() {
     if (!selectedPriceId) return;
-    setError("");
-    setLoading(true);
-
-    try {
-      const token = localStorage.getItem("qc_at");
-      const res = await fetch(`${BACKEND_URL}/api/billing/subscribe`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ plan_id: selectedPriceId }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data?.message ?? data?.error ?? "Failed to create order. Please try again.");
-        return;
-      }
-
-      const checkoutParams = data?.data ?? data;
-
-      if (!window.Razorpay) {
-        setError("Payment system not loaded. Please refresh and try again.");
-        return;
-      }
-
-      const rzp = new window.Razorpay({
-        key: checkoutParams.key,
-        amount: checkoutParams.amount,
-        currency: checkoutParams.currency ?? "INR",
-        name: "QuantCase",
-        description: "Research Platform Subscription",
-        order_id: checkoutParams.order_id,
-        subscription_id: checkoutParams.subscription_id,
-        prefill: checkoutParams.prefill,
-        theme: { color: "#0F172B" },
-        handler: () => {
-          window.location.reload();
-        },
-        modal: {
-          ondismiss: () => setLoading(false),
-        },
-      });
-
-      rzp.open();
-    } catch {
-      setError("Unable to connect to payment service. Please try again.");
-      setLoading(false);
-    }
+    reset();
+    startCheckout(selectedPriceId);
   }
 
   // --- Derive messaging from subscription status ---
@@ -193,8 +146,6 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
 
   if (!open) return null;
 
-  const StatusIcon = statusConfig.icon;
-
   return (
     <div
       style={{
@@ -225,6 +176,23 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
       >
         {/* Top accent bar */}
         <div style={{ height: 4, background: "linear-gradient(90deg, #0F172B 0%, #334155 100%)" }} />
+
+        {/* Test-mode banner — backend-driven; no real money is charged */}
+        {config?.mode === "test" && (
+          <div
+            style={{
+              background: "#0F172B",
+              color: "#fff",
+              fontSize: 11,
+              fontWeight: 600,
+              textAlign: "center",
+              padding: "6px 16px",
+              letterSpacing: "0.02em",
+            }}
+          >
+            ⚠️ Test Mode — no real money is charged.
+          </div>
+        )}
 
         {/* Header */}
         <div style={{ padding: "28px 32px 0 32px", position: "relative" }}>

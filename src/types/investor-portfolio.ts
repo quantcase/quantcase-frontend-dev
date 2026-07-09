@@ -26,6 +26,9 @@ export interface Holding {
   shadow_portfolio_id: string | null;
   notes: HoldingNote[];
   market_data?: HoldingMarketData | null;
+  broker: string | null;            // broker display name, null for uploaded holdings
+  quantity?: number | null;         // optional; null for uploaded holdings
+  current_value?: number | null;    // optional live value; else use amount_invested
 }
 
 export interface UserPortfolio {

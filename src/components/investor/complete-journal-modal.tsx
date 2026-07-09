@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { BACKEND_URL } from "@/lib/constants";
 import { apiAuthPost, apiAuthPatch, apiAuthDelete, apiAuthGet } from "@/lib/api";
 import { inlineMarkdownToHtml } from "@/lib/utils";
-import { NIFTY50_TICKERS, DEFAULT_THESIS_PROMPTS } from "@/app/(app)/investor/portfolio/_components/tracker-ideas";
+import { NIFTY50_TICKERS, DEFAULT_THESIS_PROMPTS } from "@/lib/journal-ideas";
 import type {
   JournalPendingHolding,
   JournalEntryItem,
@@ -955,7 +955,7 @@ export function CompleteJournalModal({
                 <div style={{ fontSize: 14, color: "#78716C", marginBottom: 24, lineHeight: 1.6 }}>
                   Add stocks to your holdings or trackers first.
                 </div>
-                <button onClick={() => { onClose(); window.location.href = "/investor/portfolio"; }} style={{ background: "#1C1917", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                <button onClick={() => { onClose(); window.location.href = "/diary"; }} style={{ background: "#1C1917", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
                   Add holdings →
                 </button>
               </div>

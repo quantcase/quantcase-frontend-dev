@@ -170,9 +170,9 @@ function TopBarInner() {
 
   const activeIndustryTab = searchParams.get("tab") ?? "dashboard";
 
-  const isInvestorPortfolio = pathname === "/investor/portfolio";
+  const isDiary = pathname === "/diary";
 
-  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin || isInvestorDashboard || isInvestorPortfolio) return null;
+  if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin || isInvestorDashboard || isDiary) return null;
 
   let leftZone: React.ReactNode = null;
 

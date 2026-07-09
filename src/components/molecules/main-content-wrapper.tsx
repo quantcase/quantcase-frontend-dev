@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 
-const HIDE_TOPBAR_PATHS = ["/dashboard", "/screener/home", "/screener/basket", "/investor/dashboard", "/investor/portfolio"];
+const HIDE_TOPBAR_PATHS = ["/dashboard", "/screener/home", "/screener/basket", "/investor/dashboard", "/diary"];
 const HIDE_CHROME_PATHS = ["/signin"];
 const HIDE_TOPBAR_PREFIXES = ["/admin"];
 

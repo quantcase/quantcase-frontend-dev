@@ -73,7 +73,7 @@ export function HoldingsTracker({ holdings, count, loading, empty, onConnect }: 
             </button>
           )}
           <Link
-            href="/investor/portfolio"
+            href="/diary"
             style={{
               fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-11)",
               letterSpacing: "var(--qc-track-mono)", color: "var(--qc-ink-3)",

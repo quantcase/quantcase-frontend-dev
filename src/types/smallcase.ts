@@ -31,6 +31,7 @@ export interface SmallcaseHolding {
   isin: string;
   created_at: string;
   updated_at: string;
+  broker: string | null;   // broker the holding is held at
 }
 
 export interface SmallcaseHoldingsData {

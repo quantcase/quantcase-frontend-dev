@@ -8,6 +8,8 @@ import { apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { ConnectPortfolioModal } from "@/components/investor/connect-portfolio-modal";
 import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
+import { PlaceOrderModal } from "@/components/investor/place-order-modal";
+import { useSmallcaseHoldings } from "@/hooks/useSmallcaseHoldings";
 import type { HoldingNote } from "@/types/investor-portfolio";
 import type { StocksApiResponse } from "@/types/screener";
 
@@ -435,7 +437,17 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showJournal, setShowJournal] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
+  const [showOrderModal, setShowOrderModal] = useState(false);
   const [showCsvUpload, setShowCsvUpload] = useState(false);
+
+  // Broker connection state drives whether "Buy" places an order or connects first.
+  const { data: smallcaseData, notConnected: brokerNotConnected, refetch: refetchSmallcase } = useSmallcaseHoldings();
+  const brokerConnected = !brokerNotConnected && !!smallcaseData?.portfolio;
+
+  function handleBuyClick() {
+    if (brokerConnected) setShowOrderModal(true);
+    else setShowBuyModal(true);
+  }
   const [justAdded, setJustAdded] = useState(false);
   const justAddedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -657,9 +669,9 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
         {/* Divider */}
         <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.12)", flexShrink: 0 }} />
 
-        {/* Buy button — opens the smallcase / broker connect flow */}
+        {/* Buy button — places an order if a broker is connected, else connects first */}
         <button
-          onClick={() => setShowBuyModal(true)}
+          onClick={handleBuyClick}
           style={{
             display: "flex",
             alignItems: "center",
@@ -800,11 +812,18 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
         />
       )}
 
-      {/* Buy → smallcase / broker connect flow */}
+      {/* Buy → smallcase / broker connect flow (shown when no broker is connected) */}
       <ConnectPortfolioModal
         open={showBuyModal}
         onClose={() => setShowBuyModal(false)}
         onOpenCsvUpload={() => setShowCsvUpload(true)}
+        onConnected={() => { setShowBuyModal(false); refetchSmallcase(); setShowOrderModal(true); }}
+      />
+      {/* Buy → place order (shown when a broker is connected) */}
+      <PlaceOrderModal
+        open={showOrderModal}
+        onClose={() => setShowOrderModal(false)}
+        ticker={ticker}
       />
       <UploadPortfolioModal
         open={showCsvUpload}

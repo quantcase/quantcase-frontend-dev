@@ -8,6 +8,7 @@ export { ActionButton } from "./ActionButton";
 export { MonoLabel } from "./MonoLabel";
 ;
 export { DarkGradientCard } from "./DarkGradientCard";
+export { CardShell } from "./CardShell";
 export { CommonCard } from "./CommonCard";
 export { GoldenCard } from "./GoldenCard";
 export { SignalTile } from "./SignalTile";

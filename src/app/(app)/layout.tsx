@@ -17,6 +17,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </PaywallProvider>
       </AuthGuard>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+      <Script src="https://gateway.smallcase.com/scdk/2.0.0/scdk.js" strategy="lazyOnload" />
     </UserProvider>
   );
 }

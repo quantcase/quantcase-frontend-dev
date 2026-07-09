@@ -47,11 +47,25 @@ export interface JournalSummary {
   broken: number;
   none: number;
   total: number;
+  entryCount: number;   // lifetime count of journal rows, monotonic
+  streakDays: number;   // consecutive-day writing streak ending today (0 = no active streak)
+}
+
+export type JournalChangeKind = "score" | "guidance" | "thesis" | "event" | "news";
+
+export interface JournalChange {
+  symbol: string;
+  thesisHealth: ThesisHealth;   // drives the dot color
+  description: string;
+  changedAt: string;            // ISO 8601
+  kind?: JournalChangeKind;
+  delta?: number;               // optional signed score delta (not yet populated by backend)
 }
 
 export interface JournalEntriesResponse {
   summary: JournalSummary;
   entries: JournalEntryItem[];
+  changes: JournalChange[];
 }
 
 export interface StockSignal {

@@ -193,12 +193,12 @@ export function SignInForm() {
         </button>
       </form>
 
-      <p style={{ fontSize: 12, color: "rgba(18,18,18,0.40)", marginTop: 32, textAlign: "center", lineHeight: 1.6 }}>
+      {/* <p style={{ fontSize: 12, color: "rgba(18,18,18,0.40)", marginTop: 32, textAlign: "center", lineHeight: 1.6 }}>
         Don&apos;t have an account?{" "}
         <Link href="/register" style={{ color: "#0F172B", fontWeight: 500, textDecoration: "none" }}>
           Create one
         </Link>
-      </p>
+      </p> */}
     </div>
   );
 }

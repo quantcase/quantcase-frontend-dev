@@ -8,6 +8,8 @@ export type AccountType = "manager" | "investor" | null;
 interface UserContextValue {
   accountType: AccountType;
   setAccountType: (t: AccountType) => void;
+  displayName: string | null;
+  email: string | null;
   subscription: Subscription | null;
   onboardingCompleted: boolean;
   onboardingStep: number;
@@ -21,6 +23,8 @@ interface UserContextValue {
 const UserContext = createContext<UserContextValue>({
   accountType: null,
   setAccountType: () => {},
+  displayName: null,
+  email: null,
   subscription: null,
   onboardingCompleted: true,
   onboardingStep: 0,
@@ -50,6 +54,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const [onboardingStep, setOnboardingStep] = useState<number>(0);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("qc_display_name") ?? null;
+    }
+    return null;
+  });
+  const [email, setEmail] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("qc_email") ?? null;
+    }
+    return null;
+  });
   const [paywallOpen, setPaywallOpen] = useState(false);
 
   const isAccessBlocked = subscription?.is_access_blocked ?? false;
@@ -73,12 +89,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("qc_onboarding_completed", String(data.onboarding_completed));
     setOnboardingStep(data.onboarding_step ?? 0);
     setSubscription(data.subscription ?? null);
+
+    const name = data.display_name ?? null;
+    setDisplayName(name);
+    if (name) localStorage.setItem("qc_display_name", name);
+    else localStorage.removeItem("qc_display_name");
+
+    const mail = data.email ?? null;
+    setEmail(mail);
+    if (mail) localStorage.setItem("qc_email", mail);
+    else localStorage.removeItem("qc_email");
   }, []);
 
   return (
     <UserContext.Provider value={{
       accountType,
       setAccountType,
+      displayName,
+      email,
       subscription,
       onboardingCompleted,
       onboardingStep,

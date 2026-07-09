@@ -1,25 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { Compass } from "lucide-react";
+import {
+  Compass,
+  Activity,
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+  DollarSign,
+  Percent,
+  ShieldCheck,
+  Flame,
+  BarChart3,
+  type LucideIcon,
+} from "lucide-react";
 import { MonoLabel } from "@/components/ds";
+import type { DiscoverScreenDto, DiscoverBadgeKind } from "@/types/investor-dashboard";
 
-export interface DiscoverScreen {
-  id: string;
-  iconSvg: string;
-  badgeLabel?: string;
-  badgeColor?: string;
-  title: string;
-  description: string;
-  stats: { value: string | number; label: string }[];
-  href: string;
+// Icon-key → lucide icon. Backend sends a string key (not SVG); unknown keys fall back to a chart.
+const ICON_MAP: Record<string, LucideIcon> = {
+  activity: Activity,
+  "trending-up": TrendingUp,
+  "trending-down": TrendingDown,
+  refresh: RefreshCw,
+  "dollar-sign": DollarSign,
+  percent: Percent,
+  shield: ShieldCheck,
+  flame: Flame,
+  chart: BarChart3,
+};
+
+// Render the icon for a given key. Declared at module scope so the resolved
+// lucide component isn't created during ScreenCard's render.
+function ScreenIcon({ icon }: { icon: string }) {
+  const Icon: LucideIcon = ICON_MAP[icon] ?? BarChart3;
+  return <Icon size={16} strokeWidth={2} style={{ color: "#555" }} />;
+}
+
+// Badge color from the design system, keyed off the semantic badge kind.
+const BADGE_COLORS: Record<DiscoverBadgeKind, string> = {
+  warning: "#d97706",
+  new: "#7c3aed",
+  info: "#0891b2",
+};
+
+function badgeColor(kind?: DiscoverBadgeKind): string {
+  return kind ? BADGE_COLORS[kind] : "#7c3aed";
 }
 
 interface DiscoverScreensProps {
-  screens: DiscoverScreen[];
+  screens: DiscoverScreenDto[];
 }
 
-function ScreenCard({ screen }: { screen: DiscoverScreen }) {
+function ScreenCard({ screen }: { screen: DiscoverScreenDto }) {
+  const bColor = badgeColor(screen.badge_kind);
   return (
     <Link
       href={screen.href}
@@ -49,24 +83,25 @@ function ScreenCard({ screen }: { screen: DiscoverScreen }) {
             background: "rgba(18,18,18,0.03)",
             flexShrink: 0,
           }}
-          dangerouslySetInnerHTML={{ __html: screen.iconSvg }}
-        />
-        {screen.badgeLabel && (
+        >
+          <ScreenIcon icon={screen.icon} />
+        </div>
+        {screen.badge_label && (
           <span
             style={{
               fontSize: "var(--qc-fz-10)",
               fontWeight: "var(--qc-w-bold)",
               fontFamily: "var(--qc-font-sans)",
-              color: screen.badgeColor ?? "#7c3aed",
-              background: screen.badgeColor ? `${screen.badgeColor}15` : "#f3f0ff",
-              border: `1px solid ${screen.badgeColor ?? "#7c3aed"}30`,
+              color: bColor,
+              background: `${bColor}15`,
+              border: `1px solid ${bColor}30`,
               borderRadius: 20,
               padding: "3px 10px",
               letterSpacing: "var(--qc-track-eyebrow)",
               textTransform: "uppercase",
             }}
           >
-            {screen.badgeLabel}
+            {screen.badge_label}
           </span>
         )}
       </div>

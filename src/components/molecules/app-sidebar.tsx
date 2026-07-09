@@ -28,7 +28,7 @@ const managerNavItems = [
 const investorNavItems = [
   { label: "Home",        href: "/investor/dashboard",  icon: Home,      isActive: (p: string) => p === "/investor/dashboard" },
   { label: "Terminal",    href: "/screener/home",        icon: Monitor,   isActive: (p: string) => p.startsWith("/screener") },
-  { label: "Portfolio",   href: "/investor/portfolio",   icon: BarChart2, isActive: (p: string) => p.startsWith("/investor/portfolio") },
+  { label: "Diary",       href: "/diary",                icon: BarChart2, isActive: (p: string) => p.startsWith("/diary") },
   { label: "Settings",    href: "/settings",             icon: Settings,  isActive: (p: string) => p.startsWith("/settings") },
   { label: "HTML Skills", href: "/admin/html-skills",    icon: Code2,     isActive: (p: string) => p.startsWith("/admin/html-skills") },
   { label: "Coverage",   href: "/admin/coverage",       icon: Activity,  isActive: (p: string) => p.startsWith("/admin/coverage") },

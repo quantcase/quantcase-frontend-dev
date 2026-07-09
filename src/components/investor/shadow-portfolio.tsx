@@ -69,7 +69,7 @@ export function ShadowPortfolio({ count, stocks, loading, empty }: ShadowPortfol
           <LimeCountPip count={loading ? "…" : count} />
         </div>
         <Link
-          href="/investor/portfolio"
+          href="/diary"
           style={{
             fontFamily: "var(--qc-font-mono)",
             fontSize: "var(--qc-fz-11)",
@@ -128,7 +128,7 @@ export function ShadowPortfolio({ count, stocks, loading, empty }: ShadowPortfol
             <div>
               {stocks.map((s, i) => (
                 <Link
-                  key={s.symbol}
+                  key={`${s.symbol}-${i}`}
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"

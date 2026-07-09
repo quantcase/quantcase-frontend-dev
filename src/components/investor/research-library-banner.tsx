@@ -5,15 +5,17 @@ import Link from "next/link";
 interface ResearchLibraryBannerProps {
   newIcNotes: number;
   catalystsNext30Days: number;
-  subtitle: string;
+  subtitle?: string;
   href: string;
   onOpenJournal?: () => void;
 }
 
+const DEFAULT_SUBTITLE = "DRHP verdicts, management commentary & thesis updates";
+
 export function ResearchLibraryBanner({
   newIcNotes,
   catalystsNext30Days,
-  subtitle,
+  subtitle = DEFAULT_SUBTITLE,
   href,
   onOpenJournal,
 }: ResearchLibraryBannerProps) {

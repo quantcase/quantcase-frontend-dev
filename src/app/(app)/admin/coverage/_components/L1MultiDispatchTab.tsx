@@ -7,6 +7,8 @@ import { BACKEND_URL } from "@/lib/constants";
 import { CheckboxField } from "@/components/molecules/checkbox-field";
 import { CompanySourcePicker } from "./CompanySourcePicker";
 import { KpiCleanupModal } from "./KpiCleanupModal";
+import { TruncatedChunksModal } from "./TruncatedChunksModal";
+import { SignalBrowserModal } from "./SignalBrowserModal";
 import {
   TickerSource,
   L1DispatchOptions,
@@ -272,6 +274,8 @@ function RunHistoryRow({ run }: { run: L1Run }) {
 
 export function L1MultiDispatchTab() {
   const [showKpiCleanup, setShowKpiCleanup] = useState(false);
+  const [showTruncatedChunks, setShowTruncatedChunks] = useState(false);
+  const [showSignalBrowser, setShowSignalBrowser] = useState(false);
 
   // Picker options
   const [defaultTickers, setDefaultTickers] = useState<string[]>([]);
@@ -437,12 +441,26 @@ export function L1MultiDispatchTab() {
             free to repeat; Run dispatches real, billable jobs. See Help (top right) for the full flow.
           </p>
         </div>
-        <button
-          onClick={() => setShowKpiCleanup(true)}
-          className="shrink-0 rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-[12px] font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors"
-        >
-          KPI Cleanup
-        </button>
+        <div className="flex items-start gap-2 shrink-0">
+          <button
+            onClick={() => setShowSignalBrowser(true)}
+            className="rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-[12px] font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors"
+          >
+            Signal Browser
+          </button>
+          <button
+            onClick={() => setShowTruncatedChunks(true)}
+            className="rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-[12px] font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors"
+          >
+            Truncated Chunks
+          </button>
+          <button
+            onClick={() => setShowKpiCleanup(true)}
+            className="rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-[12px] font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors"
+          >
+            KPI Cleanup
+          </button>
+        </div>
       </div>
 
       {optionsError && !optionsLoading && (
@@ -675,6 +693,8 @@ export function L1MultiDispatchTab() {
       </div>
 
       {showKpiCleanup && <KpiCleanupModal onClose={() => setShowKpiCleanup(false)} />}
+      {showTruncatedChunks && <TruncatedChunksModal onClose={() => setShowTruncatedChunks(false)} />}
+      {showSignalBrowser && <SignalBrowserModal onClose={() => setShowSignalBrowser(false)} />}
     </div>
   );
 }

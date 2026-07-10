@@ -19,13 +19,19 @@ function Divider() {
 
 // ─── Card 1 · Indian Stocks — Management Score with animated gauge ─────────────
 
+// Math.cos/Math.sin aren't guaranteed bit-identical across JS engines, so raw trig output can
+// differ by a ULP or two between server and client — round so SSR/CSR markup matches exactly.
+function round(n: number): number {
+  return Math.round(n * 1000) / 1000;
+}
+
 function GaugeTick({ filled, angle }: { filled: boolean; angle: number }) {
   const r = 52;
   const rad = (angle * Math.PI) / 180;
-  const x1 = 64 + (r - 8) * Math.cos(rad);
-  const y1 = 64 + (r - 8) * Math.sin(rad);
-  const x2 = 64 + r * Math.cos(rad);
-  const y2 = 64 + r * Math.sin(rad);
+  const x1 = round(64 + (r - 8) * Math.cos(rad));
+  const y1 = round(64 + (r - 8) * Math.sin(rad));
+  const x2 = round(64 + r * Math.cos(rad));
+  const y2 = round(64 + r * Math.sin(rad));
   return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={filled ? "#a5b4fc" : "rgba(255,255,255,0.10)"} strokeWidth="2.5" strokeLinecap="round" />;
 }
 

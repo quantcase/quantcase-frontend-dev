@@ -41,7 +41,7 @@ export function TickerSearch({ value, onChange, options, favorites }: TickerSear
   const filterFn = (o: TickerOption) => {
     if (!query.trim()) return true;
     const q = query.toLowerCase();
-    return o.symbol.toLowerCase().includes(q) || o.name.toLowerCase().includes(q);
+    return o.symbol.toLowerCase().includes(q) || (o.name ?? "").toLowerCase().includes(q);
   };
 
   const filteredFavorites = favoriteOptions.filter(filterFn);

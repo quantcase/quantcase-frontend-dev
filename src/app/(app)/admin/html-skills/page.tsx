@@ -132,7 +132,7 @@ function HtmlSkillsPage() {
       .then(async (res) => {
         const json: StocksApiResponse = await res.json();
         setTickerOptions(
-          (json.data ?? []).map((s) => ({ symbol: s.company, name: s.company_name }))
+          (json.data ?? []).map((s) => ({ symbol: s.company, name: s.company_name || s.company }))
         );
       })
       .catch(() => {});

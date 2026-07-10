@@ -333,3 +333,79 @@ export interface KpiPhase6Result {
   /** Only present on the /run response, once deletes actually happened. */
   deletedCount?: number;
 }
+
+// ── Truncated chunk jobs — split & retry ─────────────────────────────────────
+
+export type PipelineJobQueue = "summarization_v2" | "summarization_v2_ppt" | "summarization_v2_annual_report";
+
+export interface TruncatedJob {
+  queue: PipelineJobQueue;
+  id: string;
+  docId: string;
+  url: string;
+  pageStart: number;
+  pageEnd: number;
+  pages: string;
+  lineageId: string;
+  chunkIndex: number;
+  totalChunks: number;
+  attemptsMade: number;
+  failedReason: string;
+  finishedOn: string;
+}
+
+export interface TruncatedJobsResponse {
+  count: number;
+  jobs: TruncatedJob[];
+}
+
+export interface SplitRetryNewJob {
+  id: string;
+  pages: string;
+  chunkIndex: string;
+}
+
+export interface SplitRetryResult {
+  queue: PipelineJobQueue;
+  originalJobId: string;
+  originalRange: string;
+  /** Absent when success is false. */
+  newJobs?: SplitRetryNewJob[];
+  success: boolean;
+  /** Set when success is false — e.g. already at the 1-page floor, or the job raced out from under the request. */
+  error?: string;
+}
+
+export interface SplitRetryResponse {
+  processed: number;
+  succeeded: number;
+  failed: number;
+  results: SplitRetryResult[];
+}
+
+// ── Pipeline signal browser ──────────────────────────────────────────────────
+
+export type SignalSourceDocType = "transcript" | "ppt" | "annual_report";
+
+export interface PipelineSignal {
+  id: string;
+  callId: string;
+  ticker: string;
+  company: string;
+  fiscalYear: string;
+  quarter: string;
+  sourceDocType: SignalSourceDocType;
+  signalType: string;
+  lineageId: string;
+  sourceHash: string;
+  isInvalidated: boolean;
+  createdAt: string;
+  extractorModel: string;
+  promptV: string;
+}
+
+export interface PipelineSignalsResponse {
+  total: number;
+  size: number;
+  signals: PipelineSignal[];
+}

@@ -49,7 +49,10 @@ export function UploadPdfModal({ prefill, onClose }: Props) {
 
   function handleFileChange(f: File | null) {
     if (!f) { setFile(null); setFileError(null); return; }
-    if (f.type !== "application/pdf") { setFile(null); setFileError("File must be a PDF."); return; }
+    // Some browsers/OSes report an empty or generic MIME type for local files (e.g. cloud-synced
+    // drives), so fall back to the extension rather than rejecting a valid PDF outright.
+    const looksLikePdf = f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf");
+    if (!looksLikePdf) { setFile(null); setFileError("File must be a PDF."); return; }
     if (f.size > MAX_FILE_BYTES) { setFile(null); setFileError("File exceeds the 75MB limit."); return; }
     setFile(f);
     setFileError(null);
@@ -156,7 +159,7 @@ export function UploadPdfModal({ prefill, onClose }: Props) {
                   type="file"
                   accept="application/pdf"
                   onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
-                  className="block w-full text-[12px] text-[#888888]"
+                  className="block w-full text-[12px] text-[#888888] cursor-pointer file:cursor-pointer file:mr-3 file:rounded-md file:border file:border-[#E2E2E2] file:bg-white file:px-3 file:py-1.5 file:text-[12px] file:font-medium file:text-[#0F172B] hover:file:border-[#0F172B] file:transition-colors"
                 />
                 {fileError && <p className="text-[11px] text-red-600 mt-1">{fileError}</p>}
                 {file && !fileError && (

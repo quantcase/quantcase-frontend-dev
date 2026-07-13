@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { BookmarkPlus, StickyNote, PenLine, Check, Trash2, Pencil, X, Loader2, Search, ShoppingCart } from "lucide-react";
+import { BookmarkPlus, StickyNote, PenLine, Check, Trash2, Pencil, X, Loader2, Search } from "lucide-react";
 import { useShadowPortfolio } from "@/hooks/useShadowPortfolio";
 import { apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { ConnectPortfolioModal } from "@/components/investor/connect-portfolio-modal";
 import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
 import { PlaceOrderModal } from "@/components/investor/place-order-modal";
-import { useSmallcaseHoldings } from "@/hooks/useSmallcaseHoldings";
+import { useUser } from "@/components/providers/UserContext";
 import type { HoldingNote } from "@/types/investor-portfolio";
 import type { StocksApiResponse } from "@/types/screener";
 
@@ -440,9 +440,9 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showCsvUpload, setShowCsvUpload] = useState(false);
 
-  // Broker connection state drives whether "Buy" places an order or connects first.
-  const { data: smallcaseData, notConnected: brokerNotConnected, refetch: refetchSmallcase } = useSmallcaseHoldings();
-  const brokerConnected = !brokerNotConnected && !!smallcaseData?.portfolio;
+  // Broker connection state from /auth/me drives whether "Buy" places an order or connects first.
+  const { smallcase } = useUser();
+  const brokerConnected = smallcase?.is_connected ?? false;
 
   function handleBuyClick() {
     if (brokerConnected) setShowOrderModal(true);
@@ -688,7 +688,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
           }}
           className="px-3 py-2 sm:px-4 sm:py-[7px]"
         >
-          <ShoppingCart size={13} />
+          <span style={{ fontSize: 13, lineHeight: 1, fontWeight: "var(--qc-w-semi)" }}>₹</span>
           <span className="hidden sm:inline">Buy</span>
         </button>
 
@@ -817,7 +817,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
         open={showBuyModal}
         onClose={() => setShowBuyModal(false)}
         onOpenCsvUpload={() => setShowCsvUpload(true)}
-        onConnected={() => { setShowBuyModal(false); refetchSmallcase(); setShowOrderModal(true); }}
+        onConnected={() => { setShowBuyModal(false); setShowOrderModal(true); }}
       />
       {/* Buy → place order (shown when a broker is connected) */}
       <PlaceOrderModal

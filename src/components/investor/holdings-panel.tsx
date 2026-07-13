@@ -221,7 +221,7 @@ export function HoldingsPanel({
       {/* ── Header ───────────────────────────────────────────────────── */}
       <div
         style={{
-          padding: "12px 18px 10px",
+          padding: "24px 24px 10px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start",

@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Briefcase, TrendingUp, Settings, Shield, LogOut, BarChart2, Code2, Activity } from "lucide-react";
+import { Home, Briefcase, TrendingUp, Settings, Shield, LogOut, BarChart2, Code2, Activity, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TooltipProvider,
@@ -20,8 +20,9 @@ const managerNavItems = [
   { label: "Models",   href: "/model-builder",      icon: TrendingUp, isActive: (p: string) => p === "/model-builder" || p.startsWith("/model-builder/") || p === "/model-analytics" },
   { label: "Settings", href: "/settings",           icon: Settings,   isActive: (p: string) => p.startsWith("/settings") },
   { label: "HTML Skills", href: "/admin/html-skills",  icon: Code2,    isActive: (p: string) => p.startsWith("/admin/html-skills") },
+  { label: "Post-HTML Skills", href: "/admin/post-html-skills", icon: Sparkles, isActive: (p: string) => p.startsWith("/admin/post-html-skills") },
   { label: "Coverage",   href: "/admin/coverage",     icon: Activity, isActive: (p: string) => p.startsWith("/admin/coverage") },
-  { label: "Admin",      href: "/admin/pipelines",    icon: Shield,   isActive: (p: string) => p.startsWith("/admin") && !p.startsWith("/admin/html-skills") && !p.startsWith("/admin/coverage") },
+  { label: "Admin",      href: "/admin/pipelines",    icon: Shield,   isActive: (p: string) => p.startsWith("/admin") && !p.startsWith("/admin/html-skills") && !p.startsWith("/admin/post-html-skills") && !p.startsWith("/admin/coverage") },
 ];
 
 const investorNavItems = [
@@ -29,6 +30,7 @@ const investorNavItems = [
   { label: "Diary",       href: "/diary",                icon: BarChart2, isActive: (p: string) => p.startsWith("/diary") },
   { label: "Settings",    href: "/settings",             icon: Settings,  isActive: (p: string) => p.startsWith("/settings") },
   { label: "HTML Skills", href: "/admin/html-skills",    icon: Code2,     isActive: (p: string) => p.startsWith("/admin/html-skills") },
+  { label: "Post-HTML Skills", href: "/admin/post-html-skills", icon: Sparkles, isActive: (p: string) => p.startsWith("/admin/post-html-skills") },
   { label: "Coverage",   href: "/admin/coverage",       icon: Activity,  isActive: (p: string) => p.startsWith("/admin/coverage") },
 ];
 

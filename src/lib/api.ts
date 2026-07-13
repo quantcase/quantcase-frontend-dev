@@ -170,6 +170,28 @@ export function rawPost<T>(url: string, callbacks: ApiCallbacks<T>, body?: unkno
     .finally(() => onComplete?.());
 }
 
+/**
+ * PUT without success/data envelope validation — for endpoints that return raw JSON
+ */
+export function rawPut<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknown): void {
+  const { onStart, onSuccess, onError, onComplete } = callbacks;
+
+  onStart?.();
+
+  fetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+      return res.json();
+    })
+    .then((data: T) => onSuccess(data))
+    .catch((err) => onError(err.message || 'Failed to complete request'))
+    .finally(() => onComplete?.());
+}
+
 interface DownloadCallbacks {
   onStart?: () => void;
   onError: (error: string) => void;

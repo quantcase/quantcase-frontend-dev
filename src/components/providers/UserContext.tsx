@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import type { Subscription, MeResponse } from "@/types/auth";
+import type { Subscription, MeResponse, SmallcaseConnection } from "@/types/auth";
 
 export type AccountType = "manager" | "investor" | null;
 
@@ -14,6 +14,8 @@ interface UserContextValue {
   onboardingCompleted: boolean;
   onboardingStep: number;
   isAccessBlocked: boolean;
+  /** Broker/smallcase connection state from /auth/me. null until fetched. */
+  smallcase: SmallcaseConnection | null;
   setFromMe: (data: MeResponse) => void;
   paywallOpen: boolean;
   openPaywall: () => void;
@@ -29,6 +31,7 @@ const UserContext = createContext<UserContextValue>({
   onboardingCompleted: true,
   onboardingStep: 0,
   isAccessBlocked: false,
+  smallcase: null,
   setFromMe: () => {},
   paywallOpen: false,
   openPaywall: () => {},
@@ -67,6 +70,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return null;
   });
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [smallcase, setSmallcase] = useState<SmallcaseConnection | null>(null);
 
   const isAccessBlocked = subscription?.is_access_blocked ?? false;
 
@@ -99,6 +103,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setEmail(mail);
     if (mail) localStorage.setItem("qc_email", mail);
     else localStorage.removeItem("qc_email");
+
+    setSmallcase(data.smallcase ?? null);
   }, []);
 
   return (
@@ -111,6 +117,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       onboardingCompleted,
       onboardingStep,
       isAccessBlocked,
+      smallcase,
       setFromMe,
       paywallOpen,
       openPaywall,

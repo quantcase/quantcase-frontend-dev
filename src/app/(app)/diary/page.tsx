@@ -16,6 +16,8 @@ import { useJournalEntries } from "@/hooks/useJournalEntries";
 import { useJournalPending } from "@/hooks/useJournalPending";
 import { useUserPortfolio } from "@/hooks/useUserPortfolio";
 import { useSmallcaseHoldings } from "@/hooks/useSmallcaseHoldings";
+import { useUser } from "@/components/providers/UserContext";
+import { brokerLabel } from "@/lib/portfolio-format";
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
@@ -28,7 +30,8 @@ export default function DiaryPage() {
   const { data: journalData, loading: journalLoading, refetch: refetchJournal } = useJournalEntries();
   const { data: pendingData, loading: pendingLoading, refetch: refetchPending } = useJournalPending();
   const { data: userPortfolio, loading: portfolioLoading, refetch: refetchUserPortfolio } = useUserPortfolio();
-  const { data: smallcaseData, notConnected: brokerNotConnected, refetch: refetchSmallcase } = useSmallcaseHoldings();
+  const { data: smallcaseData, syncing: smallcaseSyncing, refetch: refetchSmallcase, sync: syncSmallcase } = useSmallcaseHoldings();
+  const { smallcase } = useUser();
 
   const entries = useMemo(() => journalData?.entries ?? [], [journalData]);
   const summary = journalData?.summary ?? { intact: 0, partial: 0, broken: 0, none: 0, total: 0, entryCount: 0, streakDays: 0 };
@@ -73,10 +76,17 @@ export default function DiaryPage() {
   const featured = pendingHoldings[0] ?? null;
   const toGo = pendingData?.pending ?? waiting;
 
-  // ── Everything you own — broker holdings if connected, else uploaded portfolio ──
-  const brokerConnected = !brokerNotConnected && !!smallcaseData?.portfolio;
+  // ── Everything you own ──
+  // Connection is authoritative from /auth/me — a broker can be linked with zero
+  // synced holdings (holdings_count: 0), so we must not infer it from holdings.
+  const brokerConnected = smallcase?.is_connected ?? false;
+  const connectedBrokerLabel = brokerLabel(smallcase?.broker);
+
+  // Prefer live broker holdings when the smallcase feed has them; otherwise fall
+  // back to the uploaded CSV portfolio.
+  const hasSmallcaseHoldings = (smallcaseData?.holdings?.length ?? 0) > 0;
   const ownedHoldings: DiaryHolding[] = useMemo(() => {
-    if (brokerConnected) {
+    if (hasSmallcaseHoldings) {
       return (smallcaseData?.holdings ?? []).map(h => ({
         ticker: h.ticker,
         name: null,
@@ -92,9 +102,9 @@ export default function DiaryPage() {
       qty: h.quantity ?? null,
       broker: h.broker,
     }));
-  }, [brokerConnected, smallcaseData, userPortfolio]);
+  }, [hasSmallcaseHoldings, smallcaseData, userPortfolio]);
 
-  const ownedLoading = brokerConnected ? false : portfolioLoading;
+  const ownedLoading = hasSmallcaseHoldings ? false : portfolioLoading;
 
   // ── Handlers ──
   function openJournalModal(symbol?: string) {
@@ -171,8 +181,12 @@ export default function DiaryPage() {
             <HoldingsList
               holdings={ownedHoldings}
               loading={ownedLoading}
+              brokerConnected={brokerConnected}
+              brokerLabel={connectedBrokerLabel}
+              syncing={smallcaseSyncing}
               onConnectBroker={() => setConnectModalOpen(true)}
               onUploadCsv={() => setUploadModalOpen(true)}
+              onSync={syncSmallcase}
             />
           </div>
 

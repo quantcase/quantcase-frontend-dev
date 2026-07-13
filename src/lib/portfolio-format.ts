@@ -14,6 +14,26 @@ export function fmtLakhs(n: number) {
   return `₹${fmt(n)}`;
 }
 
+// Broker slug → display label, e.g. "kite" → "Zerodha" (Kite is Zerodha's platform).
+// Unknown slugs fall back to a capitalized version of the slug.
+const BROKER_LABELS: Record<string, string> = {
+  kite: "Zerodha",
+  zerodha: "Zerodha",
+  groww: "Groww",
+  angelone: "Angel One",
+  angel_one: "Angel One",
+  upstox: "Upstox",
+  hdfc: "HDFC Sec",
+  kotak: "Kotak Sec",
+  "5paisa": "5paisa",
+  axisdirect: "AxisDirect",
+};
+
+export function brokerLabel(slug: string | null | undefined): string {
+  if (!slug) return "Broker";
+  return BROKER_LABELS[slug.toLowerCase()] ?? slug.charAt(0).toUpperCase() + slug.slice(1);
+}
+
 export const PILLAR_COLOR: Record<Pillar, string> = {
   mgmt: "var(--qc-up)",
   opp:  "var(--qc-blue)",

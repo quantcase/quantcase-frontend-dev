@@ -12,6 +12,7 @@ import {
   Cell,
 } from "recharts";
 import { formatINR } from "@/lib/utils";
+import { MonoLabel } from "@/components/ds";
 import type { AllocationSegment, ValueTrendPoint } from "@/types/investor-dashboard";
 
 // Design-system allocation palette — assigned by segment order (backend sends no colors).
@@ -32,8 +33,6 @@ interface Segment {
 interface HoldingsPanelProps {
   stockCount: number;
   fundCount: number;
-  /** Human-friendly relative time, e.g. "2 min ago". Falls back to a dash when unknown. */
-  syncedAgo: string;
   /** Current market value, ₹ (raw number). */
   equityValue: number;
   /** Total cost basis, ₹ (raw number). */
@@ -49,6 +48,10 @@ interface HoldingsPanelProps {
   /** true when figures are approximated (first-party CSV portfolio, no share qty). */
   approximate?: boolean;
   isShadow?: boolean;
+  /** True when a broker/smallcase account is linked. Shows a synced pill instead of the connect CTA. */
+  brokerConnected?: boolean;
+  /** Display name of the connected broker, e.g. "Zerodha". */
+  brokerLabel?: string;
   onUploadPortfolio?: () => void;
 }
 
@@ -157,7 +160,6 @@ function AllocationDonut({
 export function HoldingsPanel({
   stockCount,
   fundCount,
-  syncedAgo,
   equityValue,
   investedValue,
   todayChangeValue,
@@ -169,6 +171,8 @@ export function HoldingsPanel({
   industrySegments,
   approximate,
   isShadow,
+  brokerConnected,
+  brokerLabel,
   onUploadPortfolio,
 }: HoldingsPanelProps) {
   const [activeTab, setActiveTab] = useState<"cap" | "industry">("cap");
@@ -217,41 +221,18 @@ export function HoldingsPanel({
       {/* ── Header ───────────────────────────────────────────────────── */}
       <div
         style={{
-          padding: "12px 18px 10px",
-          borderBottom: "1px solid var(--qc-hair)",
+          padding: "24px 24px 10px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start",
         }}
       >
-        <div>
-          <div
-            style={{
-              fontSize: "var(--qc-fz-10)",
-              fontWeight: "var(--qc-w-semi)",
-              fontFamily: "var(--qc-font-sans)",
-              color: "var(--qc-ink-3)",
-              letterSpacing: "var(--qc-track-eyebrow-l)",
-              textTransform: "uppercase",
-              marginBottom: 3,
-            }}
-          >
-            {isShadow ? "SHADOW HOLDINGS" : "YOUR HOLDINGS"}
-          </div>
-          <div
-            style={{
-              fontSize: "var(--qc-fz-12)",
-              fontFamily: "var(--qc-font-sans)",
-              color: "var(--qc-ink-3)",
-            }}
-          >
-            {stockCount} stocks
-            {fundCount > 0 && ` · ${fundCount} mutual funds`}
-            {syncedAgo && ` · synced ${syncedAgo}`}
-          </div>
-        </div>
+        <MonoLabel size={10} tracking="0.14em" color="var(--qc-ink-3)">
+          {isShadow ? "Trackers" : "Your Holdings"} · {stockCount} stocks
+          {fundCount > 0 && ` · ${fundCount} mutual funds`}
+        </MonoLabel>
 
-        {isShadow ? (
+        {isShadow && !brokerConnected ? (
           onUploadPortfolio && (
             <button
               onClick={onUploadPortfolio}
@@ -289,6 +270,8 @@ export function HoldingsPanel({
             </button>
           )
         ) : (
+          // Broker-linked (shadow view with a connected smallcase account) or a
+          // native demat-linked portfolio — both surface a green synced pill.
           <span
             style={{
               display: "inline-flex",
@@ -302,6 +285,7 @@ export function HoldingsPanel({
               border: "1px solid rgba(31,122,74,0.20)",
               borderRadius: 20,
               padding: "3px 10px",
+              whiteSpace: "nowrap",
             }}
           >
             <span
@@ -313,7 +297,7 @@ export function HoldingsPanel({
                 display: "inline-block",
               }}
             />
-            Demat-linked
+            {isShadow ? `${brokerLabel ?? "Broker"} connected` : "Demat-linked"}
           </span>
         )}
       </div>

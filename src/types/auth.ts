@@ -5,6 +5,16 @@ export interface Subscription {
   is_access_blocked: boolean;
 }
 
+/** Broker/smallcase connection state, returned inline on /api/auth/me. */
+export interface SmallcaseConnection {
+  is_connected: boolean;
+  /** Broker slug, e.g. "kite", "groww". null when not connected. */
+  broker: string | null;
+  /** ISO timestamp of the last successful holdings sync. */
+  last_synced_at: string | null;
+  holdings_count: number;
+}
+
 export interface MeResponse {
   id?: string;
   email?: string | null;
@@ -15,6 +25,7 @@ export interface MeResponse {
   onboarding_completed: boolean;
   onboarding_step: number;
   subscription: Subscription | null;
+  smallcase?: SmallcaseConnection | null;
 }
 
 export interface BillingPrice {

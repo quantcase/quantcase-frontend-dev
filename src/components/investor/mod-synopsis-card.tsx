@@ -18,6 +18,10 @@ interface MODSynopsisCardProps {
   draggingLabel?: string;
   onOpenBreakdown?: () => void;
   isShadow?: boolean;
+  /** True when a broker/smallcase account is linked. Shows a synced pill instead of the connect CTA. */
+  brokerConnected?: boolean;
+  /** Display name of the connected broker, e.g. "Zerodha". */
+  brokerLabel?: string;
   onUploadPortfolio?: () => void;
 }
 
@@ -69,7 +73,7 @@ function ScoreTile({ label, score, rating }: SubScore) {
   );
 }
 
-export function MODSynopsisCard({ headline, subScores, draggingSymbols, draggingLabel = "Deal", onOpenBreakdown, isShadow, onUploadPortfolio }: MODSynopsisCardProps) {
+export function MODSynopsisCard({ headline, subScores, draggingSymbols, draggingLabel = "Deal", onOpenBreakdown, isShadow, brokerConnected, brokerLabel, onUploadPortfolio }: MODSynopsisCardProps) {
   return (
     <CardShell radius={14} style={{ padding: "24px 24px 20px", display: "flex", flexDirection: "column", gap: 16, height: "100%" }}>
 
@@ -78,26 +82,42 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, dragging
         <MonoLabel size={10} tracking="0.14em" color="var(--qc-ink-3)">
           {isShadow ? "Trackers · MOD Synopsis" : "Your Portfolio · MOD Synopsis"}
         </MonoLabel>
-        {isShadow && onUploadPortfolio && (
-          <button
-            onClick={onUploadPortfolio}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-on-dark)",
-              fontFamily: "var(--qc-font-sans)",
-              background: "var(--qc-ink)", border: "none",
-              borderRadius: 6, padding: "4px 10px",
-              cursor: "pointer", whiteSpace: "nowrap",
-              letterSpacing: "var(--qc-track-pill)",
-            }}
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            Connect your portfolio
-          </button>
+        {isShadow && (
+          brokerConnected ? (
+            <span
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)",
+                fontFamily: "var(--qc-font-sans)",
+                color: "var(--qc-up)", background: "var(--qc-up-soft)",
+                border: "1px solid rgba(31,122,74,0.20)",
+                borderRadius: 20, padding: "3px 10px", whiteSpace: "nowrap",
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--qc-up)", display: "inline-block" }} />
+              {brokerLabel ?? "Broker"} connected
+            </span>
+          ) : onUploadPortfolio && (
+            <button
+              onClick={onUploadPortfolio}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-medium)", color: "var(--qc-on-dark)",
+                fontFamily: "var(--qc-font-sans)",
+                background: "var(--qc-ink)", border: "none",
+                borderRadius: 6, padding: "4px 10px",
+                cursor: "pointer", whiteSpace: "nowrap",
+                letterSpacing: "var(--qc-track-pill)",
+              }}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Connect your portfolio
+            </button>
+          )
         )}
       </div>
 

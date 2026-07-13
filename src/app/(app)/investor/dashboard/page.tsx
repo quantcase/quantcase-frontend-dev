@@ -12,6 +12,7 @@ import { ConnectPortfolioModal } from "@/components/investor/connect-portfolio-m
 import { HeaderStockSearch } from "@/components/investor/header-stock-search";
 import { useUserPortfolio } from "@/hooks/useUserPortfolio";
 import { useUser } from "@/components/providers/UserContext";
+import { brokerLabel } from "@/lib/portfolio-format";
 import { useModSynopsis } from "@/hooks/useModSynopsis";
 import { usePortfolioSummary } from "@/hooks/usePortfolioSummary";
 import { useWhatsMoving } from "@/hooks/useWhatsMoving";
@@ -65,21 +66,6 @@ function buildModHeadline(overall: number, subs: ModSubScore[], weakest: ModPill
   return `Your book scores ${gold(`${overall}/100`)} — ${strongText}, ${weakText}`;
 }
 
-// Relative "synced" label from an ISO timestamp, e.g. "2 min ago". Empty when unknown.
-function timeAgo(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return "";
-  const secs = Math.max(0, Math.floor((Date.now() - then) / 1000));
-  if (secs < 60) return "just now";
-  const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins} min ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs} hr ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days} day${days === 1 ? "" : "s"} ago`;
-}
-
 // Format a market index value, e.g. 24318 → "24,318"
 function fmtIndex(v: number): string {
   return v.toLocaleString("en-IN");
@@ -95,7 +81,7 @@ function fmtIndexPct(pct: number): string {
 export default function InvestorDashboardPage() {
   const greeting = getGreeting();
   const todayMeta = getTodayMeta();
-  const { displayName } = useUser();
+  const { displayName, smallcase } = useUser();
   const firstName = displayName?.trim().split(/\s+/)[0] ?? "";
   const [modDrawerOpen, setModDrawerOpen] = useState(false);
   const [connectModalOpen, setConnectModalOpen] = useState(false);
@@ -115,6 +101,12 @@ export default function InvestorDashboardPage() {
   const userStockCount = userHoldings.length;
   const isUserPortfolioMissing = !portfolioLoading && (!userPortfolio || userHoldings.length === 0);
 
+  // Broker connection state from /auth/me. When connected, the cards show a synced
+  // status pill instead of a "Connect your portfolio" CTA — even if holdings haven't
+  // synced yet (holdings_count can be 0 right after linking).
+  const brokerConnected = smallcase?.is_connected ?? false;
+  const connectedBrokerLabel = brokerLabel(smallcase?.broker);
+
   // ── MOD synopsis (portfolio-level) ──────────────────────────────────────────
   const modSubScores = modSynopsis ? toCardSubScores(modSynopsis.sub_scores) : [];
   const modHeadline = modSynopsis
@@ -128,9 +120,6 @@ export default function InvestorDashboardPage() {
     opportunity: row.opportunity,
     deal: row.deal,
   }));
-
-  // ── Holdings summary ────────────────────────────────────────────────────────
-  const syncedAgoLabel = timeAgo(summary?.synced_at);
 
   // ── Whats-moving & discover ─────────────────────────────────────────────────
   const movingItems = whatsMoving?.items ?? [];
@@ -225,13 +214,14 @@ export default function InvestorDashboardPage() {
             draggingLabel={modSynopsis?.weakest_pillar ? pillarLabel(modSynopsis.weakest_pillar) : undefined}
             onOpenBreakdown={() => setModDrawerOpen(true)}
             isShadow={isUserPortfolioMissing}
+            brokerConnected={brokerConnected}
+            brokerLabel={connectedBrokerLabel}
             onUploadPortfolio={() => setConnectModalOpen(true)}
           />
 
           <HoldingsPanel
             stockCount={summary?.stock_count ?? userStockCount}
             fundCount={summary?.fund_count ?? 0}
-            syncedAgo={syncedAgoLabel}
             equityValue={summary?.equity_value ?? 0}
             investedValue={summary?.invested_value ?? 0}
             todayChangeValue={summary?.today_change_value ?? null}
@@ -243,6 +233,8 @@ export default function InvestorDashboardPage() {
             industrySegments={summary?.industry_segments ?? []}
             approximate={summary?.source === "firstparty"}
             isShadow={isUserPortfolioMissing}
+            brokerConnected={brokerConnected}
+            brokerLabel={connectedBrokerLabel}
             onUploadPortfolio={() => setConnectModalOpen(true)}
           />
         </section>

@@ -1,8 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import { Wallet, Link2, FileUp } from "lucide-react";
+import { Wallet, Link2, FileUp, RefreshCw } from "lucide-react";
 import { fmtLakhs } from "@/lib/portfolio-format";
+
+// Small "● Zerodha connected" status pill, reused in the header and connected empty state.
+function ConnectedPill({ brokerLabel }: { brokerLabel?: string }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 6,
+        fontSize: 12, fontWeight: 500, color: "var(--qc-up)",
+        background: "var(--qc-up-soft)", border: "1px solid rgba(31,122,74,0.20)",
+        borderRadius: 999, padding: "3px 10px", whiteSpace: "nowrap",
+      }}
+    >
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--qc-up)" }} />
+      {brokerLabel ?? "Broker"} connected
+    </span>
+  );
+}
+
+// "Sync Holdings" pill button — re-fetches holdings from the broker via the backend.
+function SyncButton({ syncing, onSync }: { syncing?: boolean; onSync?: () => void }) {
+  return (
+    <button
+      onClick={onSync}
+      disabled={syncing}
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 7,
+        fontSize: 12, fontWeight: 500, color: "var(--qc-ink-2)",
+        background: "var(--qc-card)", border: "1px solid var(--qc-hair)",
+        padding: "8px 14px", borderRadius: 999,
+        cursor: syncing ? "default" : "pointer", opacity: syncing ? 0.6 : 1,
+        transition: "border-color 0.15s, box-shadow 0.15s",
+      }}
+    >
+      <RefreshCw size={14} strokeWidth={1.75} style={{ color: "var(--qc-ink-3)", animation: syncing ? "qc-spin 0.8s linear infinite" : undefined }} />
+      <style>{`@keyframes qc-spin { to { transform: rotate(360deg); } }`}</style>
+      {syncing ? "Syncing…" : "Sync Holdings"}
+    </button>
+  );
+}
 
 export interface DiaryHolding {
   ticker: string;
@@ -135,17 +174,57 @@ function EmptyState({ onConnectBroker, onUploadCsv }: { onConnectBroker?: () => 
   );
 }
 
+// Empty state for a *connected* broker with no synced holdings — the user likely
+// hasn't traded, so we offer only a re-sync rather than another connect prompt.
+function ConnectedEmptyState({ brokerLabel, syncing, onSync }: { brokerLabel?: string; syncing?: boolean; onSync?: () => void }) {
+  return (
+    <div
+      style={{
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        padding: "44px 24px 40px", textAlign: "center",
+        border: "1px dashed var(--qc-hair)", borderRadius: 14, background: "var(--qc-bg)",
+      }}
+    >
+      <div style={{ marginBottom: 18 }}>
+        <ConnectedPill brokerLabel={brokerLabel} />
+      </div>
+
+      <div style={{ fontSize: 15, fontWeight: 600, color: "var(--qc-ink)" }}>
+        No active holdings in your {brokerLabel ?? "broker"} account
+      </div>
+      <div style={{ fontSize: 13, lineHeight: 1.5, color: "var(--qc-ink-3)", marginTop: 6, maxWidth: 320 }}>
+        We couldn&apos;t find any holdings to track. If you&apos;ve traded recently, re-sync to pull the latest from your broker.
+      </div>
+
+      <div style={{ marginTop: 20 }}>
+        <SyncButton syncing={syncing} onSync={onSync} />
+      </div>
+    </div>
+  );
+}
+
 // "EVERYTHING YOU OWN" — the full holdings list with a List / Chart toggle.
 export function HoldingsList({
   holdings,
   loading,
+  brokerConnected,
+  brokerLabel,
+  syncing,
   onConnectBroker,
   onUploadCsv,
+  onSync,
 }: {
   holdings: DiaryHolding[];
   loading?: boolean;
+  /** True when a broker/smallcase account is linked (from /auth/me), regardless of holdings count. */
+  brokerConnected?: boolean;
+  /** Display name of the connected broker, e.g. "Zerodha". */
+  brokerLabel?: string;
+  /** True while a broker-side re-sync is in flight. */
+  syncing?: boolean;
   onConnectBroker?: () => void;
   onUploadCsv?: () => void;
+  onSync?: () => void;
 }) {
   const [view, setView] = useState<"list" | "chart">("list");
 
@@ -171,23 +250,26 @@ export function HoldingsList({
           )}
         </div>
 
-        {/* List / Chart toggle — only meaningful with data */}
+        {/* List / Chart toggle + Sync — only meaningful with data */}
         {hasHoldings && (
-          <div style={{ display: "inline-flex", background: "var(--qc-bg)", borderRadius: 8, padding: 3, alignSelf: "flex-start" }}>
-            {(["list", "chart"] as const).map(v => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                style={{
-                  padding: "6px 16px", fontSize: 13, borderRadius: 6, border: "none", cursor: "pointer", textTransform: "capitalize",
-                  background: view === v ? "var(--qc-ink)" : "transparent",
-                  color: view === v ? "#fff" : "var(--qc-ink-2)",
-                  fontWeight: view === v ? 600 : 400,
-                }}
-              >
-                {v}
-              </button>
-            ))}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, alignSelf: "flex-start" }}>
+            {brokerConnected && <SyncButton syncing={syncing} onSync={onSync} />}
+            <div style={{ display: "inline-flex", background: "var(--qc-bg)", borderRadius: 8, padding: 3 }}>
+              {(["list", "chart"] as const).map(v => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  style={{
+                    padding: "6px 16px", fontSize: 13, borderRadius: 6, border: "none", cursor: "pointer", textTransform: "capitalize",
+                    background: view === v ? "var(--qc-ink)" : "transparent",
+                    color: view === v ? "#fff" : "var(--qc-ink-2)",
+                    fontWeight: view === v ? 600 : 400,
+                  }}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -199,7 +281,11 @@ export function HoldingsList({
           ))}
         </div>
       ) : holdings.length === 0 ? (
-        <EmptyState onConnectBroker={onConnectBroker} onUploadCsv={onUploadCsv} />
+        brokerConnected ? (
+          <ConnectedEmptyState brokerLabel={brokerLabel} syncing={syncing} onSync={onSync} />
+        ) : (
+          <EmptyState onConnectBroker={onConnectBroker} onUploadCsv={onUploadCsv} />
+        )
       ) : view === "list" ? (
         <ListView holdings={holdings} />
       ) : (

@@ -6,15 +6,17 @@ import { Layers, ArrowRight, HelpCircle, Sparkles } from "lucide-react";
 import { L1MultiDispatchTab } from "./_components/L1MultiDispatchTab";
 import { L2MultiDispatchTab } from "./_components/L2MultiDispatchTab";
 import { DailyRunsTab } from "./_components/DailyRunsTab";
+import { ProwessIngestionTab } from "./_components/ProwessIngestionTab";
 import { HelpModal } from "./_components/HelpModal";
 
-type CoverageTab = "l1" | "l2" | "l3" | "daily";
+type CoverageTab = "l1" | "l2" | "l3" | "daily" | "prowess";
 
 const TABS: { id: CoverageTab; label: string }[] = [
   { id: "l1", label: "L1" },
   { id: "l2", label: "L2" },
   { id: "l3", label: "L3" },
   { id: "daily", label: "Daily Runs" },
+  { id: "prowess", label: "Prowess Ingestion" },
 ];
 
 function L3Tab() {
@@ -111,6 +113,7 @@ export default function CoveragePage() {
       {activeTab === "l2" && <L2MultiDispatchTab />}
       {activeTab === "l3" && <L3Tab />}
       {activeTab === "daily" && <DailyRunsTab />}
+      {activeTab === "prowess" && <ProwessIngestionTab />}
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
     </div>

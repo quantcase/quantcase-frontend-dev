@@ -3,8 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { Home, Briefcase, TrendingUp, Settings, Shield, LogOut, BarChart2, Code2, Activity, Sparkles, Mail } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Home, Briefcase, TrendingUp, Settings, Shield, BarChart2, Code2, Activity, Sparkles, Mail, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TooltipProvider,
@@ -13,6 +13,7 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { useUser } from "@/components/providers/UserContext";
+import { UserMenu } from "@/components/molecules/user-menu";
 
 const managerNavItems = [
   { label: "Home",     href: "/dashboard",          icon: Home,       isActive: (p: string) => p === "/dashboard" },
@@ -23,7 +24,8 @@ const managerNavItems = [
   { label: "Post-HTML Skills", href: "/admin/post-html-skills", icon: Sparkles, isActive: (p: string) => p.startsWith("/admin/post-html-skills") },
   { label: "Coverage",   href: "/admin/coverage",     icon: Activity, isActive: (p: string) => p.startsWith("/admin/coverage") },
   { label: "Beta Invites", href: "/admin/invites",    icon: Mail,     isActive: (p: string) => p.startsWith("/admin/invites") },
-  { label: "Admin",      href: "/admin/pipelines",    icon: Shield,   isActive: (p: string) => p.startsWith("/admin") && !p.startsWith("/admin/html-skills") && !p.startsWith("/admin/post-html-skills") && !p.startsWith("/admin/coverage") && !p.startsWith("/admin/invites") },
+  { label: "Error Reports", href: "/admin/error-reports", icon: Flag, isActive: (p: string) => p.startsWith("/admin/error-reports") },
+  { label: "Admin",      href: "/admin/pipelines",    icon: Shield,   isActive: (p: string) => p.startsWith("/admin") && !p.startsWith("/admin/html-skills") && !p.startsWith("/admin/post-html-skills") && !p.startsWith("/admin/coverage") && !p.startsWith("/admin/invites") && !p.startsWith("/admin/error-reports") },
 ];
 
 const investorNavItems = [
@@ -34,19 +36,14 @@ const investorNavItems = [
   { label: "Post-HTML Skills", href: "/admin/post-html-skills", icon: Sparkles, isActive: (p: string) => p.startsWith("/admin/post-html-skills") },
   { label: "Coverage",   href: "/admin/coverage",       icon: Activity,  isActive: (p: string) => p.startsWith("/admin/coverage") },
   { label: "Beta Invites", href: "/admin/invites",      icon: Mail,      isActive: (p: string) => p.startsWith("/admin/invites") },
+  { label: "Error Reports", href: "/admin/error-reports", icon: Flag,    isActive: (p: string) => p.startsWith("/admin/error-reports") },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { accountType, subscription, openPaywall } = useUser();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => { setMounted(true); }, []);
-
-  function handleLogout() {
-    localStorage.clear();
-    router.push("/signin");
-  }
 
   if (pathname === "/signin") return null;
   const navItems = mounted && accountType === "investor" ? investorNavItems : managerNavItems;
@@ -157,28 +154,9 @@ export function AppSidebar() {
           </button>
         )}
 
-        <TooltipProvider delayDuration={300}>
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleLogout}
-                className="flex items-center justify-center rounded-[10px] transition-colors mb-1"
-                style={{ width: 40, height: 40, color: "var(--qc-ink-3)" }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "var(--qc-section)";
-                  (e.currentTarget as HTMLElement).style.color = "var(--qc-ink)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "transparent";
-                  (e.currentTarget as HTMLElement).style.color = "var(--qc-ink-3)";
-                }}
-              >
-                <LogOut size={18} strokeWidth={1.8} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Logout</TooltipContent>
-          </TooltipRoot>
-        </TooltipProvider>
+        <div className="mb-1">
+          <UserMenu />
+        </div>
       </aside>
 
       {/* Mobile: sticky bottom nav bar */}
@@ -195,19 +173,8 @@ export function AppSidebar() {
           {navItems.map(({ label, href, icon: Icon, isActive }) =>
             navIconLink(label, href, Icon, isActive(pathname), "top")
           )}
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleLogout}
-                className="flex items-center justify-center rounded-[10px] transition-colors"
-                style={{ width: 40, height: 40, color: "var(--qc-ink-3)" }}
-              >
-                <LogOut size={18} strokeWidth={1.8} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Logout</TooltipContent>
-          </TooltipRoot>
         </TooltipProvider>
+        <UserMenu placement="up" />
       </nav>
     </>
   );

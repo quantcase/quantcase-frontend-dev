@@ -93,7 +93,7 @@ export function UserMenu({ placement = "side" }: Props) {
               className="flex w-full items-center gap-2.5 px-3 py-2 text-[13px] text-[#0F172B] hover:bg-[#F5F5F5] transition-colors"
             >
               <Flag size={15} strokeWidth={1.8} className="text-[#888888]" />
-              Report Error
+              Flag Error
             </button>
 
             <div className="my-1 border-t border-[#E2E2E2]" />

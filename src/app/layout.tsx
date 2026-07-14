@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Serif, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
+import { GoogleTagManager } from "@next/third-parties/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { UserProvider } from "@/components/providers/UserContext";
+import { IntercomProvider } from "@/components/providers/IntercomProvider";
+import { CLARITY_PROJECT_ID, GTM_CONTAINER_ID, GSC_VERIFICATION } from "@/lib/constants";
 
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex-sans",
@@ -32,6 +36,9 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: "Quantcase - AI-Powered Market Research",
   description: "Quantcase - the AI-powered market research used by industry professionals",
+  verification: {
+    google: GSC_VERIFICATION,
+  },
 };
 
 function ThemeScript() {
@@ -58,10 +65,24 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
         <ThemeScript />
+        <script
+          type="text/javascript"
+          dangerouslySetInnerHTML={{
+            __html: `(function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "${CLARITY_PROJECT_ID}");`,
+          }}
+        />
       </head>
       <body className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${instrumentSerif.variable}`} style={{ fontFamily: "var(--qc-font-sans)", WebkitFontSmoothing: "antialiased" }}>
+        <GoogleTagManager gtmId={GTM_CONTAINER_ID} />
         <ThemeProvider>
-          {children}
+          <UserProvider>
+            {children}
+            <IntercomProvider />
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>

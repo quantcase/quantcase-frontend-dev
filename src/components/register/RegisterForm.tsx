@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
+import { GoogleSignInButton } from "@/components/molecules/google-signin-button";
+import type { GoogleAuthResponse, InviteValidation, RegisterPayload, RegisterResponse } from "@/types/auth";
 
 function FormField({
   id,
@@ -14,6 +17,7 @@ function FormField({
   onChange,
   placeholder,
   autoComplete,
+  disabled,
 }: {
   id: string;
   label: string;
@@ -22,6 +26,7 @@ function FormField({
   onChange: (v: string) => void;
   placeholder: string;
   autoComplete: string;
+  disabled?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -37,11 +42,21 @@ function FormField({
         required
         autoComplete={autoComplete}
         value={value}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="rounded-lg outline-none transition-all"
-        style={{ border: "1px solid #E2E2E2", padding: "11px 14px", fontSize: 14, color: "#121212", background: "#fff", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
+        style={{
+          border: "1px solid #E2E2E2",
+          padding: "11px 14px",
+          fontSize: 14,
+          color: disabled ? "#888888" : "#121212",
+          background: disabled ? "#F5F5F5" : "#fff",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+          cursor: disabled ? "not-allowed" : "text",
+        }}
         onFocus={(e) => {
+          if (disabled) return;
           e.currentTarget.style.borderColor = "#0F172B";
           e.currentTarget.style.boxShadow = "0 0 0 3px rgba(15,23,43,0.08)";
         }}
@@ -54,13 +69,119 @@ function FormField({
   );
 }
 
+function CenteredState({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="w-full max-w-[360px]">
+      <div className="mb-10 lg:hidden">
+        <Image src="/logos/logo-text-dark.png" alt="QuantCase" width={139} height={32} className="h-6 w-auto" />
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function GoogleSignInSection({
+  loading,
+  onSuccess,
+  onError,
+  error,
+}: {
+  loading: boolean;
+  onSuccess: (data: GoogleAuthResponse) => void;
+  onError: (message: string) => void;
+  error: string;
+}) {
+  return (
+    <div style={{ marginTop: 20 }}>
+      <div className="flex items-center gap-3" style={{ marginBottom: 20 }}>
+        <div style={{ flex: 1, height: 1, background: "#E2E2E2" }} />
+        <span style={{ fontSize: 11, color: "rgba(18,18,18,0.40)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+          or
+        </span>
+        <div style={{ flex: 1, height: 1, background: "#E2E2E2" }} />
+      </div>
+      <GoogleSignInButton disabled={loading} onSuccess={onSuccess} onError={onError} />
+      {error && (
+        <div className="rounded-lg px-4 py-3" style={{ background: "#fef2f2", border: "1px solid #fecaca", marginTop: 16 }}>
+          <p className="text-red-600" style={{ fontSize: 13 }}>{error}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type InviteState =
+  | { status: "loading" }
+  | { status: "missing" }
+  | { status: "invalid"; message: string }
+  | { status: "used" }
+  | { status: "expired" }
+  | { status: "valid"; email: string };
+
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams.get("invite_token") ?? "";
+
+  const [invite, setInvite] = useState<InviteState>({ status: "loading" });
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleError, setGoogleError] = useState("");
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  function handleGoogleSuccess(data: GoogleAuthResponse) {
+    setGoogleError("");
+    setGoogleLoading(true);
+    try {
+      localStorage.setItem("qc_at", data.access_token);
+      localStorage.setItem("qc_rt", data.refresh_token);
+      localStorage.setItem("qc_onboarding_completed", "false");
+      if (data.user?.accountType) localStorage.setItem("qc_account_type", data.user.accountType);
+      router.push("/onboarding");
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!inviteToken) {
+      setInvite({ status: "missing" });
+      return;
+    }
+
+    let cancelled = false;
+
+    fetch(`${BACKEND_URL}/api/invites/validate?token=${encodeURIComponent(inviteToken)}`)
+      .then(async (res) => {
+        const data = await res.json();
+        if (cancelled) return;
+
+        if (res.ok && data.success) {
+          const valid = data as InviteValidation;
+          setEmail(valid.email);
+          setInvite({ status: "valid", email: valid.email });
+          return;
+        }
+
+        if (res.status === 410) {
+          setInvite(data.error === "Invite has already been used" ? { status: "used" } : { status: "expired" });
+        } else if (res.status === 404) {
+          setInvite({ status: "invalid", message: "This invite link isn't valid." });
+        } else {
+          setInvite({ status: "invalid", message: data.error || "This invite link isn't valid." });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setInvite({ status: "invalid", message: "Unable to reach server. Please try again." });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [inviteToken]);
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -71,28 +192,38 @@ export function RegisterForm() {
       return;
     }
 
-    setLoading(true);
+    const payload: RegisterPayload = {
+      email,
+      password,
+      display_name: name || undefined,
+      invite_token: inviteToken,
+    };
 
     try {
+      setLoading(true);
       const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify(payload),
       });
-
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.detail || data?.message || data?.error || "Registration failed. Please try again.");
+        if (res.status === 403) {
+          setError("This invite was issued to a different email address.");
+        } else if (res.status === 410) {
+          setError(data.error || "This invite has already been used or has expired.");
+        } else {
+          setError(data.error || data.detail || data.message || "Registration failed. Please try again.");
+        }
         return;
       }
 
-      localStorage.setItem("qc_at", data.access_token);
-      localStorage.setItem("qc_rt", data.refresh_token);
+      const success = data as RegisterResponse;
+      localStorage.setItem("qc_at", success.access_token);
+      localStorage.setItem("qc_rt", success.refresh_token);
       localStorage.setItem("qc_onboarding_completed", "false");
-
-      const acctType: string | undefined = data?.accountType ?? data?.account_type;
-      if (acctType) localStorage.setItem("qc_account_type", acctType);
+      if (success.user?.accountType) localStorage.setItem("qc_account_type", success.user.accountType);
 
       router.push("/onboarding");
     } catch {
@@ -102,24 +233,72 @@ export function RegisterForm() {
     }
   }
 
-  return (
-    <div className="w-full max-w-[360px]">
-      {/* Mobile-only logo */}
-      <div className="mb-10 lg:hidden">
-        <Image
-          src="/logos/logo-text-dark.png"
-          alt="QuantCase"
-          width={139}
-          height={32}
-          className="h-6 w-auto"
-        />
-      </div>
+  if (invite.status === "loading") {
+    return (
+      <CenteredState>
+        <div className="flex items-center gap-2 text-[#888888]" style={{ fontSize: 14 }}>
+          <Loader2 className="size-4 animate-spin" />
+          Validating your invite…
+        </div>
+      </CenteredState>
+    );
+  }
 
+  if (invite.status !== "valid") {
+    const copy: Record<string, { title: string; body: string }> = {
+      missing: {
+        title: "Invite link required",
+        body: "QuantCase is currently invite-only. You'll need a valid invite link to create an account.",
+      },
+      invalid: {
+        title: "This invite link isn't valid.",
+        body: "Double-check the link you were sent, or request a new invite.",
+      },
+      used: {
+        title: "Already used",
+        body: "This invite has already been used to register. Sign in instead.",
+      },
+      expired: {
+        title: "Invite expired",
+        body: "This invite link has expired. Please request a new one.",
+      },
+    };
+    const { title, body } = copy[invite.status] ?? copy.invalid;
+
+    return (
+      <CenteredState>
+        <h1 style={{ fontSize: 28, fontWeight: 500, color: "#0F172B", marginBottom: 6, letterSpacing: "-0.02em" }}>
+          {title}
+        </h1>
+        <p style={{ fontSize: 14, color: "#888888", marginBottom: 24, lineHeight: 1.5 }}>{body}</p>
+        <Link
+          href="/signin"
+          className="inline-block rounded-lg transition-all"
+          style={{
+            background: "#0F172B",
+            color: "#fff",
+            fontSize: 14,
+            fontWeight: 500,
+            padding: "12px 24px",
+            letterSpacing: "0.01em",
+            textDecoration: "none",
+          }}
+        >
+          Go to sign in
+        </Link>
+
+        <GoogleSignInSection loading={googleLoading} onSuccess={handleGoogleSuccess} onError={setGoogleError} error={googleError} />
+      </CenteredState>
+    );
+  }
+
+  return (
+    <CenteredState>
       <h1 style={{ fontSize: 28, fontWeight: 500, color: "#0F172B", marginBottom: 6, letterSpacing: "-0.02em" }}>
         Create your account
       </h1>
       <p style={{ fontSize: 14, color: "#888888", marginBottom: 36, lineHeight: 1.5 }}>
-        Start your 7-day free trial. No credit card required.
+        You&apos;ve been invited to the QuantCase beta.
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -140,6 +319,7 @@ export function RegisterForm() {
           onChange={setEmail}
           placeholder="you@firm.com"
           autoComplete="email"
+          disabled
         />
         <FormField
           id="password"
@@ -178,6 +358,8 @@ export function RegisterForm() {
         </button>
       </form>
 
+      <GoogleSignInSection loading={googleLoading} onSuccess={handleGoogleSuccess} onError={setGoogleError} error={googleError} />
+
       <p style={{ fontSize: 12, color: "rgba(18,18,18,0.40)", marginTop: 24, textAlign: "center", lineHeight: 1.6 }}>
         Already have an account?{" "}
         <Link href="/signin" style={{ color: "#0F172B", fontWeight: 500, textDecoration: "none" }}>
@@ -188,6 +370,6 @@ export function RegisterForm() {
       <p style={{ fontSize: 11, color: "rgba(18,18,18,0.30)", marginTop: 12, textAlign: "center", lineHeight: 1.6 }}>
         By creating an account you agree to our Terms of Service and Privacy Policy.
       </p>
-    </div>
+    </CenteredState>
   );
 }

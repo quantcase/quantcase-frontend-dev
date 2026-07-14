@@ -76,3 +76,68 @@ export interface CouponValidation {
   final_amount?: number;
   message?: string;
 }
+
+/** GET /api/invites/validate?token= — success body (raw, not wrapped in .data) */
+export interface InviteValidation {
+  success: true;
+  email: string;
+  expiresAt: string;
+}
+
+/** POST /api/auth/register body */
+export interface RegisterPayload {
+  email?: string;
+  mobile?: string;
+  password: string;
+  display_name?: string;
+  invite_token: string;
+}
+
+/** POST /api/auth/register — success body (raw, not wrapped in .data) */
+export interface RegisterResponse {
+  access_token: string;
+  refresh_token: string;
+  user: {
+    id: string;
+    email: string;
+    accountType: "manager" | "investor";
+  };
+}
+
+/** POST /api/auth/google body */
+export interface GoogleAuthPayload {
+  id_token: string;
+}
+
+/** POST /api/auth/google — success body (raw, not wrapped in .data) */
+export interface GoogleAuthResponse {
+  access_token: string;
+  refresh_token: string;
+  user: {
+    id: string;
+    email: string;
+    accountType: "manager" | "investor";
+    displayName?: string | null;
+    displayPicture?: string | null;
+  };
+}
+
+/** POST /admin/invites body */
+export interface AdminInvitePayload {
+  emails: string[];
+}
+
+export type AdminInviteResultStatus = "sent" | "skipped" | "failed";
+
+export interface AdminInviteResult {
+  email: string;
+  status: AdminInviteResultStatus;
+  inviteId?: string;
+  reason?: string;
+}
+
+/** POST /admin/invites — success body (raw, not wrapped in .data) */
+export interface AdminInviteResponse {
+  success: true;
+  results: AdminInviteResult[];
+}

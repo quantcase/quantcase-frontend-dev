@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Flag } from "lucide-react";
 import type { LensDetail } from "@/hooks/useLenses";
+import { ReportErrorModal } from "@/components/molecules/report-error-modal";
 import { LensHtmlPreview } from "@/components/insight/lens-html-preview";
 import { LensDetailGuidance } from "@/components/insight/lens-detail-guidance";
 import { LensDetailPromoter } from "@/components/insight/lens-detail-promoter";
@@ -74,6 +76,8 @@ function LensDetailView({ lens, ticker, isBfsi }: { lens: LensDetail; ticker?: s
 }
 
 export function LensDrawer({ lens, onClose, ticker, isBfsi }: LensDrawerProps) {
+  const [reportOpen, setReportOpen] = useState(false);
+
   useEffect(() => {
     if (!lens) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -152,19 +156,41 @@ export function LensDrawer({ lens, onClose, ticker, isBfsi }: LensDrawerProps) {
                   {lens.name}
                 </h2>
               </div>
-              <button
-                onClick={onClose}
-                aria-label="Close"
-                style={{
-                  flexShrink: 0, background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
-                  borderRadius: 8, width: 32, height: 32, display: "flex",
-                  alignItems: "center", justifyContent: "center", cursor: "pointer",
-                  color: "var(--qc-ink-3)", fontSize: 16, lineHeight: 1,
-                }}
-              >
-                ×
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                <button
+                  onClick={() => setReportOpen(true)}
+                  aria-label="Flag Error"
+                  style={{
+                    flexShrink: 0, background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+                    borderRadius: 8, height: 32, padding: "0 10px", display: "flex",
+                    alignItems: "center", justifyContent: "center", gap: 6, cursor: "pointer",
+                    color: "var(--qc-ink-3)", fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)",
+                  }}
+                >
+                  <Flag size={14} strokeWidth={1.8} />
+                  Flag Error
+                </button>
+                <button
+                  onClick={onClose}
+                  aria-label="Close"
+                  style={{
+                    flexShrink: 0, background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+                    borderRadius: 8, width: 32, height: 32, display: "flex",
+                    alignItems: "center", justifyContent: "center", cursor: "pointer",
+                    color: "var(--qc-ink-3)", fontSize: 16, lineHeight: 1,
+                  }}
+                >
+                  ×
+                </button>
+              </div>
             </div>
+
+            {reportOpen && lens && (
+              <ReportErrorModal
+                onClose={() => setReportOpen(false)}
+                prefill={{ category: "data_issue", errorMessage: `Lens: ${lens.name}` }}
+              />
+            )}
 
             {/* Body — iframe-based HTML skill output */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>

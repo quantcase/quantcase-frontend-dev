@@ -1,315 +1,506 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { Search, Bell, TriangleAlert, X, Check } from "lucide-react";
+import { OB } from "./theme";
+import { HalfArcGauge } from "./HalfArcGauge";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0 },
+};
+
+function FadeUp({
+  children,
+  delay = 0,
+  style,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      initial="hidden"
+      animate="show"
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay }}
+      style={style}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <FadeUp>
+      <p
+        style={{
+          fontFamily: OB.mono,
+          fontSize: 12,
+          fontWeight: 500,
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: OB.muted,
+          textAlign: "center",
+          marginBottom: 20,
+        }}
+      >
+        {children}
+      </p>
+    </FadeUp>
+  );
+}
+
+function Em({ children }: { children: React.ReactNode }) {
+  return (
+    <em
+      style={{
+        fontFamily: OB.serif,
+        fontStyle: "italic",
+        color: OB.accent,
+      }}
+    >
+      {children}
+    </em>
+  );
+}
 
 // ─────────────────────────────────────────
-// Slide 1 — Problem Statement
+// Slide 1 — How it works
 // ─────────────────────────────────────────
-export function Slide1Problem() {
+const DOC_PILLS = [
+  "Concalls",
+  "Investor PPTs",
+  "Annual reports",
+  "Exchange filings",
+  "Peer comparisons",
+  "Sector filings",
+  "Years of earnings",
+  "Bulk & block deals",
+  "Analyst reports",
+  "Management guidance",
+  "Insider trades",
+];
+
+const STAT_ROW = [
+  { num: "920K+", label: "DOCS WE'VE READ" },
+  { num: "4,200K+", label: "SIGNALS SURFACED" },
+  { num: "120K+", label: "PROMISES TRACKED" },
+];
+
+function StackedDocsIcon() {
+  return (
+    <svg width="70" height="60" viewBox="0 0 70 60" fill="none">
+      {[0, 1, 2, 3].map((i) => (
+        <rect
+          key={i}
+          x={2 + i * 9}
+          y={26 - i * 6}
+          width="30"
+          height="22"
+          rx="1.5"
+          fill="#fff"
+          stroke={OB.border}
+          strokeWidth="1"
+        />
+      ))}
+      {[0, 1, 2].map((i) => (
+        <line key={i} x1={38 + i * 2} y1={4} x2={38 + i * 2} y2={20} stroke={OB.faint} strokeWidth="1" />
+      ))}
+    </svg>
+  );
+}
+
+export function Slide1HowItWorks() {
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 text-center">
-      <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#c8952a", marginBottom: 24 }}>
-        Assessments, not opinions
-      </p>
-      <h1 style={{ fontFamily: "var(--font-ibm-plex-serif), Georgia, serif", fontSize: "clamp(36px, 5.5vw, 66px)", color: "#0F172B", lineHeight: 1.06, letterSpacing: "-0.03em", maxWidth: 680, marginBottom: 16 }}>
-        The market isn&apos;t the problem.{" "}
-        <em style={{ fontStyle: "italic", color: "#1a3a5c" }}>Your process is.</em>
-      </h1>
-      <p style={{ fontSize: 16, color: "#888888", maxWidth: 400, lineHeight: 1.65, marginBottom: 48 }}>
-        Conviction without a framework is just hope. QuantCase changes that.
-      </p>
-      <div style={{ display: "flex", gap: 48, alignItems: "flex-start" }}>
-        {[
-          { num: "68%", desc: "of retail investors underperform Nifty over 5 years" },
-          { num: "32%", desc: "5-yr CAGR from QuantCase-scored portfolios" },
-          { num: "1,200+", desc: "NSE & BSE stocks scored and updated nightly" },
-        ].map((s, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 48 }}>
-            {i > 0 && <div style={{ width: 1, background: "rgba(0,0,0,0.08)", height: 68, alignSelf: "center" }} />}
-            <div style={{ textAlign: "center" }}>
-              <span style={{ fontFamily: "var(--font-ibm-plex-serif), Georgia, serif", fontSize: "clamp(44px, 6vw, 72px)", color: "#1a3a5c", letterSpacing: "-0.04em", lineHeight: 1, display: "block", marginBottom: 10 }}>
-                {s.num}
-              </span>
-              <span style={{ fontSize: 13, color: "#888888", maxWidth: 140, display: "block", lineHeight: 1.5 }}>
-                {s.desc}
-              </span>
-            </div>
+      <Eyebrow>01 — Signals, extracted</Eyebrow>
+      <FadeUp delay={0.06}>
+        <h1
+          style={{
+            fontFamily: OB.serif,
+            fontWeight: 400,
+            fontSize: "clamp(34px, 4.6vw, 60px)",
+            color: OB.ink,
+            lineHeight: 1.08,
+            letterSpacing: "-0.01em",
+            maxWidth: 760,
+            marginBottom: 44,
+          }}
+        >
+          We read <Em>hundreds</Em>. You get <Em>one</Em> answer.
+        </h1>
+      </FadeUp>
+
+      <FadeUp delay={0.14}>
+        <div style={{ display: "flex", alignItems: "center", gap: 40, marginBottom: 14 }}>
+          <div style={{ textAlign: "center" }}>
+            <span
+              style={{
+                display: "block",
+                fontFamily: OB.mono,
+                fontSize: 11,
+                fontWeight: 500,
+                letterSpacing: "0.1em",
+                color: OB.muted,
+                marginBottom: 14,
+              }}
+            >
+              WE READ
+            </span>
+            <span
+              style={{
+                display: "block",
+                fontFamily: OB.serif,
+                fontSize: 56,
+                color: OB.ink,
+                lineHeight: 1,
+                marginBottom: 10,
+              }}
+            >
+              327
+            </span>
+            <span style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.08em", color: OB.muted }}>
+              DOCS / COMPANY
+            </span>
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
-// ─────────────────────────────────────────
-// Slide 2 — M·O·D Framework
-// ─────────────────────────────────────────
-const MOD_CARDS = [
-  {
-    letter: "M",
-    title: "Management",
-    blurb: "Who's running the company — and do they do what they say?",
-    chips: ["Capital allocation track record", "Guidance vs. actuals history", "Communication credibility"],
-    accent: "#1a3a5c",
-    ghostOpacity: "rgba(26,58,92,0.1)",
-    topBar: "#1a3a5c",
-  },
-  {
-    letter: "O",
-    title: "Opportunity",
-    blurb: "Is the market growing faster than the stock prices it in?",
-    chips: ["TAM expansion signals", "Competitive moat depth", "Sector tailwind index"],
-    accent: "#2d6a4f",
-    ghostOpacity: "rgba(45,106,79,0.1)",
-    topBar: "#2d6a4f",
-  },
-  {
-    letter: "D",
-    title: "Deal",
-    blurb: "Is the current price worth the bet?",
-    chips: ["Intrinsic value vs. market price", "Entry & exit trigger matrix", "Margin of safety"],
-    accent: "#c8952a",
-    ghostOpacity: "rgba(200,149,42,0.1)",
-    topBar: "#c8952a",
-  },
-];
-
-export function Slide2MOD() {
-  return (
-    <div className="flex flex-col items-center justify-center h-full px-6">
-      <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(26,58,92,0.5)", textAlign: "center", marginBottom: 4 }}>
-        The M·O·D Framework
-      </p>
-      <h2 style={{ fontFamily: "var(--font-ibm-plex-serif), Georgia, serif", fontSize: "clamp(30px, 4vw, 52px)", color: "#0F172B", letterSpacing: "-0.03em", lineHeight: 1.1, textAlign: "center", marginBottom: 8, maxWidth: 520 }}>
-        One score. Three lenses.
-      </h2>
-      <p style={{ fontSize: 15, color: "#888888", textAlign: "center", marginBottom: 36, maxWidth: 380, lineHeight: 1.6 }}>
-        Every listed company distilled into what actually drives returns.
-      </p>
-      <div style={{ display: "flex", gap: 16, width: "100%", maxWidth: 780 }}>
-        {MOD_CARDS.map((card) => (
-          <div
-            key={card.letter}
-            style={{
-              flex: 1,
-              background: "#fff",
-              borderRadius: 14,
-              border: "1px solid rgba(0,0,0,0.08)",
-              padding: "24px 20px",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: card.topBar }} />
-            <div style={{ fontFamily: "var(--font-ibm-plex-serif), Georgia, serif", fontSize: 48, fontStyle: "italic", lineHeight: 1, marginBottom: 8, color: card.ghostOpacity }}>
-              {card.letter}
-            </div>
-            <div style={{ fontWeight: 600, fontSize: 14, color: "#0F172B", marginBottom: 5 }}>{card.title}</div>
-            <div style={{ fontSize: 12, color: "#888888", lineHeight: 1.55, marginBottom: 14 }}>{card.blurb}</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {card.chips.map((chip) => (
-                <div key={chip} style={{ fontSize: 11, color: "#3a3a3a", background: "#F5F5F5", padding: "4px 8px", borderRadius: 4, lineHeight: 1.4 }}>
-                  {chip}
-                </div>
-              ))}
-            </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "0 12px" }}>
+            <StackedDocsIcon />
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
-// ─────────────────────────────────────────
-// Slide 3 — Live Score + Technicals
-// ─────────────────────────────────────────
-const TECH_SIGNALS = [
-  { signal: "green", label: "RSI momentum signal", value: "Oversold — entry zone", buy: true },
-  { signal: "green", label: "50 / 200 MA crossover", value: "Bullish crossover", buy: true },
-  { signal: "amber", label: "Volume trend", value: "Accumulation phase", buy: false },
-  { signal: "green", label: "Support / resistance", value: "Above key support", buy: true },
-];
+          <div style={{ width: 60, display: "flex", justifyContent: "center" }}>
+            <div
+              style={{
+                width: 14,
+                height: 14,
+                borderRadius: "50%",
+                border: `1.5px solid ${OB.accent}`,
+              }}
+            />
+          </div>
 
-const SCORE_BARS = [
-  { label: "Management", value: 91, color: "#1a3a5c" },
-  { label: "Opportunity", value: 78, color: "#2d6a4f" },
-  { label: "Deal", value: 82, color: "#c8952a" },
-];
-
-export function Slide3LiveScore() {
-  const [animated, setAnimated] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setAnimated(true), 200);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <div className="flex items-center justify-center h-full px-6">
-      <div style={{ display: "flex", gap: 48, alignItems: "center", maxWidth: 900, width: "100%" }}>
-        {/* Left */}
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c8952a", marginBottom: 18 }}>
-            Live example · HDFCBANK
-          </p>
-          <h2 style={{ fontFamily: "var(--font-ibm-plex-serif), Georgia, serif", fontSize: "clamp(26px, 3.6vw, 44px)", color: "#0F172B", letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 12 }}>
-            Know the stock.<br />Know the moment.
-          </h2>
-          <p style={{ fontSize: 14, color: "#888888", lineHeight: 1.65, maxWidth: 280, marginBottom: 22 }}>
-            MOD tells you what to own. Automated technicals tell you when to pull the trigger.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 7, maxWidth: 300 }}>
-            {TECH_SIGNALS.map((t) => (
-              <div key={t.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 13px", background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8 }}>
-                <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: t.signal === "green" ? "#27ae60" : "#c8952a" }} />
-                <span style={{ fontSize: 12, color: "#3a3a3a", flex: 1 }}>{t.label}</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: t.buy ? "#27ae60" : "#c8952a" }}>{t.value}</span>
-              </div>
-            ))}
+          <div style={{ textAlign: "center" }}>
+            <span
+              style={{
+                display: "block",
+                fontFamily: OB.mono,
+                fontSize: 11,
+                fontWeight: 500,
+                letterSpacing: "0.1em",
+                color: OB.muted,
+                marginBottom: 4,
+              }}
+            >
+              YOU SEE
+            </span>
+            <HalfArcGauge score={84} ticker="HDFCBANK" size={148} delay={0.4} />
           </div>
         </div>
+      </FadeUp>
 
-        {/* Score card */}
-        <div ref={ref} style={{ width: 260, flexShrink: 0, background: "#fff", borderRadius: 16, border: "1px solid rgba(0,0,0,0.08)", padding: 22 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", color: "#bbbbbb", marginBottom: 2 }}>HDFCBANK · NSE</div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: "#0F172B", marginBottom: 16 }}>HDFC Bank Ltd.</div>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-            <div style={{ width: 76, height: 76, borderRadius: "50%", border: "2.5px solid #1a3a5c", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontFamily: "var(--font-ibm-plex-serif), Georgia, serif", fontSize: 26, color: "#1a3a5c", lineHeight: 1 }}>84</span>
-              <span style={{ fontSize: 10, color: "#bbbbbb" }}>/ 100</span>
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-            {SCORE_BARS.map((b) => (
-              <div key={b.label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 11, color: "#3a3a3a", width: 70, flexShrink: 0 }}>{b.label}</span>
-                <div style={{ flex: 1, height: 4, background: "#F5F5F5", borderRadius: 2, overflow: "hidden" }}>
-                  <div style={{ height: "100%", borderRadius: 2, background: b.color, width: animated ? `${b.value}%` : "0%", transition: "width 0.95s cubic-bezier(.4,0,.2,1)" }} />
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "#0F172B", width: 22, textAlign: "right" }}>{b.value}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{ height: 1, background: "rgba(0,0,0,0.08)", margin: "12px 0" }} />
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: 11, color: "#888888" }}>Technical signal</span>
-            <span style={{ fontWeight: 600, color: "#27ae60", background: "#eefaf2", padding: "3px 8px", borderRadius: 4, fontSize: 11 }}>▲ Buy trigger active</span>
-          </div>
-          <div style={{ marginTop: 10, padding: "9px 12px", borderRadius: 8, background: "#eef7ee", border: "1px solid rgba(45,106,79,0.18)", fontSize: 11, fontWeight: 600, color: "#2d6a4f" }}>
-            ✦ High conviction · Accumulate on dips
-          </div>
+      <FadeUp delay={0.22}>
+        <p style={{ fontFamily: OB.serif, fontStyle: "italic", fontSize: 16, color: OB.ink2, marginBottom: 40 }}>
+          cross-referenced, so nothing gets missed
+        </p>
+      </FadeUp>
+
+      <FadeUp delay={0.3} style={{ width: "100%", maxWidth: 1000 }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            overflow: "hidden",
+            borderTop: `1px solid ${OB.borderSoft}`,
+            borderBottom: `1px solid ${OB.borderSoft}`,
+            padding: "18px 0",
+            marginBottom: 32,
+            maskImage: "linear-gradient(90deg, transparent, black 6%, black 94%, transparent)",
+          }}
+        >
+          {DOC_PILLS.map((p) => (
+            <span
+              key={p}
+              style={{
+                flexShrink: 0,
+                fontFamily: OB.sans,
+                fontSize: 13,
+                color: OB.ink2,
+                border: `1px solid ${OB.border}`,
+                borderRadius: 999,
+                padding: "8px 18px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {p}
+            </span>
+          ))}
         </div>
-      </div>
-    </div>
-  );
-}
+      </FadeUp>
 
-// ─────────────────────────────────────────
-// Slide 4 — Demat Connect
-// ─────────────────────────────────────────
-const PORTFOLIO_HOLDINGS = [
-  { rank: 1, ticker: "HDFCBANK", name: "HDFC Bank", m: 91, o: 78, d: 82, score: 84, tier: "hi" },
-  { rank: 2, ticker: "INFY", name: "Infosys", m: 85, o: 72, d: 74, score: 77, tier: "hi" },
-  { rank: 3, ticker: "TATAMOTORS", name: "Tata Motors", m: 62, o: 70, d: 55, score: 62, tier: "mid" },
-  { rank: 4, ticker: "ZOMATO", name: "Zomato", m: 48, o: 66, d: 38, score: 51, tier: "lo" },
-];
-
-export function Slide4Demat({ onSkip }: { onSkip: () => void }) {
-  const [selected, setSelected] = useState<string>("cdsl");
-  const [animated, setAnimated] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setAnimated(true), 300);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const dematOptions = [
-    { id: "cdsl", abbr: "CD", name: "CDSL", desc: "Central Depository Services Ltd.", bg: "#1a3a5c", color: "#fff" },
-    { id: "nsdl", abbr: "NS", name: "NSDL", desc: "National Securities Depository Ltd.", bg: "#2d6a4f", color: "#fff" },
-    { id: "manual", abbr: "+", name: "Add manually", desc: "Enter tickers yourself", bg: "#F5F5F5", color: "#888888", border: "1px solid rgba(0,0,0,0.08)" },
-  ];
-
-  return (
-    <div className="flex items-center justify-center h-full px-6">
-      <div style={{ display: "flex", gap: 56, alignItems: "center", maxWidth: 900, width: "100%" }}>
-        {/* Left */}
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#c8952a", marginBottom: 18 }}>
-            Connect your portfolio
-          </p>
-          <h2 style={{ fontFamily: "var(--font-ibm-plex-serif), Georgia, serif", fontSize: "clamp(26px, 3.6vw, 44px)", color: "#0F172B", letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 12 }}>
-            See your holdings<br />through a <em style={{ fontStyle: "italic", color: "#1a3a5c" }}>sharper lens.</em>
-          </h2>
-          <p style={{ fontSize: 14, color: "#888888", lineHeight: 1.65, maxWidth: 290, marginBottom: 22 }}>
-            Link your demat account. Every stock you own, ranked by MOD conviction — instantly.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 9, maxWidth: 300 }}>
-            {dematOptions.map((opt) => (
-              <button
-                key={opt.id}
-                onClick={() => setSelected(opt.id)}
+      <FadeUp delay={0.36}>
+        <div style={{ display: "flex", gap: 64 }}>
+          {STAT_ROW.map((s) => (
+            <div key={s.label} style={{ textAlign: "center" }}>
+              <span
                 style={{
-                  display: "flex", alignItems: "center", gap: 13,
-                  padding: "13px 16px",
-                  background: selected === opt.id ? "#f0f4f9" : "#fff",
-                  border: selected === opt.id ? "1px solid #1a3a5c" : "1px solid rgba(0,0,0,0.08)",
-                  borderRadius: 10, cursor: "pointer", transition: "all 0.2s", textAlign: "left",
+                  display: "block",
+                  fontFamily: OB.serif,
+                  fontSize: 40,
+                  color: OB.ink,
+                  marginBottom: 6,
                 }}
               >
-                <div style={{ width: 34, height: 34, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontSize: opt.id === "manual" ? 18 : 13, fontWeight: 700, flexShrink: 0, background: opt.bg, color: opt.color, border: opt.border }}>
-                  {opt.abbr}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#0F172B", marginBottom: 1 }}>{opt.name}</div>
-                  <div style={{ fontSize: 11, color: "#888888" }}>{opt.desc}</div>
-                </div>
-                <span style={{ fontSize: 14, color: "#bbbbbb" }}>→</span>
-              </button>
-            ))}
-          </div>
-          <p style={{ fontSize: 11, color: "#bbbbbb", marginTop: 11, maxWidth: 300, lineHeight: 1.5 }}>
-            Read-only access · SOC 2 certified · Your holdings are never sold or shared.
-          </p>
-          <button
-            onClick={onSkip}
-            style={{ marginTop: 16, background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#888888", textDecoration: "underline", padding: 0 }}
-          >
-            Skip for now
-          </button>
-        </div>
-
-        {/* Portfolio preview */}
-        <div style={{ width: 300, flexShrink: 0, background: "#fff", borderRadius: 16, border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
-          <div style={{ padding: "13px 16px", borderBottom: "1px solid rgba(0,0,0,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "#0F172B" }}>Your portfolio · MOD ranked</span>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "#2d6a4f", background: "#eef7ee", padding: "3px 8px", borderRadius: 4 }}>Preview</span>
-          </div>
-          {PORTFOLIO_HOLDINGS.map((h) => (
-            <div key={h.ticker} style={{ display: "flex", alignItems: "center", gap: 9, padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#bbbbbb", width: 14, flexShrink: 0 }}>#{h.rank}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "#0F172B" }}>{h.ticker}</div>
-                <div style={{ fontSize: 10, color: "#888888" }}>{h.name}</div>
-              </div>
-              <div style={{ width: 68, flexShrink: 0 }}>
-                {[{ v: h.m, c: "#1a3a5c" }, { v: h.o, c: "#2d6a4f" }, { v: h.d, c: "#c8952a" }].map((bar, i) => (
-                  <div key={i} style={{ height: 3, background: "#F5F5F5", borderRadius: 2, overflow: "hidden", marginBottom: 3 }}>
-                    <div style={{ height: "100%", borderRadius: 2, background: bar.c, width: animated ? `${bar.v}%` : "0%", transition: `width 0.7s ease ${i * 0.08}s` }} />
-                  </div>
-                ))}
-                <div style={{ fontSize: 9, color: "#bbbbbb", textAlign: "right", marginTop: 1 }}>M · O · D</div>
-              </div>
-              <span style={{ fontSize: 13, fontWeight: 600, textAlign: "right", width: 28, flexShrink: 0, color: h.tier === "hi" ? "#2d6a4f" : h.tier === "mid" ? "#c8952a" : "#c0392b" }}>
-                {h.score}
+                {s.num}
+              </span>
+              <span style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.08em", color: OB.muted }}>
+                {s.label}
               </span>
             </div>
           ))}
-          <div style={{ padding: "10px 16px", background: "#F5F5F5", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 11, color: "#888888" }}>2 holdings need review</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "#1a3a5c" }}>View full report →</span>
+        </div>
+      </FadeUp>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Slide 2 — The Score (M · O · D)
+// ─────────────────────────────────────────
+const MOD_LETTERS = [
+  { letter: "M", title: "Management", question: "“Do they do what they say?”", score: 91, color: OB.olive },
+  { letter: "O", title: "Opportunity", question: "“Is this a good industry?”", score: 78, color: OB.ink },
+  { letter: "D", title: "Deal", question: "“Is the price right?”", score: 82, color: OB.accent },
+];
+
+export function Slide2TheScore() {
+  return (
+    <div className="flex flex-col items-center justify-center h-full px-6 text-center">
+      <Eyebrow>02 — How we score every stock</Eyebrow>
+      <FadeUp delay={0.06}>
+        <h2
+          style={{
+            fontFamily: OB.serif,
+            fontWeight: 400,
+            fontSize: "clamp(30px, 4vw, 50px)",
+            color: OB.ink,
+            letterSpacing: "-0.01em",
+            marginBottom: 28,
+          }}
+        >
+          Three questions. <Em>One</Em> score.
+        </h2>
+      </FadeUp>
+
+      <FadeUp delay={0.14} style={{ marginBottom: 40 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <HalfArcGauge score={84} ticker="HDFCBANK" size={170} delay={0.3} />
+        </div>
+      </FadeUp>
+
+      <div style={{ display: "flex", gap: 56, width: "100%", maxWidth: 900, justifyContent: "center" }}>
+        {MOD_LETTERS.map((m, i) => (
+          <FadeUp key={m.letter} delay={0.24 + i * 0.08} style={{ flex: 1, maxWidth: 240 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 10, marginBottom: 4 }}>
+              <span
+                style={{
+                  fontFamily: OB.serif,
+                  fontSize: 88,
+                  lineHeight: 0.85,
+                  color: m.color,
+                }}
+              >
+                {m.letter}
+              </span>
+              <span
+                style={{
+                  fontFamily: OB.mono,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: OB.ink,
+                  border: `1px solid ${OB.border}`,
+                  borderRadius: 4,
+                  padding: "3px 7px",
+                  marginTop: 8,
+                }}
+              >
+                {m.score}
+              </span>
+            </div>
+            <p style={{ fontFamily: OB.sans, fontSize: 16, fontWeight: 500, color: OB.ink, marginBottom: 6 }}>
+              {m.title}
+            </p>
+            <p style={{ fontFamily: OB.serif, fontStyle: "italic", fontSize: 15, color: OB.muted, marginBottom: 16 }}>
+              {m.question}
+            </p>
+            <div style={{ height: 3, background: OB.borderSoft, borderRadius: 2, overflow: "hidden" }}>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${m.score}%` }}
+                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.5 + i * 0.08 }}
+                style={{ height: "100%", background: m.color, borderRadius: 2 }}
+              />
+            </div>
+          </FadeUp>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Slide 3 — Your Journal
+// ─────────────────────────────────────────
+export function Slide3YourJournal() {
+  const [conviction, setConviction] = useState(78);
+
+  return (
+    <div className="flex items-center justify-center h-full px-6">
+      <div style={{ width: "100%", maxWidth: 980 }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <Eyebrow>03 — A journal that watches your back</Eyebrow>
+          <FadeUp delay={0.06}>
+            <h2
+              style={{
+                fontFamily: OB.serif,
+                fontWeight: 400,
+                fontSize: "clamp(28px, 3.6vw, 46px)",
+                color: OB.ink,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              You <Em>write</Em> it once. We <Em>watch</Em> it for you.
+            </h2>
+          </FadeUp>
+        </div>
+
+        <div style={{ display: "flex", gap: 24, alignItems: "stretch" }}>
+          <FadeUp delay={0.16} style={{ flex: 1.1 }}>
+            <div
+              style={{
+                background: OB.bgDeep,
+                border: `1px solid ${OB.border}`,
+                borderRadius: 14,
+                padding: 20,
+                height: "100%",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <span style={{ fontFamily: OB.mono, fontSize: 11, letterSpacing: "0.06em", color: OB.muted }}>
+                  GUIDED · 4 PROMPTS
+                </span>
+                <span style={{ fontFamily: OB.mono, fontSize: 11, color: OB.muted }}>03 of 04</span>
+              </div>
+              <p style={{ fontFamily: OB.serif, fontSize: 24, color: OB.ink, marginBottom: 16 }}>
+                Reliance <span style={{ color: OB.muted }}>· NSE</span>
+              </p>
+              <div style={{ display: "flex", gap: 6, marginBottom: 20 }}>
+                {[0, 1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      flex: 1,
+                      height: 2.5,
+                      borderRadius: 2,
+                      background: i < 3 ? OB.ink : OB.border,
+                    }}
+                  />
+                ))}
+              </div>
+              <div
+                style={{
+                  borderLeft: `2px solid ${OB.accent}`,
+                  paddingLeft: 14,
+                  marginBottom: 24,
+                }}
+              >
+                <p style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.08em", color: OB.muted, marginBottom: 8 }}>
+                  YOUR THESIS · WE&apos;RE SAVING AS YOU TYPE
+                </p>
+                <p style={{ fontFamily: OB.serif, fontStyle: "italic", fontSize: 17, color: OB.ink2, lineHeight: 1.5 }}>
+                  Buying for the Jio value unlock and disciplined capital allocation. The conglomerate discount
+                  narrows once retail and Jio list separately.
+                </p>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.08em", color: OB.muted }}>
+                  WATCHING
+                </span>
+                <span style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.08em", color: OB.muted }}>
+                  HIGHEST
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={conviction}
+                onChange={(e) => setConviction(Number(e.target.value))}
+                style={{ width: "100%", accentColor: OB.accent }}
+                aria-label="Conviction level"
+              />
+              <p style={{ fontFamily: OB.serif, fontStyle: "italic", fontSize: 13, color: OB.accent, marginTop: 4 }}>
+                High conviction
+              </p>
+            </div>
+          </FadeUp>
+
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
+            <FadeUp delay={0.26}>
+              <div
+                style={{
+                  background: OB.cardDark,
+                  borderRadius: 14,
+                  padding: 20,
+                  boxShadow: "0 12px 28px rgba(23,20,15,0.18)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: OB.accent, flexShrink: 0 }} />
+                  <span style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.08em", color: "rgba(255,255,255,0.55)" }}>
+                    LIVE ALERT · 2H AGO
+                  </span>
+                </div>
+                <p style={{ fontFamily: OB.serif, fontSize: 21, color: "#fff", marginBottom: 8 }}>Thesis at risk</p>
+                <p style={{ fontFamily: OB.sans, fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.55, marginBottom: 14 }}>
+                  KPIGREEN — order-book miss vs. management guidance from Q3 concall.
+                </p>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <Bell style={{ width: 12, height: 12, color: "rgba(255,255,255,0.4)" }} />
+                  <span style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.06em", color: "rgba(255,255,255,0.4)" }}>
+                    DRIVER YOU NOTED · TRIGGERED
+                  </span>
+                </div>
+              </div>
+            </FadeUp>
+
+            <FadeUp delay={0.34}>
+              <div
+                style={{
+                  background: OB.bgDeep,
+                  border: `1px solid ${OB.border}`,
+                  borderRadius: 14,
+                  padding: 20,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                  <TriangleAlert style={{ width: 13, height: 13, color: OB.gold }} />
+                  <span style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.08em", color: OB.muted }}>
+                    PROMISE BROKEN — YESTERDAY
+                  </span>
+                </div>
+                <p style={{ fontFamily: OB.serif, fontSize: 19, color: OB.ink, marginBottom: 8 }}>
+                  Management missed a promise
+                </p>
+                <p style={{ fontFamily: OB.sans, fontSize: 13, color: OB.ink2, lineHeight: 1.55 }}>
+                  They guided for 18% margins last quarter. Q2 came in 240bps lower. We flagged it for you.
+                </p>
+              </div>
+            </FadeUp>
           </div>
         </div>
       </div>
@@ -318,79 +509,521 @@ export function Slide4Demat({ onSkip }: { onSkip: () => void }) {
 }
 
 // ─────────────────────────────────────────
-// Slide 5 — Search first stock
+// Slide 4 — Your Stocks
 // ─────────────────────────────────────────
-const SEARCH_PILLS = [
-  { label: "Reliance Industries", symbol: "RELIANCE" },
-  { label: "Infosys", symbol: "INFY" },
-  { label: "HDFC Bank", symbol: "HDFCBANK" },
-  { label: "Tata Motors", symbol: "TATAMOTORS" },
-  { label: "Zomato", symbol: "ZOMATO" },
+const CONNECT_SOURCES = ["CDSL", "NSDL", "Zerodha", "Groww", "Upstox"];
+
+const PORTFOLIO_ROWS = [
+  { rank: 1, ticker: "HDFCBANK", name: "HDFC Bank", score: 84, trend: "up" as const },
+  { rank: 2, ticker: "INFY", name: "Infosys", score: 77, trend: "up" as const },
+  { rank: 3, ticker: "TATAMOTORS", name: "Tata Motors", score: 62, trend: "flat" as const },
+  { rank: 4, ticker: "ZOMATO", name: "Zomato", score: 51, trend: "down" as const },
 ];
 
-export function Slide5Search() {
-  const router = useRouter();
-  const [query, setQuery] = useState("");
+function TrendGlyph({ trend }: { trend: "up" | "down" | "flat" }) {
+  const color = trend === "up" ? OB.olive : trend === "down" ? OB.accent : OB.muted;
+  const glyph = trend === "up" ? "▲" : trend === "down" ? "▽" : "–";
+  return <span style={{ color, fontSize: 14 }}>{glyph}</span>;
+}
 
-  function goToScreener(symbol: string) {
-    router.push(`/screener/home?symbol=${symbol}`);
-  }
+export function Slide4YourStocks({ onSkip }: { onSkip: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full px-6">
+      <div style={{ width: "100%", maxWidth: 960, textAlign: "center" }}>
+        <Eyebrow>04 — Bring in what you already own</Eyebrow>
+        <FadeUp delay={0.06}>
+          <h2
+            style={{
+              fontFamily: OB.serif,
+              fontWeight: 400,
+              fontSize: "clamp(30px, 4vw, 50px)",
+              color: OB.ink,
+              letterSpacing: "-0.01em",
+              marginBottom: 28,
+            }}
+          >
+            Your stocks, <Em>ranked</Em> for you.
+          </h2>
+        </FadeUp>
 
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    if (query.trim()) {
-      router.push(`/screener/home?q=${encodeURIComponent(query.trim())}`);
-    }
-  }
+        <FadeUp delay={0.14}>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", alignItems: "center", marginBottom: 8 }}>
+            {CONNECT_SOURCES.map((s) => (
+              <span
+                key={s}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontFamily: OB.sans,
+                  fontSize: 13,
+                  color: OB.ink2,
+                  border: `1px solid ${OB.border}`,
+                  borderRadius: 999,
+                  padding: "8px 16px",
+                }}
+              >
+                <span style={{ width: 5, height: 5, borderRadius: "50%", background: OB.olive }} />
+                {s}
+              </span>
+            ))}
+            <span style={{ fontFamily: OB.mono, fontSize: 11, color: OB.muted, marginLeft: 4 }}>
+              → takes 20 seconds
+            </span>
+          </div>
+          <button
+            onClick={onSkip}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: OB.sans,
+              fontSize: 12,
+              color: OB.faint,
+              textDecoration: "underline",
+              padding: 0,
+              marginBottom: 32,
+            }}
+          >
+            Skip for now
+          </button>
+        </FadeUp>
+
+        <FadeUp delay={0.22}>
+          <div style={{ borderTop: `1px solid ${OB.border}` }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "14px 4px",
+                borderBottom: `1px solid ${OB.borderSoft}`,
+              }}
+            >
+              <span style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.08em", color: OB.muted }}>
+                YOUR PORTFOLIO · SORTED BY CONVICTION
+              </span>
+              <span style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.04em", color: OB.muted }}>
+                4 stocks · 2 worth a look
+              </span>
+            </div>
+            {PORTFOLIO_ROWS.map((row, i) => (
+              <div
+                key={row.ticker}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 20,
+                  padding: "16px 4px",
+                  borderBottom: `1px solid ${OB.borderSoft}`,
+                }}
+              >
+                <span style={{ fontFamily: OB.mono, fontSize: 12, color: OB.faint, width: 24, textAlign: "left" }}>
+                  #{row.rank}
+                </span>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 8, width: 220, textAlign: "left" }}>
+                  <span style={{ fontFamily: OB.mono, fontSize: 14, fontWeight: 600, color: OB.ink }}>
+                    {row.ticker}
+                  </span>
+                  <span style={{ fontFamily: OB.sans, fontSize: 12, color: OB.muted }}>{row.name}</span>
+                </div>
+                <div style={{ flex: 1, height: 2, background: OB.borderSoft, position: "relative" }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${row.score}%` }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 + i * 0.08 }}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background: row.trend === "down" ? OB.accent : OB.ink,
+                    }}
+                  />
+                </div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6, width: 70, justifyContent: "flex-end" }}>
+                  <span style={{ fontFamily: OB.serif, fontSize: 26, color: OB.ink }}>{row.score}</span>
+                  <TrendGlyph trend={row.trend} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </FadeUp>
+
+        <FadeUp delay={0.4}>
+          <p style={{ fontFamily: OB.serif, fontStyle: "italic", fontSize: 16, color: OB.muted, marginTop: 28 }}>
+            Finally, see every stock you own through the same clear lens.
+          </p>
+        </FadeUp>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Slide 5 — Your Broker
+// ─────────────────────────────────────────
+const BROKERS = [
+  { id: "zerodha", name: "Zerodha", file: "zerodha.png" },
+  { id: "groww", name: "Groww", file: "groww.png" },
+  { id: "upstox", name: "Upstox", file: "upstox.png" },
+  { id: "angelone", name: "Angel One", file: "angelone.png" },
+  { id: "5paisa", name: "5paisa", file: "5paisa.png" },
+  { id: "icicidirect", name: "ICICI Direct", file: "icicidirect.png" },
+  { id: "hdfcsky", name: "HDFC Sky", file: "hdfcsky.png" },
+  { id: "kotaksecurities", name: "Kotak Securities", file: "kotaksecurities.png" },
+  { id: "paytmmoney", name: "Paytm Money", file: "paytmmoney.png" },
+  { id: "sharekhan", name: "Sharekhan", file: "sharekhan.png" },
+];
+
+export function Slide5YourBroker() {
+  const radius = 210;
+  const center = radius + 40;
+  const size = center * 2;
 
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 text-center">
-      <h1 style={{ fontFamily: "var(--font-ibm-plex-serif), Georgia, serif", fontSize: "clamp(36px, 5.5vw, 64px)", color: "#0F172B", letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: 520, marginBottom: 10 }}>
-        Search your<br />first stock.
-      </h1>
-      <p style={{ fontSize: 16, color: "#888888", textAlign: "center", marginBottom: 36 }}>
-        MOD score, technical signal, verdict — in under 30 seconds.
-      </p>
-      <form onSubmit={handleSearch} style={{ width: "100%", maxWidth: 520 }}>
-        <div style={{ background: "#fff", border: "1.5px solid #1a3a5c", borderRadius: 10, display: "flex", alignItems: "center", boxShadow: "0 0 0 4px rgba(26,58,92,0.07)", overflow: "hidden", marginBottom: 18 }}>
-          <div style={{ padding: "0 14px 0 20px", color: "#888888", flexShrink: 0, display: "flex", alignItems: "center" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="10" cy="10" r="7" /><line x1="16.5" y1="16.5" x2="21" y2="21" />
-            </svg>
-          </div>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search any listed company…"
-            autoComplete="off"
-            style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 17, color: "#0F172B", padding: "18px 0" }}
-          />
-          <span style={{ padding: "0 18px", fontSize: 12, color: "#bbbbbb", fontFamily: "monospace", flexShrink: 0 }}>⌘K</span>
-        </div>
-      </form>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", maxWidth: 520 }}>
-        {SEARCH_PILLS.map((p) => (
-          <button
-            key={p.symbol}
-            onClick={() => goToScreener(p.symbol)}
-            style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 20, padding: "7px 16px", fontSize: 13, color: "#3a3a3a", cursor: "pointer", transition: "all 0.18s" }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = "#1a3a5c";
-              (e.currentTarget as HTMLButtonElement).style.color = "#1a3a5c";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0,0,0,0.08)";
-              (e.currentTarget as HTMLButtonElement).style.color = "#3a3a3a";
+      <Eyebrow>05 — Buy & sell without switching apps</Eyebrow>
+      <FadeUp delay={0.06}>
+        <h2
+          style={{
+            fontFamily: OB.serif,
+            fontWeight: 400,
+            fontSize: "clamp(28px, 3.6vw, 46px)",
+            color: OB.ink,
+            letterSpacing: "-0.01em",
+            lineHeight: 1.15,
+            marginBottom: 8,
+          }}
+        >
+          See a signal. <Em>Place</Em> the trade.
+        </h2>
+      </FadeUp>
+      <FadeUp delay={0.12}>
+        <h3
+          style={{
+            fontFamily: OB.serif,
+            fontWeight: 400,
+            fontSize: "clamp(22px, 2.8vw, 36px)",
+            color: OB.ink2,
+            marginBottom: 32,
+          }}
+        >
+          All in one place.
+        </h3>
+      </FadeUp>
+
+      <FadeUp delay={0.2}>
+        <div style={{ position: "relative", width: size, height: size, maxWidth: "80vw", maxHeight: "48vh" }}>
+          <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size}`} style={{ position: "absolute", inset: 0 }}>
+            <circle
+              cx={center}
+              cy={center}
+              r={radius}
+              fill="none"
+              stroke={OB.border}
+              strokeWidth="1"
+              strokeDasharray="3 5"
+            />
+          </svg>
+
+          <div
+            style={{
+              position: "absolute",
+              left: center,
+              top: center,
+              transform: "translate(-50%, -50%)",
+              width: 128,
+              height: 128,
+              borderRadius: "50%",
+              border: `1px solid ${OB.border}`,
+              background: OB.bg,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
             }}
           >
-            {p.label}
-          </button>
-        ))}
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: OB.accent, marginBottom: 4 }} />
+            <span style={{ fontFamily: OB.serif, fontSize: 24, color: OB.ink }}>You</span>
+            <span style={{ fontFamily: OB.mono, fontSize: 9, letterSpacing: "0.06em", color: OB.muted }}>
+              1 TAP · TRADE
+            </span>
+          </div>
+
+          {BROKERS.map((b, i) => {
+            const angle = (i / BROKERS.length) * 2 * Math.PI - Math.PI / 2;
+            const x = center + radius * Math.cos(angle);
+            const y = center + radius * Math.sin(angle);
+            return (
+              <motion.div
+                key={b.id}
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.3 + i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  position: "absolute",
+                  left: x,
+                  top: y,
+                  transform: "translate(-50%, -50%)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <div
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: "50%",
+                    border: `1px solid ${OB.border}`,
+                    background: OB.card,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Image src={`/logos/brokers/${b.file}`} alt={b.name} width={28} height={28} style={{ objectFit: "contain" }} />
+                </div>
+                <span
+                  style={{
+                    fontFamily: OB.mono,
+                    fontSize: 9,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: OB.muted,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {b.name}
+                </span>
+              </motion.div>
+            );
+          })}
+        </div>
+      </FadeUp>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Slide 6 — Pick a few
+// ─────────────────────────────────────────
+interface PickStock {
+  ticker: string;
+  name: string;
+  sector: string;
+  score: number;
+}
+
+const PICK_STOCKS: PickStock[] = [
+  { ticker: "HDFCBANK", name: "HDFC Bank Ltd.", sector: "Banking", score: 84 },
+  { ticker: "RELIANCE", name: "Reliance Industries", sector: "Oil & Gas", score: 79 },
+  { ticker: "INFY", name: "Infosys", sector: "IT Services", score: 77 },
+  { ticker: "TCS", name: "Tata Consultancy Services", sector: "IT Services", score: 82 },
+  { ticker: "ICICIBANK", name: "ICICI Bank", sector: "Banking", score: 81 },
+  { ticker: "BHARTIARTL", name: "Bharti Airtel", sector: "Telecom", score: 74 },
+];
+
+export function Slide6PickAFew() {
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<string[]>(["HDFCBANK", "RELIANCE"]);
+  const MAX = 4;
+
+  function toggle(ticker: string) {
+    setSelected((prev) => {
+      if (prev.includes(ticker)) return prev.filter((t) => t !== ticker);
+      if (prev.length >= MAX) return prev;
+      return [...prev, ticker];
+    });
+  }
+
+  const filtered = query.trim()
+    ? PICK_STOCKS.filter(
+        (s) =>
+          s.ticker.toLowerCase().includes(query.trim().toLowerCase()) ||
+          s.name.toLowerCase().includes(query.trim().toLowerCase())
+      )
+    : PICK_STOCKS;
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full px-6">
+      <div style={{ width: "100%", maxWidth: 880 }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <Eyebrow>06 — Last step, promise</Eyebrow>
+          <FadeUp delay={0.06}>
+            <h2
+              style={{
+                fontFamily: OB.serif,
+                fontWeight: 400,
+                fontSize: "clamp(30px, 4vw, 50px)",
+                color: OB.ink,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Pick <Em>3–4</Em> stocks to follow.
+            </h2>
+          </FadeUp>
+        </div>
+
+        <FadeUp delay={0.14}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              borderBottom: `1.5px solid ${OB.ink}`,
+              paddingBottom: 14,
+              marginBottom: 12,
+            }}
+          >
+            <Search style={{ width: 18, height: 18, color: OB.muted, flexShrink: 0 }} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Try HDFC Bank, Reliance, Infosys…"
+              autoComplete="off"
+              style={{
+                flex: 1,
+                border: "none",
+                outline: "none",
+                background: "transparent",
+                fontFamily: OB.serif,
+                fontSize: 22,
+                color: OB.ink,
+              }}
+            />
+            <span style={{ fontFamily: OB.mono, fontSize: 10, letterSpacing: "0.06em", color: OB.faint, flexShrink: 0 }}>
+              SCORED IN 3S
+            </span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+            <span style={{ fontFamily: OB.serif, fontStyle: "italic", fontSize: 20, color: OB.accent, flexShrink: 0 }}>
+              {selected.length}
+            </span>
+            <span style={{ fontFamily: OB.mono, fontSize: 12, color: OB.muted, flexShrink: 0 }}>/ {MAX}</span>
+            <div style={{ flex: 1, height: 2, background: OB.borderSoft, position: "relative" }}>
+              <motion.div
+                initial={false}
+                animate={{ width: `${(selected.length / MAX) * 100}%` }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                style={{ position: "absolute", inset: 0, background: OB.accent }}
+              />
+            </div>
+          </div>
+
+          {selected.length > 0 && (
+            <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+              {selected.map((t) => (
+                <span
+                  key={t}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontFamily: OB.mono,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#fff",
+                    background: OB.ink,
+                    borderRadius: 6,
+                    padding: "7px 10px",
+                  }}
+                >
+                  {t}
+                  <button
+                    onClick={() => toggle(t)}
+                    style={{ background: "none", border: "none", cursor: "pointer", display: "flex", padding: 0 }}
+                    aria-label={`Remove ${t}`}
+                  >
+                    <X style={{ width: 12, height: 12, color: "rgba(255,255,255,0.7)" }} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </FadeUp>
+
+        <FadeUp delay={0.22}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+            {filtered.map((s) => {
+              const isSel = selected.includes(s.ticker);
+              return (
+                <button
+                  key={s.ticker}
+                  onClick={() => toggle(s.ticker)}
+                  disabled={!isSel && selected.length >= MAX}
+                  style={{
+                    textAlign: "left",
+                    border: `1px solid ${isSel ? OB.ink : OB.border}`,
+                    borderRadius: 10,
+                    padding: 16,
+                    background: isSel ? OB.ink : "transparent",
+                    cursor: !isSel && selected.length >= MAX ? "not-allowed" : "pointer",
+                    opacity: !isSel && selected.length >= MAX ? 0.4 : 1,
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+                    <span
+                      style={{
+                        fontFamily: OB.mono,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: isSel ? "#fff" : OB.ink,
+                      }}
+                    >
+                      {s.ticker}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: OB.serif,
+                        fontSize: 26,
+                        color: isSel ? "#fff" : OB.ink,
+                      }}
+                    >
+                      {s.score}
+                    </span>
+                  </div>
+                  <p style={{ fontFamily: OB.sans, fontSize: 13, color: isSel ? "rgba(255,255,255,0.75)" : OB.ink2, marginBottom: 3 }}>
+                    {s.name}
+                  </p>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span
+                      style={{
+                        fontFamily: OB.mono,
+                        fontSize: 10,
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                        color: isSel ? "rgba(255,255,255,0.5)" : OB.muted,
+                      }}
+                    >
+                      {s.sector}
+                    </span>
+                    <span
+                      style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: "50%",
+                        border: `1px solid ${isSel ? "rgba(255,255,255,0.6)" : OB.border}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: isSel ? "#fff" : "transparent",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isSel && <Check style={{ width: 11, height: 11, color: OB.ink }} />}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </FadeUp>
       </div>
-      <p style={{ marginTop: 24, fontSize: 12, color: "#bbbbbb" }}>
-        1,200+ stocks · NSE & BSE · Updated nightly
-      </p>
     </div>
   );
 }

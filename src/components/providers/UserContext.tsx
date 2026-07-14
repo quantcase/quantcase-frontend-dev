@@ -8,6 +8,7 @@ export type AccountType = "manager" | "investor" | null;
 interface UserContextValue {
   accountType: AccountType;
   setAccountType: (t: AccountType) => void;
+  id: string | null;
   displayName: string | null;
   email: string | null;
   subscription: Subscription | null;
@@ -25,6 +26,7 @@ interface UserContextValue {
 const UserContext = createContext<UserContextValue>({
   accountType: null,
   setAccountType: () => {},
+  id: null,
   displayName: null,
   email: null,
   subscription: null,
@@ -57,6 +59,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const [onboardingStep, setOnboardingStep] = useState<number>(0);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [id, setId] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("qc_user_id") ?? null;
+    }
+    return null;
+  });
   const [displayName, setDisplayName] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("qc_display_name") ?? null;
@@ -89,6 +97,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setAccountTypeState(acctType);
       localStorage.setItem("qc_account_type", acctType);
     }
+
+    const userId = data.id ?? null;
+    setId(userId);
+    if (userId) localStorage.setItem("qc_user_id", userId);
+    else localStorage.removeItem("qc_user_id");
+
     setOnboardingCompleted(data.onboarding_completed);
     localStorage.setItem("qc_onboarding_completed", String(data.onboarding_completed));
     setOnboardingStep(data.onboarding_step ?? 0);
@@ -111,6 +125,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     <UserContext.Provider value={{
       accountType,
       setAccountType,
+      id,
       displayName,
       email,
       subscription,

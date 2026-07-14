@@ -213,6 +213,98 @@ export interface L2RunsResponse {
   runs: L2Run[];
 }
 
+// ── L3/L4 multi-dispatch — shapes per "L3 multi-dispatch — Admin Guide" ──────
+// layerId lets the same endpoints target either lens (l3: management/opportunity/deal)
+// or the top-level summary (l4) — "L3" here is just the pipeline-numbering slot.
+
+export type L3LayerId = "l3" | "l4";
+
+export interface L3OptionsResponse {
+  defaultTickers: string[];
+  companies: string[];
+  companyGroups: L1CompanyGroupOption[];
+  layerTypes: Record<L3LayerId, string[]>;
+}
+
+export interface L3DispatchOptions {
+  layerId?: L3LayerId;
+  types?: string[];
+  groupSlug?: string;
+  tickers?: string[];
+  all?: boolean;
+  startFrom?: string;
+  force?: boolean;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface L3TypeAvailability {
+  type: string;
+  available: string[];
+  missing: string[];
+  ready: boolean;
+}
+
+export interface L3PreviewTickerRow {
+  ticker: string;
+  types: L3TypeAvailability[];
+}
+
+export interface L3PreviewResponse {
+  layerId: L3LayerId;
+  types: string[];
+  /** Total across ALL pages — not perTicker.length (that's just this page). */
+  tickerCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  perTicker: L3PreviewTickerRow[];
+}
+
+export interface L3RunTriggerResponse {
+  success: boolean;
+  message: string;
+  run_id: string;
+}
+
+export interface L3RunTickerJob {
+  type: string;
+  jobId: string;
+}
+
+export interface L3RunTickerSummary {
+  ticker: string;
+  status: string;
+  /** Present when status is "queued". */
+  jobs?: L3RunTickerJob[];
+  /** Present when status is "failed". */
+  error?: string;
+}
+
+export interface L3RunMetadata {
+  queued: number;
+  failed: number;
+  tickerCount: number;
+  layerId: L3LayerId;
+  types: string[];
+  perTicker: L3RunTickerSummary[];
+}
+
+export interface L3Run {
+  id: string;
+  status: "running" | "completed" | "failed";
+  started_at?: string | null;
+  ended_at: string | null;
+  records_processed: number | null;
+  error: string | null;
+  metadata: L3RunMetadata | null;
+}
+
+export interface L3RunsResponse {
+  count: number;
+  runs: L3Run[];
+}
+
 // ── BSE Discovery — shapes per "BSE Discovery — Admin Flow" ──────────────────
 
 export interface BseDiscoveryRunTriggerResponse {

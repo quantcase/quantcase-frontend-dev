@@ -2,28 +2,50 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
+import { OB } from "./_components/theme";
+import { StepNav } from "./_components/StepNav";
 import {
-  Slide1Problem,
-  Slide2MOD,
-  Slide3LiveScore,
-  Slide4Demat,
-  Slide5Search,
+  Slide1HowItWorks,
+  Slide2TheScore,
+  Slide3YourJournal,
+  Slide4YourStocks,
+  Slide5YourBroker,
+  Slide6PickAFew,
 } from "./_components/OnboardingSlides";
 
-const TOTAL_SLIDES = 5;
+const TOTAL_SLIDES = 6;
+
+const STEPS = [
+  { label: "HOW IT WORKS" },
+  { label: "THE SCORE" },
+  { label: "YOUR JOURNAL" },
+  { label: "YOUR STOCKS" },
+  { label: "YOUR BROKER" },
+  { label: "PICK A FEW" },
+];
 
 const NEXT_LABELS = [
-  "Continue",
-  "See the framework",
-  "See a live score",
-  "Connect your demat",
-  "Start researching",
+  "Next",
+  "Next",
+  "Next",
+  "Next",
+  "Next",
+  "I'm ready",
 ];
+
+const slideVariants = {
+  enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 32 : -32 }),
+  center: { opacity: 1, x: 0 },
+  exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? -32 : 32 }),
+};
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [current, setCurrent] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [completing, setCompleting] = useState(false);
 
   function patchOnboarding(step: number, completed: boolean) {
@@ -50,21 +72,25 @@ export default function OnboardingPage() {
       await complete();
       return;
     }
-    // fire-and-forget step update
     patchOnboarding(nextSlide, false);
+    setDirection(1);
     setCurrent(nextSlide);
   }
 
   function handleBack() {
-    if (current > 0) setCurrent((c) => c - 1);
+    if (current > 0) {
+      setDirection(-1);
+      setCurrent((c) => c - 1);
+    }
   }
 
   const slides = [
-    <Slide1Problem key="s1" />,
-    <Slide2MOD key="s2" />,
-    <Slide3LiveScore key="s3" />,
-    <Slide4Demat key="s4" onSkip={complete} />,
-    <Slide5Search key="s5" />,
+    <Slide1HowItWorks key="s1" />,
+    <Slide2TheScore key="s2" />,
+    <Slide3YourJournal key="s3" />,
+    <Slide4YourStocks key="s4" onSkip={complete} />,
+    <Slide5YourBroker key="s5" />,
+    <Slide6PickAFew key="s6" />,
   ];
 
   return (
@@ -74,95 +100,37 @@ export default function OnboardingPage() {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "#F5F5F5",
+        background: OB.bg,
         overflow: "hidden",
       }}
     >
-      {/* Nav bar */}
-      <nav
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "18px 48px",
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
-          background: "#F5F5F5",
-          flexShrink: 0,
-          zIndex: 10,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-ibm-plex-serif), Georgia, serif",
-            fontSize: 20,
-            color: "#1a3a5c",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          Quantcase
-        </span>
+      <StepNav steps={STEPS} current={current} />
 
-        {/* Progress dots */}
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                height: 3,
-                borderRadius: 2,
-                transition: "all 0.35s ease",
-                width: i === current ? 36 : 22,
-                background:
-                  i < current
-                    ? "rgba(26,58,92,0.3)"
-                    : i === current
-                    ? "#1a3a5c"
-                    : "#bbbbbb",
-              }}
-            />
-          ))}
-        </div>
-
-        <span
-          style={{
-            fontSize: 12,
-            color: "#bbbbbb",
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-          }}
-        >
-          Indian markets intelligence
-        </span>
-      </nav>
-
-      {/* Slide area */}
       <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
-        {slides.map((slide, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              inset: 0,
-              opacity: i === current ? 1 : 0,
-              transform: i === current ? "translateX(0)" : i < current ? "translateX(-32px)" : "translateX(32px)",
-              pointerEvents: i === current ? "all" : "none",
-              transition: "opacity 0.4s ease, transform 0.4s ease",
-            }}
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={current}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            style={{ position: "absolute", inset: 0 }}
           >
-            {slide}
-          </div>
-        ))}
+            {slides[current]}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* Footer */}
       <footer
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           padding: "18px 48px",
-          borderTop: "1px solid rgba(0,0,0,0.08)",
-          background: "#F5F5F5",
+          borderTop: `1px solid ${OB.borderSoft}`,
+          background: OB.bg,
           flexShrink: 0,
           zIndex: 10,
         }}
@@ -171,50 +139,52 @@ export default function OnboardingPage() {
           onClick={handleBack}
           disabled={current === 0}
           style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
             background: "none",
-            border: current === 0 ? "1px solid transparent" : "1px solid rgba(0,0,0,0.08)",
-            color: current === 0 ? "transparent" : "#777777",
-            padding: "11px 22px",
-            borderRadius: 6,
-            fontSize: 14,
+            border: "none",
+            color: current === 0 ? "transparent" : OB.muted,
+            padding: "10px 4px",
+            fontFamily: OB.mono,
+            fontSize: 12,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
             cursor: current === 0 ? "default" : "pointer",
-            transition: "all 0.2s",
+            transition: "color 0.2s",
           }}
         >
           ← Back
         </button>
 
-        <span style={{ fontSize: 13, color: "#bbbbbb" }}>
-          {current + 1} of {TOTAL_SLIDES}
+        <span style={{ fontFamily: OB.mono, fontSize: 12, letterSpacing: "0.04em", color: OB.faint }}>
+          {String(current + 1).padStart(2, "0")} / {String(TOTAL_SLIDES).padStart(2, "0")}
         </span>
 
         <button
           onClick={handleNext}
           disabled={completing}
           style={{
-            background: "#1a3a5c",
-            color: "#fff",
-            border: "none",
-            padding: "12px 32px",
-            borderRadius: 6,
-            fontSize: 15,
-            fontWeight: 500,
-            cursor: completing ? "not-allowed" : "pointer",
-            letterSpacing: "0.01em",
-            opacity: completing ? 0.7 : 1,
             display: "flex",
             alignItems: "center",
             gap: 8,
-            transition: "background 0.2s",
-          }}
-          onMouseEnter={(e) => {
-            if (!completing) (e.currentTarget as HTMLButtonElement).style.background = "#122844";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "#1a3a5c";
+            background: OB.ink,
+            color: "#fff",
+            border: "none",
+            padding: "12px 26px",
+            borderRadius: 999,
+            fontFamily: OB.mono,
+            fontSize: 12,
+            fontWeight: 600,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            cursor: completing ? "not-allowed" : "pointer",
+            opacity: completing ? 0.7 : 1,
+            transition: "opacity 0.2s",
           }}
         >
-          {completing ? "Setting up…" : NEXT_LABELS[current]} {!completing && "→"}
+          {completing ? "Setting up…" : NEXT_LABELS[current]}
+          {!completing && <ArrowRight style={{ width: 14, height: 14 }} />}
         </button>
       </footer>
     </div>

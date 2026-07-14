@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import OnboardingPage from "@/app/(onboarding)/onboarding/page";
 import { MODSynopsisCard } from "@/components/investor/mod-synopsis-card";
 import { MODBreakdownDrawer } from "@/components/investor/mod-breakdown-drawer";
 import { HoldingsPanel } from "@/components/investor/holdings-panel";
@@ -79,6 +81,14 @@ function fmtIndexPct(pct: number): string {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function InvestorDashboardPage() {
+  const searchParams = useSearchParams();
+  if (searchParams.get("ob") === "true") {
+    return <OnboardingPage />;
+  }
+  return <InvestorDashboardContent />;
+}
+
+function InvestorDashboardContent() {
   const greeting = getGreeting();
   const todayMeta = getTodayMeta();
   const { displayName, smallcase } = useUser();

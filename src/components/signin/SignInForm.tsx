@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { BACKEND_URL } from "@/lib/constants";
+import { GoogleSignInButton } from "@/components/molecules/google-signin-button";
+import type { GoogleAuthResponse } from "@/types/auth";
 
 function FormField({
   id,
@@ -60,6 +62,35 @@ export function SignInForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function routeAfterAuth(accessToken: string, acctType: string | undefined) {
+    if (acctType) localStorage.setItem("qc_account_type", acctType);
+
+    // Always fetch /api/auth/me to get onboarding state and resolve accountType if missing
+    const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (meRes.ok) {
+      const me = await meRes.json();
+      const resolvedType: string | undefined = me?.accountType ?? me?.account_type ?? acctType;
+      if (resolvedType) localStorage.setItem("qc_account_type", resolvedType);
+
+      const onboardingDone: boolean = me?.onboarding_completed ?? true;
+      localStorage.setItem("qc_onboarding_completed", String(onboardingDone));
+
+      if (!onboardingDone) {
+        router.push("/onboarding");
+        return;
+      }
+
+      router.push(resolvedType === "investor" ? "/investor/dashboard" : "/dashboard");
+    } else {
+      // Fallback: route based on signin response accountType
+      router.push(acctType === "investor" ? "/investor/dashboard" : "/dashboard");
+    }
+  }
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -84,45 +115,25 @@ export function SignInForm() {
       localStorage.setItem("qc_rt", data.refresh_token);
 
       const acctType: string | undefined = data?.accountType ?? data?.account_type;
-
-      // Persist so AuthGuard and UserContext can read it synchronously on the next page
-      if (acctType) localStorage.setItem("qc_account_type", acctType);
-
-      // Always fetch /api/auth/me to get onboarding state and resolve accountType if missing
-      const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${data.access_token}` },
-      });
-
-      if (meRes.ok) {
-        const me = await meRes.json();
-        const resolvedType: string | undefined = me?.accountType ?? me?.account_type ?? acctType;
-        if (resolvedType) localStorage.setItem("qc_account_type", resolvedType);
-
-        const onboardingDone: boolean = me?.onboarding_completed ?? true;
-        localStorage.setItem("qc_onboarding_completed", String(onboardingDone));
-
-        if (!onboardingDone) {
-          router.push("/onboarding");
-          return;
-        }
-
-        if (resolvedType === "investor") {
-          router.push("/investor/dashboard");
-        } else {
-          router.push("/dashboard");
-        }
-      } else {
-        // Fallback: route based on signin response accountType
-        if (acctType === "investor") {
-          router.push("/investor/dashboard");
-        } else {
-          router.push("/dashboard");
-        }
-      }
+      await routeAfterAuth(data.access_token, acctType);
     } catch {
       setError("Unable to reach server. Please try again.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleGoogleSuccess(data: GoogleAuthResponse) {
+    setError("");
+    setGoogleLoading(true);
+    try {
+      localStorage.setItem("qc_at", data.access_token);
+      localStorage.setItem("qc_rt", data.refresh_token);
+      await routeAfterAuth(data.access_token, data.user?.accountType);
+    } catch {
+      setError("Unable to reach server. Please try again.");
+    } finally {
+      setGoogleLoading(false);
     }
   }
 
@@ -192,6 +203,22 @@ export function SignInForm() {
           {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
+
+      <div className="flex items-center gap-3" style={{ marginTop: 24 }}>
+        <div style={{ flex: 1, height: 1, background: "#E2E2E2" }} />
+        <span style={{ fontSize: 11, color: "rgba(18,18,18,0.40)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+          or
+        </span>
+        <div style={{ flex: 1, height: 1, background: "#E2E2E2" }} />
+      </div>
+
+      <div style={{ marginTop: 20 }}>
+        <GoogleSignInButton
+          disabled={loading || googleLoading}
+          onSuccess={handleGoogleSuccess}
+          onError={setError}
+        />
+      </div>
 
       {/* <p style={{ fontSize: 12, color: "rgba(18,18,18,0.40)", marginTop: 32, textAlign: "center", lineHeight: 1.6 }}>
         Don&apos;t have an account?{" "}

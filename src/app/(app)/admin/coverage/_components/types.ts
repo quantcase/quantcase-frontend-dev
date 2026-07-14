@@ -409,3 +409,74 @@ export interface PipelineSignalsResponse {
   size: number;
   signals: PipelineSignal[];
 }
+
+// ── Prowess ingestion — KPI catalogue + CSV upload ───────────────────────────
+
+export interface Kpi {
+  id?: string;
+  abbr: string;
+  full_form: string;
+  denomination: string;
+  kpi_type: string;
+  industry: string[];
+  prowess_name: string;
+}
+
+export interface KpisResponse {
+  success: true;
+  data: Kpi[];
+}
+
+export interface KpiCreateResponse {
+  success: true;
+  data: Kpi;
+}
+
+export type ProwessMode = "annual" | "quarterly" | "daily" | "index";
+
+export interface ProwessInsertStatsFinancial {
+  attempted: number;
+  inserted: number;
+  skipped: number;
+}
+
+export interface ProwessInsertStatsMarket {
+  attempted: number;
+  inserted: number;
+}
+
+export interface ProwessFinancialReport {
+  mode: "annual" | "quarterly";
+  table: "prowess_values_new";
+  inserted: boolean;
+  companiesInCsv: number;
+  columnsInCsv: number;
+  /** CSV column name → matched KPI abbr. */
+  dynamicIndicatorsMatched: Record<string, string>;
+  /** CSV columns that didn't match any known KPI — create it (§ KPI Catalogue) and re-preview. */
+  unmatchedColumns: string[];
+  totalRows: number;
+  rowsBySourceType: Record<string, number>;
+  rowsByKpi: Record<string, number>;
+  /** Only present once /run has actually inserted. */
+  insertStats?: ProwessInsertStatsFinancial;
+}
+
+export interface ProwessMarketReport {
+  mode: "daily" | "index";
+  table: "nse_equity_new";
+  inserted: boolean;
+  type: "ohlcv";
+  recordsParsed: number;
+  /** Companies/indices the parser couldn't map — review, not necessarily an error. */
+  skippedName: number;
+  /** Only present once /run has actually inserted. */
+  insertStats?: ProwessInsertStatsMarket;
+}
+
+export type ProwessIngestReport = ProwessFinancialReport | ProwessMarketReport;
+
+export interface ProwessIngestResponse {
+  success: true;
+  data: ProwessIngestReport;
+}

@@ -285,7 +285,7 @@ export function ProwessIngestionTab() {
               value={rowLimit}
               onChange={(e) => handleRowLimitChange(e.target.value.replace(/[^0-9]/g, ""))}
               placeholder="e.g. 500 for a smoke test"
-              className="rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)] w-56"
+              className="rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:border-hair-strong w-56"
             />
           </div>
 

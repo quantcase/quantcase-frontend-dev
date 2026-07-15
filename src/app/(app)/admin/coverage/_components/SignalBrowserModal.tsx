@@ -10,7 +10,7 @@ const BASE = `${BACKEND_URL}/admin/pipeline-jobs`;
 const SIZE = 20;
 
 const INPUT_CLS =
-  "rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]";
+  "rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:border-hair-strong";
 
 const DOC_TYPE_OPTIONS: { value: SignalSourceDocType | "all"; label: string }[] = [
   { value: "all", label: "All" },

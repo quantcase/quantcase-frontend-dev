@@ -1,11 +1,3 @@
-export interface HoldingNote {
-  id: string;
-  holding_id: string;
-  note_text: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface HoldingMarketData {
   ltp: number | null;
   change: number | null;
@@ -24,7 +16,6 @@ export interface Holding {
   updated_at: string;
   user_portfolio_id: string | null;
   shadow_portfolio_id: string | null;
-  notes: HoldingNote[];
   market_data?: HoldingMarketData | null;
   broker: string | null;            // broker display name, null for uploaded holdings
   quantity?: number | null;         // optional; null for uploaded holdings
@@ -41,20 +32,3 @@ export interface UserPortfolio {
   portfolio?: null;
 }
 
-export interface ShadowPortfolioData {
-  id: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-  holdings: Holding[];
-}
-
-export interface AddShadowHoldingPayload {
-  ticker: string;
-}
-
-export interface UpdateHoldingPayload {
-  ticker?: string;
-  amount_invested?: number;
-  invested_at?: string;
-}

@@ -306,7 +306,7 @@ function HtmlSkillsPage() {
                 value={selectedSlug ?? ""}
                 onChange={(e) => setSelectedSlug(e.target.value || null)}
                 disabled={loading}
-                className={`w-full appearance-none rounded-md border border-[var(--qc-border-default)] bg-card pl-3 pr-8 py-1.5 text-[13px] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer ${selectedSlug ? "text-[var(--qc-ink)]" : "text-ink-3"}`}
+                className={`w-full appearance-none rounded-md border border-[var(--qc-border-default)] bg-card pl-3 pr-8 py-1.5 text-[13px] outline-none focus:border-hair-strong disabled:opacity-50 cursor-pointer ${selectedSlug ? "text-[var(--qc-ink)]" : "text-ink-3"}`}
               >
                 <option value="" disabled={skills.length > 0}>
                   {loading ? "Loading…" : skills.length === 0 ? "No skills" : "Select a skill…"}
@@ -408,7 +408,7 @@ function HtmlSkillsPage() {
                         }}
                         disabled={calls.length === 0}
                         title={`Fiscal year / quarter for this ${historic ? "historic" : "incremental"} run`}
-                        className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-card pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
+                        className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-card pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:border-hair-strong disabled:opacity-50 cursor-pointer"
                       >
                         {calls.length === 0 && <option value="">No calls</option>}
                         {calls.map((c) => (

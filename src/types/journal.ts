@@ -1,114 +1,136 @@
-export type ThesisHealth = "intact" | "partial" | "broken" | "none";
-export type Pillar = "mgmt" | "opp" | "deal";
-export type ModRating = "STRONG" | "FAIR" | "STRETCHED";
-export type Dimension = "M" | "O" | "D";
-export type SignalType = "green" | "amber" | "red" | "neutral";
-export type PriceDir = "pos" | "neg";
+// Unified Journal domain model.
+//
+// A *journal* is a named container of stock tickers; each ticker carries multiple
+// timestamped *entries* that are either a plain note or a full M/O/D thesis.
+// Every user auto-gets two default journals — Holdings (auto-synced from real
+// holdings, add-only) and Tracking (user-managed) — and can create custom ones.
+// See docs / the Investment Journal integration guide for the API contract.
 
-export interface SubScore {
-  label: string;
-  pillar: Pillar;
-  score: number;
+export type Dimension = "M" | "O" | "D";
+export type ThesisHealth = "intact" | "partial" | "broken" | "none";
+export type JournalKind = "holdings" | "tracking" | "custom";
+export type MarketConviction = "POSITIVE" | "NEUTRAL" | "WATCH";
+export type TickerSource = "manual" | "holdings_sync";
+export type EntryType = "note" | "thesis";
+
+// ── Journal ─────────────────────────────────────────────────────────────────
+
+export interface Journal {
+  id: string;
+  name: string;
+  kind: JournalKind;
+  isDefault: boolean;
+  tickerCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export type PortfolioType = "user" | "shadow";
+// ── Ticker + live market data ───────────────────────────────────────────────
 
-export interface JournalEntry {
-  entryId: string;
+export interface TickerMarket {
+  ltp: number | null;
+  change: number | null;
+  changePercent: number | null;
+  qcScore: number | null;
+  conviction: MarketConviction | null;
+  thesisTags: string[];
+}
+
+// ── Entry (discriminated on `type`) ─────────────────────────────────────────
+// A note carries only `noteText`; a thesis carries dimension/subFactors/thesis/
+// conviction and gets AI-evaluated for thesis health. Always branch on `type`
+// before reading fields — never read thesis fields off a note.
+
+export interface NoteEntry {
+  id: string;
+  type: "note";
+  noteText: string;
+  dimension: null;
+  subFactors: null;
+  thesis: null;
+  conviction: null;
+  thesisHealth: null;
+  aiNudge: null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ThesisEntry {
+  id: string;
+  type: "thesis";
+  noteText: null;
   dimension: Dimension;
   subFactors: string[];
   thesis: string;
   conviction: 1 | 2 | 3 | 4 | 5;
-  aiNudge: string | null;
-  updatedAt: string;
-  portfolioType: PortfolioType;
-}
-
-export interface JournalEntryItem {
-  symbol: string;
-  name: string | null;
-  sector: string | null;
-  capType: string | null;
-  modScore: number;
-  modRating: ModRating;
-  trendDir: "up" | "down" | "flat" | null;
-  pnl: number;
-  pnlPct: number;
   thesisHealth: ThesisHealth;
-  alert: string | null;
-  subScores: SubScore[];
-  journal: JournalEntry | null;
-  portfolioType: PortfolioType;
+  aiNudge: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface JournalSummary {
-  intact: number;
-  partial: number;
-  broken: number;
-  none: number;
+export type JournalEntry = NoteEntry | ThesisEntry;
+
+// ── Journal detail (tickers with market data + latest entry) ────────────────
+
+export interface JournalTicker {
+  ticker: string;
+  source: TickerSource;
+  addedAt: string;
+  entryCount: number;
+  market: TickerMarket;
+  latestEntry: JournalEntry | null;
+  latestThesisHealth: ThesisHealth | null; // null = no thesis entries yet
+}
+
+export interface JournalDetail {
+  journal: Journal;
+  tickers: JournalTicker[];
+}
+
+// ── Request / response shapes ───────────────────────────────────────────────
+
+export interface AddTickersResponse {
+  added: number;
+  tickers: string[];
+}
+
+export interface EvaluateResponse {
+  entryId: string;
+  thesisHealth: ThesisHealth;
+  aiNudge: string | null;
+  evaluatedAt: string;
+}
+
+export interface SyncHoldingsResponse {
+  journalId: string;
+  added: number;
   total: number;
-  entryCount: number;   // lifetime count of journal rows, monotonic
-  streakDays: number;   // consecutive-day writing streak ending today (0 = no active streak)
 }
 
-export type JournalChangeKind = "score" | "guidance" | "thesis" | "event" | "news";
-
-export interface JournalChange {
-  symbol: string;
-  thesisHealth: ThesisHealth;   // drives the dot color
-  description: string;
-  changedAt: string;            // ISO 8601
-  kind?: JournalChangeKind;
-  delta?: number;               // optional signed score delta (not yet populated by backend)
-}
-
-export interface JournalEntriesResponse {
-  summary: JournalSummary;
-  entries: JournalEntryItem[];
-  changes: JournalChange[];
-}
-
-export interface StockSignal {
-  label: string;
-  type: SignalType;
-}
-
-export interface JournalPendingHolding {
-  symbol: string;
-  name: string | null;
-  sector: string | null;
-  capType: string | null;
-  price: number;
-  priceChange: number;
-  priceChangeDir: PriceDir;
-  mod: { M: number | null; O: number | null; D: number | null };
-  aiContext: { M: string | null; O: string | null; D: string | null };
-  signals: StockSignal[];
-  subFactors: { M: string[]; O: string[]; D: string[] };
-  prompts: string[];
-  portfolioType: PortfolioType;
-}
-
-export interface JournalPendingResponse {
-  totalHoldings: number;
-  withThesis: number;
-  pending: number;
-  holdings: JournalPendingHolding[];
-}
-
-export interface SaveEntryRequest {
-  symbol: string;
-  portfolioType: PortfolioType;
+export type NoteBody = { noteText: string };
+export type ThesisBody = {
   dimension: Dimension;
   subFactors: string[];
   thesis: string;
   conviction: number;
-}
+};
+export type EntryBody = NoteBody | ThesisBody;
 
-export interface SaveEntryResponse {
-  entryId: string;
-  holdingId: string;
-  thesisHealth: ThesisHealth;
-  aiNudge: string | null;
-  createdAt: string;
-}
+// ── Domain constants + derivations ──────────────────────────────────────────
+
+export const SUB_FACTORS: Record<Dimension, string[]> = {
+  M: ["Guidance Accuracy", "Capital Allocation", "Disclosure Honesty"],
+  O: ["Industry Tailwind", "Distribution Strength", "Competitive Edge", "TAM Expansion"],
+  D: ["Valuation", "Earnings Growth/Quality", "P/E Re-rating Potential", "Risk-Reward"],
+};
+
+export const DIMENSION_LABEL: Record<Dimension, string> = {
+  M: "Management",
+  O: "Opportunity",
+  D: "Deal",
+};
+
+// A ticker is "pending" (needs a thesis) when it has no thesis entries yet.
+// `null` = no thesis; "none" = a thesis that evaluated to a neutral outcome.
+export const isPending = (t: JournalTicker) => t.latestThesisHealth === null;

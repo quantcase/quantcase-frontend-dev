@@ -53,7 +53,7 @@ export function GroupConfigTag({ group, configKeys, onTagged }: Props) {
         <select
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          className="flex-1 max-w-sm rounded-md border border-hair px-3 py-2 text-[13px] text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+          className="flex-1 max-w-sm rounded-md border border-hair px-3 py-2 text-[13px] text-ink focus:outline-none focus:border-hair-strong"
         >
           <option value="">Untagged</option>
           {configKeys.map((c) => (

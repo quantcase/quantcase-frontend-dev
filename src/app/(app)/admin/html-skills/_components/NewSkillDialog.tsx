@@ -94,7 +94,7 @@ export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Pro
                 value={form.name}
                 onChange={(e) => set("name", e.target.value)}
                 placeholder="Management Quality Card"
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               />
             </div>
             <div>
@@ -105,7 +105,7 @@ export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Pro
                 value={form.slug}
                 onChange={(e) => set("slug", e.target.value.toLowerCase().replace(/\s+/g, "-"))}
                 placeholder="mgmt-quality-card"
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] font-mono text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] font-mono text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               />
             </div>
           </div>
@@ -118,7 +118,7 @@ export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Pro
               <select
                 value={form.category}
                 onChange={(e) => set("category", e.target.value as PluginCategory)}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {(Object.keys(CATEGORY_LABELS) as PluginCategory[]).map((c) => (
                   <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
@@ -132,7 +132,7 @@ export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Pro
               <select
                 value={form.model}
                 onChange={(e) => set("model", e.target.value)}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {MODEL_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -147,7 +147,7 @@ export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Pro
                 type="number"
                 value={form.max_tokens}
                 onChange={(e) => set("max_tokens", Number(e.target.value))}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               />
             </div>
           </div>
@@ -160,7 +160,7 @@ export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Pro
               <select
                 value={form.max_transcript_qtrs ?? ""}
                 onChange={(e) => set("max_transcript_qtrs", e.target.value === "" ? null : Number(e.target.value))}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {QTR_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -174,7 +174,7 @@ export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Pro
               <select
                 value={form.max_ppt_qtrs ?? ""}
                 onChange={(e) => set("max_ppt_qtrs", e.target.value === "" ? null : Number(e.target.value))}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {QTR_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -188,7 +188,7 @@ export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Pro
               <select
                 value={form.max_annual_report_years ?? ""}
                 onChange={(e) => set("max_annual_report_years", e.target.value === "" ? null : Number(e.target.value))}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {ANNUAL_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -206,7 +206,7 @@ export function NewSkillDialog({ open, creating, error, onClose, onCreate }: Pro
               onChange={(e) => set("skill_prompt", e.target.value)}
               rows={6}
               placeholder="You are a financial analyst. Generate an HTML card…"
-              className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:ring-1 focus:ring-[var(--qc-ink)] resize-none"
+              className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
             />
           </div>
 

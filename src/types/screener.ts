@@ -54,34 +54,6 @@ export interface BasketStocksApiResponse {
   stocks: BasketStock[];
 }
 
-// ── Watchlist types ───────────────────────────────────────────────────────────
-
-interface WatchlistAsset {
-  id: string;
-  watchlist_id: string;
-  symbol: string;
-  added_on: string;
-  notes: string | null;
-}
-
-export interface Watchlist {
-  id: string;
-  user_id: string;
-  name: string;
-  total_assets: number;
-  created_at: string;
-  updated_at: string;
-  assets: WatchlistAsset[];
-}
-
-export interface WatchlistsApiResponse {
-  watchlists: Watchlist[];
-}
-
-export interface WatchlistApiResponse {
-  watchlist: Watchlist;
-}
-
 // ── Stock types ───────────────────────────────────────────────────────────────
 
 interface StockData {

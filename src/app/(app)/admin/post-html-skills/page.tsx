@@ -209,7 +209,7 @@ export default function PostHtmlSkillsPage() {
               value={fiscalYear}
               onChange={(e) => setFiscalYear(e.target.value)}
               placeholder="FY2026"
-              className="w-28 rounded-md border border-hair bg-card px-2.5 py-1.5 text-[12px] text-ink outline-none focus:ring-1 focus:ring-ink"
+              className="w-28 rounded-md border border-hair bg-card px-2.5 py-1.5 text-[12px] text-ink outline-none focus:border-hair-strong"
             />
           </div>
           <div>
@@ -218,7 +218,7 @@ export default function PostHtmlSkillsPage() {
               value={quarter}
               onChange={(e) => setQuarter(e.target.value)}
               placeholder="Q3"
-              className="w-20 rounded-md border border-hair bg-card px-2.5 py-1.5 text-[12px] text-ink outline-none focus:ring-1 focus:ring-ink"
+              className="w-20 rounded-md border border-hair bg-card px-2.5 py-1.5 text-[12px] text-ink outline-none focus:border-hair-strong"
             />
           </div>
           <CheckboxField

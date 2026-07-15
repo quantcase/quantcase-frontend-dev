@@ -222,7 +222,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                 type="text"
                 value={name}
                 onChange={(e) => { setName(e.target.value); mark(); }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               />
             </div>
           </div>
@@ -238,7 +238,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
               <select
                 value={category}
                 onChange={(e) => { setCategory(e.target.value as PluginCategory); mark(); }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {ALL_CATEGORIES.map((c) => (
                   <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
@@ -253,7 +253,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
             <select
               value={model ?? ""}
               onChange={(e) => { setModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
-              className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
             >
               {isConfig && (
                 <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.model)?.label ?? skill.model})</option>
@@ -276,7 +276,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                 else setMaxTokens(Number(e.target.value));
                 mark();
               }}
-              className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
             />
           </div>
         </div>
@@ -304,7 +304,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   if (historic) setHistoricMaxTranscriptQtrs(v); else setMaxTranscriptQtrs(v);
                   mark();
                 }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {QTR_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -320,7 +320,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   if (historic) setHistoricMaxPptQtrs(v); else setMaxPptQtrs(v);
                   mark();
                 }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {QTR_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -336,7 +336,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   if (historic) setHistoricMaxAnnualReportYears(v); else setMaxAnnualReportYears(v);
                   mark();
                 }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {ANNUAL_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -352,7 +352,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   if (historic) setHistoricMaxMarketDataMonths(v); else setMaxMarketDataMonths(v);
                   mark();
                 }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {MARKET_DATA_MONTHS_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -410,7 +410,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   min={0}
                   value={maxBaseAnalyses}
                   onChange={(e) => { setMaxBaseAnalyses(Number(e.target.value)); mark(); }}
-                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
                 />
               </div>
             )}
@@ -595,7 +595,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
             value={prompt}
             onChange={(e) => { setPrompt(e.target.value); mark(); }}
             rows={18}
-            className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:ring-1 focus:ring-[var(--qc-ink)] resize-none"
+            className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
             placeholder="Enter the instructional prompt for this skill…"
           />
         </div>

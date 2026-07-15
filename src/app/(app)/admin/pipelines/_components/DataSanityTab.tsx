@@ -446,7 +446,7 @@ export function DataSanityTab() {
             onChange={(e) => setTicker(e.target.value)}
             onKeyDown={handleTickerKeyDown}
             placeholder="e.g. TCS"
-            className="px-3 py-2 text-sm rounded-md border border-[var(--qc-border-default)] bg-card text-[var(--qc-text-heading)] placeholder:text-ink-3 focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)] w-36 h-[58px]"
+            className="px-3 py-2 text-sm rounded-md border border-[var(--qc-border-default)] bg-card text-[var(--qc-text-heading)] placeholder:text-ink-3 focus:outline-none focus:border-hair-strong w-36 h-[58px]"
           />
         </div>
         <div className="flex-1 min-w-[220px]">
@@ -492,7 +492,7 @@ export function DataSanityTab() {
             max={20}
             value={periods}
             onChange={handlePeriodsChange}
-            className="px-3 py-2 text-sm rounded-md border border-[var(--qc-border-default)] bg-card text-[var(--qc-text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)] w-20 h-[58px] text-center"
+            className="px-3 py-2 text-sm rounded-md border border-[var(--qc-border-default)] bg-card text-[var(--qc-text-heading)] focus:outline-none focus:border-hair-strong w-20 h-[58px] text-center"
           />
         </div>
       </div>

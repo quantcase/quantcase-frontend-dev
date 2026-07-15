@@ -98,7 +98,7 @@ export function ConfigEditor({ config, saving, saveError, onSave, onPreview, pre
               <select
                 value={model}
                 onChange={(e) => { setModel(e.target.value); markDirty(); }}
-                className="appearance-none rounded-md border border-hair bg-card pl-2.5 pr-7 py-1.5 text-[12px] text-ink outline-none focus:ring-1 focus:ring-ink cursor-pointer min-w-[220px]"
+                className="appearance-none rounded-md border border-hair bg-card pl-2.5 pr-7 py-1.5 text-[12px] text-ink outline-none focus:border-hair-strong cursor-pointer min-w-[220px]"
               >
                 {MODEL_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -114,7 +114,7 @@ export function ConfigEditor({ config, saving, saveError, onSave, onPreview, pre
               onChange={(e) => { setMaxTokens(e.target.value); markDirty(); }}
               placeholder={String(DEFAULT_MAX_TOKENS)}
               inputMode="numeric"
-              className="w-28 rounded-md border border-hair bg-card px-2.5 py-1.5 text-[12px] text-ink outline-none focus:ring-1 focus:ring-ink"
+              className="w-28 rounded-md border border-hair bg-card px-2.5 py-1.5 text-[12px] text-ink outline-none focus:border-hair-strong"
             />
           </div>
           <CheckboxField
@@ -131,7 +131,7 @@ export function ConfigEditor({ config, saving, saveError, onSave, onPreview, pre
             value={prompt}
             onChange={(e) => { setPrompt(e.target.value); markDirty(); }}
             rows={16}
-            className="w-full rounded-md border border-hair bg-card px-3 py-2 text-[12px] leading-relaxed text-ink font-mono outline-none focus:ring-1 focus:ring-ink resize-y"
+            className="w-full rounded-md border border-hair bg-card px-3 py-2 text-[12px] leading-relaxed text-ink font-mono outline-none focus:border-hair-strong resize-y"
             spellCheck={false}
           />
         </div>
@@ -144,8 +144,8 @@ export function ConfigEditor({ config, saving, saveError, onSave, onPreview, pre
             value={schemaText}
             onChange={(e) => { setSchemaText(e.target.value); setSchemaError(null); markDirty(); }}
             rows={14}
-            className={`w-full rounded-md border bg-card px-3 py-2 text-[12px] leading-relaxed text-ink font-mono outline-none focus:ring-1 resize-y ${
-              schemaError ? "border-down focus:ring-down" : "border-hair focus:ring-ink"
+            className={`w-full rounded-md border bg-card px-3 py-2 text-[12px] leading-relaxed text-ink font-mono outline-none resize-y ${
+              schemaError ? "border-down focus:ring-1 focus:ring-down" : "border-hair focus:border-hair-strong"
             }`}
             spellCheck={false}
           />

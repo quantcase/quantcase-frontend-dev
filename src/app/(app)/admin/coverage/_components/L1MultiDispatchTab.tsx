@@ -29,7 +29,7 @@ interface ResolveCountResponse {
 const BASE = `${BACKEND_URL}/admin/pipeline-dispatch/l1-multi`;
 
 const INPUT_CLS =
-  "rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:ring-1 focus:ring-ink";
+  "rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:border-hair-strong";
 const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 
 // ── Small shared cells ───────────────────────────────────────────────────────

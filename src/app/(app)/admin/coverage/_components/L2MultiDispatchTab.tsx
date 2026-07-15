@@ -239,7 +239,7 @@ function SkillMultiSelect({
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={skills.length === 0}
-        className="w-full flex items-center justify-between gap-2 rounded-md border border-hair bg-card px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-ink disabled:opacity-40"
+        className="w-full flex items-center justify-between gap-2 rounded-md border border-hair bg-card px-3 py-2 text-sm text-ink focus:outline-none focus:border-hair-strong disabled:opacity-40"
       >
         <span className="truncate text-left">{label}</span>
         <ChevronDown className={`size-3.5 text-ink-3 shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
@@ -659,7 +659,7 @@ export function L2MultiDispatchTab() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as L2SortSource)}
-                  className="rounded-md border border-hair px-2 py-1 text-[11px] text-ink focus:outline-none focus:ring-1 focus:ring-ink"
+                  className="rounded-md border border-hair px-2 py-1 text-[11px] text-ink focus:outline-none focus:border-hair-strong"
                 >
                   {(Object.keys(SORT_LABEL) as L2SortSource[]).map((s) => (
                     <option key={s} value={s}>{SORT_LABEL[s]}</option>

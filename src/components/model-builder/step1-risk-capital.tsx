@@ -123,7 +123,7 @@ function GoalBasedCard({
               onGoalChange(val);
               onSelect();
             }}
-            className="w-full appearance-none rounded-lg border border-hair bg-card px-3 py-2 text-sm focus:outline-none focus:border-ink transition-all pr-8"
+            className="w-full appearance-none rounded-lg border border-hair bg-card px-3 py-2 text-sm focus:outline-none focus:border-hair-strong transition-all pr-8"
             style={{ color: selectedGoal ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
           >
             <option value="" disabled>— pick a goal —</option>
@@ -238,7 +238,7 @@ export function Step1RiskCapital({
       {/* Portfolio Capital */}
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--qc-ink-2)" }}>Portfolio Capital</p>
-        <div className="flex items-center gap-2 rounded-xl border border-hair px-4 py-3 bg-card focus-within:border-ink focus-within:ring-1 focus-within:ring-ink transition-all">
+        <div className="flex items-center gap-2 rounded-xl border border-hair px-4 py-3 bg-card focus-within:border-hair-strong transition-all">
           <span className="text-lg" style={{ color: "var(--qc-ink-2)" }}>₹</span>
           <input
             type="text"
@@ -276,7 +276,7 @@ export function Step1RiskCapital({
           value={portfolioName}
           onChange={(e) => setPortfolioName(e.target.value)}
           placeholder='e.g. "Aggressive Growth — HNI Tier 1" or "Conservative Income — Retiree"'
-          className="w-full rounded-xl border border-hair px-4 py-3 bg-card text-sm focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink transition-all placeholder:text-ink-3"
+          className="w-full rounded-xl border border-hair px-4 py-3 bg-card text-sm focus:outline-none focus:border-hair-strong transition-all placeholder:text-ink-3"
           style={{ color: portfolioName ? "var(--qc-ink)" : undefined }}
         />
       </div>

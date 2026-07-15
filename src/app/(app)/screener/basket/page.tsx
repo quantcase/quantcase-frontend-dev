@@ -31,7 +31,8 @@ import {
 } from "@tanstack/react-table";
 import { useBaskets } from "@/hooks/useBaskets";
 import { useBasketStocks } from "@/hooks/useBasketStocks";
-import { useWatchlists } from "@/hooks/useWatchlists";
+import { useJournals } from "@/hooks/useJournals";
+import { useJournalMutations } from "@/hooks/useJournalMutations";
 import { useIndustryBaskets } from "@/hooks/useIndustryBaskets";
 import { useIndustryBasketStocks } from "@/hooks/useIndustryBasketStocks";
 import type { IndustryBasketStock } from "@/hooks/useIndustryBasketStocks";
@@ -130,16 +131,17 @@ const CATEGORY_ICONS: Record<string, string> = {
   "Event-Driven": "◻",
 };
 
-// ── Add to Watchlist modal ────────────────────────────────────────────────────
+// ── Add to Journal modal ──────────────────────────────────────────────────────
 
-interface AddToWatchlistModalProps {
+interface AddToJournalModalProps {
   symbols: string[];
   onClose: () => void;
   onSuccess: () => void;
 }
 
-function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModalProps) {
-  const { watchlists, loading, addSymbols } = useWatchlists();
+function AddToJournalModal({ symbols, onClose, onSuccess }: AddToJournalModalProps) {
+  const { data: journals, loading } = useJournals();
+  const { createJournal, addTickers } = useJournalMutations();
   const [mode, setMode] = useState<"existing" | "new">("existing");
   const [selectedId, setSelectedId] = useState<string>("");
   const [newName, setNewName] = useState("");
@@ -147,26 +149,31 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
   const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  const handleSubmit = useCallback(async () => {
+  // Holdings is auto-synced/add-only — you don't manually curate it, so only
+  // Tracking + custom journals are valid destinations here.
+  const targetJournals = useMemo(() => (journals ?? []).filter((j) => j.kind !== "holdings"), [journals]);
+
+  const finish = useCallback(() => {
+    setDone(true);
+    setTimeout(() => { onSuccess(); onClose(); }, 1200);
+  }, [onSuccess, onClose]);
+
+  const handleSubmit = useCallback(() => {
     setErr(null);
-    if (mode === "existing" && !selectedId) { setErr("Select a watchlist."); return; }
-    if (mode === "new" && !newName.trim()) { setErr("Enter a watchlist name."); return; }
+    if (mode === "existing" && !selectedId) { setErr("Select a journal."); return; }
+    if (mode === "new" && !newName.trim()) { setErr("Enter a journal name."); return; }
 
     setSubmitting(true);
-    try {
-      if (mode === "existing") {
-        await addSymbols(symbols, { watchlistId: selectedId });
-      } else {
-        await addSymbols(symbols, { watchlistName: newName.trim() });
-      }
-      setDone(true);
-      setTimeout(() => { onSuccess(); onClose(); }, 1200);
-    } catch (e) {
-      setErr((e as Error).message);
-    } finally {
-      setSubmitting(false);
+    const onErr = (e: string) => { setErr(e); setSubmitting(false); };
+
+    if (mode === "existing") {
+      addTickers(selectedId, symbols, () => { setSubmitting(false); finish(); }, onErr);
+    } else {
+      createJournal(newName.trim(), (journal) => {
+        addTickers(journal.id, symbols, () => { setSubmitting(false); finish(); }, onErr);
+      }, onErr);
     }
-  }, [mode, selectedId, newName, symbols, addSymbols, onSuccess, onClose]);
+  }, [mode, selectedId, newName, symbols, addTickers, createJournal, finish]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -181,7 +188,7 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: "1px solid var(--qc-hair)" }}>
           <div>
-            <p className="text-[14px] font-semibold" style={{ color: "var(--qc-ink)" }}>Add to Watchlist</p>
+            <p className="text-[14px] font-semibold" style={{ color: "var(--qc-ink)" }}>Add to Journal</p>
             <p className="text-[11px] mt-0.5" style={{ color: "var(--qc-ink-2)" }}>
               {symbols.length} stock{symbols.length !== 1 ? "s" : ""} selected
             </p>
@@ -222,7 +229,7 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
                       color: mode === m ? "var(--qc-card)" : "var(--qc-ink-2)",
                     }}
                   >
-                    {m === "existing" ? "Existing" : "New list"}
+                    {m === "existing" ? "Existing" : "New journal"}
                   </button>
                 ))}
               </div>
@@ -232,33 +239,33 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
                   <div className="flex justify-center py-4">
                     <Loader2 className="h-4 w-4 animate-spin" style={{ color: "var(--qc-ink-2)" }} />
                   </div>
-                ) : watchlists.length === 0 ? (
+                ) : targetJournals.length === 0 ? (
                   <p className="text-[12px] text-center py-3" style={{ color: "var(--qc-ink-2)" }}>
-                    No watchlists yet. Create a new one.
+                    No journals yet. Create a new one.
                   </p>
                 ) : (
                   <div className="space-y-1.5 max-h-52 overflow-y-auto">
-                    {watchlists.map((wl) => (
+                    {targetJournals.map((j) => (
                       <button
-                        key={wl.id}
-                        onClick={() => setSelectedId(wl.id)}
+                        key={j.id}
+                        onClick={() => setSelectedId(j.id)}
                         className="w-full flex items-center justify-between rounded-[8px] px-3 py-2.5 text-left transition-colors"
                         style={{
-                          background: selectedId === wl.id ? "var(--qc-ink)" : "var(--qc-section)",
-                          border: `1px solid ${selectedId === wl.id ? "var(--qc-ink)" : "var(--qc-hair)"}`,
+                          background: selectedId === j.id ? "var(--qc-ink)" : "var(--qc-section)",
+                          border: `1px solid ${selectedId === j.id ? "var(--qc-ink)" : "var(--qc-hair)"}`,
                         }}
                       >
                         <span
                           className="text-[12px] font-medium"
-                          style={{ color: selectedId === wl.id ? "var(--qc-card)" : "var(--qc-ink)" }}
+                          style={{ color: selectedId === j.id ? "var(--qc-card)" : "var(--qc-ink)" }}
                         >
-                          {wl.name}
+                          {j.name}
                         </span>
                         <span
                           className="text-[10px] font-mono"
-                          style={{ color: selectedId === wl.id ? "rgba(255,255,255,0.6)" : "var(--qc-ink-2)" }}
+                          style={{ color: selectedId === j.id ? "rgba(255,255,255,0.6)" : "var(--qc-ink-2)" }}
                         >
-                          {wl.total_assets} stocks
+                          {j.tickerCount} tickers
                         </span>
                       </button>
                     ))}
@@ -267,13 +274,14 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
               ) : (
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--qc-ink-2)" }}>
-                    Watchlist name
+                    Journal name
                   </label>
                   <input
                     type="text"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="e.g. Value Picks"
+                    maxLength={80}
                     className="w-full rounded-[8px] px-3 py-2 text-[13px] outline-none"
                     style={{
                       border: "1px solid var(--qc-hair)",
@@ -331,7 +339,7 @@ function AddToWatchlistModal({ symbols, onClose, onSuccess }: AddToWatchlistModa
                       Adding…
                     </span>
                   ) : (
-                    "Add to watchlist"
+                    "Add to journal"
                   )}
                 </button>
               </div>
@@ -774,8 +782,8 @@ function BasketContent() {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [pageSize, setPageSize] = useState(20);
 
-  // ── Watchlist modal state ─────────────────────────────────────────────────
-  const [showWatchlistModal, setShowWatchlistModal] = useState(false);
+  // ── Journal modal state ───────────────────────────────────────────────────
+  const [showJournalModal, setShowJournalModal] = useState(false);
 
   // ── Build TanStack columns ────────────────────────────────────────────────
   const columns = useMemo<ColumnDef<BasketStock>[]>(() => {
@@ -923,11 +931,11 @@ function BasketContent() {
 
   return (
     <>
-      {/* Watchlist modal */}
-      {showWatchlistModal && (
-        <AddToWatchlistModal
+      {/* Journal modal */}
+      {showJournalModal && (
+        <AddToJournalModal
           symbols={selectedSymbols}
-          onClose={() => setShowWatchlistModal(false)}
+          onClose={() => setShowJournalModal(false)}
           onSuccess={() => setRowSelection({})}
         />
       )}
@@ -1107,15 +1115,15 @@ function BasketContent() {
                     ))}
                   </select>
 
-                  {/* Add to watchlist CTA */}
+                  {/* Add to journal CTA */}
                   {selectedCount > 0 ? (
                     <button
-                      onClick={() => setShowWatchlistModal(true)}
+                      onClick={() => setShowJournalModal(true)}
                       className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[11px] font-semibold transition-opacity hover:opacity-80"
                       style={{ background: "var(--qc-ink)", color: "var(--qc-card)" }}
                     >
                       <Bookmark className="h-3 w-3" />
-                      Add {selectedCount} to watchlist
+                      Add {selectedCount} to journal
                     </button>
                   ) : (
                     <button
@@ -1124,7 +1132,7 @@ function BasketContent() {
                       style={{ background: "var(--qc-card)", color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)" }}
                     >
                       <Bookmark className="h-3 w-3" />
-                      Watchlist
+                      Journal
                     </button>
                   )}
                 </div>

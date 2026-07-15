@@ -129,7 +129,7 @@ export function AutocompleteInput({
             onFocus={() => setShowSuggestions(true)}
             placeholder={placeholder}
             autoComplete="off"
-            className="w-full pl-12 pr-14 py-4 text-base rounded-xl border border-hair bg-card text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-ink focus:border-transparent"
+            className="w-full pl-12 pr-14 py-4 text-base rounded-xl border border-hair bg-card text-ink placeholder:text-ink-3 focus:outline-none focus:border-hair-strong"
           />
           <button
             type="submit"

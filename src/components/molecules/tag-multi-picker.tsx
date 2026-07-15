@@ -68,7 +68,7 @@ export function TagMultiPicker({
     <div ref={wrapperRef} className={`relative ${disabled ? "opacity-40 pointer-events-none" : ""}`}>
       <div
         onClick={() => { setOpen(true); inputRef.current?.focus(); }}
-        className="flex flex-wrap items-center gap-1.5 rounded-md border border-hair bg-card px-2 py-1.5 min-h-[38px] cursor-text focus-within:ring-1 focus-within:ring-ink"
+        className="flex flex-wrap items-center gap-1.5 rounded-md border border-hair bg-card px-2 py-1.5 min-h-[38px] cursor-text focus-within:border-hair-strong"
       >
         <Search className="size-3.5 text-ink-3 shrink-0" />
         {selected.map((t) => (

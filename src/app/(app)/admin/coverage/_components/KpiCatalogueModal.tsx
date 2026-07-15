@@ -9,7 +9,7 @@ import { Kpi, KpiCreateResponse, KpisResponse } from "./types";
 const BASE = `${BACKEND_URL}/admin/kpis`;
 
 const INPUT_CLS =
-  "rounded-md border border-hair px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]";
+  "rounded-md border border-hair px-3 py-2 text-sm text-ink focus:outline-none focus:border-hair-strong";
 const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 
 const EMPTY_FORM = { abbr: "", full_form: "", denomination: "", kpi_type: "", industry: "", prowess_name: "" };

@@ -14,7 +14,7 @@ import {
 } from "@/types/error-reports";
 
 const INPUT_CLS =
-  "w-full rounded-md border border-hair px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-ink";
+  "w-full rounded-md border border-hair px-3 py-2 text-sm text-ink focus:outline-none focus:border-hair-strong";
 const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 
 interface Props {

@@ -1,7 +1,7 @@
 // Shared formatting + semantic-color helpers for the investment diary / portfolio UI.
 // Decoupled from any mock data so both live-data pages and modals can reuse them.
 
-import type { ThesisHealth, Pillar } from "@/types/journal";
+import type { ThesisHealth } from "@/types/journal";
 
 export function fmt(n: number, digits = 0) {
   return new Intl.NumberFormat("en-IN", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
@@ -38,18 +38,6 @@ const BROKER_LABELS: Record<string, string> = {
 export function brokerLabel(slug: string | null | undefined): string {
   if (!slug) return "Broker";
   return BROKER_LABELS[slug.toLowerCase()] ?? slug.charAt(0).toUpperCase() + slug.slice(1);
-}
-
-export const PILLAR_COLOR: Record<Pillar, string> = {
-  mgmt: "var(--qc-up)",
-  opp:  "var(--qc-blue)",
-  deal: "var(--qc-brand-accent)",
-};
-
-export function modColor(score: number) {
-  if (score >= 80) return "var(--qc-up)";
-  if (score >= 60) return "var(--qc-warn)";
-  return "var(--qc-down)";
 }
 
 export interface ThesisStyle {

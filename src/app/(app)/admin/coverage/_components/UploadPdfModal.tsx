@@ -7,7 +7,7 @@ import { BACKEND_URL } from "@/lib/constants";
 import { BseDocType, DocumentUploadResponse } from "./types";
 
 const INPUT_CLS =
-  "rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]";
+  "rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:border-hair-strong";
 const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 
 const MAX_FILE_BYTES = 75 * 1024 * 1024;

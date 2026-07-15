@@ -131,7 +131,7 @@ function ReportRow({ report, onUpdated }: { report: ErrorReportWithUser; onUpdat
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="w-full rounded-md border border-hair px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)] resize-none bg-card"
+              className="w-full rounded-md border border-hair px-3 py-2 text-sm text-ink focus:outline-none focus:border-hair-strong resize-none bg-card"
               placeholder="Internal notes…"
             />
             <button
@@ -210,7 +210,7 @@ export default function AdminErrorReportsPage() {
             setPage(1);
             setStatusFilter(e.target.value as ErrorReportStatus | "");
           }}
-          className="rounded-md border border-hair px-3 py-2 text-sm text-ink bg-card focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+          className="rounded-md border border-hair px-3 py-2 text-sm text-ink bg-card focus:outline-none focus:border-hair-strong"
         >
           <option value="">All statuses</option>
           {STATUS_OPTIONS.map((s) => (
@@ -224,7 +224,7 @@ export default function AdminErrorReportsPage() {
             setPage(1);
             setCategoryFilter(e.target.value);
           }}
-          className="rounded-md border border-hair px-3 py-2 text-sm text-ink bg-card focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+          className="rounded-md border border-hair px-3 py-2 text-sm text-ink bg-card focus:outline-none focus:border-hair-strong"
         >
           <option value="">All categories</option>
           {ERROR_REPORT_CATEGORIES.map((c) => (

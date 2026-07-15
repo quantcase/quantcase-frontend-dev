@@ -40,7 +40,7 @@ function TextInput({
   suffix?: string;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-hair px-3 py-2 bg-card focus-within:border-ink transition-all">
+    <div className="flex items-center gap-2 rounded-lg border border-hair px-3 py-2 bg-card focus-within:border-hair-strong transition-all">
       {prefix && <span className="text-sm shrink-0" style={{ color: "var(--qc-ink-2)" }}>{prefix}</span>}
       <input
         type={type}
@@ -71,7 +71,7 @@ function SelectInput({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none rounded-lg border border-hair bg-card px-3 py-2 text-sm focus:outline-none focus:border-ink transition-all pr-8"
+        className="w-full appearance-none rounded-lg border border-hair bg-card px-3 py-2 text-sm focus:outline-none focus:border-hair-strong transition-all pr-8"
         style={{ color: value ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
       >
         {placeholder && <option value="" disabled>{placeholder}</option>}

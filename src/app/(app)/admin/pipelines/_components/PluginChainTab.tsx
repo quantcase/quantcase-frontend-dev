@@ -78,7 +78,7 @@ export function PluginChainTab({
               <select
                 value={addSkillId}
                 onChange={(e) => onAddSkillIdChange(e.target.value)}
-                className="flex-1 rounded-md border border-hair bg-card px-3 py-2 text-sm text-ink focus:outline-none focus:border-ink"
+                className="flex-1 rounded-md border border-hair bg-card px-3 py-2 text-sm text-ink focus:outline-none focus:border-hair-strong"
               >
                 <option value="">Select skill to add…</option>
                 {availableToAdd.map((s) => (

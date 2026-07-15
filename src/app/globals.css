@@ -264,6 +264,7 @@
   --color-ink-2:     var(--qc-ink-2);
   --color-ink-3:     var(--qc-ink-3);
   --color-hair:      var(--qc-hair);
+  --color-hair-strong: var(--qc-hair-strong);
 
   /* Brand / accent families (interactive + decorative-but-scoped) */
   --color-brand:            var(--qc-brand-chip);
@@ -346,7 +347,7 @@
     --destructive: #B23A2F;
     --border: var(--qc-hair);
     --input: var(--qc-hair);
-    --ring: var(--qc-ink);
+    --ring: var(--qc-hair-strong);
     --chart-1: var(--qc-ink);
     --chart-2: var(--qc-ink-2);
     --chart-3: var(--qc-ink-3);
@@ -359,10 +360,13 @@
     --sidebar-accent: var(--qc-section);
     --sidebar-accent-foreground: var(--qc-ink);
     --sidebar-border: var(--qc-hair);
-    --sidebar-ring: var(--qc-ink);
+    --sidebar-ring: var(--qc-hair-strong);
 
     --qc-hair:        #E9E7E1;
     --qc-hair-2:      #EFEDE7;
+    /* A step darker than the resting hairline — used for input/button focus so
+       focus reads as a subtly stronger border, not a colored ring. */
+    --qc-hair-strong: #C9C6BE;
 
     /* Back-compat aliases for an earlier token-naming scheme still referenced
        across the app (the text-, surface-, border- and accent- families below).

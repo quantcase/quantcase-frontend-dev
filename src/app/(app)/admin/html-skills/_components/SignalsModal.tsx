@@ -332,7 +332,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
                 value={globalFilter}
                 onChange={(e) => handleGlobalFilter(e.target.value)}
                 placeholder="Search all columns…"
-                className="pl-8 pr-3 py-1.5 rounded-md border border-[var(--qc-border-default)] bg-card text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] w-[220px]"
+                className="pl-8 pr-3 py-1.5 rounded-md border border-[var(--qc-border-default)] bg-card text-[12px] text-[var(--qc-ink)] outline-none focus:border-hair-strong w-[220px]"
               />
             </div>
 
@@ -342,7 +342,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
             <select
               value={getFilterValue("fiscal_year")}
               onChange={(e) => setDropdownFilter("fiscal_year", e.target.value)}
-              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
             >
               <option value="">All FY</option>
               {uniqueFiscalYears.map((fy) => (
@@ -354,7 +354,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
             <select
               value={getFilterValue("quarter")}
               onChange={(e) => setDropdownFilter("quarter", e.target.value)}
-              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
             >
               <option value="">All Q</option>
               {uniqueQuarters.map((q) => (
@@ -366,7 +366,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
             <select
               value={getFilterValue("signal_type")}
               onChange={(e) => setDropdownFilter("signal_type", e.target.value)}
-              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
             >
               <option value="">All Types</option>
               {uniqueSignalTypes.map((t) => (
@@ -378,7 +378,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
             <select
               value={getFilterValue("impact")}
               onChange={(e) => setDropdownFilter("impact", e.target.value)}
-              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] capitalize"
+              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:border-hair-strong capitalize"
             >
               <option value="">All Impact</option>
               {uniqueImpacts.map((v) => (
@@ -390,7 +390,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
             <select
               value={getFilterValue("source_context")}
               onChange={(e) => setDropdownFilter("source_context", e.target.value)}
-              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
             >
               <option value="">All Contexts</option>
               {uniqueSourceContexts.map((v) => (
@@ -420,7 +420,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
                 onChange={(e) => {
                   setPagination({ pageIndex: 0, pageSize: Number(e.target.value) });
                 }}
-                className="rounded-md border border-[var(--qc-border-default)] bg-card px-2 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="rounded-md border border-[var(--qc-border-default)] bg-card px-2 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               >
                 {[25, 50, 100, 200].map((n) => (
                   <option key={n} value={n}>{n}</option>

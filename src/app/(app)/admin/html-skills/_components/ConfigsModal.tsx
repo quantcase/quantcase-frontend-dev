@@ -89,14 +89,14 @@ export function ConfigsModal({ configs, onSelect, onCreate, onDelete, onClose }:
                 value={newKey}
                 onChange={(e) => setNewKey(e.target.value)}
                 placeholder="key (e.g. ppt_only)"
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[12px] font-mono text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[12px] font-mono text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               />
               <input
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Display name"
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[12px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
               />
               <div className="flex items-center gap-2">
                 <button

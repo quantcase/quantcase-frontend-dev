@@ -19,6 +19,13 @@ export function UserMenu({ placement = "side" }: Props) {
   const [helpOpen, setHelpOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
+  // displayName/email come from localStorage (client-only), so the server
+  // renders the fallback icon while the client has the real initial — a
+  // hydration mismatch. Gate the initial behind a mounted flag so the first
+  // client render matches the server, then swap in after hydration.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     if (!open) return;
     function handleClick(e: MouseEvent) {
@@ -49,7 +56,7 @@ export function UserMenu({ placement = "side" }: Props) {
             border: "1px solid var(--qc-hair)",
           }}
         >
-          {initial && initial !== "?" ? (
+          {mounted && initial && initial !== "?" ? (
             <span className="text-[13px] font-semibold">{initial}</span>
           ) : (
             <User size={16} strokeWidth={1.8} />

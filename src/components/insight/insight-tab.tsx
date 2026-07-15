@@ -2,9 +2,7 @@
 
 import React, { Suspense, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { useAnalysis } from "@/hooks/useAnalysis";
-import { useAnalyzeTrigger } from "@/hooks/useAnalyzeTrigger";
 import { useLenses } from "@/hooks/useLenses";
 import { useScreenerData } from "@/hooks/useScreenerData";
 import type { ScreenerData } from "@/types/screener";
@@ -14,10 +12,10 @@ import { AssetActionBar } from "@/components/molecules/asset-action-bar";
 import { InsightScorecard } from "@/components/insight/insight-scorecard";
 import { InsightLenses } from "@/components/insight/insight-lenses";
 import { InsightSignalMap } from "@/components/insight/insight-signal-map";
+import { InsightEmptyState } from "@/components/insight/insight-empty-state";
 import { LensDrawer } from "@/components/insight/lens-drawer";
 
 import type { InsightType } from "@/types/analysis";
-import type { TranscriptCall } from "@/types/management";
 import { QC } from "@/lib/chart-tokens";
 
 
@@ -248,109 +246,6 @@ const TYPE_VERDICT_LABELS: Record<InsightType, string> = {
   deal: "DEAL VERDICT",
 };
 
-// ─── Analyze prompt ────────────────────────────────────────────────────────────
-
-function AnalyzePromptCard({
-  transcriptCall,
-  type,
-  isAnalyzing,
-  aggregateStatus,
-  progress,
-  analyzeError,
-  onAnalyze,
-}: {
-  transcriptCall: TranscriptCall;
-  type: InsightType;
-  isAnalyzing: boolean;
-  aggregateStatus: string | null;
-  progress: number;
-  analyzeError: string | null;
-  onAnalyze: () => void;
-}) {
-  const buttonLabel = isAnalyzing
-    ? aggregateStatus === "pending" ? "Queued..."
-    : aggregateStatus === "processing" ? "Processing..."
-    : "Starting..."
-    : "Analyze";
-
-  return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--qc-bg)" }}>
-      <div className="w-full max-w-lg space-y-4">
-        {/* Call info card */}
-        <div className="rounded-[10px] p-5" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}>
-          <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)", marginBottom: 4 }}>
-            {TYPE_LABELS[type]} Analysis
-          </p>
-          <h2 style={{ fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-regular)", color: "var(--qc-ink)", margin: "0 0 2px", fontFamily: "var(--qc-font-serif)" }}>{transcriptCall.company_name}</h2>
-          {transcriptCall.basic_industry && (
-            <p style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-3)" }}>{transcriptCall.basic_industry}</p>
-          )}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-4 pt-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
-            {transcriptCall.company && (
-              <div>
-                <p style={{ fontSize: "var(--qc-fz-10)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)" }}>Ticker</p>
-                <p style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{transcriptCall.company}</p>
-              </div>
-            )}
-            <div>
-              <p style={{ fontSize: "var(--qc-fz-10)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)" }}>Quarter</p>
-              <p style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{transcriptCall.quarter} {transcriptCall.fiscal_year}</p>
-            </div>
-            <div>
-              <p style={{ fontSize: "var(--qc-fz-10)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)" }}>Call Date</p>
-              <p style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{transcriptCall.call_date}</p>
-            </div>
-            <div>
-              <p style={{ fontSize: "var(--qc-fz-10)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: "var(--qc-ink-3)" }}>Call ID</p>
-              <p style={{ fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-mono)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", letterSpacing: "var(--qc-track-mono)" }}>{transcriptCall.id}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Action card */}
-        <div className="rounded-[10px] p-5 space-y-4" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}>
-          {!isAnalyzing && !analyzeError && (
-            <p style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-3)" }}>No {TYPE_LABELS[type].toLowerCase()} analysis available yet.</p>
-          )}
-          {analyzeError && (
-            <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-down)" }}>{analyzeError}</p>
-          )}
-          {aggregateStatus === "processing" && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-blue)" }}>Analyzing transcripts...</p>
-                <p style={{ fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-blue)" }}>{progress}%</p>
-              </div>
-              <div className="w-full rounded-full h-2 overflow-hidden" style={{ background: "var(--qc-blue-soft)" }}>
-                <div className="h-full transition-all duration-300 ease-linear" style={{ width: `${progress}%`, background: "var(--qc-blue)" }} />
-              </div>
-            </div>
-          )}
-          <button
-            onClick={onAnalyze}
-            disabled={isAnalyzing}
-            className="w-full font-semibold py-3 px-4 rounded-[8px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)", fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)" }}
-          >
-            {buttonLabel}
-          </button>
-          {transcriptCall.ppt_url && (
-            <a
-              href={transcriptCall.ppt_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-center hover:underline transition-colors"
-              style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-3)" }}
-            >
-              View Presentation →
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Empty / error states ──────────────────────────────────────────────────────
 
 function CenteredMessage({ children, error }: { children: React.ReactNode; error?: boolean }) {
@@ -420,45 +315,39 @@ function InsightTabContent({ type }: { type: InsightType }) {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
 
-  const { data: transcriptCalls, loading: callsLoading, error: callsError } = useTranscriptCalls(symbol);
-  const firstCallId = transcriptCalls[0]?.id ?? "";
-  const { getInsight, loading: insightLoading } = useAnalysis(symbol);
+  const { getInsight, loading: insightLoading, error: insightError } = useAnalysis(symbol);
   const { data: screenerData } = useScreenerData(symbol);
   const insight = getInsight(type);
-
-  const { isAnalyzing, analyzeError, aggregateStatus, progress, trigger } = useAnalyzeTrigger({
-    callId: firstCallId,
-    types: [type],
-    onComplete: () => window.location.reload(),
-  });
 
   const companyInfo = screenerData?.company
     ? { name: screenerData.company.name, exchange: screenerData.company.exchange, sector: screenerData.company.sector, industry: screenerData.company.industry }
     : null;
 
   if (!symbol) return <CenteredMessage error>No symbol provided</CenteredMessage>;
-  if (callsLoading || insightLoading) return (
+  if (insightLoading) return (
     <>
       <InsightPageSkeleton />
       <AssetActionBar ticker={symbol} />
     </>
   );
-  if (callsError) return <CenteredMessage error>Error: {callsError}</CenteredMessage>;
-  if (transcriptCalls.length === 0) return <CenteredMessage>No transcript calls found for {symbol}</CenteredMessage>;
 
+  // No completed analysis for this asset yet (endpoint returned no result for
+  // this type, or a not-found/404). Show a clean "check back later" empty state
+  // inside the normal shell so the company header + action bar stay consistent.
   if (!insight) {
     return (
-      <AnalyzePromptCard
-        transcriptCall={transcriptCalls[0]}
-        type={type}
-        isAnalyzing={isAnalyzing}
-        aggregateStatus={aggregateStatus}
-        progress={progress}
-        analyzeError={analyzeError}
-        onAnalyze={trigger}
-      />
+      <>
+        <ScreenerPageShell companyInfo={companyInfo}>
+          <InsightEmptyState type={type} company={screenerData?.company?.name ?? symbol} />
+        </ScreenerPageShell>
+        <AssetActionBar ticker={symbol} />
+      </>
     );
   }
+
+  // Non-empty error that isn't just "no data" — surface it, but the empty state
+  // above already covers the common no-analysis case.
+  if (insightError && !insight) return <CenteredMessage error>Error: {insightError}</CenteredMessage>;
 
   // Underline sub-tabs so screener scaffolding matches Overview (audit: this page
   // dropped the secondary nav). Only include sections that actually render.

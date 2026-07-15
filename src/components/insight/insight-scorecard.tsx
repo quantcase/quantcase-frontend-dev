@@ -422,7 +422,9 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
   const bandColor = verdictBandColor(insight.verdict_band ?? insight.verdict);
   const bandBg = verdictBandBg(insight.verdict_band ?? insight.verdict);
   const bandLabel = (insight.verdict_band || insight.verdict || "").toUpperCase();
-  const overallScore = getTotalScore(insight.lenses);
+  // Overall score comes straight from the backend (0–100). Fall back to a
+  // lens average only if the top-level score is missing.
+  const overallScore = insight.score > 0 ? Math.round(insight.score) : getTotalScore(insight.lenses);
 
   const radarData: RadarPoint[] = insight.lenses.map((l) => ({
     subject: l.name.toUpperCase(),

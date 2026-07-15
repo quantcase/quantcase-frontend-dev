@@ -7,8 +7,8 @@ import { AssetActionBar } from "@/components/molecules/asset-action-bar";
 import { IMScoreCard } from "@/components/overview/im-score-card";
 import { FundamentalOverviewCard } from "@/components/overview/fundamental-overview-card";
 import { TechnicalsCard, PriceLevelsSection } from "@/components/overview/technicals-card";
-import { InvestmentConclusionCard } from "@/components/overview/investment-conclusion-card";
 import { DecisionIntelligencePanel } from "@/components/overview/decision-intelligence-panel";
+import { OverviewEmptyState } from "@/components/overview/overview-empty-state";
 import { useScreenerData } from "@/hooks/useScreenerData";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { useTechnicals } from "@/hooks/useTechnicals";
@@ -32,7 +32,6 @@ const OVERVIEW_NAV = [
   { id: "section-qc-insight",             label: "QC Insight" },
   { id: "section-technicals",             label: "Technical Snapshot" },
   { id: "section-fundamentals",           label: "Financial Snapshot" },
-  { id: "section-investment-conclusion",  label: "Investment Conclusion" },
 ];
 
 function getRating(scorePct: number): string {
@@ -56,8 +55,8 @@ function OverviewContent() {
   const dealInsight = getInsight("deal");
   const { data: technicalsData, loading: technicalsLoading } = useTechnicals(symbol === "—" ? "" : symbol);
 
-  // Overview analysis
-  const { data: overviewData } = useOverviewFetch(ticker);
+  // Overview analysis (L4 summary)
+  const { data: overviewData, loading: overviewLoading } = useOverviewFetch(ticker);
 
   const mScore = managementInsight?.score ?? null;
   const oScore = opportunityInsight?.score ?? null;
@@ -72,6 +71,19 @@ function OverviewContent() {
   const companyInfo = data?.company
     ? { name: data.company.name, exchange: data.company.exchange, sector: data.company.sector, industry: data.company.industry }
     : null;
+
+  // No L4 summary for this asset (once both the company + analysis fetches settle)
+  // → clean empty state, keeping the company header + action bar for continuity.
+  if (ticker && !overviewLoading && !screenerLoading && !overviewData) {
+    return (
+      <>
+        <ScreenerPageShell companyInfo={companyInfo}>
+          <OverviewEmptyState company={data?.company?.name ?? symbol} />
+        </ScreenerPageShell>
+        <AssetActionBar ticker={symbol} />
+      </>
+    );
+  }
 
   return (
     <>
@@ -169,18 +181,6 @@ function OverviewContent() {
           {/* Fundamentals */}
           <div id="section-fundamentals">
             {data && <FundamentalOverviewCard data={data} symbol={symbol} overviewData={overviewData} />}
-          </div>
-
-          {/* Investment Conclusion */}
-          <div id="section-investment-conclusion">
-            <InvestmentConclusionCard
-              dealData={null}
-              oppTakeaways={null}
-              technicalsData={technicalsData ?? null}
-              rating={rating}
-              oppInsight={opportunityInsight ?? null}
-              overviewData={overviewData}
-            />
           </div>
 
         </div>

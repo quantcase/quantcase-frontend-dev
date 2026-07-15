@@ -54,15 +54,3 @@ export interface OverviewAnalysis {
   ic_metrics?: IcMetric[];
 }
 
-export interface OverviewAnalysisApiResponse {
-  success: boolean;
-  data: OverviewAnalysis;
-}
-
-export interface OverviewTriggerResponse {
-  success: boolean;
-  message: string;
-  callId: string;
-  ticker: string;
-  jobId: string;
-}

@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import { BACKEND_URL } from '@/lib/constants';
 import { apiCall } from '@/lib/api';
-import { InsightData, InsightType } from '@/types/analysis';
+import { InsightData, InsightType, L3AnalysisResponse } from '@/types/analysis';
+import { adaptL3Results } from '@/lib/analysis-adapter';
 
-interface AnalysisApiResponse {
-  success: boolean;
-  data: {
-    insights: InsightData[];
-  };
-}
+// L3 is the current analysis layer served by /api/post-html-analysis.
+const LAYER_ID = 'l3';
 
 interface UseAnalysisResult {
   insights: InsightData[];
@@ -25,16 +22,16 @@ export function useAnalysis(ticker: string): UseAnalysisResult {
   useEffect(() => {
     if (!ticker.trim()) { setLoading(false); return; }
 
-    const url = `${BACKEND_URL}/api/analysis?ticker=${ticker}`;
+    const url = `${BACKEND_URL}/api/post-html-analysis?ticker=${ticker}&layer_id=${LAYER_ID}`;
 
-    apiCall<AnalysisApiResponse>(url, {
+    apiCall<L3AnalysisResponse>(url, {
       onStart: () => {
         setLoading(true);
         setError(null);
         setInsights([]);
       },
       onSuccess: (response) => {
-        setInsights(response.data?.insights ?? []);
+        setInsights(adaptL3Results(response.data?.results ?? []));
         setLoading(false);
       },
       onError: (err) => {

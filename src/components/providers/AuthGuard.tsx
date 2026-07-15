@@ -8,6 +8,15 @@ import type { MeResponse } from "@/types/auth";
 
 const PUBLIC_PATHS = ["/signin", "/", "/register"];
 const ONBOARDING_PATH = "/onboarding";
+const ADMIN_PATH_PREFIXES = ["/admin", "/wealthos", "/model-builder", "/model-analytics"];
+
+function isAdminPath(pathname: string) {
+  return ADMIN_PATH_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+function homePathFor(accountType: string | null) {
+  return accountType === "investor" ? "/investor/dashboard" : "/dashboard";
+}
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -34,6 +43,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const cachedType = localStorage.getItem("qc_account_type");
     if (cachedType === "investor" && pathname === "/dashboard") {
       router.replace("/investor/dashboard");
+      return;
+    }
+
+    // Synchronous guard: block admin-only routes for non-manager accounts
+    if (isAdminPath(pathname) && cachedType && cachedType !== "manager") {
+      router.replace(homePathFor(cachedType));
       return;
     }
 
@@ -69,6 +84,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         }
 
         const acctType = data.accountType ?? data.account_type ?? null;
+
+        // Authoritative guard: block admin-only routes for non-manager accounts
+        if (isAdminPath(pathname) && acctType !== "manager") {
+          router.replace(homePathFor(acctType));
+          return;
+        }
 
         // Investor on manager dashboard
         if (acctType === "investor" && pathname === "/dashboard") {

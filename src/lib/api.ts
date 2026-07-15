@@ -109,7 +109,7 @@ export function apiCall<T>(url: string, callbacks: ApiCallbacks<T>): void {
 
   onStart?.();
 
-  fetch(url)
+  fetch(url, { headers: authHeaders() })
     .then(res => {
       if (!res.ok) {
         throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
@@ -138,7 +138,7 @@ export function rawFetch<T>(url: string, callbacks: ApiCallbacks<T>): void {
 
   onStart?.();
 
-  fetch(url)
+  fetch(url, { headers: authHeaders() })
     .then((res) => {
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
       return res.json();
@@ -158,7 +158,7 @@ export function rawPost<T>(url: string, callbacks: ApiCallbacks<T>, body?: unkno
 
   fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
     body: body ? JSON.stringify(body) : undefined,
   })
     .then((res) => {
@@ -180,7 +180,7 @@ export function rawPut<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknow
 
   fetch(url, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
     body: body ? JSON.stringify(body) : undefined,
   })
     .then((res) => {
@@ -208,7 +208,7 @@ export function rawPostDownload(url: string, callbacks: DownloadCallbacks, body:
 
   fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
     body: JSON.stringify(body),
   })
     .then(async (res) => {
@@ -234,7 +234,7 @@ export function apiPut<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknow
 
   fetch(url, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
     body: body ? JSON.stringify(body) : undefined,
   })
     .then(res => {
@@ -257,7 +257,7 @@ export function apiDelete<T>(url: string, callbacks: ApiCallbacks<T>): void {
 
   onStart?.();
 
-  fetch(url, { method: 'DELETE' })
+  fetch(url, { method: 'DELETE', headers: authHeaders() })
     .then(res => {
       if (!res.ok) throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
       if (res.status === 204) return { success: true };
@@ -284,9 +284,7 @@ export function apiPost<T>(url: string, callbacks: ApiCallbacks<T>, body?: unkno
 
   fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: authHeaders(),
     body: body ? JSON.stringify(body) : undefined,
   })
     .then(res => {

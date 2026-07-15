@@ -17,36 +17,37 @@ import { UserMenu } from "@/components/molecules/user-menu";
 
 const managerNavItems = [
   { label: "Home",     href: "/dashboard",          icon: Home,       isActive: (p: string) => p === "/dashboard" },
-  { label: "WealthOS", href: "/wealthos/dashboard", icon: Briefcase,  isActive: (p: string) => p.startsWith("/wealthos") },
-  { label: "Models",   href: "/model-builder",      icon: TrendingUp, isActive: (p: string) => p === "/model-builder" || p.startsWith("/model-builder/") || p === "/model-analytics" },
+  { label: "WealthOS", href: "/wealthos/dashboard", icon: Briefcase,  isActive: (p: string) => p.startsWith("/wealthos"), adminOnly: true },
+  { label: "Models",   href: "/model-builder",      icon: TrendingUp, isActive: (p: string) => p === "/model-builder" || p.startsWith("/model-builder/") || p === "/model-analytics", adminOnly: true },
   { label: "Settings", href: "/settings",           icon: Settings,   isActive: (p: string) => p.startsWith("/settings") },
-  { label: "HTML Skills", href: "/admin/html-skills",  icon: Code2,    isActive: (p: string) => p.startsWith("/admin/html-skills") },
-  { label: "Post-HTML Skills", href: "/admin/post-html-skills", icon: Sparkles, isActive: (p: string) => p.startsWith("/admin/post-html-skills") },
-  { label: "Coverage",   href: "/admin/coverage",     icon: Activity, isActive: (p: string) => p.startsWith("/admin/coverage") },
-  { label: "Beta Invites", href: "/admin/invites",    icon: Mail,     isActive: (p: string) => p.startsWith("/admin/invites") },
-  { label: "Error Reports", href: "/admin/error-reports", icon: Flag, isActive: (p: string) => p.startsWith("/admin/error-reports") },
-  { label: "Admin",      href: "/admin/pipelines",    icon: Shield,   isActive: (p: string) => p.startsWith("/admin") && !p.startsWith("/admin/html-skills") && !p.startsWith("/admin/post-html-skills") && !p.startsWith("/admin/coverage") && !p.startsWith("/admin/invites") && !p.startsWith("/admin/error-reports") },
+  { label: "HTML Skills", href: "/admin/html-skills",  icon: Code2,    isActive: (p: string) => p.startsWith("/admin/html-skills"), adminOnly: true },
+  { label: "Post-HTML Skills", href: "/admin/post-html-skills", icon: Sparkles, isActive: (p: string) => p.startsWith("/admin/post-html-skills"), adminOnly: true },
+  { label: "Coverage",   href: "/admin/coverage",     icon: Activity, isActive: (p: string) => p.startsWith("/admin/coverage"), adminOnly: true },
+  { label: "Beta Invites", href: "/admin/invites",    icon: Mail,     isActive: (p: string) => p.startsWith("/admin/invites"), adminOnly: true },
+  { label: "Error Reports", href: "/admin/error-reports", icon: Flag, isActive: (p: string) => p.startsWith("/admin/error-reports"), adminOnly: true },
+  { label: "Admin",      href: "/admin/pipelines",    icon: Shield,   isActive: (p: string) => p.startsWith("/admin") && !p.startsWith("/admin/html-skills") && !p.startsWith("/admin/post-html-skills") && !p.startsWith("/admin/coverage") && !p.startsWith("/admin/invites") && !p.startsWith("/admin/error-reports"), adminOnly: true },
 ];
 
 const investorNavItems = [
   { label: "Home",        href: "/investor/dashboard",  icon: Home,      isActive: (p: string) => p === "/investor/dashboard" },
   { label: "Diary",       href: "/diary",                icon: BarChart2, isActive: (p: string) => p.startsWith("/diary") },
   { label: "Settings",    href: "/settings",             icon: Settings,  isActive: (p: string) => p.startsWith("/settings") },
-  { label: "HTML Skills", href: "/admin/html-skills",    icon: Code2,     isActive: (p: string) => p.startsWith("/admin/html-skills") },
-  { label: "Post-HTML Skills", href: "/admin/post-html-skills", icon: Sparkles, isActive: (p: string) => p.startsWith("/admin/post-html-skills") },
-  { label: "Coverage",   href: "/admin/coverage",       icon: Activity,  isActive: (p: string) => p.startsWith("/admin/coverage") },
-  { label: "Beta Invites", href: "/admin/invites",      icon: Mail,      isActive: (p: string) => p.startsWith("/admin/invites") },
-  { label: "Error Reports", href: "/admin/error-reports", icon: Flag,    isActive: (p: string) => p.startsWith("/admin/error-reports") },
+  { label: "HTML Skills", href: "/admin/html-skills",    icon: Code2,     isActive: (p: string) => p.startsWith("/admin/html-skills"), adminOnly: true },
+  { label: "Post-HTML Skills", href: "/admin/post-html-skills", icon: Sparkles, isActive: (p: string) => p.startsWith("/admin/post-html-skills"), adminOnly: true },
+  { label: "Coverage",   href: "/admin/coverage",       icon: Activity,  isActive: (p: string) => p.startsWith("/admin/coverage"), adminOnly: true },
+  { label: "Beta Invites", href: "/admin/invites",      icon: Mail,      isActive: (p: string) => p.startsWith("/admin/invites"), adminOnly: true },
+  { label: "Error Reports", href: "/admin/error-reports", icon: Flag,    isActive: (p: string) => p.startsWith("/admin/error-reports"), adminOnly: true },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { accountType, subscription, openPaywall } = useUser();
+  const { accountType, subscription, openPaywall, isAdmin } = useUser();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => { setMounted(true); }, []);
 
   if (pathname === "/signin") return null;
-  const navItems = mounted && accountType === "investor" ? investorNavItems : managerNavItems;
+  const baseNavItems = mounted && accountType === "investor" ? investorNavItems : managerNavItems;
+  const navItems = baseNavItems.filter((item) => !item.adminOnly || (mounted && isAdmin));
 
   const showTrialDot = subscription?.status === "trialing" && (subscription.days_remaining ?? 0) > 0;
 

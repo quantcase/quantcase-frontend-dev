@@ -11,6 +11,7 @@ interface UserContextValue {
   id: string | null;
   displayName: string | null;
   email: string | null;
+  isAdmin: boolean;
   subscription: Subscription | null;
   onboardingCompleted: boolean;
   onboardingStep: number;
@@ -29,6 +30,7 @@ const UserContext = createContext<UserContextValue>({
   id: null,
   displayName: null,
   email: null,
+  isAdmin: false,
   subscription: null,
   onboardingCompleted: true,
   onboardingStep: 0,
@@ -81,6 +83,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [smallcase, setSmallcase] = useState<SmallcaseConnection | null>(null);
 
   const isAccessBlocked = subscription?.is_access_blocked ?? false;
+  const isAdmin = accountType === "manager";
 
   const openPaywall = useCallback(() => setPaywallOpen(true), []);
   const closePaywall = useCallback(() => setPaywallOpen(false), []);
@@ -128,6 +131,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       id,
       displayName,
       email,
+      isAdmin,
       subscription,
       onboardingCompleted,
       onboardingStep,

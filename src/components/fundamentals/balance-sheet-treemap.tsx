@@ -1,5 +1,6 @@
 import ApexChart from "@/components/molecules/apex-chart";
 import type { FinancialTable } from "@/types/financials";
+import { QC } from "@/lib/chart-tokens";
 
 function fmtCr(value: number): string {
   return `₹${value.toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr`;
@@ -98,7 +99,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
               </span>
             )}
           </div>
-          <ApexChart type="treemap" series={[{ name: "Assets", data: assets }]} options={baseOptions("#3D1C54" /* deep purple: primary asset color */)} height={380} />
+          <ApexChart type="treemap" series={[{ name: "Assets", data: assets }]} options={baseOptions(QC.ink /* primary asset color */)} height={380} />
         </div>
         <div>
           <div
@@ -120,7 +121,7 @@ export function BalanceSheetTreemap({ table }: { table: FinancialTable }) {
               </span>
             )}
           </div>
-          <ApexChart type="treemap" series={[{ name: "Liabilities", data: liabilities }]} options={baseOptions("#B23A2F" /* --qc-down */)} height={380} />
+          <ApexChart type="treemap" series={[{ name: "Liabilities", data: liabilities }]} options={baseOptions(QC.down /* --qc-down */)} height={380} />
         </div>
       </div>
     </div>

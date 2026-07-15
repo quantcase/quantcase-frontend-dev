@@ -35,7 +35,7 @@ function modelsEqual(a: StoredModel, b: StoredModel) {
 
 function SummaryTile({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
+    <div className="rounded-[10px] border border-hair bg-secondary px-4 py-3">
       <p className="text-[10px] uppercase tracking-wider font-medium mb-1" style={{ color: "var(--qc-ink-2)" }}>
         {label}
       </p>
@@ -75,7 +75,7 @@ export default function ModelDetailPage() {
 
   if (loading && !model) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-card flex items-center justify-center">
         <p className="text-sm" style={{ color: "var(--qc-ink-2)" }}>Loading...</p>
       </div>
     );
@@ -83,7 +83,7 @@ export default function ModelDetailPage() {
 
   if (!loading && !model) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen bg-card flex flex-col items-center justify-center gap-4">
         <p className="text-sm font-medium" style={{ color: "var(--qc-ink)" }}>Model not found</p>
         <Link href="/model-builder" className="text-xs" style={{ color: "var(--qc-ink-2)" }}>
           ← Back to Models
@@ -161,7 +161,7 @@ export default function ModelDetailPage() {
   const riskProfile = model!.riskProfile;
 
   return (
-    <div className="min-h-screen pt-4 mb-8 px-4" style={{ background: "#FFFFFF" }}>
+    <div className="min-h-screen pt-4 mb-8 px-4" style={{ background: "var(--qc-card)" }}>
       <div className="mx-auto space-y-6">
 
         {/* ── Page Header ── */}
@@ -173,7 +173,7 @@ export default function ModelDetailPage() {
             <input
               value={draft?.name ?? ""}
               onChange={(e) => updateField("name", e.target.value)}
-              className="text-[28px] font-medium bg-transparent focus:outline-none border-b border-transparent focus:border-[#E2E2E2] transition-colors"
+              className="text-[28px] font-medium bg-transparent focus:outline-none border-b border-transparent focus:border-hair transition-colors"
               style={{ color: "var(--qc-ink)", lineHeight: 1.2 }}
             />
           </div>
@@ -183,7 +183,7 @@ export default function ModelDetailPage() {
               <>
                 <button
                   onClick={handleDiscard}
-                  className="rounded-md border border-[#E2E2E2] px-3 py-1.5 text-sm font-medium transition-colors hover:bg-[#F5F5F5]"
+                  className="rounded-md border border-hair px-3 py-1.5 text-sm font-medium transition-colors hover:bg-secondary"
                   style={{ color: "var(--qc-ink-2)" }}
                 >
                   Discard
@@ -191,7 +191,7 @@ export default function ModelDetailPage() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="rounded-md px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                  className="rounded-md px-3 py-1.5 text-sm font-semibold text-[var(--qc-on-dark)] transition-colors hover:opacity-90 disabled:opacity-50"
                   style={{ background: "var(--qc-ink)" }}
                 >
                   {saving ? "Saving..." : "Save Changes"}
@@ -200,7 +200,7 @@ export default function ModelDetailPage() {
             )}
             <button
               onClick={handleDelete}
-              className="rounded-md border border-[#E2E2E2] px-3 py-1.5 text-sm font-medium transition-colors hover:bg-red-50 hover:border-red-200 hover:text-red-600"
+              className="rounded-md border border-hair px-3 py-1.5 text-sm font-medium transition-colors hover:bg-down-soft hover:border-down hover:text-down"
               style={{ color: "var(--qc-ink-2)" }}
             >
               Delete
@@ -225,9 +225,9 @@ export default function ModelDetailPage() {
           <div
             className="rounded-[10px] px-4 py-3 text-sm font-medium flex items-center justify-between"
             style={{
-              background: totalPct > 100 ? "#FEF2F2" : "#FFF7F0",
-              color:      totalPct > 100 ? "#991B1B" : "#92400E",
-              border:     `1px solid ${totalPct > 100 ? "#FECACA" : "#FED7AA"}`,
+              background: totalPct > 100 ? "var(--qc-down-soft)" : "var(--qc-warn-soft)",
+              color:      totalPct > 100 ? "var(--qc-down)" : "var(--qc-warn)",
+              border:     `1px solid ${totalPct > 100 ? "var(--qc-down-soft)" : "var(--qc-warn-soft)"}`,
             }}
           >
             <span>
@@ -247,13 +247,13 @@ export default function ModelDetailPage() {
 
             {/* Allocation summary bar */}
             {enabledItems.length > 0 && (
-              <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-4 space-y-3">
+              <div className="rounded-[10px] border border-hair bg-secondary p-4 space-y-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: "rgba(18,18,18,0.50)" }}>
                   Allocation Breakdown
                 </p>
                 <div className="flex h-3 rounded-full overflow-hidden gap-0.5">
                   {enabledItems.map((item, i) => {
-                    const SEGMENT_COLORS = ["var(--qc-ink)", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
+                    const SEGMENT_COLORS = ["var(--qc-ink)", "var(--qc-ink-2)", "var(--qc-ink-3)", "var(--qc-hair)", "var(--qc-hair-2)"];
                     return (
                       <div
                         key={item.key}
@@ -263,12 +263,12 @@ export default function ModelDetailPage() {
                     );
                   })}
                   {totalPct < 100 && (
-                    <div style={{ width: `${100 - totalPct}%`, background: "#F0F0F0" }} title="Unallocated" />
+                    <div style={{ width: `${100 - totalPct}%`, background: "var(--qc-hair)" }} title="Unallocated" />
                   )}
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1.5">
                   {enabledItems.map((item, i) => {
-                    const SEGMENT_COLORS = ["var(--qc-ink)", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
+                    const SEGMENT_COLORS = ["var(--qc-ink)", "var(--qc-ink-2)", "var(--qc-ink-3)", "var(--qc-hair)", "var(--qc-hair-2)"];
                     return (
                       <div key={item.key} className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: SEGMENT_COLORS[i % SEGMENT_COLORS.length] }} />
@@ -282,13 +282,13 @@ export default function ModelDetailPage() {
             )}
 
             {/* Asset class toggles + sliders */}
-            <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+            <div className="rounded-[10px] border border-hair bg-secondary p-2">
               <div className="px-2 pt-1 pb-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: "rgba(18,18,18,0.50)" }}>
                   Asset Allocation
                 </p>
               </div>
-              <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4">
+              <div className="rounded-[10px] bg-card border border-[rgba(226,226,226,0.10)] p-4">
                 <AssetClassForm
                   capital={model!.capital}
                   items={assetItems}
@@ -299,13 +299,13 @@ export default function ModelDetailPage() {
 
             {/* Sub-class form for active asset classes */}
             {enabledItems.length > 0 && (
-              <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+              <div className="rounded-[10px] border border-hair bg-secondary p-2">
                 <div className="px-2 pt-1 pb-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: "rgba(18,18,18,0.50)" }}>
                     Sub-class Breakdown
                   </p>
                 </div>
-                <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] px-4">
+                <div className="rounded-[10px] bg-card border border-[rgba(226,226,226,0.10)] px-4">
                   <SubClassForm
                     capital={model!.capital}
                     activeAssetKeys={enabledItems.map((e) => e.key)}
@@ -332,7 +332,7 @@ export default function ModelDetailPage() {
             />
 
             {/* Created / updated metadata */}
-            <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-4 space-y-2">
+            <div className="rounded-[10px] border border-hair bg-card p-4 space-y-2">
               <div className="flex justify-between">
                 <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: "var(--qc-ink-2)" }}>Created</span>
                 <span className="text-xs" style={{ color: "var(--qc-ink)" }}>

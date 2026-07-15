@@ -107,9 +107,9 @@ export function StockBasketsSection() {
   return (
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pb-12">
       {basketsError && (
-        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 mb-6">
-          <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-          <p className="text-sm text-red-600">{basketsError}</p>
+        <div className="flex items-center gap-2 rounded-xl border border-down-soft bg-down-soft px-4 py-3 mb-6">
+          <AlertCircle className="h-4 w-4 text-down flex-shrink-0" />
+          <p className="text-sm text-down">{basketsError}</p>
         </div>
       )}
 

@@ -133,9 +133,9 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
   );
 
   const IMPACT_STYLES: Record<string, string> = {
-    high: "bg-red-50 text-red-700",
-    medium: "bg-amber-50 text-amber-700",
-    low: "bg-zinc-100 text-zinc-500",
+    high: "bg-down-soft text-down",
+    medium: "bg-warn-soft text-warn",
+    low: "bg-secondary text-ink-2",
   };
 
   const SOURCE_CONTEXT_LABELS: Record<string, string> = {
@@ -150,7 +150,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
       columnHelper.accessor("call_date", {
         header: "Date",
         size: 88,
-        cell: (info) => <span className="whitespace-nowrap text-[#888888]">{info.getValue() ?? "—"}</span>,
+        cell: (info) => <span className="whitespace-nowrap text-ink-3">{info.getValue() ?? "—"}</span>,
         sortingFn: "alphanumeric",
       }),
       columnHelper.accessor("fiscal_year", {
@@ -158,7 +158,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
         size: 60,
         filterFn: exactFilter,
         cell: (info) => (
-          <span className="whitespace-nowrap font-mono text-[11px] text-[#888888]">{info.getValue()}</span>
+          <span className="whitespace-nowrap font-mono text-[11px] text-ink-3">{info.getValue()}</span>
         ),
       }),
       columnHelper.accessor("quarter", {
@@ -166,7 +166,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
         size: 44,
         filterFn: exactFilter,
         cell: (info) => (
-          <span className="whitespace-nowrap font-mono text-[11px] text-[#888888]">{info.getValue()}</span>
+          <span className="whitespace-nowrap font-mono text-[11px] text-ink-3">{info.getValue()}</span>
         ),
       }),
       columnHelper.accessor("signal_type", {
@@ -174,7 +174,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
         size: 130,
         filterFn: exactFilter,
         cell: (info) => (
-          <span className="rounded-sm bg-[#F5F5F5] px-2 py-0.5 text-[10px] font-medium text-[#888888] whitespace-nowrap">
+          <span className="rounded-sm bg-secondary px-2 py-0.5 text-[10px] font-medium text-ink-3 whitespace-nowrap">
             {SIGNAL_TYPE_LABELS[info.getValue()] ?? info.getValue()}
           </span>
         ),
@@ -185,8 +185,8 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
         filterFn: exactFilter,
         cell: (info) => {
           const v = info.getValue();
-          if (!v) return <span className="text-[#888888]">—</span>;
-          const cls = IMPACT_STYLES[v] ?? "bg-zinc-100 text-zinc-500";
+          if (!v) return <span className="text-ink-3">—</span>;
+          const cls = IMPACT_STYLES[v] ?? "bg-secondary text-ink-2";
           return (
             <span className={`rounded-sm px-2 py-0.5 text-[10px] font-medium whitespace-nowrap capitalize ${cls}`}>
               {v}
@@ -210,14 +210,14 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
         enableSorting: false,
         cell: (info) => {
           const measures = info.row.original.data?.measures ?? [];
-          if (measures.length === 0) return <span className="text-[#888888]">—</span>;
+          if (measures.length === 0) return <span className="text-ink-3">—</span>;
           return (
             <div className="flex flex-col gap-0.5">
               {measures.slice(0, 2).map((m, i) => (
                 <span key={i} className="whitespace-nowrap text-[11px] text-[var(--qc-ink)]">
                   {m.value_raw ?? "—"}{m.unit ? ` ${m.unit}` : ""}
                   {m.role && m.role !== "guided" && (
-                    <span className="ml-1 text-[10px] text-[#888888]">({m.role})</span>
+                    <span className="ml-1 text-[10px] text-ink-3">({m.role})</span>
                   )}
                 </span>
               ))}
@@ -231,9 +231,9 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
         filterFn: exactFilter,
         cell: (info) => {
           const v = info.getValue();
-          if (!v) return <span className="text-[#888888]">—</span>;
+          if (!v) return <span className="text-ink-3">—</span>;
           return (
-            <span className="whitespace-nowrap text-[11px] text-[#888888]">
+            <span className="whitespace-nowrap text-[11px] text-ink-3">
               {SOURCE_CONTEXT_LABELS[v] ?? v.replace(/_/g, " ")}
             </span>
           );
@@ -244,7 +244,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
         size: 0,
         enableSorting: false,
         cell: (info) => (
-          <span className="line-clamp-2 leading-relaxed text-[#888888] block">
+          <span className="line-clamp-2 leading-relaxed text-ink-3 block">
             {info.getValue()}
           </span>
         ),
@@ -291,32 +291,32 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-      <div className="flex flex-col w-full max-w-[1200px] max-h-[88vh] rounded-[10px] border border-[var(--qc-border-default)] bg-white shadow-xl overflow-hidden">
+      <div className="flex flex-col w-full max-w-[1200px] max-h-[88vh] rounded-[10px] border border-[var(--qc-border-default)] bg-card shadow-xl overflow-hidden">
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between border-b border-[var(--qc-border-default)] px-5 py-3 shrink-0">
           <div className="flex items-center gap-3">
             <h3 className="text-[14px] font-medium text-[var(--qc-ink)]">Signals</h3>
-            <span className="text-[11px] text-[#888888] font-mono">{slug} · {ticker}</span>
-            <span className={`rounded-sm px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${historic ? "bg-amber-50 text-amber-700" : "bg-zinc-100 text-zinc-500"}`}>
+            <span className="text-[11px] text-ink-3 font-mono">{slug} · {ticker}</span>
+            <span className={`rounded-sm px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${historic ? "bg-warn-soft text-warn" : "bg-secondary text-ink-2"}`}>
               {historic ? "Historic" : "Incremental"}
             </span>
             {data && !data.base_missing && (
-              <span className="rounded-sm bg-[#F5F5F5] px-2 py-0.5 text-[11px] font-medium text-[#888888]">
+              <span className="rounded-sm bg-secondary px-2 py-0.5 text-[11px] font-medium text-ink-3">
                 {filteredCount < total
                   ? `${filteredCount.toLocaleString()} of ${total.toLocaleString()}`
                   : `${total.toLocaleString()} total`}
               </span>
             )}
             {data && !historic && !data.base_missing && (
-              <span className="text-[11px] text-[#888888]">
+              <span className="text-[11px] text-ink-3">
                 {data.base_context_count} base {data.base_context_count === 1 ? "analysis" : "analyses"} included
               </span>
             )}
           </div>
           <button
             onClick={onClose}
-            className="flex items-center justify-center size-7 rounded border border-transparent text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-border-default)] transition-colors"
+            className="flex items-center justify-center size-7 rounded border border-transparent text-ink-3 hover:text-[var(--qc-ink)] hover:border-[var(--qc-border-default)] transition-colors"
           >
             <X className="size-4" />
           </button>
@@ -324,15 +324,15 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
 
         {/* ── Toolbar: search + filter dropdowns ── */}
         {data && !data.base_missing && (
-          <div className="flex items-center gap-2 border-b border-[var(--qc-border-default)] px-5 py-2.5 shrink-0 bg-[#FAFAFA]">
+          <div className="flex items-center gap-2 border-b border-[var(--qc-border-default)] px-5 py-2.5 shrink-0 bg-secondary">
             {/* Global search */}
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[#888888]" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-ink-3" />
               <input
                 value={globalFilter}
                 onChange={(e) => handleGlobalFilter(e.target.value)}
                 placeholder="Search all columns…"
-                className="pl-8 pr-3 py-1.5 rounded-md border border-[var(--qc-border-default)] bg-white text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] w-[220px]"
+                className="pl-8 pr-3 py-1.5 rounded-md border border-[var(--qc-border-default)] bg-card text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] w-[220px]"
               />
             </div>
 
@@ -342,7 +342,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
             <select
               value={getFilterValue("fiscal_year")}
               onChange={(e) => setDropdownFilter("fiscal_year", e.target.value)}
-              className="rounded-md border border-[var(--qc-border-default)] bg-white px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
             >
               <option value="">All FY</option>
               {uniqueFiscalYears.map((fy) => (
@@ -354,7 +354,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
             <select
               value={getFilterValue("quarter")}
               onChange={(e) => setDropdownFilter("quarter", e.target.value)}
-              className="rounded-md border border-[var(--qc-border-default)] bg-white px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
             >
               <option value="">All Q</option>
               {uniqueQuarters.map((q) => (
@@ -366,7 +366,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
             <select
               value={getFilterValue("signal_type")}
               onChange={(e) => setDropdownFilter("signal_type", e.target.value)}
-              className="rounded-md border border-[var(--qc-border-default)] bg-white px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
             >
               <option value="">All Types</option>
               {uniqueSignalTypes.map((t) => (
@@ -378,7 +378,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
             <select
               value={getFilterValue("impact")}
               onChange={(e) => setDropdownFilter("impact", e.target.value)}
-              className="rounded-md border border-[var(--qc-border-default)] bg-white px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] capitalize"
+              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] capitalize"
             >
               <option value="">All Impact</option>
               {uniqueImpacts.map((v) => (
@@ -390,7 +390,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
             <select
               value={getFilterValue("source_context")}
               onChange={(e) => setDropdownFilter("source_context", e.target.value)}
-              className="rounded-md border border-[var(--qc-border-default)] bg-white px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="rounded-md border border-[var(--qc-border-default)] bg-card px-2.5 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
             >
               <option value="">All Contexts</option>
               {uniqueSourceContexts.map((v) => (
@@ -406,7 +406,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
                   setColumnFilters([]);
                   setPagination((p) => ({ ...p, pageIndex: 0 }));
                 }}
-                className="text-[11px] text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors ml-1"
+                className="text-[11px] text-ink-3 hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors ml-1"
               >
                 Clear
               </button>
@@ -414,13 +414,13 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
 
             {/* Page size picker */}
             <div className="ml-auto flex items-center gap-1.5">
-              <span className="text-[11px] text-[#888888]">Rows</span>
+              <span className="text-[11px] text-ink-3">Rows</span>
               <select
                 value={pagination.pageSize}
                 onChange={(e) => {
                   setPagination({ pageIndex: 0, pageSize: Number(e.target.value) });
                 }}
-                className="rounded-md border border-[var(--qc-border-default)] bg-white px-2 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="rounded-md border border-[var(--qc-border-default)] bg-card px-2 py-1.5 text-[12px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
               >
                 {[25, 50, 100, 200].map((n) => (
                   <option key={n} value={n}>{n}</option>
@@ -433,22 +433,22 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
         {/* ── Body ── */}
         <div className="flex-1 overflow-auto">
           {loading && (
-            <div className="flex items-center justify-center h-48 gap-3 text-[#888888]">
+            <div className="flex items-center justify-center h-48 gap-3 text-ink-3">
               <Loader2 className="size-5 animate-spin" />
               <span className="text-[13px]">Loading signals…</span>
             </div>
           )}
 
           {error && (
-            <div className="flex items-center gap-2 m-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-[12px] text-red-700">
+            <div className="flex items-center gap-2 m-5 rounded-md border border-down bg-down-soft px-4 py-3 text-[12px] text-down">
               <AlertCircle className="size-4 shrink-0" />
               {error}
             </div>
           )}
 
           {!loading && data?.base_missing && (
-            <div className="flex flex-col items-center justify-center h-48 gap-2 text-[#888888]">
-              <AlertCircle className="size-6 text-amber-600" />
+            <div className="flex flex-col items-center justify-center h-48 gap-2 text-ink-3">
+              <AlertCircle className="size-6 text-warn" />
               <p className="text-[13px]">No base output exists for this ticker yet.</p>
               <p className="text-[12px]">Run Historic first to build a base for incremental signals.</p>
             </div>
@@ -464,7 +464,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
                   />
                 ))}
               </colgroup>
-              <thead className="sticky top-0 bg-white z-10 shadow-[0_1px_0_#E2E2E2]">
+              <thead className="sticky top-0 bg-card z-10 shadow-[0_1px_0_var(--qc-hair)]">
                 {table.getHeaderGroups().map((hg) => (
                   <tr key={hg.id}>
                     {hg.headers.map((header) => {
@@ -474,7 +474,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
                         <th
                           key={header.id}
                           onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
-                          className={`px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888] whitespace-nowrap select-none ${canSort ? "cursor-pointer hover:text-[var(--qc-ink)]" : ""}`}
+                          className={`px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3 whitespace-nowrap select-none ${canSort ? "cursor-pointer hover:text-[var(--qc-ink)]" : ""}`}
                         >
                           <span className="inline-flex items-center gap-1">
                             {flexRender(header.column.columnDef.header, header.getContext())}
@@ -490,9 +490,9 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
                   </tr>
                 ))}
               </thead>
-              <tbody className="divide-y divide-[#E2E2E2]">
+              <tbody className="divide-y divide-hair">
                 {rows.map((row) => (
-                  <tr key={row.id} className="hover:bg-[#FAFAFA] transition-colors">
+                  <tr key={row.id} className="hover:bg-secondary transition-colors">
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="px-3 py-2.5 overflow-hidden">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -505,14 +505,14 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
           )}
 
           {!loading && data && !data.base_missing && filteredCount === 0 && (
-            <p className="text-center py-10 text-[13px] text-[#888888]">No signals match the current filters.</p>
+            <p className="text-center py-10 text-[13px] text-ink-3">No signals match the current filters.</p>
           )}
         </div>
 
         {/* ── Pagination footer ── */}
         {!loading && data && !data.base_missing && filteredCount > 0 && (
-          <div className="flex items-center justify-between border-t border-[var(--qc-border-default)] px-5 py-2.5 shrink-0 bg-[#FAFAFA]">
-            <span className="text-[11px] text-[#888888]">
+          <div className="flex items-center justify-between border-t border-[var(--qc-border-default)] px-5 py-2.5 shrink-0 bg-secondary">
+            <span className="text-[11px] text-ink-3">
               {(() => {
                 const start = pagination.pageIndex * pagination.pageSize + 1;
                 const end = Math.min((pagination.pageIndex + 1) * pagination.pageSize, filteredCount);
@@ -524,14 +524,14 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
               <button
                 onClick={() => table.firstPage()}
                 disabled={!table.getCanPreviousPage()}
-                className="rounded px-2 py-1 text-[11px] text-[#888888] hover:text-[var(--qc-ink)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="rounded px-2 py-1 text-[11px] text-ink-3 hover:text-[var(--qc-ink)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 First
               </button>
               <button
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-                className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-ink-3 hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="size-3.5" />
               </button>
@@ -552,15 +552,15 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
                 }
                 return pages.map((p, i) =>
                   p === "…" ? (
-                    <span key={`ellipsis-${i}`} className="px-1 text-[11px] text-[#888888]">…</span>
+                    <span key={`ellipsis-${i}`} className="px-1 text-[11px] text-ink-3">…</span>
                   ) : (
                     <button
                       key={p}
                       onClick={() => table.setPageIndex(p as number)}
                       className={`size-7 rounded text-[11px] font-medium transition-colors ${
                         p === current
-                          ? "bg-[#0F172B] text-white"
-                          : "border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)]"
+                          ? "bg-ink text-[var(--qc-on-dark)]"
+                          : "border border-[var(--qc-border-default)] text-ink-3 hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)]"
                       }`}
                     >
                       {(p as number) + 1}
@@ -572,14 +572,14 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
               <button
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-                className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-ink-3 hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="size-3.5" />
               </button>
               <button
                 onClick={() => table.lastPage()}
                 disabled={!table.getCanNextPage()}
-                className="rounded px-2 py-1 text-[11px] text-[#888888] hover:text-[var(--qc-ink)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="rounded px-2 py-1 text-[11px] text-ink-3 hover:text-[var(--qc-ink)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 Last
               </button>

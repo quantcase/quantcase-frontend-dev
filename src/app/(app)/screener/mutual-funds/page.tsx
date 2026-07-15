@@ -114,7 +114,7 @@ const COLUMNS: ColDef[] = [
             fontWeight: "var(--qc-w-medium)",
             fontFamily: "var(--qc-font-mono)",
             color:
-              v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
+              v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up)" : "var(--qc-down)",
           }}
         >
           {retPct(v)}
@@ -136,7 +136,7 @@ const COLUMNS: ColDef[] = [
             fontWeight: "var(--qc-w-medium)",
             fontFamily: "var(--qc-font-mono)",
             color:
-              v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
+              v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up)" : "var(--qc-down)",
           }}
         >
           {retPct(v)}
@@ -158,7 +158,7 @@ const COLUMNS: ColDef[] = [
             fontWeight: "var(--qc-w-medium)",
             fontFamily: "var(--qc-font-mono)",
             color:
-              v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up, #059669)" : "var(--qc-down, #dc2626)",
+              v == null ? "var(--qc-ink-2)" : v >= 0 ? "var(--qc-up)" : "var(--qc-down)",
           }}
         >
           {retPct(v)}
@@ -651,9 +651,9 @@ function MfScreenerContent() {
       {/* Table */}
       <div className="max-w-[1400px] mx-auto px-8 py-6">
         {error && (
-          <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 mb-4">
-            <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="flex items-center gap-2 rounded-xl border border-down-soft bg-down-soft px-4 py-3 mb-4">
+            <AlertCircle className="h-4 w-4 text-down flex-shrink-0" />
+            <p className="text-sm text-down">{error}</p>
           </div>
         )}
 

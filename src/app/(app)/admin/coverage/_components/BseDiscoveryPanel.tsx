@@ -29,8 +29,8 @@ import { BsePreviewModal } from "./BsePreviewModal";
 const BASE = `${BACKEND_URL}/admin/bse-discovery`;
 
 const INPUT_CLS =
-  "rounded-md border border-[#E2E2E2] px-3 py-2 text-sm font-mono text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]";
-const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5";
+  "rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]";
+const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 
 const DOC_TYPE_LABEL: Record<BseDiscoveredUrl["doc_type"], string> = {
   transcript: "Transcript",
@@ -45,7 +45,7 @@ const SOURCE_LABEL: Record<BseDiscoveredUrl["source"], string> = {
 
 function Badge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-sm bg-[#F5F5F5] px-1.5 py-0.5 text-[10px] font-medium text-[#888888]">
+    <span className="rounded-sm bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-ink-3">
       {children}
     </span>
   );
@@ -56,20 +56,20 @@ function Badge({ children }: { children: React.ReactNode }) {
 function RunStatusBadge({ status }: { status: BseDiscoveryRun["status"] }) {
   if (status === "completed") {
     return (
-      <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+      <span className="flex items-center gap-1 text-[11px] font-medium text-up">
         <CheckCircle2 className="size-3.5" /> Completed
       </span>
     );
   }
   if (status === "failed") {
     return (
-      <span className="flex items-center gap-1 text-[11px] font-medium text-red-600">
+      <span className="flex items-center gap-1 text-[11px] font-medium text-down">
         <XCircle className="size-3.5" /> Failed
       </span>
     );
   }
   return (
-    <span className="flex items-center gap-1 text-[11px] font-medium text-blue-600">
+    <span className="flex items-center gap-1 text-[11px] font-medium text-blue">
       <Clock className="size-3.5" /> Running
     </span>
   );
@@ -77,19 +77,19 @@ function RunStatusBadge({ status }: { status: BseDiscoveryRun["status"] }) {
 
 function RunHistoryRow({ run }: { run: BseDiscoveryRun }) {
   return (
-    <div className="rounded-[8px] border border-[#F0F0F0] bg-white px-3 py-2 flex items-center gap-4 flex-wrap">
-      <span className="font-mono text-[11px] text-[#888888] w-40 truncate shrink-0">{run.id}</span>
+    <div className="rounded-[8px] border border-hair bg-card px-3 py-2 flex items-center gap-4 flex-wrap">
+      <span className="font-mono text-[11px] text-ink-3 w-40 truncate shrink-0">{run.id}</span>
       <RunStatusBadge status={run.status} />
-      <span className="text-[11px] text-[#888888]">
+      <span className="text-[11px] text-ink-3">
         {run.records_processed != null ? `${run.records_processed} processed` : "—"}
       </span>
       {run.metadata && (
-        <span className="text-[11px] text-[#888888]">
+        <span className="text-[11px] text-ink-3">
           {run.metadata.companies} companies, {run.metadata.total_urls} URLs
         </span>
       )}
-      {run.ended_at && <span className="text-[11px] text-[#888888]">ended {new Date(run.ended_at).toLocaleString()}</span>}
-      {run.status === "failed" && run.error && <span className="text-[11px] text-red-600">{run.error}</span>}
+      {run.ended_at && <span className="text-[11px] text-ink-3">ended {new Date(run.ended_at).toLocaleString()}</span>}
+      {run.status === "failed" && run.error && <span className="text-[11px] text-down">{run.error}</span>}
     </div>
   );
 }
@@ -145,23 +145,23 @@ function UrlRow({
   const [previewOpen, setPreviewOpen] = useState(false);
 
   return (
-    <div className={`rounded-[8px] border border-[#F0F0F0] bg-white p-3 space-y-2.5 ${u.alreadyApproved ? "opacity-60" : ""}`}>
+    <div className={`rounded-[8px] border border-hair bg-card p-3 space-y-2.5 ${u.alreadyApproved ? "opacity-60" : ""}`}>
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[13px] font-medium text-[#0F172B]">{u.company_name}</span>
-        <span className="text-[11px] text-[#888888] font-mono">#{u.scrip_cd}</span>
+        <span className="text-[13px] font-medium text-ink">{u.company_name}</span>
+        <span className="text-[11px] text-ink-3 font-mono">#{u.scrip_cd}</span>
         <Badge>{DOC_TYPE_LABEL[u.doc_type]}</Badge>
         <Badge>{SOURCE_LABEL[u.source]}</Badge>
         {u.alreadyApproved && (
-          <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-sm px-1.5 py-0.5">
+          <span className="flex items-center gap-1 text-[10px] font-medium text-up bg-up-soft border border-up rounded-sm px-1.5 py-0.5">
             <CheckCircle2 className="size-3" /> Already Approved
           </span>
         )}
-        <span className="text-[11px] text-[#888888]">{u.scrape_date}</span>
+        <span className="text-[11px] text-ink-3">{u.scrape_date}</span>
         <a
           href={u.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-[11px] text-[#888888] hover:text-[#0F172B] transition-colors ml-auto"
+          className="flex items-center gap-1 text-[11px] text-ink-3 hover:text-ink transition-colors ml-auto"
         >
           View PDF <ExternalLink className="size-3" />
         </a>
@@ -169,7 +169,7 @@ function UrlRow({
 
       <button
         onClick={() => setPreviewOpen(true)}
-        className="flex items-center gap-1 text-[11px] text-[#888888] hover:text-[#0F172B] transition-colors"
+        className="flex items-center gap-1 text-[11px] text-ink-3 hover:text-ink transition-colors"
       >
         <ChevronDown className="size-3" /> Preview PDF text
       </button>
@@ -183,15 +183,15 @@ function UrlRow({
       )}
 
       {u.willOverwrite && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 space-y-1">
-          <p className="flex items-center gap-1.5 text-[11px] font-medium text-amber-700">
+        <div className="rounded-md border border-warn bg-warn-soft px-2.5 py-2 space-y-1">
+          <p className="flex items-center gap-1.5 text-[11px] font-medium text-warn">
             <AlertCircle className="size-3.5 shrink-0" /> This will overwrite the existing stored URL for this slot.
           </p>
-          <p className="text-[11px] text-amber-700 font-mono break-all">
-            <span className="text-amber-600 font-sans font-normal">old: </span>{u.existingUrl}
+          <p className="text-[11px] text-warn font-mono break-all">
+            <span className="text-warn font-sans font-normal">old: </span>{u.existingUrl}
           </p>
-          <p className="text-[11px] text-amber-700 font-mono break-all">
-            <span className="text-amber-600 font-sans font-normal">new: </span>{u.url}
+          <p className="text-[11px] text-warn font-mono break-all">
+            <span className="text-warn font-sans font-normal">new: </span>{u.url}
           </p>
         </div>
       )}
@@ -230,8 +230,8 @@ function UrlRow({
         <button
           onClick={onApprove}
           disabled={!canApprove || status?.loading}
-          className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-[13px] font-medium text-white transition-opacity disabled:opacity-40 disabled:cursor-not-allowed ${
-            needsOverwriteConfirm && armed ? "bg-red-600 hover:opacity-90" : "bg-[#0F172B] hover:opacity-90"
+          className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-[13px] font-medium text-[var(--qc-on-dark)] transition-opacity disabled:opacity-40 disabled:cursor-not-allowed ${
+            needsOverwriteConfirm && armed ? "bg-down hover:opacity-90" : "bg-ink hover:opacity-90"
           }`}
         >
           {status?.loading && <Loader2 className="size-3.5 animate-spin" />}
@@ -241,16 +241,16 @@ function UrlRow({
       </div>
 
       {u.suggested.company === null && (
-        <p className="flex items-center gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1.5">
+        <p className="flex items-center gap-1.5 text-[11px] text-warn bg-warn-soft border border-warn rounded-md px-2.5 py-1.5">
           <AlertCircle className="size-3.5 shrink-0" />
           Couldn&rsquo;t match this to an existing ticker — enter it manually, or{" "}
-          <button onClick={onUploadInstead} className="underline font-medium hover:text-amber-900">
+          <button onClick={onUploadInstead} className="underline font-medium hover:opacity-80">
             upload the PDF instead
           </button>
           .
         </p>
       )}
-      {status?.error && <p className="text-[11px] text-red-600">{status.error}</p>}
+      {status?.error && <p className="text-[11px] text-down">{status.error}</p>}
     </div>
   );
 }
@@ -385,9 +385,9 @@ export function BseDiscoveryPanel() {
   return (
     <div className="space-y-5 max-w-4xl">
       {/* Intro */}
-      <div className="rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
-        <p className="text-[13px] text-[#0F172B] font-medium">BSE discovery &amp; approval</p>
-        <p className="text-[12px] text-[#888888] mt-1 leading-relaxed">
+      <div className="rounded-md border border-hair bg-secondary px-4 py-3">
+        <p className="text-[13px] text-ink font-medium">BSE discovery &amp; approval</p>
+        <p className="text-[12px] text-ink-3 mt-1 leading-relaxed">
           Scrapes BSE and resolves cover-letter PDFs in the background (~1-2 min). Nothing lands in
           the real tables automatically — review each discovered URL below and Approve it
           explicitly. Approving is idempotent, so it&rsquo;s safe to click twice.
@@ -395,7 +395,7 @@ export function BseDiscoveryPanel() {
       </div>
 
       {/* Trigger */}
-      <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-4 space-y-3">
+      <div className="rounded-[10px] border border-hair bg-card p-4 space-y-3">
         <div className="flex items-end gap-3 flex-wrap">
           <div>
             <label className={LABEL_CLS}>Lookback Days</label>
@@ -411,27 +411,27 @@ export function BseDiscoveryPanel() {
           <button
             onClick={triggerRun}
             disabled={triggering || isRunLive}
-            className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-medium text-[var(--qc-on-dark)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {(triggering || isRunLive) && <Loader2 className="size-3.5 animate-spin" />}
             Run Discovery
           </button>
           <button
             onClick={() => openUploadModal()}
-            className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] bg-white px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors"
+            className="flex items-center gap-1.5 rounded-md border border-hair bg-card px-4 py-2 text-sm font-medium text-ink hover:border-[var(--qc-ink)] transition-colors"
           >
             <Upload className="size-3.5" /> Upload PDF Instead
           </button>
         </div>
 
         {triggerError && (
-          <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+          <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-3 py-2 text-[12px] text-down">
             <AlertCircle className="size-3.5 shrink-0" /> {triggerError}
           </div>
         )}
 
         {activeRun && (
-          <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-[12px] text-blue-700">
+          <div className="flex items-center gap-2 rounded-md border border-blue bg-blue-soft px-3 py-2 text-[12px] text-blue">
             <Loader2 className="size-3.5 shrink-0 animate-spin" />
             Discovery running ({activeRun.id})… this takes ~1-2 minutes.
           </div>
@@ -441,11 +441,11 @@ export function BseDiscoveryPanel() {
       {/* Run history */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Run History</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Run History</span>
           <button
             onClick={loadRuns}
             disabled={runsLoading}
-            className="flex items-center gap-1.5 text-[11px] text-[#888888] hover:text-[#0F172B] disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[11px] text-ink-3 hover:text-ink disabled:opacity-40"
           >
             {runsLoading ? <Loader2 className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
             Refresh
@@ -453,12 +453,12 @@ export function BseDiscoveryPanel() {
         </div>
 
         {runsError && !runsLoading && (
-          <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-sm text-down">
             <AlertCircle className="size-4 shrink-0" /> {runsError}
           </div>
         )}
 
-        {runs.length === 0 && !runsLoading && !runsError && <p className="text-[12px] text-[#888888]">No runs yet.</p>}
+        {runs.length === 0 && !runsLoading && !runsError && <p className="text-[12px] text-ink-3">No runs yet.</p>}
 
         <div className="space-y-1.5">
           {runs.map((run) => <RunHistoryRow key={run.id} run={run} />)}
@@ -468,11 +468,11 @@ export function BseDiscoveryPanel() {
       {/* Discovered URLs */}
       <div className="space-y-2 pt-2">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">
             Discovered URLs {urlsLoading && <span className="normal-case tracking-normal font-normal">— loading…</span>}
           </span>
           <div className="flex items-center gap-3 flex-wrap">
-            <label className="flex items-center gap-1.5 text-[11px] text-[#888888]">
+            <label className="flex items-center gap-1.5 text-[11px] text-ink-3">
               <input
                 type="checkbox"
                 checked={hideApproved}
@@ -480,7 +480,7 @@ export function BseDiscoveryPanel() {
               />
               Hide approved
             </label>
-            <label className="text-[11px] text-[#888888]">Last</label>
+            <label className="text-[11px] text-ink-3">Last</label>
             <input
               type="number"
               min={1}
@@ -488,11 +488,11 @@ export function BseDiscoveryPanel() {
               onChange={(e) => setUrlsDays(e.target.value)}
               className={`${INPUT_CLS} w-16 py-1`}
             />
-            <label className="text-[11px] text-[#888888]">days</label>
+            <label className="text-[11px] text-ink-3">days</label>
             <button
               onClick={loadUrls}
               disabled={urlsLoading}
-              className="flex items-center gap-1.5 text-[11px] text-[#888888] hover:text-[#0F172B] disabled:opacity-40"
+              className="flex items-center gap-1.5 text-[11px] text-ink-3 hover:text-ink disabled:opacity-40"
             >
               {urlsLoading ? <Loader2 className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
               Refresh
@@ -501,13 +501,13 @@ export function BseDiscoveryPanel() {
         </div>
 
         {urlsError && !urlsLoading && (
-          <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-sm text-down">
             <AlertCircle className="size-4 shrink-0" /> {urlsError}
           </div>
         )}
 
         {urls.length === 0 && !urlsLoading && !urlsError && (
-          <p className="text-[12px] text-[#888888]">No discovered URLs in this window.</p>
+          <p className="text-[12px] text-ink-3">No discovered URLs in this window.</p>
         )}
 
         <div className="space-y-1.5">

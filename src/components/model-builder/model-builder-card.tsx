@@ -9,7 +9,7 @@ const RISK_PROFILE_LABELS: Record<string, string> = {
   aggressive:   "Aggressive",
 };
 
-const SEGMENT_COLORS = ["var(--qc-ink)", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
+const SEGMENT_COLORS = ["var(--qc-ink)", "var(--qc-ink-2)", "var(--qc-ink-3)", "var(--qc-hair)", "var(--qc-hair-2)"];
 
 interface ModelBuilderCardProps {
   model: StoredModel;
@@ -24,10 +24,10 @@ export function ModelBuilderCard({ model }: ModelBuilderCardProps) {
   return (
     <Link
       href={`/model-builder/${model.id}`}
-      className="block rounded-xl border border-[#E2E2E2] bg-white hover:shadow-sm hover:border-zinc-300 transition-all cursor-pointer overflow-hidden"
+      className="block rounded-xl border border-hair bg-card hover:shadow-sm hover:border-ink-3 transition-all cursor-pointer overflow-hidden"
     >
       {/* Top strip */}
-      <div className="px-4 pt-4 pb-3 border-b border-[#F0F0F0]">
+      <div className="px-4 pt-4 pb-3 border-b border-hair">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p
@@ -76,7 +76,7 @@ export function ModelBuilderCard({ model }: ModelBuilderCardProps) {
               </span>
               <span
                 className="text-[10px] font-semibold"
-                style={{ color: isOver ? "#dc2626" : isBalanced ? "#059669" : "var(--qc-ink-2)" }}
+                style={{ color: isOver ? "var(--qc-down)" : isBalanced ? "var(--qc-up)" : "var(--qc-ink-2)" }}
               >
                 {Math.round(totalPct)}%
               </span>
@@ -90,7 +90,7 @@ export function ModelBuilderCard({ model }: ModelBuilderCardProps) {
                 />
               ))}
               {totalPct < 100 && (
-                <div style={{ width: `${100 - totalPct}%`, background: "#F0F0F0" }} />
+                <div style={{ width: `${100 - totalPct}%`, background: "var(--qc-hair)" }} />
               )}
             </div>
           </div>
@@ -122,7 +122,7 @@ export function ModelBuilderCard({ model }: ModelBuilderCardProps) {
       {/* Footer */}
       <div
         className="px-4 py-2.5 flex items-center justify-between border-t"
-        style={{ borderColor: "#F0F0F0" }}
+        style={{ borderColor: "var(--qc-hair)" }}
       >
         <span className="text-[10px]" style={{ color: "var(--qc-ink-2)" }}>
           {assetClasses.length} class{assetClasses.length !== 1 ? "es" : ""}

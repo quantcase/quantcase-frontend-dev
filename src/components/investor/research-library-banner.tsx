@@ -25,7 +25,7 @@ export function ResearchLibraryBanner({
       onClick={onOpenJournal ? (e) => { e.preventDefault(); onOpenJournal(); } : undefined}
       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       style={{
-        background: "#0F172B",
+        background: "var(--qc-ink)",
         borderRadius: 14,
         padding: "20px 26px",
         textDecoration: "none",
@@ -69,7 +69,7 @@ export function ResearchLibraryBanner({
               fontSize: "var(--qc-fz-14)",
               fontWeight: "var(--qc-w-semi)",
               fontFamily: "var(--qc-font-sans)",
-              color: "#fff",
+              color: "var(--qc-on-dark)",
               marginBottom: 5,
               letterSpacing: "var(--qc-track-display)",
             }}
@@ -136,7 +136,7 @@ export function ResearchLibraryBanner({
             fontWeight: "var(--qc-w-semi)",
             fontFamily: "var(--qc-font-sans)",
             color: "var(--qc-ink)",
-            background: "#fff",
+            background: "var(--qc-card)",
             borderRadius: 8,
             padding: "8px 18px",
             whiteSpace: "nowrap",

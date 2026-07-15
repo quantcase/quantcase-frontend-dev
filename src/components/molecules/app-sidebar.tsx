@@ -86,7 +86,7 @@ export function AppSidebar() {
                 width: 6,
                 height: 6,
                 borderRadius: "50%",
-                background: "#c8952a",
+                background: "var(--qc-golden-ink)",
                 border: "1.5px solid var(--qc-card)",
               }}
             />
@@ -138,9 +138,9 @@ export function AppSidebar() {
             style={{
               fontSize: 10,
               fontWeight: 600,
-              color: "#c8952a",
-              background: "#fdf6e3",
-              border: "1px solid #EFD6A0",
+              color: "var(--qc-golden-ink)",
+              background: "var(--qc-warn-soft)",
+              border: "1px solid var(--qc-warn-soft)",
               borderRadius: 4,
               padding: "3px 6px",
               textAlign: "center",

@@ -35,14 +35,14 @@ export function GroupConfigTag({ group, configKeys, onTagged }: Props) {
   }
 
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-4 space-y-3">
+    <div className="rounded-[10px] border border-hair bg-card p-4 space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <Tag className="size-4 text-[#888888] shrink-0" />
-          <span className="text-[14px] font-semibold text-[#0F172B]">{group.name}</span>
+          <Tag className="size-4 text-ink-3 shrink-0" />
+          <span className="text-[14px] font-semibold text-ink">{group.name}</span>
         </div>
         {!draft && (
-          <span className="flex items-center gap-1 text-[11px] text-amber-700">
+          <span className="flex items-center gap-1 text-[11px] text-warn">
             <AlertCircle className="size-3.5 shrink-0" />
             Untagged — tickers in this group will 400 on L2 runs.
           </span>
@@ -53,7 +53,7 @@ export function GroupConfigTag({ group, configKeys, onTagged }: Props) {
         <select
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          className="flex-1 max-w-sm rounded-md border border-[#E2E2E2] px-3 py-2 text-[13px] text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]"
+          className="flex-1 max-w-sm rounded-md border border-hair px-3 py-2 text-[13px] text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
         >
           <option value="">Untagged</option>
           {configKeys.map((c) => (
@@ -64,14 +64,14 @@ export function GroupConfigTag({ group, configKeys, onTagged }: Props) {
         <button
           onClick={save}
           disabled={!dirty || saving}
-          className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-4 py-2 text-[13px] font-medium text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-[13px] font-medium text-[var(--qc-on-dark)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {saving && <Loader2 className="size-3.5 animate-spin" />}
           Save
         </button>
       </div>
 
-      {error && <p className="text-[11px] text-red-600">{error}</p>}
+      {error && <p className="text-[11px] text-down">{error}</p>}
     </div>
   );
 }

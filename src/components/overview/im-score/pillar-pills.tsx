@@ -1,9 +1,11 @@
 "use client";
 
+import { PILLAR_MUTED } from "@/lib/chart-tokens";
+
 export const PILLAR_COLORS = {
-  M: { dot: "var(--qc-blue, #2563EB)", seg: "var(--qc-ink)" },
-  O: { dot: "var(--qc-up, #1F7A4A)", seg: "#1E3A2B" },
-  D: { dot: "var(--qc-warn, #B4731A)", seg: "#7A5A12" },
+  M: { dot: "var(--qc-blue, #2563EB)", seg: PILLAR_MUTED.M },
+  O: { dot: "var(--qc-up, #1F7A4A)", seg: PILLAR_MUTED.O },
+  D: { dot: "var(--qc-warn, #B4731A)", seg: PILLAR_MUTED.D },
 } as const;
 
 export type PillarKey = "M" | "O" | "D";

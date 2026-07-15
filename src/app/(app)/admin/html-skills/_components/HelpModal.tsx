@@ -20,13 +20,13 @@ export function HelpModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-      <div className="flex flex-col w-full max-w-[760px] max-h-[85vh] rounded-[10px] border border-[var(--qc-border-default)] bg-white shadow-xl overflow-hidden">
+      <div className="flex flex-col w-full max-w-[760px] max-h-[85vh] rounded-[10px] border border-[var(--qc-border-default)] bg-card shadow-xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--qc-border-default)] px-5 py-3 shrink-0">
           <h3 className="text-[14px] font-medium text-[var(--qc-ink)]">Help — HTML Incremental Skills</h3>
           <button
             onClick={onClose}
-            className="flex items-center justify-center size-7 rounded border border-transparent text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-border-default)] transition-colors"
+            className="flex items-center justify-center size-7 rounded border border-transparent text-ink-3 hover:text-[var(--qc-ink)] hover:border-[var(--qc-border-default)] transition-colors"
           >
             <X className="size-4" />
           </button>
@@ -40,8 +40,8 @@ export function HelpModal({ onClose }: Props) {
               onClick={() => setTab(t.id)}
               className={`px-3 py-2.5 text-[12px] font-medium transition-colors border-b-2 -mb-px ${
                 tab === t.id
-                  ? "border-[#0F172B] text-[var(--qc-ink)]"
-                  : "border-transparent text-[#888888] hover:text-[var(--qc-ink)]"
+                  ? "border-[var(--qc-ink)] text-[var(--qc-ink)]"
+                  : "border-transparent text-ink-3 hover:text-[var(--qc-ink)]"
               }`}
             >
               {t.label}
@@ -49,7 +49,7 @@ export function HelpModal({ onClose }: Props) {
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6 text-[13px] leading-relaxed text-[#888888]">
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6 text-[13px] leading-relaxed text-ink-3">
           {/* ── For Admins ── */}
           {tab === "admins" && (
             <section className="space-y-3">
@@ -137,9 +137,9 @@ export function HelpModal({ onClose }: Props) {
                 <table className="w-full text-[11px] border-collapse">
                   <thead>
                     <tr className="border-b border-[var(--qc-border-default)]">
-                      <th className="text-left py-1 pr-2 font-semibold text-[#888888]"></th>
-                      <th className="text-left py-1 pr-2 font-semibold text-[#888888]">Historic</th>
-                      <th className="text-left py-1 font-semibold text-[#888888]">Incremental</th>
+                      <th className="text-left py-1 pr-2 font-semibold text-ink-3"></th>
+                      <th className="text-left py-1 pr-2 font-semibold text-ink-3">Historic</th>
+                      <th className="text-left py-1 font-semibold text-ink-3">Incremental</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--qc-border-default)]">

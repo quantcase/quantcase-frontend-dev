@@ -199,7 +199,7 @@ export function MarketViewCard() {
                 display: "inline-flex", alignItems: "center", gap: 6,
                 padding: "4px 10px", borderRadius: 999,
                 background: "var(--qc-down-soft, #FDECEA)",
-                border: "1px solid #F0C0BB",
+                border: "1px solid var(--qc-down-soft)",
                 color: "var(--qc-down, #B23A2F)",
                 fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", letterSpacing: "var(--qc-track-pill)", textTransform: "uppercase",
               }}

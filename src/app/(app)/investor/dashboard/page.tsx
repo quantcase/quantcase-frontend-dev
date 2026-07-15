@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import OnboardingPage from "@/app/(onboarding)/onboarding/page";
 import { MODSynopsisCard } from "@/components/investor/mod-synopsis-card";
@@ -11,7 +11,6 @@ import { DiscoverScreens } from "@/components/investor/discover-screens";
 import { ResearchHero } from "@/components/investor/research-hero";
 import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
 import { ConnectPortfolioModal } from "@/components/investor/connect-portfolio-modal";
-import { HeaderStockSearch } from "@/components/investor/header-stock-search";
 import { useUserPortfolio } from "@/hooks/useUserPortfolio";
 import { useUser } from "@/components/providers/UserContext";
 import { brokerLabel } from "@/lib/portfolio-format";
@@ -53,7 +52,8 @@ function toCardSubScores(subs: ModSubScore[]): { label: string; score: number; r
 
 // Build the serif headline for the MOD synopsis card from the overall score + weakest pillar.
 function buildModHeadline(overall: number, subs: ModSubScore[], weakest: ModPillar | null): string {
-  const gold = (t: string) => `<span style="color:#7C3AED;font-style:italic">${t}</span>`;
+  // Emphasis = serif-italic ink (was off-palette brand-accent purple — accent drift).
+  const gold = (t: string) => `<span style="font-style:italic">${t}</span>`;
   const strongest = [...subs].sort((a, b) => b.score - a.score)[0];
   const strongText = strongest ? `strong on ${strongest.pillar}` : "";
   if (!weakest) {
@@ -81,6 +81,15 @@ function fmtIndexPct(pct: number): string {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function InvestorDashboardPage() {
+  // useSearchParams() requires a Suspense boundary during static prerender.
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[var(--qc-bg)]" />}>
+      <InvestorDashboardRouter />
+    </Suspense>
+  );
+}
+
+function InvestorDashboardRouter() {
   const searchParams = useSearchParams();
   if (searchParams.get("ob") === "true") {
     return <OnboardingPage />;
@@ -140,46 +149,17 @@ function InvestorDashboardContent() {
   const sensex = indices?.indices.find((i) => i.symbol.toUpperCase() === "SENSEX");
 
   return (
-    <div style={{ background: "var(--qc-bg, #F5F5F5)", minHeight: "100vh" }}>
-      <main
-        className="px-4 pb-16 pt-6 sm:px-6 md:px-9"
-        style={{
-          fontFamily: "var(--qc-font-sans)",
-          color: "var(--qc-ink, #0F172B)",
-        }}
-      >
+    <div className="min-h-screen bg-[var(--qc-bg)]">
+      <main className="px-4 pb-16 pt-6 font-sans text-ink sm:px-6 md:px-9">
         {/* ── Page header ───────────────────────────────────────────────── */}
-        <header
-          className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
-          style={{ marginBottom: 22 }}
-        >
-          <div>
-          <h1
-            style={{
-              fontSize: "var(--qc-fz-30)",
-              fontWeight: "var(--qc-w-medium)",
-              letterSpacing: "var(--qc-track-display)",
-              margin: 0,
-              lineHeight: 1.15,
-              color: "var(--qc-ink)",
-              fontFamily: "var(--qc-font-sans)",
-            }}
-          >
+        {/* Single search surface only — the research hero below is the primary
+            entry point, so the header no longer duplicates a stock search. */}
+        <header className="mb-[22px]">
+          <h1 className="m-0 text-[30px] font-medium leading-[1.15] tracking-[var(--qc-track-display)] text-ink">
             {greeting}
-            {firstName && (
-              <>
-                , <span style={{ fontWeight: "var(--qc-w-medium)" }}>{firstName}</span>
-              </>
-            )}
+            {firstName && <>, <span className="font-medium">{firstName}</span></>}
           </h1>
-          <div
-            className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5"
-            style={{
-              fontSize: "var(--qc-fz-12)",
-              fontFamily: "var(--qc-font-sans)",
-              color: "var(--qc-ink-3)",
-            }}
-          >
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-3">
             <span>{todayMeta}</span>
             {[
               { label: "NIFTY", idx: nifty },
@@ -188,25 +168,19 @@ function InvestorDashboardContent() {
               .filter((e) => e.idx)
               .map((e) => {
                 const up = (e.idx!.change_pct ?? 0) >= 0;
-                const color = up ? "var(--qc-up)" : "var(--qc-down)";
                 return (
                   <span key={e.label} className="flex items-center gap-x-2">
-                    <span style={{ color: "var(--qc-ink-3)" }}>·</span>
+                    <span className="text-ink-3">·</span>
                     <span>
                       {e.label}{" "}
-                      <span style={{ color, fontWeight: "var(--qc-w-medium)" }}>
+                      <span className={`font-mono font-medium ${up ? "text-up" : "text-down"}`}>
                         {fmtIndex(e.idx!.value)}
                       </span>
-                      <span style={{ color }}> {fmtIndexPct(e.idx!.change_pct)}</span>
+                      <span className={`font-mono ${up ? "text-up" : "text-down"}`}> {fmtIndexPct(e.idx!.change_pct)}</span>
                     </span>
                   </span>
                 );
               })}
-          </div>
-          </div>
-
-          <div className="sm:pt-1 sm:shrink-0">
-            <HeaderStockSearch />
           </div>
         </header>
 

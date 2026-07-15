@@ -77,7 +77,7 @@ export function ValuationHeroSection({
           <div
             style={{
               position: "relative", height: 22,
-              background: "linear-gradient(90deg,#E8F3C9 0%, #F3EBC8 55%, #F7D8C8 100%)",
+              background: "linear-gradient(90deg,var(--qc-up-soft) 0%, var(--qc-warn-soft) 55%, var(--qc-down-soft) 100%)",
               borderRadius: 6, overflow: "visible",
             }}
           >

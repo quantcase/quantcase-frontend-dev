@@ -9,31 +9,31 @@ interface ValuationVsPeersProps {
 }
 
 const positionColors: Record<string, { bg: string; value: string }> = {
-  amber:   { bg: "bg-[#F5F5F5]", value: "text-[#0F172B]" },
-  emerald: { bg: "bg-[#F5F5F5]", value: "text-[#0F172B]" },
+  amber:   { bg: "bg-secondary", value: "text-ink" },
+  emerald: { bg: "bg-secondary", value: "text-ink" },
 };
 
 const multipleColors: Record<string, string> = {
-  emerald: "text-[#0F172B]",
-  blue:    "text-[#0F172B]",
-  red:     "text-[#0F172B]",
+  emerald: "text-ink",
+  blue:    "text-ink",
+  red:     "text-ink",
 };
 
 const multipleSubColors: Record<string, string> = {
-  emerald: "text-[#888888]",
-  blue:    "text-[#888888]",
-  red:     "text-[#888888]",
+  emerald: "text-ink-3",
+  blue:    "text-ink-3",
+  red:     "text-ink-3",
 };
 
 const segmentColor: Record<string, string> = {
-  emerald: "text-emerald-600",
-  blue:    "text-blue-600",
-  red:     "text-red-500",
+  emerald: "text-up",
+  blue:    "text-blue",
+  red:     "text-down",
 };
 
 function RichDescription({ segments }: { segments: (DescriptionSegment | ValuationRichSegment)[] }) {
   return (
-    <p className="text-sm text-zinc-600 dark:text-zinc-400">
+    <p className="text-sm text-ink-2">
       {segments.map((seg, i) => {
         const colorClass = seg.color ? segmentColor[seg.color] : "";
         return (
@@ -60,17 +60,17 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
       {/* Section Header */}
       <div className="flex items-center gap-2.5">
         <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] flex items-center justify-center flex-shrink-0">
-          <BarChart3 className="h-4 w-4 text-zinc-500" />
+          <BarChart3 className="h-4 w-4 text-ink-2" />
         </div>
         <div>
-          <h3 className="text-[14px] font-semibold text-[#0F172B] uppercase tracking-[0.01em] mb-0.5">{title}</h3>
-          {subtitle && <p className="text-[14px] text-[#888888]">{subtitle}</p>}
+          <h3 className="text-[14px] font-semibold text-ink uppercase tracking-[0.01em] mb-0.5">{title}</h3>
+          {subtitle && <p className="text-[14px] text-ink-3">{subtitle}</p>}
         </div>
       </div>
 
       {/* Current Valuation Position */}
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-3">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-3">
           Current Valuation Position
         </p>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -79,13 +79,13 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
             return (
               <div
                 key={i}
-                className={`rounded-lg border border-[#E2E2E2] p-4 ${colors.bg}`}
+                className={`rounded-lg border border-hair p-4 ${colors.bg}`}
               >
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1">
                   {item.label}
                 </p>
                 <p className={`text-[26px] font-normal ${colors.value}`}>{item.value}</p>
-                <p className="text-xs text-[#888888] mt-0.5">{item.detail}</p>
+                <p className="text-xs text-ink-3 mt-0.5">{item.detail}</p>
               </div>
             );
           })}
@@ -94,25 +94,25 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
 
       {/* Multiple Re-Rating Potential */}
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-3">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-3">
           Multiple Re-Rating Potential
         </p>
-        <Card className="bg-[#F5F5F5] border border-[#E2E2E2]">
+        <Card className="bg-secondary border border-hair">
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-white flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="h-4 w-4 text-zinc-500" />
+              <div className="p-1 rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-card flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="h-4 w-4 text-ink-2" />
               </div>
               <div className="flex items-center gap-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[#888888]">
+                <p className="text-xs font-semibold uppercase tracking-wider text-ink-3">
                   Re-Rating View
                 </p>
-                <Badge className="bg-white text-[#0F172B] text-[10px] font-bold border border-[#E2E2E2]">
+                <Badge className="bg-card text-ink text-[10px] font-bold border border-hair">
                   {reRatingView.badge}
                 </Badge>
               </div>
             </div>
-            <h4 className="text-sm font-bold text-[#0F172B] mb-2">
+            <h4 className="text-sm font-bold text-ink mb-2">
               {reRatingView.title}
             </h4>
             <RichDescription segments={reRatingView.description} />
@@ -123,11 +123,11 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
       {/* 3-column grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {/* Expansion Drivers */}
-        <Card className="bg-white border border-[#E2E2E2]">
+        <Card className="bg-card border border-hair">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-zinc-500" />
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F172B]">
+              <TrendingUp className="h-4 w-4 text-ink-2" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-ink">
                 Expansion Drivers
               </h4>
             </div>
@@ -135,9 +135,9 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
           <CardContent className="space-y-2">
             {expansionDrivers.map((item, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span className="text-zinc-400 text-sm mt-0.5">▲</span>
-                <p className="text-xs text-[#888888]">
-                  <span className="font-semibold text-[#121212]">
+                <span className="text-ink-3 text-sm mt-0.5">▲</span>
+                <p className="text-xs text-ink-3">
+                  <span className="font-semibold text-ink">
                     {item.text}
                   </span>{" "}
                   {item.detail}
@@ -148,11 +148,11 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
         </Card>
 
         {/* Contraction Risks */}
-        <Card className="bg-white border border-[#E2E2E2]">
+        <Card className="bg-card border border-hair">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-zinc-500" />
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F172B]">
+              <TrendingDown className="h-4 w-4 text-ink-2" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-ink">
                 Contraction Risks
               </h4>
             </div>
@@ -160,9 +160,9 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
           <CardContent className="space-y-2">
             {contractionRisks.map((item, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span className="text-zinc-400 text-sm mt-0.5">▼</span>
-                <p className="text-xs text-[#888888]">
-                  <span className="font-semibold text-[#121212]">
+                <span className="text-ink-3 text-sm mt-0.5">▼</span>
+                <p className="text-xs text-ink-3">
+                  <span className="font-semibold text-ink">
                     {item.text}
                   </span>{" "}
                   {item.detail}
@@ -173,11 +173,11 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
         </Card>
 
         {/* Scenario Multiples */}
-        <Card className="bg-white border border-[#E2E2E2]">
+        <Card className="bg-card border border-hair">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <BarChart2 className="h-4 w-4 text-zinc-500" />
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F172B]">
+              <BarChart2 className="h-4 w-4 text-ink-2" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-ink">
                 Scenario Multiples
               </h4>
             </div>
@@ -185,7 +185,7 @@ export function ValuationVsPeers({ data }: ValuationVsPeersProps) {
           <CardContent className="space-y-4">
             {scenarioMultiples.map((item, i) => (
               <div key={i}>
-                <p className="text-[10px] text-zinc-400">{item.label}</p>
+                <p className="text-[10px] text-ink-3">{item.label}</p>
                 <p className={`text-[26px] font-normal ${multipleColors[item.color]}`}>
                   {item.value}
                 </p>

@@ -68,16 +68,16 @@ export function TagMultiPicker({
     <div ref={wrapperRef} className={`relative ${disabled ? "opacity-40 pointer-events-none" : ""}`}>
       <div
         onClick={() => { setOpen(true); inputRef.current?.focus(); }}
-        className="flex flex-wrap items-center gap-1.5 rounded-md border border-[#E2E2E2] bg-white px-2 py-1.5 min-h-[38px] cursor-text focus-within:ring-1 focus-within:ring-[#0F172B]"
+        className="flex flex-wrap items-center gap-1.5 rounded-md border border-hair bg-card px-2 py-1.5 min-h-[38px] cursor-text focus-within:ring-1 focus-within:ring-ink"
       >
-        <Search className="size-3.5 text-[#888888] shrink-0" />
+        <Search className="size-3.5 text-ink-3 shrink-0" />
         {selected.map((t) => (
           <span
             key={t}
-            className="flex items-center gap-1 rounded-sm bg-[#F5F5F5] text-[#0F172B] text-[11px] font-mono font-medium px-1.5 py-0.5"
+            className="flex items-center gap-1 rounded-sm bg-secondary text-ink text-[11px] font-mono font-medium px-1.5 py-0.5"
           >
             {t}
-            <button type="button" onClick={() => remove(t)} className="text-[#888888] hover:text-red-600">
+            <button type="button" onClick={() => remove(t)} className="text-ink-3 hover:text-down">
               <X className="size-3" />
             </button>
           </span>
@@ -89,18 +89,18 @@ export function TagMultiPicker({
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={selected.length === 0 ? placeholder : ""}
-          className="flex-1 min-w-[100px] text-[13px] text-[#0F172B] outline-none bg-transparent py-0.5"
+          className="flex-1 min-w-[100px] text-[13px] text-ink outline-none bg-transparent py-0.5"
         />
       </div>
 
       {open && filtered.length > 0 && (
-        <div className="absolute z-[100] top-full mt-1 left-0 w-full max-w-[320px] rounded-md border border-[#E2E2E2] bg-white shadow-lg overflow-y-auto max-h-[260px]">
+        <div className="absolute z-[100] top-full mt-1 left-0 w-full max-w-[320px] rounded-md border border-hair bg-card shadow-lg overflow-y-auto max-h-[260px]">
           {filtered.map((o) => (
             <button
               key={o}
               type="button"
               onClick={() => add(o)}
-              className="w-full flex items-center px-3 py-1.5 text-left text-[12px] font-mono text-[#0F172B] hover:bg-[#F5F5F5] transition-colors"
+              className="w-full flex items-center px-3 py-1.5 text-left text-[12px] font-mono text-ink hover:bg-secondary transition-colors"
             >
               {o}
             </button>

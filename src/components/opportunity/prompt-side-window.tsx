@@ -140,16 +140,16 @@ export function PromptSideWindow({
   const metrics = data?.metrics ?? [];
 
   return (
-    <div className="fixed top-0 right-0 h-screen w-[460px] z-50 flex flex-col bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl">
+    <div className="fixed top-0 right-0 h-screen w-[460px] z-50 flex flex-col bg-card border-l border-hair shadow-2xl">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 flex-shrink-0">
-        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-hair flex-shrink-0">
+        <p className="text-xs font-semibold uppercase tracking-wider text-ink-2">
           Prompt Context
         </p>
         <button
           onClick={onClose}
-          className="rounded-md p-1 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          className="rounded-md p-1 text-ink-3 hover:text-ink-2 hover:bg-secondary transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
@@ -159,8 +159,8 @@ export function PromptSideWindow({
       <div className="flex-1 overflow-y-auto flex flex-col">
 
         {/* Section Selector */}
-        <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 mb-2">
+        <div className="px-4 py-3 border-b border-hair">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink-2 mb-2">
             Section
           </p>
           <div className="grid grid-cols-2 gap-1.5">
@@ -173,8 +173,8 @@ export function PromptSideWindow({
                   disabled={generating}
                   className={`text-left px-3 py-2 rounded-md text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                     isSelected
-                      ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
-                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+                      ? "bg-ink text-[var(--qc-on-dark)]"
+                      : "text-ink-2 hover:bg-secondary border border-hair"
                   }`}
                 >
                   {section.label}
@@ -185,22 +185,22 @@ export function PromptSideWindow({
         </div>
 
         {/* Pre Computed Metrics — collapsible */}
-        <div className="border-b border-zinc-100 dark:border-zinc-800">
+        <div className="border-b border-hair">
           <button
             onClick={() => setMetricsOpen((v) => !v)}
-            className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-secondary transition-colors"
           >
             <div className="flex items-center gap-1.5">
-              <Lock className="h-3 w-3 text-zinc-400 dark:text-zinc-500" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              <Lock className="h-3 w-3 text-ink-3" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink-2">
                 Pre Computed Metrics
               </span>
               {!loading && metrics.length > 0 && (
-                <span className="text-[10px] text-zinc-400 dark:text-zinc-600">({metrics.length})</span>
+                <span className="text-[10px] text-ink-3">({metrics.length})</span>
               )}
             </div>
             <ChevronDown
-              className={`h-3.5 w-3.5 text-zinc-400 transition-transform ${metricsOpen ? "rotate-180" : ""}`}
+              className={`h-3.5 w-3.5 text-ink-3 transition-transform ${metricsOpen ? "rotate-180" : ""}`}
             />
           </button>
 
@@ -209,15 +209,15 @@ export function PromptSideWindow({
               {loading ? (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-4 rounded bg-zinc-100 dark:bg-zinc-800 animate-pulse my-1" />
+                    <div key={i} className="h-4 rounded bg-secondary animate-pulse my-1" />
                   ))}
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
                   {metrics.map((metric) => (
                     <div key={metric.name} className="flex items-center gap-2 py-0.5">
-                      <span className="text-zinc-300 dark:text-zinc-600 text-[10px]">→</span>
-                      <span className="text-[11px] text-zinc-500 dark:text-zinc-400">{metric.name}</span>
+                      <span className="text-ink-3 text-[10px]">→</span>
+                      <span className="text-[11px] text-ink-2">{metric.name}</span>
                     </div>
                   ))}
                 </div>
@@ -229,7 +229,7 @@ export function PromptSideWindow({
         {/* System Instructions */}
         <div className="flex flex-col flex-1 px-4 py-3 min-h-0">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-2">
               System Instructions
             </p>
             <button
@@ -237,10 +237,10 @@ export function PromptSideWindow({
               disabled={generating || loading || !callId}
               className={`flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-semibold transition-colors disabled:cursor-not-allowed ${
                 done
-                  ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                  ? "bg-up-soft text-up"
                   : generating
-                  ? "bg-blue-400 text-white opacity-80"
-                  : "bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                  ? "bg-blue text-[var(--qc-on-dark)] opacity-80"
+                  : "bg-blue hover:bg-blue/90 text-[var(--qc-on-dark)] disabled:opacity-50"
               }`}
             >
               {done ? (
@@ -259,18 +259,18 @@ export function PromptSideWindow({
             </button>
           </div>
           {loading ? (
-            <div className="rounded-md border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 flex-1 animate-pulse" />
+            <div className="rounded-md border border-hair bg-secondary px-3 py-2 flex-1 animate-pulse" />
           ) : (
             <textarea
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               disabled={generating}
-              className="w-full resize-none rounded-md border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 text-[11px] text-zinc-700 dark:text-zinc-300 leading-relaxed placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600 font-mono flex-1 disabled:opacity-60"
+              className="w-full resize-none rounded-md border border-hair bg-secondary px-3 py-2 text-[11px] text-ink-2 leading-relaxed placeholder:text-ink-3 focus:outline-none focus:ring-1 focus:ring-hair font-mono flex-1 disabled:opacity-60"
               spellCheck={false}
             />
           )}
           {generateError && (
-            <p className="mt-2 text-[11px] text-red-500 dark:text-red-400">{generateError}</p>
+            <p className="mt-2 text-[11px] text-down">{generateError}</p>
           )}
         </div>
       </div>

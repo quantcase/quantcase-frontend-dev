@@ -132,9 +132,15 @@
 .animate-float-slow { animation: floatSlowKF 9s ease-in-out infinite; }
 .animate-pulse-soft { animation: pulseSoftKF 2.4s ease-in-out infinite; }
 
-/* Remove focus rings globally */
+/* Focus: no ring on mouse click, but a visible keyboard-focus ring for a11y.
+   Interactive elements get a token-based ring; opt out with .no-focus-ring. */
 *:focus { outline: none; }
-*:focus-visible { outline: none; box-shadow: none; }
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid var(--qc-ink);
+  outline-offset: 2px;
+  border-radius: var(--qc-r-2);
+}
+.no-focus-ring:focus-visible { outline: none; }
 
 /* Landing CTA button (ink bg → gold on hover) */
 .lp-cta-btn {
@@ -220,10 +226,54 @@
   display: none;
 }
 
+/* Bottom padding so the fixed floating dock never covers content (audit #9).
+   Apply to the scroll container of any page that mounts AssetActionBar. */
+.qc-dock-clearance {
+  padding-bottom: var(--qc-dock-clearance-mobile);
+}
+@media (min-width: 768px) {
+  .qc-dock-clearance {
+    padding-bottom: var(--qc-dock-clearance);
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Fonts — expose serif/mono as Tailwind utilities (font-sans/serif/mono) */
   --font-sans: var(--qc-font-sans);
+  --font-serif: var(--qc-font-serif);
+  --font-mono: var(--qc-font-mono);
+
+  /* ── Semantic data colors (exclusive meaning) ──────────────────────
+     green = positive · red = negative · amber = caution ONLY · blue = state.
+     Enables bg-up / text-up / bg-up-soft utilities, replacing bg-emerald-600
+     and inline var(--qc-up). Do NOT use these for decoration. */
+  --color-up:        var(--qc-up);
+  --color-up-soft:   var(--qc-up-soft);
+  --color-down:      var(--qc-down);
+  --color-down-soft: var(--qc-down-soft);
+  --color-warn:      var(--qc-warn);
+  --color-warn-soft: var(--qc-warn-soft);
+  --color-blue:      var(--qc-blue);
+  --color-blue-soft: var(--qc-blue-soft);
+
+  /* Ink scale + hairline as utilities (text-ink-2, text-ink-3, border-hair) */
+  --color-ink:       var(--qc-ink);
+  --color-ink-2:     var(--qc-ink-2);
+  --color-ink-3:     var(--qc-ink-3);
+  --color-hair:      var(--qc-hair);
+
+  /* Brand / accent families (interactive + decorative-but-scoped) */
+  --color-brand:            var(--qc-brand-chip);
+  --color-brand-accent:     var(--qc-brand-accent);
+  --color-brand-accent-soft: var(--qc-brand-accent-soft);
+  --color-lime:       var(--qc-lime);
+  --color-lime-soft:  var(--qc-lime-soft);
+  --color-lime-edge:  var(--qc-lime-edge);
+  --color-golden-ink: var(--qc-golden-ink);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -314,6 +364,23 @@
     --qc-hair:        #E9E7E1;
     --qc-hair-2:      #EFEDE7;
 
+    /* Back-compat aliases for an earlier token-naming scheme still referenced
+       across the app (the text-, surface-, border- and accent- families below).
+       They were never defined, so those call sites rendered with no color —
+       these aliases repair them and fold everything back onto the single
+       --qc- source. Prefer the canonical names (ink / ink-2 / ink-3 / card /
+       section / hair) in new code. */
+    --qc-text-heading:   var(--qc-ink);
+    --qc-text-body:      var(--qc-ink-2);
+    --qc-text-muted:     var(--qc-ink-3);
+    --qc-surface-base:   var(--qc-section);
+    --qc-surface-panel:  var(--qc-section);
+    --qc-surface-card:   var(--qc-card);
+    --qc-border-default: var(--qc-hair);
+    --qc-border-inner:   var(--qc-hair-2);
+    --qc-accent-primary: var(--qc-ink);
+    --qc-accent-lime-bg: var(--qc-lime-soft);
+
     --qc-lime:        #FFF5CA;
     --qc-lime-soft:   #EAF7BC;
     --qc-lime-edge:   #C6DC8A;
@@ -323,6 +390,9 @@
     --qc-golden-grad-from: #f8f6ee;
     --qc-golden-grad-to:   #FFEB99;
     --qc-golden-ink:       #C8A84B;
+
+    --qc-lime-grad-from:   #E8F3BD;
+    --qc-lime-grad-to:     #D6E996;
 
     --qc-chip:        var(--qc-section);
 
@@ -339,6 +409,13 @@
     --qc-brand-pill-bg-2: var(--qc-lime-soft);
     --qc-brand-pill-edge: var(--qc-lime-edge);
     --qc-brand-chip:      #E86854;
+
+    /* Interactive/brand accent (violet) — used ONLY for brand/interactive
+       affordances (active wizard step, research hero, links), never for
+       semantic data meaning. Central token so the accent is controlled once. */
+    --qc-brand-accent:      #7C3AED;
+    --qc-brand-accent-soft: #EDE9FE;
+    --qc-brand-accent-edge: #DDD6FE;
 
     --qc-font-sans:  var(--font-ibm-plex-sans, 'IBM Plex Sans'), system-ui, -apple-system, sans-serif;
     --qc-font-serif: var(--font-ibm-plex-serif, 'IBM Plex Serif'), Georgia, serif;
@@ -398,6 +475,12 @@
     --qc-shadow-shell: 0 30px 60px -30px rgba(0, 0, 0, .18), 0 1px 0 rgba(255, 255, 255, .8) inset;
     --qc-shadow-annot: 0 8px 24px rgba(14, 14, 12, 0.08);
     --qc-ring-track:   0 0 0 1px var(--qc-hair);
+
+    /* Clearance so the fixed floating dock (AssetActionBar) never overlaps page
+       content: dock height (~56px) + its bottom offset + breathing room.
+       Larger on mobile where the dock sits above the bottom nav bar. */
+    --qc-dock-clearance:        104px;
+    --qc-dock-clearance-mobile: 148px;
 
     --qc-s-1:  4px;
     --qc-s-2:  6px;
@@ -535,6 +618,12 @@
 .qc-golden-card {
   background: linear-gradient(180deg, var(--qc-golden-grad-from) 0%, var(--qc-golden-grad-to) 100%);
   border: 1px solid rgba(200,170,60,0.25);
+}
+
+/* ── Lime card ──────────────────────────────────────────────────── */
+.qc-lime-gradient-card {
+  background: linear-gradient(175deg, var(--qc-lime-grad-from) 0%, var(--qc-lime-grad-to) 100%);
+  border: 1px solid var(--qc-lime-edge);
 }
 
 /* ── Dark gradient card ─────────────────────────────────────────── */

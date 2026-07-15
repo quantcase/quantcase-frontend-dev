@@ -61,7 +61,7 @@ export function MomentumVolatilityPanel({
             style={{
               position: "relative", height: 10, borderRadius: 999, overflow: "visible",
               background:
-                "linear-gradient(90deg, #D7EEDD 0%, #D7EEDD 30%, #EFEDE7 30%, #EFEDE7 70%, #F4D8D4 70%, #F4D8D4 100%)",
+                "linear-gradient(90deg, var(--qc-up-soft) 0%, var(--qc-up-soft) 30%, var(--qc-hair-2) 30%, var(--qc-hair-2) 70%, var(--qc-down-soft) 70%, var(--qc-down-soft) 100%)",
             }}
           >
             <div

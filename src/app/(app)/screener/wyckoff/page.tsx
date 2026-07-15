@@ -42,33 +42,52 @@ function phaseTokens(pt: string): { color: string; soft: string; border: string 
   return map[pt] ?? { color: "var(--qc-blue)", soft: "var(--qc-blue-soft)", border: "rgba(58,107,239,0.22)" };
 }
 
-// Canvas colors — adapted for light bg
-const C = {
-  grid:       "rgba(0,0,0,0.06)",
-  axis:       "#9A9A92",
-  sma:        "#B4731A",   // amber — warm accent visible on white
-  trAccum:    "rgba(31,122,74,0.08)",
-  trDist:     "rgba(178,58,47,0.08)",
-  trLineAccum:"rgba(31,122,74,0.6)",
-  trLineDist: "rgba(178,58,47,0.6)",
-  ptr:        "rgba(58,107,239,0.55)",
-  ptrFill:    "rgba(58,107,239,0.06)",
-  candleUp:   "rgba(31,122,74,0.85)",
-  candleDn:   "rgba(178,58,47,0.85)",
-  dotHH:      "#1F7A4A",
-  dotLL:      "#B23A2F",
-  dotEq:      "#9A9A92",
-  dotSC:      "#3A6BEF",
-  dotBC:      "#B4731A",
-  dotSpring:  "#7C3AED",
-  dotUT:      "#B4731A",
-  volUp:      "rgba(31,122,74,0.55)",
-  volDn:      "rgba(178,58,47,0.55)",
-  tip:        "#FFFFFF",
-  tipBorder:  "#E9E7E1",
-  tipText:    "#210B2C",
-  tipMuted:   "#5A5A54",
+// Canvas colors — sourced from the --qc-* design tokens. Canvas 2D contexts can't
+// resolve CSS custom properties, so we read their computed values at draw time.
+// The rgba(...) entries are intentional low-alpha shades of the same token hues
+// (fills / range shading) that have no direct token and stay as literals.
+type CanvasColors = {
+  grid: string; axis: string; sma: string;
+  trAccum: string; trDist: string; trLineAccum: string; trLineDist: string;
+  ptr: string; ptrFill: string; candleUp: string; candleDn: string;
+  dotHH: string; dotLL: string; dotEq: string; dotSC: string; dotBC: string;
+  dotSpring: string; dotUT: string; volUp: string; volDn: string;
+  tip: string; tipBorder: string; tipText: string; tipMuted: string;
 };
+
+function resolveCanvasColors(): CanvasColors {
+  const cs = typeof window !== "undefined"
+    ? getComputedStyle(document.documentElement)
+    : null;
+  const t = (name: string, fallback: string) =>
+    (cs?.getPropertyValue(name).trim() || fallback);
+  return {
+    grid:       "rgba(0,0,0,0.06)",
+    axis:       t("--qc-ink-3", "#9A9A92"),
+    sma:        t("--qc-warn", "#B4731A"),   // amber — warm accent visible on white
+    trAccum:    "rgba(31,122,74,0.08)",
+    trDist:     "rgba(178,58,47,0.08)",
+    trLineAccum:"rgba(31,122,74,0.6)",
+    trLineDist: "rgba(178,58,47,0.6)",
+    ptr:        "rgba(58,107,239,0.55)",
+    ptrFill:    "rgba(58,107,239,0.06)",
+    candleUp:   "rgba(31,122,74,0.85)",
+    candleDn:   "rgba(178,58,47,0.85)",
+    dotHH:      t("--qc-up", "#1F7A4A"),
+    dotLL:      t("--qc-down", "#B23A2F"),
+    dotEq:      t("--qc-ink-3", "#9A9A92"),
+    dotSC:      t("--qc-blue", "#3A6BEF"),
+    dotBC:      t("--qc-warn", "#B4731A"),
+    dotSpring:  t("--qc-brand-accent", "#7C3AED"),
+    dotUT:      t("--qc-warn", "#B4731A"),
+    volUp:      "rgba(31,122,74,0.55)",
+    volDn:      "rgba(178,58,47,0.55)",
+    tip:        t("--qc-card", "#FFFFFF"),
+    tipBorder:  t("--qc-hair", "#E9E7E1"),
+    tipText:    t("--qc-ink", "#210B2C"),
+    tipMuted:   t("--qc-ink-2", "#5A5A54"),
+  };
+}
 
 // ── Canvas chart ───────────────────────────────────────────────────────────────
 
@@ -98,6 +117,7 @@ function WyckoffChart({ bars, result }: { bars: WyckoffBar[]; result: WyckoffRes
   const draw = useCallback(() => {
     const pcEl = pcRef.current, vcEl = vcRef.current;
     if (!pcEl || !vcEl) return;
+    const C = resolveCanvasColors();
     const cs = stateRef.current;
     const { bars: b, sma, cw, gap, offset, result: res } = cs;
     if (!b.length) return;
@@ -413,13 +433,13 @@ function WyckoffChart({ bars, result }: { bars: WyckoffBar[]; result: WyckoffRes
         fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)",
       }}>
         {[
-          { dot: C.dotHH, label: "HH/HL" },
-          { dot: C.dotLL, label: "LH/LL" },
-          { dot: C.dotEq, label: "EH/EL" },
-          { dot: C.dotSC, label: "SC" },
-          { dot: C.dotBC, label: "BC" },
-          { dot: C.dotSpring, label: "Spring" },
-          { dot: C.dotUT, label: "UT" },
+          { dot: "var(--qc-up)",           label: "HH/HL" },
+          { dot: "var(--qc-down)",          label: "LH/LL" },
+          { dot: "var(--qc-ink-3)",         label: "EH/EL" },
+          { dot: "var(--qc-blue)",          label: "SC" },
+          { dot: "var(--qc-warn)",          label: "BC" },
+          { dot: "var(--qc-brand-accent)",  label: "Spring" },
+          { dot: "var(--qc-warn)",          label: "UT" },
         ].map(({ dot, label }) => (
           <span key={label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: dot, display: "inline-block" }} />
@@ -686,7 +706,7 @@ function PageHeader({ symbol }: { symbol: string }) {
           background: "var(--qc-ink)", display: "flex",
           alignItems: "center", justifyContent: "center",
         }}>
-          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-bold)", color: "#fff" }}>W</span>
+          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-bold)", color: "var(--qc-on-dark)" }}>W</span>
         </div>
         <div>
           <div style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-16)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", letterSpacing: "var(--qc-track-display)" }}>

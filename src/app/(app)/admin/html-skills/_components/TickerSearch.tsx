@@ -63,11 +63,11 @@ export function TickerSearch({ value, onChange, options, favorites }: TickerSear
       {/* Trigger button */}
       <button
         onClick={handleOpen}
-        className="flex items-center gap-1.5 rounded-md border border-[var(--qc-border-default)] bg-white pl-2.5 pr-2 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors min-w-[120px]"
+        className="flex items-center gap-1.5 rounded-md border border-[var(--qc-border-default)] bg-card pl-2.5 pr-2 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors min-w-[120px]"
       >
-        <Search className="size-3 text-[#888888] shrink-0" />
+        <Search className="size-3 text-ink-3 shrink-0" />
         <span className="flex-1 text-left">{value || "Select ticker"}</span>
-        <ChevronDown className="size-3 text-[#888888] shrink-0" />
+        <ChevronDown className="size-3 text-ink-3 shrink-0" />
       </button>
 
       {/* Dropdown */}
@@ -176,7 +176,7 @@ function TickerRow({
       onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = ""; }}
     >
       {isFavorite ? (
-        <Star className="size-3 shrink-0 fill-amber-400 text-amber-400" />
+        <Star className="size-3 shrink-0 fill-warn text-warn" />
       ) : (
         <span className="size-3 shrink-0" />
       )}

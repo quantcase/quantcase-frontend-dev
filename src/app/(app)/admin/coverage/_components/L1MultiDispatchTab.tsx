@@ -29,14 +29,14 @@ interface ResolveCountResponse {
 const BASE = `${BACKEND_URL}/admin/pipeline-dispatch/l1-multi`;
 
 const INPUT_CLS =
-  "rounded-md border border-[#E2E2E2] px-3 py-2 text-sm font-mono text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]";
-const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5";
+  "rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:ring-1 focus:ring-ink";
+const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 
 // ── Small shared cells ───────────────────────────────────────────────────────
 
 function BoolTick({ value }: { value: boolean }) {
   return (
-    <span className={`text-[11px] font-medium ${value ? "text-emerald-600" : "text-red-600"}`}>
+    <span className={`text-[11px] font-medium ${value ? "text-up" : "text-down"}`}>
       {value ? "✓" : "✗"}
     </span>
   );
@@ -47,47 +47,47 @@ function BoolTick({ value }: { value: boolean }) {
 function PreviewTickerRow({ t }: { t: L1PreviewTicker }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-[8px] border border-[#F0F0F0] bg-white overflow-hidden">
+    <div className="rounded-[8px] border border-hair bg-card overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-4 px-3 py-2 hover:bg-[#FAFAFA] transition-colors text-left"
+        className="w-full flex items-center gap-4 px-3 py-2 hover:bg-secondary transition-colors text-left"
       >
-        <span className="font-mono text-[12px] font-medium text-[#0F172B] w-24 shrink-0">{t.symbol}</span>
-        <span className="text-[11px] text-[#888888]">
-          Calls: <span className="text-[#0F172B] font-medium">{t.calls.shown}</span>/{t.calls.total}
+        <span className="font-mono text-[12px] font-medium text-ink w-24 shrink-0">{t.symbol}</span>
+        <span className="text-[11px] text-ink-3">
+          Calls: <span className="text-ink font-medium">{t.calls.shown}</span>/{t.calls.total}
         </span>
-        <span className="text-[11px] text-[#888888]">
-          Annual: <span className="text-[#0F172B] font-medium">{t.annualReports.shown}</span>/{t.annualReports.total}
+        <span className="text-[11px] text-ink-3">
+          Annual: <span className="text-ink font-medium">{t.annualReports.shown}</span>/{t.annualReports.total}
         </span>
-        <ChevronDown className={`size-3.5 text-[#888888] ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`size-3.5 text-ink-3 ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="border-t border-[#F0F0F0] px-3 py-3 bg-[#FAFAFA] space-y-3">
+        <div className="border-t border-hair px-3 py-3 bg-secondary space-y-3">
           {t.calls.items.length > 0 && (
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">Calls</div>
-              <div className="rounded-md border border-[#E2E2E2] overflow-x-auto">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1">Calls</div>
+              <div className="rounded-md border border-hair overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-[#F5F5F5] border-b border-[#F0F0F0]">
-                      <th className="px-3 py-1 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]" rowSpan={2}>Year</th>
-                      <th className="px-3 py-1 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]" rowSpan={2}>Quarter</th>
-                      <th className="px-3 py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]" colSpan={2}>Transcript</th>
-                      <th className="px-3 py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]" colSpan={2}>PPT</th>
+                    <tr className="bg-secondary border-b border-hair">
+                      <th className="px-3 py-1 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3" rowSpan={2}>Year</th>
+                      <th className="px-3 py-1 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3" rowSpan={2}>Quarter</th>
+                      <th className="px-3 py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-3" colSpan={2}>Transcript</th>
+                      <th className="px-3 py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-3" colSpan={2}>PPT</th>
                     </tr>
-                    <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-[#888888]">Doc</th>
-                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-[#888888]">Signal</th>
-                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-[#888888]">Doc</th>
-                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-[#888888]">Signal</th>
+                    <tr className="bg-secondary border-b border-hair">
+                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-ink-3">Doc</th>
+                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-ink-3">Signal</th>
+                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-ink-3">Doc</th>
+                      <th className="px-3 py-1.5 text-center text-[10px] font-medium text-ink-3">Signal</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#F0F0F0] bg-white">
+                  <tbody className="divide-y divide-hair bg-card">
                     {t.calls.items.map((c) => (
                       <tr key={c.id}>
-                        <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{c.fiscal_year}</td>
-                        <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{c.quarter}</td>
+                        <td className="px-3 py-1.5 font-mono text-[11px] text-ink-3">{c.fiscal_year}</td>
+                        <td className="px-3 py-1.5 font-mono text-[11px] text-ink-3">{c.quarter}</td>
                         <td className="px-3 py-1.5 text-center"><BoolTick value={c.hasTranscript} /></td>
                         <td className="px-3 py-1.5 text-center"><BoolTick value={c.hasTranscriptSignal} /></td>
                         <td className="px-3 py-1.5 text-center"><BoolTick value={c.hasPpt} /></td>
@@ -102,20 +102,20 @@ function PreviewTickerRow({ t }: { t: L1PreviewTicker }) {
 
           {t.annualReports.items.length > 0 && (
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">Annual Reports</div>
-              <div className="rounded-md border border-[#E2E2E2] overflow-x-auto">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1">Annual Reports</div>
+              <div className="rounded-md border border-hair overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-                      <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Year</th>
-                      <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">URL</th>
-                      <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Signal</th>
+                    <tr className="bg-secondary border-b border-hair">
+                      <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3">Year</th>
+                      <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-3">URL</th>
+                      <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-3">Signal</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#F0F0F0] bg-white">
+                  <tbody className="divide-y divide-hair bg-card">
                     {t.annualReports.items.map((a) => (
                       <tr key={a.id}>
-                        <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{a.fiscal_year}</td>
+                        <td className="px-3 py-1.5 font-mono text-[11px] text-ink-3">{a.fiscal_year}</td>
                         <td className="px-3 py-1.5 text-center"><BoolTick value={a.hasUrl} /></td>
                         <td className="px-3 py-1.5 text-center"><BoolTick value={a.hasSignal} /></td>
                       </tr>
@@ -136,20 +136,20 @@ function PreviewTickerRow({ t }: { t: L1PreviewTicker }) {
 function RunStatusBadge({ status }: { status: L1Run["status"] }) {
   if (status === "completed") {
     return (
-      <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+      <span className="flex items-center gap-1 text-[11px] font-medium text-up">
         <CheckCircle2 className="size-3.5" /> Completed
       </span>
     );
   }
   if (status === "failed") {
     return (
-      <span className="flex items-center gap-1 text-[11px] font-medium text-red-600">
+      <span className="flex items-center gap-1 text-[11px] font-medium text-down">
         <XCircle className="size-3.5" /> Failed
       </span>
     );
   }
   return (
-    <span className="flex items-center gap-1 text-[11px] font-medium text-blue-600">
+    <span className="flex items-center gap-1 text-[11px] font-medium text-blue">
       <Clock className="size-3.5" /> Running
     </span>
   );
@@ -161,14 +161,14 @@ function TickerErrorDetail({ errors }: { errors: L1RunTickerError[] }) {
   return (
     <div className="space-y-1.5">
       {errors.map((e, i) => (
-        <div key={i} className="text-[11px] text-red-700">
+        <div key={i} className="text-[11px] text-down">
           <span className="font-mono font-medium">
             {e.source}
             {e.quarter ? ` ${e.quarter}` : ""} {e.fiscal_year}
           </span>
           {" — "}
           {e.error}
-          <span className="block font-mono text-red-400">{e.source === "annual_report" ? e.reportId : e.callId}</span>
+          <span className="block font-mono text-down">{e.source === "annual_report" ? e.reportId : e.callId}</span>
         </div>
       ))}
     </div>
@@ -181,78 +181,78 @@ function RunHistoryRow({ run }: { run: L1Run }) {
   const hasMeta = !!run.metadata;
 
   return (
-    <div className="rounded-[8px] border border-[#F0F0F0] bg-white overflow-hidden">
+    <div className="rounded-[8px] border border-hair bg-card overflow-hidden">
       <button
         onClick={() => hasMeta && setOpen((v) => !v)}
-        className={`w-full flex items-center gap-4 px-3 py-2 text-left transition-colors ${hasMeta ? "hover:bg-[#FAFAFA]" : ""}`}
+        className={`w-full flex items-center gap-4 px-3 py-2 text-left transition-colors ${hasMeta ? "hover:bg-secondary" : ""}`}
       >
-        <span className="font-mono text-[11px] text-[#888888] w-40 truncate shrink-0">{run.id}</span>
+        <span className="font-mono text-[11px] text-ink-3 w-40 truncate shrink-0">{run.id}</span>
         <RunStatusBadge status={run.status} />
-        <span className="text-[11px] text-[#888888]">
+        <span className="text-[11px] text-ink-3">
           {run.records_processed != null ? `${run.records_processed} queued` : "—"}
         </span>
-        {run.ended_at && <span className="text-[11px] text-[#888888]">ended {new Date(run.ended_at).toLocaleString()}</span>}
+        {run.ended_at && <span className="text-[11px] text-ink-3">ended {new Date(run.ended_at).toLocaleString()}</span>}
         {hasMeta && (
-          <ChevronDown className={`size-3.5 text-[#888888] ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+          <ChevronDown className={`size-3.5 text-ink-3 ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
         )}
       </button>
 
       {run.status === "failed" && run.error && (
-        <div className="border-t border-[#F0F0F0] px-3 py-2 text-[11px] text-red-700 bg-red-50">
+        <div className="border-t border-hair px-3 py-2 text-[11px] text-down bg-down-soft">
           {run.error}
-          <span className="block text-red-500 mt-0.5">Partial progress before the failure was not rolled back.</span>
+          <span className="block text-down mt-0.5">Partial progress before the failure was not rolled back.</span>
         </div>
       )}
 
       {open && run.metadata && (
-        <div className="border-t border-[#F0F0F0] px-3 py-3 bg-[#FAFAFA] space-y-2">
-          <div className="flex gap-4 text-[11px] text-[#888888]">
-            <span>Queued: <span className="text-[#0F172B] font-medium">{run.metadata.queued}</span></span>
-            <span>Skipped: <span className="text-[#0F172B] font-medium">{run.metadata.skipped}</span></span>
-            <span>No source: <span className="text-[#0F172B] font-medium">{run.metadata.noSource}</span></span>
-            <span>Failed: <span className="text-[#0F172B] font-medium">{run.metadata.failed}</span></span>
+        <div className="border-t border-hair px-3 py-3 bg-secondary space-y-2">
+          <div className="flex gap-4 text-[11px] text-ink-3">
+            <span>Queued: <span className="text-ink font-medium">{run.metadata.queued}</span></span>
+            <span>Skipped: <span className="text-ink font-medium">{run.metadata.skipped}</span></span>
+            <span>No source: <span className="text-ink font-medium">{run.metadata.noSource}</span></span>
+            <span>Failed: <span className="text-ink font-medium">{run.metadata.failed}</span></span>
           </div>
           {run.metadata.perTicker?.length > 0 && (
-            <div className="rounded-md border border-[#E2E2E2] overflow-hidden">
+            <div className="rounded-md border border-hair overflow-hidden">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Ticker</th>
-                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Queued</th>
-                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Skipped</th>
-                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">No Source</th>
-                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Failed</th>
+                  <tr className="bg-secondary border-b border-hair">
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3">Ticker</th>
+                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-3">Queued</th>
+                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-3">Skipped</th>
+                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-3">No Source</th>
+                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-3">Failed</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F0F0F0] bg-white">
+                <tbody className="divide-y divide-hair bg-card">
                   {run.metadata.perTicker.map((p) => {
                     const hasErrors = !!p.errors?.length;
                     const rowOpen = expandedTicker === p.symbol;
                     return (
                       <Fragment key={p.symbol}>
                         <tr>
-                          <td className="px-3 py-1.5 font-mono text-[11px] text-[#0F172B]">{p.symbol}</td>
-                          <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.queued}</td>
-                          <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.skipped}</td>
-                          <td className="px-3 py-1.5 text-center text-[11px] text-[#0F172B]">{p.noSource}</td>
+                          <td className="px-3 py-1.5 font-mono text-[11px] text-ink">{p.symbol}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px] text-ink">{p.queued}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px] text-ink">{p.skipped}</td>
+                          <td className="px-3 py-1.5 text-center text-[11px] text-ink">{p.noSource}</td>
                           <td className="px-3 py-1.5 text-center text-[11px]">
                             {hasErrors ? (
                               <button
                                 onClick={() => setExpandedTicker(rowOpen ? null : p.symbol)}
                                 title="Click to view error details"
-                                className="inline-flex items-center gap-0.5 font-medium text-red-600 hover:underline"
+                                className="inline-flex items-center gap-0.5 font-medium text-down hover:underline"
                               >
                                 {p.failed}
                                 <ChevronDown className={`size-3 transition-transform duration-150 ${rowOpen ? "rotate-180" : ""}`} />
                               </button>
                             ) : (
-                              <span className="text-red-600">{p.failed}</span>
+                              <span className="text-down">{p.failed}</span>
                             )}
                           </td>
                         </tr>
                         {rowOpen && hasErrors && (
                           <tr>
-                            <td colSpan={5} className="border-t border-red-100 bg-red-50 px-3 py-2">
+                            <td colSpan={5} className="border-t border-hair bg-down-soft px-3 py-2">
                               <TickerErrorDetail errors={p.errors!} />
                             </td>
                           </tr>
@@ -433,10 +433,10 @@ export function L1MultiDispatchTab() {
   return (
     <div className="space-y-5 max-w-4xl">
       {/* Intro */}
-      <div className="flex items-start justify-between gap-3 rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
+      <div className="flex items-start justify-between gap-3 rounded-md border border-hair bg-secondary px-4 py-3">
         <div>
-          <p className="text-[13px] text-[#0F172B] font-medium">On-demand L1 extraction</p>
-          <p className="text-[12px] text-[#888888] mt-1">
+          <p className="text-[13px] text-ink font-medium">On-demand L1 extraction</p>
+          <p className="text-[12px] text-ink-3 mt-1">
             Transcript, PPT, and annual-report signal extraction for a chosen ticker set. Preview is
             free to repeat; Run dispatches real, billable jobs. See Help (top right) for the full flow.
           </p>
@@ -444,19 +444,19 @@ export function L1MultiDispatchTab() {
         <div className="flex items-start gap-2 shrink-0">
           <button
             onClick={() => setShowSignalBrowser(true)}
-            className="rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-[12px] font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors"
+            className="rounded-md border border-hair bg-card px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink transition-colors"
           >
             Signal Browser
           </button>
           <button
             onClick={() => setShowTruncatedChunks(true)}
-            className="rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-[12px] font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors"
+            className="rounded-md border border-hair bg-card px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink transition-colors"
           >
             Truncated Chunks
           </button>
           <button
             onClick={() => setShowKpiCleanup(true)}
-            className="rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-[12px] font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors"
+            className="rounded-md border border-hair bg-card px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink transition-colors"
           >
             KPI Cleanup
           </button>
@@ -464,7 +464,7 @@ export function L1MultiDispatchTab() {
       </div>
 
       {optionsError && !optionsLoading && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {optionsError}
         </div>
       )}
@@ -484,7 +484,7 @@ export function L1MultiDispatchTab() {
       />
 
       {/* L1-specific extraction options */}
-      <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-4 space-y-4">
+      <div className="rounded-[10px] border border-hair bg-card p-4 space-y-4">
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className={LABEL_CLS}>Start From</label>
@@ -494,7 +494,7 @@ export function L1MultiDispatchTab() {
               placeholder="e.g. MSUMI"
               className={`${INPUT_CLS} w-full uppercase`}
             />
-            <p className="text-[11px] text-[#888888] mt-1">Alphabetical cursor — resume a long run.</p>
+            <p className="text-[11px] text-ink-3 mt-1">Alphabetical cursor — resume a long run.</p>
           </div>
           <div>
             <label className={LABEL_CLS}>Limit</label>
@@ -506,7 +506,7 @@ export function L1MultiDispatchTab() {
               placeholder="all history"
               className={`${INPUT_CLS} w-full`}
             />
-            <p className="text-[11px] text-[#888888] mt-1">Most-recent calls/reports considered.</p>
+            <p className="text-[11px] text-ink-3 mt-1">Most-recent calls/reports considered.</p>
           </div>
           <div>
             <label className={LABEL_CLS}>Latest</label>
@@ -518,15 +518,15 @@ export function L1MultiDispatchTab() {
               placeholder="—"
               className={`${INPUT_CLS} w-full`}
             />
-            <p className="text-[11px] text-[#888888] mt-1">Takes precedence over Limit if both set.</p>
+            <p className="text-[11px] text-ink-3 mt-1">Takes precedence over Limit if both set.</p>
           </div>
         </div>
-        <p className="text-[11px] text-[#888888]">
+        <p className="text-[11px] text-ink-3">
           Leave Limit and Latest blank and Preview shows only the 20 most recent calls per ticker
           (the total count is still shown alongside) — set either one explicitly to look further back.
         </p>
 
-        <div className="flex flex-wrap gap-6 pt-1 border-t border-[#F0F0F0]">
+        <div className="flex flex-wrap gap-6 pt-1 border-t border-hair">
           <CheckboxField
             checked={force}
             onChange={setForce}
@@ -550,17 +550,17 @@ export function L1MultiDispatchTab() {
 
       {/* Errors */}
       {previewError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {previewError}
         </div>
       )}
       {csvError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {csvError}
         </div>
       )}
       {runError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {runError}
         </div>
       )}
@@ -570,7 +570,7 @@ export function L1MultiDispatchTab() {
         <button
           onClick={() => doPreview(1)}
           disabled={previewLoading}
-          className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink hover:border-ink transition-colors disabled:opacity-40"
         >
           {previewLoading && <Loader2 className="size-3.5 animate-spin" />}
           Preview
@@ -579,7 +579,7 @@ export function L1MultiDispatchTab() {
         <button
           onClick={doExportCsv}
           disabled={csvLoading}
-          className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink hover:border-ink transition-colors disabled:opacity-40"
         >
           {csvLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
           Export CSV
@@ -588,8 +588,8 @@ export function L1MultiDispatchTab() {
         <button
           onClick={handleRunClick}
           disabled={!canRun}
-          className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-40 disabled:cursor-not-allowed ${
-            confirmArmed ? "bg-red-600 hover:opacity-90" : "bg-[#0F172B] hover:opacity-90"
+          className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium text-[var(--qc-on-dark)] transition-opacity disabled:opacity-40 disabled:cursor-not-allowed ${
+            confirmArmed ? "bg-down hover:opacity-90" : "bg-ink hover:opacity-90"
           }`}
         >
           {triggering && <Loader2 className="size-3.5 animate-spin" />}
@@ -599,26 +599,26 @@ export function L1MultiDispatchTab() {
         {confirmArmed && (
           <button
             onClick={() => setConfirmArmed(false)}
-            className="text-sm text-[#888888] hover:text-[#0F172B]"
+            className="text-sm text-ink-3 hover:text-ink"
           >
             Cancel
           </button>
         )}
 
-        <span className="text-[11px] text-[#888888]">
+        <span className="text-[11px] text-ink-3">
           {confirmArmed
             ? "This queues real extraction jobs and can't be cancelled once started."
             : "Preview is optional — Run dispatches with the current options whether or not you've previewed them."}
         </span>
       </div>
-      <p className="text-[11px] text-[#888888] -mt-3">
+      <p className="text-[11px] text-ink-3 -mt-3">
         CSV export always covers full uncapped history — Limit, Latest, AR-only, and Skip AR are
         ignored for the export.
       </p>
 
       {/* Active run banner */}
       {activeRun && (
-        <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+        <div className="flex items-center gap-2 rounded-md border border-blue-soft bg-blue-soft px-4 py-3 text-sm text-blue">
           <Loader2 className="size-4 shrink-0 animate-spin" />
           Dispatching run {activeRun.id}… this can take a while for large ticker sets. You can
           navigate away — check back under Run History.
@@ -630,23 +630,23 @@ export function L1MultiDispatchTab() {
         <div className="space-y-2">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Preview</span>
-              <span className="text-[10px] text-[#C8C8C8]">{preview.tickerCount} companies total</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Preview</span>
+              <span className="text-[10px] text-ink-3">{preview.tickerCount} companies total</span>
             </div>
             {preview.totalPages > 1 && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => doPreview(page - 1)}
                   disabled={page <= 1 || previewLoading || previewedKey !== bodyKey}
-                  className="flex items-center justify-center size-6 rounded border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] disabled:opacity-40 disabled:hover:border-[#E2E2E2] disabled:hover:text-[#888888] transition-colors"
+                  className="flex items-center justify-center size-6 rounded border border-hair text-ink-3 hover:text-ink hover:border-ink disabled:opacity-40 disabled:hover:border-hair disabled:hover:text-ink-3 transition-colors"
                 >
                   <ChevronLeft className="size-3.5" />
                 </button>
-                <span className="text-[11px] text-[#888888]">Page {preview.page} of {preview.totalPages}</span>
+                <span className="text-[11px] text-ink-3">Page {preview.page} of {preview.totalPages}</span>
                 <button
                   onClick={() => doPreview(page + 1)}
                   disabled={page >= preview.totalPages || previewLoading || previewedKey !== bodyKey}
-                  className="flex items-center justify-center size-6 rounded border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] disabled:opacity-40 disabled:hover:border-[#E2E2E2] disabled:hover:text-[#888888] transition-colors"
+                  className="flex items-center justify-center size-6 rounded border border-hair text-ink-3 hover:text-ink hover:border-ink disabled:opacity-40 disabled:hover:border-hair disabled:hover:text-ink-3 transition-colors"
                 >
                   <ChevronRight className="size-3.5" />
                 </button>
@@ -664,11 +664,11 @@ export function L1MultiDispatchTab() {
       {/* Run history */}
       <div className="space-y-2 pt-2">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Run History</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Run History</span>
           <button
             onClick={loadRuns}
             disabled={runsLoading}
-            className="flex items-center gap-1.5 text-[11px] text-[#888888] hover:text-[#0F172B] disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[11px] text-ink-3 hover:text-ink disabled:opacity-40"
           >
             {runsLoading ? <Loader2 className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
             Refresh
@@ -676,13 +676,13 @@ export function L1MultiDispatchTab() {
         </div>
 
         {runsError && !runsLoading && (
-          <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
             <AlertCircle className="size-4 shrink-0" /> {runsError}
           </div>
         )}
 
         {runs.length === 0 && !runsLoading && !runsError && (
-          <p className="text-[12px] text-[#888888]">No runs yet.</p>
+          <p className="text-[12px] text-ink-3">No runs yet.</p>
         )}
 
         <div className="space-y-1.5">

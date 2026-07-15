@@ -18,6 +18,7 @@ import { LensDrawer } from "@/components/insight/lens-drawer";
 
 import type { InsightType } from "@/types/analysis";
 import type { TranscriptCall } from "@/types/management";
+import { QC } from "@/lib/chart-tokens";
 
 
 // ─── Skeleton components ──────────────────────────────────────────────────────
@@ -54,18 +55,18 @@ function RadarDiamondSkeleton({ size = 220 }: { size?: number }) {
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: "visible", flexShrink: 0 }}>
       {/* Background rings */}
       {rings.map((r, i) => (
-        <polygon key={i} points={ringPoints(r)} fill="none" stroke="#CCCCCC" strokeWidth={i === 2 ? 1.2 : 0.9} strokeDasharray={i === 2 ? "3 3" : undefined} />
+        <polygon key={i} points={ringPoints(r)} fill="none" stroke={QC.hair} strokeWidth={i === 2 ? 1.2 : 0.9} strokeDasharray={i === 2 ? "3 3" : undefined} />
       ))}
       {/* Axis spokes */}
       {axes.map((pt, i) => (
-        <line key={i} x1={cx} y1={cy} x2={pt.x} y2={pt.y} stroke="#CCCCCC" strokeWidth={0.9} />
+        <line key={i} x1={cx} y1={cy} x2={pt.x} y2={pt.y} stroke={QC.hair} strokeWidth={0.9} />
       ))}
       {/* Shimmer data polygon — animated via CSS class */}
-      <polygon points={dataPoints} className="skeleton-shimmer" style={{ fill: "#E0E0E0" }} strokeWidth={0} />
+      <polygon points={dataPoints} className="skeleton-shimmer" style={{ fill: QC.section }} strokeWidth={0} />
       {/* Polygon stroke outline */}
-      <polygon points={dataPoints} fill="none" stroke="#BBBBBB" strokeWidth={1.5} strokeLinejoin="round" />
+      <polygon points={dataPoints} fill="none" stroke={QC.hair} strokeWidth={1.5} strokeLinejoin="round" />
       {/* Center score placeholder */}
-      <rect x={cx - 14} y={cy - 8} width={28} height={14} rx={3} fill="#D5D5D5" />
+      <rect x={cx - 14} y={cy - 8} width={28} height={14} rx={3} fill={QC.section} />
     </svg>
   );
 }
@@ -77,7 +78,9 @@ function InsightScorecardSkeleton() {
         {/* Dark verdict panel — mimic the dark navy gradient card */}
         <div style={{
           borderRadius: 14, overflow: "hidden", minHeight: 300, padding: "20px 16px",
-          background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f172a 100%)",
+          // Decorative dark hero ramp (mimics DarkGradientCard). Endpoint mapped to
+          // the ink token; the mid navy stops have no clean 3-stop token, so kept.
+          background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, var(--qc-ink) 100%)",
           display: "flex", flexDirection: "column", gap: 16,
         }}>
           {/* "MANAGEMENT VERDICT" label + band pill */}
@@ -457,9 +460,17 @@ function InsightTabContent({ type }: { type: InsightType }) {
     );
   }
 
+  // Underline sub-tabs so screener scaffolding matches Overview (audit: this page
+  // dropped the secondary nav). Only include sections that actually render.
+  const navItems = [
+    { id: "section-score", label: `${TYPE_LABELS[type]} Score` },
+    insight.lenses.length > 0 && { id: "section-lenses", label: `${TYPE_LABELS[type]} Lenses` },
+    insight.signal_map.length > 0 && { id: "section-signal-map", label: "Signals" },
+  ].filter((x): x is { id: string; label: string } => Boolean(x));
+
   return (
     <>
-      <ScreenerPageShell companyInfo={companyInfo}>
+      <ScreenerPageShell companyInfo={companyInfo} navItems={navItems}>
         <InsightDashboard insight={insight} type={type} ticker={symbol} screenerData={screenerData} />
       </ScreenerPageShell>
       <AssetActionBar ticker={symbol} />

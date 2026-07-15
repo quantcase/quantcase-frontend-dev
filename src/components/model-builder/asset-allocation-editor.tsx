@@ -20,10 +20,10 @@ function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
       type="button"
       onClick={onClick}
       className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0"
-      style={{ background: on ? "#475569" : "var(--qc-hair)" }}
+      style={{ background: on ? "var(--qc-ink)" : "var(--qc-hair)" }}
     >
       <span
-        className="inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform"
+        className="inline-block h-4 w-4 rounded-full bg-card shadow transform transition-transform"
         style={{ transform: on ? "translateX(22px)" : "translateX(2px)" }}
       />
     </button>
@@ -40,8 +40,8 @@ function SliderBar({ value, onChange }: { value: number; onChange: (v: number) =
       onChange={(e) => onChange(Number(e.target.value))}
       className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
       style={{
-        background: `linear-gradient(to right, #475569 ${value}%, #E2E2E2 ${value}%)`,
-        accentColor: "#475569",
+        background: `linear-gradient(to right, var(--qc-ink) ${value}%, var(--qc-hair) ${value}%)`,
+        accentColor: "var(--qc-ink)",
       }}
     />
   );
@@ -245,7 +245,7 @@ function SubClassSection({
   };
 
   return (
-    <div className="border-b border-[#E2E2E2] last:border-0">
+    <div className="border-b border-hair last:border-0">
       <div className="flex items-center justify-between py-3">
         <div>
           <p className="text-sm font-semibold" style={{ color: "var(--qc-ink)" }}>{assetLabel}</p>
@@ -256,7 +256,7 @@ function SubClassSection({
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="flex items-center gap-1.5 rounded-full border border-[#E2E2E2] px-3 py-1 text-xs font-medium hover:border-zinc-300 transition-colors"
+          className="flex items-center gap-1.5 rounded-full border border-hair px-3 py-1 text-xs font-medium hover:border-ink-3 transition-colors"
           style={{ color: "var(--qc-ink)" }}
         >
           {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}

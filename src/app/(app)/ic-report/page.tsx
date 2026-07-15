@@ -37,8 +37,8 @@ export default function ICReportPage() {
 
         {/* Section heading */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-zinc-400 dark:text-zinc-500">§9</span>
-          <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 tracking-tight uppercase">
+          <span className="text-sm font-bold text-ink-3">§9</span>
+          <h2 className="text-lg font-bold text-ink tracking-tight uppercase">
             Final IC Conclusion
           </h2>
         </div>

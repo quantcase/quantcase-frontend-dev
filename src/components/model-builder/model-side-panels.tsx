@@ -12,13 +12,13 @@ import type { StocksApiResponse } from "@/types/screener";
 
 function PanelShell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+    <div className="rounded-[10px] border border-hair bg-secondary p-2">
       <div className="px-2 pt-1 pb-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: "rgba(18,18,18,0.50)" }}>
           {title}
         </p>
       </div>
-      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4">
+      <div className="rounded-[10px] bg-card border border-[rgba(226,226,226,0.10)] p-4">
         {children}
       </div>
     </div>
@@ -95,7 +95,7 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
               <button
                 type="button"
                 onClick={() => toggle(c.id)}
-                className="ml-2 p-1 rounded hover:bg-red-50 transition-colors shrink-0"
+                className="ml-2 p-1 rounded hover:bg-down-soft transition-colors shrink-0"
                 title="Remove"
               >
                 <X className="w-3.5 h-3.5" style={{ color: "var(--qc-ink-2)" }} />
@@ -110,8 +110,8 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="w-full flex items-center justify-between rounded-lg border border-[#E2E2E2] px-3 py-2 text-xs transition-colors hover:border-[#0F172B]"
-          style={{ color: "var(--qc-ink-2)", background: "#fff" }}
+          className="w-full flex items-center justify-between rounded-lg border border-hair px-3 py-2 text-xs transition-colors hover:border-ink"
+          style={{ color: "var(--qc-ink-2)", background: "var(--qc-card)" }}
         >
           <span>{linked.length > 0 ? "Link more clients…" : "Link clients…"}</span>
           <ChevronDown className="w-3.5 h-3.5 shrink-0" />
@@ -119,10 +119,10 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
 
         {open && (
           <div
-            className="absolute z-50 left-0 right-0 mt-1 rounded-[10px] border border-[#E2E2E2] bg-white shadow-lg"
+            className="absolute z-50 left-0 right-0 mt-1 rounded-[10px] border border-hair bg-card shadow-lg"
             style={{ maxHeight: 240, overflow: "hidden", display: "flex", flexDirection: "column" }}
           >
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-[#E2E2E2]">
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-hair">
               <Search className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--qc-ink-2)" }} />
               <input
                 autoFocus
@@ -146,18 +146,18 @@ export function LinkedClientsPanel({ linkedClientIds, onChange }: LinkedClientsP
                       <button
                         type="button"
                         onClick={() => { toggle(c.id); setSearch(""); }}
-                        className="w-full text-left pr-3 hover:bg-[#F5F5F5] transition-colors flex items-center gap-2.5"
+                        className="w-full text-left pr-3 hover:bg-secondary transition-colors flex items-center gap-2.5"
                       >
                         <div
                           className="w-4 h-4 rounded border flex items-center justify-center shrink-0"
                           style={{
-                            border: isLinked ? "none" : "1.5px solid #D1D5DB",
+                            border: isLinked ? "none" : "1.5px solid var(--qc-hair)",
                             background: isLinked ? "var(--qc-ink)" : "transparent",
                           }}
                         >
                           {isLinked && (
                             <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                              <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M1 3.5L3.5 6L8 1" stroke="var(--qc-on-dark)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           )}
                         </div>
@@ -334,7 +334,7 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
                   <button
                     type="button"
                     onClick={() => removeHolding(h.ticker)}
-                    className="p-1 rounded hover:bg-red-50 transition-colors"
+                    className="p-1 rounded hover:bg-down-soft transition-colors"
                     title="Remove"
                   >
                     <X className="w-3.5 h-3.5" style={{ color: "var(--qc-ink-2)" }} />
@@ -361,9 +361,9 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
         <div
           className="flex items-center justify-between rounded-lg px-3 py-1.5 mb-3 text-xs"
           style={{
-            background: totalWeight === 100 ? "#F0FDF4" : "#FFF7F0",
-            color:      totalWeight === 100 ? "#166534" : "#92400E",
-            border:     `1px solid ${totalWeight === 100 ? "#BBF7D0" : "#FED7AA"}`,
+            background: totalWeight === 100 ? "var(--qc-up-soft)" : "var(--qc-warn-soft)",
+            color:      totalWeight === 100 ? "var(--qc-up)" : "var(--qc-warn)",
+            border:     `1px solid ${totalWeight === 100 ? "var(--qc-up-soft)" : "var(--qc-warn-soft)"}`,
           }}
         >
           <span>Total weight</span>
@@ -376,8 +376,8 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="w-full flex items-center justify-between rounded-lg border border-[#E2E2E2] px-3 py-2 text-xs transition-colors hover:border-[#0F172B]"
-          style={{ color: "var(--qc-ink-2)", background: "#fff" }}
+          className="w-full flex items-center justify-between rounded-lg border border-hair px-3 py-2 text-xs transition-colors hover:border-ink"
+          style={{ color: "var(--qc-ink-2)", background: "var(--qc-card)" }}
         >
           <span>{holdings.length > 0 ? "Add another stock…" : "Search & add stocks…"}</span>
           <ChevronDown className="w-3.5 h-3.5 shrink-0" />
@@ -385,10 +385,10 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
 
         {open && (
           <div
-            className="absolute z-50 left-0 right-0 mt-1 rounded-[10px] border border-[#E2E2E2] bg-white shadow-lg"
+            className="absolute z-50 left-0 right-0 mt-1 rounded-[10px] border border-hair bg-card shadow-lg"
             style={{ maxHeight: 260, overflow: "hidden", display: "flex", flexDirection: "column" }}
           >
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-[#E2E2E2]">
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-hair">
               <Search className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--qc-ink-2)" }} />
               <input
                 autoFocus
@@ -412,18 +412,18 @@ export function ModelHoldingsPanel({ holdings, onChange }: ModelHoldingsPanelPro
                       <button
                         type="button"
                         onClick={() => addHolding(s)}
-                        className="w-full text-left hover:bg-[#F5F5F5] transition-colors flex items-center gap-2.5"
+                        className="w-full text-left hover:bg-secondary transition-colors flex items-center gap-2.5"
                       >
                         <div
                           className="w-4 h-4 rounded border flex items-center justify-center shrink-0"
                           style={{
-                            border: isAdded ? "none" : "1.5px solid #D1D5DB",
+                            border: isAdded ? "none" : "1.5px solid var(--qc-hair)",
                             background: isAdded ? "var(--qc-ink)" : "transparent",
                           }}
                         >
                           {isAdded && (
                             <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                              <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M1 3.5L3.5 6L8 1" stroke="var(--qc-on-dark)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           )}
                         </div>

@@ -5,6 +5,7 @@ import { createSubscribeOrder, verifyPayment } from "@/lib/billing";
 import type { VerifyResponse } from "@/types/auth";
 
 /** Namespaced console logging so the whole checkout flow is traceable in DevTools. */
+// Hex kept intentionally: these are console `%c` style strings — the DevTools console cannot resolve CSS var() tokens.
 const log = (msg: string, data?: unknown) =>
   data === undefined
     ? console.log(`%c[razorpay]%c ${msg}`, "color:#0F172B;font-weight:600", "color:inherit")
@@ -104,6 +105,7 @@ export function useRazorpayCheckout({ onSuccess }: UseRazorpayCheckoutOptions = 
         description: "QuantCase Pro subscription",
         order_id: order.razorpay_order_id,
         prefill: order.prefill,
+        // Hex kept intentionally: passed to Razorpay's external SDK, which cannot resolve CSS var() tokens.
         theme: { color: "#0F172B" },
 
         // On success Razorpay calls this — verify server-side before unlocking.

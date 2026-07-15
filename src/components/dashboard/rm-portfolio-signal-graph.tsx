@@ -57,13 +57,16 @@ export interface RMNode {
 
 // Note: hex values here are intentional — Framer Motion animation props and ReactFlow styles
 // cannot resolve CSS custom properties at runtime, so these stay as resolved hex.
+// bg/text are tokenized. `border` stays hex because it's consumed with a hex-alpha
+// suffix (`${cfg.border}33`) and in box-shadows — a `var(--qc-*)` string cannot be
+// alpha-suffixed. `edge`/`glow` are light tints/rgba of the same semantic hue, no token.
 const SEV: Record<SignalSeverity, {
   bg: string; border: string; text: string; edge: string; glow: string; label: string;
 }> = {
-  critical: { bg: "#F7E6E3", border: "#B23A2F", text: "#B23A2F", edge: "#e8a39d", glow: "rgba(178,58,47,0.18)", label: "Critical" },
-  warning:  { bg: "#FAF0D8", border: "#B4731A", text: "#B4731A", edge: "#dbb87a", glow: "rgba(180,115,26,0.18)", label: "Warning"  },
-  moderate: { bg: "#E9EEFE", border: "#3A6BEF", text: "#3A6BEF", edge: "#93a8f5", glow: "rgba(58,107,239,0.18)", label: "Moderate" },
-  clean:    { bg: "#E3F1E8", border: "#1F7A4A", text: "#1F7A4A", edge: "#7fbf99", glow: "rgba(31,122,74,0.18)",  label: "Clean"    },
+  critical: { bg: "var(--qc-down-soft)", border: "#B23A2F", text: "var(--qc-down)", edge: "#e8a39d", glow: "rgba(178,58,47,0.18)", label: "Critical" },
+  warning:  { bg: "var(--qc-warn-soft)", border: "#B4731A", text: "var(--qc-warn)", edge: "#dbb87a", glow: "rgba(180,115,26,0.18)", label: "Warning"  },
+  moderate: { bg: "var(--qc-blue-soft)", border: "#3A6BEF", text: "var(--qc-blue)", edge: "#93a8f5", glow: "rgba(58,107,239,0.18)", label: "Moderate" },
+  clean:    { bg: "var(--qc-up-soft)",   border: "#1F7A4A", text: "var(--qc-up)",   edge: "#7fbf99", glow: "rgba(31,122,74,0.18)",  label: "Clean"    },
 };
 
 // Radius by severity (RM nodes — bigger = worse)

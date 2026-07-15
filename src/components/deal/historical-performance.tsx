@@ -8,13 +8,14 @@ import { BarChart2 } from "lucide-react";
 import type { HistoricalPerformanceSection } from "@/types/deal";
 import { fmtDealNum } from "@/lib/utils";
 import { historicalPerformanceData } from "@/components/deal/detailed-analysis-data";
+import { QC } from "@/lib/chart-tokens";
 
-// Chart hex colors (Recharts can't use CSS vars)
+// Chart colors — Recharts/SVG accept var(--qc-*) directly.
 const CHART = {
-  grid: "#f4f4f5",
-  axis: "#a1a1aa",
-  companyBar: "var(--qc-ink)",   // --qc-ink approx
-  industryLine: "#9A9A92", // --qc-ink-2 approx
+  grid: QC.hair,
+  axis: QC.ink3,
+  companyBar: QC.ink,
+  industryLine: QC.ink2,
 };
 
 interface HistoricalPerformanceProps {
@@ -70,7 +71,7 @@ export function HistoricalPerformance({ data, hideHeader }: HistoricalPerformanc
               <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} vertical={false} />
               <XAxis dataKey="year" tick={{ fontSize: 10, fill: CHART.axis }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: CHART.axis }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e4e4e7", backgroundColor: "white" }} itemStyle={{ padding: "0px 10px" }} />
+              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: `1px solid ${QC.hair}`, backgroundColor: QC.card }} itemStyle={{ padding: "0px 10px" }} />
               <Legend
                 iconSize={8}
                 wrapperStyle={{ fontSize: 10 }}

@@ -30,10 +30,11 @@ function lensTrafficLight(lens: InsightLens): "positive" | "negative" | "neutral
   return "negative";
 }
 
+// Semantic colors from design-system tokens (was hardcoded #16a34a/#dc2626/#d97706).
 function trafficColor(t: "positive" | "negative" | "neutral") {
-  if (t === "positive") return { dot: "#16a34a", bg: "#f0fdf4", border: "rgba(22,163,74,0.20)", text: "#15803d" };
-  if (t === "negative") return { dot: "#dc2626", bg: "#fef2f2", border: "rgba(220,38,38,0.20)", text: "#b91c1c" };
-  return { dot: "#d97706", bg: "#fffbeb", border: "rgba(217,119,6,0.20)", text: "#b45309" };
+  if (t === "positive") return { dot: "var(--qc-up)",   bg: "var(--qc-up-soft)",   border: "rgba(31,122,74,0.20)",  text: "var(--qc-up)"   };
+  if (t === "negative") return { dot: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "rgba(178,58,47,0.20)",  text: "var(--qc-down)" };
+  return { dot: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "rgba(180,115,26,0.20)", text: "var(--qc-warn)" };
 }
 
 // verdict_band drives the ring color — it's the contextual/relative rating the backend computes.
@@ -41,13 +42,13 @@ function trafficColor(t: "positive" | "negative" | "neutral") {
 function verdictBandColor(verdictBand: string) {
   const b = (verdictBand ?? "").toUpperCase();
   if (b.includes("STRONG") || b.includes("HIGH") || b.includes("GOOD")) {
-    return { color: "#16a34a", bg: "#f0fdf4", border: "#16a34a" };
+    return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "var(--qc-up)" };
   }
   if (b.includes("WEAK") || b.includes("LOW") || b.includes("POOR") || b.includes("SELL")) {
-    return { color: "#dc2626", bg: "#fef2f2", border: "#dc2626" };
+    return { color: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "var(--qc-down)" };
   }
   // MODERATE BAND, NEUTRAL, or unknown
-  return { color: "#d97706", bg: "#fffbeb", border: "#d97706" };
+  return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "var(--qc-warn)" };
 }
 
 // Capitalize each word

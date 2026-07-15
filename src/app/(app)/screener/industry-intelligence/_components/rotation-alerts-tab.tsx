@@ -98,8 +98,8 @@ function HighConvictionCard({ pick }: { pick: IIHighConvictionPick }) {
         <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{pick.context}</span>
       </div>
       <div className="flex flex-col gap-1">
-        <p className="text-[15px] font-semibold" style={{ color: "#ffffff" }}>
-          <span style={{ color: "#C084FC" }}>{pick.ticker}</span>{` · ${pick.cluster_label}`}
+        <p className="text-[15px] font-semibold" style={{ color: "var(--qc-on-dark)" }}>
+          <span style={{ color: "var(--qc-brand-accent)" }}>{pick.ticker}</span>{` · ${pick.cluster_label}`}
         </p>
         <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
           RS vs market {pick.rs_vs_market_pct ?? "—"} · Revisions {pick.revisions ?? "—"} · Quality {pick.quality_score}
@@ -109,7 +109,7 @@ function HighConvictionCard({ pick }: { pick: IIHighConvictionPick }) {
         variant="outline"
         size="sm"
         className="w-full rounded-lg justify-center hover:opacity-80"
-        style={{ borderColor: "rgba(255,255,255,0.2)", color: "#ffffff", background: "rgba(255,255,255,0.08)" }}
+        style={{ borderColor: "rgba(255,255,255,0.2)", color: "var(--qc-on-dark)", background: "rgba(255,255,255,0.08)" }}
       >
         Full case <ArrowUpRight className="h-3.5 w-3.5" />
       </Button>

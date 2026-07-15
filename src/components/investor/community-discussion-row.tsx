@@ -36,8 +36,8 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
   return (
     <div
       style={{
-        background: "#fff",
-        border: "1px solid #E2E2E2",
+        background: "var(--qc-card)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 14,
         display: "flex",
         flexDirection: "column",
@@ -50,8 +50,8 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
         style={{
           height: 3,
           background: isCommunity
-            ? "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)"
-            : "linear-gradient(90deg, #0F172B 0%, #475569 100%)",
+            ? "linear-gradient(90deg, var(--qc-brand-accent) 0%, var(--qc-brand-accent) 100%)"
+            : "linear-gradient(90deg, var(--qc-ink) 0%, var(--qc-ink-2) 100%)",
         }}
       />
 
@@ -69,7 +69,7 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
             style={{
               fontSize: 10,
               fontWeight: 600,
-              color: "#aaa",
+              color: "var(--qc-ink-3)",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
             }}
@@ -81,9 +81,9 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
               style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: "#ef4444",
-                background: "#fef2f2",
-                border: "1px solid #fecaca",
+                color: "var(--qc-down)",
+                background: "var(--qc-down-soft)",
+                border: "1px solid var(--qc-down)",
                 borderRadius: 20,
                 padding: "3px 8px",
                 display: "flex",
@@ -97,7 +97,7 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
                   width: 6,
                   height: 6,
                   borderRadius: "50%",
-                  background: "#ef4444",
+                  background: "var(--qc-down)",
                   display: "inline-block",
                   animation: "pulse 1.5s infinite",
                 }}
@@ -110,9 +110,9 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
               style={{
                 fontSize: 10,
                 fontWeight: 600,
-                color: "#0F172B",
-                background: "#F5F5F5",
-                border: "1px solid #E2E2E2",
+                color: "var(--qc-ink)",
+                background: "var(--qc-section)",
+                border: "1px solid var(--qc-hair)",
                 borderRadius: 20,
                 padding: "3px 10px",
                 letterSpacing: "0.06em",
@@ -129,7 +129,7 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
           style={{
             fontSize: 21,
             fontWeight: 400,
-            color: "#0F172B",
+            color: "var(--qc-ink)",
             lineHeight: 1.3,
             marginBottom: 12,
             fontFamily: "Georgia, serif",
@@ -139,7 +139,7 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
         />
 
         {/* Body */}
-        <p style={{ fontSize: 13, color: "#888", lineHeight: 1.6, margin: "0 0 20px", flex: 1 }}>
+        <p style={{ fontSize: 13, color: "var(--qc-ink-3)", lineHeight: 1.6, margin: "0 0 20px", flex: 1 }}>
           {item.body}
         </p>
 
@@ -149,9 +149,9 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
             display: "flex",
             gap: 0,
             marginBottom: 18,
-            background: "#F8F8F8",
+            background: "var(--qc-section)",
             borderRadius: 8,
-            border: "1px solid #EFEFEF",
+            border: "1px solid var(--qc-hair)",
             overflow: "hidden",
           }}
         >
@@ -161,13 +161,13 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
               style={{
                 flex: 1,
                 padding: "10px 14px",
-                borderRight: i < item.stats.length - 1 ? "1px solid #EFEFEF" : "none",
+                borderRight: i < item.stats.length - 1 ? "1px solid var(--qc-hair)" : "none",
               }}
             >
-              <div style={{ fontSize: 18, fontWeight: 700, color: "#0F172B", lineHeight: 1 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: "var(--qc-ink)", lineHeight: 1 }}>
                 {s.value}
               </div>
-              <div style={{ fontSize: 10, color: "#aaa", marginTop: 3, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 10, color: "var(--qc-ink-3)", marginTop: 3, letterSpacing: "0.04em", textTransform: "uppercase" }}>
                 {s.label}
               </div>
             </div>
@@ -180,9 +180,9 @@ function DiscussionCard({ item }: { item: CommunityThread | IpoDiscussion }) {
           style={{
             fontSize: 12,
             fontWeight: 600,
-            color: isCommunity ? "#7c3aed" : "#0F172B",
-            background: isCommunity ? "#f5f3ff" : "#F5F5F5",
-            border: `1px solid ${isCommunity ? "#ddd6fe" : "#E2E2E2"}`,
+            color: isCommunity ? "var(--qc-brand-accent)" : "var(--qc-ink)",
+            background: isCommunity ? "var(--qc-brand-accent-soft)" : "var(--qc-section)",
+            border: `1px solid ${isCommunity ? "var(--qc-brand-accent-edge)" : "var(--qc-hair)"}`,
             borderRadius: 8,
             padding: "9px 18px",
             textDecoration: "none",

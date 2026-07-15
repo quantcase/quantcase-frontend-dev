@@ -52,7 +52,7 @@ function ShellInner({ navItems, headerRight, children, companyInfo }: ScreenerPa
   const industry = companyInfo?.industry ?? screenerInfo?.company?.industry;
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--qc-bg)" }}>
+    <div className="min-h-screen qc-dock-clearance" style={{ background: "var(--qc-bg)" }}>
       {/* Company Header — design-sample style */}
       <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4" style={{ padding: "10px 16px 10px" }}>
         <h1

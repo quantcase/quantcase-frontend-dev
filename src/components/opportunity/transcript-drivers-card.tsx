@@ -12,12 +12,12 @@ function DriverRow({ item, sentiment }: DriverRowProps) {
   if (!text) return null;
 
   const mentionLabel = `${item.mentioned_by}/${item.total_companies}`;
-  const borderColor = sentiment === "positive" ? "#22c55e" : "#ef4444";
-  const mentionColor = sentiment === "positive" ? "#059669" : "#dc2626";
+  const borderColor = sentiment === "positive" ? "var(--qc-up)" : "var(--qc-down)";
+  const mentionColor = sentiment === "positive" ? "var(--qc-up)" : "var(--qc-down)";
 
   return (
     <div
-      className="flex items-start gap-3 py-2.5 border-b border-[#F0F0F0] last:border-0"
+      className="flex items-start gap-3 py-2.5 border-b border-hair last:border-0"
     >
       {/* Mention badge */}
       <div
@@ -40,8 +40,8 @@ interface DriverColumnProps {
 }
 
 function DriverColumn({ title, subtitle, items, sentiment }: DriverColumnProps) {
-  const accentColor = sentiment === "positive" ? "#22c55e" : "#ef4444";
-  const labelColor = sentiment === "positive" ? "#059669" : "#dc2626";
+  const accentColor = sentiment === "positive" ? "var(--qc-up)" : "var(--qc-down)";
+  const labelColor = sentiment === "positive" ? "var(--qc-up)" : "var(--qc-down)";
   const bgColor = sentiment === "positive" ? "rgba(34,197,94,0.04)" : "rgba(239,68,68,0.04)";
 
   return (
@@ -58,12 +58,12 @@ function DriverColumn({ title, subtitle, items, sentiment }: DriverColumnProps) 
           {title}
         </p>
         {subtitle && (
-          <p className="text-[11px] text-[#888888] mt-0.5">{subtitle}</p>
+          <p className="text-[11px] text-ink-3 mt-0.5">{subtitle}</p>
         )}
       </div>
 
       {items.length === 0 ? (
-        <p className="text-[12px] text-[#888888] italic">No data available</p>
+        <p className="text-[12px] text-ink-3 italic">No data available</p>
       ) : (
         <div className="overflow-y-auto" style={{ maxHeight: 180 }}>
           {items.map((item, i) => (
@@ -97,8 +97,8 @@ function TranscriptDriversSection({
         <p style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-mono)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
           {title}
         </p>
-        <div className="flex-1 h-px bg-[#E2E2E2]" />
-        <p className="text-[10px] text-[#AAAAAA]">x/y = mentions / total companies</p>
+        <div className="flex-1 h-px bg-hair" />
+        <p className="text-[10px] text-ink-3">x/y = mentions / total companies</p>
       </div>
 
       {/* Two-column layout */}

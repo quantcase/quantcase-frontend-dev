@@ -46,9 +46,9 @@ export function Step3SubClasses({
     <div className="space-y-4">
       <div className="grid grid-cols-4 gap-3 pb-2">
         {summaryTiles.map(({ label, value, highlight }) => (
-          <div key={label} className="rounded-lg border border-[#E2E2E2] bg-[#F5F5F5] px-3 py-3">
+          <div key={label} className="rounded-lg border border-hair bg-secondary px-3 py-3">
             <p className="text-[10px] uppercase tracking-wider font-medium mb-1" style={{ color: "var(--qc-ink-2)" }}>{label}</p>
-            <p className="text-sm font-semibold" style={{ color: highlight ? "#166534" : "var(--qc-ink)" }}>{value}</p>
+            <p className="text-sm font-semibold" style={{ color: highlight ? "var(--qc-up)" : "var(--qc-ink)" }}>{value}</p>
           </div>
         ))}
       </div>

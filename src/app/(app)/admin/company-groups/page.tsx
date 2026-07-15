@@ -16,7 +16,7 @@ interface L1OptionsForCompanies {
 function FilterSummary({ group }: { group: CompanyGroup }) {
   if (isManualConfig(group)) {
     const count = group.filter_config.tickers?.length ?? 0;
-    return <span className="text-[12px] text-[#888888]">{count} ticker{count !== 1 ? "s" : ""}, manual</span>;
+    return <span className="text-[12px] text-ink-3">{count} ticker{count !== 1 ? "s" : ""}, manual</span>;
   }
   const cfg = group.filter_config as Record<string, unknown>;
   const parts: string[] = [];
@@ -26,7 +26,7 @@ function FilterSummary({ group }: { group: CompanyGroup }) {
   if (cfg.annualReport) parts.push("annual report");
   if (cfg.marketCap) parts.push("market cap");
   if (Array.isArray(cfg.industries) && cfg.industries.length > 0) parts.push("industry");
-  return <span className="text-[12px] text-[#888888]">{parts.length > 0 ? parts.join(" · ") : "no filters — empty"}</span>;
+  return <span className="text-[12px] text-ink-3">{parts.length > 0 ? parts.join(" · ") : "no filters — empty"}</span>;
 }
 
 function GroupRow({
@@ -50,56 +50,56 @@ function GroupRow({
   }
 
   return (
-    <div className="rounded-[8px] border border-[#E2E2E2] bg-white px-4 py-3 flex items-center gap-4">
+    <div className="rounded-[8px] border border-hair bg-card px-4 py-3 flex items-center gap-4">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] font-medium text-[#0F172B]">{group.name}</span>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[#888888] bg-[#F5F5F5] rounded-sm px-1.5 py-0.5">
+          <span className="text-[13px] font-medium text-ink">{group.name}</span>
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-ink-3 bg-secondary rounded-sm px-1.5 py-0.5">
             {group.filter_type}
           </span>
           {group.config_key && (
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#0F172B] bg-emerald-50 border border-emerald-200 rounded-sm px-1.5 py-0.5">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-ink bg-up-soft border border-up rounded-sm px-1.5 py-0.5">
               config: {group.config_key}
             </span>
           )}
         </div>
-        {group.description && <p className="text-[12px] text-[#888888] mt-0.5">{group.description}</p>}
+        {group.description && <p className="text-[12px] text-ink-3 mt-0.5">{group.description}</p>}
         <div className="mt-1"><FilterSummary group={group} /></div>
       </div>
 
       <div className="shrink-0 flex items-center gap-2">
         {count === null && (
-          <button onClick={resolveCount} className="text-[11px] text-[#888888] hover:text-[#0F172B] underline">
+          <button onClick={resolveCount} className="text-[11px] text-ink-3 hover:text-ink underline">
             Preview count
           </button>
         )}
-        {count === "loading" && <Loader2 className="size-3.5 animate-spin text-[#888888]" />}
-        {count === "error" && <span className="text-[11px] text-red-600">count failed</span>}
+        {count === "loading" && <Loader2 className="size-3.5 animate-spin text-ink-3" />}
+        {count === "error" && <span className="text-[11px] text-down">count failed</span>}
         {typeof count === "number" && (
-          <span className="text-[12px] text-[#0F172B] font-medium">{count} companies</span>
+          <span className="text-[12px] text-ink font-medium">{count} companies</span>
         )}
       </div>
 
       <div className="shrink-0 flex items-center gap-1">
         <button
           onClick={onEdit}
-          className="flex size-7 items-center justify-center rounded-md text-[#888888] hover:text-[#0F172B] hover:bg-[#F5F5F5] transition-colors"
+          className="flex size-7 items-center justify-center rounded-md text-ink-3 hover:text-ink hover:bg-secondary transition-colors"
         >
           <Pencil className="size-3.5" />
         </button>
         {!confirmDelete ? (
           <button
             onClick={() => setConfirmDelete(true)}
-            className="flex size-7 items-center justify-center rounded-md text-[#888888] hover:text-red-600 hover:bg-red-50 transition-colors"
+            className="flex size-7 items-center justify-center rounded-md text-ink-3 hover:text-down hover:bg-down-soft transition-colors"
           >
             <Trash2 className="size-3.5" />
           </button>
         ) : (
           <div className="flex items-center gap-1">
-            <button onClick={onDelete} className="text-[11px] font-medium text-red-600 hover:underline">
+            <button onClick={onDelete} className="text-[11px] font-medium text-down hover:underline">
               Confirm
             </button>
-            <button onClick={() => setConfirmDelete(false)} className="text-[#888888] hover:text-[#0F172B]">
+            <button onClick={() => setConfirmDelete(false)} className="text-ink-3 hover:text-ink">
               <X className="size-3.5" />
             </button>
           </div>
@@ -170,20 +170,20 @@ export default function CompanyGroupsPage() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity shrink-0"
+          className="flex items-center gap-1.5 rounded-md bg-ink px-3 py-2 text-sm font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity shrink-0"
         >
           <Plus className="size-4" /> New Group
         </button>
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">
           {groups.length} group{groups.length !== 1 ? "s" : ""}
         </span>
         <button
           onClick={loadGroups}
           disabled={loading}
-          className="flex items-center gap-1.5 text-[11px] text-[#888888] hover:text-[#0F172B] disabled:opacity-40"
+          className="flex items-center gap-1.5 text-[11px] text-ink-3 hover:text-ink disabled:opacity-40"
         >
           {loading ? <Loader2 className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
           Refresh
@@ -191,20 +191,20 @@ export default function CompanyGroupsPage() {
       </div>
 
       {error && !loading && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-hair bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {error}
         </div>
       )}
 
       {loading && groups.length === 0 && (
         <div className="space-y-2">
-          {[1, 2, 3].map((i) => <div key={i} className="h-16 rounded-[8px] bg-[#F5F5F5] animate-pulse" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="h-16 rounded-[8px] bg-secondary animate-pulse" />)}
         </div>
       )}
 
       {!loading && !error && groups.length === 0 && (
-        <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-10 text-center">
-          <p className="text-[13px] text-[#888888]">No groups yet — create one to reuse a ticker set across dispatch flows.</p>
+        <div className="rounded-[10px] border border-hair bg-secondary px-4 py-10 text-center">
+          <p className="text-[13px] text-ink-3">No groups yet — create one to reuse a ticker set across dispatch flows.</p>
         </div>
       )}
 

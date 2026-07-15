@@ -26,12 +26,12 @@ function PortfolioBuilderModal({
       {/* Dialog */}
       <div
         className="relative flex flex-col w-full max-w-4xl mx-auto my-0 sm:my-10 sm:rounded-lg overflow-hidden"
-        style={{ background: "#fff", maxHeight: "calc(100dvh - 80px)" }}
+        style={{ background: "var(--qc-card)", maxHeight: "calc(100dvh - 80px)" }}
       >
         {/* Fixed header */}
         <div
           className="shrink-0 flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor: "var(--qc-hair)", background: "#fff" }}
+          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
         >
           <div>
             <h2 className="text-xl font-semibold" style={{ color: "var(--qc-ink)" }}>
@@ -44,7 +44,7 @@ function PortfolioBuilderModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-200 transition-colors shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-secondary transition-colors shrink-0"
             style={{ color: "var(--qc-ink-2)" }}
           >
             <X className="w-4 h-4" />
@@ -74,7 +74,7 @@ export default function ModelBuilderPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-[#F5F5F5] mb-8 px-4 py-8">
+      <div className="min-h-screen bg-secondary mb-8 px-4 py-8">
         <div className="mx-auto space-y-6">
 
           {/* Header */}
@@ -90,7 +90,7 @@ export default function ModelBuilderPage() {
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
+              className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-[var(--qc-on-dark)] transition-colors hover:opacity-90"
               style={{ background: "var(--qc-ink)" }}
             >
               <Plus className="h-4 w-4" />
@@ -105,13 +105,13 @@ export default function ModelBuilderPage() {
             </div>
           ) : error ? (
             <div className="flex items-center justify-center py-24">
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="text-sm text-down">{error}</p>
             </div>
           ) : models.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-                style={{ background: "#EBEBEB", border: "1px solid #E2E2E2" }}
+                style={{ background: "var(--qc-section)", border: "1px solid var(--qc-hair)" }}
               >
                 <Plus className="w-5 h-5" style={{ color: "var(--qc-ink-2)" }} />
               </div>
@@ -124,7 +124,7 @@ export default function ModelBuilderPage() {
               <button
                 type="button"
                 onClick={() => setModalOpen(true)}
-                className="rounded-md px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
+                className="rounded-md px-5 py-2.5 text-sm font-semibold text-[var(--qc-on-dark)] transition-colors hover:opacity-90"
                 style={{ background: "var(--qc-ink)" }}
               >
                 Build your first portfolio

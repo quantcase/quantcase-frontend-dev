@@ -7,16 +7,11 @@ interface LimeGradientCardProps {
   className?: string;
 }
 
-function LimeGradientCard({ children, style, radius = 18, className }: LimeGradientCardProps) {
+export function LimeGradientCard({ children, style, radius = 18, className }: LimeGradientCardProps) {
   return (
     <div
-      className={className}
-      style={{
-        background: "linear-gradient(175deg, #E8F3BD 0%, #D6E996 100%)",
-        border: "1px solid var(--qc-lime-edge)",
-        borderRadius: radius,
-        ...style,
-      }}
+      className={`qc-lime-gradient-card${className ? ` ${className}` : ""}`}
+      style={{ borderRadius: radius, ...style }}
     >
       {children}
     </div>

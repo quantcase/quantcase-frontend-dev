@@ -41,7 +41,7 @@ function FinancialReportView({ report }: { report: ProwessFinancialReport }) {
       </div>
 
       {report.insertStats && (
-        <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="flex items-center gap-2 rounded-md border border-up bg-up-soft px-4 py-3 text-sm text-up">
           <CheckCircle2 className="size-4 shrink-0" />
           Inserted {report.insertStats.inserted} of {report.insertStats.attempted} rows
           {report.insertStats.skipped > 0 ? ` — ${report.insertStats.skipped} skipped (already present)` : ""}.
@@ -49,17 +49,17 @@ function FinancialReportView({ report }: { report: ProwessFinancialReport }) {
       )}
 
       {report.unmatchedColumns.length > 0 && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] text-amber-800 space-y-1.5">
+        <div className="rounded-md border border-warn bg-warn-soft px-4 py-3 text-[12px] text-warn space-y-1.5">
           <p className="font-medium">
             {report.unmatchedColumns.length} column{report.unmatchedColumns.length === 1 ? "" : "s"} unmatched to any KPI
           </p>
-          <p className="text-amber-700">
+          <p className="text-warn">
             These rows will be skipped on run. Add a KPI for each (matching its exact CSV column name as
             &quot;Prowess Name&quot;) via the KPI Catalogue, then re-run preview.
           </p>
           <div className="flex flex-wrap gap-1.5 pt-1">
             {report.unmatchedColumns.map((c) => (
-              <span key={c} className="rounded-sm bg-white border border-amber-200 px-2 py-0.5 font-mono text-[11px]">
+              <span key={c} className="rounded-sm bg-card border border-warn px-2 py-0.5 font-mono text-[11px]">
                 {c}
               </span>
             ))}
@@ -69,10 +69,10 @@ function FinancialReportView({ report }: { report: ProwessFinancialReport }) {
 
       {sourceTypeEntries.length > 0 && (
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-[#888888] mb-1.5">Rows by Source Type</p>
+          <p className="text-[10px] uppercase tracking-wider text-ink-3 mb-1.5">Rows by Source Type</p>
           <div className="flex flex-wrap gap-1.5">
             {sourceTypeEntries.map(([k, v]) => (
-              <span key={k} className="rounded-sm bg-[#F5F5F5] border border-[#E2E2E2] px-2 py-1 text-[11px] text-[#0F172B]">
+              <span key={k} className="rounded-sm bg-secondary border border-hair px-2 py-1 text-[11px] text-ink">
                 <span className="font-mono font-medium">{k}</span> — {v.toLocaleString("en-IN")}
               </span>
             ))}
@@ -82,20 +82,20 @@ function FinancialReportView({ report }: { report: ProwessFinancialReport }) {
 
       {indicatorEntries.length > 0 && (
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-[#888888] mb-1.5">Matched Indicators</p>
-          <div className="rounded-[10px] border border-[#E2E2E2] bg-white overflow-hidden max-h-[180px] overflow-y-auto">
+          <p className="text-[10px] uppercase tracking-wider text-ink-3 mb-1.5">Matched Indicators</p>
+          <div className="rounded-[10px] border border-hair bg-card overflow-hidden max-h-[180px] overflow-y-auto">
             <table className="w-full text-xs">
               <thead className="sticky top-0">
-                <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-                  <th className="px-3 py-1.5 text-left text-[10px] uppercase tracking-wider text-[#888888]">CSV Column</th>
-                  <th className="px-3 py-1.5 text-left text-[10px] uppercase tracking-wider text-[#888888]">KPI Abbr</th>
+                <tr className="bg-secondary border-b border-hair">
+                  <th className="px-3 py-1.5 text-left text-[10px] uppercase tracking-wider text-ink-3">CSV Column</th>
+                  <th className="px-3 py-1.5 text-left text-[10px] uppercase tracking-wider text-ink-3">KPI Abbr</th>
                 </tr>
               </thead>
               <tbody>
                 {indicatorEntries.map(([col, abbr]) => (
-                  <tr key={col} className="border-b border-[#F0F0F0] last:border-0">
-                    <td className="px-3 py-1.5 text-[#0F172B]">{col}</td>
-                    <td className="px-3 py-1.5 text-[#888888] font-mono">{abbr}</td>
+                  <tr key={col} className="border-b border-hair last:border-0">
+                    <td className="px-3 py-1.5 text-ink">{col}</td>
+                    <td className="px-3 py-1.5 text-ink-3 font-mono">{abbr}</td>
                   </tr>
                 ))}
               </tbody>
@@ -106,20 +106,20 @@ function FinancialReportView({ report }: { report: ProwessFinancialReport }) {
 
       {kpiEntries.length > 0 && (
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-[#888888] mb-1.5">Rows by KPI</p>
-          <div className="rounded-[10px] border border-[#E2E2E2] bg-white overflow-hidden max-h-[180px] overflow-y-auto">
+          <p className="text-[10px] uppercase tracking-wider text-ink-3 mb-1.5">Rows by KPI</p>
+          <div className="rounded-[10px] border border-hair bg-card overflow-hidden max-h-[180px] overflow-y-auto">
             <table className="w-full text-xs">
               <thead className="sticky top-0">
-                <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-                  <th className="px-3 py-1.5 text-left text-[10px] uppercase tracking-wider text-[#888888]">KPI</th>
-                  <th className="px-3 py-1.5 text-right text-[10px] uppercase tracking-wider text-[#888888]">Rows</th>
+                <tr className="bg-secondary border-b border-hair">
+                  <th className="px-3 py-1.5 text-left text-[10px] uppercase tracking-wider text-ink-3">KPI</th>
+                  <th className="px-3 py-1.5 text-right text-[10px] uppercase tracking-wider text-ink-3">Rows</th>
                 </tr>
               </thead>
               <tbody>
                 {kpiEntries.map(([abbr, count]) => (
-                  <tr key={abbr} className="border-b border-[#F0F0F0] last:border-0">
-                    <td className="px-3 py-1.5 text-[#0F172B] font-mono">{abbr}</td>
-                    <td className="px-3 py-1.5 text-right text-[#888888]">{count.toLocaleString("en-IN")}</td>
+                  <tr key={abbr} className="border-b border-hair last:border-0">
+                    <td className="px-3 py-1.5 text-ink font-mono">{abbr}</td>
+                    <td className="px-3 py-1.5 text-right text-ink-3">{count.toLocaleString("en-IN")}</td>
                   </tr>
                 ))}
               </tbody>
@@ -140,14 +140,14 @@ function MarketReportView({ report }: { report: ProwessMarketReport }) {
       </div>
 
       {report.insertStats && (
-        <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="flex items-center gap-2 rounded-md border border-up bg-up-soft px-4 py-3 text-sm text-up">
           <CheckCircle2 className="size-4 shrink-0" />
           Inserted {report.insertStats.inserted} of {report.insertStats.attempted} rows attempted.
         </div>
       )}
 
       {report.skippedName > 0 && (
-        <p className="text-[12px] text-[#888888]">
+        <p className="text-[12px] text-ink-3">
           {report.skippedName} row{report.skippedName === 1 ? "" : "s"} referenced a company/index the parser
           couldn&apos;t map — review the CSV names, not necessarily an error.
         </p>
@@ -228,22 +228,22 @@ export function ProwessIngestionTab() {
   return (
     <div className="max-w-3xl space-y-4">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[12px] text-[#888888] max-w-xl">
+        <p className="text-[12px] text-ink-3 max-w-xl">
           Upload a Prowess CSV export to preview, then insert. Preview never writes to the DB — always
           review the report (and resolve any unmatched columns) before running.
         </p>
         <button
           onClick={() => setShowKpiCatalogue(true)}
-          className="rounded-md border border-[#E2E2E2] bg-white px-3 py-1.5 text-[12px] font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors shrink-0"
+          className="rounded-md border border-hair bg-card px-3 py-1.5 text-[12px] font-medium text-ink hover:border-[var(--qc-ink)] transition-colors shrink-0"
         >
           KPI Catalogue
         </button>
       </div>
 
-      <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
-        <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4 space-y-4">
+      <div className="rounded-[10px] border border-hair bg-secondary p-2">
+        <div className="rounded-[10px] bg-card border border-[rgba(226,226,226,0.10)] p-4 space-y-4">
           <div>
-            <p className="block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">Mode</p>
+            <p className="block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">Mode</p>
             <div className="flex gap-2 flex-wrap">
               {MODE_OPTIONS.map((opt) => (
                 <button
@@ -251,49 +251,49 @@ export function ProwessIngestionTab() {
                   onClick={() => selectMode(opt.value)}
                   className={`rounded-md border px-3 py-1.5 text-[12px] font-medium transition-colors ${
                     mode === opt.value
-                      ? "border-[#0F172B] bg-[#0F172B] text-white"
-                      : "border-[#E2E2E2] text-[#0F172B] hover:border-[#0F172B]"
+                      ? "border-[var(--qc-ink)] bg-ink text-[var(--qc-on-dark)]"
+                      : "border-hair text-ink hover:border-[var(--qc-ink)]"
                   }`}
                 >
                   {opt.label}
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-[#888888] mt-1.5">
+            <p className="text-[11px] text-ink-3 mt-1.5">
               Target table: <span className="font-mono">{MODE_OPTIONS.find((o) => o.value === mode)?.table}</span>
             </p>
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+            <label className="block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
               Prowess CSV
             </label>
             <input
               type="file"
               accept=".csv,text/csv"
               onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
-              className="block w-full text-[12px] text-[#888888] cursor-pointer file:cursor-pointer file:mr-3 file:rounded-md file:border file:border-[#E2E2E2] file:bg-white file:px-3 file:py-1.5 file:text-[12px] file:font-medium file:text-[#0F172B] hover:file:border-[#0F172B] file:transition-colors"
+              className="block w-full text-[12px] text-ink-3 cursor-pointer file:cursor-pointer file:mr-3 file:rounded-md file:border file:border-hair file:bg-card file:px-3 file:py-1.5 file:text-[12px] file:font-medium file:text-ink hover:file:border-[var(--qc-ink)] file:transition-colors"
             />
-            {file && <p className="text-[11px] text-[#888888] mt-1">{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</p>}
+            {file && <p className="text-[11px] text-ink-3 mt-1">{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</p>}
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+            <label className="block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
               Row Limit (optional)
             </label>
             <input
               value={rowLimit}
               onChange={(e) => handleRowLimitChange(e.target.value.replace(/[^0-9]/g, ""))}
               placeholder="e.g. 500 for a smoke test"
-              className="rounded-md border border-[#E2E2E2] px-3 py-2 text-sm font-mono text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B] w-56"
+              className="rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)] w-56"
             />
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap pt-1 border-t border-[#E2E2E2]">
+          <div className="flex items-center gap-3 flex-wrap pt-1 border-t border-hair">
             <button
               onClick={doPreview}
               disabled={!file || previewLoading}
-              className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-3"
+              className="flex items-center gap-1.5 rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-3"
             >
               {previewLoading && <Loader2 className="size-3.5 animate-spin" />}
               {previewReport ? "Re-run Preview" : "Preview"}
@@ -302,14 +302,14 @@ export function ProwessIngestionTab() {
             <button
               onClick={handleRunClick}
               disabled={!previewMatchesInputs || running}
-              className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed mt-3"
+              className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed mt-3"
             >
               {running && <Loader2 className="size-3.5 animate-spin" />}
               {!running && <Upload className="size-3.5" />}
               Run Ingestion
             </button>
 
-            <span className="text-[11px] text-[#888888] mt-3">
+            <span className="text-[11px] text-ink-3 mt-3">
               {previewMatchesInputs ? "Preview matches current inputs." : "Run preview for these exact inputs first."}
             </span>
           </div>
@@ -317,12 +317,12 @@ export function ProwessIngestionTab() {
       </div>
 
       {previewError && !previewLoading && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {previewError}
         </div>
       )}
       {runError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {runError}
         </div>
       )}

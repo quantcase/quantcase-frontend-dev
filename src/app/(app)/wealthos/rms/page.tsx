@@ -43,7 +43,7 @@ function RMRow({
         padding: "10px 16px",
         borderBottom: "1px solid var(--qc-hair)",
         background: isSelected ? "rgba(200,245,105,0.07)" : "transparent",
-        borderLeft: isSelected ? "2px solid #a8e63d" : "2px solid transparent",
+        borderLeft: isSelected ? "2px solid var(--qc-lime-edge)" : "2px solid transparent",
       }}
     >
       {/* Rank */}
@@ -141,7 +141,7 @@ function RMRow({
       <ChevronRight
         className="size-3.5 transition-opacity shrink-0"
         style={{
-          color: isSelected ? "#a8e63d" : "var(--qc-ink-2)",
+          color: isSelected ? "var(--qc-lime-edge)" : "var(--qc-ink-2)",
           opacity: isSelected ? 1 : 0,
         }}
       />

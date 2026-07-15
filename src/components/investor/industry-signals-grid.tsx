@@ -24,9 +24,9 @@ interface IndustrySignalsGridProps {
 }
 
 const ratingStyle: Record<SignalRating, { bg: string; border: string; labelColor: string; sectorColor: string; etfColor: string }> = {
-  BUY:   { bg: "#f0faf0", border: "#c3e6c3", labelColor: "#3a6b3a", sectorColor: "#1a3a1a", etfColor: "#3a6b3a" },
-  WAIT:  { bg: "#fdf8ed", border: "#f0d89a", labelColor: "#8a5e1a", sectorColor: "#3a2800", etfColor: "#8a5e1a" },
-  AVOID: { bg: "#fdf0f0", border: "#f0c4c4", labelColor: "#8a2020", sectorColor: "#3a0000", etfColor: "#8a2020" },
+  BUY:   { bg: "var(--qc-up-soft)", border: "var(--qc-up-soft)", labelColor: "var(--qc-up)", sectorColor: "var(--qc-up)", etfColor: "var(--qc-up)" },
+  WAIT:  { bg: "var(--qc-warn-soft)", border: "var(--qc-warn-soft)", labelColor: "var(--qc-warn)", sectorColor: "var(--qc-warn)", etfColor: "var(--qc-warn)" },
+  AVOID: { bg: "var(--qc-down-soft)", border: "var(--qc-down-soft)", labelColor: "var(--qc-down)", sectorColor: "var(--qc-down)", etfColor: "var(--qc-down)" },
 };
 
 function BasketCard({ basket }: { basket: IndustryBasket }) {
@@ -62,8 +62,8 @@ function SkeletonCard() {
   return (
     <div
       style={{
-        background: "#f5f5f5",
-        border: "1px solid #e2e2e2",
+        background: "var(--qc-section)",
+        border: "1px solid var(--qc-hair)",
         borderRadius: 10,
         padding: "14px 16px",
         height: 88,

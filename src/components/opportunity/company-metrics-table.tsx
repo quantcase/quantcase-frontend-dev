@@ -1,6 +1,7 @@
 "use client";
 
 import type { IndustryCompanyRow, IndustryAnalysis } from "@/types/opportunity";
+import { QC } from "@/lib/chart-tokens";
 
 interface CompanyMetricsTableProps {
   data?: IndustryAnalysis;
@@ -40,8 +41,8 @@ function formatValue(val: CellValue): string {
 function changeColor(val: CellValue): string {
   if (val === null || val === undefined) return "var(--qc-ink-2)";
   const s = String(val).trim();
-  if (s.startsWith("+") || s.startsWith("▲")) return "#059669";
-  if (s.startsWith("-") || s.startsWith("▼")) return "#dc2626";
+  if (s.startsWith("+") || s.startsWith("▲")) return QC.up;
+  if (s.startsWith("-") || s.startsWith("▼")) return QC.down;
   return "var(--qc-ink-2)";
 }
 
@@ -50,7 +51,7 @@ function sentimentBadge(sentiment: string | null | undefined) {
   const s = sentiment.toLowerCase();
   const isPos = s === "positive" || s === "bullish";
   const isNeg = s === "negative" || s === "bearish";
-  const color = isPos ? "#059669" : isNeg ? "#dc2626" : "#D97706";
+  const color = isPos ? QC.up : isNeg ? QC.down : QC.warn;
   const bg = isPos ? "rgba(5,150,105,0.08)" : isNeg ? "rgba(220,38,38,0.08)" : "rgba(217,119,6,0.08)";
   const label = isPos ? "▲" : isNeg ? "▼" : "→";
   return (
@@ -120,7 +121,7 @@ function CellContent({ col, val }: { col: ColDef; val: CellValue }) {
   return (
     <span
       className="whitespace-nowrap"
-      style={{ color: numeric ? changeColor(val) : "#121212" }}
+      style={{ color: numeric ? changeColor(val) : "var(--qc-ink)" }}
     >
       {text}
     </span>
@@ -164,12 +165,12 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
         >
           Company-by-Company Metrics{period ? ` · ${period}` : ""}
         </p>
-        <div className="flex-1 h-px bg-[#E2E2E2]" />
+        <div className="flex-1 h-px bg-hair" />
       </div>
 
       {/* Scrollable wrapper */}
       <div
-        className="rounded-lg border border-[#E2E2E2] bg-white"
+        className="rounded-lg border border-hair bg-card"
         style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
       >
         <table
@@ -182,7 +183,7 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
           }}
         >
           <thead>
-            <tr style={{ borderBottom: "1px solid #E2E2E2", backgroundColor: "#F9F9F9" }}>
+            <tr style={{ borderBottom: "1px solid var(--qc-hair)", backgroundColor: "var(--qc-section)" }}>
               {/* Sticky company column */}
               <th
                 style={{
@@ -199,9 +200,9 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                   whiteSpace: "nowrap",
                   position: "sticky",
                   left: 0,
-                  backgroundColor: "#F9F9F9",
+                  backgroundColor: "var(--qc-section)",
                   zIndex: 1,
-                  borderRight: "1px solid #E2E2E2",
+                  borderRight: "1px solid var(--qc-hair)",
                 }}
               >
                 Company
@@ -235,7 +236,7 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
               <tr
                 key={idx}
                 style={{
-                  borderBottom: idx < bodyRows.length - 1 ? "1px solid #F0F0F0" : undefined,
+                  borderBottom: idx < bodyRows.length - 1 ? "1px solid var(--qc-hair)" : undefined,
                   backgroundColor: row.is_current ? "rgba(15,23,43,0.03)" : "transparent",
                 }}
               >
@@ -247,12 +248,12 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                     fontSize: "var(--qc-fz-12)",
                     fontWeight: row.is_current ? "var(--qc-w-semi)" : "var(--qc-w-regular)",
                     fontFamily: "var(--qc-font-sans)",
-                    color: row.is_current ? "var(--qc-ink)" : "#121212",
+                    color: row.is_current ? "var(--qc-ink)" : "var(--qc-ink)",
                     position: "sticky",
                     left: 0,
-                    backgroundColor: row.is_current ? "rgba(15,23,43,0.03)" : "#ffffff",
+                    backgroundColor: row.is_current ? "rgba(15,23,43,0.03)" : "var(--qc-card)",
                     zIndex: 1,
-                    borderRight: "1px solid #E2E2E2",
+                    borderRight: "1px solid var(--qc-hair)",
                   }}
                 >
                   {row.company}
@@ -291,7 +292,7 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
               <tr
                 key={`avg-${idx}`}
                 style={{
-                  borderTop: "2px solid #E2E2E2",
+                  borderTop: "2px solid var(--qc-hair)",
                   backgroundColor: "var(--qc-section)",
                 }}
               >
@@ -307,7 +308,7 @@ export function CompanyMetricsTable({ data, period }: CompanyMetricsTableProps) 
                     left: 0,
                     backgroundColor: "var(--qc-section)",
                     zIndex: 1,
-                    borderRight: "1px solid #E2E2E2",
+                    borderRight: "1px solid var(--qc-hair)",
                   }}
                 >
                   {row.company}

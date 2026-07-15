@@ -21,8 +21,8 @@ import {
 
 const BASE = `${BACKEND_URL}/admin/company-groups`;
 const INPUT_CLS =
-  "w-full rounded-md border border-[#E2E2E2] px-3 py-2 text-sm text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]";
-const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5";
+  "w-full rounded-md border border-hair px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]";
+const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 
 const EMPTY_DOC_FILTER: DocFilter = { status: "present" };
 
@@ -61,12 +61,12 @@ function DocFilterBlock({
   onChange: (v: DocFilter) => void;
 }) {
   return (
-    <div className="rounded-md border border-[#E2E2E2] p-3">
+    <div className="rounded-md border border-hair p-3">
       <CheckboxField checked={enabled} onChange={onEnabledChange} label={label} hint={hint} />
       {enabled && (
         <div className="mt-3 pl-5 space-y-3">
           <div>
-            <label className="text-[10px] text-[#888888] block mb-1">Status</label>
+            <label className="text-[10px] text-ink-3 block mb-1">Status</label>
             <select
               value={value.status}
               onChange={(e) => onChange({ ...value, status: e.target.value as DocStatus })}
@@ -79,7 +79,7 @@ function DocFilterBlock({
           </div>
 
           <div>
-            <label className="text-[10px] text-[#888888] block mb-1">
+            <label className="text-[10px] text-ink-3 block mb-1">
               Only look at the N most recent {periodLabel}
             </label>
             <input
@@ -130,12 +130,12 @@ function WindowedDocFilterBlock({
   }
 
   return (
-    <div className="rounded-md border border-[#E2E2E2] p-3">
+    <div className="rounded-md border border-hair p-3">
       <CheckboxField checked={enabled} onChange={onEnabledChange} label={label} hint={hint} />
       {enabled && (
         <div className="mt-3 pl-5 space-y-3">
           <div>
-            <label className="text-[10px] text-[#888888] block mb-1">Status</label>
+            <label className="text-[10px] text-ink-3 block mb-1">Status</label>
             <select
               value={value.status}
               onChange={(e) => onChange({ ...value, status: e.target.value as DocStatus })}
@@ -149,14 +149,14 @@ function WindowedDocFilterBlock({
 
           <div className="space-y-2">
             {rows.map((row, idx) => (
-              <div key={idx} className="rounded-md border border-[#E2E2E2] bg-[#F5F5F5] p-3">
+              <div key={idx} className="rounded-md border border-hair bg-secondary p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Rule {idx + 1}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Rule {idx + 1}</p>
                   {idx > 0 && (
                     <button
                       type="button"
                       onClick={() => removeRow(idx)}
-                      className="flex items-center justify-center size-5 rounded text-[#888888] hover:text-[#0F172B] transition-colors"
+                      className="flex items-center justify-center size-5 rounded text-ink-3 hover:text-ink transition-colors"
                     >
                       <X className="size-3.5" />
                     </button>
@@ -164,7 +164,7 @@ function WindowedDocFilterBlock({
                 </div>
                 <div className="flex items-start gap-3">
                   <div>
-                    <label className="text-[10px] text-[#888888] block mb-1">
+                    <label className="text-[10px] text-ink-3 block mb-1">
                       Only look at the N most recent quarters
                     </label>
                     <input
@@ -173,11 +173,11 @@ function WindowedDocFilterBlock({
                       value={row.window ?? ""}
                       onChange={(e) => updateRow(idx, { window: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="All history"
-                      className={`${INPUT_CLS} w-40 bg-white`}
+                      className={`${INPUT_CLS} w-40 bg-card`}
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-[#888888] block mb-1">
+                    <label className="text-[10px] text-ink-3 block mb-1">
                       …of which at least this many must match
                     </label>
                     <input
@@ -186,11 +186,11 @@ function WindowedDocFilterBlock({
                       value={row.minCount ?? ""}
                       onChange={(e) => updateRow(idx, { minCount: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="All of them"
-                      className={`${INPUT_CLS} w-40 bg-white`}
+                      className={`${INPUT_CLS} w-40 bg-card`}
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-[#888888] block mb-1">
+                    <label className="text-[10px] text-ink-3 block mb-1">
                       …but no more than this many
                     </label>
                     <input
@@ -199,7 +199,7 @@ function WindowedDocFilterBlock({
                       value={row.maxCount ?? ""}
                       onChange={(e) => updateRow(idx, { maxCount: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="No limit"
-                      className={`${INPUT_CLS} w-40 bg-white`}
+                      className={`${INPUT_CLS} w-40 bg-card`}
                     />
                   </div>
                 </div>
@@ -207,17 +207,17 @@ function WindowedDocFilterBlock({
             ))}
           </div>
 
-          <button type="button" onClick={addRow} className="text-[12px] font-medium text-[#0F172B] hover:underline">
+          <button type="button" onClick={addRow} className="text-[12px] font-medium text-ink hover:underline">
             + Add another rule (AND)
           </button>
 
-          <p className="text-[11px] text-[#888888]">
+          <p className="text-[11px] text-ink-3">
             Each additional rule must ALSO be true (AND). E.g. rule 1 = &ldquo;8 and 4&rdquo; plus rule 2 =
             just &ldquo;6&rdquo; means: at least 4 of the last 8 quarters, AND at least 6 ever. Set
             minCount:0 with a low maxCount to find sparse coverage instead of good coverage (e.g. a
             backlog/gap finder).
           </p>
-          <p className="text-[11px] text-[#888888]">
+          <p className="text-[11px] text-ink-3">
             Leave minCount/maxCount blank to require all N, no gaps. Lower minCount to tolerate some gaps.
           </p>
         </div>
@@ -366,17 +366,17 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      <div className="relative z-10 flex flex-col w-[600px] max-h-[90vh] bg-white rounded-[10px] border border-[#E2E2E2] shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E2E2] shrink-0">
+      <div className="relative z-10 flex flex-col w-[600px] max-h-[90vh] bg-card rounded-[10px] border border-hair shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-hair shrink-0">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888]">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-3">
               {currentSlug ? "Edit Group" : "New Group"}
             </p>
-            <p className="text-[15px] font-semibold text-[#0F172B] mt-0.5">{name || "Untitled group"}</p>
+            <p className="text-[15px] font-semibold text-ink mt-0.5">{name || "Untitled group"}</p>
           </div>
           <button
             onClick={onClose}
-            className="flex size-7 items-center justify-center rounded-md text-[#888888] hover:text-[#0F172B] hover:bg-[#F5F5F5] transition-colors"
+            className="flex size-7 items-center justify-center rounded-md text-ink-3 hover:text-ink hover:bg-secondary transition-colors"
           >
             <X className="size-4" />
           </button>
@@ -401,21 +401,21 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
 
           <div>
             <label className={LABEL_CLS}>Type</label>
-            <div className="inline-flex rounded-md border border-[#E2E2E2] p-0.5 bg-[#F5F5F5]">
+            <div className="inline-flex rounded-md border border-hair p-0.5 bg-secondary">
               {(["manual", "dynamic"] as const).map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setFilterType(t)}
                   className={`px-3 py-1.5 text-[12px] font-medium rounded-[5px] transition-colors ${
-                    filterType === t ? "bg-white text-[#0F172B] shadow-sm" : "text-[#888888] hover:text-[#0F172B]"
+                    filterType === t ? "bg-card text-ink shadow-sm" : "text-ink-3 hover:text-ink"
                   }`}
                 >
                   {t === "manual" ? "Manual list" : "Filter-based"}
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-[#888888] mt-1.5">
+            <p className="text-[11px] text-ink-3 mt-1.5">
               {filterType === "manual"
                 ? "A fixed ticker list — static until you edit it."
                 : "Recomputed live every time this group is used — never a frozen snapshot. Every filter below is ANDed together; there's no OR — if you need that, make two groups."}
@@ -425,11 +425,11 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
           {filterType === "manual" && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Tickers</label>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Tickers</label>
                 <button
                   type="button"
                   onClick={() => csvInputRef.current?.click()}
-                  className="flex items-center gap-1 text-[11px] font-medium text-[#0F172B] hover:underline"
+                  className="flex items-center gap-1 text-[11px] font-medium text-ink hover:underline"
                 >
                   <Upload className="size-3" /> Upload CSV
                 </button>
@@ -443,7 +443,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
               </div>
               <TagMultiPicker options={companies} selected={manualTickers} onChange={setManualTickers} placeholder="Add a ticker…" />
               {csvUnmatched && csvUnmatched.length > 0 && (
-                <div className="mt-2 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+                <div className="mt-2 flex items-start gap-2 rounded-md border border-hair bg-down-soft px-3 py-2 text-[12px] text-down">
                   <AlertCircle className="size-3.5 shrink-0 mt-px" />
                   <span>
                     {csvUnmatched.length} ticker{csvUnmatched.length === 1 ? "" : "s"} from the CSV didn&apos;t
@@ -457,7 +457,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
 
           {filterType === "dynamic" && (
             <div className="space-y-3">
-              <div className="rounded-md border border-[#E2E2E2] p-3">
+              <div className="rounded-md border border-hair p-3">
                 <CheckboxField
                   checked={nameRangeEnabled}
                   onChange={setNameRangeEnabled}
@@ -467,7 +467,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                 {nameRangeEnabled && (
                   <div className="mt-3 pl-5 flex items-center gap-3">
                     <div>
-                      <label className="text-[10px] text-[#888888] block mb-1">From</label>
+                      <label className="text-[10px] text-ink-3 block mb-1">From</label>
                       <input
                         value={nameFrom}
                         onChange={(e) => setNameFrom(e.target.value.toUpperCase())}
@@ -475,9 +475,9 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                         className={`${INPUT_CLS} w-20 uppercase`}
                       />
                     </div>
-                    <span className="text-[#888888] mt-4">–</span>
+                    <span className="text-ink-3 mt-4">–</span>
                     <div>
-                      <label className="text-[10px] text-[#888888] block mb-1">To</label>
+                      <label className="text-[10px] text-ink-3 block mb-1">To</label>
                       <input
                         value={nameTo}
                         onChange={(e) => setNameTo(e.target.value.toUpperCase())}
@@ -517,7 +517,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                 onChange={setAnnualReport}
               />
 
-              <div className="rounded-md border border-[#E2E2E2] p-3">
+              <div className="rounded-md border border-hair p-3">
                 <CheckboxField
                   checked={marketCapEnabled}
                   onChange={setMarketCapEnabled}
@@ -527,7 +527,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                 {marketCapEnabled && (
                   <div className="mt-3 pl-5 flex items-center gap-3">
                     <div>
-                      <label className="text-[10px] text-[#888888] block mb-1">Min (Cr)</label>
+                      <label className="text-[10px] text-ink-3 block mb-1">Min (Cr)</label>
                       <input
                         type="number"
                         value={marketCapMin}
@@ -536,9 +536,9 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                         className={`${INPUT_CLS} w-28`}
                       />
                     </div>
-                    <span className="text-[#888888] mt-4">–</span>
+                    <span className="text-ink-3 mt-4">–</span>
                     <div>
-                      <label className="text-[10px] text-[#888888] block mb-1">Max (Cr)</label>
+                      <label className="text-[10px] text-ink-3 block mb-1">Max (Cr)</label>
                       <input
                         type="number"
                         value={marketCapMax}
@@ -551,7 +551,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                 )}
               </div>
 
-              <div className="rounded-md border border-[#E2E2E2] p-3">
+              <div className="rounded-md border border-hair p-3">
                 <CheckboxField
                   checked={industriesEnabled}
                   onChange={setIndustriesEnabled}
@@ -566,7 +566,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
               </div>
 
               {isEmptyDynamic && (
-                <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-700">
+                <div className="flex items-center gap-2 rounded-md border border-hair bg-warn-soft px-3 py-2 text-[12px] text-warn">
                   <AlertCircle className="size-3.5 shrink-0" />
                   No filters selected — this group will always be empty.
                 </div>
@@ -575,30 +575,30 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
           )}
 
           {resolveResult && (
-            <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-700">
+            <div className="rounded-md border border-hair bg-up-soft px-3 py-2 text-[12px] text-up">
               This group currently matches <span className="font-semibold">{resolveResult.count}</span> companies.
             </div>
           )}
           {resolving && (
-            <div className="flex items-center gap-2 text-[12px] text-[#888888]">
+            <div className="flex items-center gap-2 text-[12px] text-ink-3">
               <Loader2 className="size-3.5 animate-spin" /> Resolving live count…
             </div>
           )}
         </div>
 
-        <div className="shrink-0 px-5 py-4 border-t border-[#E2E2E2] flex items-center justify-between">
-          {error ? <p className="text-xs text-red-600 max-w-[280px]">{error}</p> : <span />}
+        <div className="shrink-0 px-5 py-4 border-t border-hair flex items-center justify-between">
+          {error ? <p className="text-xs text-down max-w-[280px]">{error}</p> : <span />}
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] transition-colors"
+              className="rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink-3 hover:text-ink hover:border-ink transition-colors"
             >
               {currentSlug ? "Done" : "Cancel"}
             </button>
             <button
               onClick={handleSave}
               disabled={saving || !name.trim()}
-              className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving && <Loader2 className="size-3.5 animate-spin" />}
               {currentSlug ? "Save changes" : "Create group"}

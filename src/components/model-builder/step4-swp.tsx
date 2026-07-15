@@ -40,14 +40,14 @@ function TextInput({
   suffix?: string;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-[#E2E2E2] px-3 py-2 bg-white focus-within:border-[#0F172B] transition-all">
+    <div className="flex items-center gap-2 rounded-lg border border-hair px-3 py-2 bg-card focus-within:border-ink transition-all">
       {prefix && <span className="text-sm shrink-0" style={{ color: "var(--qc-ink-2)" }}>{prefix}</span>}
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-zinc-300"
+        className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-ink-3"
         style={{ color: value ? "var(--qc-ink)" : undefined }}
       />
       {suffix && <span className="text-sm shrink-0" style={{ color: "var(--qc-ink-2)" }}>{suffix}</span>}
@@ -71,7 +71,7 @@ function SelectInput({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none rounded-lg border border-[#E2E2E2] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#0F172B] transition-all pr-8"
+        className="w-full appearance-none rounded-lg border border-hair bg-card px-3 py-2 text-sm focus:outline-none focus:border-ink transition-all pr-8"
         style={{ color: value ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
       >
         {placeholder && <option value="" disabled>{placeholder}</option>}
@@ -94,7 +94,7 @@ function TogglePill({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex gap-1 p-1 rounded-full border border-[#E2E2E2] bg-[#F5F5F5] w-fit">
+    <div className="flex gap-1 p-1 rounded-full border border-hair bg-secondary w-fit">
       {options.map((o) => (
         <button
           key={o.value}
@@ -103,7 +103,7 @@ function TogglePill({
           className="rounded-full px-3 py-1 text-xs font-medium transition-all"
           style={{
             background: value === o.value ? "var(--qc-ink)" : "transparent",
-            color:      value === o.value ? "#fff" : "var(--qc-ink-2)",
+            color:      value === o.value ? "var(--qc-on-dark)" : "var(--qc-ink-2)",
           }}
         >
           {o.label}
@@ -115,9 +115,9 @@ function TogglePill({
 
 function SectionBox({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+    <div className="rounded-[10px] border border-hair bg-secondary p-2">
       <p className="text-[11px] font-semibold uppercase tracking-wider px-2 pt-1 pb-3" style={{ color: "var(--qc-ink-2)" }}>{title}</p>
-      <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4 space-y-4">
+      <div className="rounded-[10px] bg-card border border-[rgba(226,226,226,0.10)] p-4 space-y-4">
         {children}
       </div>
     </div>
@@ -143,7 +143,7 @@ function MethodCard({
       style={{
         borderColor: active ? "var(--qc-ink)" : "var(--qc-hair)",
         borderWidth:  active ? 2 : 1,
-        background:  active ? "#F8F9FB" : "#fff",
+        background:  active ? "var(--qc-section)" : "var(--qc-card)",
       }}
     >
       <p className="text-[12px] font-bold mb-1" style={{ color: "var(--qc-ink)" }}>{label}</p>
@@ -226,9 +226,9 @@ function SwpPassiveIncomeForm({
         )}
 
         <ZoneLegend zones={[
-          { label: "Green", condition: "Rate ≤ CAGR",            bg: "#F0FDF4", color: "#166534" },
-          { label: "Amber", condition: "Rate 1–3% above CAGR",   bg: "#FFFBEB", color: "#92400E" },
-          { label: "Red",   condition: "Rate >3% above CAGR",    bg: "#FEF2F2", color: "#991B1B" },
+          { label: "Green", condition: "Rate ≤ CAGR",            bg: "var(--qc-up-soft)",   color: "var(--qc-up)" },
+          { label: "Amber", condition: "Rate 1–3% above CAGR",   bg: "var(--qc-warn-soft)", color: "var(--qc-warn)" },
+          { label: "Red",   condition: "Rate >3% above CAGR",    bg: "var(--qc-down-soft)", color: "var(--qc-down)" },
         ]} />
       </SectionBox>
 
@@ -318,12 +318,12 @@ function SwpRetirementIncomeForm({
 
       <SectionBox title="Longevity engine — core of this goal">
         <ZoneLegend zones={[
-          { label: "Safe",   condition: "Corpus >20% at target age",    bg: "#F0FDF4", color: "#166534" },
-          { label: "Tight",  condition: "Corpus 0–20% at target age",   bg: "#FFFBEB", color: "#92400E" },
-          { label: "Breach", condition: "Corpus depletes before target", bg: "#FEF2F2", color: "#991B1B" },
+          { label: "Safe",   condition: "Corpus >20% at target age",    bg: "var(--qc-up-soft)",   color: "var(--qc-up)" },
+          { label: "Tight",  condition: "Corpus 0–20% at target age",   bg: "var(--qc-warn-soft)", color: "var(--qc-warn)" },
+          { label: "Breach", condition: "Corpus depletes before target", bg: "var(--qc-down-soft)", color: "var(--qc-down)" },
         ]} />
         <p className="text-[11px] leading-relaxed" style={{ color: "var(--qc-ink-2)" }}>
-          If corpus runs out before target age — a <span className="font-semibold text-red-600">soft block</span> triggers. Plan cannot be saved without senior RM approval.
+          If corpus runs out before target age — a <span className="font-semibold text-down">soft block</span> triggers. Plan cannot be saved without senior RM approval.
         </p>
       </SectionBox>
 
@@ -386,14 +386,14 @@ function SwpChildEducationForm({
                 className="flex items-center justify-between rounded-lg border px-4 py-3 transition-all"
                 style={{
                   borderColor: active ? m.color : "var(--qc-hair)",
-                  background:  active ? m.bg : "#fff",
+                  background:  active ? m.bg : "var(--qc-card)",
                 }}
               >
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
                     <span
                       className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                      style={{ background: m.color, color: "#fff" }}
+                      style={{ background: m.color, color: "var(--qc-on-dark)" }}
                     >
                       {m.label}
                     </span>
@@ -410,7 +410,7 @@ function SwpChildEducationForm({
                   style={{ width: 40, height: 22, background: active ? m.color : "var(--qc-hair)" }}
                 >
                   <span
-                    className="absolute top-1 rounded-full bg-white transition-all shadow-sm"
+                    className="absolute top-1 rounded-full bg-card transition-all shadow-sm"
                     style={{ width: 14, height: 14, left: active ? 22 : 4 }}
                   />
                 </button>
@@ -423,10 +423,10 @@ function SwpChildEducationForm({
       <SectionBox title="Age → phase engine">
         <div className="space-y-2">
           <div className="flex h-2 rounded-full overflow-hidden">
-            <div style={{ flex: 14, background: "#CBD5E1" }} title="0–13: Accumulation" />
-            <div style={{ flex: 4,  background: "#3B82F6" }} title="14–17: School" />
-            <div style={{ flex: 4,  background: "#10B981" }} title="18–21: UG" />
-            <div style={{ flex: 4,  background: "#F59E0B" }} title="22–25: PG/Pro" />
+            <div style={{ flex: 14, background: "var(--qc-ink-3)" }} title="0–13: Accumulation" />
+            <div style={{ flex: 4,  background: "var(--qc-blue)" }} title="14–17: School" />
+            <div style={{ flex: 4,  background: "var(--qc-up)" }} title="18–21: UG" />
+            <div style={{ flex: 4,  background: "var(--qc-warn)" }} title="22–25: PG/Pro" />
           </div>
           <div className="flex text-[9px] justify-between" style={{ color: "var(--qc-ink-2)" }}>
             <span>0 — Accumulation</span>
@@ -442,10 +442,10 @@ function SwpChildEducationForm({
             { phase: "Phase 3 — UG withdrawals",     age: "Age 18–21", desc: "8 payouts over 4 years. Larger amount in Year 1 June (admission + first-semester fees)." },
             { phase: "Phase 4 — PG / Higher",        age: "Age 22–25", desc: "RM activates if applicable. Duration and amount RM-defined." },
           ].map((p) => (
-            <div key={p.phase} className="rounded-lg border border-[#E2E2E2] p-3">
+            <div key={p.phase} className="rounded-lg border border-hair p-3">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-[11px] font-semibold" style={{ color: "var(--qc-ink)" }}>{p.phase}</p>
-                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[#F5F5F5]" style={{ color: "var(--qc-ink-2)" }}>{p.age}</span>
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary" style={{ color: "var(--qc-ink-2)" }}>{p.age}</span>
               </div>
               <p className="text-[11px] leading-snug" style={{ color: "var(--qc-ink-2)" }}>{p.desc}</p>
             </div>
@@ -481,7 +481,7 @@ export function Step4SWP({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
+      <div className="rounded-lg border border-hair bg-secondary px-4 py-3">
         <p className="text-[10px] uppercase tracking-wider font-medium mb-0.5" style={{ color: "var(--qc-ink-2)" }}>Configuring SWP for goal</p>
         <p className="text-sm font-semibold" style={{ color: "var(--qc-ink)" }}>{goalLabel}</p>
       </div>

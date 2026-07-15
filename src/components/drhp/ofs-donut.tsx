@@ -1,6 +1,7 @@
 "use client";
 
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
+import { QC } from "@/lib/chart-tokens";
 
 interface OfsDonutProps {
   ofsCr: number;
@@ -10,7 +11,7 @@ interface OfsDonutProps {
 
 export function OfsDonut({ ofsCr, freshIssueCr, ofsPct }: OfsDonutProps) {
   const data = [
-    { name: "OFS", value: ofsCr, color: "#dc2626" },
+    { name: "OFS", value: ofsCr, color: QC.down },
     { name: "Fresh", value: freshIssueCr, color: "var(--qc-ink)" },
   ];
 
@@ -23,11 +24,11 @@ export function OfsDonut({ ofsCr, freshIssueCr, ofsPct }: OfsDonutProps) {
           </Pie>
           <Tooltip
             formatter={(val: number) => [`₹${val.toLocaleString("en-IN")} Cr`]}
-            contentStyle={{ fontSize: 11, border: "1px solid #E2E2E2", borderRadius: 6 }}
+            contentStyle={{ fontSize: 11, border: "1px solid var(--qc-hair)", borderRadius: 6 }}
           />
         </PieChart>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-[14px] font-bold" style={{ color: "#dc2626" }}>{Number(ofsPct).toFixed(0)}%</span>
+          <span className="text-[14px] font-bold" style={{ color: "var(--qc-down)" }}>{Number(ofsPct).toFixed(0)}%</span>
           <span className="text-[9px] uppercase tracking-wider" style={{ color: "var(--qc-ink-2)" }}>OFS</span>
         </div>
       </div>

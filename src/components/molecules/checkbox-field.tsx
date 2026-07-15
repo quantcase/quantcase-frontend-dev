@@ -16,11 +16,11 @@ export function CheckboxField({ checked, onChange, label, hint, disabled }: Chec
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 size-3.5 accent-[#0F172B] disabled:cursor-not-allowed"
+        className="mt-0.5 size-3.5 accent-[var(--qc-ink)] disabled:cursor-not-allowed"
       />
       <span>
-        <span className="block text-[13px] text-[#0F172B] font-medium">{label}</span>
-        {hint && <span className="block text-[11px] text-[#888888] mt-0.5 max-w-[320px]">{hint}</span>}
+        <span className="block text-[13px] text-ink font-medium">{label}</span>
+        {hint && <span className="block text-[11px] text-ink-3 mt-0.5 max-w-[320px]">{hint}</span>}
       </span>
     </label>
   );

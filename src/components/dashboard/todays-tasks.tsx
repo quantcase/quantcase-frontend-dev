@@ -18,8 +18,8 @@ interface TodaysTasksProps {
 
 const BADGE_STYLE: Record<TaskStatus, React.CSSProperties> = {
   pending: { background: "transparent", color: "var(--qc-ink-3)", border: "none" },
-  overdue: { background: "var(--qc-down-soft)", color: "var(--qc-down)", border: "1px solid #E8C4BE" },
-  done:    { background: "var(--qc-up-soft)",   color: "var(--qc-up)",   border: "1px solid #BBD9C6" },
+  overdue: { background: "var(--qc-down-soft)", color: "var(--qc-down)", border: "1px solid var(--qc-down-soft)" },
+  done:    { background: "var(--qc-up-soft)",   color: "var(--qc-up)",   border: "1px solid var(--qc-up-soft)" },
 };
 
 const TITLE_ICON = (

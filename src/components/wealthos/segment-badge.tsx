@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Segment } from "@/types/wealthos";
 
@@ -6,20 +7,14 @@ interface SegmentBadgeProps {
   className?: string;
 }
 
+/**
+ * Neutral category tag rendered through the canonical Badge (secondary variant
+ * = --qc-section chip + hairline border), keeping the single-source styling.
+ */
 export function SegmentBadge({ segment, className }: SegmentBadgeProps) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium",
-        className
-      )}
-      style={{
-        background: "var(--qc-chip)",
-        border: "1px solid var(--qc-hair)",
-        color: "var(--qc-ink-2)",
-      }}
-    >
+    <Badge variant="secondary" className={cn("border-hair text-ink-2 font-medium", className)}>
       {segment}
-    </span>
+    </Badge>
   );
 }

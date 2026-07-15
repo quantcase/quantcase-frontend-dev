@@ -44,14 +44,14 @@ function BalanceSheetPanel({ d }: { d: NonNullable<CapitalStructureSection["bala
               {d.cash_investments}
             </span>
           </div>
-          <SegmentedBar pct={d.cash_bar_pct} color="bg-emerald-400" />
+          <SegmentedBar pct={d.cash_bar_pct} color="bg-up" />
         </div>
         <div>
           <div className="flex justify-between text-sm mb-1">
             <span style={{ color: "var(--qc-ink)" }}>Gross Debt</span>
             <span className="font-bold" style={{ color: "var(--qc-down)" }}>{d.gross_debt}</span>
           </div>
-          <SegmentedBar pct={d.debt_bar_pct} color="bg-red-400" />
+          <SegmentedBar pct={d.debt_bar_pct} color="bg-down" />
         </div>
       </div>
 
@@ -283,7 +283,7 @@ function CapexIntensityPanel({ d }: { d: NonNullable<CapitalStructureSection["ca
 
       <div className="space-y-4">
         {d.metrics.map((m) => {
-          const barColor = m.status === "red" ? "bg-red-400" : m.status === "yellow" ? "bg-amber-400" : "bg-emerald-400";
+          const barColor = m.status === "red" ? "bg-down" : m.status === "yellow" ? "bg-warn" : "bg-up";
           return (
             <div key={m.label} className="space-y-1">
               <div className="flex items-center justify-between text-sm">

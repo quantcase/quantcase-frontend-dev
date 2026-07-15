@@ -77,12 +77,12 @@ export function PlaceOrderModal({ open, onClose, ticker, onPlaced }: PlaceOrderM
       <div
         style={{
           position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-          background: "#fff", borderRadius: 18, width: 440, maxWidth: "calc(100vw - 32px)",
+          background: "var(--qc-card)", borderRadius: 18, width: 440, maxWidth: "calc(100vw - 32px)",
           zIndex: 1001, boxShadow: "0 24px 80px rgba(15,23,43,0.20)", overflow: "hidden",
         }}
       >
         {/* Header band */}
-        <div style={{ background: "linear-gradient(135deg, #0F172B 0%, #1e3a5f 100%)", padding: "24px 26px 22px", position: "relative" }}>
+        <div style={{ background: "linear-gradient(135deg, var(--qc-ink) 0%, #1e3a5f 100%)", padding: "24px 26px 22px", position: "relative" }}>
           {!inProgress && (
             <button
               onClick={handleClose}
@@ -101,11 +101,11 @@ export function PlaceOrderModal({ open, onClose, ticker, onPlaced }: PlaceOrderM
           {done ? (
             <>
               <div style={{ fontSize: 30, marginBottom: 8 }}>✓</div>
-              <h2 style={{ fontSize: 19, fontWeight: 500, color: "#fff", fontFamily: "var(--qc-font-serif)", margin: 0 }}>Order placed</h2>
+              <h2 style={{ fontSize: 19, fontWeight: 500, color: "var(--qc-on-dark)", fontFamily: "var(--qc-font-serif)", margin: 0 }}>Order placed</h2>
             </>
           ) : errored ? (
             <>
-              <h2 style={{ fontSize: 19, fontWeight: 500, color: "#fff", fontFamily: "var(--qc-font-serif)", margin: "0 0 6px" }}>Order failed</h2>
+              <h2 style={{ fontSize: 19, fontWeight: 500, color: "var(--qc-on-dark)", fontFamily: "var(--qc-font-serif)", margin: "0 0 6px" }}>Order failed</h2>
               <p style={{ fontSize: 13, color: "rgba(255,100,100,0.85)", fontFamily: "var(--qc-font-sans)", margin: 0 }}>
                 {placeError || "Something went wrong. Please try again."}
               </p>
@@ -114,7 +114,7 @@ export function PlaceOrderModal({ open, onClose, ticker, onPlaced }: PlaceOrderM
             <>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                 <Spinner />
-                <h2 style={{ fontSize: 18, fontWeight: 500, color: "#fff", fontFamily: "var(--qc-font-serif)", margin: 0 }}>
+                <h2 style={{ fontSize: 18, fontWeight: 500, color: "var(--qc-on-dark)", fontFamily: "var(--qc-font-serif)", margin: 0 }}>
                   {stepLabel(placeStep).title}
                 </h2>
               </div>
@@ -124,7 +124,7 @@ export function PlaceOrderModal({ open, onClose, ticker, onPlaced }: PlaceOrderM
             </>
           ) : (
             <>
-              <h2 style={{ fontSize: 20, fontWeight: 500, color: "#fff", fontFamily: "var(--qc-font-serif)", margin: 0 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 500, color: "var(--qc-on-dark)", fontFamily: "var(--qc-font-serif)", margin: 0 }}>
                 Trade {ticker}
               </h2>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", fontFamily: "var(--qc-font-sans)", margin: "6px 0 0" }}>
@@ -148,40 +148,40 @@ export function PlaceOrderModal({ open, onClose, ticker, onPlaced }: PlaceOrderM
                       onClick={() => setType(t.value)}
                       style={{
                         borderRadius: 10, padding: "12px 14px", cursor: "pointer", textAlign: "left",
-                        border: active ? "1.5px solid #0F172B" : "1px solid #E2E2E2",
-                        background: active ? "rgba(15,23,43,0.03)" : "#fff",
+                        border: active ? "1.5px solid var(--qc-ink)" : "1px solid var(--qc-hair)",
+                        background: active ? "rgba(15,23,43,0.03)" : "var(--qc-card)",
                       }}
                     >
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172B", fontFamily: "var(--qc-font-sans)" }}>{t.label}</div>
-                      <div style={{ fontSize: 11, color: "#888", fontFamily: "var(--qc-font-sans)", marginTop: 2 }}>{t.hint}</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>{t.label}</div>
+                      <div style={{ fontSize: 11, color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)", marginTop: 2 }}>{t.hint}</div>
                     </button>
                   );
                 })}
               </div>
 
               {/* Amount (optional) */}
-              <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6, fontFamily: "var(--qc-font-sans)" }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--qc-ink-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6, fontFamily: "var(--qc-font-sans)" }}>
                 Amount (optional)
               </label>
-              <div style={{ display: "flex", alignItems: "center", border: "1px solid #E2E2E2", borderRadius: 10, padding: "0 12px", marginBottom: 20 }}>
-                <span style={{ fontSize: 14, color: "#888", fontFamily: "var(--qc-font-mono)" }}>₹</span>
+              <div style={{ display: "flex", alignItems: "center", border: "1px solid var(--qc-hair)", borderRadius: 10, padding: "0 12px", marginBottom: 20 }}>
+                <span style={{ fontSize: 14, color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-mono)" }}>₹</span>
                 <input
                   type="number"
                   inputMode="numeric"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="Leave blank to choose in broker"
-                  style={{ flex: 1, border: "none", outline: "none", padding: "12px 8px", fontSize: 14, fontFamily: "var(--qc-font-sans)", color: "#0F172B", background: "transparent" }}
+                  style={{ flex: 1, border: "none", outline: "none", padding: "12px 8px", fontSize: 14, fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)", background: "transparent" }}
                 />
               </div>
 
               <button
                 onClick={handleSubmit}
-                style={{ width: "100%", background: "#0F172B", color: "#fff", border: "none", borderRadius: 10, padding: "13px 20px", fontSize: 14, fontWeight: 600, fontFamily: "var(--qc-font-sans)", cursor: "pointer", letterSpacing: "0.01em" }}
+                style={{ width: "100%", background: "var(--qc-ink)", color: "var(--qc-on-dark)", border: "none", borderRadius: 10, padding: "13px 20px", fontSize: 14, fontWeight: 600, fontFamily: "var(--qc-font-sans)", cursor: "pointer", letterSpacing: "0.01em" }}
               >
                 Continue to broker
               </button>
-              <p style={{ textAlign: "center", fontSize: 11, color: "#bbb", fontFamily: "var(--qc-font-sans)", margin: "12px 0 0" }}>
+              <p style={{ textAlign: "center", fontSize: 11, color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)", margin: "12px 0 0" }}>
                 You&apos;ll confirm the final order in your broker&apos;s window.
               </p>
             </>
@@ -195,10 +195,10 @@ export function PlaceOrderModal({ open, onClose, ticker, onPlaced }: PlaceOrderM
 
           {errored && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 4 }}>
-              <button onClick={resetPlace} style={{ width: "100%", background: "#0F172B", color: "#fff", border: "none", borderRadius: 10, padding: "13px 20px", fontSize: 14, fontWeight: 600, fontFamily: "var(--qc-font-sans)", cursor: "pointer" }}>
+              <button onClick={resetPlace} style={{ width: "100%", background: "var(--qc-ink)", color: "var(--qc-on-dark)", border: "none", borderRadius: 10, padding: "13px 20px", fontSize: 14, fontWeight: 600, fontFamily: "var(--qc-font-sans)", cursor: "pointer" }}>
                 Try again
               </button>
-              <button onClick={handleClose} style={{ width: "100%", background: "#fff", color: "#555", border: "1px solid #E2E2E2", borderRadius: 10, padding: "11px 20px", fontSize: 13, fontWeight: 500, fontFamily: "var(--qc-font-sans)", cursor: "pointer" }}>
+              <button onClick={handleClose} style={{ width: "100%", background: "var(--qc-card)", color: "var(--qc-ink-2)", border: "1px solid var(--qc-hair)", borderRadius: 10, padding: "11px 20px", fontSize: 13, fontWeight: 500, fontFamily: "var(--qc-font-sans)", cursor: "pointer" }}>
                 Cancel
               </button>
             </div>
@@ -220,7 +220,7 @@ function Spinner() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ animation: "spin 0.8s linear infinite" }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
-      <path d="M12 2a10 10 0 0 1 10 10" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
+      <path d="M12 2a10 10 0 0 1 10 10" stroke="var(--qc-on-dark)" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }

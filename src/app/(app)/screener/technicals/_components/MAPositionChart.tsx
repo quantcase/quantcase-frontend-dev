@@ -34,13 +34,14 @@ export function MAPositionChart({
   const BOT_H = 48;
   const TOTAL_H = TOP_LABEL_H + TRACK_H + BOT_H;
 
-  // Design token hex values — resolved for purple theme (mirrored from --qc-* CSS vars for SVG use)
-  const QC_UP = "#15803D";
-  const QC_DOWN = "#B91C1C";
+  // Design tokens — SVG attributes resolve `var(--qc-*)` directly, so reference
+  // the tokens straight through (a token edit in globals.css cascades here).
+  const QC_UP = "var(--qc-up)";
+  const QC_DOWN = "var(--qc-down)";
   const QC_HEADING = "var(--qc-ink)";
-  const QC_GRID = "#EDE8F5";
-  const QC_BORDER = "#E4DCF0";
-  const QC_MUTED = "#7C6998";
+  const QC_GRID = "var(--qc-hair)";
+  const QC_BORDER = "var(--qc-hair)";
+  const QC_MUTED = "var(--qc-ink-3)";
 
   return (
     <div className="px-4 py-6 select-none">

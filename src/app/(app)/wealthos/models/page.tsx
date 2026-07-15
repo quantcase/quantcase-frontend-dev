@@ -34,7 +34,13 @@ const RISK_COLOR: Record<RiskProfileType, string> = {
   "goal-based": "var(--qc-warn)",
 };
 
-const ASSET_COLORS = ["#1A0A2E", "#3D2460", "#6B21A8", "#9333EA", "#C084FC"];
+const ASSET_COLORS = [
+  "color-mix(in srgb, var(--qc-brand-accent) 85%, var(--qc-ink))",
+  "color-mix(in srgb, var(--qc-brand-accent) 90%, black)",
+  "var(--qc-brand-accent)",
+  "color-mix(in srgb, var(--qc-brand-accent) 70%, white)",
+  "color-mix(in srgb, var(--qc-brand-accent) 45%, white)",
+];
 
 // ─── Modal ─────────────────────────────────────────────────────────────────────
 
@@ -72,7 +78,7 @@ function PortfolioBuilderModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-200 transition-colors shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-secondary transition-colors shrink-0"
             style={{ color: "var(--qc-ink-2)" }}
           >
             <X className="w-4 h-4" />

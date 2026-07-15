@@ -27,7 +27,7 @@ function Sparkline({ values }: { values: number[] }) {
             width={barW}
             height={barH}
             rx={1}
-            fill={i === values.length - 1 ? "#64748B" : "#CBD5E1"}
+            fill={i === values.length - 1 ? "var(--qc-ink-3)" : "var(--qc-hair)"}
           />
         );
       })}
@@ -77,7 +77,7 @@ function KpiCard({ label, value, unit, yoy, muted, sparkValues, metricKey, selec
       onClick={isClickable ? () => onSelect(selected ? null : metricKey) : undefined}
       style={{
         background: selected
-          ? "linear-gradient(180deg, #fdfbf3 0%, #faefc4 100%)"
+          ? "linear-gradient(180deg, var(--qc-warn-soft) 0%, var(--qc-warn-soft) 100%)"
           : muted
           ? "var(--qc-section, #F2F1EC)"
           : "var(--qc-card)",

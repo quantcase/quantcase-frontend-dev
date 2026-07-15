@@ -5,7 +5,7 @@ export function BoldText({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         i % 2 === 1 ? (
-          <strong key={i} className="font-semibold text-zinc-800 dark:text-zinc-100">
+          <strong key={i} className="font-semibold text-ink">
             {p}
           </strong>
         ) : (
@@ -26,7 +26,7 @@ export function InsightText({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         i % 2 === 1 ? (
-          <span key={i} className="text-sm font-normal text-zinc-700 dark:text-zinc-200">
+          <span key={i} className="text-sm font-normal text-ink-2">
             {p}
           </span>
         ) : (

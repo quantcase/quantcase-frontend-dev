@@ -2,6 +2,15 @@
 
 import { cn } from "@/lib/utils";
 
+/**
+ * TabToggle — the canonical tab primitive.
+ *
+ * Variants: `pill` (segmented control), `outline` (button group), `underline`
+ * (sub-nav). All tokens resolve from --qc-* (previously the underline/pill
+ * variants referenced nonexistent vars like --qc-border-default and off-palette
+ * bg-gray-* — fixed here). Route TopBar / InPageNav / the diary M·O·D control
+ * through this instead of re-implementing tabs.
+ */
 interface TabToggleProps {
   options: string[];
   value: string;
@@ -13,23 +22,19 @@ interface TabToggleProps {
 export function TabToggle({ options, value, onChange, className, variant = "pill" }: TabToggleProps) {
   if (variant === "underline") {
     return (
-      <div
-        className={cn("flex items-center overflow-x-auto scrollbar-none", className)}
-        style={{ borderBottom: "1px solid var(--qc-border-default)" }}
-      >
+      <div className={cn("flex items-center overflow-x-auto scrollbar-none border-b border-hair", className)}>
         {options.map((option) => (
           <button
             key={option}
             onClick={() => onChange(option)}
-            className="relative px-4 py-3 text-[12px] font-medium whitespace-nowrap shrink-0 transition-colors"
-            style={{ color: value === option ? "var(--qc-text-heading)" : "var(--qc-text-muted)" }}
+            className={cn(
+              "relative px-4 py-3 text-[12px] font-medium whitespace-nowrap shrink-0 transition-colors",
+              value === option ? "text-ink" : "text-ink-2 hover:text-ink"
+            )}
           >
             {option}
             {value === option && (
-              <span
-                className="absolute bottom-0 left-0 right-0 h-0.5"
-                style={{ background: "var(--qc-accent-primary)" }}
-              />
+              <span className="absolute inset-x-0 bottom-0 h-0.5 bg-ink" />
             )}
           </button>
         ))}
@@ -44,18 +49,12 @@ export function TabToggle({ options, value, onChange, className, variant = "pill
           <button
             key={option}
             onClick={() => onChange(option)}
-            style={{
-              fontSize: "var(--qc-fz-12)",
-              fontWeight: "var(--qc-w-medium)",
-              fontFamily: "var(--qc-font-sans)",
-              padding: "4px 12px",
-              borderRadius: 6,
-              border: `1px solid ${value === option ? "var(--qc-ink)" : "var(--qc-hair)"}`,
-              background: value === option ? "var(--qc-ink)" : "transparent",
-              color: value === option ? "#ffffff" : "var(--qc-ink-2)",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
+            className={cn(
+              "cursor-pointer whitespace-nowrap rounded-md border px-3 py-1 text-xs font-medium transition-colors",
+              value === option
+                ? "border-ink bg-ink text-[var(--qc-on-dark)]"
+                : "border-hair bg-transparent text-ink-2 hover:bg-secondary"
+            )}
           >
             {option}
           </button>
@@ -65,16 +64,16 @@ export function TabToggle({ options, value, onChange, className, variant = "pill
   }
 
   return (
-    <div className={cn("inline-flex rounded-lg p-1 bg-gray-100 dark:bg-gray-800", className)}>
+    <div className={cn("inline-flex rounded-lg bg-secondary p-1", className)}>
       {options.map((option) => (
         <button
           key={option}
           onClick={() => onChange(option)}
           className={cn(
-            "px-6 py-2 text-sm font-medium rounded-md transition-all",
+            "rounded-md px-6 py-2 text-sm font-medium transition-all",
             value === option
-              ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              ? "bg-primary text-primary-foreground"
+              : "text-ink-2 hover:text-ink"
           )}
         >
           {option}

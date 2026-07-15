@@ -100,16 +100,16 @@ export function SkillDrawer({ skill, onClose, onSave }: Props) {
       <div className="flex-1 bg-black/20" onClick={onClose} />
 
       {/* Drawer */}
-      <div className="w-[480px] shrink-0 flex flex-col bg-white border-l border-[#E2E2E2] shadow-2xl overflow-hidden">
+      <div className="w-[480px] shrink-0 flex flex-col bg-card border-l border-hair shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E2E2] shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-hair shrink-0">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888]">Skill</p>
-            <p className="text-[15px] font-semibold text-[#0F172B] mt-0.5 font-mono">{skill.name}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-3">Skill</p>
+            <p className="text-[15px] font-semibold text-ink mt-0.5 font-mono">{skill.name}</p>
           </div>
           <button
             onClick={onClose}
-            className="flex size-7 items-center justify-center rounded-md text-[#888888] hover:text-[#0F172B] hover:bg-[#F5F5F5] transition-colors"
+            className="flex size-7 items-center justify-center rounded-md text-ink-3 hover:text-ink hover:bg-secondary transition-colors"
           >
             <X className="size-4" />
           </button>
@@ -206,8 +206,8 @@ export function SkillDrawer({ skill, onClose, onSave }: Props) {
               onClick={() => set("isActive", !form.isActive)}
               className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
                 form.isActive
-                  ? "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200"
-                  : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:bg-gray-100"
+                  ? "bg-up-soft text-up border-up hover:bg-up-soft"
+                  : "bg-secondary text-ink-3 border-hair hover:bg-secondary"
               }`}
             >
               {form.isActive ? "Active" : "Inactive"}
@@ -222,7 +222,7 @@ export function SkillDrawer({ skill, onClose, onSave }: Props) {
                 {usedBy.map((ps) => (
                   <span
                     key={ps.plugin.id}
-                    className="rounded-sm bg-[#F5F5F5] px-2 py-0.5 text-[11px] font-medium text-[#888888] capitalize"
+                    className="rounded-sm bg-secondary px-2 py-0.5 text-[11px] font-medium text-ink-3 capitalize"
                   >
                     {ps.plugin.name}
                   </span>
@@ -234,9 +234,9 @@ export function SkillDrawer({ skill, onClose, onSave }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 px-5 py-4 border-t border-[#E2E2E2] flex items-center justify-between">
+        <div className="shrink-0 px-5 py-4 border-t border-hair flex items-center justify-between">
           {saveError ? (
-            <p className="text-xs text-red-600">{saveError}</p>
+            <p className="text-xs text-down">{saveError}</p>
           ) : (
             <span />
           )}
@@ -245,8 +245,8 @@ export function SkillDrawer({ skill, onClose, onSave }: Props) {
             disabled={saving}
             className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
               saved
-                ? "bg-emerald-600 text-white"
-                : "bg-[#0F172B] text-white hover:opacity-90"
+                ? "bg-up text-[var(--qc-on-dark)]"
+                : "bg-ink text-[var(--qc-on-dark)] hover:opacity-90"
             }`}
           >
             {saved ? (
@@ -265,9 +265,9 @@ export function SkillDrawer({ skill, onClose, onSave }: Props) {
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1";
+const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1";
 const INPUT_CLS =
-  "w-full rounded border border-[#E2E2E2] px-2.5 py-1.5 text-xs text-[#0F172B] focus:outline-none focus:border-[#0F172B]";
+  "w-full rounded border border-hair px-2.5 py-1.5 text-xs text-ink focus:outline-none focus:border-[var(--qc-ink)]";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

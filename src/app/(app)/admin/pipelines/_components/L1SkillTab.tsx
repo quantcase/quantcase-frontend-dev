@@ -323,7 +323,7 @@ export function L1SkillTab() {
     return (
       <div className="space-y-2">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-12 rounded-[8px] bg-[#F5F5F5] animate-pulse" />
+          <div key={i} className="h-12 rounded-[8px] bg-secondary animate-pulse" />
         ))}
       </div>
     );
@@ -331,7 +331,7 @@ export function L1SkillTab() {
 
   if (loadError || !draft) {
     return (
-      <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-sm text-down">
         <AlertCircle className="size-4 shrink-0" />
         {loadError ?? "Failed to load skill"}
       </div>
@@ -375,15 +375,15 @@ export function L1SkillTab() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {saveError && (
-            <span className="text-xs text-red-600 max-w-[220px] text-right">{saveError}</span>
+            <span className="text-xs text-down max-w-[220px] text-right">{saveError}</span>
           )}
           <button
             onClick={handleSave}
             disabled={!isDirty || isSaving}
             className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
               saveSuccess
-                ? "bg-emerald-600 text-white"
-                : "bg-[#0F172B] text-white hover:opacity-90"
+                ? "bg-up text-[var(--qc-on-dark)]"
+                : "bg-ink text-[var(--qc-on-dark)] hover:opacity-90"
             }`}
           >
             {saveSuccess ? (
@@ -399,7 +399,7 @@ export function L1SkillTab() {
 
       {/* Dirty warning */}
       {isDirty && (
-        <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+        <div className="flex items-start gap-2 rounded-md border border-warn bg-warn-soft px-4 py-3 text-xs text-warn">
           <AlertCircle className="size-3.5 mt-0.5 shrink-0" />
           Saving changes will invalidate all existing L1 signals. The pipeline will re-extract on
           the next run.
@@ -424,7 +424,7 @@ export function L1SkillTab() {
 
         <button
           onClick={addDefinition}
-          className="flex items-center gap-1.5 w-full rounded-md border border-dashed border-[#E2E2E2] px-4 py-2.5 text-xs text-[#888888] hover:border-[#0F172B] hover:text-[#0F172B] transition-colors"
+          className="flex items-center gap-1.5 w-full rounded-md border border-dashed border-hair px-4 py-2.5 text-xs text-ink-3 hover:border-[var(--qc-ink)] hover:text-ink transition-colors"
         >
           <Plus className="size-3.5" /> Add signal type
         </button>
@@ -447,7 +447,7 @@ export function L1SkillTab() {
             <button
               onClick={handleRunPreview}
               disabled={!previewCallId.trim() || isPreviewing || cooldownSecs > 0}
-              className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-4 py-[7px] text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-[7px] text-sm font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isPreviewing ? (
                 <><Loader2 className="size-3.5 animate-spin" /> Running… {elapsedSecs}s</>
@@ -459,13 +459,13 @@ export function L1SkillTab() {
             </button>
           </div>
 
-          <p className="text-[11px] text-[#888888]">
+          <p className="text-[11px] text-ink-3">
             Runs against the live LLM (10–30 s) using the <strong>saved</strong> config — save
             first to preview changes.
           </p>
 
           {previewError && (
-            <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+            <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-xs text-down">
               <AlertCircle className="size-3.5 shrink-0" />
               {previewError}
             </div>
@@ -474,7 +474,7 @@ export function L1SkillTab() {
           {previewResult && (
             <div className="space-y-4">
               {/* Stats */}
-              <div className="flex flex-wrap gap-5 rounded-lg border border-[#E2E2E2] bg-[#F5F5F5] px-5 py-4">
+              <div className="flex flex-wrap gap-5 rounded-lg border border-hair bg-secondary px-5 py-4">
                 <Stat label="Signals" value={String(previewResult.signal_count ?? previewResult.signals?.length ?? 0)} />
                 <Stat label="New KPIs" value={String(previewResult.new_kpis?.length ?? 0)} />
                 <Stat label="Model" value={previewResult.model} mono />
@@ -485,7 +485,7 @@ export function L1SkillTab() {
                   {(previewResult.signal_types_used ?? Object.keys(groupedSignals)).map((type) => (
                     <span
                       key={type}
-                      className="rounded-full bg-white border border-[#E2E2E2] px-2.5 py-0.5 text-[11px] text-[#888888]"
+                      className="rounded-full bg-card border border-hair px-2.5 py-0.5 text-[11px] text-ink-3"
                     >
                       {type} ({groupedSignals[type]?.length ?? 0})
                     </span>
@@ -498,45 +498,45 @@ export function L1SkillTab() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-[#E2E2E2]">
+                      <tr className="border-b border-hair">
                         {["Type", "Metric", "Value", "Impact", "Statement"].map((h) => (
                           <th
                             key={h}
-                            className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888] px-2 first:pl-0"
+                            className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3 px-2 first:pl-0"
                           >
                             {h}
                           </th>
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E2E2E2]">
+                    <tbody className="divide-y divide-hair">
                       {previewResult.signals.map((sig, i) => (
-                        <tr key={i} className="hover:bg-[#FAFAFA] transition-colors">
+                        <tr key={i} className="hover:bg-secondary transition-colors">
                           <td className="py-2 px-2 pl-0">
-                            <span className="rounded-sm bg-[#F5F5F5] px-1.5 py-0.5 font-mono text-[10px] text-[#888888] whitespace-nowrap">
+                            <span className="rounded-sm bg-secondary px-1.5 py-0.5 font-mono text-[10px] text-ink-3 whitespace-nowrap">
                               {sig.signal_type}
                             </span>
                           </td>
-                          <td className="py-2 px-2 font-medium text-[#0F172B] max-w-[160px]">
+                          <td className="py-2 px-2 font-medium text-ink max-w-[160px]">
                             <span className="line-clamp-1">{sig.metric}</span>
                           </td>
-                          <td className="py-2 px-2 text-[#888888] max-w-[120px]">
+                          <td className="py-2 px-2 text-ink-3 max-w-[120px]">
                             <span className="line-clamp-1">{sig.value}</span>
                           </td>
                           <td className="py-2 px-2 whitespace-nowrap">
                             <span
                               className={`font-semibold ${
                                 sig.impact === "HIGH"
-                                  ? "text-emerald-600"
+                                  ? "text-up"
                                   : sig.impact === "LOW"
-                                  ? "text-red-600"
-                                  : "text-amber-600"
+                                  ? "text-down"
+                                  : "text-warn"
                               }`}
                             >
                               {sig.impact}
                             </span>
                           </td>
-                          <td className="py-2 px-2 text-[#888888] max-w-[340px]">
+                          <td className="py-2 px-2 text-ink-3 max-w-[340px]">
                             <span className="line-clamp-2">{sig.statement}</span>
                           </td>
                         </tr>
@@ -552,26 +552,26 @@ export function L1SkillTab() {
                   <p className={`${LABEL_CLS} mb-2`}>New KPIs ({previewResult.new_kpis.length})</p>
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-[#E2E2E2]">
+                      <tr className="border-b border-hair">
                         {["Abbr", "Full Form", "KPI Type"].map((h) => (
                           <th
                             key={h}
-                            className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888] px-2 first:pl-0"
+                            className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3 px-2 first:pl-0"
                           >
                             {h}
                           </th>
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E2E2E2]">
+                    <tbody className="divide-y divide-hair">
                       {previewResult.new_kpis.map((kpi, i) => (
-                        <tr key={i} className="hover:bg-[#FAFAFA]">
-                          <td className="py-2 px-2 pl-0 font-mono font-medium text-[#0F172B]">
+                        <tr key={i} className="hover:bg-secondary">
+                          <td className="py-2 px-2 pl-0 font-mono font-medium text-ink">
                             {kpi.abbr}
                           </td>
-                          <td className="py-2 px-2 text-[#888888]">{kpi.full_form}</td>
+                          <td className="py-2 px-2 text-ink-3">{kpi.full_form}</td>
                           <td className="py-2 px-2">
-                            <span className="rounded-sm bg-[#F5F5F5] px-1.5 py-0.5 font-mono text-[10px] text-[#888888]">
+                            <span className="rounded-sm bg-secondary px-1.5 py-0.5 font-mono text-[10px] text-ink-3">
                               {kpi.kpi_type}
                             </span>
                           </td>
@@ -601,8 +601,8 @@ interface CardProps {
 function SignalTypeCard({ def, expanded, onToggleExpand, onChange, onRemove }: CardProps) {
   return (
     <div
-      className={`rounded-[8px] border bg-white overflow-hidden transition-opacity ${
-        def.active ? "border-[#E2E2E2]" : "border-[#E2E2E2] opacity-60"
+      className={`rounded-[8px] border bg-card overflow-hidden transition-opacity ${
+        def.active ? "border-hair" : "border-hair opacity-60"
       }`}
     >
       {/* Card header */}
@@ -617,22 +617,22 @@ function SignalTypeCard({ def, expanded, onToggleExpand, onChange, onRemove }: C
             onChange({ active: !def.active });
           }}
           className={`relative shrink-0 inline-flex w-8 h-4 rounded-full transition-colors ${
-            def.active ? "bg-[#0F172B]" : "bg-[#D1D5DB]"
+            def.active ? "bg-ink" : "bg-hair"
           }`}
         >
           <span
-            className={`absolute top-0.5 left-0.5 inline-block w-3 h-3 rounded-full bg-white shadow-sm transition-transform ${
+            className={`absolute top-0.5 left-0.5 inline-block w-3 h-3 rounded-full bg-card shadow-sm transition-transform ${
               def.active ? "translate-x-4" : "translate-x-0"
             }`}
           />
         </button>
 
-        <span className="flex-1 text-sm font-medium text-[#0F172B] truncate">
-          {def.label || <span className="text-[#888888] font-normal italic">Untitled</span>}
+        <span className="flex-1 text-sm font-medium text-ink truncate">
+          {def.label || <span className="text-ink-3 font-normal italic">Untitled</span>}
         </span>
 
         {def.slug && (
-          <span className="shrink-0 font-mono text-[11px] text-[#888888]">{def.slug}</span>
+          <span className="shrink-0 font-mono text-[11px] text-ink-3">{def.slug}</span>
         )}
 
         <button
@@ -640,21 +640,21 @@ function SignalTypeCard({ def, expanded, onToggleExpand, onChange, onRemove }: C
             e.stopPropagation();
             onRemove();
           }}
-          className="shrink-0 p-1 text-transparent group-hover:text-[#888888] hover:!text-red-600 transition-colors"
+          className="shrink-0 p-1 text-transparent group-hover:text-ink-3 hover:!text-down transition-colors"
         >
           <Trash2 className="size-3.5" />
         </button>
 
         {expanded ? (
-          <ChevronDown className="size-4 text-[#888888] shrink-0" />
+          <ChevronDown className="size-4 text-ink-3 shrink-0" />
         ) : (
-          <ChevronRight className="size-4 text-[#888888] shrink-0" />
+          <ChevronRight className="size-4 text-ink-3 shrink-0" />
         )}
       </div>
 
       {/* Card body */}
       {expanded && (
-        <div className="border-t border-[#E2E2E2] px-4 py-4 space-y-4">
+        <div className="border-t border-hair px-4 py-4 space-y-4">
 
           {/* Label + Slug row */}
           <div className="grid grid-cols-2 gap-3">
@@ -674,7 +674,7 @@ function SignalTypeCard({ def, expanded, onToggleExpand, onChange, onRemove }: C
                 value={def.slug}
                 readOnly={!!def.slug}
                 onChange={(e) => !def.slug && onChange({ slug: slugify(e.target.value) })}
-                className={`${INPUT_CLS} font-mono ${def.slug ? "bg-[#F5F5F5] cursor-not-allowed text-[#888888]" : ""}`}
+                className={`${INPUT_CLS} font-mono ${def.slug ? "bg-secondary cursor-not-allowed text-ink-3" : ""}`}
                 placeholder="auto-generated"
               />
             </Field>
@@ -790,9 +790,9 @@ function SignalTypeCard({ def, expanded, onToggleExpand, onChange, onRemove }: C
                         : def.active_fields.filter((f) => f !== field);
                       onChange({ active_fields: next });
                     }}
-                    className="rounded accent-[#0F172B]"
+                    className="rounded accent-[var(--qc-ink)]"
                   />
-                  <span className="text-xs font-mono text-[#0F172B]">{field}</span>
+                  <span className="text-xs font-mono text-ink">{field}</span>
                 </label>
               ))}
             </div>
@@ -825,7 +825,7 @@ function SignalTypeCard({ def, expanded, onToggleExpand, onChange, onRemove }: C
                     ],
                   })
                 }
-                className="flex items-center gap-1 text-xs text-[#888888] hover:text-[#0F172B] transition-colors"
+                className="flex items-center gap-1 text-xs text-ink-3 hover:text-ink transition-colors"
               >
                 <Plus className="size-3" /> Add extra field
               </button>
@@ -849,15 +849,15 @@ function TypeToggle({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex rounded-md border border-[#E2E2E2] overflow-hidden w-fit">
+    <div className="flex rounded-md border border-hair overflow-hidden w-fit">
       {options.map((opt) => (
         <button
           key={opt}
           onClick={() => onChange(opt)}
           className={`px-3 py-1.5 text-[11px] font-medium transition-colors ${
             value === opt
-              ? "bg-[#0F172B] text-white"
-              : "bg-white text-[#888888] hover:text-[#0F172B]"
+              ? "bg-ink text-[var(--qc-on-dark)]"
+              : "bg-card text-ink-3 hover:text-ink"
           }`}
         >
           {opt}
@@ -891,16 +891,16 @@ function TagInput({
   }
 
   return (
-    <div className="flex flex-wrap gap-1.5 rounded border border-[#E2E2E2] px-2.5 py-2 bg-white min-h-[34px]">
+    <div className="flex flex-wrap gap-1.5 rounded border border-hair px-2.5 py-2 bg-card min-h-[34px]">
       {values.map((v) => (
         <span
           key={v}
-          className="flex items-center gap-1 rounded-sm bg-[#F5F5F5] px-1.5 py-0.5 text-[11px] text-[#0F172B]"
+          className="flex items-center gap-1 rounded-sm bg-secondary px-1.5 py-0.5 text-[11px] text-ink"
         >
           {v}
           <button
             onClick={() => onChange(values.filter((x) => x !== v))}
-            className="text-[#888888] hover:text-red-600 transition-colors"
+            className="text-ink-3 hover:text-down transition-colors"
           >
             <X className="size-2.5" />
           </button>
@@ -919,7 +919,7 @@ function TagInput({
           }
         }}
         onBlur={commit}
-        className="flex-1 min-w-[80px] text-xs text-[#0F172B] focus:outline-none bg-transparent"
+        className="flex-1 min-w-[80px] text-xs text-ink focus:outline-none bg-transparent"
         placeholder={values.length === 0 ? placeholder : ""}
       />
     </div>
@@ -938,7 +938,7 @@ function ExtraFieldRow({
   onRemove: () => void;
 }) {
   return (
-    <div className="flex items-start gap-2 rounded-[6px] border border-[#E2E2E2] bg-[#FAFAFA] px-3 py-2.5">
+    <div className="flex items-start gap-2 rounded-[6px] border border-hair bg-secondary px-3 py-2.5">
       <div className="flex-1 space-y-2">
         <div className="flex items-center gap-2">
           <input
@@ -977,7 +977,7 @@ function ExtraFieldRow({
       </div>
       <button
         onClick={onRemove}
-        className="shrink-0 mt-1 p-1 text-[#888888] hover:text-red-600 transition-colors"
+        className="shrink-0 mt-1 p-1 text-ink-3 hover:text-down transition-colors"
       >
         <X className="size-3.5" />
       </button>
@@ -988,9 +988,9 @@ function ExtraFieldRow({
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
 const LABEL_CLS =
-  "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1";
+  "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1";
 const INPUT_CLS =
-  "w-full rounded border border-[#E2E2E2] px-2.5 py-1.5 text-xs text-[#0F172B] bg-white focus:outline-none focus:border-[#0F172B]";
+  "w-full rounded border border-hair px-2.5 py-1.5 text-xs text-ink bg-card focus:outline-none focus:border-[var(--qc-ink)]";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -1004,8 +1004,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Stat({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] uppercase tracking-wider text-[#888888]">{label}</span>
-      <span className={`text-sm font-semibold text-[#0F172B] ${mono ? "font-mono" : ""}`}>
+      <span className="text-[10px] uppercase tracking-wider text-ink-3">{label}</span>
+      <span className={`text-sm font-semibold text-ink ${mono ? "font-mono" : ""}`}>
         {value}
       </span>
     </div>

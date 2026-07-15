@@ -24,10 +24,10 @@ export function DetailedAnalysis({ data }: DetailedAnalysisProps) {
 
       {isOpen && (
         <div className="space-y-6">
-          <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+          <div className="pt-2 border-t border-hair space-y-4">
             <QualityOfEarnings data={data?.quality_of_earnings} />
           </div>
-          <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+          <div className="pt-2 border-t border-hair space-y-4">
             <ValuationVsPeers data={data?.valuation_vs_peers} />
           </div>
         </div>

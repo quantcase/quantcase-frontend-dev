@@ -23,7 +23,7 @@ function ConvictionPill({ value }: { value: string | null | undefined }) {
   if (!value) return <span style={{ color: "var(--qc-ink-3)", fontSize: "var(--qc-fz-11)" }}>—</span>;
   const map: Record<string, { bg: string; color: string }> = {
     POSITIVE: { bg: "rgba(31,122,74,0.10)", color: "var(--qc-up,#1F7A4A)" },
-    WATCH:    { bg: "#FEF3C7",              color: "#92400E" },
+    WATCH:    { bg: "var(--qc-warn-soft)",  color: "var(--qc-warn)" },
     NEUTRAL:  { bg: "var(--qc-section)",    color: "var(--qc-ink-2)" },
   };
   const style = map[value] ?? map.NEUTRAL;

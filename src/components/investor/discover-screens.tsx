@@ -37,15 +37,15 @@ function ScreenIcon({ icon }: { icon: string }) {
   return <Icon size={16} strokeWidth={2} style={{ color: "#555" }} />;
 }
 
-// Badge color from the design system, keyed off the semantic badge kind.
+// Badge color from the design-system tokens (was off-palette purple/cyan/amber).
 const BADGE_COLORS: Record<DiscoverBadgeKind, string> = {
-  warning: "#d97706",
-  new: "#7c3aed",
-  info: "#0891b2",
+  warning: "var(--qc-warn)",
+  new: "var(--qc-ink)",
+  info: "var(--qc-blue)",
 };
 
 function badgeColor(kind?: DiscoverBadgeKind): string {
-  return kind ? BADGE_COLORS[kind] : "#7c3aed";
+  return kind ? BADGE_COLORS[kind] : "var(--qc-ink)";
 }
 
 interface DiscoverScreensProps {
@@ -93,8 +93,8 @@ function ScreenCard({ screen }: { screen: DiscoverScreenDto }) {
               fontWeight: "var(--qc-w-bold)",
               fontFamily: "var(--qc-font-sans)",
               color: bColor,
-              background: `${bColor}15`,
-              border: `1px solid ${bColor}30`,
+              background: `color-mix(in srgb, ${bColor} 9%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${bColor} 20%, transparent)`,
               borderRadius: 20,
               padding: "3px 10px",
               letterSpacing: "var(--qc-track-eyebrow)",
@@ -183,19 +183,24 @@ export function DiscoverScreens({ screens }: DiscoverScreensProps) {
         Curated screens · click any to see the names
       </div>
 
-      {/* 3-column card grid inside white inner card */}
-      <div
-        className="rounded-[10px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-        style={{
-          background: "var(--qc-card)",
-          padding: "14px",
-          gap: 10,
-        }}
-      >
-        {screens.map((s) => (
-          <ScreenCard key={s.id} screen={s} />
-        ))}
-      </div>
+      {/* 3-column card grid inside white inner card — real empty state when the
+          backend returns no curated screens (audit #11: no empty placeholder). */}
+      {screens.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 rounded-[10px] bg-card px-4 py-10 text-center">
+          <Compass className="size-5 text-ink-3" strokeWidth={1.75} />
+          <div className="text-[13px] font-medium text-ink">No curated screens this week</div>
+          <p className="m-0 max-w-[320px] text-[12px] leading-[1.5] text-ink-3">
+            We refresh Discover as new opportunities surface. In the meantime,{" "}
+            <Link href="/screener/home" className="font-medium text-ink underline-offset-2 hover:underline">browse all screens</Link>.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-2.5 rounded-[10px] bg-card p-3.5 sm:grid-cols-2 lg:grid-cols-3">
+          {screens.map((s) => (
+            <ScreenCard key={s.id} screen={s} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

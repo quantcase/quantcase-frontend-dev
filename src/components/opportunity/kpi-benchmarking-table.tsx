@@ -24,11 +24,11 @@ function formatValue(value: string | null | undefined): string {
 
 export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProps) {
   if (loading) {
-    return <div className="text-center text-xs text-zinc-400 py-6">Loading KPI benchmarking...</div>;
+    return <div className="text-center text-xs text-ink-3 py-6">Loading KPI benchmarking...</div>;
   }
 
   if (!data?.companies?.length) {
-    return <div className="text-center text-xs text-zinc-400 py-6">No KPI benchmarking data available.</div>;
+    return <div className="text-center text-xs text-ink-3 py-6">No KPI benchmarking data available.</div>;
   }
 
   // Collect all unique KPI keys across all companies
@@ -37,7 +37,7 @@ export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProp
   );
 
   if (allKpis.length === 0) {
-    return <div className="text-center text-xs text-zinc-400 py-6">No KPI benchmarking data available for peers.</div>;
+    return <div className="text-center text-xs text-ink-3 py-6">No KPI benchmarking data available for peers.</div>;
   }
 
   // For each company + KPI, get the latest (last) data point value
@@ -50,11 +50,11 @@ export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProp
   };
 
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+    <div className="rounded-lg border border-hair overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="border-0">
-            <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 py-2.5 min-w-[160px]">
+            <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-ink-2 bg-secondary py-2.5 min-w-[160px]">
               KPI
             </TableHead>
             {data.companies.map((company) => (
@@ -62,8 +62,8 @@ export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProp
                 key={company.ticker}
                 className={`text-[10px] font-semibold uppercase tracking-wider py-2.5 text-right whitespace-nowrap ${
                   company.is_current
-                    ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+                    ? "bg-blue-soft text-blue"
+                    : "bg-secondary text-ink-2"
                 }`}
               >
                 {company.ticker}
@@ -76,10 +76,10 @@ export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProp
         </TableHeader>
         <TableBody>
           {allKpis.map((kpi) => (
-            <TableRow key={kpi} className="border-zinc-100 dark:border-zinc-800">
-              <TableCell className="py-2.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+            <TableRow key={kpi} className="border-hair">
+              <TableCell className="py-2.5 text-xs font-semibold text-ink-2">
                 {humanize(kpi)}
-                <span className="ml-1.5 text-[10px] font-normal text-zinc-400">{kpi}</span>
+                <span className="ml-1.5 text-[10px] font-normal text-ink-3">{kpi}</span>
               </TableCell>
               {data.companies.map((company) => {
                 const val = latestValue(company.ticker, kpi);
@@ -88,10 +88,10 @@ export function KpiBenchmarkingTable({ data, loading }: KpiBenchmarkingTableProp
                     key={company.ticker}
                     className={`text-xs py-2.5 text-right font-semibold ${
                       company.is_current
-                        ? "text-blue-700 dark:text-blue-300 bg-blue-50/50 dark:bg-blue-900/10"
+                        ? "text-blue bg-blue-soft"
                         : val != null
-                        ? "text-zinc-700 dark:text-zinc-300"
-                        : "text-zinc-300 dark:text-zinc-600"
+                        ? "text-ink-2"
+                        : "text-ink-3"
                     }`}
                   >
                     {formatValue(val)}

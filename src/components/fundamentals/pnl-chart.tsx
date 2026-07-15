@@ -14,6 +14,7 @@ import {
   type TooltipProps,
 } from "recharts";
 import type { FinancialTable } from "@/types/financials";
+import { QC, SEQUENTIAL } from "@/lib/chart-tokens";
 
 const ROW_KEYS = {
   revenue:         "revenue",
@@ -32,13 +33,13 @@ function fmtCr(val: number | null | undefined): string {
   return `${Math.round(Math.abs(val)).toLocaleString("en-IN")} Cr`;
 }
 
-// Maps to --qc-* tokens (resolved hex for SVG fill compatibility)
+// Maps to --qc-* tokens via chart-tokens (SVG fill accepts var(--qc-*))
 const COLORS = {
-  revenue:  "#3D1C54",  // deep purple: primary revenue bar
-  expenses: "#7C4A9E",  // mid purple: expenses bar
-  interest: "#B23A2F",  // --qc-down: interest is a cost drag
-  opProfit: "#C6DC8A",  // lime-edge: operating profit line
-  netProfit:"#FFEB99",  // golden: net profit secondary line
+  revenue:  SEQUENTIAL[0],  // decorative: primary revenue bar
+  expenses: SEQUENTIAL[1],  // decorative: expenses bar
+  interest: QC.down,        // interest is a cost drag
+  opProfit: QC.limeEdge,    // operating profit line
+  netProfit:QC.goldenInk,   // net profit secondary line
 };
 
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {

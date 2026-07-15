@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { ChartGroup } from "@/types/financials";
+import { QC } from "@/lib/chart-tokens";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -34,7 +35,7 @@ interface MultiLineBarComboChartProps {
 
 // Purple-ink + lime-golden palette aligned to the qc-* design tokens
 const BAR_COLORS = ["rgba(33,11,44,0.75)", "rgba(33,11,44,0.45)", "rgba(33,11,44,0.25)", "rgba(33,11,44,0.15)"];
-const LINE_COLORS = ["var(--qc-ink)", "#C6DC8A", "#7C3FAE", "#9A9A92"];
+const LINE_COLORS = [QC.ink, QC.limeEdge, QC.brandAccent, QC.ink3];
 
 // ─── Merge series data into flat recharts rows keyed by x ────────────────────
 

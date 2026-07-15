@@ -53,7 +53,14 @@ export interface DiaryHolding {
 
 // A small deterministic color per broker chip (until the backend provides one).
 function brokerColor(broker: string) {
-  const palette = ["#2563EB", "#7C3AED", "#059669", "#D97706", "#DC2626", "#0891B2"];
+  const palette = [
+    "var(--qc-blue)",
+    "var(--qc-brand-accent)",
+    "var(--qc-up)",
+    "var(--qc-warn)",
+    "var(--qc-down)",
+    "var(--qc-ink-2)",
+  ];
   let hash = 0;
   for (let i = 0; i < broker.length; i++) hash = (hash * 31 + broker.charCodeAt(i)) >>> 0;
   return palette[hash % palette.length];
@@ -262,7 +269,7 @@ export function HoldingsList({
                   style={{
                     padding: "6px 16px", fontSize: 13, borderRadius: 6, border: "none", cursor: "pointer", textTransform: "capitalize",
                     background: view === v ? "var(--qc-ink)" : "transparent",
-                    color: view === v ? "#fff" : "var(--qc-ink-2)",
+                    color: view === v ? "var(--qc-on-dark)" : "var(--qc-ink-2)",
                     fontWeight: view === v ? 600 : 400,
                   }}
                 >

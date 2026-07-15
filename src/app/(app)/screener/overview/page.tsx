@@ -23,11 +23,15 @@ import {
   CompanyProfileSkeleton,
 } from "@/components/overview/skeletons";
 
+// Sub-section labels deliberately DON'T repeat the top-bar page labels
+// ("Technicals" / "Fundamentals" are dedicated pages). These are on-page
+// summaries, so they read as "Technical Snapshot" / "Financial Snapshot"
+// to remove the double-navigation ambiguity (audit /overview).
 const OVERVIEW_NAV = [
   { id: "section-about",                  label: "About" },
   { id: "section-qc-insight",             label: "QC Insight" },
-  { id: "section-technicals",             label: "Technicals" },
-  { id: "section-fundamentals",           label: "Fundamentals" },
+  { id: "section-technicals",             label: "Technical Snapshot" },
+  { id: "section-fundamentals",           label: "Financial Snapshot" },
   { id: "section-investment-conclusion",  label: "Investment Conclusion" },
 ];
 
@@ -79,7 +83,7 @@ function OverviewContent() {
       <div className="pb-8 pt-6">
 
         {error && (
-          <div className="mx-4 mt-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+          <div className="mx-4 mt-4 rounded border border-down/25 bg-down-soft px-4 py-2 text-sm text-down">
             Failed to load data: {error}
           </div>
         )}

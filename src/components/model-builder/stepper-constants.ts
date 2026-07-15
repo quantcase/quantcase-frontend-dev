@@ -90,32 +90,32 @@ export const SUB_CLASSES: Record<AssetClassKey, SubClassDef[]> = {
 
 export const RISK_ALLOC_BARS: Record<Exclude<RiskProfileType, "goal-based">, { label: string; color: string; pct: number }[]> = {
   conservative: [
-    { label: "Equity",  color: "#0F172B", pct: 20 },
-    { label: "Debt",    color: "#475569", pct: 55 },
-    { label: "Cash",    color: "#94A3B8", pct: 10 },
-    { label: "Comm",    color: "#CBD5E1", pct: 10 },
-    { label: "Alt",     color: "#E2E8F0", pct: 5  },
+    { label: "Equity",  color: "var(--qc-ink)",   pct: 20 },
+    { label: "Debt",    color: "var(--qc-ink-2)", pct: 55 },
+    { label: "Cash",    color: "var(--qc-ink-3)", pct: 10 },
+    { label: "Comm",    color: "var(--qc-hair)",  pct: 10 },
+    { label: "Alt",     color: "var(--qc-hair-2)", pct: 5  },
   ],
   balanced: [
-    { label: "Equity",  color: "#0F172B", pct: 50 },
-    { label: "Debt",    color: "#475569", pct: 30 },
-    { label: "Cash",    color: "#94A3B8", pct: 7  },
-    { label: "Comm",    color: "#CBD5E1", pct: 7  },
-    { label: "Alt",     color: "#E2E8F0", pct: 6  },
+    { label: "Equity",  color: "var(--qc-ink)",   pct: 50 },
+    { label: "Debt",    color: "var(--qc-ink-2)", pct: 30 },
+    { label: "Cash",    color: "var(--qc-ink-3)", pct: 7  },
+    { label: "Comm",    color: "var(--qc-hair)",  pct: 7  },
+    { label: "Alt",     color: "var(--qc-hair-2)", pct: 6  },
   ],
   aggressive: [
-    { label: "Equity",  color: "#0F172B", pct: 75 },
-    { label: "Debt",    color: "#475569", pct: 10 },
-    { label: "Cash",    color: "#94A3B8", pct: 5  },
-    { label: "Comm",    color: "#CBD5E1", pct: 5  },
-    { label: "Alt",     color: "#E2E8F0", pct: 5  },
+    { label: "Equity",  color: "var(--qc-ink)",   pct: 75 },
+    { label: "Debt",    color: "var(--qc-ink-2)", pct: 10 },
+    { label: "Cash",    color: "var(--qc-ink-3)", pct: 5  },
+    { label: "Comm",    color: "var(--qc-hair)",  pct: 5  },
+    { label: "Alt",     color: "var(--qc-hair-2)", pct: 5  },
   ],
 };
 
 export const RISK_METER: Record<Exclude<RiskProfileType, "goal-based">, { dots: number; color: string; accent: string }> = {
-  conservative: { dots: 3, color: "#3B82F6", accent: "#EFF6FF" },
-  balanced:     { dots: 6, color: "#10B981", accent: "#ECFDF5" },
-  aggressive:   { dots: 9, color: "#EF4444", accent: "#FEF2F2" },
+  conservative: { dots: 3, color: "var(--qc-blue)", accent: "var(--qc-blue-soft)" },
+  balanced:     { dots: 6, color: "var(--qc-up)",   accent: "var(--qc-up-soft)" },
+  aggressive:   { dots: 9, color: "var(--qc-down)", accent: "var(--qc-down-soft)" },
 };
 
 // ── Default SWP states ────────────────────────────────────────────────────────
@@ -164,8 +164,8 @@ export const MILESTONE_DEFS = [
     label: "School",
     tag: "Class 9 & Class 11",
     age: "Age 14 & 16 · semi-annual",
-    color: "#3B82F6",
-    bg: "#EFF6FF",
+    color: "var(--qc-blue)",
+    bg: "var(--qc-blue-soft)",
   },
   {
     id: "ug" as const,
@@ -173,8 +173,8 @@ export const MILESTONE_DEFS = [
     label: "Graduation",
     tag: "UG — 4 years",
     age: "Age 18 · 8 payouts · semi-annual",
-    color: "#10B981",
-    bg: "#ECFDF5",
+    color: "var(--qc-up)",
+    bg: "var(--qc-up-soft)",
   },
   {
     id: "pg" as const,
@@ -182,8 +182,8 @@ export const MILESTONE_DEFS = [
     label: "Post-grad",
     tag: "PG — 2 years",
     age: "Age 22 · 4 payouts · semi-annual",
-    color: "#F59E0B",
-    bg: "#FFFBEB",
+    color: "var(--qc-warn)",
+    bg: "var(--qc-warn-soft)",
   },
   {
     id: "pro" as const,
@@ -191,8 +191,8 @@ export const MILESTONE_DEFS = [
     label: "Higher / Professional",
     tag: "",
     age: "Age 24–26 · custom · semi-annual",
-    color: "#6366F1",
-    bg: "#EEF2FF",
+    color: "var(--qc-brand-accent)",
+    bg: "var(--qc-brand-accent-soft)",
   },
 ];
 

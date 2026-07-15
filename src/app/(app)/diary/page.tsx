@@ -18,6 +18,7 @@ import { useUserPortfolio } from "@/hooks/useUserPortfolio";
 import { useSmallcaseHoldings } from "@/hooks/useSmallcaseHoldings";
 import { useUser } from "@/components/providers/UserContext";
 import { brokerLabel } from "@/lib/portfolio-format";
+import { Display } from "@/components/ds";
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
@@ -117,18 +118,18 @@ export default function DiaryPage() {
   }
 
   return (
-    <div style={{ background: "var(--qc-bg)", minHeight: "100vh", fontFamily: "var(--qc-font-sans)" }}>
+    <div className="min-h-screen bg-[var(--qc-bg)] font-sans">
       <main className="mx-auto max-w-[1400px] px-4 pb-24 pt-8 sm:px-6 lg:px-10">
 
         {/* ── Masthead ─────────────────────────────────────────────── */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={{ fontSize: 12, letterSpacing: "0.1em", color: "var(--qc-ink-3)", fontWeight: 500 }}>
+        <div className="mb-10">
+          <div className="text-[12px] font-medium tracking-[0.1em] text-ink-3">
             {dateLabel}{entryNumber > 0 ? ` · ENTRY ${entryNumber}` : ""}
           </div>
-          <h1 style={{ fontFamily: "var(--qc-font-serif)", fontSize: "var(--qc-fz-30)", fontWeight: "var(--qc-w-medium)", fontStyle: "italic", letterSpacing: "var(--qc-track-display)", lineHeight: 1.15, margin: "12px 0 0", color: "var(--qc-ink)" }}>
+          <Display as="h1" italic className="mt-3 text-[30px] font-medium leading-[1.15]">
             Your investment diary
-          </h1>
-          <p style={{ fontSize: 17, lineHeight: 1.5, color: "var(--qc-ink-2)", marginTop: 20, maxWidth: 640 }}>
+          </Display>
+          <p className="mt-5 max-w-[640px] text-[17px] leading-[1.5] text-ink-2">
             {journalLoading ? (
               "Loading your entries…"
             ) : (
@@ -146,22 +147,22 @@ export default function DiaryPage() {
         </div>
 
         {/* ── YOUR ENTRIES ─────────────────────────────────────────── */}
-        <section style={{ marginBottom: 44 }}>
-          <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600, color: "var(--qc-ink-3)", marginBottom: 16 }}>
+        <section className="mb-11">
+          <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
             Your entries
           </div>
           {journalLoading ? (
-            <div style={{ display: "flex", gap: 16 }}>
+            <div className="flex gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} style={{ flex: "0 0 320px", height: 250, background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 12, opacity: 0.5 }} />
+                <div key={i} className="h-[250px] flex-[0_0_320px] rounded-xl border border-hair bg-card opacity-50" />
               ))}
             </div>
           ) : writtenEntries.length === 0 && pendingHoldings.length === 0 ? (
-            <div style={{ padding: "40px 20px", textAlign: "center", fontSize: 14, color: "var(--qc-ink-3)", border: "1px dashed var(--qc-hair)", borderRadius: 12 }}>
+            <div className="rounded-xl border border-dashed border-hair px-5 py-10 text-center text-[14px] text-ink-3">
               No entries yet. Write your first investment reason below.
             </div>
           ) : (
-            <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 8 }}>
+            <div className="flex gap-4 overflow-x-auto pb-2">
               {writtenEntries.map(item => (
                 <EntryCard key={item.symbol} item={item} onClick={openJournalModal} />
               ))}
@@ -173,9 +174,9 @@ export default function DiaryPage() {
         </section>
 
         {/* ── SINCE YOUR LAST ENTRY + EVERYTHING YOU OWN · KEEP WRITING ─ */}
-        <section className="grid grid-cols-1 gap-8 items-start lg:grid-cols-[1fr_minmax(440px,42%)]" style={{ marginBottom: 44 }}>
+        <section className="mb-11 grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_minmax(440px,42%)]">
           {/* Left — change feed, then everything you own */}
-          <div className="flex flex-col" style={{ gap: 44 }}>
+          <div className="flex flex-col gap-11">
             <ChangeFeed items={changes} onReRead={openJournalModal} />
 
             <HoldingsList
@@ -192,21 +193,21 @@ export default function DiaryPage() {
 
           {/* Right — keep writing + dimension card */}
           <div>
-            <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600, color: "var(--qc-ink-3)" }}>
+            <div className="mb-4 flex items-center justify-between">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
                 Keep writing{toGo > 0 ? ` · ${toGo} to go` : ""}
               </div>
               <StreakDots filled={summary.streakDays} />
             </div>
 
             {pendingLoading ? (
-              <div style={{ height: 360, background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 16, opacity: 0.5 }} />
+              <div className="h-[360px] rounded-2xl border border-hair bg-card opacity-50" />
             ) : featured ? (
               <DimensionCard holding={featured} onWrite={openJournalModal} />
             ) : (
-              <div style={{ padding: "48px 24px", textAlign: "center", background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 16 }}>
-                <div style={{ fontSize: 15, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 6 }}>All caught up ✓</div>
-                <div style={{ fontSize: 13, color: "var(--qc-ink-3)" }}>Every holding has a thesis entry.</div>
+              <div className="rounded-2xl border border-hair bg-card px-6 py-12 text-center">
+                <div className="mb-1.5 text-[15px] font-medium text-ink">All caught up ✓</div>
+                <div className="text-[13px] text-ink-3">Every holding has a thesis entry.</div>
               </div>
             )}
           </div>

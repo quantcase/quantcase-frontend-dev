@@ -182,14 +182,14 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
         <div className="flex items-center justify-between border-b border-[var(--qc-border-default)] px-5 py-3.5 shrink-0">
           <div>
             <h2 className="text-[15px] font-medium text-[var(--qc-ink)]">{skill.name}</h2>
-            <p className="text-[11px] text-[#888888] font-mono mt-0.5">{skill.slug}</p>
+            <p className="text-[11px] text-ink-3 font-mono mt-0.5">{skill.slug}</p>
           </div>
           <div className="flex items-center gap-2">
-            {saveError && <span className="text-[11px] text-red-600">{saveError}</span>}
+            {saveError && <span className="text-[11px] text-down">{saveError}</span>}
             <button
               onClick={handleSave}
               disabled={saving || !dirty}
-              className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40"
+              className="flex items-center gap-1.5 rounded-md bg-ink px-3 py-1.5 text-[12px] font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40"
             >
               {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
               Save
@@ -204,25 +204,25 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
         {isConfig && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
-                Key <span className="normal-case font-normal text-[10px] text-[#888888]">(immutable)</span>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                Key <span className="normal-case font-normal text-[10px] text-ink-3">(immutable)</span>
               </label>
               <input
                 type="text"
                 value={config.key}
                 disabled
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-[#F5F5F5] px-3 py-2 text-[13px] font-mono text-[#888888] outline-none cursor-not-allowed"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-secondary px-3 py-2 text-[13px] font-mono text-ink-3 outline-none cursor-not-allowed"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
                 Name
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => { setName(e.target.value); mark(); }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
               />
             </div>
           </div>
@@ -232,13 +232,13 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
         <div className={isConfig ? "grid grid-cols-2 gap-3" : "grid grid-cols-3 gap-3"}>
           {!isConfig && (
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => { setCategory(e.target.value as PluginCategory); mark(); }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
               >
                 {ALL_CATEGORIES.map((c) => (
                   <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
@@ -247,13 +247,13 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
             </div>
           )}
           <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
               Model
             </label>
             <select
               value={model ?? ""}
               onChange={(e) => { setModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
-              className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
             >
               {isConfig && (
                 <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.model)?.label ?? skill.model})</option>
@@ -264,7 +264,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
             </select>
           </div>
           <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
               Max Tokens
             </label>
             <input
@@ -276,7 +276,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                 else setMaxTokens(Number(e.target.value));
                 mark();
               }}
-              className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+              className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
             />
           </div>
         </div>
@@ -284,19 +284,19 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
         {/* Signal windows — bound to the historic_max_* fields when Historic is selected, the base max_* fields when Incremental is selected. Each mode saves to its own backend fields. */}
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">
               Signal Windows
             </span>
-            <span className={`rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${historic ? "bg-amber-50 text-amber-700" : "bg-zinc-100 text-zinc-500"}`}>
+            <span className={`rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${historic ? "bg-warn-soft text-warn" : "bg-secondary text-ink-2"}`}>
               editing {historic ? "historic" : "incremental"} window
             </span>
             {!historic && countsBaseMissing && (
-              <span className="text-[11px] text-amber-700">No base yet — run Historic first</span>
+              <span className="text-[11px] text-warn">No base yet — run Historic first</span>
             )}
           </div>
           <div className="grid grid-cols-4 gap-3">
             <div>
-              <label className="block text-[11px] text-[#888888] mb-1.5">Transcript Qtrs</label>
+              <label className="block text-[11px] text-ink-3 mb-1.5">Transcript Qtrs</label>
               <select
                 value={(historic ? historicMaxTranscriptQtrs : maxTranscriptQtrs) ?? ""}
                 onChange={(e) => {
@@ -304,7 +304,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   if (historic) setHistoricMaxTranscriptQtrs(v); else setMaxTranscriptQtrs(v);
                   mark();
                 }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
               >
                 {QTR_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -312,7 +312,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-[#888888] mb-1.5">PPT Qtrs</label>
+              <label className="block text-[11px] text-ink-3 mb-1.5">PPT Qtrs</label>
               <select
                 value={(historic ? historicMaxPptQtrs : maxPptQtrs) ?? ""}
                 onChange={(e) => {
@@ -320,7 +320,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   if (historic) setHistoricMaxPptQtrs(v); else setMaxPptQtrs(v);
                   mark();
                 }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
               >
                 {QTR_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -328,7 +328,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-[#888888] mb-1.5">Annual Report Yrs</label>
+              <label className="block text-[11px] text-ink-3 mb-1.5">Annual Report Yrs</label>
               <select
                 value={(historic ? historicMaxAnnualReportYears : maxAnnualReportYears) ?? ""}
                 onChange={(e) => {
@@ -336,7 +336,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   if (historic) setHistoricMaxAnnualReportYears(v); else setMaxAnnualReportYears(v);
                   mark();
                 }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
               >
                 {ANNUAL_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -344,7 +344,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-[#888888] mb-1.5">Market Data Months</label>
+              <label className="block text-[11px] text-ink-3 mb-1.5">Market Data Months</label>
               <select
                 value={(historic ? historicMaxMarketDataMonths : maxMarketDataMonths) ?? ""}
                 onChange={(e) => {
@@ -352,7 +352,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   if (historic) setHistoricMaxMarketDataMonths(v); else setMaxMarketDataMonths(v);
                   mark();
                 }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
               >
                 {MARKET_DATA_MONTHS_OPTIONS.map((o) => (
                   <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
@@ -366,7 +366,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
         {!historic && (
           <div className={isConfig ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-3"}>
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
                 Strip Base HTML
               </label>
               {isConfig ? (
@@ -380,7 +380,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                       key={String(o.value)}
                       onClick={() => { setStripHtml(o.value); mark(); }}
                       className={`flex-1 px-2 py-2 text-[12px] font-medium transition-colors ${
-                        stripHtml === o.value ? "bg-[#0F172B] text-white" : "bg-white text-[#888888] hover:text-[#0F172B]"
+                        stripHtml === o.value ? "bg-ink text-[var(--qc-on-dark)]" : "bg-card text-ink-3 hover:text-ink"
                       }`}
                     >
                       {o.label}
@@ -392,8 +392,8 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   onClick={() => { setStripHtml(!stripHtml); mark(); }}
                   className={`w-full rounded-md border px-3 py-2 text-[13px] text-left transition-colors ${
                     stripHtml
-                      ? "border-[#0F172B] bg-[#0F172B] text-white"
-                      : "border-[var(--qc-border-default)] bg-white text-[#888888]"
+                      ? "border-ink bg-ink text-[var(--qc-on-dark)]"
+                      : "border-[var(--qc-border-default)] bg-card text-ink-3"
                   }`}
                 >
                   {stripHtml ? "On — plain text" : "Off — raw HTML"}
@@ -402,7 +402,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
             </div>
             {!isConfig && (
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
                   Max Base Analyses
                 </label>
                 <input
@@ -410,7 +410,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   min={0}
                   value={maxBaseAnalyses}
                   onChange={(e) => { setMaxBaseAnalyses(Number(e.target.value)); mark(); }}
-                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
                 />
               </div>
             )}
@@ -422,7 +422,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
           {/* Transcript */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888]">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
                 Transcript Signal Types
               </label>
               <button
@@ -431,7 +431,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   setTranscriptSignalTypes(allSelected ? [] : [...ALL_TRANSCRIPT_SIGNAL_TYPES]);
                   mark();
                 }}
-                className="text-[10px] font-medium text-[#888888] hover:text-[#0F172B] transition-colors"
+                className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
               >
                 {ALL_TRANSCRIPT_SIGNAL_TYPES.every((t) => transcriptSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
               </button>
@@ -446,13 +446,13 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                     onClick={() => toggleTranscriptSignal(type)}
                     className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
                       active
-                        ? "bg-[#0F172B] text-white border-[#0F172B]"
-                        : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:border-[#0F172B] hover:text-[#0F172B]"
+                        ? "bg-ink text-[var(--qc-on-dark)] border-ink"
+                        : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
                     }`}
                   >
                     {TRANSCRIPT_SIGNAL_TYPE_LABELS[type]}
                     {count !== undefined && (
-                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-white" : "bg-[#E2E2E2] text-[#888888]"}`}>
+                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-[var(--qc-on-dark)]" : "bg-secondary text-ink-3"}`}>
                         {count.toLocaleString()}
                       </span>
                     )}
@@ -465,7 +465,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
           {/* PPT */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888]">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
                 PPT Signal Types
               </label>
               <button
@@ -474,7 +474,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   setPptSignalTypes(allSelected ? [] : [...ALL_PPT_SIGNAL_TYPES]);
                   mark();
                 }}
-                className="text-[10px] font-medium text-[#888888] hover:text-[#0F172B] transition-colors"
+                className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
               >
                 {ALL_PPT_SIGNAL_TYPES.every((t) => pptSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
               </button>
@@ -489,13 +489,13 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                     onClick={() => togglePptSignal(type)}
                     className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
                       active
-                        ? "bg-[#0F172B] text-white border-[#0F172B]"
-                        : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:border-[#0F172B] hover:text-[#0F172B]"
+                        ? "bg-ink text-[var(--qc-on-dark)] border-ink"
+                        : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
                     }`}
                   >
                     {PPT_SIGNAL_TYPE_LABELS[type]}
                     {count !== undefined && (
-                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-white" : "bg-[#E2E2E2] text-[#888888]"}`}>
+                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-[var(--qc-on-dark)]" : "bg-secondary text-ink-3"}`}>
                         {count.toLocaleString()}
                       </span>
                     )}
@@ -508,7 +508,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
           {/* Annual Report */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888]">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
                 Annual Report Signal Types
               </label>
               <button
@@ -517,7 +517,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   setAnnualReportSignalTypes(allSelected ? [] : [...ALL_ANNUAL_REPORT_SIGNAL_TYPES]);
                   mark();
                 }}
-                className="text-[10px] font-medium text-[#888888] hover:text-[#0F172B] transition-colors"
+                className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
               >
                 {ALL_ANNUAL_REPORT_SIGNAL_TYPES.every((t) => annualReportSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
               </button>
@@ -532,13 +532,13 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                     onClick={() => toggleAnnualReportSignal(type)}
                     className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
                       active
-                        ? "bg-[#0F172B] text-white border-[#0F172B]"
-                        : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:border-[#0F172B] hover:text-[#0F172B]"
+                        ? "bg-ink text-[var(--qc-on-dark)] border-ink"
+                        : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
                     }`}
                   >
                     {ANNUAL_REPORT_SIGNAL_TYPE_LABELS[type]}
                     {count !== undefined && (
-                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-white" : "bg-[#E2E2E2] text-[#888888]"}`}>
+                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-[var(--qc-on-dark)]" : "bg-secondary text-ink-3"}`}>
                         {count.toLocaleString()}
                       </span>
                     )}
@@ -551,7 +551,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
           {/* Market Data */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888]">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
                 Market Data Signal Types
               </label>
               <button
@@ -560,7 +560,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   setMarketDataSignalTypes(allSelected ? [] : [...ALL_MARKET_DATA_SIGNAL_TYPES]);
                   mark();
                 }}
-                className="text-[10px] font-medium text-[#888888] hover:text-[#0F172B] transition-colors"
+                className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
               >
                 {ALL_MARKET_DATA_SIGNAL_TYPES.every((t) => marketDataSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
               </button>
@@ -574,8 +574,8 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                     onClick={() => toggleMarketDataSignal(type)}
                     className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
                       active
-                        ? "bg-[#0F172B] text-white border-[#0F172B]"
-                        : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:border-[#0F172B] hover:text-[#0F172B]"
+                        ? "bg-ink text-[var(--qc-on-dark)] border-ink"
+                        : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
                     }`}
                   >
                     {MARKET_DATA_SIGNAL_TYPE_LABELS[type]}
@@ -588,14 +588,14 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
 
         {/* Prompt */}
         <div className="flex-1">
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5">
+          <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
             Skill Prompt
           </label>
           <textarea
             value={prompt}
             onChange={(e) => { setPrompt(e.target.value); mark(); }}
             rows={18}
-            className="w-full rounded-md border border-[var(--qc-border-default)] bg-white px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:ring-1 focus:ring-[var(--qc-ink)] resize-none"
+            className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:ring-1 focus:ring-[var(--qc-ink)] resize-none"
             placeholder="Enter the instructional prompt for this skill…"
           />
         </div>

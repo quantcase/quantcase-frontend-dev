@@ -1,9 +1,9 @@
 interface SegmentedBarProps {
   /** Fill percentage 0–100 */
   pct: number;
-  /** Tailwind bg class for filled segments, e.g. "bg-emerald-400". Ignored if hexColor is set. */
+  /** Tailwind bg class for filled segments, e.g. "bg-up". Ignored if hexColor is set. */
   color?: string;
-  /** Hex color string for filled segments, e.g. "#f59e0b" */
+  /** Hex color string for filled segments (arbitrary runtime value) */
   hexColor?: string;
   /** Total number of tick segments (default 40) */
   segments?: number;
@@ -18,7 +18,7 @@ export function SegmentedBar({ pct, color, hexColor, segments = 40, height = 22 
       {Array.from({ length: segments }).map((_, i) => (
         <div
           key={i}
-          className={`flex-1 rounded-[1px] ${i < filled && !hexColor ? (color ?? "") : i >= filled ? "bg-zinc-200 dark:bg-zinc-700" : ""}`}
+          className={`flex-1 rounded-[1px] ${i < filled && !hexColor ? (color ?? "") : i >= filled ? "bg-secondary" : ""}`}
           style={{
             height,
             ...(i < filled && hexColor ? { backgroundColor: hexColor } : {}),

@@ -20,8 +20,8 @@ export interface MeResponse {
   email?: string | null;
   display_name?: string | null;
   display_picture?: string | null;
-  accountType?: "manager" | "investor" | null;
-  account_type?: "manager" | "investor" | null;
+  accountType?: "manager" | "investor" | "admin" | null;
+  account_type?: "manager" | "investor" | "admin" | null;
   onboarding_completed: boolean;
   onboarding_step: number;
   subscription: Subscription | null;
@@ -100,7 +100,7 @@ export interface RegisterResponse {
   user: {
     id: string;
     email: string;
-    accountType: "manager" | "investor";
+    accountType: "manager" | "investor" | "admin";
   };
 }
 
@@ -116,7 +116,7 @@ export interface GoogleAuthResponse {
   user: {
     id: string;
     email: string;
-    accountType: "manager" | "investor";
+    accountType: "manager" | "investor" | "admin";
     displayName?: string | null;
     displayPicture?: string | null;
   };

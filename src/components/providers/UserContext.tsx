@@ -3,7 +3,20 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import type { Subscription, MeResponse, SmallcaseConnection } from "@/types/auth";
 
-export type AccountType = "manager" | "investor" | null;
+export type AccountType = "manager" | "investor" | "admin" | null;
+
+/**
+ * Whether an account follows the investor UX flow (investor dashboard + sidebar).
+ * "admin" mirrors the investor flow while retaining privileged access elsewhere.
+ */
+export function usesInvestorFlow(accountType: AccountType): boolean {
+  return accountType === "investor" || accountType === "admin";
+}
+
+/** Whether an account has privileged (admin-only) nav items and routes. */
+export function hasAdminPrivileges(accountType: AccountType): boolean {
+  return accountType === "manager" || accountType === "admin";
+}
 
 interface UserContextValue {
   accountType: AccountType;
@@ -83,7 +96,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [smallcase, setSmallcase] = useState<SmallcaseConnection | null>(null);
 
   const isAccessBlocked = subscription?.is_access_blocked ?? false;
-  const isAdmin = accountType === "manager";
+  const isAdmin = hasAdminPrivileges(accountType);
 
   const openPaywall = useCallback(() => setPaywallOpen(true), []);
   const closePaywall = useCallback(() => setPaywallOpen(false), []);

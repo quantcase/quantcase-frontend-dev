@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BACKEND_URL } from "@/lib/constants";
 import { GoogleSignInButton } from "@/components/molecules/google-signin-button";
+import { usesInvestorFlow, type AccountType } from "@/components/providers/UserContext";
 import type { GoogleAuthResponse } from "@/types/auth";
 
 function FormField({
@@ -85,10 +86,10 @@ export function SignInForm() {
         return;
       }
 
-      router.push(resolvedType === "investor" ? "/investor/dashboard" : "/dashboard");
+      router.push(usesInvestorFlow((resolvedType ?? null) as AccountType) ? "/investor/dashboard" : "/dashboard");
     } else {
       // Fallback: route based on signin response accountType
-      router.push(acctType === "investor" ? "/investor/dashboard" : "/dashboard");
+      router.push(usesInvestorFlow((acctType ?? null) as AccountType) ? "/investor/dashboard" : "/dashboard");
     }
   }
 

@@ -21,7 +21,7 @@ export function formatINR(value: number | null | undefined): string {
     return `${sign}₹${Math.round(cr).toLocaleString("en-IN")} Cr`;
   }
   if (cr >= 1) {
-    return `${sign}₹${cr.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} Cr`;
+    return `${sign}₹${cr.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr`;
   }
   // Below 1 Cr — show as lakhs
   const lakh = abs / 1e5;

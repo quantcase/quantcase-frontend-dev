@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { BACKEND_URL } from "@/lib/constants";
-import { useUser } from "@/components/providers/UserContext";
+import { useUser, usesInvestorFlow, hasAdminPrivileges, type AccountType } from "@/components/providers/UserContext";
 import type { MeResponse } from "@/types/auth";
 
 const PUBLIC_PATHS = ["/signin", "/", "/register"];
@@ -14,8 +14,8 @@ function isAdminPath(pathname: string) {
   return ADMIN_PATH_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
-function homePathFor(accountType: string | null) {
-  return accountType === "investor" ? "/investor/dashboard" : "/dashboard";
+function homePathFor(accountType: AccountType) {
+  return usesInvestorFlow(accountType) ? "/investor/dashboard" : "/dashboard";
 }
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -39,15 +39,15 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Synchronous guard: redirect investor from manager dashboard immediately
-    const cachedType = localStorage.getItem("qc_account_type");
-    if (cachedType === "investor" && pathname === "/dashboard") {
+    // Synchronous guard: redirect investor-flow accounts from manager dashboard immediately
+    const cachedType = localStorage.getItem("qc_account_type") as AccountType;
+    if (usesInvestorFlow(cachedType) && pathname === "/dashboard") {
       router.replace("/investor/dashboard");
       return;
     }
 
-    // Synchronous guard: block admin-only routes for non-manager accounts
-    if (isAdminPath(pathname) && cachedType && cachedType !== "manager") {
+    // Synchronous guard: block admin-only routes for accounts without admin privileges
+    if (isAdminPath(pathname) && cachedType && !hasAdminPrivileges(cachedType)) {
       router.replace(homePathFor(cachedType));
       return;
     }
@@ -83,16 +83,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        const acctType = data.accountType ?? data.account_type ?? null;
+        const acctType: AccountType = data.accountType ?? data.account_type ?? null;
 
-        // Authoritative guard: block admin-only routes for non-manager accounts
-        if (isAdminPath(pathname) && acctType !== "manager") {
+        // Authoritative guard: block admin-only routes for accounts without admin privileges
+        if (isAdminPath(pathname) && !hasAdminPrivileges(acctType)) {
           router.replace(homePathFor(acctType));
           return;
         }
 
-        // Investor on manager dashboard
-        if (acctType === "investor" && pathname === "/dashboard") {
+        // Investor-flow account on manager dashboard
+        if (usesInvestorFlow(acctType) && pathname === "/dashboard") {
           router.replace("/investor/dashboard");
         }
       })

@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { useUser } from "@/components/providers/UserContext";
+import { useUser, usesInvestorFlow } from "@/components/providers/UserContext";
 import { UserMenu } from "@/components/molecules/user-menu";
 
 const managerNavItems = [
@@ -39,6 +39,19 @@ const investorNavItems = [
   { label: "Error Reports", href: "/admin/error-reports", icon: Flag,    isActive: (p: string) => p.startsWith("/admin/error-reports"), adminOnly: true },
 ];
 
+// Admin accounts use the investor dashboard flow (Home/Diary/Settings) plus the full admin toolset.
+const adminNavItems = [
+  { label: "Home",        href: "/investor/dashboard",  icon: Home,      isActive: (p: string) => p === "/investor/dashboard" },
+  { label: "Diary",       href: "/diary",                icon: BarChart2, isActive: (p: string) => p.startsWith("/diary") },
+  { label: "Settings",    href: "/settings",             icon: Settings,  isActive: (p: string) => p.startsWith("/settings") },
+  { label: "HTML Skills", href: "/admin/html-skills",    icon: Code2,     isActive: (p: string) => p.startsWith("/admin/html-skills"), adminOnly: true },
+  { label: "Post-HTML Skills", href: "/admin/post-html-skills", icon: Sparkles, isActive: (p: string) => p.startsWith("/admin/post-html-skills"), adminOnly: true },
+  { label: "Coverage",   href: "/admin/coverage",       icon: Activity,  isActive: (p: string) => p.startsWith("/admin/coverage"), adminOnly: true },
+  { label: "Beta Invites", href: "/admin/invites",      icon: Mail,      isActive: (p: string) => p.startsWith("/admin/invites"), adminOnly: true },
+  { label: "Admin",      href: "/admin/pipelines",    icon: Shield,   isActive: (p: string) => p.startsWith("/admin") && !p.startsWith("/admin/html-skills") && !p.startsWith("/admin/post-html-skills") && !p.startsWith("/admin/coverage") && !p.startsWith("/admin/invites") && !p.startsWith("/admin/error-reports"), adminOnly: true },
+  { label: "Error Reports", href: "/admin/error-reports", icon: Flag,    isActive: (p: string) => p.startsWith("/admin/error-reports"), adminOnly: true },
+];
+
 export function AppSidebar() {
   const pathname = usePathname();
   const { accountType, subscription, openPaywall, isAdmin } = useUser();
@@ -46,7 +59,13 @@ export function AppSidebar() {
   React.useEffect(() => { setMounted(true); }, []);
 
   if (pathname === "/signin") return null;
-  const baseNavItems = mounted && accountType === "investor" ? investorNavItems : managerNavItems;
+  const baseNavItems = mounted
+    ? accountType === "admin"
+      ? adminNavItems
+      : usesInvestorFlow(accountType)
+        ? investorNavItems
+        : managerNavItems
+    : managerNavItems;
   const navItems = baseNavItems.filter((item) => !item.adminOnly || (mounted && isAdmin));
 
   const showTrialDot = subscription?.status === "trialing" && (subscription.days_remaining ?? 0) > 0;

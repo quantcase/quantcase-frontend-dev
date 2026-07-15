@@ -1,8 +1,8 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, RefreshCw, Loader2 } from "lucide-react";
+import { ArrowLeft, RefreshCw, Loader2, Flame } from "lucide-react";
 
 import { Table, TableHeader, TableBody, TableHead, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { TickerRow } from "./_components/ticker-row";
 import { AddTickerInput } from "./_components/add-ticker-input";
 import { IdeasEmptyState } from "./_components/ideas-empty-state";
 import { TickerEntriesPanel } from "@/components/journal/ticker-entries-panel";
+import { JournalCompletionWizard } from "@/components/journal/journal-completion-wizard";
 
 import { useJournalDetail } from "@/hooks/useJournalDetail";
 import { useJournalMutations } from "@/hooks/useJournalMutations";
@@ -25,13 +26,15 @@ export default function JournalDetailPage({ params }: { params: Promise<{ journa
   const { addTickers, syncHoldings, mutating } = useJournalMutations();
 
   const [openTicker, setOpenTicker] = useState<JournalTicker | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
 
   const journal = data?.journal;
-  const tickers = data?.tickers ?? [];
+  const tickers = useMemo(() => data?.tickers ?? [], [data]);
   const isHoldings = journal?.kind === "holdings";
-  const pendingCount = tickers.filter(isPending).length;
+  const pendingTickers = useMemo(() => tickers.filter(isPending), [tickers]);
+  const pendingCount = pendingTickers.length;
 
   function handleAdd(ticker: string) {
     setAddError(null);
@@ -68,6 +71,12 @@ export default function JournalDetailPage({ params }: { params: Promise<{ journa
           </div>
 
           <div className="flex items-center gap-2">
+            {pendingCount > 0 && (
+              <Button variant="default" size="sm" onClick={() => setWizardOpen(true)}>
+                <Flame className="size-3.5" />
+                Complete journal
+              </Button>
+            )}
             {isHoldings && (
               <Button variant="pill" size="sm" onClick={handleSync} disabled={syncing}>
                 {syncing ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
@@ -139,6 +148,16 @@ export default function JournalDetailPage({ params }: { params: Promise<{ journa
           market={openTicker.market}
           name={null}
           onClose={() => setOpenTicker(null)}
+          onChanged={refetch}
+        />
+      )}
+
+      {/* Multi-stock "complete your journal" wizard drawer */}
+      {wizardOpen && pendingTickers.length > 0 && (
+        <JournalCompletionWizard
+          journalId={journalId}
+          tickers={pendingTickers}
+          onClose={() => setWizardOpen(false)}
           onChanged={refetch}
         />
       )}

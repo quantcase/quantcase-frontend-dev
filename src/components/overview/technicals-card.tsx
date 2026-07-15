@@ -337,9 +337,9 @@ function PriceLevelsBar({
         >
           <defs>
             <linearGradient id="plBarGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%"   stopColor="#D9E8B3" />
-              <stop offset="50%"  stopColor="#F3E4C3" />
-              <stop offset="100%" stopColor="#F0D3C9" />
+              <stop offset="0%"   stopColor="var(--qc-up-soft)" />
+              <stop offset="50%"  stopColor="var(--qc-warn-soft)" />
+              <stop offset="100%" stopColor="var(--qc-down-soft)" />
             </linearGradient>
           </defs>
 
@@ -387,7 +387,7 @@ function PriceLevelsBar({
                 {/* Dot on bar */}
                 <circle cx={dotX} cy={BAR_Y} r={r} fill={ds.bg} stroke={ds.border} strokeWidth={isCmp ? 2.5 : 1.8} />
                 {isCmp && (
-                  <circle cx={dotX} cy={BAR_Y} r={r + 3} fill="none" stroke="#0F172B" strokeWidth="1" opacity="0.18" />
+                  <circle cx={dotX} cy={BAR_Y} r={r + 3} fill="none" stroke="var(--qc-ink)" strokeWidth="1" opacity="0.18" />
                 )}
 
                 {/* Label box at fixed row, centred on labelX */}
@@ -405,7 +405,7 @@ function PriceLevelsBar({
                       fontWeight: isCmp ? "var(--qc-w-bold)" : "var(--qc-w-medium)",
                       fontVariantNumeric: "tabular-nums",
                       whiteSpace: "nowrap",
-                      background: isCmp ? "#0F172B" : "transparent",
+                      background: isCmp ? "var(--qc-ink)" : "transparent",
                       color: isCmp ? "#fff" : "var(--qc-ink)",
                       padding: isCmp ? "1px 6px" : "0",
                       borderRadius: isCmp ? 4 : 0,
@@ -451,7 +451,7 @@ function PriceLevelsBar({
         }}
       >
         {[
-          { dot: "#0F172B",           label: "CMP" },
+          { dot: "var(--qc-ink)",     label: "CMP" },
           { dot: "var(--qc-blue)",    label: "SMA 20 / 50 / 100 / 200" },
           { dot: "var(--qc-up)",      label: "Support" },
           { dot: "var(--qc-down)",    label: "Resistance / ATH" },

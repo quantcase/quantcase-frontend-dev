@@ -18,6 +18,7 @@ import {
   type SeriesMarker,
   type Time,
 } from "lightweight-charts";
+import { readQC } from "@/lib/chart-tokens";
 import type { PriceBar, IndicatorPoint, PriceIndicators } from "@/hooks/usePrices";
 import type { EngineTab } from "./TechnicalsRuleEngine";
 import type {
@@ -60,41 +61,57 @@ interface OscillatorConfig {
   height: number;
 }
 
-// Design token hex values — resolved for purple theme (mirrored from --qc-* CSS vars for chart API use)
-const QC_HEADING = "#1A0A2E";
-const QC_MUTED   = "#7C6998";
-const QC_UP      = "#15803D";
-const QC_DOWN    = "#B91C1C";
-const QC_BORDER  = "#E4DCF0";
-const QC_GRID    = "#EDE8F5";
+/**
+ * Resolve chart colors from `--qc-*` tokens at draw time. lightweight-charts
+ * renders to `<canvas>`, which cannot resolve `var(--qc-*)`, so we read the
+ * computed token value via `readQC` (fallbacks mirror the purple theme). Called
+ * client-side inside the chart-building effects so a token change cascades.
+ */
+function resolveChartColors() {
+  return {
+    heading: readQC("--qc-ink", "#1A0A2E"),
+    muted:   readQC("--qc-ink-3", "#7C6998"),
+    up:      readQC("--qc-up", "#15803D"),
+    down:    readQC("--qc-down", "#B91C1C"),
+    border:  readQC("--qc-hair", "#E4DCF0"),
+    grid:    readQC("--qc-hair", "#EDE8F5"),
+    card:    readQC("--qc-card", "#FFFFFF"),
+    smaAccent: readQC("--qc-brand-accent", "#9333EA"),
+  };
+}
+type ChartColors = ReturnType<typeof resolveChartColors>;
 
-const OVERLAY_CONFIGS: Record<ChartMode, LineConfig[]> = {
-  DEFAULT: [
-    { key: "sma50",  color: QC_DOWN,    lineWidth: 1, title: "SMA 50" },
-    { key: "sma200", color: QC_HEADING, lineWidth: 2, title: "SMA 200" },
-  ],
-  STRUCTURE: [],
-  TREND: [
-    { key: "sma20",  color: QC_MUTED,   lineWidth: 1, title: "SMA 20" },
-    { key: "sma50",  color: "#9333EA",  lineWidth: 1, title: "SMA 50" },
-    { key: "sma100", color: "#6B21A8",  lineWidth: 1, title: "SMA 100" },
-    { key: "sma200", color: QC_HEADING, lineWidth: 2, title: "SMA 200" },
-  ],
-  TIMING: [
-    { key: "bbUpper",  color: QC_MUTED,   lineWidth: 1, title: "BB Upper" },
-    { key: "bbMiddle", color: QC_HEADING, lineWidth: 1, title: "BB Mid" },
-    { key: "bbLower",  color: QC_MUTED,   lineWidth: 1, title: "BB Lower" },
-  ],
-  "RELATIVE STRENGTH": [],
-};
+function buildOverlayConfigs(C: ChartColors): Record<ChartMode, LineConfig[]> {
+  return {
+    DEFAULT: [
+      { key: "sma50",  color: C.down,    lineWidth: 1, title: "SMA 50" },
+      { key: "sma200", color: C.heading, lineWidth: 2, title: "SMA 200" },
+    ],
+    STRUCTURE: [],
+    TREND: [
+      { key: "sma20",  color: C.muted,      lineWidth: 1, title: "SMA 20" },
+      { key: "sma50",  color: C.smaAccent,  lineWidth: 1, title: "SMA 50" },
+      { key: "sma100", color: "#6B21A8",    lineWidth: 1, title: "SMA 100" }, // darker SMA shade — decorative, no token
+      { key: "sma200", color: C.heading,    lineWidth: 2, title: "SMA 200" },
+    ],
+    TIMING: [
+      { key: "bbUpper",  color: C.muted,   lineWidth: 1, title: "BB Upper" },
+      { key: "bbMiddle", color: C.heading, lineWidth: 1, title: "BB Mid" },
+      { key: "bbLower",  color: C.muted,   lineWidth: 1, title: "BB Lower" },
+    ],
+    "RELATIVE STRENGTH": [],
+  };
+}
 
-const OSCILLATOR_CONFIGS: Record<ChartMode, OscillatorConfig | null> = {
-  DEFAULT:   { key: "rsi14", color: QC_HEADING, title: "RSI (14)", height: 80 },
-  STRUCTURE: { key: "cmf14", color: QC_HEADING, title: "CMF (14)", height: 80 },
-  TREND:     { key: "adx14", color: QC_HEADING, title: "ADX (14)", height: 80 },
-  TIMING:    { key: "bbWidth" as keyof PriceIndicators, color: QC_HEADING, title: "BB Width", height: 80 },
-  "RELATIVE STRENGTH": null,
-};
+function buildOscillatorConfigs(C: ChartColors): Record<ChartMode, OscillatorConfig | null> {
+  return {
+    DEFAULT:   { key: "rsi14", color: C.heading, title: "RSI (14)", height: 80 },
+    STRUCTURE: { key: "cmf14", color: C.heading, title: "CMF (14)", height: 80 },
+    TREND:     { key: "adx14", color: C.heading, title: "ADX (14)", height: 80 },
+    TIMING:    { key: "bbWidth" as keyof PriceIndicators, color: C.heading, title: "BB Width", height: 80 },
+    "RELATIVE STRENGTH": null,
+  };
+}
 
 // RSI divergence detection
 interface DivergenceMarker {
@@ -200,31 +217,33 @@ export function CandlestickChart({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const C = resolveChartColors();
+
     const chart = createChart(containerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: "#FFFFFF" }, // --qc-card
-        textColor: QC_MUTED,
+        background: { type: ColorType.Solid, color: C.card },
+        textColor: C.muted,
         fontFamily: "IBM Plex Mono, monospace",
         fontSize: 11,
       },
       grid: {
-        vertLines: { color: QC_GRID },
-        horzLines: { color: QC_GRID },
+        vertLines: { color: C.grid },
+        horzLines: { color: C.grid },
       },
       crosshair: { mode: CrosshairMode.Normal },
-      rightPriceScale: { borderColor: QC_BORDER },
-      timeScale: { borderColor: QC_BORDER, timeVisible: true },
+      rightPriceScale: { borderColor: C.border },
+      timeScale: { borderColor: C.border, timeVisible: true },
       width: containerRef.current.clientWidth,
       height: 380,
     });
 
     const candleSeries = chart.addSeries(CandlestickSeries, {
-      upColor: QC_UP,
-      downColor: QC_DOWN,
-      borderUpColor: QC_UP,
-      borderDownColor: QC_DOWN,
-      wickUpColor: QC_UP,
-      wickDownColor: QC_DOWN,
+      upColor: C.up,
+      downColor: C.down,
+      borderUpColor: C.up,
+      borderDownColor: C.down,
+      wickUpColor: C.up,
+      wickDownColor: C.down,
     });
 
     // Volume histogram overlay on the main pane
@@ -276,28 +295,28 @@ export function CandlestickChart({
         const d = param.seriesData.get(series) as { value: number } | undefined;
         if (!d) return;
         const opts = series.options() as { color?: string };
-        const color = opts.color ?? QC_MUTED;
-        const row = `<span style="color:${QC_MUTED}">${title}</span><span style="color:${color};font-weight:500">${d.value.toFixed(2)}</span>`;
+        const color = opts.color ?? C.muted;
+        const row = `<span style="color:${C.muted}">${title}</span><span style="color:${color};font-weight:500">${d.value.toFixed(2)}</span>`;
         if (isOsc) oscRows.push(row); else mainRows.push(row);
       });
 
       // Volume tooltip
       const volData = param.seriesData.get(volumeSeries) as { value: number } | undefined;
       const volRow = volData
-        ? `<span style="color:${QC_MUTED}">Vol</span><span style="color:${QC_HEADING};font-weight:500">${formatVolume(volData.value)}</span>`
+        ? `<span style="color:${C.muted}">Vol</span><span style="color:${C.heading};font-weight:500">${formatVolume(volData.value)}</span>`
         : "";
 
       const divider = oscRows.length
-        ? `<div style="border-top:1px solid ${QC_BORDER};margin:5px 0"></div>`
+        ? `<div style="border-top:1px solid ${C.border};margin:5px 0"></div>`
         : "";
 
       tooltip.innerHTML = `
-        <div style="font-size:10px;font-weight:600;color:${QC_HEADING};margin-bottom:5px;font-family:IBM Plex Mono,monospace;text-transform:uppercase;letter-spacing:0.12em">${dateStr}</div>
+        <div style="font-size:10px;font-weight:600;color:${C.heading};margin-bottom:5px;font-family:IBM Plex Mono,monospace;text-transform:uppercase;letter-spacing:0.12em">${dateStr}</div>
         <div style="display:grid;grid-template-columns:auto auto;column-gap:12px;row-gap:3px;font-size:11px">
-          <span style="color:${QC_MUTED}">O</span><span style="color:${QC_HEADING};font-weight:500">${data.open.toFixed(2)}</span>
-          <span style="color:${QC_MUTED}">H</span><span style="color:${QC_UP};font-weight:500">${data.high.toFixed(2)}</span>
-          <span style="color:${QC_MUTED}">L</span><span style="color:${QC_DOWN};font-weight:500">${data.low.toFixed(2)}</span>
-          <span style="color:${QC_MUTED}">C</span><span style="color:${QC_HEADING};font-weight:500">${data.close.toFixed(2)}</span>
+          <span style="color:${C.muted}">O</span><span style="color:${C.heading};font-weight:500">${data.open.toFixed(2)}</span>
+          <span style="color:${C.muted}">H</span><span style="color:${C.up};font-weight:500">${data.high.toFixed(2)}</span>
+          <span style="color:${C.muted}">L</span><span style="color:${C.down};font-weight:500">${data.low.toFixed(2)}</span>
+          <span style="color:${C.muted}">C</span><span style="color:${C.heading};font-weight:500">${data.close.toFixed(2)}</span>
           ${volRow}
           ${mainRows.join("")}
         </div>
@@ -322,6 +341,7 @@ export function CandlestickChart({
   // Load candle + volume data
   useEffect(() => {
     if (!candleSeriesRef.current || !volumeSeriesRef.current || prices.length === 0) return;
+    const C = resolveChartColors();
     const sorted = [...prices]
       .sort((a, b) => a.date.localeCompare(b.date))
       .filter((p, i, arr) => i === 0 || p.date !== arr[i - 1].date);
@@ -340,18 +360,18 @@ export function CandlestickChart({
       const chg = last.close - last.open;
       const chgPct = last.open !== 0 ? (chg / last.open) * 100 : 0;
       const sign = chg >= 0 ? "+" : "";
-      const chgColor = chg >= 0 ? QC_UP : QC_DOWN;
+      const chgColor = chg >= 0 ? C.up : C.down;
       const tiles = [
-        { label: "O", value: last.open.toFixed(2), color: QC_HEADING },
-        { label: "H", value: last.high.toFixed(2), color: QC_UP },
-        { label: "L", value: last.low.toFixed(2), color: QC_DOWN },
-        { label: "C", value: last.close.toFixed(2), color: QC_HEADING },
+        { label: "O", value: last.open.toFixed(2), color: C.heading },
+        { label: "H", value: last.high.toFixed(2), color: C.up },
+        { label: "L", value: last.low.toFixed(2), color: C.down },
+        { label: "C", value: last.close.toFixed(2), color: C.heading },
         { label: "CHG", value: `${sign}${chg.toFixed(2)}`, color: chgColor },
         { label: "CHG%", value: `${sign}${chgPct.toFixed(2)}%`, color: chgColor },
       ];
       ohlcBarRef.current.innerHTML = tiles.map((t, i) =>
-        `<div style="display:flex;flex-direction:column;align-items:flex-start;${i < tiles.length - 1 ? `padding-right:8px;border-right:1px solid ${QC_BORDER};margin-right:2px` : ""}">
-          <span style="font-size:9px;color:${QC_MUTED};font-weight:500;text-transform:uppercase;letter-spacing:0.08em;line-height:1.2">${t.label}</span>
+        `<div style="display:flex;flex-direction:column;align-items:flex-start;${i < tiles.length - 1 ? `padding-right:8px;border-right:1px solid ${C.border};margin-right:2px` : ""}">
+          <span style="font-size:9px;color:${C.muted};font-weight:500;text-transform:uppercase;letter-spacing:0.08em;line-height:1.2">${t.label}</span>
           <span style="font-size:11px;color:${t.color};font-weight:600;line-height:1.4;white-space:nowrap">${t.value}</span>
         </div>`
       ).join("");
@@ -396,6 +416,8 @@ export function CandlestickChart({
 
     if (prices.length === 0) return;
 
+    const C = resolveChartColors();
+
     const sorted = [...prices]
       .sort((a, b) => a.date.localeCompare(b.date))
       .filter((p, i, arr) => i === 0 || p.date !== arr[i - 1].date);
@@ -406,7 +428,7 @@ export function CandlestickChart({
     for (const level of supportResistance.static.support.slice(0, 2)) {
       if (!level) continue;
       const s = chart.addSeries(LineSeries, {
-        color: QC_UP,
+        color: C.up,
         lineWidth: 1,
         lineStyle: 0, // Solid
         priceLineVisible: false,
@@ -425,7 +447,7 @@ export function CandlestickChart({
     for (const level of supportResistance.static.resistance.slice(0, 2)) {
       if (!level) continue;
       const s = chart.addSeries(LineSeries, {
-        color: QC_DOWN,
+        color: C.down,
         lineWidth: 1,
         lineStyle: 0,
         priceLineVisible: false,
@@ -445,6 +467,10 @@ export function CandlestickChart({
   useEffect(() => {
     const chart = chartRef.current;
     if (!chart) return;
+
+    const C = resolveChartColors();
+    const OVERLAY_CONFIGS = buildOverlayConfigs(C);
+    const OSCILLATOR_CONFIGS = buildOscillatorConfigs(C);
 
     // Remove all existing overlay series
     overlayMapRef.current.forEach(({ series }) => {
@@ -527,14 +553,14 @@ export function CandlestickChart({
         });
         return result.sort((a, b) => String(a.time).localeCompare(String(b.time)));
       })();
-      addOscPane(1, bbwData, QC_HEADING, "BB Width", "BB Width");
+      addOscPane(1, bbwData, C.heading, "BB Width", "BB Width");
 
       const rsiData = toLineData(indicators.rsi14);
-      const rsiSeries = addOscPane(2, rsiData, QC_HEADING, "RSI (14)", "RSI (14)");
+      const rsiSeries = addOscPane(2, rsiData, C.heading, "RSI (14)", "RSI (14)");
       if (rsiSeries && firstDate && lastDate) {
         for (const [refVal, label] of [[30, "__rsi_30"], [70, "__rsi_70"]] as const) {
           const refLine = chart.addSeries(LineSeries, {
-            color: QC_MUTED, lineWidth: 1, lineStyle: 2,
+            color: C.muted, lineWidth: 1, lineStyle: 2,
             priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
           }, 2);
           refLine.setData([{ time: firstDate, value: refVal }, { time: lastDate, value: refVal }]);
@@ -546,7 +572,7 @@ export function CandlestickChart({
             time: d.time,
             position: d.type === "bear" ? "aboveBar" as const : "belowBar" as const,
             shape: "square" as const,
-            color: d.type === "bear" ? QC_DOWN : QC_UP,
+            color: d.type === "bear" ? C.down : C.up,
             text: d.type === "bear" ? "Bear" : "Bull",
             size: 0.5,
           }));
@@ -562,7 +588,7 @@ export function CandlestickChart({
         if (s && firstDate && lastDate) {
           if (oscCfg.key === "cmf14") {
             const zeroLine = chart.addSeries(LineSeries, {
-              color: QC_MUTED, lineWidth: 1, lineStyle: 0,
+              color: C.muted, lineWidth: 1, lineStyle: 0,
               priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
             }, 1);
             zeroLine.setData([{ time: firstDate, value: 0 }, { time: lastDate, value: 0 }]);
@@ -570,7 +596,7 @@ export function CandlestickChart({
           }
           if (oscCfg.key === "adx14") {
             const adx15Line = chart.addSeries(LineSeries, {
-              color: QC_MUTED, lineWidth: 1, lineStyle: 0,
+              color: C.muted, lineWidth: 1, lineStyle: 0,
               priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
             }, 1);
             adx15Line.setData([{ time: firstDate, value: 15 }, { time: lastDate, value: 15 }]);
@@ -579,7 +605,7 @@ export function CandlestickChart({
           if (oscCfg.key === "rsi14") {
             for (const [refVal, label] of [[30, "__rsi_30"], [70, "__rsi_70"]] as const) {
               const refLine = chart.addSeries(LineSeries, {
-                color: QC_MUTED, lineWidth: 1, lineStyle: 2,
+                color: C.muted, lineWidth: 1, lineStyle: 2,
                 priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
               }, 1);
               refLine.setData([{ time: firstDate, value: refVal }, { time: lastDate, value: refVal }]);
@@ -591,7 +617,7 @@ export function CandlestickChart({
                 time: d.time,
                 position: d.type === "bear" ? "aboveBar" as const : "belowBar" as const,
                 shape: "square" as const,
-                color: d.type === "bear" ? QC_DOWN : QC_UP,
+                color: d.type === "bear" ? C.down : C.up,
                 text: d.type === "bear" ? "Bear" : "Bull",
                 size: 0.5,
               }));
@@ -616,7 +642,7 @@ export function CandlestickChart({
       }
       if (avgVolData.length > 0) {
         const avgVolSeries = chart.addSeries(LineSeries, {
-          color: QC_MUTED,
+          color: C.muted,
           lineWidth: 1,
           priceScaleId: "volume",
           priceLineVisible: false,
@@ -626,7 +652,7 @@ export function CandlestickChart({
         });
         avgVolSeries.setData(avgVolData);
         overlayMapRef.current.set("Avg Vol (20)", { series: avgVolSeries, isOsc: false });
-        nextLegend.push({ key: "Avg Vol (20)", title: "Avg Vol (20)", color: QC_MUTED, isOsc: false, visible: true });
+        nextLegend.push({ key: "Avg Vol (20)", title: "Avg Vol (20)", color: C.muted, isOsc: false, visible: true });
       }
     }
 
@@ -664,7 +690,7 @@ export function CandlestickChart({
       <div
         ref={ohlcBarRef}
         className="absolute top-2 left-2 z-10 font-mono select-none backdrop-blur-sm rounded-[6px] px-2 py-1.5"
-        style={{ display: "none", background: "rgba(255,255,255,0.88)", border: `1px solid ${QC_BORDER}`, maxWidth: "calc(100% - 1rem)", flexWrap: "wrap", gap: 4 }}
+        style={{ display: "none", background: "rgba(255,255,255,0.88)", border: "1px solid var(--qc-hair)", maxWidth: "calc(100% - 1rem)", flexWrap: "wrap", gap: 4 }}
       />
 
       {/* Phase + Volume Signal badges */}

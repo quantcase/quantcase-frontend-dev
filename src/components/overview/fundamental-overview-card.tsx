@@ -109,10 +109,10 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
   const publicPct = shareholdingMap.get("npNonInst") ?? (own.public != null ? own.public * 100 : null);
 
   const shareholdingSegments = [
-    { label: "Promoter", pct: promoterPct, color: "#0F172B" },
-    { label: "FII", pct: fiiPct, color: "#2D4A7A" },
-    { label: "DII", pct: diiPct, color: "#4A7AB5" },
-    { label: "Public", pct: publicPct, color: "#8AAED4" },
+    { label: "Promoter", pct: promoterPct, color: "var(--qc-ink)" },
+    { label: "FII", pct: fiiPct, color: "var(--qc-ink-2)" },
+    { label: "DII", pct: diiPct, color: "var(--qc-ink-3)" },
+    { label: "Public", pct: publicPct, color: "var(--qc-hair)" },
   ];
 
   const trend = fp.quarterlyTrend ?? [];

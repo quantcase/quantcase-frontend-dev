@@ -1,6 +1,7 @@
 "use client";
 
 import { type PillarKey } from "./pillar-pills";
+import { PILLAR, PILLAR_MUTED } from "@/lib/chart-tokens";
 
 interface PillarPieChartProps {
   activePillar: PillarKey;
@@ -10,17 +11,9 @@ interface PillarPieChartProps {
   rating: string | null;
 }
 
-const PILLAR_FILL: Record<PillarKey, string> = {
-  M: "#1a1a18",
-  O: "#1E3A2B",
-  D: "#7A5A12",
-};
+const PILLAR_FILL: Record<PillarKey, string> = PILLAR_MUTED;
 
-const PILLAR_FILL_ACTIVE: Record<PillarKey, string> = {
-  M: "#2563EB",
-  O: "#1F7A4A",
-  D: "#B4731A",
-};
+const PILLAR_FILL_ACTIVE: Record<PillarKey, string> = PILLAR;
 
 
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {

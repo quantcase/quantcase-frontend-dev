@@ -24,6 +24,7 @@ function toModalStep(step: ConnectStep): Step {
   }
 }
 
+// Broker brand colors — intentional, not part of the --qc-* semantic system.
 const BROKERS = [
   { name: "Zerodha",    logo: "Z",  bg: "#387ED1", color: "#fff" },
   { name: "Groww",      logo: "G",  bg: "#00D09C", color: "#fff" },
@@ -33,7 +34,7 @@ const BROKERS = [
   { name: "Kotak Sec",  logo: "K",  bg: "#ED1C24", color: "#fff" },
   { name: "5paisa",     logo: "5",  bg: "#1A5276", color: "#fff" },
   { name: "AxisDirect", logo: "Ax", bg: "#800000", color: "#fff" },
-  { name: "+ 5 more",   logo: "",   bg: "#F5F5F5", color: "#888", isMore: true },
+  { name: "+ 5 more",   logo: "",   bg: "var(--qc-section)", color: "var(--qc-ink-3)", isMore: true },
 ];
 
 const BENEFITS = [
@@ -107,7 +108,7 @@ export function ConnectPortfolioModal({ open, onClose, onOpenCsvUpload, onConnec
         {/* Header band */}
         <div
           style={{
-            background: "linear-gradient(135deg, #0F172B 0%, #1e3a5f 100%)",
+            background: "linear-gradient(135deg, var(--qc-ink) 0%, #1e3a5f 100%)",
             padding: "28px 28px 24px",
             position: "relative",
           }}
@@ -252,7 +253,7 @@ export function ConnectPortfolioModal({ open, onClose, onOpenCsvUpload, onConnec
                     <div
                       style={{
                         width: 28, height: 28, borderRadius: 7,
-                        background: "#F5F5F5",
+                        background: "var(--qc-section)",
                         border: "1px solid rgba(18,18,18,0.08)",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         flexShrink: 0,
@@ -272,7 +273,7 @@ export function ConnectPortfolioModal({ open, onClose, onOpenCsvUpload, onConnec
                 onClick={handleConnect}
                 style={{
                   width: "100%",
-                  background: "#0F172B", color: "#fff",
+                  background: "var(--qc-ink)", color: "var(--qc-on-dark)",
                   border: "none", borderRadius: 10,
                   padding: "13px 20px",
                   fontSize: 14, fontWeight: 600,
@@ -288,9 +289,9 @@ export function ConnectPortfolioModal({ open, onClose, onOpenCsvUpload, onConnec
 
               {/* Divider */}
               <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "14px 0" }}>
-                <div style={{ flex: 1, height: 1, background: "#E2E2E2" }} />
+                <div style={{ flex: 1, height: 1, background: "var(--qc-hair)" }} />
                 <span style={{ fontSize: 11, color: "#aaa", fontFamily: "var(--qc-font-sans)" }}>or</span>
-                <div style={{ flex: 1, height: 1, background: "#E2E2E2" }} />
+                <div style={{ flex: 1, height: 1, background: "var(--qc-hair)" }} />
               </div>
 
               {/* Secondary CTA */}
@@ -299,7 +300,7 @@ export function ConnectPortfolioModal({ open, onClose, onOpenCsvUpload, onConnec
                 style={{
                   width: "100%",
                   background: "#fff", color: "#555",
-                  border: "1px solid #E2E2E2", borderRadius: 10,
+                  border: "1px solid var(--qc-hair)", borderRadius: 10,
                   padding: "11px 20px",
                   fontSize: 13, fontWeight: 500,
                   fontFamily: "var(--qc-font-sans)",
@@ -328,7 +329,7 @@ export function ConnectPortfolioModal({ open, onClose, onOpenCsvUpload, onConnec
               <button
                 onClick={handleConnect}
                 style={{
-                  width: "100%", background: "#0F172B", color: "#fff",
+                  width: "100%", background: "var(--qc-ink)", color: "var(--qc-on-dark)",
                   border: "none", borderRadius: 10, padding: "13px 20px",
                   fontSize: 14, fontWeight: 600, fontFamily: "var(--qc-font-sans)", cursor: "pointer",
                 }}
@@ -339,7 +340,7 @@ export function ConnectPortfolioModal({ open, onClose, onOpenCsvUpload, onConnec
                 onClick={handleClose}
                 style={{
                   width: "100%", background: "#fff", color: "#555",
-                  border: "1px solid #E2E2E2", borderRadius: 10, padding: "11px 20px",
+                  border: "1px solid var(--qc-hair)", borderRadius: 10, padding: "11px 20px",
                   fontSize: 13, fontWeight: 500, fontFamily: "var(--qc-font-sans)", cursor: "pointer",
                 }}
               >
@@ -382,7 +383,7 @@ function SmallcaseIcon() {
 
 function LinkIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F172B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--qc-ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
     </svg>
@@ -391,7 +392,7 @@ function LinkIcon() {
 
 function SyncIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F172B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--qc-ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="1 4 1 10 7 10" />
       <polyline points="23 20 23 14 17 14" />
       <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
@@ -401,7 +402,7 @@ function SyncIcon() {
 
 function ChartIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F172B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--qc-ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="20" x2="18" y2="10" />
       <line x1="12" y1="20" x2="12" y2="4" />
       <line x1="6" y1="20" x2="6" y2="14" />
@@ -411,7 +412,7 @@ function ChartIcon() {
 
 function AiIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F172B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--qc-ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3" />
       <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
     </svg>

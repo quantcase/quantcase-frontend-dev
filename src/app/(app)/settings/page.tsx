@@ -90,10 +90,10 @@ const SECTIONS: SettingSection[] = [
 
 function SettingRowItem({ row, wide }: { row: SettingRow; wide?: boolean }) {
   return (
-    <div className="flex flex-col gap-1.5 py-3 border-b border-[#E2E2E2] last:border-0">
+    <div className="flex flex-col gap-1.5 py-3 border-b border-hair last:border-0">
       <div className="flex flex-col gap-0.5">
-        <span className="text-sm font-medium text-[#0F172B]">{row.label}</span>
-        <span className="text-xs text-[#888888]">{row.description}</span>
+        <span className="text-sm font-medium text-ink">{row.label}</span>
+        <span className="text-xs text-ink-3">{row.description}</span>
       </div>
       <div>
         {row.value !== undefined || row.placeholder ? (
@@ -102,10 +102,10 @@ function SettingRowItem({ row, wide }: { row: SettingRow; wide?: boolean }) {
             defaultValue={row.value ?? ""}
             placeholder={row.placeholder}
             disabled
-            className={`rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-3 py-1.5 text-sm text-[#0F172B] placeholder:text-[#888888] disabled:cursor-not-allowed focus:outline-none ${wide ? "w-full" : "w-full max-w-xs"}`}
+            className={`rounded-md border border-hair bg-secondary px-3 py-1.5 text-sm text-ink placeholder:text-ink-3 disabled:cursor-not-allowed focus:outline-none ${wide ? "w-full" : "w-full max-w-xs"}`}
           />
         ) : (
-          <span className="text-xs font-medium text-[#888888] uppercase tracking-wide bg-[#F5F5F5] border border-[#E2E2E2] rounded-sm px-2 py-1">
+          <span className="text-xs font-medium text-ink-3 uppercase tracking-wide bg-secondary border border-hair rounded-sm px-2 py-1">
             Coming soon
           </span>
         )}
@@ -119,8 +119,8 @@ export default function SettingsPage() {
     <div className="p-6 space-y-4">
       {/* Page header */}
       <div>
-        <h2 className="text-[22px] font-medium text-[#0F172B]">Settings</h2>
-        <p className="text-sm text-[#888888] mt-1">Manage your account, organisation, and platform preferences.</p>
+        <h2 className="text-[22px] font-medium text-ink">Settings</h2>
+        <p className="text-sm text-ink-3 mt-1">Manage your account, organisation, and platform preferences.</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
@@ -132,7 +132,7 @@ export default function SettingsPage() {
                 title={
                   <span className="flex items-center gap-2">
                     <span className="inline-flex items-center justify-center rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] p-1">
-                      <Icon className="size-4 text-[#888888]" />
+                      <Icon className="size-4 text-ink-3" />
                     </span>
                     {section.title}
                   </span>

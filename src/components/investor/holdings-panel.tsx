@@ -13,12 +13,13 @@ import {
 } from "recharts";
 import { formatINR } from "@/lib/utils";
 import { MonoLabel } from "@/components/ds";
+import { QC, SEQUENTIAL } from "@/lib/chart-tokens";
 import type { AllocationSegment, ValueTrendPoint } from "@/types/investor-dashboard";
 
 // Allocation categories carry no semantic meaning, so per the design system they
-// use a neutral navy→zinc ramp (not off-palette purple/cyan/amber). Differentiate
-// segments by position + label, never by decorative color.
-const SEGMENT_COLORS = ["#210B2C", "#4A3A52", "#6E5F74", "#948898", "#B8AFBC", "#D6D0D9"];
+// use the shared decorative SEQUENTIAL ramp. Differentiate segments by position +
+// label, never by decorative color.
+const SEGMENT_COLORS = SEQUENTIAL;
 
 function segmentColor(i: number): string {
   return SEGMENT_COLORS[i % SEGMENT_COLORS.length];
@@ -474,8 +475,8 @@ export function HoldingsPanel({
             >
               <defs>
                 <linearGradient id="holdingsFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#22c55e" stopOpacity={0.18} />
-                  <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+                  <stop offset="0%" stopColor={QC.up} stopOpacity={0.18} />
+                  <stop offset="100%" stopColor={QC.up} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis
@@ -502,11 +503,11 @@ export function HoldingsPanel({
               <Area
                 type="monotone"
                 dataKey="norm"
-                stroke="#22c55e"
+                stroke={QC.up}
                 strokeWidth={1.5}
                 fill="url(#holdingsFill)"
                 dot={false}
-                activeDot={{ r: 3, fill: "#22c55e", strokeWidth: 0 }}
+                activeDot={{ r: 3, fill: QC.up, strokeWidth: 0 }}
               />
             </AreaChart>
           </ResponsiveContainer>

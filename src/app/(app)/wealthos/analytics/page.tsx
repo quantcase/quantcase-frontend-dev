@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import type { RiskProfileType } from "@/types/portfolio";
 import type { SegmentAnalytic } from "@/types/wealthos";
+import { QC } from "@/lib/chart-tokens";
 
 const LIME_GRADIENT = "linear-gradient(135deg, var(--qc-ink) 0%, var(--qc-ink) 100%)";
 
@@ -83,7 +84,7 @@ function RMSelectorRow({
             onClick={() => onSelect(isSelected ? "" : rm.id)}
             style={{
               borderRadius: 8,
-              border: isSelected ? "1.5px solid #a8e63d" : "1px solid var(--qc-hair)",
+              border: isSelected ? `1.5px solid ${QC.limeEdge}` : "1px solid var(--qc-hair)",
               background: isSelected ? "rgba(200,245,105,0.08)" : "var(--qc-card)",
               padding: "7px 12px",
               cursor: "pointer",
@@ -297,7 +298,7 @@ function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
             Engagement
           </span>
           <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
-            <span style={{ width: 8, height: 8, borderRadius: 2, background: "#a1a1aa", display: "inline-block" }} />
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: QC.ink3, display: "inline-block" }} />
             Churn %
           </span>
         </div>
@@ -328,7 +329,7 @@ function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
               cursor={{ fill: "rgba(0,0,0,0.03)" }}
             />
             <Bar dataKey="engagement" fill="var(--qc-ink)" radius={[3, 3, 0, 0]} maxBarSize={28} />
-            <Bar dataKey="churn" fill="#a1a1aa" radius={[3, 3, 0, 0]} maxBarSize={28} />
+            <Bar dataKey="churn" fill={QC.ink3} radius={[3, 3, 0, 0]} maxBarSize={28} />
           </BarChart>
         </ResponsiveContainer>
       </div>

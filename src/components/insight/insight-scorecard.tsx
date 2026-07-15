@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { InsightData, InsightLens } from "@/types/analysis";
 import { DarkGradientCard, MonoLabel } from "@/components/ds";
 import { renderMd } from "@/lib/render-md";
+import { QC } from "@/lib/chart-tokens";
 
 // ─── Color helpers ─────────────────────────────────────────────────────────────
 
@@ -15,10 +16,12 @@ function scoreToTier(pct: number): "strong" | "moderate" | "weak" {
   return "weak";
 }
 
+// `hex` is used for SVG fills/stops/text/tooltip colors — SVG accepts var(--qc-*)
+// directly, so it points at the same token as `var`. `soft`/`fill` stay rgba.
 const TIER_COLORS = {
-  strong:   { hex: "#1F7A4A", soft: "rgba(31,122,74,0.14)",  fill: "rgba(31,122,74,0.50)",  var: "var(--qc-up)" },
-  moderate: { hex: "#B4731A", soft: "rgba(180,115,26,0.14)", fill: "rgba(180,115,26,0.50)", var: "var(--qc-warn)" },
-  weak:     { hex: "#DC2626", soft: "rgba(220,38,38,0.14)",  fill: "rgba(220,38,38,0.50)",  var: "var(--qc-down)" },
+  strong:   { hex: QC.up,   soft: "rgba(31,122,74,0.14)",  fill: "rgba(31,122,74,0.50)",  var: QC.up },
+  moderate: { hex: QC.warn, soft: "rgba(180,115,26,0.14)", fill: "rgba(180,115,26,0.50)", var: QC.warn },
+  weak:     { hex: QC.down, soft: "rgba(220,38,38,0.14)",  fill: "rgba(220,38,38,0.50)",  var: QC.down },
 };
 
 function axisStatusColor(pct: number) {
@@ -186,7 +189,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
             key={ri}
             points={ringPts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}
             fill="none"
-            stroke={isThreshold ? "#AAAAAA" : "#BBBBBB"}
+            stroke={isThreshold ? QC.ink3 : QC.hair}
             strokeWidth={isThreshold ? 1.2 : 0.9}
             strokeOpacity={1}
             strokeDasharray={isThreshold ? "3 3" : undefined}
@@ -200,7 +203,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
           key={i}
           x1={cx} y1={cy}
           x2={pt.x.toFixed(2)} y2={pt.y.toFixed(2)}
-          stroke="#BBBBBB"
+          stroke={QC.hair}
           strokeWidth={0.9}
           strokeOpacity={1}
         />
@@ -271,7 +274,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
                 fontSize={8}
                 fontWeight={isHovered ? 700 : 500}
                 letterSpacing="0.06em"
-                fill={isHovered ? axColor : "#9A9A92"}
+                fill={isHovered ? axColor : QC.ink3}
                 style={{ transition: "fill 0.15s" }}
               >
                 {word}
@@ -331,7 +334,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
           fontSize={8.5}
           fontWeight={700}
           letterSpacing="0.14em"
-          fill="#5A5A54"
+          fill={QC.ink2}
         >
           {label}
         </text>
@@ -362,7 +365,7 @@ function VertexTooltip({ lens, visible, pctX, pctY }: { lens: InsightLens | null
             top: `${topPct}%`,
             transform: "translate(-50%, calc(-100% - 10px))",
             zIndex: 20,
-            background: "#1C1C20",
+            background: QC.ink,
             border: "1px solid rgba(255,255,255,0.10)",
             borderRadius: 8,
             padding: "8px 14px",

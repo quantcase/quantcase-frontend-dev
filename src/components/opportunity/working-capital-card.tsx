@@ -17,16 +17,17 @@ import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
 import { InsightsCard } from "@/components/opportunity/insights-card";
 import { MetricTile } from "@/components/molecules/metric-tile";
 import { StatusBadge } from "@/components/opportunity/status-badge";
+import { QC } from "@/lib/chart-tokens";
 
-// Chart hex colors (Recharts can't use CSS vars)
+// Chart colors mapped to --qc-* tokens (Recharts SVG accepts var(--qc-*))
 const CHART = {
-  grid: "#f4f4f5",
-  axis: "#a1a1aa",
-  refLine: "#a1a1aa",
-  wcLine: "#3A6BEF",    // --qc-blue approx
-  dsoBar: "#3A6BEF",    // blue
-  dioBar: "#B4731A",    // --qc-warn approx
-  dpoBar: "#1F7A4A",    // --qc-up approx
+  grid: QC.hair,
+  axis: QC.ink3,
+  refLine: QC.ink3,
+  wcLine: QC.blue,
+  dsoBar: QC.blue,
+  dioBar: QC.warn,
+  dpoBar: QC.up,
 };
 
 type WcChartDataPoint = {
@@ -85,7 +86,7 @@ function WcTrendChartPanel({
             <YAxis yAxisId="left" orientation="left" tick={{ fontSize: 9, fill: CHART.axis }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}d`} domain={["auto", "auto"]} />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: CHART.wcLine }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} domain={["auto", "auto"]} />
             <Tooltip
-              contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid #e4e4e7", backgroundColor: "white" }}
+              contentStyle={{ fontSize: 11, borderRadius: 6, border: `1px solid ${QC.hair}`, backgroundColor: QC.card }}
               itemStyle={{ padding: "0px 10px" }}
               formatter={(value: number, name: string) => name === "WC % of Revenue" ? [`${value}%`, name] : [`${value} days`, name]}
             />

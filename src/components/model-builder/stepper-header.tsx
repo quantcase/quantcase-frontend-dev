@@ -13,7 +13,7 @@ interface StepperHeaderProps {
 export function StepperHeader({ step, completedSteps, hasSWP }: StepperHeaderProps) {
   const STEP_CONFIG = getStepConfig(hasSWP);
   return (
-    <div className="flex gap-4 px-6 py-4 border-b border-[#E2E2E2]" style={{ background: "#fff" }}>
+    <div className="flex gap-4 px-6 py-4 border-b border-hair" style={{ background: "var(--qc-card)" }}>
       {STEP_CONFIG.map((s) => {
         const done   = completedSteps.includes(s.number);
         const active = s.number === step;
@@ -24,8 +24,8 @@ export function StepperHeader({ step, completedSteps, hasSWP }: StepperHeaderPro
               <motion.span
                 layout
                 animate={{
-                  background: active ? "var(--qc-ink)" : done ? "var(--qc-ink)" : "#EBEBEB",
-                  color:      active || done ? "#fff" : "var(--qc-ink-2)",
+                  background: active ? "var(--qc-ink)" : done ? "var(--qc-ink)" : "var(--qc-hair)",
+                  color:      active || done ? "var(--qc-on-dark)" : "var(--qc-ink-2)",
                   scale:      active ? 1.08 : 1,
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}

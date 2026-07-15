@@ -184,6 +184,8 @@ export function riskLabel(r: PortfolioData["riskProfile"]) {
 }
 
 export function riskColor(r: PortfolioData["riskProfile"]) {
+  // Hex kept intentionally: consumers concatenate a hex-alpha suffix (e.g. `riskColor(...) + "18"`
+  // in portfolio-dropdown.tsx), which requires a hex value — a CSS var() token cannot be alpha-suffixed.
   return ({ conservative: "#16a34a", balanced: "#d97706", aggressive: "#dc2626", "goal-based": "#d97706" } as Record<string, string>)[r] ?? "#888888";
 }
 

@@ -95,7 +95,7 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
         style={{
           position: "fixed", top: "50%", left: "50%",
           transform: "translate(-50%, -50%)",
-          background: "#fff", borderRadius: 16,
+          background: "var(--qc-card)", borderRadius: 16,
           padding: "32px 32px 28px",
           width: 480, maxWidth: "calc(100vw - 32px)",
           zIndex: 1001,
@@ -153,12 +153,12 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
           style={{
-            border: `1.5px dashed ${dragOver ? "#0F172B" : selectedFile ? "#22c55e" : "#D1D5DB"}`,
+            border: `1.5px dashed ${dragOver ? "var(--qc-ink)" : selectedFile ? "var(--qc-up)" : "var(--qc-hair)"}`,
             borderRadius: 10,
             padding: "28px 24px",
             textAlign: "center",
             cursor: "pointer",
-            background: dragOver ? "#F5F5F5" : selectedFile ? "rgba(34,197,94,0.04)" : "#FAFAFA",
+            background: dragOver ? "var(--qc-section)" : selectedFile ? "rgba(34,197,94,0.04)" : "var(--qc-section)",
             transition: "all 0.15s",
           }}
         >
@@ -179,7 +179,7 @@ export function UploadPortfolioModal({ open, onClose, onSuccess }: UploadPortfol
             </>
           ) : (
             <>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 8px" }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--qc-ink-3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 8px" }}>
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="17 8 12 3 7 8"/>
                 <line x1="12" y1="3" x2="12" y2="15"/>

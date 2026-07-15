@@ -96,7 +96,7 @@ export function ShareholdingPanel({ segments, quarter }: ShareholdingPanelProps)
           <div
             style={{
               flex: 1,
-              background: "repeating-linear-gradient(45deg,#F2F1EC,#F2F1EC 6px,#EAE9E2 6px,#EAE9E2 12px)",
+              background: "repeating-linear-gradient(45deg,var(--qc-chip),var(--qc-chip) 6px,var(--qc-hair) 6px,var(--qc-hair) 12px)",
               display: "flex",
               alignItems: "center",
               paddingLeft: 14,

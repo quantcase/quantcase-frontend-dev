@@ -4,9 +4,10 @@ import { useState } from "react";
 import ApexChart from "@/components/molecules/apex-chart";
 import type { ShareholdingSection, ShareholdingChild } from "@/hooks/useShareholding";
 import { MonoEyebrow } from "@/components/overview/primitives";
+import { QC, SEQUENTIAL } from "@/lib/chart-tokens";
 
-// Purple-ink ramp → lime accent, derived from qc-* tokens
-const SHAREHOLDING_COLORS = ["#210B2C", "#3D1C54", "#6B2FA0", "#9A60C8", "#C6DC8A", "#FFEB99", "#F3F2EE"];
+// Decorative multi-slice ramp (composition has no semantic meaning)
+const SHAREHOLDING_COLORS: string[] = [...SEQUENTIAL];
 
 // Non-promoter child IDs bucketed into DII / FII / Retail
 const DII_IDS = new Set([
@@ -108,7 +109,7 @@ function makeDonutOptions(labels: string[], groupLabel: string): ApexCharts.Apex
               label: groupLabel,
               fontSize: "11px",
               fontFamily: "'IBM Plex Mono', monospace",
-              color: "#5A5A54", // --qc-ink-2
+              color: QC.ink2,
               formatter: (w) => {
                 const total = w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0);
                 return `${total.toFixed(1)}%`;
@@ -122,7 +123,7 @@ function makeDonutOptions(labels: string[], groupLabel: string): ApexCharts.Apex
       theme: "light",
       y: { formatter: (val: number) => `${val.toFixed(1)}%` },
     },
-    stroke: { width: 2, colors: ["#FFFFFF"] },
+    stroke: { width: 2, colors: [QC.card] },
   };
 }
 

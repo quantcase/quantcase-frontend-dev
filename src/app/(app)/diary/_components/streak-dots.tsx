@@ -12,8 +12,8 @@ export function StreakDots({ filled, total = 6 }: { filled: number; total?: numb
             key={i}
             style={{
               width: 12, height: 12, borderRadius: "50%",
-              background: i < filled ? "#6D28D9" : "transparent",
-              border: `1.5px solid ${i < filled ? "#6D28D9" : "var(--qc-hair)"}`,
+              background: i < filled ? "var(--qc-brand-accent)" : "transparent",
+              border: `1.5px solid ${i < filled ? "var(--qc-brand-accent)" : "var(--qc-hair)"}`,
             }}
           />
         ))}

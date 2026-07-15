@@ -37,6 +37,7 @@ function authHeaders(): Record<string, string> {
 /** Unwrap the `{ success, data }` envelope, throwing the server error message on failure. */
 async function unwrap<T>(res: Response, fallback: string): Promise<T> {
   const json = await res.json().catch(() => null);
+  // Hex kept intentionally below: console `%c` style strings — the DevTools console cannot resolve CSS var() tokens.
   if (!res.ok) {
     const httpStatus = res.statusText ? `${res.status} ${res.statusText}` : `${res.status}`;
     console.error(

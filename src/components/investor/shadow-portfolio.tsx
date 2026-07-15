@@ -157,7 +157,7 @@ export function ShadowPortfolio({ count, stocks, loading, empty }: ShadowPortfol
                     <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
                       {s.thesisTags.map(tag => <ThesisChip key={tag} tag={tag} />)}
                       {s.thesisDrift && (
-                        <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "#92400e", background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 3, padding: "1px 6px", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
+                        <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-warn)", background: "var(--qc-warn-soft)", border: "1px solid var(--qc-warn-soft)", borderRadius: 3, padding: "1px 6px", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
                           DRIFT
                         </span>
                       )}
@@ -195,7 +195,7 @@ export function ShadowPortfolio({ count, stocks, loading, empty }: ShadowPortfol
                       <span style={{ color: "var(--qc-hair-2)" }}>·</span>
                       {s.thesisTags.map(tag => <ThesisChip key={tag} tag={tag} />)}
                       {s.thesisDrift && (
-                        <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "#92400e", background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 3, padding: "1px 6px", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
+                        <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-medium)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-warn)", background: "var(--qc-warn-soft)", border: "1px solid var(--qc-warn-soft)", borderRadius: 3, padding: "1px 6px", letterSpacing: "var(--qc-track-mono)", textTransform: "uppercase" }}>
                           DRIFT
                         </span>
                       )}
@@ -269,7 +269,7 @@ export function EmptyState({
 }) {
   const ctaStyle: React.CSSProperties = {
     display: "inline-flex", alignItems: "center", gap: 6, marginTop: 12,
-    background: "var(--qc-ink)", color: "#fff", border: "none",
+    background: "var(--qc-ink)", color: "var(--qc-on-dark)", border: "none",
     borderRadius: 8, padding: "8px 16px", fontSize: "var(--qc-fz-12)",
     fontWeight: "var(--qc-w-medium)", cursor: "pointer",
     fontFamily: "var(--qc-font-sans)", textDecoration: "none",

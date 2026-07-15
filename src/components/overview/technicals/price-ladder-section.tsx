@@ -199,7 +199,7 @@ export function PriceLadderSection({
               top: 12,
               bottom: 12,
               width: 2,
-              background: "linear-gradient(180deg,#F0D3C9 0%, #F3E4C3 45%, #D9E8B3 100%)",
+              background: "linear-gradient(180deg,var(--qc-down-soft) 0%, var(--qc-warn-soft) 45%, var(--qc-up-soft) 100%)",
               borderRadius: 2,
             }}
           />
@@ -282,7 +282,7 @@ export function PriceLadderSection({
               style={{
                 position: "relative",
                 height: 34,
-                background: "#EAE9E2",
+                background: "var(--qc-hair)",
                 borderRadius: 6,
                 overflow: "hidden",
                 marginBottom: 4,
@@ -293,7 +293,7 @@ export function PriceLadderSection({
                   position: "absolute",
                   left: 0, top: 0, bottom: 0,
                   width: `${rangePct}%`,
-                  background: "linear-gradient(90deg, var(--qc-up-soft), #E9F4C4)",
+                  background: "linear-gradient(90deg, var(--qc-up-soft), var(--qc-up-soft))",
                   borderRadius: 6,
                 }}
               />

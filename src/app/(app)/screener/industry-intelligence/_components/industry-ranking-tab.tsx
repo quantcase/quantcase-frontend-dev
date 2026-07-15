@@ -12,6 +12,7 @@ import {
   Table, TableBody, TableHead, TableHeader, TableRow, TableCell,
 } from "@/components/ui/table";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { SEQUENTIAL } from "@/lib/chart-tokens";
 import type { IIIndustryRanking, IIIndustry, QLevel, Direction } from "@/types/industry-intelligence";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -19,13 +20,9 @@ import type { IIIndustryRanking, IIIndustry, QLevel, Direction } from "@/types/i
 type SortKey = "Composite rank" | "Momentum" | "Breadth" | "Revisions";
 type FilterKey = "All" | "Top quartile" | "Upper mid" | "Lower mid" | "Bottom";
 
-// ── Chart colors — data-viz palette, 12 distinct hues ────────────────────────
+// ── Chart colors — decorative cluster ramp (no semantic meaning) ─────────────
 
-const CHART_COLORS = [
-  "#6366F1", "#10B981", "#F59E0B", "#EF4444",
-  "#8B5CF6", "#06B6D4", "#F97316", "#EC4899",
-  "#14B8A6", "#84CC16", "#3B82F6", "#A855F7",
-];
+const CHART_COLORS = SEQUENTIAL;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -276,7 +273,7 @@ function ChartView({
             className="text-[12px] font-medium px-3.5 py-1.5 rounded-full transition-colors"
             style={
               filter === f
-                ? { background: "var(--qc-text-heading)", color: "#ffffff" }
+                ? { background: "var(--qc-text-heading)", color: "var(--qc-on-dark)" }
                 : { background: "transparent", color: "var(--qc-text-muted)", border: "1px solid var(--qc-border-default)" }
             }
           >

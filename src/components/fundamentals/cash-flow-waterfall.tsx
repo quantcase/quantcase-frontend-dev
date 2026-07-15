@@ -1,5 +1,6 @@
 import ApexChart from "@/components/molecules/apex-chart";
 import type { FinancialTable } from "@/types/financials";
+import { QC } from "@/lib/chart-tokens";
 
 const CF_TOTAL_KEYS = ["cfo", "operating", "fcff", "fcfe", "net_cash", "core_cash", "total"];
 
@@ -74,8 +75,8 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         dataLabels: { position: "top" },
       },
     },
-    // transparent spacer, lime-edge increase, --qc-down decrease, deep-purple total
-    colors: ["transparent", "#7C9E3A", "#B23A2F", "#3D1C54"],
+    // transparent spacer, up increase, down decrease, ink total
+    colors: ["transparent", QC.up, QC.down, QC.ink],
     dataLabels: {
       enabled: true,
       enabledOnSeries: [1, 2, 3],
@@ -87,7 +88,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         fontSize: "10px",
         fontWeight: "500",
         fontFamily: "'IBM Plex Mono', monospace",
-        colors: ["var(--qc-ink)"], // --qc-ink
+        colors: [QC.ink],
       },
       offsetY: -4,
     },
@@ -97,7 +98,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         rotate: -45,
         style: {
           fontSize: "10px",
-          colors: "#9A9A92", // --qc-ink-2
+          colors: QC.ink3,
           fontFamily: "'IBM Plex Mono', monospace",
         },
       },
@@ -109,7 +110,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
         formatter: (val: number) => `${Math.round(val).toLocaleString("en-IN")}`,
         style: {
           fontSize: "10px",
-          colors: ["#9A9A92"], // --qc-ink-2
+          colors: [QC.ink3],
           fontFamily: "'IBM Plex Mono', monospace",
         },
       },
@@ -129,7 +130,7 @@ export function CashFlowWaterfall({ table }: { table: FinancialTable }) {
       markers: { size: 8 },
       onItemClick: { toggleDataSeries: false },
       formatter: (seriesName: string) => (seriesName === "spacer" ? "" : seriesName),
-      labels: { colors: "#5A5A54" }, // --qc-ink
+      labels: { colors: QC.ink2 },
     },
     tooltip: {
       shared: false,

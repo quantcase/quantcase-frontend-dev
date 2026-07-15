@@ -7,9 +7,9 @@ import type { DealIntelligence, DealIntelligenceSignal, DealRecommendedStrategy,
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function sentimentVars(sentiment: DealIntelligenceSignal["sentiment"]) {
-  if (sentiment === "positive") return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "#BBD9C6" };
-  if (sentiment === "negative") return { color: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "#F0C0BB" };
-  return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "#E8D4A0" };
+  if (sentiment === "positive") return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "var(--qc-up-soft)" };
+  if (sentiment === "negative") return { color: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "var(--qc-down-soft)" };
+  return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "var(--qc-warn-soft)" };
 }
 
 function labelVars(label: string) {

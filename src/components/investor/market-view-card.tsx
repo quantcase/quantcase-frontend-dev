@@ -77,7 +77,7 @@ export function MarketViewCard({ score, sentiment, metrics, updatedTime }: Marke
                 position: "relative",
                 height: 8,
                 borderRadius: 99,
-                background: "linear-gradient(to right, #ef4444, #f59e0b 40%, #22c55e 80%)",
+                background: "linear-gradient(to right, var(--qc-down), var(--qc-warn) 40%, var(--qc-up) 80%)",
                 marginBottom: 4,
               }}
             >

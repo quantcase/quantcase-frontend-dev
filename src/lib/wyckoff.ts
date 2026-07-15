@@ -1051,6 +1051,9 @@ export const WYCKOFF_CYCLE = [
 ] as const;
 
 export function phaseColor(pt: string): string {
+  // Decorative Wyckoff-phase palette (bright, phase-distinguishing) — intentionally
+  // NOT part of the --qc-* semantic system; these six phases need their own
+  // recognizable colors that don't map onto up/down/warn/blue.
   const map: Record<string, string> = {
     Markup: "#00e396", "Re-Accumulation": "#00d4ff", Accumulation: "#a78bfa",
     Distribution: "#ff6b35", "Re-Distribution": "#ffd166", Markdown: "#ff4560",

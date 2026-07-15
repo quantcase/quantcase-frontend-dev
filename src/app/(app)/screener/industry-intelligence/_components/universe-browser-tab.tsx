@@ -4,9 +4,12 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { QC } from "@/lib/chart-tokens";
 import type { IIUniverseBrowser, IIMacroSector } from "@/types/industry-intelligence";
 
 // ── Sector identity colors — categorical, not semantic ────────────────────────
+// Decorative sector palette — kept distinct; each color is hue-paired with its
+// rgba tint (bg), which has no token equivalent, so the color hex are retained.
 
 const SECTOR_COLORS: Record<string, { color: string; bg: string }> = {
   CD: { color: "#E57373", bg: "rgba(229,115,115,0.14)" },
@@ -23,7 +26,7 @@ const SECTOR_COLORS: Record<string, { color: string; bg: string }> = {
   DV: { color: "#78909C", bg: "rgba(120,144,156,0.14)" },
 };
 
-const FALLBACK_COLORS = { color: "#888888", bg: "rgba(136,136,136,0.14)" };
+const FALLBACK_COLORS = { color: QC.ink3, bg: "rgba(136,136,136,0.14)" };
 
 // ── Sector card ───────────────────────────────────────────────────────────────
 

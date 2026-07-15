@@ -18,15 +18,16 @@ import { InsightText } from "@/components/opportunity/bold-text";
 import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
 import { InsightsCard } from "@/components/opportunity/insights-card";
 import { MetricTile } from "@/components/molecules/metric-tile";
+import { QC } from "@/lib/chart-tokens";
 
-// Chart hex colors (Recharts can't use CSS vars)
+// Chart colors mapped to --qc-* tokens (Recharts SVG accepts var(--qc-*))
 const CHART = {
-  grid: "#f4f4f5",
-  axis: "#a1a1aa",
-  convLine: "#B4731A",    // --qc-warn
-  fcfPos: "#1F7A4A",      // --qc-up
-  fcfNeg: "#B23A2F",      // --qc-down
-  pat: "#1F7A4A",         // --qc-up (lighter opacity)
+  grid: QC.hair,
+  axis: QC.ink3,
+  convLine: QC.warn,
+  fcfPos: QC.up,
+  fcfNeg: QC.down,
+  pat: QC.up,             // (rendered at lighter opacity)
 };
 
 function parseAmtCr(s?: string | null): number {
@@ -36,7 +37,7 @@ function parseAmtCr(s?: string | null): number {
 }
 
 function conversionHexColor(pct: number | null, threshold: number): string {
-  if (pct == null) return "#a1a1aa";
+  if (pct == null) return QC.ink3;
   if (pct < 0) return CHART.fcfNeg;
   if (pct >= threshold) return CHART.fcfPos;
   return CHART.convLine;
@@ -99,7 +100,7 @@ function FcfChartPanel({
             <YAxis yAxisId="left" orientation="left" tick={{ fontSize: 9, fill: CHART.axis }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v}`} domain={["auto", "auto"]} />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: CHART.convLine }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} domain={["auto", "auto"]} />
             <Tooltip
-              contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid #e4e4e7", backgroundColor: "white" }}
+              contentStyle={{ fontSize: 11, borderRadius: 6, border: `1px solid ${QC.hair}`, backgroundColor: QC.card }}
               itemStyle={{ padding: "0px 10px" }}
               formatter={(value: number, name: string) => name === "FCF/PAT %" ? [`${value}%`, name] : [`₹${value} Cr`, name]}
             />

@@ -14,6 +14,12 @@ export function fmtLakhs(n: number) {
   return `₹${fmt(n)}`;
 }
 
+// Signed percent with a direction arrow: 9.1 → "↑9.1%", -1.4 → "↓1.4%".
+export function fmtSignedPct(pct: number, digits = 1) {
+  const arrow = pct >= 0 ? "↑" : "↓";
+  return `${arrow}${Math.abs(pct).toFixed(digits)}%`;
+}
+
 // Broker slug → display label, e.g. "kite" → "Zerodha" (Kite is Zerodha's platform).
 // Unknown slugs fall back to a capitalized version of the slug.
 const BROKER_LABELS: Record<string, string> = {

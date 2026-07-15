@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Wallet, Link2, FileUp, RefreshCw } from "lucide-react";
-import { fmtLakhs } from "@/lib/portfolio-format";
+import { fmtLakhs, fmtSignedPct } from "@/lib/portfolio-format";
+import { Badge } from "@/components/ds";
 
 // Small "● Zerodha connected" status pill, reused in the header and connected empty state.
 function ConnectedPill({ brokerLabel }: { brokerLabel?: string }) {
@@ -46,9 +47,13 @@ function SyncButton({ syncing, onSync }: { syncing?: boolean; onSync?: () => voi
 export interface DiaryHolding {
   ticker: string;
   name: string | null;
-  amount: number;        // current value or amount invested, in raw rupees
+  amount: number;        // display_value — live current value, or cost basis when no live price
   qty: number | null;
   broker: string | null; // broker attribution (backend note — may be null)
+  /** Gain/loss %, only meaningful when hasLivePrice is true. null when no live market data. */
+  pnlPct?: number | null;
+  /** False → amount is cost basis; suppress the P&L badge (would otherwise read a fake 0%). */
+  hasLivePrice?: boolean;
 }
 
 // A small deterministic color per broker chip (until the backend provides one).
@@ -85,8 +90,14 @@ function ListView({ holdings }: { holdings: DiaryHolding[] }) {
             <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: "0.02em", color: "var(--qc-ink)" }}>{h.ticker}</div>
             {h.name && <div style={{ fontSize: 12, color: "var(--qc-ink-3)", marginTop: 2 }}>{h.name}</div>}
           </div>
-          <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)", textAlign: "right" }}>
-            {fmtLakhs(h.amount)}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 }}>
+            <span style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>
+              {fmtLakhs(h.amount)}
+            </span>
+            {/* P&L only when there's a live price — otherwise amount is cost basis and a "0%" would mislead. */}
+            {h.hasLivePrice && h.pnlPct != null && (
+              <Badge variant={h.pnlPct >= 0 ? "up" : "crit"}>{fmtSignedPct(h.pnlPct)}</Badge>
+            )}
           </div>
           <div style={{ fontSize: 14, color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)", textAlign: "right", minWidth: 32 }}>
             {h.qty ?? "—"}
@@ -217,6 +228,7 @@ export function HoldingsList({
   brokerConnected,
   brokerLabel,
   syncing,
+  totalValue,
   onConnectBroker,
   onUploadCsv,
   onSync,
@@ -229,13 +241,16 @@ export function HoldingsList({
   brokerLabel?: string;
   /** True while a broker-side re-sync is in flight. */
   syncing?: boolean;
+  /** Authoritative portfolio total from the backend; falls back to the local sum when omitted. */
+  totalValue?: number | null;
   onConnectBroker?: () => void;
   onUploadCsv?: () => void;
   onSync?: () => void;
 }) {
   const [view, setView] = useState<"list" | "chart">("list");
 
-  const total = holdings.reduce((s, h) => s + h.amount, 0);
+  // Prefer the server total (it accounts for live LTP); fall back to summing display values.
+  const total = totalValue ?? holdings.reduce((s, h) => s + h.amount, 0);
   const brokerCount = new Set(holdings.map(h => h.broker).filter(Boolean)).size;
   const hasHoldings = !loading && holdings.length > 0;
 

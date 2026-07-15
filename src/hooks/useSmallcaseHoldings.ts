@@ -3,14 +3,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { BACKEND_URL } from "@/lib/constants";
 import { apiAuthGet, apiAuthPost } from "@/lib/api";
-import type { SmallcaseHoldingsData } from "@/types/smallcase";
+import type { SmallcaseHoldingsData, SmallcaseSyncResult } from "@/types/smallcase";
 
 interface State {
   data: SmallcaseHoldingsData | null;
   loading: boolean;
   error: string | null;
   notConnected: boolean;
-  /** True while a broker-side re-sync is in flight (POST /holdings/sync). */
+  /** True while a broker-side re-sync is in flight (POST /smallcase/sync). */
   syncing: boolean;
 }
 
@@ -44,22 +44,17 @@ export function useSmallcaseHoldings() {
   // Trigger a broker-side refetch, then reload the local holdings once it settles.
   const sync = useCallback(() => {
     setState(s => ({ ...s, syncing: true, error: null }));
-    apiAuthPost<{ success: boolean; data?: SmallcaseHoldingsData }>(
-      `${BACKEND_URL}/api/smallcase/holdings/sync`,
+    apiAuthPost<{ success: boolean; data: SmallcaseSyncResult }>(
+      `${BACKEND_URL}/api/smallcase/sync`,
       {
-        onSuccess: (res) => {
-          // Prefer the freshly-synced payload when the endpoint returns it; otherwise re-GET.
-          if (res.data) {
-            setState(s => ({ ...s, data: res.data!, error: null, notConnected: false }));
-          } else {
-            fetch();
-          }
-        },
+        // /sync returns only a completion summary ({ holdings_synced, synced_at }),
+        // not the holdings themselves — so always re-GET to pull the fresh list.
+        onSuccess: () => { load(); },
         onError: (err) => setState(s => ({ ...s, error: err })),
         onComplete: () => setState(s => ({ ...s, syncing: false })),
       }
     );
-  }, [fetch]);
+  }, [load]);
 
   // Initial load — state already starts in { loading: true }, so no setState here.
   useEffect(() => { load(); }, [load]);

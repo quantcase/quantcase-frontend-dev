@@ -6,6 +6,7 @@ import { EntryCard, PendingEntryCard } from "./_components/entry-card";
 import { ChangeFeed, type ChangeItem } from "./_components/change-feed";
 import { DimensionCard } from "./_components/dimension-card";
 import { HoldingsList, type DiaryHolding } from "./_components/holdings-list";
+import { BasketsList } from "./_components/baskets-list";
 import { StreakDots } from "./_components/streak-dots";
 
 import { CompleteJournalModal } from "@/components/investor/complete-journal-modal";
@@ -90,10 +91,13 @@ export default function DiaryPage() {
     if (hasSmallcaseHoldings) {
       return (smallcaseData?.holdings ?? []).map(h => ({
         ticker: h.ticker,
-        name: null,
-        amount: h.current_value,
+        name: h.name,
+        // display_value never null — falls back to cost basis, so no ₹0 rows.
+        amount: h.display_value,
         qty: h.quantity,
         broker: h.broker,
+        pnlPct: h.pnl_pct,
+        hasLivePrice: h.has_live_price,
       }));
     }
     return (userPortfolio?.holdings ?? []).map(h => ({
@@ -104,6 +108,10 @@ export default function DiaryPage() {
       broker: h.broker,
     }));
   }, [hasSmallcaseHoldings, smallcaseData, userPortfolio]);
+
+  // Prefer the backend's live portfolio total for smallcase; the CSV path has none.
+  const ownedTotalValue = hasSmallcaseHoldings ? smallcaseData?.portfolio?.total_value ?? null : null;
+  const ownedBaskets = hasSmallcaseHoldings ? smallcaseData?.baskets ?? [] : [];
 
   const ownedLoading = hasSmallcaseHoldings ? false : portfolioLoading;
 
@@ -185,10 +193,13 @@ export default function DiaryPage() {
               brokerConnected={brokerConnected}
               brokerLabel={connectedBrokerLabel}
               syncing={smallcaseSyncing}
+              totalValue={ownedTotalValue}
               onConnectBroker={() => setConnectModalOpen(true)}
               onUploadCsv={() => setUploadModalOpen(true)}
               onSync={syncSmallcase}
             />
+
+            {ownedBaskets.length > 0 && <BasketsList baskets={ownedBaskets} />}
           </div>
 
           {/* Right — keep writing + dimension card */}

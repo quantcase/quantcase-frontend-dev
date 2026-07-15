@@ -100,7 +100,7 @@ function TechnicalsContent() {
   if (!symbol) {
     return (
       <ScreenerPageShell navItems={TECHNICALS_NAV} companyInfo={companyInfo}>
-        <div className="text-sm text-red-600 px-4 pt-6">
+        <div className="text-sm text-down px-4 pt-6">
           Error: No symbol provided in query parameters
         </div>
       </ScreenerPageShell>
@@ -110,7 +110,7 @@ function TechnicalsContent() {
   if (error) {
     return (
       <ScreenerPageShell navItems={TECHNICALS_NAV} companyInfo={companyInfo}>
-        <div className="text-sm text-red-600 px-4 pt-6">Error: {error}</div>
+        <div className="text-sm text-down px-4 pt-6">Error: {error}</div>
       </ScreenerPageShell>
     );
   }
@@ -237,8 +237,8 @@ function TechnicalsContent() {
             <SectionPanel title="Key Insights" subtitle="AI-generated observations from technical analysis">
               <ul className="space-y-2 pb-4 px-2">
                 {data.insights.map((insight, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-[#888888]">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-zinc-400 shrink-0" />
+                  <li key={i} className="flex gap-2 text-sm text-ink-3">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-ink-3 shrink-0" />
                     {insight}
                   </li>
                 ))}

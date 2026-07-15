@@ -207,7 +207,9 @@ interface PriceLevelMarker {
 
 // Spread label X positions so no two labels on the same side overlap.
 // Labels start at their true dot X, then are nudged apart if within MIN_LABEL_GAP SVG units.
-const MIN_LABEL_GAP = 80; // minimum horizontal gap between label centres
+// Widened from 80 → 120 so the price + pill boxes (e.g. CMP ₹2,131 vs SMA-50
+// ₹2,200) no longer collide on the same side (audit /overview price chart).
+const MIN_LABEL_GAP = 120; // minimum horizontal gap between label centres
 
 function spreadLabelPositions(
   markers: (PriceLevelMarker & { dotX: number })[],
@@ -236,7 +238,7 @@ function spreadLabelPositions(
 
 function markerDotStyle(style: PriceLevelMarker["style"]): { bg: string; border: string; size: number } {
   switch (style) {
-    case "cmp":        return { bg: "#0F172B",              border: "#0F172B",              size: 14 };
+    case "cmp":        return { bg: "var(--qc-ink)",         border: "var(--qc-ink)",        size: 14 };
     case "support":    return { bg: "var(--qc-card)",       border: "var(--qc-up)",         size: 11 };
     case "resistance": return { bg: "var(--qc-card)",       border: "var(--qc-down)",       size: 11 };
     case "range-high": return { bg: "var(--qc-card)",       border: "var(--qc-warn)",       size: 11 };
@@ -249,7 +251,7 @@ function markerDotStyle(style: PriceLevelMarker["style"]): { bg: string; border:
 
 function labelColor(style: PriceLevelMarker["style"]): string {
   switch (style) {
-    case "cmp":        return "#0F172B";
+    case "cmp":        return "var(--qc-ink)";
     case "support":    return "var(--qc-up)";
     case "resistance":
     case "ath":        return "var(--qc-down)";

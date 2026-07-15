@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import type { InsightLens } from "@/types/analysis";
 import { renderMd } from "@/lib/render-md";
-import { SectionHeader } from "@/components/ds";
+import { SectionHeader, StatusBadge, type StatusSentiment } from "@/components/ds";
 
 const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
   "guidance-credibility": Target,
@@ -33,13 +33,20 @@ interface InsightLensesProps {
   onLensClick?: (slug: string) => void;
 }
 
-function lensColors(status: string | undefined, pct: number) {
+function lensSentiment(status: string | undefined, pct: number): StatusSentiment {
   const s = (status ?? "").toLowerCase();
   const isPositive = s === "strong" || s === "stable" || s === "disciplined" || (!s && pct >= 70);
   const isWarn = s === "moderate" || s === "mixed" || s === "reactive" || (!s && pct >= 40 && pct < 70);
-  if (isPositive) return { color: "var(--qc-up)", bg: "rgba(31,122,74,0.10)" };
-  if (isWarn) return { color: "var(--qc-warn)", bg: "rgba(180,115,26,0.10)" };
-  return { color: "var(--qc-down)", bg: "rgba(220,38,38,0.10)" };
+  if (isPositive) return "positive";
+  if (isWarn) return "caution";
+  return "negative";
+}
+
+function sentimentColor(sentiment: StatusSentiment): string {
+  if (sentiment === "positive") return "var(--qc-up)";
+  if (sentiment === "caution") return "var(--qc-warn)";
+  if (sentiment === "negative") return "var(--qc-down)";
+  return "var(--qc-ink-3)";
 }
 
 function ExpandIcon() {
@@ -68,8 +75,8 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
       >
         {lenses.map((lens) => {
           const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
-          const { color: statusColor, bg: statusBg } = lensColors(lens.status, pct);
-          const accentColor = statusColor;
+          const sentiment = lensSentiment(lens.status, pct);
+          const accentColor = sentimentColor(sentiment);
           const statusLabel = (lens.status || (pct >= 70 ? "STRONG" : pct >= 40 ? "MODERATE" : "NEUTRAL")).toUpperCase();
           const isClickable = !!onLensClick;
           const Icon = LENS_ICON_CONFIG[lens.slug];
@@ -117,23 +124,13 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
                   <h4 style={{ fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-semi)", lineHeight: 1.2, margin: 0, color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>
                     {lens.name}
                   </h4>
-                  {lens.subtitle && (
-                    <p style={{ fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: accentColor, margin: "2px 0 0", fontFamily: "var(--qc-font-sans)" }}>
-                      {lens.subtitle}
-                    </p>
-                  )}
+                  {/* Consistent subtitle slot across every lens card — reserves the
+                      row even when a lens has no subtitle, so cards align (audit). */}
+                  <p style={{ fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-semi)", textTransform: "uppercase", letterSpacing: "var(--qc-track-eyebrow)", color: accentColor, margin: "2px 0 0", minHeight: 12, fontFamily: "var(--qc-font-sans)" }}>
+                    {lens.subtitle ?? " "}
+                  </p>
                 </div>
-                <span style={{
-                  flexShrink: 0,
-                  display: "inline-flex", alignItems: "center", gap: 4,
-                  fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-bold)", letterSpacing: "var(--qc-track-eyebrow)",
-                  color: statusColor, background: statusBg,
-                  borderRadius: 4, padding: "3px 7px", textTransform: "uppercase",
-                  fontFamily: "var(--qc-font-sans)",
-                }}>
-                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: statusColor, flexShrink: 0 }} />
-                  {statusLabel}
-                </span>
+                <StatusBadge label={statusLabel} sentiment={sentiment} hideGlyph className="shrink-0 self-start font-bold" />
               </div>
 
               {/* Divider */}

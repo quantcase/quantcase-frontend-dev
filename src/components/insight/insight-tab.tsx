@@ -457,9 +457,17 @@ function InsightTabContent({ type }: { type: InsightType }) {
     );
   }
 
+  // Underline sub-tabs so screener scaffolding matches Overview (audit: this page
+  // dropped the secondary nav). Only include sections that actually render.
+  const navItems = [
+    { id: "section-score", label: `${TYPE_LABELS[type]} Score` },
+    insight.lenses.length > 0 && { id: "section-lenses", label: `${TYPE_LABELS[type]} Lenses` },
+    insight.signal_map.length > 0 && { id: "section-signal-map", label: "Signals" },
+  ].filter((x): x is { id: string; label: string } => Boolean(x));
+
   return (
     <>
-      <ScreenerPageShell companyInfo={companyInfo}>
+      <ScreenerPageShell companyInfo={companyInfo} navItems={navItems}>
         <InsightDashboard insight={insight} type={type} ticker={symbol} screenerData={screenerData} />
       </ScreenerPageShell>
       <AssetActionBar ticker={symbol} />

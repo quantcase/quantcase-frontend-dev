@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import type { JournalPendingHolding, Dimension, SignalType } from "@/types/journal";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, cn } from "@/lib/utils";
 import { modColor } from "@/lib/portfolio-format";
 import { renderMd } from "@/lib/render-md";
+import { StatusBadge, ScoreValue, type StatusSentiment } from "@/components/ds";
+import { Button } from "@/components/ui/button";
 
 const DIMS: { key: Dimension; label: string }[] = [
   { key: "M", label: "Management" },
@@ -12,22 +14,15 @@ const DIMS: { key: Dimension; label: string }[] = [
   { key: "D", label: "Deal" },
 ];
 
-const SIGNAL_STYLE: Record<SignalType, { bg: string; color: string; icon: string }> = {
-  green:   { bg: "var(--qc-up-soft)",   color: "var(--qc-up)",   icon: "✓" },
-  amber:   { bg: "var(--qc-warn-soft)", color: "#92400E",        icon: "⚡" },
-  red:     { bg: "#FEF2F2",             color: "#B91C1C",        icon: "✕" },
-  neutral: { bg: "var(--qc-bg)",        color: "var(--qc-ink-3)", icon: "•" },
+// Map the diary signal types onto the canonical StatusBadge sentiment, so the
+// ✓/⚡/✕ chip cloud shares ONE styling source with the rest of the app
+// (audit /diary: "ragged chip cloud", off-palette hardcoded colors).
+const SIGNAL_SENTIMENT: Record<SignalType, StatusSentiment> = {
+  green: "positive",
+  amber: "caution",
+  red: "negative",
+  neutral: "neutral",
 };
-
-function SignalChip({ label, type }: { label: string; type: SignalType }) {
-  const s = SIGNAL_STYLE[type] ?? SIGNAL_STYLE.neutral;
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: s.bg, color: s.color, fontSize: 13, padding: "7px 12px", borderRadius: 999, lineHeight: 1 }}>
-      <span style={{ fontWeight: 700 }}>{s.icon}</span>
-      {label}
-    </span>
-  );
-}
 
 // The "KEEP WRITING" hero card: a single pending holding shown with price, MOD,
 // signal chips and M · O · D dimension tabs. Clicking a tab or the CTA opens
@@ -50,51 +45,48 @@ export function DimensionCard({
   const priceUp = holding.priceChangeDir === "pos";
 
   return (
-    <div style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 16, padding: "22px 24px", boxShadow: "0 8px 30px rgba(0,0,0,0.05)" }}>
+    <div className="rounded-2xl border border-hair bg-card p-[22px_24px] shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
       {/* Header — name + price */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontFamily: "var(--qc-font-serif)", fontSize: 30, fontWeight: 500, letterSpacing: "-0.01em", color: "var(--qc-ink)", fontStyle: "italic", lineHeight: 1 }}>{holding.symbol}</div>
-          <div style={{ fontSize: 14, color: "var(--qc-ink-3)", marginTop: 8 }}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="serif text-[30px] font-medium italic leading-none text-ink">{holding.symbol}</div>
+          <div className="mt-2 text-[14px] text-ink-3">
             {[holding.name ?? holding.symbol, holding.sector].filter(Boolean).join(" · ")}
           </div>
         </div>
-        <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <div style={{ fontSize: 24, fontWeight: 600, color: "var(--qc-ink)", fontFamily: "var(--qc-font-mono)" }}>{formatPrice(holding.price)}</div>
-          <div style={{ fontSize: 13, marginTop: 4, fontFamily: "var(--qc-font-mono)", color: priceUp ? "var(--qc-up)" : "#B91C1C" }}>
+        <div className="shrink-0 text-right">
+          <div className="font-mono text-[24px] font-semibold text-ink">{formatPrice(holding.price)}</div>
+          <div className={cn("mt-1 font-mono text-[13px]", priceUp ? "text-up" : "text-down")}>
             {priceUp ? "+" : ""}{holding.priceChange.toFixed(1)}%
-            {avgMod != null && <span style={{ color: "var(--qc-up)" }}> · MOD {avgMod}</span>}
+            {avgMod != null && <span className="text-up"> · MOD {avgMod}</span>}
           </div>
         </div>
       </div>
 
-      {/* Signal chips */}
+      {/* Signal chips — canonical StatusBadge, even flex-wrap */}
       {holding.signals.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 20 }}>
+        <div className="mt-5 flex flex-wrap gap-2">
           {holding.signals.map((sig, i) => (
-            <SignalChip key={i} label={sig.label} type={sig.type} />
+            <StatusBadge key={i} label={sig.label} sentiment={SIGNAL_SENTIMENT[sig.type] ?? "neutral"} />
           ))}
         </div>
       )}
 
-      {/* Dimension tabs */}
-      <div style={{ marginTop: 24 }}>
-        <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600, color: "var(--qc-ink-3)", marginBottom: 10 }}>Dimension</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", border: "1px solid var(--qc-hair)", borderRadius: 10, overflow: "hidden" }}>
+      {/* Dimension segmented control */}
+      <div className="mt-6">
+        <div className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">Dimension</div>
+        <div className="grid grid-cols-3 overflow-hidden rounded-[10px] border border-hair">
           {DIMS.map((d, i) => {
             const active = d.key === dim;
             return (
               <button
                 key={d.key}
                 onClick={() => setDim(d.key)}
-                style={{
-                  padding: "12px 8px", fontSize: 13, cursor: "pointer",
-                  background: active ? "var(--qc-bg)" : "transparent",
-                  color: active ? "var(--qc-ink)" : "var(--qc-ink-3)",
-                  fontWeight: active ? 600 : 400,
-                  border: "none",
-                  borderRight: i < DIMS.length - 1 ? "1px solid var(--qc-hair)" : "none",
-                }}
+                className={cn(
+                  "cursor-pointer px-2 py-3 text-[13px] transition-colors",
+                  i < DIMS.length - 1 && "border-r border-hair",
+                  active ? "bg-[var(--qc-bg)] font-semibold text-ink" : "font-normal text-ink-3 hover:text-ink"
+                )}
               >
                 {d.key} · {d.label}
               </button>
@@ -104,32 +96,31 @@ export function DimensionCard({
       </div>
 
       {/* Selected dimension detail */}
-      <div style={{ marginTop: 16 }}>
+      <div className="mt-4">
         {mod != null && (
-          <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 8 }}>
-            <span style={{ fontSize: 22, fontWeight: 500, color: modColor(mod) }}>{mod}</span>
-            <span style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>/100</span>
+          <div className="mb-2">
+            <ScoreValue value={mod} max={100} size="sm" style={{ color: modColor(mod) }} />
           </div>
         )}
         {context && (
-          <div style={{ fontSize: 13, lineHeight: 1.55, color: "var(--qc-ink-2)", marginBottom: 12 }}>{renderMd(context)}</div>
+          <div className="mb-3 text-[13px] leading-[1.55] text-ink-2">{renderMd(context)}</div>
         )}
         {subFactors.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <div className="flex flex-wrap gap-1.5">
             {subFactors.map(sf => (
-              <span key={sf} style={{ fontSize: 11, background: "var(--qc-bg)", color: "var(--qc-ink-2)", padding: "4px 10px", borderRadius: 999 }}>{sf}</span>
+              <span key={sf} className="rounded-full bg-[var(--qc-bg)] px-2.5 py-1 text-[11px] text-ink-2">{sf}</span>
             ))}
           </div>
         )}
       </div>
 
-      {/* CTA */}
-      <button
+      {/* CTA — primary tier */}
+      <Button
         onClick={() => onWrite?.(holding.symbol)}
-        style={{ marginTop: 22, width: "100%", background: "var(--qc-ink)", color: "#fff", border: "none", padding: "12px", borderRadius: 10, fontSize: 14, fontWeight: 500, cursor: "pointer" }}
+        className="mt-[22px] w-full rounded-[10px] py-3 text-sm font-medium"
       >
         Write your reason for {holding.symbol} →
-      </button>
+      </Button>
     </div>
   );
 }

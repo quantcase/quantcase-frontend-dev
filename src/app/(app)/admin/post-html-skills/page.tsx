@@ -23,7 +23,7 @@ import { ResultCard } from "./_components/ResultCard";
 import { ConfigsPanel } from "./_components/ConfigsPanel";
 
 const API = `${BACKEND_URL}/api/post-html-analysis`;
-const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5";
+const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 const POLL_MS = 2000;
 const JOB_TIMEOUT_MS = 3 * 60 * 1000; // give up watching a job after 3 min of no matching result
 
@@ -161,9 +161,9 @@ export default function PostHtmlSkillsPage() {
       ) : (
         <>
       {/* Intro */}
-      <div className="rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
-        <p className="text-[13px] text-[#0F172B] font-medium">On-demand post-HTML analysis dispatch</p>
-        <p className="text-[12px] text-[#888888] mt-1">
+      <div className="rounded-md border border-hair bg-secondary px-4 py-3">
+        <p className="text-[13px] text-ink font-medium">On-demand post-HTML analysis dispatch</p>
+        <p className="text-[12px] text-ink-3 mt-1">
           Enqueues an LLM analysis job per type against the most recent HTML available for each lens.
           There&rsquo;s no dedicated job-status endpoint for this queue yet — this page polls the results
           endpoint below and treats a fresh <code>updated_at</code> as &ldquo;done&rdquo;. L4 requires at
@@ -172,7 +172,7 @@ export default function PostHtmlSkillsPage() {
       </div>
 
       {/* Ticker + layer */}
-      <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-4 space-y-4">
+      <div className="rounded-[10px] border border-hair bg-card p-4 space-y-4">
         <div className="flex items-center gap-3 flex-wrap">
           <div>
             <label className={LABEL_CLS}>Ticker</label>
@@ -186,7 +186,7 @@ export default function PostHtmlSkillsPage() {
 
         {layer === "l3" && (
           <div>
-            <label className={LABEL_CLS}>Types <span className="normal-case tracking-normal font-normal text-[#888888]">— omit all to default to all three</span></label>
+            <label className={LABEL_CLS}>Types <span className="normal-case tracking-normal font-normal text-ink-3">— omit all to default to all three</span></label>
             <div className="flex gap-5 flex-wrap">
               {L3_TYPES.map((t) => (
                 <CheckboxField key={t} checked={types.includes(t)} onChange={() => toggleType(t)} label={POST_HTML_TYPE_LABELS[t]} />
@@ -196,20 +196,20 @@ export default function PostHtmlSkillsPage() {
         )}
 
         {layer === "l4" && (
-          <p className="text-[12px] text-[#888888]">
-            L4 has a single implicit type (<span className="font-medium text-[#0F172B]">summary</span>) —
+          <p className="text-[12px] text-ink-3">
+            L4 has a single implicit type (<span className="font-medium text-ink">summary</span>) —
             no type selection needed.
           </p>
         )}
 
-        <div className="flex items-end gap-3 flex-wrap pt-1 border-t border-[#F0F0F0]">
+        <div className="flex items-end gap-3 flex-wrap pt-1 border-t border-hair">
           <div>
             <label className={LABEL_CLS}>Fiscal year <span className="normal-case tracking-normal font-normal">(optional)</span></label>
             <input
               value={fiscalYear}
               onChange={(e) => setFiscalYear(e.target.value)}
               placeholder="FY2026"
-              className="w-28 rounded-md border border-[#E2E2E2] bg-white px-2.5 py-1.5 text-[12px] text-[#0F172B] outline-none focus:ring-1 focus:ring-[#0F172B]"
+              className="w-28 rounded-md border border-hair bg-card px-2.5 py-1.5 text-[12px] text-ink outline-none focus:ring-1 focus:ring-ink"
             />
           </div>
           <div>
@@ -218,7 +218,7 @@ export default function PostHtmlSkillsPage() {
               value={quarter}
               onChange={(e) => setQuarter(e.target.value)}
               placeholder="Q3"
-              className="w-20 rounded-md border border-[#E2E2E2] bg-white px-2.5 py-1.5 text-[12px] text-[#0F172B] outline-none focus:ring-1 focus:ring-[#0F172B]"
+              className="w-20 rounded-md border border-hair bg-card px-2.5 py-1.5 text-[12px] text-ink outline-none focus:ring-1 focus:ring-ink"
             />
           </div>
           <CheckboxField
@@ -231,9 +231,9 @@ export default function PostHtmlSkillsPage() {
       </div>
 
       {enqueueError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {enqueueError}
-          <button onClick={() => setEnqueueError(null)} className="ml-auto text-red-500 hover:text-red-700"><X className="size-4" /></button>
+          <button onClick={() => setEnqueueError(null)} className="ml-auto text-down hover:text-down"><X className="size-4" /></button>
         </div>
       )}
 
@@ -241,31 +241,31 @@ export default function PostHtmlSkillsPage() {
         <button
           onClick={handleEnqueue}
           disabled={!canEnqueue}
-          className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40"
         >
           {enqueuing ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
           Enqueue {layer.toUpperCase()} analysis
         </button>
-        {!ticker && <span className="text-[11px] text-[#888888]">Select a ticker first</span>}
+        {!ticker && <span className="text-[11px] text-ink-3">Select a ticker first</span>}
       </div>
 
       {/* Tracked jobs */}
       {trackedJobs.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">
               Enqueued jobs {pendingCount > 0 && `(${pendingCount} pending)`}
             </span>
           </div>
           <div className="space-y-1.5">
             {trackedJobs.map((j) => (
-              <div key={j.jobId} className="flex items-center gap-3 rounded-md border border-[#F0F0F0] bg-white px-3 py-2">
-                {j.status === "pending" && <Loader2 className="size-3.5 text-blue-600 animate-spin shrink-0" />}
-                {j.status === "done" && <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" />}
-                {j.status === "timeout" && <Clock className="size-3.5 text-amber-600 shrink-0" />}
-                <span className="text-[12px] font-medium text-[#0F172B] w-24 shrink-0">{POST_HTML_TYPE_LABELS[j.type] ?? j.type}</span>
-                <span className="font-mono text-[11px] text-[#888888] truncate">{j.jobId}</span>
-                <span className="text-[11px] text-[#888888] ml-auto shrink-0">
+              <div key={j.jobId} className="flex items-center gap-3 rounded-md border border-hair bg-card px-3 py-2">
+                {j.status === "pending" && <Loader2 className="size-3.5 text-blue animate-spin shrink-0" />}
+                {j.status === "done" && <CheckCircle2 className="size-3.5 text-up shrink-0" />}
+                {j.status === "timeout" && <Clock className="size-3.5 text-warn shrink-0" />}
+                <span className="text-[12px] font-medium text-ink w-24 shrink-0">{POST_HTML_TYPE_LABELS[j.type] ?? j.type}</span>
+                <span className="font-mono text-[11px] text-ink-3 truncate">{j.jobId}</span>
+                <span className="text-[11px] text-ink-3 ml-auto shrink-0">
                   {j.status === "pending" ? "watching for result…" : j.status === "done" ? "result updated" : "no update yet — check worker logs"}
                 </span>
               </div>
@@ -277,13 +277,13 @@ export default function PostHtmlSkillsPage() {
       {/* Results */}
       <div className="space-y-2 pt-2">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">
             Results {layer.toUpperCase()} {ticker ? `— ${ticker}` : ""}
           </span>
           <button
             onClick={loadResults}
             disabled={resultsLoading || !ticker}
-            className="flex items-center gap-1.5 text-[11px] text-[#888888] hover:text-[#0F172B] disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[11px] text-ink-3 hover:text-ink disabled:opacity-40"
           >
             {resultsLoading ? <Loader2 className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
             Refresh
@@ -291,14 +291,14 @@ export default function PostHtmlSkillsPage() {
         </div>
 
         {resultsError && !resultsLoading && (
-          <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-sm text-down">
             <AlertCircle className="size-4 shrink-0" /> {resultsError}
           </div>
         )}
 
-        {!ticker && <p className="text-[12px] text-[#888888]">Select a ticker to view results.</p>}
+        {!ticker && <p className="text-[12px] text-ink-3">Select a ticker to view results.</p>}
         {ticker && results.length === 0 && !resultsLoading && !resultsError && (
-          <p className="text-[12px] text-[#888888]">
+          <p className="text-[12px] text-ink-3">
             No results yet — either nothing has been enqueued, or the job hasn&rsquo;t completed. This
             endpoint doesn&rsquo;t surface a distinct &ldquo;pending&rdquo; state.
           </p>

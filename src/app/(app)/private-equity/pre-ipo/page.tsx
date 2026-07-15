@@ -67,9 +67,9 @@ function UploadArea({
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-[8px] border border-red-200 bg-red-50 px-4 py-3">
-          <AlertCircle className="size-4 text-red-600 flex-shrink-0" />
-          <p className="text-[13px] text-red-600">{error}</p>
+        <div className="flex items-center gap-2 rounded-[8px] border border-down-soft bg-down-soft px-4 py-3">
+          <AlertCircle className="size-4 text-down flex-shrink-0" />
+          <p className="text-[13px] text-down">{error}</p>
         </div>
       )}
 

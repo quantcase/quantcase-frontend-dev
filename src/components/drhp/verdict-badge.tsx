@@ -15,11 +15,12 @@ function classify(verdict: string): "positive" | "negative" | "neutral" | "cauti
   return "neutral";
 }
 
+// Solid verdict fill from design-system tokens (semantic up/down/warn/ink).
 const CONFIG = {
-  positive:  { bg: "bg-emerald-600", text: "text-white", Icon: CheckCircle2 },
-  negative:  { bg: "bg-red-600",     text: "text-white", Icon: XCircle },
-  cautious:  { bg: "bg-amber-500",   text: "text-white", Icon: TrendingUp },
-  neutral:   { bg: "bg-zinc-800",    text: "text-white", Icon: AlertCircle },
+  positive:  { bg: "bg-up",   text: "text-white", Icon: CheckCircle2 },
+  negative:  { bg: "bg-down", text: "text-white", Icon: XCircle },
+  cautious:  { bg: "bg-warn", text: "text-white", Icon: TrendingUp },
+  neutral:   { bg: "bg-ink",  text: "text-[var(--qc-on-dark)]", Icon: AlertCircle },
 };
 
 const SIZE = {

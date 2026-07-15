@@ -38,7 +38,7 @@ export default function CoveragePage() {
         <button
           onClick={() => setShowHelp(true)}
           title="Help"
-          className="flex items-center justify-center size-7 rounded border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] transition-colors shrink-0"
+          className="flex items-center justify-center size-7 rounded border border-hair text-ink-3 hover:text-ink hover:border-ink transition-colors shrink-0"
         >
           <HelpCircle className="size-3.5" />
         </button>
@@ -48,31 +48,31 @@ export default function CoveragePage() {
           reusable across L1/L2/L3, managed in one place regardless of which lens tab is open. */}
       <Link
         href="/admin/company-groups"
-        className="flex items-center gap-4 rounded-[10px] border border-[#E2E2E2] bg-white px-5 py-4 hover:border-[#0F172B] transition-colors group"
+        className="flex items-center gap-4 rounded-[10px] border border-hair bg-card px-5 py-4 hover:border-ink transition-colors group"
       >
-        <div className="flex size-10 items-center justify-center rounded-[8px] bg-[#0F172B] shrink-0">
-          <Layers className="size-5 text-white" />
+        <div className="flex size-10 items-center justify-center rounded-[8px] bg-ink shrink-0">
+          <Layers className="size-5 text-[var(--qc-on-dark)]" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-semibold text-[#0F172B]">Company Groups</p>
-          <p className="text-[12px] text-[#888888] mt-0.5">
+          <p className="text-[14px] font-semibold text-ink">Company Groups</p>
+          <p className="text-[12px] text-ink-3 mt-0.5">
             Manual ticker lists and live filters, reusable across L1, L2, and L3 dispatch — create,
             edit, and tag them here.
           </p>
         </div>
-        <ArrowRight className="size-4 text-[#888888] group-hover:text-[#0F172B] transition-colors shrink-0" />
+        <ArrowRight className="size-4 text-ink-3 group-hover:text-ink transition-colors shrink-0" />
       </Link>
 
       {/* Tab strip */}
-      <div className="flex border-b border-[#E2E2E2]">
+      <div className="flex border-b border-hair">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
               activeTab === tab.id
-                ? "border-[#0F172B] text-[#0F172B]"
-                : "border-transparent text-[#888888] hover:text-[#0F172B]"
+                ? "border-ink text-ink"
+                : "border-transparent text-ink-3 hover:text-ink"
             }`}
           >
             {tab.label}

@@ -354,9 +354,9 @@ function SortIcon({ dir }: { dir: false | "asc" | "desc" }) {
 // ── Industry basket signal badge ──────────────────────────────────────────────
 
 const SIGNAL_STYLE: Record<string, { bg: string; border: string; color: string }> = {
-  BUY:   { bg: "#f0faf0", border: "#c3e6c3", color: "#3a6b3a" },
-  WAIT:  { bg: "#fdf8ed", border: "#f0d89a", color: "#8a5e1a" },
-  AVOID: { bg: "#fdf0f0", border: "#f0c4c4", color: "#8a2020" },
+  BUY:   { bg: "var(--qc-up-soft)",   border: "var(--qc-up-soft)",   color: "var(--qc-up)" },
+  WAIT:  { bg: "var(--qc-warn-soft)", border: "var(--qc-warn-soft)", color: "var(--qc-warn)" },
+  AVOID: { bg: "var(--qc-down-soft)", border: "var(--qc-down-soft)", color: "var(--qc-down)" },
 };
 
 // ── Industry basket detail view ───────────────────────────────────────────────
@@ -522,7 +522,7 @@ function IndustryBasketView({ basketId }: { basketId: string }) {
             </div>
           )}
           {error && (
-            <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+            <div className="flex items-center gap-2 rounded-xl border border-down-soft bg-down-soft px-4 py-3">
               <AlertCircle className="h-4 w-4 flex-shrink-0" style={{ color: "var(--qc-down)" }} />
               <p className="text-sm" style={{ color: "var(--qc-down)" }}>{error}</p>
             </div>
@@ -958,7 +958,7 @@ function BasketContent() {
 
             {/* Top-level error */}
             {topError && (
-              <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+              <div className="flex items-center gap-2 rounded-xl border border-down-soft bg-down-soft px-4 py-3">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" style={{ color: "var(--qc-down)" }} />
                 <p className="text-sm" style={{ color: "var(--qc-down)" }}>{topError}</p>
               </div>

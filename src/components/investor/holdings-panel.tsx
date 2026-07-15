@@ -15,8 +15,10 @@ import { formatINR } from "@/lib/utils";
 import { MonoLabel } from "@/components/ds";
 import type { AllocationSegment, ValueTrendPoint } from "@/types/investor-dashboard";
 
-// Design-system allocation palette — assigned by segment order (backend sends no colors).
-const SEGMENT_COLORS = ["#0F172B", "#7c3aed", "#d97706", "#0891b2", "#71717a", "#be123c"];
+// Allocation categories carry no semantic meaning, so per the design system they
+// use a neutral navy→zinc ramp (not off-palette purple/cyan/amber). Differentiate
+// segments by position + label, never by decorative color.
+const SEGMENT_COLORS = ["#210B2C", "#4A3A52", "#6E5F74", "#948898", "#B8AFBC", "#D6D0D9"];
 
 function segmentColor(i: number): string {
   return SEGMENT_COLORS[i % SEGMENT_COLORS.length];
@@ -207,6 +209,10 @@ export function HoldingsPanel({
     ? "var(--qc-ink-3)"
     : todayPositive ? "var(--qc-up)" : "var(--qc-down)";
 
+  // Show a real empty state instead of rendering ₹0.00L / "— YTD" / a donut off
+  // zero values when there's nothing to display yet (audit #11).
+  const hasEquity = equityValue > 0;
+
   return (
     <div
       style={{
@@ -228,8 +234,8 @@ export function HoldingsPanel({
         }}
       >
         <MonoLabel size={10} tracking="0.14em" color="var(--qc-ink-3)">
-          {isShadow ? "Trackers" : "Your Holdings"} · {stockCount} stocks
-          {fundCount > 0 && ` · ${fundCount} mutual funds`}
+          {isShadow ? "Trackers" : "Your Holdings"} · {stockCount} {stockCount === 1 ? "stock" : "stocks"}
+          {fundCount > 0 && ` · ${fundCount} mutual fund${fundCount === 1 ? "" : "s"}`}
         </MonoLabel>
 
         {isShadow && !brokerConnected ? (
@@ -342,64 +348,83 @@ export function HoldingsPanel({
             >
               EQUITY VALUE
             </div>
-            <div
-              style={{
-                fontSize: "var(--qc-fz-26)",
-                fontWeight: "var(--qc-w-medium)",
-                fontFamily: "var(--qc-font-mono)",
-                color: "var(--qc-ink)",
-                letterSpacing: "var(--qc-track-display)",
-                lineHeight: 1,
-              }}
-            >
-              {formatINR(equityValue)}
-            </div>
-            <div
-              style={{
-                fontSize: "var(--qc-fz-11)",
-                fontFamily: "var(--qc-font-sans)",
-                color: todayColor,
-                marginTop: 3,
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                flexWrap: "wrap",
-              }}
-            >
-              {todayChangeValue != null && (
-                <>
-                  <span>
-                    {fmtSignedINR(todayChangeValue)}
-                    {todayChangePct != null && ` (${fmtPct(todayChangePct)})`} today
-                  </span>
-                  <span style={{ color: "var(--qc-ink-3)" }}>·</span>
-                </>
-              )}
-              <span style={{ color: ytdChangePct == null ? "var(--qc-ink-3)" : todayColor }}>
-                {fmtPct(ytdChangePct)} YTD
-              </span>
-              {approximate && (
-                <>
-                  <span style={{ color: "var(--qc-ink-3)" }}>·</span>
-                  <span style={{ color: "var(--qc-ink-3)", fontStyle: "italic" }}>approx.</span>
-                </>
-              )}
-            </div>
+            {hasEquity ? (
+              <>
+                <div
+                  style={{
+                    fontSize: "var(--qc-fz-26)",
+                    fontWeight: "var(--qc-w-medium)",
+                    fontFamily: "var(--qc-font-mono)",
+                    color: "var(--qc-ink)",
+                    letterSpacing: "var(--qc-track-display)",
+                    lineHeight: 1,
+                  }}
+                >
+                  {formatINR(equityValue)}
+                </div>
+                <div
+                  style={{
+                    fontSize: "var(--qc-fz-11)",
+                    fontFamily: "var(--qc-font-sans)",
+                    color: todayColor,
+                    marginTop: 3,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {todayChangeValue != null && (
+                    <>
+                      <span>
+                        {fmtSignedINR(todayChangeValue)}
+                        {todayChangePct != null && ` (${fmtPct(todayChangePct)})`} today
+                      </span>
+                      <span style={{ color: "var(--qc-ink-3)" }}>·</span>
+                    </>
+                  )}
+                  {ytdChangePct != null && (
+                    <span style={{ color: todayColor }}>{fmtPct(ytdChangePct)} YTD</span>
+                  )}
+                  {approximate && (
+                    <>
+                      <span style={{ color: "var(--qc-ink-3)" }}>·</span>
+                      <span style={{ color: "var(--qc-ink-3)", fontStyle: "italic" }}>approx.</span>
+                    </>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div
+                style={{
+                  fontSize: "var(--qc-fz-13)",
+                  fontFamily: "var(--qc-font-sans)",
+                  color: "var(--qc-ink-3)",
+                  lineHeight: 1.4,
+                  maxWidth: 260,
+                }}
+              >
+                {brokerConnected
+                  ? "Syncing your holdings — your equity value will appear here shortly."
+                  : "Connect or sync your holdings to see your equity value."}
+              </div>
+            )}
           </div>
 
-          {/* Quick stat chips */}
+          {/* Quick stat chips — only render stats that actually have a value
+              (no bare "6M RETURN —" placeholders; audit #11). */}
           <div
             className="hidden sm:flex"
             style={{ flexDirection: "column", gap: 4, alignItems: "flex-end" }}
           >
             {[
-              {
+              return6mPct != null && {
                 label: "6M RETURN",
                 value: fmtPct(return6mPct),
-                positive: return6mPct == null ? null : return6mPct >= 0,
+                positive: return6mPct >= 0,
               },
-              { label: "INVESTED", value: formatINR(investedValue), positive: null },
-            ].map((s) => (
+              investedValue > 0 && { label: "INVESTED", value: formatINR(investedValue), positive: null },
+            ].filter((s): s is { label: string; value: string; positive: boolean | null } => Boolean(s)).map((s) => (
               <div
                 key={s.label}
                 style={{
@@ -619,7 +644,7 @@ export function HoldingsPanel({
                         flexShrink: 0,
                       }}
                     >
-                      {seg.count} stocks
+                      {seg.count} {seg.count === 1 ? "stock" : "stocks"}
                     </span>
                   </div>
                   <div

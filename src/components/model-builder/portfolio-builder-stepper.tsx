@@ -357,13 +357,13 @@ export function PortfolioBuilderStepper({ onSuccess, onCancel }: PortfolioBuilde
               />
             )}
 
-            {error && <p className="text-sm text-red-600 text-center pt-4">{error}</p>}
+            {error && <p className="text-sm text-down text-center pt-4">{error}</p>}
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 flex items-center justify-between px-6 py-4 border-t border-[#E2E2E2] bg-white">
+      <div className="shrink-0 flex items-center justify-between px-6 py-4 border-t border-hair bg-card">
         <AnimatePresence mode="wait" initial={false}>
           {footerBack ? (
             <motion.button
@@ -376,7 +376,7 @@ export function PortfolioBuilderStepper({ onSuccess, onCancel }: PortfolioBuilde
               transition={{ duration: 0.2 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
-              className="rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium hover:bg-zinc-50"
+              className="rounded-md border border-hair px-4 py-2 text-sm font-medium hover:bg-secondary"
               style={{ color: "var(--qc-ink)" }}
             >
               ← Back
@@ -390,7 +390,7 @@ export function PortfolioBuilderStepper({ onSuccess, onCancel }: PortfolioBuilde
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="text-sm hover:text-zinc-700 transition-colors"
+              className="text-sm hover:text-ink transition-colors"
               style={{ color: "var(--qc-ink-2)" }}
             >
               Cancel
@@ -410,7 +410,7 @@ export function PortfolioBuilderStepper({ onSuccess, onCancel }: PortfolioBuilde
             transition={{ duration: 0.22 }}
             whileHover={footerNextDisabled ? {} : { scale: 1.02 }}
             whileTap={footerNextDisabled ? {} : { scale: 0.97 }}
-            className="rounded-md px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed"
+            className="rounded-md px-5 py-2.5 text-sm font-semibold text-[var(--qc-on-dark)] disabled:cursor-not-allowed"
             style={{ background: "var(--qc-ink)" }}
           >
             {footerNextLabel}

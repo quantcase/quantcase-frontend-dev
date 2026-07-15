@@ -15,10 +15,10 @@ import {
 const BASE = `${BACKEND_URL}/admin/error-reports`;
 
 const STATUS_OPTIONS: { value: ErrorReportStatus; label: string; color: string }[] = [
-  { value: "open", label: "Open", color: "text-blue-600 bg-blue-50 border-blue-200" },
-  { value: "in_progress", label: "In progress", color: "text-amber-600 bg-amber-50 border-amber-200" },
-  { value: "resolved", label: "Resolved", color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
-  { value: "wont_fix", label: "Won't fix", color: "text-zinc-500 bg-zinc-50 border-zinc-200" },
+  { value: "open", label: "Open", color: "text-blue bg-blue-soft border-blue" },
+  { value: "in_progress", label: "In progress", color: "text-warn bg-warn-soft border-warn" },
+  { value: "resolved", label: "Resolved", color: "text-up bg-up-soft border-up" },
+  { value: "wont_fix", label: "Won't fix", color: "text-ink-2 bg-secondary border-hair" },
 ];
 
 function statusMeta(status: ErrorReportStatus) {
@@ -59,36 +59,36 @@ function ReportRow({ report, onUpdated }: { report: ErrorReportWithUser; onUpdat
   }
 
   return (
-    <div className="rounded-[8px] border border-[#E2E2E2] bg-white overflow-hidden">
+    <div className="rounded-[8px] border border-hair bg-card overflow-hidden">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#F5F5F5] transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-secondary transition-colors"
       >
         <span className={cn("shrink-0 text-[10px] font-semibold uppercase tracking-wider rounded-sm border px-1.5 py-0.5", meta.color)}>
           {meta.label}
         </span>
-        <span className="shrink-0 text-[10px] uppercase tracking-wider font-semibold text-[#888888] bg-[#F5F5F5] rounded-sm px-1.5 py-0.5">
+        <span className="shrink-0 text-[10px] uppercase tracking-wider font-semibold text-ink-3 bg-secondary rounded-sm px-1.5 py-0.5">
           {categoryLabel}
         </span>
-        <span className="flex-1 min-w-0 truncate text-[13px] text-[#0F172B]">{report.message}</span>
-        <span className="shrink-0 text-[11px] text-[#888888]">{report.user?.email ?? report.user_email ?? "—"}</span>
-        <span className="shrink-0 text-[11px] text-[#888888]">{formatDate(report.created_at)}</span>
+        <span className="flex-1 min-w-0 truncate text-[13px] text-ink">{report.message}</span>
+        <span className="shrink-0 text-[11px] text-ink-3">{report.user?.email ?? report.user_email ?? "—"}</span>
+        <span className="shrink-0 text-[11px] text-ink-3">{formatDate(report.created_at)}</span>
       </button>
 
       {expanded && (
-        <div className="border-t border-[#E2E2E2] px-4 py-3 space-y-3 bg-[#FAFAFA]">
-          <p className="text-[13px] text-[#0F172B] whitespace-pre-wrap">{report.message}</p>
+        <div className="border-t border-hair px-4 py-3 space-y-3 bg-secondary">
+          <p className="text-[13px] text-ink whitespace-pre-wrap">{report.message}</p>
 
           {report.error_message && (
-            <div className="rounded-md border border-[#E2E2E2] bg-white px-3 py-2">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">Captured error</p>
-              <p className="text-[12px] font-mono text-[#0F172B] break-words">{report.error_message}</p>
+            <div className="rounded-md border border-hair bg-card px-3 py-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1">Captured error</p>
+              <p className="text-[12px] font-mono text-ink break-words">{report.error_message}</p>
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-[#888888]">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-ink-3">
             {report.page_url && (
-              <a href={report.page_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#0F172B] transition-colors">
+              <a href={report.page_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-ink transition-colors">
                 <ExternalLink className="size-3" />
                 {report.page_url}
               </a>
@@ -97,9 +97,9 @@ function ReportRow({ report, onUpdated }: { report: ErrorReportWithUser; onUpdat
           </div>
 
           {report.metadata && Object.keys(report.metadata).length > 0 && (
-            <div className="rounded-md border border-[#E2E2E2] bg-white px-3 py-2">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">Metadata</p>
-              <pre className="text-[11px] font-mono text-[#0F172B] whitespace-pre-wrap break-words">
+            <div className="rounded-md border border-hair bg-card px-3 py-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1">Metadata</p>
+              <pre className="text-[11px] font-mono text-ink whitespace-pre-wrap break-words">
                 {JSON.stringify(report.metadata, null, 2)}
               </pre>
             </div>
@@ -115,7 +115,7 @@ function ReportRow({ report, onUpdated }: { report: ErrorReportWithUser; onUpdat
                   "text-[11px] font-medium rounded-md border px-2.5 py-1 transition-colors disabled:cursor-default",
                   s.value === report.status
                     ? s.color
-                    : "text-[#888888] bg-white border-[#E2E2E2] hover:border-[#0F172B] hover:text-[#0F172B]"
+                    : "text-ink-3 bg-card border-hair hover:border-ink hover:text-ink"
                 )}
               >
                 {s.label}
@@ -124,20 +124,20 @@ function ReportRow({ report, onUpdated }: { report: ErrorReportWithUser; onUpdat
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#888888]">
+            <label className="block text-[10px] font-semibold uppercase tracking-wider text-ink-3">
               Admin notes
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="w-full rounded-md border border-[#E2E2E2] px-3 py-2 text-sm text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B] resize-none bg-white"
+              className="w-full rounded-md border border-hair px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)] resize-none bg-card"
               placeholder="Internal notes…"
             />
             <button
               onClick={saveNotes}
               disabled={saving || notes === (report.admin_notes ?? "")}
-              className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-md bg-ink px-3 py-1.5 text-xs font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving && <Loader2 className="size-3 animate-spin" />}
               Save notes
@@ -196,7 +196,7 @@ export default function AdminErrorReportsPage() {
             setPage(1);
             load();
           }}
-          className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-3 py-2 text-sm font-medium text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] transition-colors"
+          className="flex items-center gap-1.5 rounded-md border border-hair px-3 py-2 text-sm font-medium text-ink-3 hover:text-ink hover:border-ink transition-colors"
         >
           <RefreshCw className={cn("size-3.5", loading && "animate-spin")} />
           Refresh
@@ -210,7 +210,7 @@ export default function AdminErrorReportsPage() {
             setPage(1);
             setStatusFilter(e.target.value as ErrorReportStatus | "");
           }}
-          className="rounded-md border border-[#E2E2E2] px-3 py-2 text-sm text-[#0F172B] bg-white focus:outline-none focus:ring-1 focus:ring-[#0F172B]"
+          className="rounded-md border border-hair px-3 py-2 text-sm text-ink bg-card focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
         >
           <option value="">All statuses</option>
           {STATUS_OPTIONS.map((s) => (
@@ -224,7 +224,7 @@ export default function AdminErrorReportsPage() {
             setPage(1);
             setCategoryFilter(e.target.value);
           }}
-          className="rounded-md border border-[#E2E2E2] px-3 py-2 text-sm text-[#0F172B] bg-white focus:outline-none focus:ring-1 focus:ring-[#0F172B]"
+          className="rounded-md border border-hair px-3 py-2 text-sm text-ink bg-card focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]"
         >
           <option value="">All categories</option>
           {ERROR_REPORT_CATEGORIES.map((c) => (
@@ -234,19 +234,19 @@ export default function AdminErrorReportsPage() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-hair bg-down-soft px-3 py-2 text-[12px] text-down">
           <AlertCircle className="size-3.5 shrink-0" />
           {error}
         </div>
       )}
 
       {loading && reports.length === 0 ? (
-        <div className="flex items-center gap-2 text-[13px] text-[#888888] py-8 justify-center">
+        <div className="flex items-center gap-2 text-[13px] text-ink-3 py-8 justify-center">
           <Loader2 className="size-4 animate-spin" />
           Loading reports…
         </div>
       ) : reports.length === 0 ? (
-        <div className="text-[13px] text-[#888888] py-8 text-center">No error reports found.</div>
+        <div className="text-[13px] text-ink-3 py-8 text-center">No error reports found.</div>
       ) : (
         <div className="space-y-2">
           {reports.map((report) => (
@@ -260,15 +260,15 @@ export default function AdminErrorReportsPage() {
           <button
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-md border border-[#E2E2E2] px-3 py-1.5 text-xs font-medium text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="rounded-md border border-hair px-3 py-1.5 text-xs font-medium text-ink-3 hover:text-ink hover:border-ink transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Previous
           </button>
-          <span className="text-[12px] text-[#888888]">Page {page} of {totalPages}</span>
+          <span className="text-[12px] text-ink-3">Page {page} of {totalPages}</span>
           <button
             disabled={page >= totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="rounded-md border border-[#E2E2E2] px-3 py-1.5 text-xs font-medium text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="rounded-md border border-hair px-3 py-1.5 text-xs font-medium text-ink-3 hover:text-ink hover:border-ink transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next
           </button>

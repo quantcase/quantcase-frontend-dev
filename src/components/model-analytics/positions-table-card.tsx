@@ -2,11 +2,11 @@ import { Target } from "lucide-react";
 import type { PortfolioData } from "@/types/portfolio";
 
 function PositionRow({ pos, rank }: { pos: PortfolioData["positions"][0]; rank: number }) {
-  const scoreColor = pos.score >= 80 ? "#16a34a" : pos.score >= 65 ? "#d97706" : "#dc2626";
+  const scoreColor = pos.score >= 80 ? "var(--qc-up)" : pos.score >= 65 ? "var(--qc-warn)" : "var(--qc-down)";
 
   return (
     <div
-      className="grid items-center gap-3 py-3 border-b border-[#E2E2E2] last:border-0"
+      className="grid items-center gap-3 py-3 border-b border-hair last:border-0"
       style={{ gridTemplateColumns: "24px 1fr 68px 70px 54px" }}
     >
       <span style={{ fontSize: 11, color: "var(--qc-ink-2)", fontVariantNumeric: "tabular-nums" }}>{rank}</span>
@@ -43,20 +43,20 @@ export function PositionsTableCard({ portfolio }: { portfolio: PortfolioData }) 
   const totalWeight = portfolio.positions.reduce((s, p) => s + p.allocation, 0);
 
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
-      <div className="rounded-[10px] bg-white p-4">
+    <div className="rounded-[10px] border border-hair bg-secondary p-2">
+      <div className="rounded-[10px] bg-card p-4">
         <div className="flex items-center justify-between mb-4">
           <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)" }}>Equity Positions</span>
           <div className="flex items-center gap-2">
             <span style={{ fontSize: 12, color: "var(--qc-ink-2)" }}>
               {portfolio.positions.length} holdings · {totalWeight}% allocated
             </span>
-            <Target className="size-4 text-zinc-400" />
+            <Target className="size-4 text-ink-3" />
           </div>
         </div>
 
         <div
-          className="grid gap-3 pb-2 border-b border-[#E2E2E2] mb-1"
+          className="grid gap-3 pb-2 border-b border-hair mb-1"
           style={{ gridTemplateColumns: "24px 1fr 68px 70px 54px" }}
         >
           {["#", "Company", "Class", "IC Score", "Alloc"].map((h) => (

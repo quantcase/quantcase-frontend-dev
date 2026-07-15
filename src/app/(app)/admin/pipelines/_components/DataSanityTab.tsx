@@ -96,15 +96,15 @@ function isDeltaEntry(v: unknown): v is DeltaEntry {
 
 function FormulaDisplay({ formula }: { formula: unknown }) {
   if (typeof formula === "string") {
-    return <code className="text-xs font-mono text-[#0F172B]">{formula}</code>;
+    return <code className="text-xs font-mono text-ink">{formula}</code>;
   }
   if (typeof formula === "object" && formula !== null) {
     return (
       <div className="space-y-0.5">
         {Object.entries(formula as Record<string, string>).map(([k, v]) => (
           <div key={k} className="flex gap-2 text-xs">
-            <span className="text-[#888888] uppercase font-medium w-16 shrink-0">{k}:</span>
-            <code className="font-mono text-[#0F172B]">{v}</code>
+            <span className="text-ink-3 uppercase font-medium w-16 shrink-0">{k}:</span>
+            <code className="font-mono text-ink">{v}</code>
           </div>
         ))}
       </div>
@@ -127,25 +127,25 @@ function InputValuesTable({
       <div className="rounded-md border border-[var(--qc-border-default)] overflow-hidden">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-[#F5F5F5] border-b border-[var(--qc-border-default)]">
-              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Component</th>
-              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">Current</th>
-              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">Previous</th>
-              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">Delta</th>
+            <tr className="bg-secondary border-b border-[var(--qc-border-default)]">
+              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Component</th>
+              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-ink-3">Current</th>
+              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-ink-3">Previous</th>
+              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-ink-3">Delta</th>
             </tr>
           </thead>
           <tbody>
             {Object.entries(inputValues).map(([k, v]) => {
               const e = v as DeltaEntry;
               const deltaColor =
-                e.delta == null ? "text-[#888888]" :
-                e.delta > 0 ? "text-emerald-600" :
-                e.delta < 0 ? "text-red-600" : "text-[#888888]";
+                e.delta == null ? "text-ink-3" :
+                e.delta > 0 ? "text-up" :
+                e.delta < 0 ? "text-down" : "text-ink-3";
               return (
                 <tr key={k} className="border-b last:border-0">
-                  <td className="px-3 py-2 font-mono text-[#0F172B]">{k}</td>
-                  <td className="px-3 py-2 text-right text-[#0F172B]">{fmtNum(e.curr, unit)}</td>
-                  <td className="px-3 py-2 text-right text-[#888888]">{fmtNum(e.prev, unit)}</td>
+                  <td className="px-3 py-2 font-mono text-ink">{k}</td>
+                  <td className="px-3 py-2 text-right text-ink">{fmtNum(e.curr, unit)}</td>
+                  <td className="px-3 py-2 text-right text-ink-3">{fmtNum(e.prev, unit)}</td>
                   <td className={`px-3 py-2 text-right font-medium ${deltaColor}`}>{fmtNum(e.delta, unit)}</td>
                 </tr>
               );
@@ -160,16 +160,16 @@ function InputValuesTable({
     <div className="rounded-md border border-[var(--qc-border-default)] overflow-hidden">
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-[#F5F5F5] border-b border-[var(--qc-border-default)]">
-            <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Input</th>
-            <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">Value</th>
+          <tr className="bg-secondary border-b border-[var(--qc-border-default)]">
+            <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Input</th>
+            <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-ink-3">Value</th>
           </tr>
         </thead>
         <tbody>
           {Object.entries(inputValues).map(([k, v]) => (
             <tr key={k} className="border-b last:border-0">
-              <td className="px-3 py-2 font-mono text-[#0F172B]">{k}</td>
-              <td className="px-3 py-2 text-right text-[#0F172B]">{fmtNum(v as number, unit)}</td>
+              <td className="px-3 py-2 font-mono text-ink">{k}</td>
+              <td className="px-3 py-2 text-right text-ink">{fmtNum(v as number, unit)}</td>
             </tr>
           ))}
         </tbody>
@@ -184,19 +184,19 @@ function PeriodSection({ entry, unit }: { entry: PeriodDataEntry; unit: string }
       {/* Period header row */}
       <div className="flex items-center justify-between py-1 border-b border-[var(--qc-border-default)]">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-mono font-medium text-[#0F172B]">
+          <span className="text-[11px] font-mono font-medium text-ink">
             {entry.fiscal_year} {entry.quarter}
           </span>
-          <span className="text-[10px] text-[#888888]">{entry.source}</span>
+          <span className="text-[10px] text-ink-3">{entry.source}</span>
         </div>
         {entry.value != null && (
-          <span className="text-[15px] font-[500] text-[#0F172B]">{fmtNum(entry.value, unit)}</span>
+          <span className="text-[15px] font-[500] text-ink">{fmtNum(entry.value, unit)}</span>
         )}
       </div>
 
       {/* Formula */}
       {!!entry.formula && (
-        <div className="bg-[#F5F5F5] rounded-md px-3 py-2">
+        <div className="bg-secondary rounded-md px-3 py-2">
           <FormulaDisplay formula={entry.formula} />
         </div>
       )}
@@ -222,25 +222,25 @@ function PeriodTable({
 }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1">
+      <div className="text-[10px] uppercase tracking-wider text-ink-3 font-medium mb-1">
         {label}
-        {note && <span className="normal-case tracking-normal ml-1 text-[#888888]">({note})</span>}
+        {note && <span className="normal-case tracking-normal ml-1 text-ink-3">({note})</span>}
       </div>
       <div className="rounded-md border border-[var(--qc-border-default)] overflow-hidden">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-[#F5F5F5] border-b border-[var(--qc-border-default)]">
-              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Period</th>
-              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Fiscal Year</th>
-              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-[#888888]">Value</th>
+            <tr className="bg-secondary border-b border-[var(--qc-border-default)]">
+              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Period</th>
+              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Fiscal Year</th>
+              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-wider text-ink-3">Value</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.period} className="border-b last:border-0">
-                <td className="px-3 py-2 font-mono text-[#0F172B]">{row.period}</td>
-                <td className="px-3 py-2 text-[#888888]">{row.fiscal_year}</td>
-                <td className="px-3 py-2 text-right text-[#0F172B]">{fmtNum(row.value, unit)}</td>
+                <td className="px-3 py-2 font-mono text-ink">{row.period}</td>
+                <td className="px-3 py-2 text-ink-3">{row.fiscal_year}</td>
+                <td className="px-3 py-2 text-right text-ink">{fmtNum(row.value, unit)}</td>
               </tr>
             ))}
           </tbody>
@@ -256,23 +256,23 @@ function DetailView({ data }: { data: IndicatorDetail }) {
   const hasPeriodRows = !hasArrayData && !hasSeriesUsed && !!data.periods;
 
   return (
-    <div className="rounded-[10px] border border-[var(--qc-border-default)] bg-white p-4 space-y-4">
+    <div className="rounded-[10px] border border-[var(--qc-border-default)] bg-card p-4 space-y-4">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-[11px] uppercase tracking-wider text-[#888888] font-medium">
+          <div className="text-[11px] uppercase tracking-wider text-ink-3 font-medium">
             {data.ticker} · {data.metricId}
           </div>
-          <div className="text-[18px] font-[500] text-[#0F172B] mt-0.5">{data.name}</div>
+          <div className="text-[18px] font-[500] text-ink mt-0.5">{data.name}</div>
           {data.company && (
-            <div className="text-[12px] text-[#888888] mt-0.5">{data.company}</div>
+            <div className="text-[12px] text-ink-3 mt-0.5">{data.company}</div>
           )}
         </div>
         {/* Show top-level value only for cagr/average (unchanged types) */}
         {!hasArrayData && data.value != null && (
           <div className="text-right shrink-0">
-            <div className="text-[10px] uppercase tracking-wider text-[#888888]">Value</div>
-            <div className="text-[22px] font-[500] text-[#0F172B]">{fmtNum(data.value, data.unit)}</div>
+            <div className="text-[10px] uppercase tracking-wider text-ink-3">Value</div>
+            <div className="text-[22px] font-[500] text-ink">{fmtNum(data.value, data.unit)}</div>
           </div>
         )}
       </div>
@@ -280,40 +280,40 @@ function DetailView({ data }: { data: IndicatorDetail }) {
       {/* Meta row */}
       <div className="flex gap-6 text-[12px] flex-wrap">
         <span>
-          <span className="text-[#888888]">Unit: </span>
-          <span className="text-[#0F172B] font-medium">{data.unit}</span>
+          <span className="text-ink-3">Unit: </span>
+          <span className="text-ink font-medium">{data.unit}</span>
         </span>
         {data.granularity && (
           <span>
-            <span className="text-[#888888]">Granularity: </span>
-            <span className="text-[#0F172B] font-medium capitalize">{data.granularity}</span>
+            <span className="text-ink-3">Granularity: </span>
+            <span className="text-ink font-medium capitalize">{data.granularity}</span>
           </span>
         )}
         <span>
-          <span className="text-[#888888]">BFSI: </span>
-          <span className="text-[#0F172B] font-medium">{data.bfsi ? "Yes" : "No"}</span>
+          <span className="text-ink-3">BFSI: </span>
+          <span className="text-ink font-medium">{data.bfsi ? "Yes" : "No"}</span>
         </span>
         {/* Legacy single-period meta */}
         {!hasArrayData && data.currentPeriod && (
           <span>
-            <span className="text-[#888888]">Current: </span>
-            <span className="text-[#0F172B] font-medium">
+            <span className="text-ink-3">Current: </span>
+            <span className="text-ink font-medium">
               {data.currentPeriod.fiscal_year} {data.currentPeriod.quarter}
             </span>
           </span>
         )}
         {!hasArrayData && data.prevPeriod && (
           <span>
-            <span className="text-[#888888]">Previous: </span>
-            <span className="text-[#0F172B] font-medium">
+            <span className="text-ink-3">Previous: </span>
+            <span className="text-ink font-medium">
               {data.prevPeriod.fiscal_year} {data.prevPeriod.quarter}
             </span>
           </span>
         )}
         {!hasArrayData && data.source && (
           <span>
-            <span className="text-[#888888]">Source: </span>
-            <span className="text-[#0F172B] font-medium">{data.source}</span>
+            <span className="text-ink-3">Source: </span>
+            <span className="text-ink font-medium">{data.source}</span>
           </span>
         )}
       </div>
@@ -437,7 +437,7 @@ export function DataSanityTab() {
       {/* Controls */}
       <div className="flex gap-3 items-end flex-wrap">
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5 block">
+          <label className="text-[10px] uppercase tracking-wider text-ink-3 font-medium mb-1.5 block">
             Ticker
           </label>
           <input
@@ -446,18 +446,18 @@ export function DataSanityTab() {
             onChange={(e) => setTicker(e.target.value)}
             onKeyDown={handleTickerKeyDown}
             placeholder="e.g. TCS"
-            className="px-3 py-2 text-sm rounded-md border border-[var(--qc-border-default)] bg-white text-[var(--qc-text-heading)] placeholder:text-[#888888] focus:outline-none focus:ring-1 focus:ring-[#0F172B] w-36 h-[58px]"
+            className="px-3 py-2 text-sm rounded-md border border-[var(--qc-border-default)] bg-card text-[var(--qc-text-heading)] placeholder:text-ink-3 focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)] w-36 h-[58px]"
           />
         </div>
         <div className="flex-1 min-w-[220px]">
-          <label className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5 block">
+          <label className="text-[10px] uppercase tracking-wider text-ink-3 font-medium mb-1.5 block">
             Indicator
             {loadingIndicators && (
-              <span className="normal-case tracking-normal font-normal ml-1 text-[#888888]">— loading…</span>
+              <span className="normal-case tracking-normal font-normal ml-1 text-ink-3">— loading…</span>
             )}
           </label>
           {indicatorError ? (
-            <p className="text-sm text-red-600">{indicatorError}</p>
+            <p className="text-sm text-down">{indicatorError}</p>
           ) : (
             <AutocompleteInput
               placeholder={loadingIndicators ? "Loading…" : "Search indicator…"}
@@ -470,7 +470,7 @@ export function DataSanityTab() {
           )}
         </div>
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5 block">
+          <label className="text-[10px] uppercase tracking-wider text-ink-3 font-medium mb-1.5 block">
             Granularity
           </label>
           <div className="h-[58px] flex items-center">
@@ -483,7 +483,7 @@ export function DataSanityTab() {
           </div>
         </div>
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5 block">
+          <label className="text-[10px] uppercase tracking-wider text-ink-3 font-medium mb-1.5 block">
             Periods
           </label>
           <input
@@ -492,19 +492,19 @@ export function DataSanityTab() {
             max={20}
             value={periods}
             onChange={handlePeriodsChange}
-            className="px-3 py-2 text-sm rounded-md border border-[var(--qc-border-default)] bg-white text-[var(--qc-text-heading)] focus:outline-none focus:ring-1 focus:ring-[#0F172B] w-20 h-[58px] text-center"
+            className="px-3 py-2 text-sm rounded-md border border-[var(--qc-border-default)] bg-card text-[var(--qc-text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)] w-20 h-[58px] text-center"
           />
         </div>
       </div>
 
       {/* Loading / error */}
       {loadingDetail && (
-        <div className="flex items-center gap-2 text-sm text-[#888888]">
+        <div className="flex items-center gap-2 text-sm text-ink-3">
           <Loader2 className="size-4 animate-spin" /> Fetching provenance…
         </div>
       )}
       {detailError && !loadingDetail && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="rounded-md border border-down bg-down-soft px-3 py-2 text-sm text-down">
           {detailError}
         </div>
       )}

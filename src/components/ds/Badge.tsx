@@ -1,14 +1,17 @@
 import type { CSSProperties, ReactNode } from "react";
+import { Badge as UIBadge } from "@/components/ui/badge";
 
+/**
+ * ds/Badge — the mono/uppercase "data chip" flavour of the canonical Badge.
+ *
+ * Kept as a thin wrapper over ui/Badge so existing consumers
+ * (dashboard/opportunities-panel, dashboard/who-to-call-today) keep their
+ * exact API (`variant` required, `style` passthrough) while the styling now
+ * flows through the single canonical Badge + --qc-* token utilities.
+ *
+ * Variant names map 1:1 onto the canonical variants (crit is an alias of down).
+ */
 export type BadgeVariant = "crit" | "warn" | "up" | "info" | "muted";
-
-const VARIANT_STYLES: Record<BadgeVariant, CSSProperties> = {
-  crit:  { color: "var(--qc-down)", background: "var(--qc-down-soft)", border: "1px solid #E8C4BE" },
-  warn:  { color: "var(--qc-warn)", background: "var(--qc-warn-soft)", border: "1px solid #EFD6A0" },
-  up:    { color: "var(--qc-up)",   background: "var(--qc-up-soft)",   border: "1px solid #BBD9C6" },
-  info:  { color: "var(--qc-blue)", background: "var(--qc-blue-soft)", border: "1px solid #B8CDF9" },
-  muted: { color: "var(--qc-ink-3)", background: "transparent",        border: "none"              },
-};
 
 interface BadgeProps {
   variant: BadgeVariant;
@@ -18,21 +21,12 @@ interface BadgeProps {
 
 export function Badge({ variant, children, style }: BadgeProps) {
   return (
-    <span
-      style={{
-        fontFamily: "var(--qc-font-mono)",
-        fontSize: "var(--qc-fz-9)",
-        letterSpacing: "var(--qc-track-eyebrow)",
-        textTransform: "uppercase",
-        padding: "2px 7px",
-        borderRadius: 4,
-        display: "inline-block",
-        whiteSpace: "nowrap",
-        ...VARIANT_STYLES[variant],
-        ...style,
-      }}
+    <UIBadge
+      variant={variant}
+      style={style}
+      className="font-mono text-[9px] tracking-[0.14em] uppercase px-[7px] py-[2px] h-auto rounded-[4px]"
     >
       {children}
-    </span>
+    </UIBadge>
   );
 }

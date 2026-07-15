@@ -78,7 +78,7 @@ function GoalBasedCard({
       className="rounded-xl text-left flex flex-col"
       animate={{
         borderColor: active ? "var(--qc-ink)" : "var(--qc-hair)",
-        background:  active ? "#F8F9FB" : "#fff",
+        background:  active ? "var(--qc-section)" : "var(--qc-card)",
         borderWidth:  active ? 2 : 1,
         padding:      active ? 15 : 16,
         boxShadow:   active ? "0 4px 16px rgba(15,23,43,0.10)" : "0 0px 0px rgba(0,0,0,0)",
@@ -99,7 +99,7 @@ function GoalBasedCard({
               <div
                 key={i}
                 className="rounded-sm"
-                style={{ width: 5, height: 4 + i * 2.5, background: i === 0 ? "#3B82F6" : i === 1 ? "#10B981" : "#EF4444" }}
+                style={{ width: 5, height: 4 + i * 2.5, background: i === 0 ? "var(--qc-blue)" : i === 1 ? "var(--qc-up)" : "var(--qc-down)" }}
               />
             ))}
           </div>
@@ -108,7 +108,7 @@ function GoalBasedCard({
 
       <span
         className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mb-3 self-start"
-        style={{ background: "#EFF6FF", color: "#3B82F6" }}
+        style={{ background: "var(--qc-blue-soft)", color: "var(--qc-blue)" }}
       >
         Select goal
       </span>
@@ -123,7 +123,7 @@ function GoalBasedCard({
               onGoalChange(val);
               onSelect();
             }}
-            className="w-full appearance-none rounded-lg border border-[#E2E2E2] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#0F172B] transition-all pr-8"
+            className="w-full appearance-none rounded-lg border border-hair bg-card px-3 py-2 text-sm focus:outline-none focus:border-ink transition-all pr-8"
             style={{ color: selectedGoal ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
           >
             <option value="" disabled>— pick a goal —</option>
@@ -140,7 +140,7 @@ function GoalBasedCard({
             {goal.hasSWP && (
               <>
                 <span>·</span>
-                <span className="font-semibold text-emerald-600">SWP available</span>
+                <span className="font-semibold text-up">SWP available</span>
               </>
             )}
           </p>
@@ -194,7 +194,7 @@ export function Step1RiskCapital({
                 className="rounded-xl text-left flex flex-col"
                 animate={{
                   borderColor: active ? "var(--qc-ink)" : "var(--qc-hair)",
-                  background:  active ? "#F8F9FB" : "#fff",
+                  background:  active ? "var(--qc-section)" : "var(--qc-card)",
                   borderWidth:  active ? 2 : 1,
                   padding:      active ? 15 : 16,
                   boxShadow:   active ? "0 4px 16px rgba(15,23,43,0.10)" : "0 0px 0px rgba(0,0,0,0)",
@@ -238,14 +238,14 @@ export function Step1RiskCapital({
       {/* Portfolio Capital */}
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--qc-ink-2)" }}>Portfolio Capital</p>
-        <div className="flex items-center gap-2 rounded-xl border border-[#E2E2E2] px-4 py-3 bg-white focus-within:border-[#0F172B] focus-within:ring-1 focus-within:ring-[#0F172B] transition-all">
+        <div className="flex items-center gap-2 rounded-xl border border-hair px-4 py-3 bg-card focus-within:border-ink focus-within:ring-1 focus-within:ring-ink transition-all">
           <span className="text-lg" style={{ color: "var(--qc-ink-2)" }}>₹</span>
           <input
             type="text"
             value={capitalRaw}
             onChange={(e) => setCapitalRaw(e.target.value)}
             placeholder="Enter amount"
-            className="flex-1 bg-transparent text-lg focus:outline-none placeholder:text-zinc-300"
+            className="flex-1 bg-transparent text-lg focus:outline-none placeholder:text-ink-3"
             style={{ color: capitalRaw ? "var(--qc-ink)" : undefined }}
           />
         </div>
@@ -255,11 +255,11 @@ export function Step1RiskCapital({
               key={chip.value}
               type="button"
               onClick={() => onCapitalChip(chip.value)}
-              className="rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:border-[#0F172B] hover:text-[#0F172B]"
+              className="rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:border-ink hover:text-ink"
               style={{
-                border:     capital === chip.value ? "1px solid #0F172B" : "1px solid #E2E2E2",
+                border:     capital === chip.value ? "1px solid var(--qc-ink)" : "1px solid var(--qc-hair)",
                 color:      capital === chip.value ? "var(--qc-ink)" : "var(--qc-ink-2)",
-                background: capital === chip.value ? "var(--qc-section)" : "#fff",
+                background: capital === chip.value ? "var(--qc-section)" : "var(--qc-card)",
               }}
             >
               {chip.label}
@@ -276,7 +276,7 @@ export function Step1RiskCapital({
           value={portfolioName}
           onChange={(e) => setPortfolioName(e.target.value)}
           placeholder='e.g. "Aggressive Growth — HNI Tier 1" or "Conservative Income — Retiree"'
-          className="w-full rounded-xl border border-[#E2E2E2] px-4 py-3 bg-white text-sm focus:outline-none focus:border-[#0F172B] focus:ring-1 focus:ring-[#0F172B] transition-all placeholder:text-zinc-300"
+          className="w-full rounded-xl border border-hair px-4 py-3 bg-card text-sm focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink transition-all placeholder:text-ink-3"
           style={{ color: portfolioName ? "var(--qc-ink)" : undefined }}
         />
       </div>

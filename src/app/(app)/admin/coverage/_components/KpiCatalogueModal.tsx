@@ -9,8 +9,8 @@ import { Kpi, KpiCreateResponse, KpisResponse } from "./types";
 const BASE = `${BACKEND_URL}/admin/kpis`;
 
 const INPUT_CLS =
-  "rounded-md border border-[#E2E2E2] px-3 py-2 text-sm text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]";
-const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5";
+  "rounded-md border border-hair px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-[var(--qc-ink)]";
+const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 
 const EMPTY_FORM = { abbr: "", full_form: "", denomination: "", kpi_type: "", industry: "", prowess_name: "" };
 
@@ -81,19 +81,19 @@ export function KpiCatalogueModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-      <div className="flex flex-col w-full max-w-[760px] max-h-[85vh] rounded-[10px] border border-[#E2E2E2] bg-white shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between border-b border-[#E2E2E2] px-5 py-3 shrink-0">
-          <h3 className="text-[14px] font-medium text-[#0F172B]">KPI Catalogue</h3>
+      <div className="flex flex-col w-full max-w-[760px] max-h-[85vh] rounded-[10px] border border-hair bg-card shadow-xl overflow-hidden">
+        <div className="flex items-center justify-between border-b border-hair px-5 py-3 shrink-0">
+          <h3 className="text-[14px] font-medium text-ink">KPI Catalogue</h3>
           <button
             onClick={onClose}
-            className="flex items-center justify-center size-7 rounded border border-transparent text-[#888888] hover:text-[#0F172B] hover:border-[#E2E2E2] transition-colors"
+            className="flex items-center justify-center size-7 rounded border border-transparent text-ink-3 hover:text-ink hover:border-hair transition-colors"
           >
             <X className="size-4" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-          <p className="text-[12px] text-[#888888]">
+          <p className="text-[12px] text-ink-3">
             Every column in a Prowess CSV export must map to a KPI here (FK-enforced). Create the
             missing indicator before re-running the preview.
           </p>
@@ -113,7 +113,7 @@ export function KpiCatalogueModal({ onClose }: Props) {
               <button
                 onClick={() => load(search)}
                 disabled={loading}
-                className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-3 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-md border border-hair px-3 py-2 text-sm font-medium text-ink hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40"
               >
                 {loading ? <Loader2 className="size-3.5 animate-spin" /> : <Search className="size-3.5" />}
                 Search
@@ -121,25 +121,25 @@ export function KpiCatalogueModal({ onClose }: Props) {
             </div>
             <button
               onClick={() => setShowCreate((v) => !v)}
-              className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+              className="flex items-center gap-1.5 rounded-md bg-ink px-3 py-2 text-sm font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity"
             >
               <Plus className="size-3.5" /> New KPI
             </button>
           </div>
 
           {showCreate && (
-            <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-3 space-y-3">
+            <div className="rounded-[10px] border border-hair bg-secondary p-3 space-y-3">
               {createError && (
-                <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+                <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-3 py-2 text-[12px] text-down">
                   <AlertCircle className="size-3.5 shrink-0" /> {createError}
                 </div>
               )}
               {created ? (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-700">
+                  <div className="flex items-center gap-2 rounded-md border border-up bg-up-soft px-3 py-2 text-[12px] text-up">
                     <CheckCircle2 className="size-3.5 shrink-0" /> Created {created.abbr}.
                   </div>
-                  <button onClick={startAnother} className="text-[12px] text-[#888888] hover:text-[#0F172B]">
+                  <button onClick={startAnother} className="text-[12px] text-ink-3 hover:text-ink">
                     Add another
                   </button>
                 </div>
@@ -204,7 +204,7 @@ export function KpiCatalogueModal({ onClose }: Props) {
                   <button
                     onClick={createKpi}
                     disabled={creating || !form.abbr.trim() || !form.full_form.trim()}
-                    className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-medium text-[var(--qc-on-dark)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {creating && <Loader2 className="size-3.5 animate-spin" />}
                     Create
@@ -215,41 +215,41 @@ export function KpiCatalogueModal({ onClose }: Props) {
           )}
 
           {error && !loading && (
-            <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-sm text-down">
               <AlertCircle className="size-4 shrink-0" /> {error}
             </div>
           )}
           {loading && !kpis && (
-            <div className="flex items-center gap-2 text-sm text-[#888888]">
+            <div className="flex items-center gap-2 text-sm text-ink-3">
               <Loader2 className="size-4 animate-spin" /> Loading KPIs…
             </div>
           )}
 
           {kpis && !loading && (
             kpis.length === 0 ? (
-              <p className="text-[12px] text-[#888888]">No KPIs match this search.</p>
+              <p className="text-[12px] text-ink-3">No KPIs match this search.</p>
             ) : (
-              <div className="rounded-[10px] border border-[#E2E2E2] bg-white overflow-hidden">
+              <div className="rounded-[10px] border border-hair bg-card overflow-hidden">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Abbr</th>
-                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Full Form</th>
-                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Denom.</th>
-                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Type</th>
-                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Industry</th>
-                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-[#888888]">Prowess Name</th>
+                    <tr className="bg-secondary border-b border-hair">
+                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Abbr</th>
+                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Full Form</th>
+                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Denom.</th>
+                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Type</th>
+                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Industry</th>
+                      <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Prowess Name</th>
                     </tr>
                   </thead>
                   <tbody>
                     {kpis.map((k) => (
-                      <tr key={k.id ?? k.abbr} className="border-b border-[#F0F0F0] last:border-0">
-                        <td className="px-3 py-2 text-[#0F172B] font-medium font-mono whitespace-nowrap">{k.abbr}</td>
-                        <td className="px-3 py-2 text-[#0F172B]">{k.full_form}</td>
-                        <td className="px-3 py-2 text-[#888888] whitespace-nowrap">{k.denomination}</td>
-                        <td className="px-3 py-2 text-[#888888] whitespace-nowrap">{k.kpi_type}</td>
-                        <td className="px-3 py-2 text-[#888888]">{k.industry.join(", ")}</td>
-                        <td className="px-3 py-2 text-[#888888] font-mono">{k.prowess_name}</td>
+                      <tr key={k.id ?? k.abbr} className="border-b border-hair last:border-0">
+                        <td className="px-3 py-2 text-ink font-medium font-mono whitespace-nowrap">{k.abbr}</td>
+                        <td className="px-3 py-2 text-ink">{k.full_form}</td>
+                        <td className="px-3 py-2 text-ink-3 whitespace-nowrap">{k.denomination}</td>
+                        <td className="px-3 py-2 text-ink-3 whitespace-nowrap">{k.kpi_type}</td>
+                        <td className="px-3 py-2 text-ink-3">{k.industry.join(", ")}</td>
+                        <td className="px-3 py-2 text-ink-3 font-mono">{k.prowess_name}</td>
                       </tr>
                     ))}
                   </tbody>

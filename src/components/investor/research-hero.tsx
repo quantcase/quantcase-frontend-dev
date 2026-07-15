@@ -183,7 +183,7 @@ export function ResearchHero() {
               width: 40,
               height: 40,
               borderRadius: "50%",
-              background: "#7C3AED",
+              background: "var(--qc-brand-accent)",
               border: "none",
               cursor: "pointer",
             }}

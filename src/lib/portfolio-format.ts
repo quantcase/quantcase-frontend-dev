@@ -37,13 +37,13 @@ export function brokerLabel(slug: string | null | undefined): string {
 export const PILLAR_COLOR: Record<Pillar, string> = {
   mgmt: "var(--qc-up)",
   opp:  "var(--qc-blue)",
-  deal: "#7C3AED",
+  deal: "var(--qc-brand-accent)",
 };
 
 export function modColor(score: number) {
   if (score >= 80) return "var(--qc-up)";
   if (score >= 60) return "var(--qc-warn)";
-  return "#B91C1C";
+  return "var(--qc-down)";
 }
 
 export interface ThesisStyle {
@@ -58,8 +58,8 @@ export interface ThesisStyle {
 
 // Visual config keyed to thesis health — colored rule / badge / header tints.
 export function thesisConfig(h: ThesisHealth): ThesisStyle {
-  if (h === "intact")  return { label: "Intact",    color: "var(--qc-up)",   bg: "var(--qc-up-soft)",   icon: "●", border: "#86EFAC",        headerBg: "var(--qc-up-soft)", rule: "var(--qc-up)"  };
-  if (h === "partial") return { label: "Partial",   color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", icon: "⚡", border: "#FCD34D",        headerBg: "#FFFBEB",           rule: "var(--qc-warn)" };
-  if (h === "broken")  return { label: "Broken",    color: "#B91C1C",        bg: "#FEF2F2",             icon: "✕", border: "#FCA5A5",        headerBg: "#FEF2F2",           rule: "#B91C1C"        };
-  return                      { label: "No thesis", color: "#9A9A92",        bg: "var(--qc-bg)",        icon: "○", border: "var(--qc-hair)", headerBg: "var(--qc-bg)",      rule: "var(--qc-hair)" };
+  if (h === "intact")  return { label: "Intact",    color: "var(--qc-up)",   bg: "var(--qc-up-soft)",   icon: "●", border: "var(--qc-up)",   headerBg: "var(--qc-up-soft)",   rule: "var(--qc-up)"   };
+  if (h === "partial") return { label: "Partial",   color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", icon: "⚡", border: "var(--qc-warn)", headerBg: "var(--qc-warn-soft)", rule: "var(--qc-warn)" };
+  if (h === "broken")  return { label: "Broken",    color: "var(--qc-down)", bg: "var(--qc-down-soft)", icon: "✕", border: "var(--qc-down)", headerBg: "var(--qc-down-soft)", rule: "var(--qc-down)" };
+  return                      { label: "No thesis", color: "var(--qc-ink-3)", bg: "var(--qc-bg)",        icon: "○", border: "var(--qc-hair)", headerBg: "var(--qc-bg)",        rule: "var(--qc-hair)" };
 }

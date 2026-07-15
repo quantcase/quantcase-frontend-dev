@@ -24,16 +24,16 @@ export function NewSkillDialog({ open, form, creating, error, onChange, onCreate
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Dialog */}
-      <div className="relative z-10 flex flex-col w-[560px] max-h-[90vh] bg-white rounded-[10px] border border-[#E2E2E2] shadow-2xl overflow-hidden">
+      <div className="relative z-10 flex flex-col w-[560px] max-h-[90vh] bg-card rounded-[10px] border border-hair shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E2E2] shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-hair shrink-0">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888]">New Skill</p>
-            <p className="text-[15px] font-semibold text-[#0F172B] mt-0.5">Create a skill</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-3">New Skill</p>
+            <p className="text-[15px] font-semibold text-ink mt-0.5">Create a skill</p>
           </div>
           <button
             onClick={onClose}
-            className="flex size-7 items-center justify-center rounded-md text-[#888888] hover:text-[#0F172B] hover:bg-[#F5F5F5] transition-colors"
+            className="flex size-7 items-center justify-center rounded-md text-ink-3 hover:text-ink hover:bg-secondary transition-colors"
           >
             <X className="size-4" />
           </button>
@@ -124,8 +124,8 @@ export function NewSkillDialog({ open, form, creating, error, onChange, onCreate
               onClick={() => set("isActive", !form.isActive)}
               className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
                 form.isActive
-                  ? "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200"
-                  : "bg-[#F5F5F5] text-[#888888] border-[#E2E2E2] hover:bg-gray-100"
+                  ? "bg-up-soft text-up border-up hover:bg-up-soft"
+                  : "bg-secondary text-ink-3 border-hair hover:bg-secondary"
               }`}
             >
               {form.isActive ? "Active" : "Inactive"}
@@ -135,23 +135,23 @@ export function NewSkillDialog({ open, form, creating, error, onChange, onCreate
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 px-5 py-4 border-t border-[#E2E2E2] flex items-center justify-between">
+        <div className="shrink-0 px-5 py-4 border-t border-hair flex items-center justify-between">
           {error ? (
-            <p className="text-xs text-red-600">{error}</p>
+            <p className="text-xs text-down">{error}</p>
           ) : (
             <span />
           )}
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] transition-colors"
+              className="rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink-3 hover:text-ink hover:border-[var(--qc-ink)] transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={onCreate}
               disabled={creating}
-              className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {creating && <Loader2 className="size-3.5 animate-spin" />}
               Create Skill
@@ -165,9 +165,9 @@ export function NewSkillDialog({ open, form, creating, error, onChange, onCreate
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1";
+const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1";
 const INPUT_CLS =
-  "w-full rounded border border-[#E2E2E2] px-2.5 py-1.5 text-xs text-[#0F172B] focus:outline-none focus:border-[#0F172B]";
+  "w-full rounded border border-hair px-2.5 py-1.5 text-xs text-ink focus:outline-none focus:border-[var(--qc-ink)]";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

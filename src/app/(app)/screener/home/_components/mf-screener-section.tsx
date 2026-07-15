@@ -327,12 +327,12 @@ function MfTable({
               {Array.from({ length: 8 }).map((_, i) => (
                 <tr key={i} style={{ borderBottom: "1px solid var(--qc-hair-2)" }}>
                   <td className="px-4 py-3.5" style={{ width: 48 }}>
-                    <div className="h-3 w-5 rounded bg-zinc-100 animate-pulse" />
+                    <div className="h-3 w-5 rounded bg-secondary animate-pulse" />
                   </td>
                   {MF_COLUMNS.map((col) => (
                     <td key={col.key} className={`px-4 py-3.5 ${col.align === "right" ? "text-right" : ""}`}>
-                      <div className={`h-3 rounded bg-zinc-100 animate-pulse ${col.key === "name" ? "w-48" : "w-12 ml-auto"}`} style={col.align !== "right" ? { marginLeft: 0 } : {}} />
-                      {col.key === "name" && <div className="h-2.5 w-28 rounded bg-zinc-50 animate-pulse mt-1.5" />}
+                      <div className={`h-3 rounded bg-secondary animate-pulse ${col.key === "name" ? "w-48" : "w-12 ml-auto"}`} style={col.align !== "right" ? { marginLeft: 0 } : {}} />
+                      {col.key === "name" && <div className="h-2.5 w-28 rounded bg-secondary animate-pulse mt-1.5" />}
                     </td>
                   ))}
                   <td className="px-4 py-3.5" style={{ width: 40 }} />
@@ -556,9 +556,9 @@ export function MfScreenerSection() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 mb-4">
-          <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="flex items-center gap-2 rounded-xl border border-down-soft bg-down-soft px-4 py-3 mb-4">
+          <AlertCircle className="h-4 w-4 text-down flex-shrink-0" />
+          <p className="text-sm text-down">{error}</p>
         </div>
       )}
 

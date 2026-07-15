@@ -140,7 +140,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
       {/* Content */}
       <div className="flex-1 overflow-hidden relative">
         {error && (
-          <div className="absolute inset-x-4 top-4 z-10 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-[12px] text-red-700">
+          <div className="absolute inset-x-4 top-4 z-10 flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-[12px] text-down">
             <AlertCircle className="size-4 shrink-0" />
             {error}
           </div>
@@ -148,7 +148,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
 
         {running && !html && (
           <div className="flex h-full items-center justify-center">
-            <div className="flex flex-col items-center gap-3 text-[#888888]">
+            <div className="flex flex-col items-center gap-3 text-ink-3">
               <Loader2 className="size-8 animate-spin" />
               <span className="text-[13px]">Running skill on {ticker}…</span>
             </div>
@@ -157,7 +157,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
 
         {!running && !html && !error && (
           <div className="flex h-full items-center justify-center">
-            <div className="flex flex-col items-center gap-3 text-[#888888]">
+            <div className="flex flex-col items-center gap-3 text-ink-3">
               <Play className="size-8 opacity-20" />
               <span className="text-[13px]">Select a ticker and click Run to preview</span>
             </div>

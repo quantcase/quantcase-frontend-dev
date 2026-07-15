@@ -233,9 +233,9 @@ function MfBasketContent() {
           )}
 
           {topError && (
-            <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-              <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-              <p className="text-sm text-red-600">{topError}</p>
+            <div className="flex items-center gap-2 rounded-xl border border-down-soft bg-down-soft px-4 py-3">
+              <AlertCircle className="h-4 w-4 text-down flex-shrink-0" />
+              <p className="text-sm text-down">{topError}</p>
             </div>
           )}
 
@@ -369,7 +369,7 @@ function MfBasketContent() {
                 )}
 
                 {!schemesLoading && schemesError && (
-                  <div className="flex items-center justify-center py-16 gap-2 text-red-600">
+                  <div className="flex items-center justify-center py-16 gap-2 text-down">
                     <AlertCircle className="h-4 w-4" />
                     <span className="text-sm">{schemesError}</span>
                   </div>

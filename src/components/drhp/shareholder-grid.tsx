@@ -12,13 +12,12 @@ export function ShareholderGrid({ shareholders }: ShareholderGridProps) {
       {unique.map((s) => (
         <div
           key={s.name}
-          className="rounded-[8px] border border-[#E2E2E2] px-3 py-2.5 flex items-center justify-between gap-2"
-          style={{ background: "#FAFAFA" }}
+          className="rounded-[8px] border border-hair bg-secondary px-3 py-2.5 flex items-center justify-between gap-2"
         >
           <p className="text-[12px] font-medium leading-snug truncate" style={{ color: "var(--qc-ink)" }}>{s.name}</p>
           <span
             className={`flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider ${
-              s.status === "EXIT" ? "text-red-600" : "text-emerald-600"
+              s.status === "EXIT" ? "text-down" : "text-up"
             }`}
           >
             {s.status}

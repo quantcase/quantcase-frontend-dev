@@ -17,17 +17,17 @@ import { SegmentedBar } from "@/components/opportunity/segmented-bar";
 import { BentoSectionGrid } from "@/components/opportunity/bento-section-grid";
 import { MetricTile } from "@/components/molecules/metric-tile";
 
-// Chart colors must be hex (Recharts can't use CSS vars)
+// Chart colors reference design-system tokens (valid as SVG attribute values)
 const CHART_COLORS = {
-  grid: "#f4f4f5",
-  axis: "#a1a1aa",
-  refLine: "#a1a1aa",
-  revenueBar: "#64748b",
-  ebitBar: "var(--qc-ink)",   // --qc-ink approx
-  dolLine: "#B4731A",   // --qc-warn approx
-  dolUp: "#1F7A4A",     // --qc-up
-  dolMid: "#B4731A",    // --qc-warn
-  dolDown: "#B23A2F",   // --qc-down
+  grid: "var(--qc-hair)",
+  axis: "var(--qc-ink-3)",
+  refLine: "var(--qc-ink-3)",
+  revenueBar: "var(--qc-ink-2)",
+  ebitBar: "var(--qc-ink)",
+  dolLine: "var(--qc-warn)",
+  dolUp: "var(--qc-up)",
+  dolMid: "var(--qc-warn)",
+  dolDown: "var(--qc-down)",
 };
 
 function dolZone(dol: number): string {
@@ -45,7 +45,7 @@ function dolHexColor(dol: number): string {
 const DolDot = (props: { cx?: number; cy?: number; payload?: DolDataPoint }) => {
   const { cx, cy, payload } = props;
   if (cx === undefined || cy === undefined || !payload) return null;
-  return <circle cx={cx} cy={cy} r={5} fill={dolHexColor(payload.dol)} stroke="white" strokeWidth={2} />;
+  return <circle cx={cx} cy={cy} r={5} fill={dolHexColor(payload.dol)} stroke="var(--qc-card)" strokeWidth={2} />;
 };
 
 function DolChartPanel({ chartData }: { chartData: DolDataPoint[] }) {
@@ -70,7 +70,7 @@ function DolChartPanel({ chartData }: { chartData: DolDataPoint[] }) {
             <YAxis yAxisId="left" orientation="left" tick={{ fontSize: 9, fill: CHART_COLORS.axis }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} domain={["auto", "auto"]} />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: CHART_COLORS.dolLine }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}x`} domain={["auto", "auto"]} />
             <Tooltip
-              contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid var(--qc-hair)", backgroundColor: "white" }}
+              contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid var(--qc-hair)", backgroundColor: "var(--qc-card)" }}
               itemStyle={{ padding: "0px 10px" }}
               formatter={(value: number, name: string) =>
                 name === "DOL" ? [`${value}x (${dolZone(value)})`, name] : [`${value}%`, name]
@@ -125,7 +125,7 @@ function FixedCostLinesPanel({
                   <span className="text-sm font-semibold" style={{ color: "var(--qc-ink)" }}>{line.label} (% Revenue)</span>
                   <span className="text-base font-bold" style={{ color: "var(--qc-ink)" }}>{currentPct}%</span>
                 </div>
-                <SegmentedBar pct={barPct} color="bg-slate-400" />
+                <SegmentedBar pct={barPct} color="bg-ink-3" />
                 <p className="text-xs mt-1" style={{ color: "var(--qc-ink-2)" }}>
                   Prior: {line.prior_pct ?? "N/A"}% | {isUp ? "+" : ""}{changeBps} bps {isUp ? "increase" : "improvement"}
                 </p>

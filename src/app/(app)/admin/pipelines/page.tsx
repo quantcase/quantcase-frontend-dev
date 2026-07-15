@@ -213,10 +213,10 @@ export default function PipelinesPage() {
 
         {/* Error banner */}
         {mutationError && (
-          <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-sm text-down">
             <AlertCircle className="size-4 shrink-0" />
             <span className="flex-1">{mutationError}</span>
-            <button onClick={() => setMutationError(null)} className="text-red-500 hover:text-red-700">
+            <button onClick={() => setMutationError(null)} className="text-down hover:text-down">
               <X className="size-4" />
             </button>
           </div>
@@ -225,7 +225,7 @@ export default function PipelinesPage() {
         {/* Tab card: tabs + content unified */}
         <div className="rounded-[10px] border border-[var(--qc-border-default)] bg-[var(--qc-surface-panel)]">
           {/* Tab strip */}
-          <div className="flex border-b border-[var(--qc-border-default)] bg-white px-4 rounded-t-[10px] overflow-hidden">
+          <div className="flex border-b border-[var(--qc-border-default)] bg-card px-4 rounded-t-[10px] overflow-hidden">
             {(["plugin", "skills", "sanity"] as const).map((tab) => (
               <button
                 key={tab}

@@ -60,15 +60,15 @@ export function UserMenu({ placement = "side" }: Props) {
           <div
             className={
               placement === "up"
-                ? "absolute bottom-[calc(100%+8px)] right-0 z-40 w-56 rounded-[10px] border border-[#E2E2E2] bg-white shadow-lg py-1.5"
-                : "absolute bottom-0 left-[calc(100%+8px)] z-40 w-56 rounded-[10px] border border-[#E2E2E2] bg-white shadow-lg py-1.5"
+                ? "absolute bottom-[calc(100%+8px)] right-0 z-40 w-56 rounded-[10px] border border-hair bg-card shadow-lg py-1.5"
+                : "absolute bottom-0 left-[calc(100%+8px)] z-40 w-56 rounded-[10px] border border-hair bg-card shadow-lg py-1.5"
             }
             role="menu"
           >
             {(displayName || email) && (
-              <div className="px-3 py-2 border-b border-[#E2E2E2] mb-1">
-                {displayName && <p className="text-[13px] font-medium text-[#0F172B] truncate">{displayName}</p>}
-                {email && <p className="text-[11px] text-[#888888] truncate">{email}</p>}
+              <div className="px-3 py-2 border-b border-hair mb-1">
+                {displayName && <p className="text-[13px] font-medium text-ink truncate">{displayName}</p>}
+                {email && <p className="text-[11px] text-ink-3 truncate">{email}</p>}
               </div>
             )}
 
@@ -78,9 +78,9 @@ export function UserMenu({ placement = "side" }: Props) {
                 setOpen(false);
                 setHelpOpen(true);
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-[13px] text-[#0F172B] hover:bg-[#F5F5F5] transition-colors"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-[13px] text-ink hover:bg-secondary transition-colors"
             >
-              <LifeBuoy size={15} strokeWidth={1.8} className="text-[#888888]" />
+              <LifeBuoy size={15} strokeWidth={1.8} className="text-ink-3" />
               Help &amp; Support
             </button>
 
@@ -90,18 +90,18 @@ export function UserMenu({ placement = "side" }: Props) {
                 setOpen(false);
                 setReportOpen(true);
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-[13px] text-[#0F172B] hover:bg-[#F5F5F5] transition-colors"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-[13px] text-ink hover:bg-secondary transition-colors"
             >
-              <Flag size={15} strokeWidth={1.8} className="text-[#888888]" />
+              <Flag size={15} strokeWidth={1.8} className="text-ink-3" />
               Flag Error
             </button>
 
-            <div className="my-1 border-t border-[#E2E2E2]" />
+            <div className="my-1 border-t border-hair" />
 
             <button
               role="menuitem"
               onClick={handleLogout}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-[13px] text-red-600 hover:bg-[#F5F5F5] transition-colors"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-[13px] text-down hover:bg-secondary transition-colors"
             >
               <LogOut size={15} strokeWidth={1.8} />
               Logout
@@ -120,26 +120,26 @@ function HelpSupportModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 flex flex-col w-[380px] bg-white rounded-[10px] border border-[#E2E2E2] shadow-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#E2E2E2]">
-          <h3 className="text-[16px] font-medium text-[#0F172B]">Help &amp; Support</h3>
+      <div className="relative z-10 flex flex-col w-[380px] bg-card rounded-[10px] border border-hair shadow-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-hair">
+          <h3 className="text-[16px] font-medium text-ink">Help &amp; Support</h3>
         </div>
         <div className="px-5 py-4 space-y-3">
-          <p className="text-[13px] text-[#888888]">
+          <p className="text-[13px] text-ink-3">
             Need a hand or found something confusing? Reach out and we&apos;ll get back to you.
           </p>
           <a
             href="mailto:support@quantcase.ai"
-            className="flex items-center gap-2.5 rounded-md border border-[#E2E2E2] px-3 py-2.5 text-[13px] text-[#0F172B] hover:border-[#0F172B] transition-colors"
+            className="flex items-center gap-2.5 rounded-md border border-hair px-3 py-2.5 text-[13px] text-ink hover:border-ink transition-colors"
           >
-            <Mail size={15} strokeWidth={1.8} className="text-[#888888]" />
+            <Mail size={15} strokeWidth={1.8} className="text-ink-3" />
             support@quantcase.ai
           </a>
         </div>
-        <div className="px-5 py-4 border-t border-[#E2E2E2] flex justify-end">
+        <div className="px-5 py-4 border-t border-hair flex justify-end">
           <button
             onClick={onClose}
-            className="rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] transition-colors"
+            className="rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink-3 hover:text-ink hover:border-ink transition-colors"
           >
             Close
           </button>

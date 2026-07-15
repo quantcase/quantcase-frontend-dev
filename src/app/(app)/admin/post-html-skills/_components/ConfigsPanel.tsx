@@ -73,12 +73,12 @@ export function ConfigsPanel({ ticker }: Props) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-260px)] min-h-[480px] rounded-[10px] border border-[#E2E2E2] bg-white overflow-hidden">
+    <div className="flex h-[calc(100vh-260px)] min-h-[480px] rounded-[10px] border border-hair bg-card overflow-hidden">
       {/* Row list — fixed 4 seeded configs, no create/delete */}
-      <div className="w-[220px] shrink-0 border-r border-[#E2E2E2] overflow-y-auto">
-        {loading && <p className="px-4 py-3 text-[12px] text-[#888888]">Loading…</p>}
+      <div className="w-[220px] shrink-0 border-r border-hair overflow-y-auto">
+        {loading && <p className="px-4 py-3 text-[12px] text-ink-3">Loading…</p>}
         {error && !loading && (
-          <div className="flex items-center gap-1.5 px-4 py-3 text-[11px] text-red-700">
+          <div className="flex items-center gap-1.5 px-4 py-3 text-[11px] text-down">
             <AlertCircle className="size-3.5 shrink-0" /> {error}
           </div>
         )}
@@ -89,14 +89,14 @@ export function ConfigsPanel({ ticker }: Props) {
             <button
               key={key}
               onClick={() => setSelectedKey(key)}
-              className={`w-full flex items-center gap-2 px-4 py-3 text-left border-b border-[#F0F0F0] transition-colors ${
-                selectedKey === key ? "bg-[#F5F5F5]" : "hover:bg-[#FAFAFA]"
+              className={`w-full flex items-center gap-2 px-4 py-3 text-left border-b border-hair transition-colors ${
+                selectedKey === key ? "bg-secondary" : "hover:bg-secondary"
               }`}
             >
-              <Circle className={`size-1.5 shrink-0 ${cfg?.is_active ?? true ? "fill-emerald-500 text-emerald-500" : "fill-zinc-300 text-zinc-300"}`} />
+              <Circle className={`size-1.5 shrink-0 ${cfg?.is_active ?? true ? "fill-up text-up" : "fill-ink-3 text-ink-3"}`} />
               <div className="min-w-0">
-                <p className="text-[12px] font-medium text-[#0F172B] truncate">{cfg?.name ?? POST_HTML_TYPE_LABELS[type]}</p>
-                <p className="text-[10px] text-[#888888] uppercase tracking-wide">{layer_id} / {type}</p>
+                <p className="text-[12px] font-medium text-ink truncate">{cfg?.name ?? POST_HTML_TYPE_LABELS[type]}</p>
+                <p className="text-[10px] text-ink-3 uppercase tracking-wide">{layer_id} / {type}</p>
               </div>
             </button>
           );
@@ -116,7 +116,7 @@ export function ConfigsPanel({ ticker }: Props) {
             previewing={previewing}
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-[13px] text-[#888888]">
+          <div className="flex h-full items-center justify-center text-[13px] text-ink-3">
             {loading ? "Loading configs…" : "Config not found"}
           </div>
         )}

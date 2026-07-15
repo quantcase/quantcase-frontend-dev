@@ -5,10 +5,10 @@ export function ClientContextCard({ portfolio }: { portfolio: PortfolioData }) {
   const { client } = portfolio;
 
   return (
-    <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
-      <div className="rounded-[10px] bg-white p-4">
+    <div className="rounded-[10px] border border-hair bg-secondary p-2">
+      <div className="rounded-[10px] bg-card p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Users className="size-4 text-zinc-400" />
+          <Users className="size-4 text-ink-3" />
           <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)" }}>Client Context</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

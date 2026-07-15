@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { TrendingUp } from "lucide-react";
 import { MonoLabel, LimeCountPip } from "@/components/ds";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, cn } from "@/lib/utils";
 import type { WhatsMovingItem, WhatsMovingKind } from "@/types/investor-dashboard";
 
 interface WhatsMovingFeedProps {
@@ -12,22 +12,17 @@ interface WhatsMovingFeedProps {
   loading?: boolean;
 }
 
-const kindColors: Record<WhatsMovingKind, string> = {
-  score_upgrade:   "var(--qc-up,  #22c55e)",
-  score_downgrade: "var(--qc-down, #ef4444)",
-  earnings:        "var(--qc-warn, #f59e0b)",
+// Kind → semantic text color for the headline label (meaning: up/down/earnings).
+const kindTextClass: Record<WhatsMovingKind, string> = {
+  score_upgrade: "text-up",
+  score_downgrade: "text-down",
+  earnings: "text-warn",
 };
 
-const kindBorderColors: Record<WhatsMovingKind, string> = {
-  score_upgrade:   "var(--qc-up,  #22c55e)",
-  score_downgrade: "var(--qc-down, #ef4444)",
-  earnings:        "var(--qc-warn, #f59e0b)",
-};
-
-function scoreColor(score: number) {
-  if (score >= 70) return "var(--qc-up, #22c55e)";
-  if (score >= 50) return "var(--qc-warn, #f59e0b)";
-  return "var(--qc-down, #ef4444)";
+function scoreDotClass(score: number) {
+  if (score >= 70) return "bg-up";
+  if (score >= 50) return "bg-warn";
+  return "bg-down";
 }
 
 // Signed percent for the price delta, e.g. 0.9 → "↑0.9%", -1.4 → "↓1.4%"
@@ -38,253 +33,101 @@ function fmtPriceChange(pct: number): string {
 
 export function WhatsMovingFeed({ count, items, loading }: WhatsMovingFeedProps) {
   return (
-    <div
-      className="rounded-[10px] p-2"
-      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
-    >
+    <div className="rounded-[10px] border border-hair bg-[var(--qc-section)] p-2">
       {/* Header */}
-      <div className="px-2 pt-1 pb-3 flex items-center justify-between">
+      <div className="flex items-center justify-between px-2 pb-3 pt-1">
         <div className="flex items-center gap-2">
-          <TrendingUp className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <TrendingUp className="size-3.5 text-ink-2" />
           <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">What&apos;s moving in your stocks</MonoLabel>
           <LimeCountPip count={count} />
         </div>
       </div>
 
       {/* Subtitle */}
-      <div className="px-2 pb-2" style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginTop: -8 }}>
+      <div className="-mt-2 px-2 pb-2 text-[12px] text-ink-3">
         Updates on stocks you hold or watch · scored by QC Insight
       </div>
 
       {/* Inner white card */}
-      <div className="rounded-[10px] overflow-hidden" style={{ background: "var(--qc-card)" }}>
+      <div className="overflow-hidden rounded-[10px] bg-card">
         {items.length === 0 && (
-          <div
-            style={{
-              padding: "28px 18px",
-              textAlign: "center",
-              fontSize: "var(--qc-fz-12)",
-              fontFamily: "var(--qc-font-sans)",
-              color: "var(--qc-ink-3)",
-            }}
-          >
+          <div className="px-[18px] py-7 text-center text-[12px] text-ink-3">
             {loading ? "Loading…" : "Nothing moving in your stocks right now."}
           </div>
         )}
-        {items.map((item, idx) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            style={{ textDecoration: "none", display: "block" }}
-            className="moving-feed-row"
-          >
-            <div
-              style={{
-                padding: "14px 18px",
-                borderTop: idx === 0 ? "none" : "1px solid var(--qc-hair-2)",
-                borderLeft: `3px solid ${kindBorderColors[item.kind]}`,
-                transition: "background 0.12s ease",
-              }}
-            >
-              {/* Mobile: symbol + price inline above body */}
-              <div className="flex items-start gap-4 sm:hidden mb-2">
-                <div style={{ flexShrink: 0, minWidth: 80 }}>
-                  <div style={{
-                    fontSize: "var(--qc-fz-13)",
-                    fontWeight: "var(--qc-w-semi)",
-                    fontFamily: "var(--qc-font-sans)",
-                    color: "var(--qc-ink)",
-                    lineHeight: 1.3,
-                    letterSpacing: "0.02em",
-                  }}>
-                    {item.symbol}
+        {items.map((item, idx) => {
+          const up = item.price_change_pct >= 0;
+          return (
+            <Link key={item.id} href={item.href} className="moving-feed-row block no-underline">
+              <div className={cn("px-[18px] py-3.5 transition-colors", idx !== 0 && "border-t border-[var(--qc-hair-2)]")}>
+                {/* Mobile: symbol + price inline above body */}
+                <div className="mb-2 flex items-start gap-4 sm:hidden">
+                  <div className="min-w-[80px] shrink-0">
+                    <div className="text-[13px] font-semibold leading-[1.3] tracking-[0.02em] text-ink">{item.symbol}</div>
+                    <div className={cn("mt-0.5 font-mono text-[11px] tracking-[0.01em]", up ? "text-up" : "text-down")}>
+                      {formatPrice(item.price)}
+                      <span className="ml-1 opacity-85">{fmtPriceChange(item.price_change_pct)}</span>
+                    </div>
                   </div>
-                  <div style={{
-                    fontSize: "var(--qc-fz-11)",
-                    fontFamily: "var(--qc-font-mono)",
-                    color: item.price_change_pct >= 0 ? "var(--qc-up)" : "var(--qc-down)",
-                    marginTop: 3,
-                    letterSpacing: "0.01em",
-                  }}>
-                    {formatPrice(item.price)}
-                    <span style={{ marginLeft: 4, opacity: 0.85 }}>{fmtPriceChange(item.price_change_pct)}</span>
-                  </div>
-                </div>
-                {/* QC score inline on mobile */}
-                <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", flexShrink: 0 }}>
-                  <span style={{
-                    width: 6, height: 6, borderRadius: "50%",
-                    background: scoreColor(item.qc_score),
-                    display: "inline-block", flexShrink: 0,
-                  }} />
-                  <span style={{
-                    fontSize: "var(--qc-fz-14)",
-                    fontWeight: "var(--qc-w-semi)",
-                    color: "var(--qc-ink)",
-                    fontFamily: "var(--qc-font-mono)",
-                  }}>
-                    {item.qc_score}
-                  </span>
-                </div>
-              </div>
-
-              {/* Desktop: 3-column grid */}
-              <div
-                className="hidden sm:grid"
-                style={{
-                  gridTemplateColumns: "100px minmax(0,1fr) 64px",
-                  gap: 20,
-                  alignItems: "center",
-                }}
-              >
-                {/* Symbol + price */}
-                <div style={{ flexShrink: 0 }}>
-                  <div style={{
-                    fontSize: "var(--qc-fz-13)",
-                    fontWeight: "var(--qc-w-semi)",
-                    fontFamily: "var(--qc-font-sans)",
-                    color: "var(--qc-ink)",
-                    lineHeight: 1.3,
-                    letterSpacing: "0.02em",
-                  }}>
-                    {item.symbol}
-                  </div>
-                  <div style={{
-                    fontSize: "var(--qc-fz-11)",
-                    fontFamily: "var(--qc-font-mono)",
-                    color: item.price_change_pct >= 0 ? "var(--qc-up)" : "var(--qc-down)",
-                    marginTop: 3,
-                    letterSpacing: "0.01em",
-                  }}>
-                    {formatPrice(item.price)}
-                    <span style={{ marginLeft: 4, opacity: 0.85 }}>{fmtPriceChange(item.price_change_pct)}</span>
+                  <div className="ml-auto flex shrink-0 items-center gap-1.5">
+                    <span className={cn("size-1.5 shrink-0 rounded-full", scoreDotClass(item.qc_score))} />
+                    <span className="font-mono text-[14px] font-semibold text-ink">{item.qc_score}</span>
                   </div>
                 </div>
 
-                {/* Body (desktop) */}
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4, flexWrap: "wrap" }}>
-                    <span style={{
-                      fontSize: "var(--qc-fz-12)",
-                      fontWeight: "var(--qc-w-semi)",
-                      fontFamily: "var(--qc-font-sans)",
-                      color: kindColors[item.kind],
-                      whiteSpace: "nowrap",
-                    }}>
+                {/* Desktop: symbol · body · score — body no longer stretches to
+                    create a dead zone; the QC score sits right after the text. */}
+                <div className="hidden items-center gap-5 sm:flex">
+                  {/* Symbol + price */}
+                  <div className="w-[100px] shrink-0">
+                    <div className="text-[13px] font-semibold leading-[1.3] tracking-[0.02em] text-ink">{item.symbol}</div>
+                    <div className={cn("mt-0.5 font-mono text-[11px] tracking-[0.01em]", up ? "text-up" : "text-down")}>
+                      {formatPrice(item.price)}
+                      <span className="ml-1 opacity-85">{fmtPriceChange(item.price_change_pct)}</span>
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex flex-wrap items-baseline gap-1.5">
+                      <span className={cn("whitespace-nowrap text-[12px] font-semibold", kindTextClass[item.kind])}>
+                        {item.headline_label}
+                      </span>
+                      {item.headline_detail && (
+                        <span className="font-mono text-[12px] font-normal text-ink-2">{item.headline_detail}</span>
+                      )}
+                    </div>
+                    <div className="mb-1.5 line-clamp-2 text-[12px] leading-[1.55] text-ink-2">{item.body}</div>
+                    <div className="text-[11px] tracking-[0.01em] text-ink-3">{item.holding_detail}</div>
+                  </div>
+
+                  {/* QC Score — fixed narrow column, close to the body */}
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <div className="font-mono text-[9px] font-semibold uppercase tracking-[var(--qc-track-eyebrow-l)] text-ink-3">QC SCORE</div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={cn("size-1.5 shrink-0 rounded-full", scoreDotClass(item.qc_score))} />
+                      <span className="font-mono text-[15px] font-semibold text-ink">{item.qc_score}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Body (mobile only) */}
+                <div className="sm:hidden">
+                  <div className="mb-1 flex flex-wrap items-baseline gap-1.5">
+                    <span className={cn("whitespace-nowrap text-[12px] font-semibold", kindTextClass[item.kind])}>
                       {item.headline_label}
                     </span>
                     {item.headline_detail && (
-                      <span style={{
-                        fontSize: "var(--qc-fz-12)",
-                        fontFamily: "var(--qc-font-mono)",
-                        color: "var(--qc-ink-2)",
-                        fontWeight: "var(--qc-w-regular)",
-                      }}>
-                        {item.headline_detail}
-                      </span>
+                      <span className="font-mono text-[12px] font-normal text-ink-2">{item.headline_detail}</span>
                     )}
                   </div>
-                  <div style={{
-                    fontSize: "var(--qc-fz-12)",
-                    fontFamily: "var(--qc-font-sans)",
-                    color: "var(--qc-ink-2)",
-                    lineHeight: 1.55,
-                    marginBottom: 5,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                  }}>
-                    {item.body}
-                  </div>
-                  <div style={{
-                    fontSize: "var(--qc-fz-11)",
-                    fontFamily: "var(--qc-font-sans)",
-                    color: "var(--qc-ink-3)",
-                    letterSpacing: "0.01em",
-                  }}>
-                    {item.holding_detail}
-                  </div>
-                </div>
-
-                {/* QC Score (desktop) */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
-                  <div style={{
-                    fontFamily: "var(--qc-font-mono)",
-                    fontSize: "var(--qc-fz-9)",
-                    fontWeight: "var(--qc-w-semi)",
-                    color: "var(--qc-ink-3)",
-                    letterSpacing: "var(--qc-track-eyebrow-l)",
-                    textTransform: "uppercase",
-                  }}>
-                    QC SCORE
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                    <span style={{
-                      width: 6, height: 6, borderRadius: "50%",
-                      background: scoreColor(item.qc_score),
-                      display: "inline-block", flexShrink: 0,
-                    }} />
-                    <span style={{
-                      fontSize: "var(--qc-fz-15)",
-                      fontWeight: "var(--qc-w-semi)",
-                      color: "var(--qc-ink)",
-                      fontFamily: "var(--qc-font-mono)",
-                    }}>
-                      {item.qc_score}
-                    </span>
-                  </div>
+                  <div className="mb-1.5 line-clamp-2 text-[12px] leading-[1.55] text-ink-2">{item.body}</div>
+                  <div className="text-[11px] tracking-[0.01em] text-ink-3">{item.holding_detail}</div>
                 </div>
               </div>
-
-              {/* Body (mobile only) */}
-              <div className="sm:hidden">
-                <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4, flexWrap: "wrap" }}>
-                  <span style={{
-                    fontSize: "var(--qc-fz-12)",
-                    fontWeight: "var(--qc-w-semi)",
-                    fontFamily: "var(--qc-font-sans)",
-                    color: kindColors[item.kind],
-                    whiteSpace: "nowrap",
-                  }}>
-                    {item.headline_label}
-                  </span>
-                  {item.headline_detail && (
-                    <span style={{
-                      fontSize: "var(--qc-fz-12)",
-                      fontFamily: "var(--qc-font-mono)",
-                      color: "var(--qc-ink-2)",
-                      fontWeight: "var(--qc-w-regular)",
-                    }}>
-                      {item.headline_detail}
-                    </span>
-                  )}
-                </div>
-                <div style={{
-                  fontSize: "var(--qc-fz-12)",
-                  fontFamily: "var(--qc-font-sans)",
-                  color: "var(--qc-ink-2)",
-                  lineHeight: 1.55,
-                  marginBottom: 5,
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                }}>
-                  {item.body}
-                </div>
-                <div style={{
-                  fontSize: "var(--qc-fz-11)",
-                  fontFamily: "var(--qc-font-sans)",
-                  color: "var(--qc-ink-3)",
-                  letterSpacing: "0.01em",
-                }}>
-                  {item.holding_detail}
-                </div>
-              </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
 
       <style>{`

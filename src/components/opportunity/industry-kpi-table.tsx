@@ -32,13 +32,13 @@ export function IndustryKpiTable({ data, loading }: IndustryKpiTableProps) {
 
   if (loading) {
     return (
-      <div className="text-center text-xs text-zinc-400 py-6">Loading KPI data...</div>
+      <div className="text-center text-xs text-ink-3 py-6">Loading KPI data...</div>
     );
   }
 
   if (!data?.timeseries?.length) {
     return (
-      <div className="text-center text-xs text-zinc-400 py-6">No KPI data available.</div>
+      <div className="text-center text-xs text-ink-3 py-6">No KPI data available.</div>
     );
   }
 
@@ -69,17 +69,17 @@ export function IndustryKpiTable({ data, loading }: IndustryKpiTableProps) {
 
   return (
     <div className="space-y-2">
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+      <div className="rounded-lg border border-hair overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-0">
-              <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 py-2.5 min-w-[180px]">
+              <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-ink-2 bg-secondary py-2.5 min-w-[180px]">
                 KPI
               </TableHead>
               {allPeriods.map((period) => (
                 <TableHead
                   key={period}
-                  className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 py-2.5 text-right whitespace-nowrap"
+                  className="text-[10px] font-semibold uppercase tracking-wider text-ink-2 bg-secondary py-2.5 text-right whitespace-nowrap"
                 >
                   {period}
                 </TableHead>
@@ -90,10 +90,10 @@ export function IndustryKpiTable({ data, loading }: IndustryKpiTableProps) {
             {visible.map((entry) => {
               const periodMap = lookup.get(entry.kpi_abbr)!;
               return (
-                <TableRow key={entry.kpi_abbr} className="border-zinc-100 dark:border-zinc-800">
-                  <TableCell className="py-2.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <TableRow key={entry.kpi_abbr} className="border-hair">
+                  <TableCell className="py-2.5 text-xs font-semibold text-ink-2">
                     {humanize(entry.kpi_abbr)}
-                    <span className="ml-1.5 text-[10px] font-normal text-zinc-400">
+                    <span className="ml-1.5 text-[10px] font-normal text-ink-3">
                       {entry.kpi_abbr}
                     </span>
                   </TableCell>
@@ -104,8 +104,8 @@ export function IndustryKpiTable({ data, loading }: IndustryKpiTableProps) {
                         key={period}
                         className={`text-xs py-2.5 text-right ${
                           val != null
-                            ? "text-zinc-700 dark:text-zinc-300 font-semibold"
-                            : "text-zinc-300 dark:text-zinc-600"
+                            ? "text-ink-2 font-semibold"
+                            : "text-ink-3"
                         }`}
                       >
                         {formatValue(val)}
@@ -123,7 +123,7 @@ export function IndustryKpiTable({ data, loading }: IndustryKpiTableProps) {
         <div className="flex justify-center pt-2">
           <button
             onClick={() => setShowAll((v) => !v)}
-            className="flex items-center gap-1.5 rounded-full border border-zinc-200 dark:border-zinc-700 px-4 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            className="flex items-center gap-1.5 rounded-full border border-hair px-4 py-1.5 text-xs text-ink-2 hover:bg-secondary transition-colors"
           >
             {showAll ? "Show Less" : `Show ${sorted.length - DEFAULT_VISIBLE} More`}
             {showAll ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}

@@ -77,12 +77,12 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
     if (status === "trialing" && daysLeft > 0) {
       return {
         badge: `${daysLeft} day${daysLeft === 1 ? "" : "s"} left in trial`,
-        badgeColor: "#c8952a",
-        badgeBg: "#fdf6e3",
-        badgeBorder: "#EFD6A0",
+        badgeColor: "var(--qc-warn)",
+        badgeBg: "var(--qc-warn-soft)",
+        badgeBorder: "var(--qc-warn)",
         icon: Clock,
-        iconBg: "#fdf6e3",
-        iconColor: "#c8952a",
+        iconBg: "var(--qc-warn-soft)",
+        iconColor: "var(--qc-warn)",
         headline: "You're on a free trial",
         subtext: `Your trial ends in ${daysLeft} day${daysLeft === 1 ? "" : "s"}. Subscribe now to keep uninterrupted access to all QuantCase features.`,
         urgency: daysLeft <= 2,
@@ -91,12 +91,12 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
     if (status === "trialing" && daysLeft <= 0) {
       return {
         badge: "Trial ended",
-        badgeColor: "#dc2626",
-        badgeBg: "#fef2f2",
-        badgeBorder: "#fecaca",
+        badgeColor: "var(--qc-down)",
+        badgeBg: "var(--qc-down-soft)",
+        badgeBorder: "var(--qc-down)",
         icon: Clock,
-        iconBg: "#fef2f2",
-        iconColor: "#dc2626",
+        iconBg: "var(--qc-down-soft)",
+        iconColor: "var(--qc-down)",
         headline: "Your free trial has ended",
         subtext: "Subscribe to a plan to continue using QuantCase and access all research tools.",
         urgency: true,
@@ -105,12 +105,12 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
     if (status === "past_due") {
       return {
         badge: "Payment overdue",
-        badgeColor: "#dc2626",
-        badgeBg: "#fef2f2",
-        badgeBorder: "#fecaca",
+        badgeColor: "var(--qc-down)",
+        badgeBg: "var(--qc-down-soft)",
+        badgeBorder: "var(--qc-down)",
         icon: Shield,
-        iconBg: "#fef2f2",
-        iconColor: "#dc2626",
+        iconBg: "var(--qc-down-soft)",
+        iconColor: "var(--qc-down)",
         headline: "Payment overdue",
         subtext: "Your last payment failed. Update your subscription to restore full access.",
         urgency: true,
@@ -119,12 +119,12 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
     if (status === "canceled") {
       return {
         badge: "Subscription cancelled",
-        badgeColor: "#6b7280",
-        badgeBg: "#f9fafb",
-        badgeBorder: "#e5e7eb",
+        badgeColor: "var(--qc-ink-2)",
+        badgeBg: "var(--qc-section)",
+        badgeBorder: "var(--qc-hair)",
         icon: Shield,
-        iconBg: "#f9fafb",
-        iconColor: "#6b7280",
+        iconBg: "var(--qc-section)",
+        iconColor: "var(--qc-ink-2)",
         headline: "Subscription cancelled",
         subtext: "Re-subscribe to regain access to earnings call analysis, MOD scoring, and your portfolio.",
         urgency: false,
@@ -132,12 +132,12 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
     }
     return {
       badge: "Subscription required",
-      badgeColor: "#6b7280",
-      badgeBg: "#f9fafb",
-      badgeBorder: "#e5e7eb",
+      badgeColor: "var(--qc-ink-2)",
+      badgeBg: "var(--qc-section)",
+      badgeBorder: "var(--qc-hair)",
       icon: Shield,
-      iconBg: "#f9fafb",
-      iconColor: "#6b7280",
+      iconBg: "var(--qc-section)",
+      iconColor: "var(--qc-ink-2)",
       headline: "Upgrade to continue",
       subtext: "Choose a plan to unlock the full QuantCase research platform.",
       urgency: false,
@@ -163,8 +163,8 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
     >
       <div
         style={{
-          background: "#fff",
-          border: "1px solid #E2E2E2",
+          background: "var(--qc-card)",
+          border: "1px solid var(--qc-hair)",
           borderRadius: 16,
           maxWidth: 560,
           width: "100%",
@@ -175,14 +175,14 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
         }}
       >
         {/* Top accent bar */}
-        <div style={{ height: 4, background: "linear-gradient(90deg, #0F172B 0%, #334155 100%)" }} />
+        <div style={{ height: 4, background: "linear-gradient(90deg, var(--qc-ink) 0%, var(--qc-ink-2) 100%)" }} />
 
         {/* Test-mode banner — backend-driven; no real money is charged */}
         {config?.mode === "test" && (
           <div
             style={{
-              background: "#0F172B",
-              color: "#fff",
+              background: "var(--qc-ink)",
+              color: "var(--qc-on-dark)",
               fontSize: 11,
               fontWeight: 600,
               textAlign: "center",
@@ -206,13 +206,13 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                border: "1px solid #E2E2E2",
-                background: "#F5F5F5",
+                border: "1px solid var(--qc-hair)",
+                background: "var(--qc-section)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                color: "#888888",
+                color: "var(--qc-ink-3)",
               }}
             >
               <X size={14} />
@@ -254,7 +254,7 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
             style={{
               fontSize: 24,
               fontWeight: 500,
-              color: "#0F172B",
+              color: "var(--qc-ink)",
               marginBottom: 8,
               letterSpacing: "-0.02em",
               lineHeight: 1.2,
@@ -262,7 +262,7 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
           >
             {statusConfig.headline}
           </h2>
-          <p style={{ fontSize: 14, color: "#888888", lineHeight: 1.6, marginBottom: 20 }}>
+          <p style={{ fontSize: 14, color: "var(--qc-ink-3)", lineHeight: 1.6, marginBottom: 20 }}>
             {statusConfig.subtext}
           </p>
 
@@ -275,9 +275,9 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                 gap: 8,
                 marginBottom: 24,
                 padding: "16px",
-                background: "#F5F5F5",
+                background: "var(--qc-section)",
                 borderRadius: 10,
-                border: "1px solid #E2E2E2",
+                border: "1px solid var(--qc-hair)",
               }}
             >
               {FEATURE_LIST.map(({ icon: Icon, text }) => (
@@ -295,9 +295,9 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                       flexShrink: 0,
                     }}
                   >
-                    <Icon size={12} color="#0F172B" strokeWidth={2} />
+                    <Icon size={12} color="var(--qc-ink)" strokeWidth={2} />
                   </div>
-                  <span style={{ fontSize: 12, color: "#444", lineHeight: 1.3 }}>{text}</span>
+                  <span style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.3 }}>{text}</span>
                 </div>
               ))}
             </div>
@@ -311,7 +311,7 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
             style={{
               fontSize: 10,
               fontWeight: 600,
-              color: "#888888",
+              color: "var(--qc-ink-3)",
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               marginBottom: 12,
@@ -324,11 +324,11 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
           <div
             style={{
               display: "inline-flex",
-              border: "1px solid #E2E2E2",
+              border: "1px solid var(--qc-hair)",
               borderRadius: 999,
               padding: 3,
               marginBottom: 16,
-              background: "#F5F5F5",
+              background: "var(--qc-section)",
             }}
           >
             {(["monthly", "annual"] as const).map((opt) => (
@@ -343,8 +343,8 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                   border: "none",
                   cursor: "pointer",
                   transition: "all 0.15s",
-                  background: billingInterval === opt ? "#0F172B" : "transparent",
-                  color: billingInterval === opt ? "#fff" : "#888888",
+                  background: billingInterval === opt ? "var(--qc-ink)" : "transparent",
+                  color: billingInterval === opt ? "var(--qc-on-dark)" : "var(--qc-ink-3)",
                   textTransform: "capitalize",
                   display: "flex",
                   alignItems: "center",
@@ -356,8 +356,8 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                   <span
                     style={{
                       fontSize: 9,
-                      background: billingInterval === "annual" ? "rgba(255,255,255,0.2)" : "#d1fae5",
-                      color: billingInterval === "annual" ? "#fff" : "#065f46",
+                      background: billingInterval === "annual" ? "rgba(255,255,255,0.2)" : "var(--qc-up-soft)",
+                      color: billingInterval === "annual" ? "var(--qc-on-dark)" : "var(--qc-up)",
                       borderRadius: 999,
                       padding: "1px 6px",
                       fontWeight: 700,
@@ -382,16 +382,16 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                       width: 6,
                       height: 6,
                       borderRadius: "50%",
-                      background: "#0F172B",
+                      background: "var(--qc-ink)",
                       opacity: 0.3 + i * 0.3,
                     }}
                   />
                 ))}
               </div>
-              <p style={{ fontSize: 13, color: "#888888" }}>Loading plans…</p>
+              <p style={{ fontSize: 13, color: "var(--qc-ink-3)" }}>Loading plans…</p>
             </div>
           ) : visiblePrices.length === 0 ? (
-            <div style={{ padding: "24px 0", textAlign: "center", color: "#888888", fontSize: 14 }}>
+            <div style={{ padding: "24px 0", textAlign: "center", color: "var(--qc-ink-3)", fontSize: 14 }}>
               No plans available right now.
             </div>
           ) : (
@@ -407,8 +407,8 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                       textAlign: "left",
                       padding: "16px 18px",
                       borderRadius: 10,
-                      border: isSelected ? "2px solid #0F172B" : "1.5px solid #E2E2E2",
-                      background: isSelected ? "#F5F5F5" : "#fff",
+                      border: isSelected ? "2px solid var(--qc-ink)" : "1.5px solid var(--qc-hair)",
+                      background: isSelected ? "var(--qc-section)" : "var(--qc-card)",
                       cursor: "pointer",
                       display: "flex",
                       justifyContent: "space-between",
@@ -425,8 +425,8 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                           left: 14,
                           fontSize: 9,
                           fontWeight: 700,
-                          background: "#0F172B",
-                          color: "#fff",
+                          background: "var(--qc-ink)",
+                          color: "var(--qc-on-dark)",
                           borderRadius: 999,
                           padding: "2px 8px",
                           letterSpacing: "0.06em",
@@ -443,26 +443,26 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                           width: 16,
                           height: 16,
                           borderRadius: "50%",
-                          border: isSelected ? "5px solid #0F172B" : "1.5px solid #D1D5DB",
-                          background: "#fff",
+                          border: isSelected ? "5px solid var(--qc-ink)" : "1.5px solid var(--qc-hair)",
+                          background: "var(--qc-card)",
                           flexShrink: 0,
                           transition: "all 0.12s",
                         }}
                       />
                       <div>
-                        <div style={{ fontSize: 14, fontWeight: 500, color: "#0F172B", marginBottom: 2 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2 }}>
                           {product.name}
                         </div>
-                        <div style={{ fontSize: 12, color: "#888888" }}>
+                        <div style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>
                           {product.description}
                         </div>
                       </div>
                     </div>
                     <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <div style={{ fontSize: 18, fontWeight: 600, color: "#0F172B", letterSpacing: "-0.02em" }}>
+                      <div style={{ fontSize: 18, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "-0.02em" }}>
                         {formatAmount(price.amount, price.currency)}
                       </div>
-                      <div style={{ fontSize: 11, color: "#888888" }}>/{price.plan_type}</div>
+                      <div style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>/{price.plan_type}</div>
                     </div>
                   </button>
                 );
@@ -473,14 +473,14 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
           {error && (
             <div
               style={{
-                background: "#fef2f2",
-                border: "1px solid #fecaca",
+                background: "var(--qc-down-soft)",
+                border: "1px solid var(--qc-down)",
                 borderRadius: 8,
                 padding: "10px 14px",
                 marginBottom: 16,
               }}
             >
-              <p style={{ fontSize: 13, color: "#dc2626" }}>{error}</p>
+              <p style={{ fontSize: 13, color: "var(--qc-down)" }}>{error}</p>
             </div>
           )}
 
@@ -491,8 +491,8 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
             style={{
               width: "100%",
               padding: "14px 0",
-              background: loading || !selectedPriceId ? "#94a3b8" : "#0F172B",
-              color: "#fff",
+              background: loading || !selectedPriceId ? "var(--qc-ink-3)" : "var(--qc-ink)",
+              color: "var(--qc-on-dark)",
               border: "none",
               borderRadius: 8,
               fontSize: 14,
@@ -514,7 +514,7 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                     width: 14,
                     height: 14,
                     border: "2px solid rgba(255,255,255,0.4)",
-                    borderTopColor: "#fff",
+                    borderTopColor: "var(--qc-on-dark)",
                     borderRadius: "50%",
                     display: "inline-block",
                     animation: "spin 0.6s linear infinite",
@@ -527,7 +527,7 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
             )}
           </button>
 
-          <p style={{ fontSize: 11, color: "rgba(18,18,18,0.35)", textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
             Secured by Razorpay &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No hidden fees
           </p>
         </div>

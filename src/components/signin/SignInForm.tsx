@@ -179,7 +179,7 @@ export function SignInForm() {
 
         {error && (
           <div className="rounded-lg px-4 py-3" style={{ background: "#fef2f2", border: "1px solid #fecaca" }}>
-            <p className="text-red-600" style={{ fontSize: 13 }}>{error}</p>
+            <p className="text-down" style={{ fontSize: 13 }}>{error}</p>
           </div>
         )}
 

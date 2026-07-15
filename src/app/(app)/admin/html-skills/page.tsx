@@ -306,7 +306,7 @@ function HtmlSkillsPage() {
                 value={selectedSlug ?? ""}
                 onChange={(e) => setSelectedSlug(e.target.value || null)}
                 disabled={loading}
-                className={`w-full appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-3 pr-8 py-1.5 text-[13px] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer ${selectedSlug ? "text-[var(--qc-ink)]" : "text-[#888888]"}`}
+                className={`w-full appearance-none rounded-md border border-[var(--qc-border-default)] bg-card pl-3 pr-8 py-1.5 text-[13px] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer ${selectedSlug ? "text-[var(--qc-ink)]" : "text-ink-3"}`}
               >
                 <option value="" disabled={skills.length > 0}>
                   {loading ? "Loading…" : skills.length === 0 ? "No skills" : "Select a skill…"}
@@ -319,29 +319,29 @@ function HtmlSkillsPage() {
                   </optgroup>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[#888888]" />
+              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-ink-3" />
             </div>
 
             {/* Active indicator + slug */}
             {selectedSkill && (
               <div className="flex items-center gap-1.5 shrink-0">
-                <Circle className={`size-1.5 ${selectedSkill.is_active ? "fill-emerald-500 text-emerald-500" : "fill-zinc-300 text-zinc-300"}`} />
+                <Circle className={`size-1.5 ${selectedSkill.is_active ? "fill-up text-up" : "fill-ink-3 text-ink-3"}`} />
               </div>
             )}
 
             {/* Which settings the panel below is currently editing — the skill's own defaults, or a saved config */}
             {selectedSkill && configKey && (
-              <span className="shrink-0 whitespace-nowrap rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide bg-blue-50 text-blue-700">
+              <span className="shrink-0 whitespace-nowrap rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide bg-blue-soft text-blue">
                 editing: {selectedConfig?.name ?? configKey}
               </span>
             )}
 
-            {saveError && <span className="text-[11px] text-red-600 shrink-0">{saveError}</span>}
+            {saveError && <span className="text-[11px] text-down shrink-0">{saveError}</span>}
             {selectedSkill && (
               <button
                 onClick={() => skillDetailRef.current?.save()}
                 disabled={saving || !skillDirty}
-                className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
+                className="flex items-center gap-1.5 rounded-md bg-ink px-3 py-1.5 text-[12px] font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
               >
                 {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
                 Save
@@ -351,7 +351,7 @@ function HtmlSkillsPage() {
               <button
                 onClick={() => handleDeleteConfig(configKey)}
                 title="Delete this config"
-                className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-red-600 hover:border-red-300 transition-colors shrink-0"
+                className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-ink-3 hover:text-down hover:border-down transition-colors shrink-0"
               >
                 <Trash2 className="size-3.5" />
               </button>
@@ -361,7 +361,7 @@ function HtmlSkillsPage() {
             <button
               onClick={() => setShowHelp(true)}
               title="Help"
-              className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors shrink-0"
+              className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-ink-3 hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors shrink-0"
             >
               <HelpCircle className="size-3.5" />
             </button>
@@ -394,7 +394,7 @@ function HtmlSkillsPage() {
                     />
                   )}
                   {ticker && previewControls?.hasBase === false && (
-                    <span className="text-[11px] text-amber-700 shrink-0">No base yet — run Historic first</span>
+                    <span className="text-[11px] text-warn shrink-0">No base yet — run Historic first</span>
                   )}
 
                   {/* Pick the fiscal year/quarter that resolves to callId — Historic and Incremental each keep their own selection */}
@@ -408,14 +408,14 @@ function HtmlSkillsPage() {
                         }}
                         disabled={calls.length === 0}
                         title={`Fiscal year / quarter for this ${historic ? "historic" : "incremental"} run`}
-                        className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-white pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
+                        className="appearance-none rounded-md border border-[var(--qc-border-default)] bg-card pl-2.5 pr-7 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] outline-none focus:ring-1 focus:ring-[var(--qc-ink)] disabled:opacity-50 cursor-pointer"
                       >
                         {calls.length === 0 && <option value="">No calls</option>}
                         {calls.map((c) => (
                           <option key={c.id} value={c.id}>{c.quarter} {c.fiscal_year}</option>
                         ))}
                       </select>
-                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-[#888888]" />
+                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-ink-3" />
                     </div>
                   )}
 
@@ -426,7 +426,7 @@ function HtmlSkillsPage() {
                     onClick={handleExportPrompt}
                     disabled={exportingPrompt || !callId}
                     title="Export full prompt as .md"
-                    className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-[#888888] hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
+                    className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-ink-3 hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
                   >
                     {exportingPrompt ? <Loader2 className="size-3.5 animate-spin" /> : <FileDown className="size-3.5" />}
                   </button>
@@ -435,7 +435,7 @@ function HtmlSkillsPage() {
                   <button
                     onClick={() => previewControls?.run(true)}
                     disabled={previewControls?.running || !callId}
-                    className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
+                    className="flex items-center gap-1.5 rounded-md bg-ink px-3 py-1.5 text-[12px] font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
                   >
                     {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
                     Run
@@ -447,27 +447,27 @@ function HtmlSkillsPage() {
                   {/* Config selection — kept visually distinct because it's the entry point to the wider flow:
                       try a config here against various tickers, then pin it to a Company Group in
                       Coverage → L2 so bulk L2 dispatch resolves it automatically per ticker. */}
-                  <div className="flex items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50/60 px-1.5 py-1 shrink-0">
+                  <div className="flex items-center gap-1.5 rounded-md border border-blue bg-blue-soft px-1.5 py-1 shrink-0">
                     {ticker && configs.length > 0 && (
                       <div className="relative">
                         <select
                           value={configKey ?? ""}
                           onChange={(e) => setConfigKey(e.target.value || null)}
                           title="Use a saved config bundle for this run — pin one to a Company Group in Coverage → L2 to scale it up"
-                          className="appearance-none rounded-md border border-blue-200 bg-white pl-2.5 pr-7 py-1 text-[12px] font-medium text-blue-800 outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer"
+                          className="appearance-none rounded-md border border-blue bg-card pl-2.5 pr-7 py-1 text-[12px] font-medium text-blue outline-none focus:ring-1 focus:ring-blue cursor-pointer"
                         >
                           <option value="">Default config</option>
                           {configs.map((c) => (
                             <option key={c.key} value={c.key}>{c.name}</option>
                           ))}
                         </select>
-                        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-blue-400" />
+                        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-blue" />
                       </div>
                     )}
                     <button
                       onClick={() => setShowConfigsModal(true)}
                       title="Create, edit, and try saved configs — then pin one to a Company Group in Coverage → L2 for bulk dispatch"
-                      className="flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-blue-700 transition-colors shrink-0"
+                      className="flex items-center gap-1 rounded-md bg-blue px-2.5 py-1 text-[12px] font-semibold text-[var(--qc-on-dark)] hover:bg-blue transition-colors shrink-0"
                     >
                       <Layers className="size-3" />
                       Configs
@@ -478,7 +478,7 @@ function HtmlSkillsPage() {
                   {ticker && (
                     <button
                       onClick={() => setShowSignals(true)}
-                      className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                      className="flex items-center gap-1 text-[13px] font-medium text-ink-3 hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
                     >
                       <Radio className="size-3" />
                       Signals
@@ -490,7 +490,7 @@ function HtmlSkillsPage() {
                     <button
                       onClick={() => setShowHistoryModal(true)}
                       title="Browse past outputs for this ticker"
-                      className="flex items-center gap-1 text-[13px] font-medium text-[#888888] hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
+                      className="flex items-center gap-1 text-[13px] font-medium text-ink-3 hover:text-[var(--qc-ink)] underline underline-offset-2 decoration-dotted transition-colors shrink-0"
                     >
                       <History className="size-3" />
                       History
@@ -502,19 +502,19 @@ function HtmlSkillsPage() {
                   {/* Run metadata */}
                   {previewControls?.result && (
                     <span className={`text-[10px] font-medium rounded-sm px-2 py-0.5 shrink-0 ${
-                      previewControls.result.cached ? "bg-zinc-100 text-zinc-500" : "bg-emerald-50 text-emerald-700"
+                      previewControls.result.cached ? "bg-secondary text-ink-2" : "bg-up-soft text-up"
                     }`}>
                       {previewControls.result.cached ? "cached" : "fresh"}
                     </span>
                   )}
                   {previewControls?.result?.output && (
-                    <span className="text-[10px] text-[#888888] shrink-0">
+                    <span className="text-[10px] text-ink-3 shrink-0">
                       {previewControls.result.output.input_tokens + previewControls.result.output.output_tokens} tok
                       {" · "}${previewControls.result.output.cost_usd?.toFixed(5) ?? "—"}
                     </span>
                   )}
                   {previewControls?.result?.output?.config_key && (
-                    <span className="text-[10px] font-medium rounded-sm px-2 py-0.5 bg-blue-50 text-blue-700 shrink-0">
+                    <span className="text-[10px] font-medium rounded-sm px-2 py-0.5 bg-blue-soft text-blue shrink-0">
                       config: {previewControls.result.output.config_key}
                     </span>
                   )}
@@ -527,10 +527,10 @@ function HtmlSkillsPage() {
 
         {/* Global error */}
         {error && (
-          <div className="flex items-center gap-2 mx-5 mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-2.5 text-[12px] text-red-700 shrink-0">
+          <div className="flex items-center gap-2 mx-5 mt-3 rounded-md border border-down bg-down-soft px-4 py-2.5 text-[12px] text-down shrink-0">
             <AlertCircle className="size-4 shrink-0" />
             <span className="flex-1">{error}</span>
-            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700">
+            <button onClick={() => setError(null)} className="text-down hover:text-down">
               <X className="size-4" />
             </button>
           </div>
@@ -559,7 +559,7 @@ function HtmlSkillsPage() {
                 onDirtyChange={setSkillDirty}
               />
             ) : (
-              <div className="flex h-full items-center justify-center text-[13px] text-[#888888]">
+              <div className="flex h-full items-center justify-center text-[13px] text-ink-3">
                 {loading ? "Loading skills…" : "Select a skill to edit"}
               </div>
             )}
@@ -580,7 +580,7 @@ function HtmlSkillsPage() {
                 onControls={setPreviewControls}
               />
             ) : (
-              <div className="flex h-full items-center justify-center text-[13px] text-[#888888]">
+              <div className="flex h-full items-center justify-center text-[13px] text-ink-3">
                 {!selectedSkill ? "Select a skill to preview" : "Select a ticker to preview"}
               </div>
             )}

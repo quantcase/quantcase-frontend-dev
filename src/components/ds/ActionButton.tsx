@@ -1,5 +1,11 @@
 import type { CSSProperties, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
+/**
+ * @deprecated Use `ui/Button` (primary = default, secondary = variant="pill")
+ * or `ds/CtaLink` (tertiary text+arrow) instead. Kept as a token-driven shim
+ * for its remaining dashboard/brief consumers until they migrate in Phase 3.
+ */
 interface ActionButtonProps {
   children: ReactNode;
   onClick?: () => void;
@@ -9,9 +15,9 @@ interface ActionButtonProps {
   noWrap?: boolean;
 }
 
-const SIZE: Record<"sm" | "md", CSSProperties> = {
-  sm: { fontSize: "var(--qc-fz-12)", padding: "5px 12px", borderRadius: 999 },
-  md: { fontSize: "var(--qc-fz-12)", padding: "7px 14px",  borderRadius: 8  },
+const SIZE: Record<"sm" | "md", string> = {
+  sm: "text-xs px-3 py-[5px] rounded-full",
+  md: "text-xs px-3.5 py-[7px] rounded-lg",
 };
 
 export function ActionButton({
@@ -22,22 +28,18 @@ export function ActionButton({
   style,
   noWrap = false,
 }: ActionButtonProps) {
-  const base: CSSProperties =
-    variant === "primary"
-      ? { background: "var(--qc-ink)", color: "#fff", border: "1px solid var(--qc-ink)" }
-      : { background: "#fff", color: "var(--qc-ink)", border: "1px solid var(--qc-hair)" };
-
   return (
     <button
       onClick={onClick}
-      style={{
-        cursor: "pointer",
-        fontFamily: "var(--qc-font-sans)",
-        whiteSpace: noWrap ? "nowrap" : undefined,
-        ...SIZE[size],
-        ...base,
-        ...style,
-      }}
+      style={style}
+      className={cn(
+        "cursor-pointer border font-sans transition-colors",
+        SIZE[size],
+        variant === "primary"
+          ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
+          : "bg-background text-ink border-hair hover:bg-secondary",
+        noWrap && "whitespace-nowrap"
+      )}
     >
       {children}
     </button>

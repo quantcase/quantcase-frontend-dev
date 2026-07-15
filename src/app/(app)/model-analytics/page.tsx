@@ -24,7 +24,7 @@ export default function ModelAnalyticsPage() {
   const totalWeight = active.positions.reduce((s, p) => s + p.allocation, 0);
 
   return (
-    <div className="min-h-screen bg-white mb-12 px-6">
+    <div className="min-h-screen bg-card mb-12 px-6">
       <div className="space-y-4">
 
         {/* Header + dropdown on one line */}
@@ -39,27 +39,27 @@ export default function ModelAnalyticsPage() {
         </div>
 
         {/* Summary stat cards */}
-        <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+        <div className="rounded-[10px] border border-hair bg-secondary p-2">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
             <StatCard
               flat
               value={formatCrore(active.capital)}
               label="Portfolio AUM"
-              icon={<BarChart2 className="size-4 text-zinc-500" />}
+              icon={<BarChart2 className="size-4 text-ink-3" />}
               sublabel={active.client.clientName}
             />
             <StatCard
               flat
               value={active.positions.length}
               label="Active Positions"
-              icon={<Layers className="size-4 text-zinc-500" />}
+              icon={<Layers className="size-4 text-ink-3" />}
               sublabel={`${totalWeight}% allocated`}
             />
             <StatCard
               flat
               value={avgScore}
               label="Avg IC Score"
-              icon={<ShieldCheck className="size-4 text-zinc-500" />}
+              icon={<ShieldCheck className="size-4 text-ink-3" />}
               sublabel={avgScore >= 75 ? "Strong conviction" : "Moderate"}
               trend={avgScore >= 75 ? "up" : "neutral"}
             />
@@ -67,7 +67,7 @@ export default function ModelAnalyticsPage() {
               flat
               value={criticalDrifts + warningDrifts}
               label="Drift Alerts"
-              icon={<AlertTriangle className="size-4 text-zinc-500" />}
+              icon={<AlertTriangle className="size-4 text-ink-3" />}
               sublabel={criticalDrifts > 0 ? `${criticalDrifts} critical` : "No critical drifts"}
               trend={criticalDrifts > 0 ? "down" : warningDrifts > 0 ? "neutral" : "up"}
             />

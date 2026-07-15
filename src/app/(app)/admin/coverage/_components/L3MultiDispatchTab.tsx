@@ -26,8 +26,8 @@ interface ResolveCountResponse {
 const BASE = `${BACKEND_URL}/admin/pipeline-dispatch/l3-multi`;
 
 const INPUT_CLS =
-  "rounded-md border border-[#E2E2E2] px-3 py-2 text-sm font-mono text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]";
-const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5";
+  "rounded-md border border-hair px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:ring-1 focus:ring-ink";
+const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 
 const LAYER_OPTIONS: { id: L3LayerId; label: string }[] = [
   { id: "l3", label: "L3 — Lens Verdicts" },
@@ -42,15 +42,15 @@ function humanize(s: string): string {
 
 function TypeAvailabilityBlock({ t }: { t: L3PreviewTickerRow["types"][number] }) {
   return (
-    <div className="rounded-md border border-[#E2E2E2] bg-white px-3 py-2 space-y-1">
+    <div className="rounded-md border border-hair bg-card px-3 py-2 space-y-1">
       <div className="flex items-center gap-1.5">
-        <span className="text-[11px] font-medium text-[#0F172B]">{humanize(t.type)}</span>
+        <span className="text-[11px] font-medium text-ink">{humanize(t.type)}</span>
         {t.ready ? (
-          <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600">
+          <span className="flex items-center gap-1 text-[10px] font-medium text-up">
             <CheckCircle2 className="size-3" /> Ready
           </span>
         ) : (
-          <span className="flex items-center gap-1 text-[10px] font-medium text-red-600">
+          <span className="flex items-center gap-1 text-[10px] font-medium text-down">
             <XCircle className="size-3" /> Not ready
           </span>
         )}
@@ -58,7 +58,7 @@ function TypeAvailabilityBlock({ t }: { t: L3PreviewTickerRow["types"][number] }
       {t.available.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {t.available.map((a) => (
-            <span key={a} className="rounded-sm bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 text-[10px] text-emerald-700">
+            <span key={a} className="rounded-sm bg-up-soft border border-up-soft px-1.5 py-0.5 text-[10px] text-up">
               {a}
             </span>
           ))}
@@ -67,7 +67,7 @@ function TypeAvailabilityBlock({ t }: { t: L3PreviewTickerRow["types"][number] }
       {t.missing.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {t.missing.map((m) => (
-            <span key={m} className="rounded-sm bg-[#F5F5F5] border border-[#E2E2E2] px-1.5 py-0.5 text-[10px] text-[#888888]">
+            <span key={m} className="rounded-sm bg-secondary border border-hair px-1.5 py-0.5 text-[10px] text-ink-3">
               {m}
             </span>
           ))}
@@ -82,29 +82,29 @@ function PreviewTickerRow({ row }: { row: L3PreviewTickerRow }) {
   const readyCount = row.types.filter((t) => t.ready).length;
 
   return (
-    <div className="rounded-[8px] border border-[#F0F0F0] bg-white overflow-hidden">
+    <div className="rounded-[8px] border border-hair bg-card overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-4 px-3 py-2 hover:bg-[#FAFAFA] transition-colors text-left"
+        className="w-full flex items-center gap-4 px-3 py-2 hover:bg-secondary transition-colors text-left"
       >
-        <span className="font-mono text-[12px] font-medium text-[#0F172B] w-24 shrink-0">{row.ticker}</span>
-        <span className="text-[11px] text-[#888888]">
-          Ready: <span className="text-[#0F172B] font-medium">{readyCount}</span>/{row.types.length}
+        <span className="font-mono text-[12px] font-medium text-ink w-24 shrink-0">{row.ticker}</span>
+        <span className="text-[11px] text-ink-3">
+          Ready: <span className="text-ink font-medium">{readyCount}</span>/{row.types.length}
         </span>
         <div className="flex gap-1">
           {row.types.map((t) => (
             <span
               key={t.type}
               title={`${humanize(t.type)} — ${t.ready ? "ready" : "not ready"}`}
-              className={`size-2 rounded-full ${t.ready ? "bg-emerald-500" : "bg-red-400"}`}
+              className={`size-2 rounded-full ${t.ready ? "bg-up" : "bg-down"}`}
             />
           ))}
         </div>
-        <ChevronDown className={`size-3.5 text-[#888888] ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`size-3.5 text-ink-3 ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="border-t border-[#F0F0F0] px-3 py-3 bg-[#FAFAFA] grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="border-t border-hair px-3 py-3 bg-secondary grid grid-cols-1 sm:grid-cols-2 gap-2">
           {row.types.map((t) => (
             <TypeAvailabilityBlock key={t.type} t={t} />
           ))}
@@ -119,20 +119,20 @@ function PreviewTickerRow({ row }: { row: L3PreviewTickerRow }) {
 function RunStatusBadge({ status }: { status: L3Run["status"] }) {
   if (status === "completed") {
     return (
-      <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+      <span className="flex items-center gap-1 text-[11px] font-medium text-up">
         <CheckCircle2 className="size-3.5" /> Completed
       </span>
     );
   }
   if (status === "failed") {
     return (
-      <span className="flex items-center gap-1 text-[11px] font-medium text-red-600">
+      <span className="flex items-center gap-1 text-[11px] font-medium text-down">
         <XCircle className="size-3.5" /> Failed
       </span>
     );
   }
   return (
-    <span className="flex items-center gap-1 text-[11px] font-medium text-blue-600">
+    <span className="flex items-center gap-1 text-[11px] font-medium text-blue">
       <Clock className="size-3.5" /> Running
     </span>
   );
@@ -140,13 +140,13 @@ function RunStatusBadge({ status }: { status: L3Run["status"] }) {
 
 function TickerRunDetail({ p }: { p: L3RunTickerSummary }) {
   if (p.status === "failed") {
-    return <div className="text-[11px] text-red-700">{p.error}</div>;
+    return <div className="text-[11px] text-down">{p.error}</div>;
   }
   return (
     <div className="flex flex-wrap gap-1.5">
       {(p.jobs ?? []).map((j) => (
-        <span key={j.jobId} className="rounded-sm bg-white border border-[#E2E2E2] px-1.5 py-0.5 text-[10px] text-[#888888]">
-          <span className="font-medium text-[#0F172B]">{humanize(j.type)}</span> — {j.jobId}
+        <span key={j.jobId} className="rounded-sm bg-card border border-hair px-1.5 py-0.5 text-[10px] text-ink-3">
+          <span className="font-medium text-ink">{humanize(j.type)}</span> — {j.jobId}
         </span>
       ))}
     </div>
@@ -159,57 +159,57 @@ function RunHistoryRow({ run }: { run: L3Run }) {
   const hasMeta = !!run.metadata;
 
   return (
-    <div className="rounded-[8px] border border-[#F0F0F0] bg-white overflow-hidden">
+    <div className="rounded-[8px] border border-hair bg-card overflow-hidden">
       <button
         onClick={() => hasMeta && setOpen((v) => !v)}
-        className={`w-full flex items-center gap-4 px-3 py-2 text-left transition-colors ${hasMeta ? "hover:bg-[#FAFAFA]" : ""}`}
+        className={`w-full flex items-center gap-4 px-3 py-2 text-left transition-colors ${hasMeta ? "hover:bg-secondary" : ""}`}
       >
-        <span className="font-mono text-[11px] text-[#888888] w-40 truncate shrink-0">{run.id}</span>
+        <span className="font-mono text-[11px] text-ink-3 w-40 truncate shrink-0">{run.id}</span>
         <RunStatusBadge status={run.status} />
         {run.metadata && (
-          <span className="text-[11px] text-[#888888] uppercase">{run.metadata.layerId}</span>
+          <span className="text-[11px] text-ink-3 uppercase">{run.metadata.layerId}</span>
         )}
-        <span className="text-[11px] text-[#888888]">
+        <span className="text-[11px] text-ink-3">
           {run.records_processed != null ? `${run.records_processed} queued` : "—"}
         </span>
-        {run.ended_at && <span className="text-[11px] text-[#888888]">ended {new Date(run.ended_at).toLocaleString()}</span>}
+        {run.ended_at && <span className="text-[11px] text-ink-3">ended {new Date(run.ended_at).toLocaleString()}</span>}
         {hasMeta && (
-          <ChevronDown className={`size-3.5 text-[#888888] ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+          <ChevronDown className={`size-3.5 text-ink-3 ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
         )}
       </button>
 
       {run.status === "failed" && run.error && (
-        <div className="border-t border-[#F0F0F0] px-3 py-2 text-[11px] text-red-700 bg-red-50">{run.error}</div>
+        <div className="border-t border-hair px-3 py-2 text-[11px] text-down bg-down-soft">{run.error}</div>
       )}
 
       {open && run.metadata && (
-        <div className="border-t border-[#F0F0F0] px-3 py-3 bg-[#FAFAFA] space-y-2">
-          <div className="flex gap-4 text-[11px] text-[#888888]">
-            <span>Types: <span className="text-[#0F172B] font-medium">{run.metadata.types.map(humanize).join(", ")}</span></span>
-            <span>Queued: <span className="text-[#0F172B] font-medium">{run.metadata.queued}</span></span>
-            <span>Failed: <span className="text-[#0F172B] font-medium">{run.metadata.failed}</span></span>
+        <div className="border-t border-hair px-3 py-3 bg-secondary space-y-2">
+          <div className="flex gap-4 text-[11px] text-ink-3">
+            <span>Types: <span className="text-ink font-medium">{run.metadata.types.map(humanize).join(", ")}</span></span>
+            <span>Queued: <span className="text-ink font-medium">{run.metadata.queued}</span></span>
+            <span>Failed: <span className="text-ink font-medium">{run.metadata.failed}</span></span>
           </div>
           {run.metadata.perTicker?.length > 0 && (
-            <div className="rounded-md border border-[#E2E2E2] overflow-hidden">
+            <div className="rounded-md border border-hair overflow-hidden">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Ticker</th>
-                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Status</th>
+                  <tr className="bg-secondary border-b border-hair">
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3">Ticker</th>
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F0F0F0] bg-white">
+                <tbody className="divide-y divide-hair bg-card">
                   {run.metadata.perTicker.map((p) => {
                     const rowOpen = expandedTicker === p.ticker;
                     return (
                       <Fragment key={p.ticker}>
                         <tr>
-                          <td className="px-3 py-1.5 font-mono text-[11px] text-[#0F172B]">{p.ticker}</td>
+                          <td className="px-3 py-1.5 font-mono text-[11px] text-ink">{p.ticker}</td>
                           <td className="px-3 py-1.5 text-[11px]">
                             <button
                               onClick={() => setExpandedTicker(rowOpen ? null : p.ticker)}
                               className={`inline-flex items-center gap-0.5 font-medium hover:underline ${
-                                p.status === "failed" ? "text-red-600" : "text-[#0F172B]"
+                                p.status === "failed" ? "text-down" : "text-ink"
                               }`}
                             >
                               {p.status}
@@ -219,7 +219,7 @@ function RunHistoryRow({ run }: { run: L3Run }) {
                         </tr>
                         {rowOpen && (
                           <tr>
-                            <td colSpan={2} className="border-t border-[#F0F0F0] bg-[#FAFAFA] px-3 py-2">
+                            <td colSpan={2} className="border-t border-hair bg-secondary px-3 py-2">
                               <TickerRunDetail p={p} />
                             </td>
                           </tr>
@@ -401,9 +401,9 @@ export function L3MultiDispatchTab() {
   return (
     <div className="space-y-5 max-w-4xl">
       {/* Intro */}
-      <div className="rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
-        <p className="text-[13px] text-[#0F172B] font-medium">On-demand L3/L4 dispatch</p>
-        <p className="text-[12px] text-[#888888] mt-1">
+      <div className="rounded-md border border-hair bg-secondary px-4 py-3">
+        <p className="text-[13px] text-ink font-medium">On-demand L3/L4 dispatch</p>
+        <p className="text-[12px] text-ink-3 mt-1">
           Bulk-enqueues management/opportunity/deal lens analysis (L3) or the top-level summary (L4)
           for a chosen ticker set. Preview only checks whether the backing signals a ticker needs
           already exist — it&rsquo;s not a full prompt build, so it stays fast at 100+ tickers.
@@ -411,7 +411,7 @@ export function L3MultiDispatchTab() {
       </div>
 
       {optionsError && !optionsLoading && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {optionsError}
         </div>
       )}
@@ -431,17 +431,17 @@ export function L3MultiDispatchTab() {
       />
 
       {/* L3/L4-specific dispatch options */}
-      <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-4 space-y-4">
+      <div className="rounded-[10px] border border-hair bg-card p-4 space-y-4">
         <div>
           <label className={LABEL_CLS}>Layer</label>
-          <div className="inline-flex rounded-md border border-[#E2E2E2] p-0.5 bg-[#F5F5F5]">
+          <div className="inline-flex rounded-md border border-hair p-0.5 bg-secondary">
             {LAYER_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
                 type="button"
                 onClick={() => setLayerId(opt.id)}
                 className={`px-3 py-1.5 text-[12px] font-medium rounded-[5px] transition-colors ${
-                  layerId === opt.id ? "bg-white text-[#0F172B] shadow-sm" : "text-[#888888] hover:text-[#0F172B]"
+                  layerId === opt.id ? "bg-card text-ink shadow-sm" : "text-ink-3 hover:text-ink"
                 }`}
               >
                 {opt.label}
@@ -455,7 +455,7 @@ export function L3MultiDispatchTab() {
             Types {optionsLoading && <span className="normal-case tracking-normal font-normal">— loading…</span>}
           </label>
           {availableTypes.length === 0 && !optionsLoading ? (
-            <p className="text-[12px] text-[#888888]">No types available for this layer.</p>
+            <p className="text-[12px] text-ink-3">No types available for this layer.</p>
           ) : (
             <div className="flex gap-2 flex-wrap">
               {availableTypes.map((t) => (
@@ -464,8 +464,8 @@ export function L3MultiDispatchTab() {
                   onClick={() => toggleType(t)}
                   className={`rounded-md border px-3 py-1.5 text-[12px] font-medium transition-colors ${
                     types.includes(t)
-                      ? "border-[#0F172B] bg-[#0F172B] text-white"
-                      : "border-[#E2E2E2] text-[#0F172B] hover:border-[#0F172B]"
+                      ? "border-ink bg-ink text-[var(--qc-on-dark)]"
+                      : "border-hair text-ink hover:border-ink"
                   }`}
                 >
                   {humanize(t)}
@@ -473,7 +473,7 @@ export function L3MultiDispatchTab() {
               ))}
             </div>
           )}
-          <p className="text-[11px] text-[#888888] mt-1.5">
+          <p className="text-[11px] text-ink-3 mt-1.5">
             Omitting a type entirely (leave all checked) dispatches every valid type for this layer.
           </p>
         </div>
@@ -486,10 +486,10 @@ export function L3MultiDispatchTab() {
             placeholder="e.g. MSUMI"
             className={`${INPUT_CLS} w-full max-w-xs uppercase`}
           />
-          <p className="text-[11px] text-[#888888] mt-1">Alphabetical cursor — resume a long run over &ldquo;All companies&rdquo;.</p>
+          <p className="text-[11px] text-ink-3 mt-1">Alphabetical cursor — resume a long run over &ldquo;All companies&rdquo;.</p>
         </div>
 
-        <div className="flex flex-wrap gap-6 pt-1 border-t border-[#F0F0F0]">
+        <div className="flex flex-wrap gap-6 pt-1 border-t border-hair">
           <CheckboxField
             checked={force}
             onChange={setForce}
@@ -501,17 +501,17 @@ export function L3MultiDispatchTab() {
 
       {/* Errors */}
       {previewError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {previewError}
         </div>
       )}
       {csvError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {csvError}
         </div>
       )}
       {runError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {runError}
         </div>
       )}
@@ -521,7 +521,7 @@ export function L3MultiDispatchTab() {
         <button
           onClick={() => doPreview(1)}
           disabled={!canPreview}
-          className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink hover:border-ink transition-colors disabled:opacity-40"
         >
           {previewLoading && <Loader2 className="size-3.5 animate-spin" />}
           Preview
@@ -530,7 +530,7 @@ export function L3MultiDispatchTab() {
         <button
           onClick={doExportCsv}
           disabled={types.length === 0 || csvLoading}
-          className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink hover:border-ink transition-colors disabled:opacity-40"
         >
           {csvLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
           Export CSV
@@ -539,8 +539,8 @@ export function L3MultiDispatchTab() {
         <button
           onClick={handleRunClick}
           disabled={!canRun}
-          className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-40 disabled:cursor-not-allowed ${
-            confirmArmed ? "bg-red-600 hover:opacity-90" : "bg-[#0F172B] hover:opacity-90"
+          className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium text-[var(--qc-on-dark)] transition-opacity disabled:opacity-40 disabled:cursor-not-allowed ${
+            confirmArmed ? "bg-down hover:opacity-90" : "bg-ink hover:opacity-90"
           }`}
         >
           {triggering && <Loader2 className="size-3.5 animate-spin" />}
@@ -548,12 +548,12 @@ export function L3MultiDispatchTab() {
         </button>
 
         {confirmArmed && (
-          <button onClick={() => setConfirmArmed(false)} className="text-sm text-[#888888] hover:text-[#0F172B]">
+          <button onClick={() => setConfirmArmed(false)} className="text-sm text-ink-3 hover:text-ink">
             Cancel
           </button>
         )}
 
-        <span className="text-[11px] text-[#888888]">
+        <span className="text-[11px] text-ink-3">
           {confirmArmed
             ? "This queues real jobs (one per ticker, fanning out across the selected types) and can't be cancelled once started."
             : "Preview is optional — Run dispatches with the current options whether or not you've previewed them."}
@@ -562,7 +562,7 @@ export function L3MultiDispatchTab() {
 
       {/* Active run banner */}
       {activeRun && (
-        <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+        <div className="flex items-center gap-2 rounded-md border border-blue-soft bg-blue-soft px-4 py-3 text-sm text-blue">
           <Loader2 className="size-4 shrink-0 animate-spin" />
           Dispatching run {activeRun.id}… this can take a while for large ticker sets. You can
           navigate away — check back under Run History.
@@ -574,8 +574,8 @@ export function L3MultiDispatchTab() {
         <div className="space-y-2">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Preview</span>
-              <span className="text-[10px] text-[#C8C8C8]">{preview.tickerCount} companies total</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Preview</span>
+              <span className="text-[10px] text-ink-3">{preview.tickerCount} companies total</span>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               {preview.totalPages > 1 && (
@@ -583,26 +583,26 @@ export function L3MultiDispatchTab() {
                   <button
                     onClick={() => doPreview(page - 1)}
                     disabled={page <= 1 || previewLoading || previewedKey !== bodyKey}
-                    className="flex items-center justify-center size-6 rounded border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] disabled:opacity-40 disabled:hover:border-[#E2E2E2] disabled:hover:text-[#888888] transition-colors"
+                    className="flex items-center justify-center size-6 rounded border border-hair text-ink-3 hover:text-ink hover:border-ink disabled:opacity-40 disabled:hover:border-hair disabled:hover:text-ink-3 transition-colors"
                   >
                     <ChevronLeft className="size-3.5" />
                   </button>
-                  <span className="text-[11px] text-[#888888]">Page {preview.page} of {preview.totalPages}</span>
+                  <span className="text-[11px] text-ink-3">Page {preview.page} of {preview.totalPages}</span>
                   <button
                     onClick={() => doPreview(page + 1)}
                     disabled={page >= preview.totalPages || previewLoading || previewedKey !== bodyKey}
-                    className="flex items-center justify-center size-6 rounded border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] disabled:opacity-40 disabled:hover:border-[#E2E2E2] disabled:hover:text-[#888888] transition-colors"
+                    className="flex items-center justify-center size-6 rounded border border-hair text-ink-3 hover:text-ink hover:border-ink disabled:opacity-40 disabled:hover:border-hair disabled:hover:text-ink-3 transition-colors"
                   >
                     <ChevronRight className="size-3.5" />
                   </button>
                 </div>
               )}
-              <label className="flex items-center gap-1.5 text-[11px] text-[#888888] cursor-pointer">
+              <label className="flex items-center gap-1.5 text-[11px] text-ink-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={showNotReadyFirst}
                   onChange={(e) => setShowNotReadyFirst(e.target.checked)}
-                  className="accent-[#0F172B]"
+                  className="accent-[var(--qc-ink)]"
                 />
                 Not-ready first
               </label>
@@ -617,11 +617,11 @@ export function L3MultiDispatchTab() {
       {/* Run history */}
       <div className="space-y-2 pt-2">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Run History</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Run History</span>
           <button
             onClick={loadRuns}
             disabled={runsLoading}
-            className="flex items-center gap-1.5 text-[11px] text-[#888888] hover:text-[#0F172B] disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[11px] text-ink-3 hover:text-ink disabled:opacity-40"
           >
             {runsLoading ? <Loader2 className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
             Refresh
@@ -629,13 +629,13 @@ export function L3MultiDispatchTab() {
         </div>
 
         {runsError && !runsLoading && (
-          <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
             <AlertCircle className="size-4 shrink-0" /> {runsError}
           </div>
         )}
 
         {runs.length === 0 && !runsLoading && !runsError && (
-          <p className="text-[12px] text-[#888888]">No runs yet.</p>
+          <p className="text-[12px] text-ink-3">No runs yet.</p>
         )}
 
         <div className="space-y-1.5">

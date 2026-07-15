@@ -30,7 +30,7 @@ const SORT_LABEL: Record<L2SortSource, string> = {
 
 const BASE = `${BACKEND_URL}/admin/pipeline-dispatch/l2-multi`;
 
-const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1.5";
+const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5";
 
 // ── Preview per-ticker row — signal-availability report (one query for the whole batch) ─────
 
@@ -38,22 +38,22 @@ function PreviewSourceBlock({ label, cov, hasQuarter }: { label: string; cov: L2
   if (cov.periods.length === 0) return null;
   return (
     <div>
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-1">{label}</div>
-      <div className="rounded-md border border-[#E2E2E2] overflow-x-auto">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-ink-3 mb-1">{label}</div>
+      <div className="rounded-md border border-hair overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-              <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Year</th>
-              {hasQuarter && <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Quarter</th>}
-              <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Count</th>
+            <tr className="bg-secondary border-b border-hair">
+              <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3">Year</th>
+              {hasQuarter && <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3">Quarter</th>}
+              <th className="px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-3">Count</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#F0F0F0] bg-white">
+          <tbody className="divide-y divide-hair bg-card">
             {cov.periods.map((p, i) => (
               <tr key={i}>
-                <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{p.fiscal_year}</td>
-                {hasQuarter && <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{p.quarter}</td>}
-                <td className="px-3 py-1.5 text-center text-[11px] font-medium text-[#0F172B]">{p.count}</td>
+                <td className="px-3 py-1.5 font-mono text-[11px] text-ink-3">{p.fiscal_year}</td>
+                {hasQuarter && <td className="px-3 py-1.5 font-mono text-[11px] text-ink-3">{p.quarter}</td>}
+                <td className="px-3 py-1.5 text-center text-[11px] font-medium text-ink">{p.count}</td>
               </tr>
             ))}
           </tbody>
@@ -66,26 +66,26 @@ function PreviewSourceBlock({ label, cov, hasQuarter }: { label: string; cov: L2
 function PreviewTickerRow({ row }: { row: L2PreviewTickerRow }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-[8px] border border-[#F0F0F0] bg-white overflow-hidden">
+    <div className="rounded-[8px] border border-hair bg-card overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-4 px-3 py-2 hover:bg-[#FAFAFA] transition-colors text-left"
+        className="w-full flex items-center gap-4 px-3 py-2 hover:bg-secondary transition-colors text-left"
       >
-        <span className="font-mono text-[12px] font-medium text-[#0F172B] w-24 shrink-0">{row.ticker}</span>
-        <span className="text-[11px] text-[#888888]">
-          Transcript: <span className="text-[#0F172B] font-medium">{row.transcript.total}</span>
+        <span className="font-mono text-[12px] font-medium text-ink w-24 shrink-0">{row.ticker}</span>
+        <span className="text-[11px] text-ink-3">
+          Transcript: <span className="text-ink font-medium">{row.transcript.total}</span>
         </span>
-        <span className="text-[11px] text-[#888888]">
-          PPT: <span className="text-[#0F172B] font-medium">{row.ppt.total}</span>
+        <span className="text-[11px] text-ink-3">
+          PPT: <span className="text-ink font-medium">{row.ppt.total}</span>
         </span>
-        <span className="text-[11px] text-[#888888]">
-          Annual: <span className="text-[#0F172B] font-medium">{row.annual_report.total}</span>
+        <span className="text-[11px] text-ink-3">
+          Annual: <span className="text-ink font-medium">{row.annual_report.total}</span>
         </span>
-        <ChevronDown className={`size-3.5 text-[#888888] ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`size-3.5 text-ink-3 ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="border-t border-[#F0F0F0] px-3 py-3 bg-[#FAFAFA] space-y-3">
+        <div className="border-t border-hair px-3 py-3 bg-secondary space-y-3">
           <PreviewSourceBlock label="Transcript" cov={row.transcript} hasQuarter />
           <PreviewSourceBlock label="PPT" cov={row.ppt} hasQuarter />
           <PreviewSourceBlock label="Annual Report" cov={row.annual_report} hasQuarter={false} />
@@ -100,20 +100,20 @@ function PreviewTickerRow({ row }: { row: L2PreviewTickerRow }) {
 function RunStatusBadge({ status }: { status: L2Run["status"] }) {
   if (status === "completed") {
     return (
-      <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+      <span className="flex items-center gap-1 text-[11px] font-medium text-up">
         <CheckCircle2 className="size-3.5" /> Completed
       </span>
     );
   }
   if (status === "failed") {
     return (
-      <span className="flex items-center gap-1 text-[11px] font-medium text-red-600">
+      <span className="flex items-center gap-1 text-[11px] font-medium text-down">
         <XCircle className="size-3.5" /> Failed
       </span>
     );
   }
   return (
-    <span className="flex items-center gap-1 text-[11px] font-medium text-blue-600">
+    <span className="flex items-center gap-1 text-[11px] font-medium text-blue">
       <Clock className="size-3.5" /> Running
     </span>
   );
@@ -126,55 +126,55 @@ function RunHistoryRow({ run }: { run: L2Run }) {
   const hasMeta = !!run.metadata;
 
   return (
-    <div className="rounded-[8px] border border-[#F0F0F0] bg-white overflow-hidden">
+    <div className="rounded-[8px] border border-hair bg-card overflow-hidden">
       <button
         onClick={() => hasMeta && setOpen((v) => !v)}
-        className={`w-full flex items-center gap-4 px-3 py-2 text-left transition-colors ${hasMeta ? "hover:bg-[#FAFAFA]" : ""}`}
+        className={`w-full flex items-center gap-4 px-3 py-2 text-left transition-colors ${hasMeta ? "hover:bg-secondary" : ""}`}
       >
-        <span className="font-mono text-[11px] text-[#888888] w-40 truncate shrink-0">{run.job_id}</span>
+        <span className="font-mono text-[11px] text-ink-3 w-40 truncate shrink-0">{run.job_id}</span>
         <RunStatusBadge status={run.status} />
-        <span className="text-[11px] text-[#888888]">
+        <span className="text-[11px] text-ink-3">
           {run.records_processed != null ? `${run.records_processed} queued` : "—"}
         </span>
-        {run.ended_at && <span className="text-[11px] text-[#888888]">ended {new Date(run.ended_at).toLocaleString()}</span>}
+        {run.ended_at && <span className="text-[11px] text-ink-3">ended {new Date(run.ended_at).toLocaleString()}</span>}
         {hasMeta && (
-          <ChevronDown className={`size-3.5 text-[#888888] ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+          <ChevronDown className={`size-3.5 text-ink-3 ml-auto transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
         )}
       </button>
 
       {run.status === "failed" && run.error && (
-        <div className="border-t border-[#F0F0F0] px-3 py-2 text-[11px] text-red-700 bg-red-50">{run.error}</div>
+        <div className="border-t border-hair px-3 py-2 text-[11px] text-down bg-down-soft">{run.error}</div>
       )}
 
       {open && run.metadata && (
-        <div className="border-t border-[#F0F0F0] px-3 py-3 bg-[#FAFAFA] space-y-2">
-          <p className="flex items-start gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1.5">
+        <div className="border-t border-hair px-3 py-3 bg-secondary space-y-2">
+          <p className="flex items-start gap-1.5 text-[11px] text-warn bg-warn-soft border border-warn-soft rounded-md px-2.5 py-1.5">
             <AlertCircle className="size-3.5 shrink-0 mt-px" />
             Queued/failed here only mean dispatch succeeded — config resolution happens per-job,
             later, inside the worker. A ticker can show &ldquo;queued&rdquo; here and still fail
             once picked up; check the job/Bull Board flow for the real per-ticker outcome.
           </p>
-          <div className="flex gap-4 text-[11px] text-[#888888]">
-            <span>Queued: <span className="text-[#0F172B] font-medium">{run.metadata.queued}</span></span>
-            <span>No source: <span className="text-[#0F172B] font-medium">{run.metadata.noSource}</span></span>
-            <span>Failed: <span className="text-[#0F172B] font-medium">{run.metadata.failed}</span></span>
+          <div className="flex gap-4 text-[11px] text-ink-3">
+            <span>Queued: <span className="text-ink font-medium">{run.metadata.queued}</span></span>
+            <span>No source: <span className="text-ink font-medium">{run.metadata.noSource}</span></span>
+            <span>Failed: <span className="text-ink font-medium">{run.metadata.failed}</span></span>
           </div>
           {run.metadata.perTicker?.length > 0 && (
-            <div className="rounded-md border border-[#E2E2E2] overflow-hidden">
+            <div className="rounded-md border border-hair overflow-hidden">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="bg-[#F5F5F5] border-b border-[#E2E2E2]">
-                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Ticker</th>
-                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Status</th>
-                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Job ID</th>
+                  <tr className="bg-secondary border-b border-hair">
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3">Ticker</th>
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3">Status</th>
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-3">Job ID</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F0F0F0] bg-white">
+                <tbody className="divide-y divide-hair bg-card">
                   {run.metadata.perTicker.map((p) => (
                     <tr key={p.ticker}>
-                      <td className="px-3 py-1.5 font-mono text-[11px] text-[#0F172B]">{p.ticker}</td>
-                      <td className="px-3 py-1.5 text-[11px] text-[#888888]">{p.status ?? "—"}</td>
-                      <td className="px-3 py-1.5 font-mono text-[11px] text-[#888888]">{p.jobId ?? "—"}</td>
+                      <td className="px-3 py-1.5 font-mono text-[11px] text-ink">{p.ticker}</td>
+                      <td className="px-3 py-1.5 text-[11px] text-ink-3">{p.status ?? "—"}</td>
+                      <td className="px-3 py-1.5 font-mono text-[11px] text-ink-3">{p.jobId ?? "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -239,27 +239,27 @@ function SkillMultiSelect({
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={skills.length === 0}
-        className="w-full flex items-center justify-between gap-2 rounded-md border border-[#E2E2E2] bg-white px-3 py-2 text-sm text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B] disabled:opacity-40"
+        className="w-full flex items-center justify-between gap-2 rounded-md border border-hair bg-card px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-ink disabled:opacity-40"
       >
         <span className="truncate text-left">{label}</span>
-        <ChevronDown className={`size-3.5 text-[#888888] shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`size-3.5 text-ink-3 shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && skills.length > 0 && (
-        <div className="absolute z-[100] top-full mt-1 left-0 w-full min-w-[240px] rounded-md border border-[#E2E2E2] bg-white shadow-lg overflow-y-auto max-h-[280px]">
-          <label className="flex items-center gap-1.5 px-3 py-2 border-b border-[#F0F0F0] cursor-pointer hover:bg-[#FAFAFA]">
-            <input type="checkbox" checked={allSelected} onChange={toggleAll} className="rounded accent-[#0F172B]" />
-            <span className="text-[12px] font-medium text-[#0F172B]">Select all ({skills.length})</span>
+        <div className="absolute z-[100] top-full mt-1 left-0 w-full min-w-[240px] rounded-md border border-hair bg-card shadow-lg overflow-y-auto max-h-[280px]">
+          <label className="flex items-center gap-1.5 px-3 py-2 border-b border-hair cursor-pointer hover:bg-secondary">
+            <input type="checkbox" checked={allSelected} onChange={toggleAll} className="rounded accent-[var(--qc-ink)]" />
+            <span className="text-[12px] font-medium text-ink">Select all ({skills.length})</span>
           </label>
           {skills.map((s) => (
-            <label key={s.slug} className="flex items-center gap-1.5 px-3 py-1.5 cursor-pointer hover:bg-[#FAFAFA]">
+            <label key={s.slug} className="flex items-center gap-1.5 px-3 py-1.5 cursor-pointer hover:bg-secondary">
               <input
                 type="checkbox"
                 checked={selected.includes(s.slug)}
                 onChange={() => toggle(s.slug)}
-                className="rounded accent-[#0F172B]"
+                className="rounded accent-[var(--qc-ink)]"
               />
-              <span className="text-[12px] text-[#0F172B]">{s.name}</span>
+              <span className="text-[12px] text-ink">{s.name}</span>
             </label>
           ))}
         </div>
@@ -458,16 +458,16 @@ export function L2MultiDispatchTab() {
   return (
     <div className="space-y-5 max-w-4xl">
       {/* Intro */}
-      <div className="rounded-md border border-[#E2E2E2] bg-[#F5F5F5] px-4 py-3">
-        <p className="text-[13px] text-[#0F172B] font-medium">On-demand L2 skill dispatch</p>
-        <p className="text-[12px] text-[#888888] mt-1">
+      <div className="rounded-md border border-hair bg-secondary px-4 py-3">
+        <p className="text-[13px] text-ink font-medium">On-demand L2 skill dispatch</p>
+        <p className="text-[12px] text-ink-3 mt-1">
           Runs a skill against the chosen ticker set — an untagged ticker hard-fails with a 400.
           Preview is optional. See Help (top right) for the full flow.
         </p>
       </div>
 
       {optionsError && !optionsLoading && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {optionsError}
         </div>
       )}
@@ -490,7 +490,7 @@ export function L2MultiDispatchTab() {
       {/* Config tag for the group selected above — full width, always editable even if already tagged */}
       {source === "group" && selectedGroup && (
         <div className="space-y-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Group Config Tag</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Group Config Tag</span>
           <GroupConfigTag
             group={selectedGroup}
             configKeys={configKeys}
@@ -502,7 +502,7 @@ export function L2MultiDispatchTab() {
       )}
 
       {/* Options form */}
-      <div className="rounded-[10px] border border-[#E2E2E2] bg-white p-4 space-y-4">
+      <div className="rounded-[10px] border border-hair bg-card p-4 space-y-4">
         <div>
           <label className={LABEL_CLS}>
             Skills {optionsLoading && <span className="normal-case tracking-normal font-normal">— loading…</span>}
@@ -510,7 +510,7 @@ export function L2MultiDispatchTab() {
           <SkillMultiSelect skills={skills} selected={skillSlugs} onChange={setSkillSlugs} loading={optionsLoading} />
         </div>
 
-        <div className="flex flex-wrap gap-6 pt-1 border-t border-[#F0F0F0]">
+        <div className="flex flex-wrap gap-6 pt-1 border-t border-hair">
           <CheckboxField
             checked={historic}
             onChange={setHistoric}
@@ -529,30 +529,30 @@ export function L2MultiDispatchTab() {
 
       {/* Errors */}
       {previewError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {previewError}
         </div>
       )}
       {csvError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {csvError}
         </div>
       )}
       {runError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {runError}
         </div>
       )}
 
       {multiSkillNotice && (
-        <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div className="flex items-start gap-2 rounded-md border border-warn-soft bg-warn-soft px-4 py-3 text-sm text-warn">
           <AlertCircle className="size-4 shrink-0 mt-px" />
           <span className="flex-1">
             Preview only queries {skills.find((s) => s.slug === previewSlug)?.name ?? previewSlug} (the
             first selected skill) — Run will still dispatch all {skillSlugs.length} selected skills
             concurrently, each resolving its own per-ticker config.
           </span>
-          <button onClick={() => setMultiSkillNotice(false)} className="text-amber-600 hover:text-amber-900 shrink-0">
+          <button onClick={() => setMultiSkillNotice(false)} className="text-warn hover:opacity-80 shrink-0">
             <X className="size-3.5" />
           </button>
         </div>
@@ -563,7 +563,7 @@ export function L2MultiDispatchTab() {
         <button
           onClick={() => doPreview(1)}
           disabled={!canPreview}
-          className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink hover:border-ink transition-colors disabled:opacity-40"
         >
           {previewLoading && <Loader2 className="size-3.5 animate-spin" />}
           Preview
@@ -573,7 +573,7 @@ export function L2MultiDispatchTab() {
           onClick={doExportCsv}
           disabled={!sourceUsable || skillSlugs.length === 0 || csvLoading}
           title="CSV reports total signal coverage of any type per period — it does not filter to this skill's whitelist the way the JSON preview above does, so the numbers won't match exactly."
-          className="flex items-center gap-1.5 rounded-md border border-[#E2E2E2] px-4 py-2 text-sm font-medium text-[#0F172B] hover:border-[#0F172B] transition-colors disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink hover:border-ink transition-colors disabled:opacity-40"
         >
           {csvLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
           Export CSV
@@ -582,8 +582,8 @@ export function L2MultiDispatchTab() {
         <button
           onClick={handleRunClick}
           disabled={!canRun}
-          className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-40 disabled:cursor-not-allowed ${
-            confirmArmed ? "bg-red-600 hover:opacity-90" : "bg-[#0F172B] hover:opacity-90"
+          className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium text-[var(--qc-on-dark)] transition-opacity disabled:opacity-40 disabled:cursor-not-allowed ${
+            confirmArmed ? "bg-down hover:opacity-90" : "bg-ink hover:opacity-90"
           }`}
         >
           {triggering && <Loader2 className="size-3.5 animate-spin" />}
@@ -591,24 +591,24 @@ export function L2MultiDispatchTab() {
         </button>
 
         {confirmArmed && (
-          <button onClick={() => setConfirmArmed(false)} className="text-sm text-[#888888] hover:text-[#0F172B]">
+          <button onClick={() => setConfirmArmed(false)} className="text-sm text-ink-3 hover:text-ink">
             Cancel
           </button>
         )}
 
-        <span className="text-[11px] text-[#888888]">
+        <span className="text-[11px] text-ink-3">
           {confirmArmed
             ? `This queues real jobs for ${skillSlugs.length} skill${skillSlugs.length === 1 ? "" : "s"} concurrently and can't be cancelled once started.`
             : "Preview is optional — Run dispatches with the current options whether or not you've previewed them."}
         </span>
       </div>
-      <p className="text-[11px] text-[#888888] -mt-3">
+      <p className="text-[11px] text-ink-3 -mt-3">
         CSV numbers are total signal coverage (any type) per period — the JSON preview above counts
         only signals relevant to this skill&rsquo;s whitelist, so the two won&rsquo;t match exactly.
       </p>
 
       {previewLoading && (
-        <div className="flex items-center gap-2 text-[12px] text-[#888888]">
+        <div className="flex items-center gap-2 text-[12px] text-ink-3">
           <Loader2 className="size-3.5 animate-spin" />
           Previewing…
         </div>
@@ -618,7 +618,7 @@ export function L2MultiDispatchTab() {
       {activeRuns.length > 0 && (
         <div className="space-y-1.5">
           {activeRuns.map((r) => (
-            <div key={r.job_id} className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            <div key={r.job_id} className="flex items-center gap-2 rounded-md border border-blue-soft bg-blue-soft px-4 py-3 text-sm text-blue">
               <Loader2 className="size-4 shrink-0 animate-spin" />
               Dispatching run {r.job_id}… check back under Run History.
             </div>
@@ -631,8 +631,8 @@ export function L2MultiDispatchTab() {
         <div className="space-y-2">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Preview</span>
-              <span className="text-[10px] text-[#C8C8C8]">{preview.tickerCount} companies total</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Preview</span>
+              <span className="text-[10px] text-ink-3">{preview.tickerCount} companies total</span>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               {preview.totalPages > 1 && (
@@ -640,26 +640,26 @@ export function L2MultiDispatchTab() {
                   <button
                     onClick={() => doPreview(page - 1)}
                     disabled={page <= 1 || previewLoading || previewedKey !== previewKey}
-                    className="flex items-center justify-center size-6 rounded border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] disabled:opacity-40 disabled:hover:border-[#E2E2E2] disabled:hover:text-[#888888] transition-colors"
+                    className="flex items-center justify-center size-6 rounded border border-hair text-ink-3 hover:text-ink hover:border-ink disabled:opacity-40 disabled:hover:border-hair disabled:hover:text-ink-3 transition-colors"
                   >
                     <ChevronLeft className="size-3.5" />
                   </button>
-                  <span className="text-[11px] text-[#888888]">Page {preview.page} of {preview.totalPages}</span>
+                  <span className="text-[11px] text-ink-3">Page {preview.page} of {preview.totalPages}</span>
                   <button
                     onClick={() => doPreview(page + 1)}
                     disabled={page >= preview.totalPages || previewLoading || previewedKey !== previewKey}
-                    className="flex items-center justify-center size-6 rounded border border-[#E2E2E2] text-[#888888] hover:text-[#0F172B] hover:border-[#0F172B] disabled:opacity-40 disabled:hover:border-[#E2E2E2] disabled:hover:text-[#888888] transition-colors"
+                    className="flex items-center justify-center size-6 rounded border border-hair text-ink-3 hover:text-ink hover:border-ink disabled:opacity-40 disabled:hover:border-hair disabled:hover:text-ink-3 transition-colors"
                   >
                     <ChevronRight className="size-3.5" />
                   </button>
                 </div>
               )}
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-[#888888]">Sort by least covered:</span>
+                <span className="text-[10px] text-ink-3">Sort by least covered:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as L2SortSource)}
-                  className="rounded-md border border-[#E2E2E2] px-2 py-1 text-[11px] text-[#0F172B] focus:outline-none focus:ring-1 focus:ring-[#0F172B]"
+                  className="rounded-md border border-hair px-2 py-1 text-[11px] text-ink focus:outline-none focus:ring-1 focus:ring-ink"
                 >
                   {(Object.keys(SORT_LABEL) as L2SortSource[]).map((s) => (
                     <option key={s} value={s}>{SORT_LABEL[s]}</option>
@@ -677,11 +677,11 @@ export function L2MultiDispatchTab() {
       {/* Run history */}
       <div className="space-y-2 pt-2">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">Run History</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Run History</span>
           <button
             onClick={loadRuns}
             disabled={runsLoading}
-            className="flex items-center gap-1.5 text-[11px] text-[#888888] hover:text-[#0F172B] disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[11px] text-ink-3 hover:text-ink disabled:opacity-40"
           >
             {runsLoading ? <Loader2 className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
             Refresh
@@ -689,13 +689,13 @@ export function L2MultiDispatchTab() {
         </div>
 
         {runsError && !runsLoading && (
-          <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="flex items-center gap-2 rounded-md border border-down-soft bg-down-soft px-4 py-3 text-sm text-down">
             <AlertCircle className="size-4 shrink-0" /> {runsError}
           </div>
         )}
 
         {runs.length === 0 && !runsLoading && !runsError && (
-          <p className="text-[12px] text-[#888888]">No runs yet.</p>
+          <p className="text-[12px] text-ink-3">No runs yet.</p>
         )}
 
         <div className="space-y-1.5">

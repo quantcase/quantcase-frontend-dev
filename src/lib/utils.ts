@@ -1,6 +1,5 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import type { TrustLevel, StatusType, ConfidenceLevel } from "@/types/management"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -119,49 +118,4 @@ function formatLabel(camelCase: string): string {
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (str) => str.toUpperCase())
     .trim();
-}
-
-// Variance color helper
-function getVarianceColor(variance: string | undefined | null): string {
-  if (!variance) return "text-muted-foreground";
-  if (variance.startsWith("+")) {
-    return "text-green-600 dark:text-green-400";
-  } else if (variance.startsWith("-")) {
-    return "text-red-600 dark:text-red-400";
-  }
-  return "text-muted-foreground";
-}
-
-// Badge variant helpers
-function getRatingVariant(rating: TrustLevel): "default" | "secondary" | "destructive" {
-  switch (rating) {
-    case "HIGH":
-      return "default";
-    case "MODERATE":
-      return "secondary";
-    case "LOW":
-      return "destructive";
-  }
-}
-
-function getStatusVariant(status: StatusType): "default" | "secondary" | "destructive" {
-  switch (status) {
-    case "ACHIEVED":
-      return "default";
-    case "MISSED":
-      return "destructive";
-    case "PENDING":
-      return "secondary";
-  }
-}
-
-function getConfidenceVariant(level: ConfidenceLevel): "default" | "secondary" | "destructive" {
-  switch (level) {
-    case "HIGH":
-      return "default";
-    case "MEDIUM":
-      return "secondary";
-    case "LOW":
-      return "destructive";
-  }
 }

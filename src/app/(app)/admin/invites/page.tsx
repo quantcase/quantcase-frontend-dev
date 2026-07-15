@@ -17,21 +17,21 @@ function parseEmails(raw: string): string[] {
 
 function ResultRow({ result }: { result: AdminInviteResult }) {
   const config: Record<AdminInviteResult["status"], { icon: React.ReactNode; label: string; color: string }> = {
-    sent: { icon: <CheckCircle2 className="size-3.5" />, label: "Sent", color: "text-emerald-600" },
-    skipped: { icon: <Clock className="size-3.5" />, label: "Skipped", color: "text-amber-600" },
-    failed: { icon: <XCircle className="size-3.5" />, label: "Failed", color: "text-red-600" },
+    sent: { icon: <CheckCircle2 className="size-3.5" />, label: "Sent", color: "text-up" },
+    skipped: { icon: <Clock className="size-3.5" />, label: "Skipped", color: "text-warn" },
+    failed: { icon: <XCircle className="size-3.5" />, label: "Failed", color: "text-down" },
   };
   const { icon, label, color } = config[result.status];
 
   return (
-    <div className="flex items-center gap-3 rounded-[8px] border border-[#E2E2E2] bg-white px-4 py-3">
+    <div className="flex items-center gap-3 rounded-[8px] border border-hair bg-card px-4 py-3">
       <div className={`shrink-0 flex items-center gap-1.5 ${color}`}>
         {icon}
         <span className="text-[11px] font-semibold uppercase tracking-wider">{label}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <span className="text-[13px] text-[#0F172B]">{result.email}</span>
-        {result.reason && <p className="text-[12px] text-[#888888] mt-0.5">{result.reason}</p>}
+        <span className="text-[13px] text-ink">{result.email}</span>
+        {result.reason && <p className="text-[12px] text-ink-3 mt-0.5">{result.reason}</p>}
       </div>
     </div>
   );
@@ -81,16 +81,16 @@ export default function AdminInvitesPage() {
         </p>
       </div>
 
-      <div className="rounded-[10px] border border-[#E2E2E2] bg-[#F5F5F5] p-2">
+      <div className="rounded-[10px] border border-hair bg-secondary p-2">
         <div className="px-2 pt-1 pb-3">
-          <span className="text-[14px] font-semibold uppercase tracking-[0.01em] text-[#0F172B]">
+          <span className="text-[14px] font-semibold uppercase tracking-[0.01em] text-ink">
             Send invites
           </span>
         </div>
-        <div className="rounded-[10px] bg-white border border-[rgba(226,226,226,0.10)] p-4 space-y-3">
+        <div className="rounded-[10px] bg-card border border-[rgba(226,226,226,0.10)] p-4 space-y-3">
           <label
             htmlFor="emails"
-            className="block text-[11px] font-semibold uppercase tracking-wider text-[#0F172B]"
+            className="block text-[11px] font-semibold uppercase tracking-wider text-ink"
           >
             Email addresses
           </label>
@@ -102,21 +102,21 @@ export default function AdminInvitesPage() {
             rows={5}
             className="w-full rounded-lg outline-none transition-all resize-y"
             style={{
-              border: "1px solid #E2E2E2",
+              border: "1px solid var(--qc-hair)",
               padding: "11px 14px",
               fontSize: 14,
-              color: "#121212",
-              background: "#fff",
+              color: "var(--qc-ink)",
+              background: "var(--qc-card)",
             }}
           />
           <div className="flex items-center justify-between">
-            <span className="text-[12px] text-[#888888]">
+            <span className="text-[12px] text-ink-3">
               {emails.length} email{emails.length !== 1 ? "s" : ""} · separate with commas or new lines
             </span>
             <button
               onClick={handleSend}
               disabled={sending || emails.length === 0}
-              className="flex items-center gap-1.5 rounded-md bg-[#0F172B] px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-md bg-ink px-3 py-2 text-sm font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {sending ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
               {sending ? "Sending…" : "Send invites"}
@@ -126,14 +126,14 @@ export default function AdminInvitesPage() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-hair bg-down-soft px-4 py-3 text-sm text-down">
           <AlertCircle className="size-4 shrink-0" /> {error}
         </div>
       )}
 
       {results.length > 0 && (
         <div className="space-y-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#888888]">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">
             Results
           </span>
           <div className="space-y-2">

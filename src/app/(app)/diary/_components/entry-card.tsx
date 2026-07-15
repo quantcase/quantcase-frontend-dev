@@ -4,6 +4,12 @@ import type { JournalEntryItem, JournalPendingHolding } from "@/types/journal";
 import { thesisConfig } from "@/lib/portfolio-format";
 import { timeAgo } from "@/lib/utils";
 import { renderMd } from "@/lib/render-md";
+import { ArrowRight } from "lucide-react";
+
+// Shared card body typography — quotes are serif-italic, AI synopsis is sans,
+// but BOTH share the same size (15px) and leading (1.5) so the two card kinds
+// read as one product (audit /diary: "card content styles diverge").
+const CARD_BODY = "flex-1 text-[15px] leading-[1.5] line-clamp-5 overflow-hidden";
 
 // A single "YOUR ENTRIES" card — colored top rule keyed to thesis health,
 // symbol + status label, an italic thesis quote, and MOD score + relative time.
@@ -15,50 +21,26 @@ export function EntryCard({ item, onClick }: { item: JournalEntryItem; onClick?:
   return (
     <button
       onClick={() => onClick?.(item.symbol)}
-      style={{
-        flex: "0 0 320px", width: 320, minHeight: 250,
-        textAlign: "left", cursor: onClick ? "pointer" : "default",
-        background: "var(--qc-card)",
-        border: "1px solid var(--qc-hair)",
-        borderTop: `3px solid ${tc.rule}`,
-        borderRadius: 12,
-        padding: "18px 20px 16px",
-        display: "flex", flexDirection: "column",
-        transition: "box-shadow 0.15s, transform 0.15s",
-      }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.06)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}
+      className="group flex min-h-[250px] w-80 flex-[0_0_20rem] flex-col rounded-xl border border-hair bg-card p-[18px_20px_16px] text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)]"
+      style={{ borderTopWidth: 3, borderTopColor: tc.rule, cursor: onClick ? "pointer" : "default" }}
     >
       {/* Header — symbol + status */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.02em", color: "var(--qc-ink)" }}>{item.symbol}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: tc.color }}>{statusLabel}</span>
+      <div className="mb-4 flex items-center justify-between">
+        <span className="text-[15px] font-bold tracking-[0.02em] text-ink">{item.symbol}</span>
+        <span className="text-[11px] font-bold tracking-[0.06em]" style={{ color: tc.color }}>{statusLabel}</span>
       </div>
 
       {/* Thesis quote — serif italic, markdown-aware, clamped to 5 lines */}
-      <div
-        style={{
-          flex: 1,
-          fontFamily: "var(--qc-font-serif)",
-          fontStyle: "italic",
-          fontSize: 15,
-          lineHeight: 1.5,
-          color: "var(--qc-ink-2)",
-          display: "-webkit-box",
-          WebkitBoxOrient: "vertical",
-          WebkitLineClamp: 5,
-          overflow: "hidden",
-        }}
-      >
-        {quote ? <>&ldquo;{renderMd(quote)}&rdquo;</> : <span style={{ color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)", fontStyle: "normal" }}>No thesis written yet</span>}
+      <div className={`${CARD_BODY} serif italic text-ink-2`}>
+        {quote ? <>&ldquo;{renderMd(quote)}&rdquo;</> : <span className="font-sans not-italic text-ink-3">No thesis written yet</span>}
       </div>
 
       {/* Footer — MOD score + relative time */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 18, paddingTop: 12, borderTop: "1px solid var(--qc-hair)" }}>
-        <span style={{ fontSize: 11, fontFamily: "var(--qc-font-mono)", letterSpacing: "0.06em", color: "var(--qc-ink-3)" }}>
+      <div className="mt-[18px] flex items-center justify-between border-t border-hair pt-3">
+        <span className="font-mono text-[11px] tracking-[0.06em] text-ink-3">
           {item.modScore > 0 ? `MOD ${item.modScore}` : "MOD —"}
         </span>
-        <span style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>
+        <span className="text-[11px] text-ink-3">
           {item.journal?.updatedAt ? timeAgo(item.journal.updatedAt) : ""}
         </span>
       </div>
@@ -80,49 +62,29 @@ export function PendingEntryCard({ item, onClick }: { item: JournalPendingHoldin
   return (
     <button
       onClick={() => onClick?.(item.symbol)}
-      style={{
-        flex: "0 0 320px", width: 320, minHeight: 250,
-        textAlign: "left", cursor: onClick ? "pointer" : "default",
-        background: "var(--qc-bg)",
-        border: "1px dashed var(--qc-hair)",
-        borderTop: "3px solid var(--qc-hair)",
-        borderRadius: 12,
-        padding: "18px 20px 16px",
-        display: "flex", flexDirection: "column",
-        transition: "box-shadow 0.15s, transform 0.15s, border-color 0.15s",
-      }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.05)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "var(--qc-ink-3)"; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; e.currentTarget.style.borderColor = "var(--qc-hair)"; }}
+      className="group flex min-h-[250px] w-80 flex-[0_0_20rem] flex-col rounded-xl border border-dashed border-hair bg-[var(--qc-bg)] p-[18px_20px_16px] text-left transition-all hover:-translate-y-0.5 hover:border-ink-3 hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)]"
+      style={{ borderTopWidth: 3, borderTopStyle: "solid", borderTopColor: "var(--qc-hair)", cursor: onClick ? "pointer" : "default" }}
     >
       {/* Header — symbol + "no entry" status */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.02em", color: "var(--qc-ink)" }}>{item.symbol}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--qc-ink-3)" }}>NO ENTRY</span>
+      <div className="mb-4 flex items-center justify-between">
+        <span className="text-[15px] font-bold tracking-[0.02em] text-ink">{item.symbol}</span>
+        <span className="text-[11px] font-bold tracking-[0.06em] text-ink-3">NO ENTRY</span>
       </div>
 
-      {/* AI nudge / prompt — markdown-aware, clamped to 5 lines */}
-      <div
-        style={{
-          flex: 1,
-          fontSize: 14,
-          lineHeight: 1.5,
-          color: "var(--qc-ink-3)",
-          display: "-webkit-box",
-          WebkitBoxOrient: "vertical",
-          WebkitLineClamp: 5,
-          overflow: "hidden",
-        }}
-      >
+      {/* AI nudge / prompt — sans, markdown-aware, clamped to 5 lines (same size/leading as quote) */}
+      <div className={`${CARD_BODY} text-ink-3`}>
         {renderMd(nudge)}
       </div>
 
-      {/* Footer — MOD + CTA */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 18, paddingTop: 12, borderTop: "1px solid var(--qc-hair)" }}>
-        <span style={{ fontSize: 11, fontFamily: "var(--qc-font-mono)", letterSpacing: "0.06em", color: "var(--qc-ink-3)" }}>
+      {/* Footer — MOD + CTA (same slot layout as EntryCard: meta left, action right) */}
+      <div className="mt-[18px] flex items-center justify-between border-t border-hair pt-3">
+        <span className="font-mono text-[11px] tracking-[0.06em] text-ink-3">
           {typeof bestMod === "number" ? `MOD ${bestMod}` : "MOD —"}
         </span>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--qc-ink)" }}>
-          Write your reason →
+        {/* Card is the click target, so this mirrors CtaLink's look as a non-interactive span */}
+        <span className="inline-flex items-center gap-1 text-[12px] font-medium text-ink transition-transform group-hover:[&>svg]:translate-x-0.5">
+          Write your reason
+          <ArrowRight className="size-3.5 transition-transform" />
         </span>
       </div>
     </button>

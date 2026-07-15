@@ -15,8 +15,14 @@ import { InsightSignalMap } from "@/components/insight/insight-signal-map";
 import { InsightEmptyState } from "@/components/insight/insight-empty-state";
 import { LensDrawer } from "@/components/insight/lens-drawer";
 
-import type { InsightType } from "@/types/analysis";
+import type { InsightType, InsightLens } from "@/types/analysis";
 import { QC } from "@/lib/chart-tokens";
+
+// The Industry Analysis lens lives natively on the Opportunity page. Users expect
+// to see it on the Deal page too, so we clone it onto Deal — frontend only, no
+// backend change. The clone reuses the opportunity `industry-analysis` lens data
+// (grid card) and its lens detail (drawer), both already fetched for the asset.
+const INDUSTRY_LENS_SLUG = "industry-analysis";
 
 
 // ─── Skeleton components ──────────────────────────────────────────────────────
@@ -263,11 +269,15 @@ function InsightDashboard({
   type,
   ticker,
   screenerData,
+  injectedLenses = [],
 }: {
   insight: import("@/types/analysis").InsightData;
   type: InsightType;
   ticker: string;
   screenerData: ScreenerData | null;
+  // Lenses cloned from another pillar (e.g. Industry Analysis onto Deal). Rendered
+  // in the grid after the native lenses; the drawer resolves their detail below.
+  injectedLenses?: InsightLens[];
 }) {
   const [activeLensSlug, setActiveLensSlug] = useState<string | null>(null);
   const { lenses: lensDetails } = useLenses(ticker);
@@ -277,8 +287,19 @@ function InsightDashboard({
     setActiveLensSlug(slug);
   }, []);
 
+  // The grid shows native lenses plus any injected (cloned) ones. Guard against a
+  // duplicate slug in case the backend ever starts serving the injected lens too.
+  const gridLenses = injectedLenses.length
+    ? [...insight.lenses, ...injectedLenses.filter((l) => !insight.lenses.some((n) => n.slug === l.slug))]
+    : insight.lenses;
+
+  // Drawer detail lookup: prefer this pillar's details, but fall back to ANY
+  // category so an injected/cloned lens (whose detail lives under another pillar)
+  // still resolves its drawer content.
   const activeLens = activeLensSlug
-    ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug) ?? null
+    ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug)
+        ?? Object.values(lensDetails).flat().find((l) => l.slug === activeLensSlug)
+        ?? null
     : null;
 
   const lensHeading = `${TYPE_LABELS[type]} lenses`;
@@ -287,13 +308,13 @@ function InsightDashboard({
     <>
       <div className="px-3 sm:px-6 pt-3 space-y-3">
         <div id="section-score">
-          <InsightScorecard insight={insight} verdictLabel={TYPE_VERDICT_LABELS[type]} onLensClick={handleLensClick} />
+          <InsightScorecard insight={insight} verdictLabel={TYPE_VERDICT_LABELS[type]} onLensClick={handleLensClick} lenses={gridLenses} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.2fr]" style={{ gap: 12, alignItems: "stretch" }}>
-          {insight.lenses.length > 0 && (
+          {gridLenses.length > 0 && (
             <div id="section-lenses" style={{ display: "flex", flexDirection: "column" }}>
-              <InsightLenses lenses={insight.lenses} heading={lensHeading} onLensClick={handleLensClick} />
+              <InsightLenses lenses={gridLenses} heading={lensHeading} onLensClick={handleLensClick} />
             </div>
           )}
           {insight.signal_map.length > 0 && (
@@ -318,6 +339,14 @@ function InsightTabContent({ type }: { type: InsightType }) {
   const { getInsight, loading: insightLoading, error: insightError } = useAnalysis(symbol);
   const { data: screenerData } = useScreenerData(symbol);
   const insight = getInsight(type);
+
+  // Frontend-only clone: surface the Opportunity page's Industry Analysis lens on
+  // the Deal page too. Pull it from the already-fetched opportunity insight so no
+  // extra request is made and the card mirrors its source exactly.
+  const injectedLenses =
+    type === "deal"
+      ? (getInsight("opportunity")?.lenses ?? []).filter((l) => l.slug === INDUSTRY_LENS_SLUG)
+      : [];
 
   const companyInfo = screenerData?.company
     ? { name: screenerData.company.name, exchange: screenerData.company.exchange, sector: screenerData.company.sector, industry: screenerData.company.industry }
@@ -360,7 +389,7 @@ function InsightTabContent({ type }: { type: InsightType }) {
   return (
     <>
       <ScreenerPageShell companyInfo={companyInfo} navItems={navItems}>
-        <InsightDashboard insight={insight} type={type} ticker={symbol} screenerData={screenerData} />
+        <InsightDashboard insight={insight} type={type} ticker={symbol} screenerData={screenerData} injectedLenses={injectedLenses} />
       </ScreenerPageShell>
       <AssetActionBar ticker={symbol} />
     </>

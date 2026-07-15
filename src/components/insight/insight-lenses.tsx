@@ -67,10 +67,12 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
     >
       <SectionHeader label={heading ?? "Lenses"} count={lenses.length} style={{ marginBottom: 0, padding: "10px 12px 16px" }} />
 
-      {/* 2-col grid of individually color-coded cards */}
+      {/* Grid of individually color-coded cards. Exactly 3 lenses sit in a single
+          row of 3; any other count uses 2 columns (so 4 → 2x2). Full class strings
+          kept static so Tailwind's JIT doesn't purge them. */}
       <div className="rounded-[10px] p-3" style={{ background: "var(--qc-card)", flex: 1 }}>
       <div
-        className="grid grid-cols-1 sm:grid-cols-2"
+        className={`grid grid-cols-1 ${lenses.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
         style={{ gap: 10, height: "100%" }}
       >
         {lenses.map((lens) => {

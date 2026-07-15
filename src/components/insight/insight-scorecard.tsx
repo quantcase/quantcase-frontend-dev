@@ -413,25 +413,31 @@ interface InsightScorecardProps {
   insight: InsightData;
   verdictLabel: string;
   onLensClick?: (slug: string) => void;
+  // Lens list to drive the radar + score-breakdown tiles. Defaults to the
+  // insight's own lenses; the Deal page passes native + the cloned Industry
+  // Analysis lens so the radar/tiles include it (frontend-only clone).
+  lenses?: InsightLens[];
 }
 
-export function InsightScorecard({ insight, verdictLabel, onLensClick }: InsightScorecardProps) {
+export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }: InsightScorecardProps) {
   const [hoveredVertex, setHoveredVertex] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ pctX: 0.5, pctY: 0 });
+
+  const scorecardLenses = lenses ?? insight.lenses;
 
   const bandColor = verdictBandColor(insight.verdict_band ?? insight.verdict);
   const bandBg = verdictBandBg(insight.verdict_band ?? insight.verdict);
   const bandLabel = (insight.verdict_band || insight.verdict || "").toUpperCase();
   // Overall score comes straight from the backend (0–100). Fall back to a
   // lens average only if the top-level score is missing.
-  const overallScore = insight.score > 0 ? Math.round(insight.score) : getTotalScore(insight.lenses);
+  const overallScore = insight.score > 0 ? Math.round(insight.score) : getTotalScore(scorecardLenses);
 
-  const radarData: RadarPoint[] = insight.lenses.map((l) => ({
+  const radarData: RadarPoint[] = scorecardLenses.map((l) => ({
     subject: l.name.toUpperCase(),
     pct: l.max_score > 0 ? Math.round((l.score / l.max_score) * 100) : 0,
   }));
 
-  const hoveredLens = hoveredVertex !== null ? insight.lenses[hoveredVertex] ?? null : null;
+  const hoveredLens = hoveredVertex !== null ? scorecardLenses[hoveredVertex] ?? null : null;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -566,20 +572,27 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick }: Insight
             </div>
           </div>
 
-          {/* Bottom: lens score tiles */}
+          {/* Bottom: lens score tiles — columns track the lens count so 3 or 4
+              tiles each fill the full card width (no empty trailing column).
+              Full class strings kept static so Tailwind's JIT doesn't purge them. */}
           <div
-            className="grid grid-cols-2 sm:grid-cols-4"
+            className={`grid grid-cols-2 ${
+              scorecardLenses.length >= 4 ? "sm:grid-cols-4"
+              : scorecardLenses.length === 3 ? "sm:grid-cols-3"
+              : scorecardLenses.length === 2 ? "sm:grid-cols-2"
+              : "sm:grid-cols-1"
+            }`}
             style={{
               borderTop: "1px solid var(--qc-hair)",
               borderBottomLeftRadius: 14,
               borderBottomRightRadius: 14,
               overflow: "hidden",
             }}>
-            {insight.lenses.map((lens, i) => {
+            {scorecardLenses.map((lens, i) => {
               const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
               const barColor = lensBarColor(pct);
               const statusLabel = lensStatusLabel(pct, lens.status);
-              const isLast = i === insight.lenses.length - 1;
+              const isLast = i === scorecardLenses.length - 1;
               const isClickable = !!onLensClick;
               const isHovered = hoveredVertex === i;
 

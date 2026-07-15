@@ -16,8 +16,19 @@ const MAX_KEY_SIGNALS = 4;
 // (score / max_score * 100) and the "N/100" display then read correctly.
 const LENS_SCALE = 100;
 
+// Frontend-only display-name overrides, keyed by lens slug. The backend still
+// serves the original name; we relabel purely for presentation. Keep in sync with
+// the drawer's own lookup in useLenses (LENS_DISPLAY_NAME there).
+export const LENS_DISPLAY_NAME: Record<string, string> = {
+  "pe-rerating-potential": "Earnings Quality",
+};
+
 function normalizeLenses(lenses: InsightLens[]): InsightLens[] {
-  return lenses.map((l) => ({ ...l, max_score: LENS_SCALE }));
+  return lenses.map((l) => ({
+    ...l,
+    max_score: LENS_SCALE,
+    name: LENS_DISPLAY_NAME[l.slug] ?? l.name,
+  }));
 }
 
 function deriveKeySignals(signalMap: L3Result["result"]["signal_map"]): InsightKeySignal[] {

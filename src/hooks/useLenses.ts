@@ -1,5 +1,20 @@
 import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/constants";
+import { LENS_DISPLAY_NAME } from "@/lib/analysis-adapter";
+
+// Apply the frontend-only lens display-name overrides (shared with the L3 adapter)
+// so the lens drawer header matches the relabelled card/tile/radar names.
+function relabelLensDetails(
+  categories: Record<LensCategory, LensDetail[]>,
+): Record<LensCategory, LensDetail[]> {
+  const relabel = (lenses: LensDetail[]) =>
+    lenses.map((l) => ({ ...l, name: LENS_DISPLAY_NAME[l.slug] ?? l.name }));
+  return {
+    management: relabel(categories.management ?? []),
+    opportunity: relabel(categories.opportunity ?? []),
+    deal: relabel(categories.deal ?? []),
+  };
+}
 
 export interface TimeseriesPoint {
   callId: string | null;
@@ -107,7 +122,7 @@ export function useLenses(ticker: string): UseLensesResult {
     fetch(`${BACKEND_URL}/api/lenses?ticker=${ticker}`)
       .then((r) => r.json())
       .then((data: LensesApiResponse) => {
-        setLenses(data.categories ?? { management: [], opportunity: [], deal: [] });
+        setLenses(relabelLensDetails(data.categories ?? { management: [], opportunity: [], deal: [] }));
         setLoading(false);
       })
       .catch((e) => {

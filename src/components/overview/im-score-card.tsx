@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-import type { InsightData, InsightLens } from "@/types/analysis";
-import type { OverviewAnalysis } from "@/types/overview";
-import { SectionShell, InlineMd } from "./primitives";
+import { ChevronRight } from "lucide-react";
+import type { InsightData } from "@/types/analysis";
+import type { OverviewAnalysis, OverviewPillarPattern } from "@/types/overview";
+import { SectionShell } from "./primitives";
 
 interface IMScoreCardProps {
   management: InsightData | null;
@@ -15,274 +15,416 @@ interface IMScoreCardProps {
   overviewData?: OverviewAnalysis | null;
 }
 
-const PILLAR_META = [
-  { key: "management" as const, label: "Management", href: "/screener/management" },
-  { key: "opportunity" as const, label: "Opportunity", href: "/screener/opportunity" },
-  { key: "deal" as const, label: "Deal", href: "/screener/deal" },
-];
+const PILLAR_META = {
+  management: { label: "Management", href: "/screener/management", color: "var(--qc-blue)" },
+  opportunity: { label: "Opportunity", href: "/screener/opportunity", color: "var(--qc-up)" },
+  deal: { label: "Deal", href: "/screener/deal", color: "var(--qc-golden-ink)" },
+} as const;
 
-// Traffic light from score percentage only — API `status` field is not reliable
-// (backend sets it to "STRONG" for all lenses regardless of relative quality)
-function lensTrafficLight(lens: InsightLens): "positive" | "negative" | "neutral" {
-  const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
-  if (pct >= 75) return "positive";
-  if (pct >= 55) return "neutral";
-  return "negative";
-}
+type PillarKey = keyof typeof PILLAR_META;
 
-// Semantic colors from design-system tokens (was hardcoded #16a34a/#dc2626/#d97706).
-function trafficColor(t: "positive" | "negative" | "neutral") {
-  if (t === "positive") return { dot: "var(--qc-up)",   bg: "var(--qc-up-soft)",   border: "rgba(31,122,74,0.20)",  text: "var(--qc-up)"   };
-  if (t === "negative") return { dot: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "rgba(178,58,47,0.20)",  text: "var(--qc-down)" };
-  return { dot: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "rgba(180,115,26,0.20)", text: "var(--qc-warn)" };
-}
-
-// verdict_band drives the ring color — it's the contextual/relative rating the backend computes.
-// `verdict` ("STRONG") is just a raw score threshold label and is not meaningful here.
-function verdictBandColor(verdictBand: string) {
-  const b = (verdictBand ?? "").toUpperCase();
-  if (b.includes("STRONG") || b.includes("HIGH") || b.includes("GOOD")) {
-    return { color: "var(--qc-up)", bg: "var(--qc-up-soft)", border: "var(--qc-up)" };
+// ── trend → semantics ────────────────────────────────────────────────────────
+// The pattern `trend` drives the mini-chart line color and the trend badge.
+// rising = the thesis is improving (positive), falling = deteriorating (negative),
+// steady = holding (neutral). Everything else falls back to neutral.
+function trendSemantics(trend: string): {
+  line: string;
+  badge: { bg: string; text: string; label: string };
+} {
+  const t = (trend ?? "").toLowerCase();
+  if (t.includes("ris") || t.includes("improv") || t.includes("up") || t.includes("accel")) {
+    return { line: "var(--qc-up)", badge: { bg: "var(--qc-up-soft)", text: "var(--qc-up)", label: "Rising" } };
   }
-  if (b.includes("WEAK") || b.includes("LOW") || b.includes("POOR") || b.includes("SELL")) {
-    return { color: "var(--qc-down)", bg: "var(--qc-down-soft)", border: "var(--qc-down)" };
+  if (t.includes("fall") || t.includes("declin") || t.includes("down") || t.includes("soft") || t.includes("weak")) {
+    return { line: "var(--qc-down)", badge: { bg: "var(--qc-down-soft)", text: "var(--qc-down)", label: "Softening" } };
   }
-  // MODERATE BAND, NEUTRAL, or unknown
-  return { color: "var(--qc-warn)", bg: "var(--qc-warn-soft)", border: "var(--qc-warn)" };
+  return { line: "var(--qc-warn)", badge: { bg: "var(--qc-warn-soft)", text: "var(--qc-warn)", label: "Steady" } };
 }
 
-// Capitalize each word
-function toTitleCase(str: string) {
-  return str.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+// rating word → semantic tone for the lens-grid rating pills.
+function ratingTone(rating: string): "up" | "down" | "neutral" {
+  const r = (rating ?? "").toLowerCase();
+  if (
+    r.includes("strong") || r.includes("excellent") || r.includes("disciplin") ||
+    r.includes("achiev") || r.includes("clean") || r.includes("good") || r.includes("high")
+  ) return "up";
+  if (
+    r.includes("weak") || r.includes("poor") || r.includes("soft") || r.includes("selective") ||
+    r.includes("pressur") || r.includes("low") || r.includes("risk") || r.includes("capped")
+  ) return "down";
+  return "neutral";
 }
 
-function LensRow({ lens }: { lens: InsightLens }) {
-  const traffic = lensTrafficLight(lens);
-  const colors = trafficColor(traffic);
+function toneColor(tone: "up" | "down" | "neutral") {
+  if (tone === "up") return { text: "var(--qc-up)", bg: "var(--qc-up-soft)" };
+  if (tone === "down") return { text: "var(--qc-down)", bg: "var(--qc-down-soft)" };
+  return { text: "var(--qc-ink-2)", bg: "var(--qc-chip, #F2F1EC)" };
+}
+
+// Turn *emphasis* markers from the L4 title into accented spans.
+function EmphasisTitle({ text }: { text: string }) {
+  const parts = text.split(/(\*[^*]+\*)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        p.startsWith("*") && p.endsWith("*") && p.length > 2 ? (
+          <em key={i} style={{ fontStyle: "italic", color: "var(--qc-brand-chip)", fontWeight: "var(--qc-w-medium)" }}>
+            {p.slice(1, -1)}
+          </em>
+        ) : (
+          <span key={i}>{p}</span>
+        )
+      )}
+    </>
+  );
+}
+
+// ── MiniLineChart ─────────────────────────────────────────────────────────────
+// Compact line chart from a `spark` series (values in any range), with a terminal
+// dot and FY24 → FY26 baseline labels — the Asian-Paints pattern glyph.
+function MiniLineChart({ values, color }: { values: number[]; color: string }) {
+  const w = 132;
+  const h = 56;
+  const padY = 8;
+  if (!values.length) {
+    return <div style={{ width: w, height: h + 20 }} />;
+  }
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const range = max - min || 1;
+  const n = values.length;
+  const pts = values.map((v, i) => {
+    const x = n === 1 ? w / 2 : (i / (n - 1)) * w;
+    const y = padY + (1 - (v - min) / range) * (h - padY * 2);
+    return [x, y] as const;
+  });
+  const d = pts.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+  const last = pts[pts.length - 1];
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: "8px 10px",
-        borderRadius: 8,
-        background: "var(--qc-card)",
-        border: "1px solid var(--qc-hair)",
-        borderLeft: `3px solid ${colors.dot}`,
-      }}
-    >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontFamily: "var(--qc-font-mono)",
-            fontSize: "var(--qc-fz-9)",
-            letterSpacing: "var(--qc-track-eyebrow-l)",
-            textTransform: "uppercase",
-            color: "var(--qc-ink-2)",
-            marginBottom: 3,
-          }}
-        >
-          {lens.name}
-        </div>
-        {lens.subtitle ? (
-          <span
-            style={{
-              display: "inline-block",
-              fontFamily: "var(--qc-font-sans)",
-              fontSize: "var(--qc-fz-11)",
-              fontWeight: "var(--qc-w-semi)",
-              padding: "2px 8px",
-              borderRadius: 5,
-              background: colors.bg,
-              border: `1px solid ${colors.border}`,
-              color: colors.text,
-              letterSpacing: ".01em",
-            }}
-          >
-            {toTitleCase(lens.subtitle)}
-          </span>
-        ) : (
-          <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-3)", fontStyle: "italic" }}>
-            —
-          </span>
-        )}
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, width: w, flexShrink: 0 }}>
+      <svg width={w} height={h} style={{ display: "block", overflow: "visible" }} aria-hidden>
+        <polyline
+          points={d}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx={last[0]} cy={last[1]} r={3.5} fill={color} />
+      </svg>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          fontFamily: "var(--qc-font-mono)",
+          fontSize: "var(--qc-fz-9)",
+          letterSpacing: ".06em",
+          color: "var(--qc-ink-3)",
+        }}
+      >
+        <span>FY24</span>
+        <span>FY26</span>
       </div>
     </div>
   );
 }
 
-function PillarColumn({
-  insight,
-  label,
+// ── Routing chip ("Opportunity · Pricing power") ──────────────────────────────
+function RouteChip({ pillar, lens }: { pillar: PillarKey; lens: string }) {
+  // Deal routes read golden; management/opportunity read soft-green — matches the Asian Paints legend.
+  const bg = pillar === "deal" ? "var(--qc-warn-soft)" : "var(--qc-up-soft)";
+  const text = pillar === "deal" ? "var(--qc-golden-ink)" : "var(--qc-up)";
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "3px 9px",
+        borderRadius: 6,
+        background: bg,
+        color: text,
+        fontFamily: "var(--qc-font-sans)",
+        fontSize: "var(--qc-fz-11)",
+        fontWeight: "var(--qc-w-medium)",
+        letterSpacing: ".01em",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {PILLAR_META[pillar].label} · {lens}
+    </span>
+  );
+}
+
+// ── Pattern card ──────────────────────────────────────────────────────────────
+function PatternCard({
+  pattern,
   href,
   symbol,
+  isOverarching,
 }: {
-  insight: InsightData | null;
-  label: string;
+  pattern: OverviewPillarPattern;
   href: string;
   symbol: string;
+  isOverarching: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
-  const score = insight?.score ?? null;
-  const hasData = insight != null && insight.available;
+  const sem = trendSemantics(pattern.trend);
   const dest = `${href}?symbol=${encodeURIComponent(symbol)}`;
-  const ring = hasData ? verdictBandColor(insight.verdict_band) : null;
+
+  // "Routes to" — the two strongest lenses of this pillar, as routing chips.
+  const routes = [...pattern.lenses]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 2)
+    .map((l) => l.lens);
 
   return (
-    <div
+    <Link
+      href={dest}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        display: "block",
+        textDecoration: "none",
         background: "var(--qc-card)",
         border: `1px solid ${hovered ? "var(--qc-ink-2)" : "var(--qc-hair)"}`,
         borderRadius: 14,
-        padding: "18px 18px 16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 0,
-        minWidth: 0,
+        padding: "18px 20px",
         position: "relative",
         transition: "border-color 0.15s ease, box-shadow 0.15s ease",
-        boxShadow: hovered ? "0 2px 12px rgba(0,0,0,0.07)" : "none",
+        boxShadow: hovered ? "0 2px 14px rgba(0,0,0,0.06)" : "none",
       }}
     >
-      {/* Header: label + verdict_band on left, score ring on right — tight row */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 3, paddingTop: 2 }}>
+      {/* chevron affordance, top-right */}
+      <ChevronRight
+        size={15}
+        strokeWidth={2}
+        style={{
+          position: "absolute",
+          top: 18,
+          right: 18,
+          color: "var(--qc-ink-3)",
+          opacity: hovered ? 1 : 0.5,
+          transform: hovered ? "translateX(2px)" : "none",
+          transition: "opacity 0.15s ease, transform 0.15s ease",
+        }}
+      />
+
+      <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+        {/* left rail: color dot + mini chart */}
+        <div style={{ display: "flex", gap: 12, alignItems: "flex-start", paddingTop: 2 }}>
           <span
             style={{
-              fontFamily: "var(--qc-font-mono)",
-              fontSize: "var(--qc-fz-10)",
-              letterSpacing: ".16em",
-              color: "var(--qc-ink-2)",
-              textTransform: "uppercase",
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: sem.line,
+              marginTop: 22,
+              flexShrink: 0,
             }}
-          >
-            {label}
-          </span>
-          {hasData && insight.verdict_band && (
+          />
+          <MiniLineChart values={pattern.spark} color={sem.line} />
+        </div>
+
+        {/* right: title, badges, snapshot, routes */}
+        <div style={{ flex: 1, minWidth: 0, paddingRight: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
             <span
               style={{
                 fontFamily: "var(--qc-font-sans)",
-                fontSize: "var(--qc-fz-12)",
-                color: ring ? ring.color : "var(--qc-ink)",
+                fontSize: "var(--qc-fz-16)",
                 fontWeight: "var(--qc-w-semi)",
-                lineHeight: 1.3,
-                letterSpacing: ".01em",
+                color: "var(--qc-ink)",
+                letterSpacing: "-0.01em",
+                lineHeight: 1.25,
               }}
             >
-              {toTitleCase(insight.verdict_band)}
-            </span>
-          )}
-        </div>
-
-        {/* Score ring */}
-        {ring !== null && score !== null && hasData && (
-          <div
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: "50%",
-              border: `2.5px solid ${ring.border}`,
-              background: ring.bg,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--qc-font-mono)",
-                fontSize: "var(--qc-fz-18)",
-                fontWeight: "var(--qc-w-bold)",
-                color: ring.color,
-                fontVariantNumeric: "tabular-nums",
-                lineHeight: 1,
-              }}
-            >
-              {score}
+              {pattern.name}
             </span>
             <span
               style={{
                 fontFamily: "var(--qc-font-mono)",
                 fontSize: "var(--qc-fz-9)",
-                color: ring.color,
-                opacity: 0.7,
-                letterSpacing: ".06em",
+                fontWeight: "var(--qc-w-semi)",
+                letterSpacing: ".08em",
                 textTransform: "uppercase",
-                marginTop: 1,
+                padding: "2px 7px",
+                borderRadius: 5,
+                background: sem.badge.bg,
+                color: sem.badge.text,
               }}
             >
-              /100
+              {sem.badge.label}
             </span>
+            {isOverarching && (
+              <span
+                style={{
+                  fontFamily: "var(--qc-font-mono)",
+                  fontSize: "var(--qc-fz-9)",
+                  fontWeight: "var(--qc-w-semi)",
+                  letterSpacing: ".08em",
+                  textTransform: "uppercase",
+                  padding: "2px 7px",
+                  borderRadius: 5,
+                  background: "var(--qc-brand-accent-soft)",
+                  color: "var(--qc-brand-accent)",
+                }}
+              >
+                Overarching
+              </span>
+            )}
           </div>
-        )}
-        {!hasData && (
-          <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", fontStyle: "italic" }}>N/A</span>
-        )}
-      </div>
 
-      {/* Divider */}
-      {hasData && insight.lenses.length > 0 && (
-        <div style={{ height: 1, background: "var(--qc-hair)", marginBottom: 10 }} />
-      )}
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "var(--qc-font-sans)",
+              fontSize: "var(--qc-fz-13)",
+              color: "var(--qc-ink-2)",
+              lineHeight: 1.6,
+            }}
+          >
+            {pattern.snapshot}
+          </p>
 
-      {/* Lens rows */}
-      {hasData && insight.lenses.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-          {insight.lenses.map((lens) => (
-            <LensRow key={lens.slug} lens={lens} />
-          ))}
+          {routes.length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
+              <span
+                style={{
+                  fontFamily: "var(--qc-font-mono)",
+                  fontSize: "var(--qc-fz-10)",
+                  letterSpacing: ".1em",
+                  textTransform: "uppercase",
+                  color: "var(--qc-ink-3)",
+                  marginRight: 2,
+                }}
+              >
+                Routes to
+              </span>
+              {routes.map((lens) => (
+                <RouteChip key={lens} pillar={pattern.pillar} lens={lens} />
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
+    </Link>
+  );
+}
 
-      {/* Hover arrow — absolute bottom-right */}
+// ── Twelve-lenses grid ────────────────────────────────────────────────────────
+function LensGridColumn({ pattern, symbol }: { pattern: OverviewPillarPattern; symbol: string }) {
+  const meta = PILLAR_META[pattern.pillar];
+  const dest = `${meta.href}?symbol=${encodeURIComponent(symbol)}`;
+
+  return (
+    <div style={{ minWidth: 0 }}>
       <Link
         href={dest}
-        aria-label={`Go to ${label} page`}
         style={{
-          position: "absolute",
-          bottom: 14,
-          right: 14,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 26,
-          height: 26,
-          borderRadius: "50%",
-          background: "var(--qc-ink)",
-          color: "var(--qc-card)",
-          opacity: hovered ? 1 : 0,
-          transform: hovered ? "scale(1)" : "scale(0.6)",
-          transition: "opacity 0.15s ease, transform 0.15s ease",
-          pointerEvents: hovered ? "auto" : "none",
+          display: "inline-block",
+          textDecoration: "none",
+          fontFamily: "var(--qc-font-mono)",
+          fontSize: "var(--qc-fz-11)",
+          fontWeight: "var(--qc-w-semi)",
+          letterSpacing: ".14em",
+          textTransform: "uppercase",
+          color: meta.color,
+          marginBottom: 12,
         }}
-        onClick={(e) => e.stopPropagation()}
       >
-        <ArrowUpRight size={13} strokeWidth={2.5} />
+        {meta.label}
       </Link>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {pattern.lenses.map((lens, i) => {
+          const tone = toneColor(ratingTone(lens.rating));
+          return (
+            <div
+              key={lens.lens}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+                padding: "10px 0",
+                borderTop: i === 0 ? "none" : "1px solid var(--qc-hair)",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--qc-font-sans)",
+                  fontSize: "var(--qc-fz-13)",
+                  color: "var(--qc-ink)",
+                  minWidth: 0,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {lens.lens}
+              </span>
+              <span
+                style={{
+                  flexShrink: 0,
+                  fontFamily: "var(--qc-font-sans)",
+                  fontSize: "var(--qc-fz-11)",
+                  fontWeight: "var(--qc-w-semi)",
+                  letterSpacing: ".01em",
+                  padding: "2px 9px",
+                  borderRadius: 6,
+                  background: tone.bg,
+                  color: tone.text,
+                }}
+              >
+                {lens.rating || "—"}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-function NarrativeBar({
+// ── Empty fallback (no L4 pattern data) ───────────────────────────────────────
+function NarrativeFallback({
   management,
   opportunity,
   deal,
-  overviewNarrative,
 }: {
   management: InsightData | null;
   opportunity: InsightData | null;
   deal: InsightData | null;
-  overviewNarrative?: string | null;
 }) {
-  if (overviewNarrative) {
+  const parts: { bold: string; rest: string }[] = [];
+  if (management?.description) parts.push({ bold: "Management", rest: " — " + management.description.split(".")[0] + ". " });
+  if (opportunity?.description) parts.push({ bold: "Opportunity", rest: " — " + opportunity.description.split(".")[0] + ". " });
+  if (deal?.description) parts.push({ bold: "Deal", rest: " — " + deal.description.split(".")[0] + "." });
+  if (parts.length === 0) return null;
+
+  return (
+    <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", lineHeight: 1.65 }}>
+      {parts.map((p, i) => (
+        <span key={i}>
+          <strong style={{ fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{p.bold}</strong>
+          {p.rest}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+export function IMScoreCard({ management, opportunity, deal, overviewData }: IMScoreCardProps) {
+  const searchParams = useSearchParams();
+  const symbol = searchParams.get("symbol") ?? "";
+
+  const patterns = overviewData?.pillar_patterns ?? [];
+
+  // No L4 pattern data → keep a lightweight narrative so the section never blanks.
+  if (patterns.length === 0) {
     return (
-      <div style={{ marginBottom: 16 }}>
+      <SectionShell>
         <div
           style={{
             fontFamily: "var(--qc-font-mono)",
@@ -295,88 +437,136 @@ function NarrativeBar({
         >
           QC Insight
         </div>
-        <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", lineHeight: 1.65, fontWeight: "var(--qc-w-regular)" }}>
-          <InlineMd text={overviewNarrative} />
-        </p>
-      </div>
+        <NarrativeFallback management={management} opportunity={opportunity} deal={deal} />
+      </SectionShell>
     );
   }
 
-  const parts: { bold: string; rest: string }[] = [];
-  if (management?.description) {
-    parts.push({ bold: "Management", rest: " — " + management.description.split(".")[0] + ". " });
-  }
-  if (opportunity?.description) {
-    parts.push({ bold: "Opportunity", rest: " — " + opportunity.description.split(".")[0] + ". " });
-  }
-  if (deal?.description) {
-    parts.push({ bold: "Deal", rest: " — " + deal.description.split(".")[0] + "." });
-  }
-  if (parts.length === 0) return null;
+  // Order pattern cards by pillar score (impact), like Asian Paints "ranked by impact".
+  const rankedPatterns = [...patterns].sort((a, b) => b.score - a.score);
+  // A pattern is "overarching" when it touches ≥2 lenses (moves more than one sub-factor).
+  const isOverarching = (p: OverviewPillarPattern) => p.lenses.length >= 2;
+
+  const title = overviewData?.headline ?? "";
+  const subtitle = overviewData?.subtitle ?? "";
 
   return (
-    <div style={{ marginBottom: 16 }}>
-      <div
-        style={{
-          fontFamily: "var(--qc-font-mono)",
-          fontSize: "var(--qc-fz-10)",
-          letterSpacing: "var(--qc-track-eyebrow)",
-          textTransform: "uppercase",
-          color: "var(--qc-ink-2)",
-          marginBottom: 8,
-        }}
-      >
-        QC Insight
-      </div>
-      <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", lineHeight: 1.65 }}>
-        {parts.map((p, i) => (
-          <span key={i}>
-            <strong style={{ fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>{p.bold}</strong>
-            {p.rest}
-          </span>
-        ))}
-      </p>
-    </div>
-  );
-}
-
-export function IMScoreCard({ management, opportunity, deal, overviewData }: IMScoreCardProps) {
-  const searchParams = useSearchParams();
-  const symbol = searchParams.get("symbol") ?? "";
-
-  const overviewNarrative = overviewData?.dimensions
-    ? (() => {
-        const parts: string[] = [];
-        const dims = overviewData.dimensions.filter(d => d.headline && d.score != null && d.score > 0);
-        for (const d of dims) {
-          const label = d.type.charAt(0).toUpperCase() + d.type.slice(1);
-          parts.push(`**${label}** — ${d.headline}`);
-        }
-        return parts.length > 0 ? parts.join("; ") + "." : null;
-      })()
-    : null;
-
-  return (
-    <div>
-      <SectionShell>
-        <NarrativeBar
-          management={management}
-          opportunity={opportunity}
-          deal={deal}
-          overviewNarrative={overviewNarrative}
-        />
+    <SectionShell>
+      {/* ── Header ── */}
+      <div style={{ marginBottom: 20 }}>
         <div
-          className="grid grid-cols-1 sm:grid-cols-3"
-          style={{ gap: 12 }}
+          style={{
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-10)",
+            letterSpacing: "var(--qc-track-eyebrow)",
+            textTransform: "uppercase",
+            color: "var(--qc-ink-3)",
+            marginBottom: 10,
+          }}
         >
-          {PILLAR_META.map(({ key, label, href }) => {
-            const insight = key === "management" ? management : key === "opportunity" ? opportunity : deal;
-            return (
-              <PillarColumn key={key} insight={insight} label={label} href={href} symbol={symbol} />
-            );
+          QuantCase · Pattern Overview
+        </div>
+        {title && (
+          <h2
+            style={{
+              margin: 0,
+              fontFamily: "var(--qc-font-serif)",
+              fontSize: "var(--qc-fz-26)",
+              fontWeight: "var(--qc-w-regular)",
+              lineHeight: 1.22,
+              letterSpacing: "-0.01em",
+              color: "var(--qc-ink)",
+            }}
+          >
+            <EmphasisTitle text={title} />
+          </h2>
+        )}
+        {subtitle && (
+          <p
+            style={{
+              margin: "10px 0 0",
+              fontFamily: "var(--qc-font-sans)",
+              fontSize: "var(--qc-fz-13)",
+              color: "var(--qc-ink-2)",
+              lineHeight: 1.55,
+            }}
+          >
+            {subtitle}
+          </p>
+        )}
+      </div>
+
+      {/* ── What's moving the thesis ── */}
+      <div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
+          <span
+            style={{
+              fontFamily: "var(--qc-font-mono)",
+              fontSize: "var(--qc-fz-11)",
+              letterSpacing: ".14em",
+              textTransform: "uppercase",
+              color: "var(--qc-ink)",
+              fontWeight: "var(--qc-w-semi)",
+            }}
+          >
+            What&apos;s moving the thesis
+          </span>
+          <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-3)" }}>
+            ranked by impact · tap any card for the source statement
+          </span>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {rankedPatterns.map((p) => (
+            <PatternCard
+              key={p.pillar}
+              pattern={p}
+              href={PILLAR_META[p.pillar].href}
+              symbol={symbol}
+              isOverarching={isOverarching(p)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Go deeper · twelve lenses ── */}
+      <div style={{ marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--qc-hair)" }}>
+        <div
+          style={{
+            fontFamily: "var(--qc-font-mono)",
+            fontSize: "var(--qc-fz-11)",
+            letterSpacing: ".14em",
+            textTransform: "uppercase",
+            color: "var(--qc-ink-3)",
+            marginBottom: 18,
+          }}
+        >
+          Go deeper · twelve lenses
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3" style={{ gap: 28 }}>
+          {(["management", "opportunity", "deal"] as PillarKey[]).map((key) => {
+            const p = patterns.find((x) => x.pillar === key);
+            if (!p) return <div key={key} />;
+            return <LensGridColumn key={key} pattern={p} symbol={symbol} />;
           })}
         </div>
-      </SectionShell>
-    </div>
+
+        <p
+          style={{
+            margin: "22px 0 0",
+            fontFamily: "var(--qc-font-sans)",
+            fontSize: "var(--qc-fz-12)",
+            color: "var(--qc-ink-3)",
+            lineHeight: 1.6,
+          }}
+        >
+          Patterns are detected across earnings calls, annual reports and decks, then routed by which lens
+          sub-factors the underlying signals touch. A pattern moving two or more lenses is flagged{" "}
+          <strong style={{ color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-semi)" }}>overarching</strong> and
+          surfaced above; single-lens patterns live inside their lens. Every card links to the pillar detail.
+        </p>
+      </div>
+    </SectionShell>
   );
 }

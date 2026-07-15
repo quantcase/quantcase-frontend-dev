@@ -7,7 +7,11 @@
 // so this lives alongside `adaptL3Result` rather than overloading it.
 
 import type { L4Result, L4SummaryBody, L4PillarPattern } from "@/types/analysis";
-import type { OverviewAnalysis, OverviewDimension } from "@/types/overview";
+import type {
+  OverviewAnalysis,
+  OverviewDimension,
+  OverviewPillarPattern,
+} from "@/types/overview";
 
 // The L4 verdict is a single word ("STRONG" | "MODERATE" | "WEAK"). Map it onto
 // the band / conviction / action-bias fields the panel + cards read.
@@ -47,6 +51,28 @@ function toDimensions(patterns: L4PillarPattern[]): OverviewDimension[] {
   }));
 }
 
+// pillar_patterns → OverviewPillarPattern[]. Unlike toDimensions() this keeps the
+// full pattern payload — spark time-series, trend, interpretation, evidence
+// strength and lens ratings — which the QC-Insight pattern cards + lenses grid
+// render directly (toDimensions() flattens/drops these for the older consumers).
+function toPillarPatterns(patterns: L4PillarPattern[]): OverviewPillarPattern[] {
+  return patterns.map((p) => ({
+    pillar: p.pillar.toLowerCase() as OverviewPillarPattern["pillar"],
+    name: p.pattern?.name ?? "",
+    snapshot: p.pattern?.snapshot ?? "",
+    interpretation: p.pattern?.interpretation ?? "",
+    trend: p.pattern?.trend ?? "steady",
+    evidenceStrength: p.pattern?.evidence_strength ?? "",
+    spark: Array.isArray(p.pattern?.spark) ? p.pattern.spark : [],
+    score: pillarScore(p),
+    lenses: (p.pattern?.lenses ?? []).map((l) => ({
+      lens: l.lens,
+      score: l.score ?? 0,
+      rating: l.rating ?? "",
+    })),
+  }));
+}
+
 export function adaptL4Summary(raw: L4Result): OverviewAnalysis {
   const r: L4SummaryBody = raw.result;
 
@@ -69,6 +95,7 @@ export function adaptL4Summary(raw: L4Result): OverviewAnalysis {
     // `subtitle` is the actionable directive ("Wait for digital monetization…").
     action_bias: r.subtitle ?? r.verdict ?? "",
     dimensions: toDimensions(r.pillar_patterns ?? []),
+    pillar_patterns: toPillarPatterns(r.pillar_patterns ?? []),
     key_signals: [],
     signal_map: [],
     thesis: r.thesis ?? "",

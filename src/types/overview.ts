@@ -8,6 +8,30 @@ export interface OverviewDimension {
   contribution: number;
 }
 
+// ─── Pillar patterns (L4) ──────────────────────────────────────────────────────
+// The L4 summary carries a "pattern" per pillar with a mini time-series (`spark`),
+// a trend, a plain-language snapshot, a long-form interpretation, and the lens
+// ratings that roll up into the pillar. This drives the QC-Insight "what's moving
+// the thesis" pattern cards + the "twelve lenses" grid on /overview.
+
+export interface OverviewLensRating {
+  lens: string;
+  score: number;
+  rating: string;
+}
+
+export interface OverviewPillarPattern {
+  pillar: "management" | "opportunity" | "deal";
+  name: string;
+  snapshot: string;
+  interpretation: string;
+  trend: "rising" | "steady" | "falling" | string;
+  evidenceStrength: string;
+  spark: number[];
+  score: number;
+  lenses: OverviewLensRating[];
+}
+
 export interface OverviewKeySignal {
   label: string;
   sentiment: "positive" | "negative" | "neutral";
@@ -42,6 +66,7 @@ export interface OverviewAnalysis {
   headline: string;
   subtitle: string;
   dimensions: OverviewDimension[];
+  pillar_patterns: OverviewPillarPattern[];
   key_signals: OverviewKeySignal[];
   signal_map: OverviewSignalMapItem[];
   thesis: string;

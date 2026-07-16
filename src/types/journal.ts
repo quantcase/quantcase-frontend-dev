@@ -81,10 +81,27 @@ export interface JournalTicker {
   market: TickerMarket;
   latestEntry: JournalEntry | null;
   latestThesisHealth: ThesisHealth | null; // null = no thesis entries yet
+  /**
+   * Every entry for this ticker *in this journal*, uncapped.
+   *
+   * Arrival order is not guaranteed by the API, so nothing may depend on it —
+   * `sortEntries` orders these by `createdAt` at the join boundary and callers
+   * read the sorted result. A ticker filed in several journals has its entries
+   * split across those journals' rows; the cross-journal join concatenates them.
+   */
+  entries: JournalEntry[];
 }
 
-export interface JournalDetail {
-  journal: Journal;
+/**
+ * A journal with its tickers and their entries inline — what
+ * `GET /api/journal/journals` returns.
+ *
+ * The whole diary is one fetch of this. It replaces the older per-journal detail
+ * + per-ticker entries endpoints, which forced an N+1 fan-out to answer
+ * cross-journal questions ("which journals is this ticker in?", "everything
+ * written about ACE").
+ */
+export interface JournalWithTickers extends Journal {
   tickers: JournalTicker[];
 }
 

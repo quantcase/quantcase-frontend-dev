@@ -21,6 +21,8 @@ import type { DiaryTicker } from "../_lib/diary-derive";
 
 interface ComposerCardProps {
   t: DiaryTicker;
+  /** The journal this entry is filed under — the ticker's own, not the page's
+   *  active one. The queue spans journals, so they're often different. */
   journalId: string;
   onSaved: () => void;
 }

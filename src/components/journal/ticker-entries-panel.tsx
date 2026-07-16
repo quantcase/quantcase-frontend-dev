@@ -2,49 +2,50 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { X, Plus } from "lucide-react";
-import { useTickerEntriesAcross } from "@/hooks/useTickerEntriesAcross";
-import type { EntrySource } from "@/hooks/useTickerEntriesAcross";
 import { EntryTimelineItem } from "./entry-timeline-item";
 import { EntryComposer } from "./entry-composer";
 import { Button } from "@/components/ui/button";
 import { fmtPrice } from "@/lib/journal-format";
 import { fmtSignedPct } from "@/lib/portfolio-format";
 import type { TickerMarket } from "@/types/journal";
+import type { SourcedEntry } from "@/app/(app)/diary/_lib/diary-derive";
 
 interface Props {
-  /** The journal new entries are written to, and — unless `sources` is given —
-   *  the only one read from. */
+  /** The journal new entries are written to. Reads come from `entries`. */
   journalId: string;
-  /** Journals to read entries from, for the cross-journal view: a ticker in both
-   *  Holdings and Tracking has one story, told in two places. Omit for the
-   *  single-journal panel (`journalId` alone). Writes still go to `journalId`. */
-  sources?: EntrySource[];
+  /**
+   * Every entry to show, newest first, each stamped with the journal it's filed
+   * under — a ticker in both Holdings and Tracking has one story told in two
+   * places, and this is that story merged.
+   *
+   * Passed in rather than fetched: the journal tree already carries it, so a
+   * fetch here would re-request data the caller is holding (and could disagree
+   * with the card the drawer was opened from).
+   */
+  entries: SourcedEntry[];
   ticker: string;
   /** Optional market snapshot to show in the panel header. */
   market?: TickerMarket | null;
   /** Ticker's display name, if known. */
   name?: string | null;
   onClose: () => void;
-  /** Fired whenever an entry is added/edited/deleted/evaluated, so the parent
-   *  table can refetch the ticker row (latestEntry / health / count). */
+  /** Fired whenever an entry is added/edited/deleted/evaluated, so the owner of
+   *  `entries` can refetch. */
   onChanged?: () => void;
 }
 
-export function TickerEntriesPanel({ journalId, sources, ticker, market, name, onClose, onChanged }: Props) {
-  // Single-journal callers pass no `sources`; read from `journalId` alone so the
-  // panel on a stock page keeps showing exactly that journal's entries.
-  const readFrom: EntrySource[] = useMemo(
-    () => sources ?? [{ id: journalId, name: "" }],
-    [sources, journalId],
-  );
-  const { data: entries, loading, refetch } = useTickerEntriesAcross(readFrom, ticker);
+export function TickerEntriesPanel({ journalId, entries, ticker, market, name, onClose, onChanged }: Props) {
   const [composing, setComposing] = useState(false);
 
   // Only worth naming the journal on each entry when the list actually spans
   // more than one — otherwise the badge states a fact the header already implies.
-  const showJournalBadge = readFrom.length > 1;
+  const journalIds = useMemo(
+    () => new Set(entries.map((e) => e.journalId)),
+    [entries],
+  );
+  const showJournalBadge = journalIds.size > 1;
   const writeTargetName = showJournalBadge
-    ? readFrom.find((s) => s.id === journalId)?.name ?? null
+    ? entries.find((e) => e.journalId === journalId)?.journalName ?? null
     : null;
 
   // Close on Escape
@@ -54,8 +55,9 @@ export function TickerEntriesPanel({ journalId, sources, ticker, market, name, o
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  // The parent owns `entries`, so it owns refreshing them — this drawer has
+  // nothing of its own to refetch.
   function afterChange() {
-    refetch();
     onChanged?.();
   }
 
@@ -118,18 +120,13 @@ export function TickerEntriesPanel({ journalId, sources, ticker, market, name, o
             </Button>
           )}
 
-          {/* Timeline */}
+          {/* Timeline. No loading state: the drawer opens from a row that already
+              has its entries, so there's nothing to wait for. */}
           <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
-            Entries{entries ? ` · ${entries.length}` : ""}
+            Entries{entries.length > 0 ? ` · ${entries.length}` : ""}
           </div>
 
-          {loading ? (
-            <div className="flex flex-col gap-2.5">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="h-[92px] rounded-lg border border-hair bg-secondary opacity-50" />
-              ))}
-            </div>
-          ) : !entries || entries.length === 0 ? (
+          {entries.length === 0 ? (
             <div className="rounded-lg border border-dashed border-hair px-4 py-8 text-center text-[13px] text-ink-3">
               No entries yet. Add your first note or thesis above.
             </div>

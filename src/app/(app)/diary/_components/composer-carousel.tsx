@@ -9,11 +9,14 @@ import { fmtPrice } from "@/lib/journal-format";
 
 import { ComposerCard } from "./composer-card";
 import { prefetchQuantcaseRead } from "../_hooks/useQuantcaseRead";
+import { primaryJournal } from "../_lib/diary-derive";
 import type { DiaryTicker } from "../_lib/diary-derive";
 
 interface ComposerCarouselProps {
   tickers: DiaryTicker[];
-  journalId: string;
+  /** Where to file a ticker that carries no journal membership. The queue is
+   *  cross-journal, so each card files against its own journal first. */
+  fallbackJournalId: string | null;
   onSaved: () => void;
   /** Position state, owned by the caller so the nav can live in the header. */
   pos: CarouselPos;
@@ -126,7 +129,7 @@ function isEdgeDot(i: number, active: number, n: number): boolean {
 //
 // Index is clamped, never wrapped — a queue has an end, and wrapping would make
 // "3 to go" feel like a treadmill.
-export function ComposerCarousel({ tickers, journalId, onSaved, pos }: ComposerCarouselProps) {
+export function ComposerCarousel({ tickers, fallbackJournalId, onSaved, pos }: ComposerCarouselProps) {
   const reduceMotion = useReducedMotion();
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -154,7 +157,8 @@ export function ComposerCarousel({ tickers, journalId, onSaved, pos }: ComposerC
       <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-hair bg-card px-6 py-14 text-center">
         <div className="mb-1.5 text-[17px] font-medium text-ink">You&rsquo;re all caught up</div>
         <p className="mx-auto max-w-[300px] text-[13px] leading-[1.5] text-ink-2">
-          Every stock here has a thesis. Add one to your watchlist and it&rsquo;ll show up for writing.
+          Every stock you own or track has an entry. Add one to your watchlist and it&rsquo;ll show up
+          for writing.
         </p>
       </div>
     );
@@ -162,6 +166,10 @@ export function ComposerCarousel({ tickers, journalId, onSaved, pos }: ComposerC
 
   const front = tickers[safeIndex];
   const ghosts = tickers.slice(safeIndex + 1, safeIndex + 1 + GHOSTS);
+
+  // The front card files against its own journal. Cross-journal rows carry their
+  // membership; a row without any falls back to the active journal.
+  const frontJournalId = primaryJournal(front)?.id ?? fallbackJournalId;
 
   return (
     <div
@@ -210,7 +218,13 @@ export function ComposerCarousel({ tickers, journalId, onSaved, pos }: ComposerC
             className="relative flex flex-1 flex-col"
             style={{ zIndex: 10 }}
           >
-            <ComposerCard t={front} journalId={journalId} onSaved={onSaved} />
+            {frontJournalId ? (
+              <ComposerCard t={front} journalId={frontJournalId} onSaved={onSaved} />
+            ) : (
+              // No journal to file under: showing a composer here would save the
+              // entry into whatever journal happened to be active.
+              <GhostCard t={front} />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

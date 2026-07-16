@@ -58,8 +58,9 @@ export function JournalTabs({ journals, activeId, onSelect, onCreate, onChanged,
 
   function doDelete(j: Journal) {
     setError(null);
-    // Hand the id up first: the page must move off this journal before the
-    // refetch, or useJournalDetail re-fetches a dead id and 404s.
+    // Hand the id up first so the page moves off this journal before the refetch
+    // lands — otherwise `activeId` briefly names a journal the tree no longer
+    // has, and the sections scoped to it render empty.
     deleteJournal(j.id, () => { setConfirmId(null); onDeleted(j.id); onChanged(); }, setError);
   }
 

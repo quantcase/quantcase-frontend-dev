@@ -31,7 +31,7 @@ import {
 } from "@tanstack/react-table";
 import { useBaskets } from "@/hooks/useBaskets";
 import { useBasketStocks } from "@/hooks/useBasketStocks";
-import { useJournals } from "@/hooks/useJournals";
+import { useJournalTree, toJournals } from "@/hooks/useJournalTree";
 import { useJournalMutations } from "@/hooks/useJournalMutations";
 import { useIndustryBaskets } from "@/hooks/useIndustryBaskets";
 import { useIndustryBasketStocks } from "@/hooks/useIndustryBasketStocks";
@@ -140,7 +140,8 @@ interface AddToJournalModalProps {
 }
 
 function AddToJournalModal({ symbols, onClose, onSuccess }: AddToJournalModalProps) {
-  const { data: journals, loading } = useJournals();
+  const { data: tree, loading } = useJournalTree();
+  const journals = useMemo(() => toJournals(tree), [tree]);
   const { createJournal, addTickers } = useJournalMutations();
   const [mode, setMode] = useState<"existing" | "new">("existing");
   const [selectedId, setSelectedId] = useState<string>("");
@@ -151,7 +152,7 @@ function AddToJournalModal({ symbols, onClose, onSuccess }: AddToJournalModalPro
 
   // Holdings is auto-synced/add-only — you don't manually curate it, so only
   // Tracking + custom journals are valid destinations here.
-  const targetJournals = useMemo(() => (journals ?? []).filter((j) => j.kind !== "holdings"), [journals]);
+  const targetJournals = useMemo(() => journals.filter((j) => j.kind !== "holdings"), [journals]);
 
   const finish = useCallback(() => {
     setDone(true);

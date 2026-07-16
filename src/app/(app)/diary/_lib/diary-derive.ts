@@ -3,15 +3,15 @@
 // about (and tested) without a network.
 //
 // The diary joins four independently-fetched sources onto one view model:
-//   journal detail  → the tickers + entries (camelCase API)
+//   journal tree    → the journals, their tickers, and every entry (camelCase API)
 //   smallcase       → holdings: name / qty / broker / value (snake_case API)
 //   mod synopsis    → bulk ticker→company name + M/O/D scores
 //   stocks universe → fallback name + industry
 // Beware the naming split: journal is camelCase, portfolio/smallcase snake_case.
 
 import { isPending } from "@/types/journal";
-import type { JournalEntry, JournalKind, JournalTicker, TickerMarket, ThesisHealth } from "@/types/journal";
-import type { OwnedJournalTicker } from "@/hooks/useAllJournalTickers";
+import type { JournalEntry, JournalKind, JournalTicker, TickerMarket, ThesisEntry, ThesisHealth } from "@/types/journal";
+import type { OwnedJournalTicker } from "@/hooks/useJournalTree";
 import type { SmallcaseHolding, SmallcaseHoldingsData } from "@/types/smallcase";
 import type { ModSynopsis, ModBreakdownRow } from "@/types/investor-dashboard";
 import type { StockOption } from "@/hooks/useStocks";
@@ -23,6 +23,14 @@ export interface JournalRef {
   id: string;
   name: string;
   kind: JournalKind;
+}
+
+/** An entry plus the journal it was filed under — the identity a merged,
+ *  cross-journal list would otherwise lose. The drawer badges it. */
+export interface SourcedEntry {
+  entry: JournalEntry;
+  journalId: string;
+  journalName: string;
 }
 
 export interface DiaryTicker {
@@ -37,6 +45,16 @@ export interface DiaryTicker {
   market: TickerMarket;
   latestEntry: JournalEntry | null;
   latestThesisHealth: ThesisHealth | null;
+  /**
+   * Every entry written about this ticker, across every journal it's filed in,
+   * newest first and stamped with its journal.
+   *
+   * The whole history, not a preview: the API nests it, so the drawer reads this
+   * instead of fetching per-ticker. `latestEntry` is just `entries[0]`'s entry
+   * for a single-journal row, but the two can differ on a merged row — prefer
+   * this.
+   */
+  entries: SourcedEntry[];
   /** True when the ticker has no thesis yet — drives the composer queue. */
   pending: boolean;
   /** The matching holding, or null when this is watchlist-only (not owned). */
@@ -64,8 +82,17 @@ function indexBy<T>(rows: T[] | undefined, pick: (row: T) => string | null | und
   return map;
 }
 
+/** Newest first. The API doesn't promise an order, so every list of entries that
+ *  reaches the UI passes through here rather than trusting arrival order. */
+function sortEntries(entries: SourcedEntry[]): SourcedEntry[] {
+  return [...entries].sort(
+    (a, b) => new Date(b.entry.createdAt).getTime() - new Date(a.entry.createdAt).getTime(),
+  );
+}
+
 /**
- * Join journal tickers against holdings, MOD scores, and the stock universe.
+ * Join one journal's tickers against holdings, MOD scores, and the stock
+ * universe, stamping each entry with the journal it was filed under.
  *
  * Name precedence: mod-synopsis (portfolio-accurate) → smallcase → universe →
  * null. Callers fall back to the ticker itself for display; the universe is a
@@ -73,6 +100,7 @@ function indexBy<T>(rows: T[] | undefined, pick: (row: T) => string | null | und
  */
 export function joinTickers(
   tickers: JournalTicker[],
+  journal: JournalRef,
   holdings: SmallcaseHoldingsData | null,
   mod: ModSynopsis | null,
   stocks: StockOption[],
@@ -96,10 +124,17 @@ export function joinTickers(
       market: t.market,
       latestEntry: t.latestEntry,
       latestThesisHealth: t.latestThesisHealth,
+      entries: sortEntries(
+        (t.entries ?? []).map((entry) => ({
+          entry,
+          journalId: journal.id,
+          journalName: journal.name,
+        })),
+      ),
       pending: isPending(t),
       holding,
       mod: modRow,
-      journals: [],
+      journals: [journal],
     };
   });
 }
@@ -107,11 +142,12 @@ export function joinTickers(
 /**
  * The cross-journal join: same enrichment as `joinTickers`, but over rows from
  * every journal at once, collapsed to one row per ticker carrying its full
- * membership.
+ * membership and its complete history.
  *
  * A ticker in both Holdings and Tracking arrives as two rows. They're merged on
- * the ticker, keeping the most-recently-touched row's entry data so the card
- * quotes the newest writing, and unioning the journals for the badge.
+ * the ticker: entries concatenate (the writing is the ticker's, not the
+ * journal's), the journals union for the badge, and the fresher row wins the
+ * fields that are genuinely per-row.
  */
 export function joinAllTickers(
   rows: OwnedJournalTicker[],
@@ -122,24 +158,35 @@ export function joinAllTickers(
   const merged = new Map<string, DiaryTicker>();
 
   for (const row of rows) {
-    const [joined] = joinTickers([row], holdings, mod, stocks);
     const ref: JournalRef = { id: row.journalId, name: row.journalName, kind: row.journalKind };
+    const [joined] = joinTickers([row], ref, holdings, mod, stocks);
     const k = key(row.ticker);
     const prev = merged.get(k);
 
     if (!prev) {
-      merged.set(k, { ...joined, journals: [ref] });
+      merged.set(k, joined);
       continue;
     }
 
-    // Keep the fresher row's entry fields; the duplicate only adds membership.
+    // Keep the fresher row's per-journal fields; the duplicate adds membership.
     const base = touchedAt(joined) > touchedAt(prev) ? joined : prev;
+    const entries = sortEntries([...prev.entries, ...joined.entries]);
+
     merged.set(k, {
       ...base,
       // Entry counts are per-journal, so the ticker's true total is the sum.
       entryCount: prev.entryCount + joined.entryCount,
       // Pending only if no journal has a thesis for it.
       pending: prev.pending && joined.pending,
+      // Health is a per-ticker fact riding on per-journal rows, so it can't come
+      // from `base` — the fresher row is fresher by *any* entry, and a note filed
+      // in one journal would otherwise mask a thesis written in another, sending
+      // the ticker to the watchlist when it has a thesis.
+      latestThesisHealth: prev.latestThesisHealth ?? joined.latestThesisHealth,
+      entries,
+      // The newest entry across every journal — `base`'s own is only the newest
+      // within its journal.
+      latestEntry: entries[0]?.entry ?? null,
       journals: [...prev.journals, ref],
     });
   }
@@ -156,6 +203,54 @@ export function primaryJournal(t: DiaryTicker): JournalRef | null {
   return t.journals.find((j) => j.kind === "holdings") ?? t.journals[0];
 }
 
+/**
+ * The newest thesis written about a ticker, across every journal — or null if
+ * it only has notes.
+ *
+ * Derived from `entries` rather than read off a field: the API returns the whole
+ * history, so the thesis is always in hand even when a note is the newer entry
+ * and `latestEntry` hides it.
+ */
+export function latestThesis(t: DiaryTicker): ThesisEntry | null {
+  // `entries` is newest-first, so the first thesis found is the newest one.
+  for (const { entry } of t.entries) {
+    if (entry.type === "thesis") return entry;
+  }
+  return null;
+}
+
+// ── Sectioning (thesis vs. watchlist) ───────────────────────────────────────
+
+/**
+ * Does this ticker have a thesis at all?
+ *
+ * Reads the entries rather than `latestThesisHealth`, so the fact that files a
+ * ticker under "Your thesis" is the same fact the card quotes — a ticker can't
+ * be sectioned as having a thesis it can't show. The two agree in practice
+ * (health is non-null exactly when a thesis exists), but only `entries` is
+ * load-bearing for both questions.
+ */
+export function hasThesis(t: DiaryTicker): boolean {
+  return latestThesis(t) !== null;
+}
+
+/**
+ * "Your thesis" — tickers you've reasoned about, plus the ones still waiting.
+ *
+ * Two buckets by design: a written thesis, or nothing written at all. The blanks
+ * belong here because the section is the ask — it's where you go to write, and a
+ * needs-entry card is the prompt to. A ticker with only notes is neither: it has
+ * writing, so it isn't an ask, but the writing isn't a thesis — so it sits this
+ * strip out and appears only in its journal's roster below.
+ *
+ * This filters the strip, not the page: "On your watchlist" renders its
+ * journal's tickers in full, so a ticker shown here can legitimately appear
+ * there too. The sections are different views, not a partition.
+ */
+export function hasThesisOrNeedsEntry(t: DiaryTicker): boolean {
+  return hasThesis(t) || entryStatus(t) === "needs-entry";
+}
+
 // ── Status ──────────────────────────────────────────────────────────────────
 
 /**
@@ -166,9 +261,12 @@ export function primaryJournal(t: DiaryTicker): JournalRef | null {
  * axis (is the reasoning still holding up?) and deliberately isn't styled here —
  * a ticker with no thesis has no health to report, and reading one anyway is
  * what gave note-only tickers a thesis-colored rail.
+ *
+ * Reads `entries`, the same list the card renders from, so "Needs entry" and a
+ * visible quote can never appear on the same card.
  */
 export function entryStatus(t: DiaryTicker): EntryStatus {
-  return t.entryCount === 0 ? "needs-entry" : "written";
+  return t.entries.length === 0 ? "needs-entry" : "written";
 }
 
 /**
@@ -195,10 +293,22 @@ export function journalIcon(kind: JournalKind): JournalIcon {
   return kind === "holdings" ? "holdings" : "list";
 }
 
-/** The quote shown on a strip card — a thesis if there is one, else the note. */
+/** The text of a single entry, whichever type it is. */
 export function entryExcerpt(entry: JournalEntry | null): string | null {
   if (!entry) return null;
   return entry.type === "thesis" ? entry.thesis : entry.noteText;
+}
+
+/**
+ * The quote a ticker's card shows: its thesis whenever it has one, else its
+ * latest note.
+ *
+ * A thesis outranks a newer note. The reasoning is the thing the diary is for,
+ * and a card filed under "Your thesis" that quotes a note contradicts the
+ * section it sits in — so recency loses to type here, unlike `entryExcerpt`.
+ */
+export function tickerExcerpt(t: DiaryTicker): string | null {
+  return latestThesis(t)?.thesis ?? entryExcerpt(t.latestEntry);
 }
 
 /**
@@ -217,6 +327,23 @@ export function sortForStrip(tickers: DiaryTicker[]): DiaryTicker[] {
     if (aWritten !== bWritten) return aWritten ? -1 : 1;
     return touchedAt(b) - touchedAt(a);
   });
+}
+
+/**
+ * The writing queue: the strip's "Needs entry" cards, in the strip's own order.
+ *
+ * Deliberately keyed on `entryStatus`, not `pending` — the queue is the strip
+ * filtered to what it labels unwritten, so "3 to go" and the count of amber
+ * cards are the same fact. `pending` is the other axis (thesis-only), and using
+ * it here is what let a note-only ticker read "Written" and still be queued.
+ *
+ * Callers pass the cross-journal set: a ticker needs an entry wherever it's
+ * filed, so scoping this to the active journal hid work the strip was showing.
+ * Uncapped — the strip truncates because it's a glance, but the queue is the
+ * backlog, and a cap would make "N to go" understate it.
+ */
+export function needsEntryQueue(tickers: DiaryTicker[]): DiaryTicker[] {
+  return sortForStrip(tickers).filter((t) => entryStatus(t) === "needs-entry");
 }
 
 function touchedAt(t: DiaryTicker): number {
@@ -248,10 +375,6 @@ function dayKey(d: Date): string {
  *
  * The yesterday-grace is deliberate: without it a real streak reads 0 every
  * morning until the user writes, which punishes them for showing up early.
- *
- * Known limit (G3): JournalDetail exposes only each ticker's `latestEntry`, so
- * days where an older entry was the only one are invisible and the streak can
- * undercount. Exact once the API returns `entryDates[]`.
  */
 export function computeStreak(dates: (string | null | undefined)[], now: Date = new Date()): number {
   const days = new Set<string>();
@@ -288,9 +411,16 @@ export function streakDots(dates: (string | null | undefined)[], length = 7, now
   });
 }
 
-/** Every entry date we can see — the streak's input. See G3 on why this is partial. */
+/**
+ * Every entry date — the streak's input.
+ *
+ * Reads all of `entries`, not just each ticker's newest. This used to be limited
+ * to `latestEntry` because that was all the API returned, which made the streak
+ * undercount: a day whose only writing was later superseded on that same ticker
+ * was invisible. The nested payload carries the full history, so it's exact now.
+ */
 export function entryDates(tickers: DiaryTicker[]): string[] {
-  return tickers.map((t) => t.latestEntry?.createdAt).filter((d): d is string => Boolean(d));
+  return tickers.flatMap((t) => t.entries.map((e) => e.entry.createdAt));
 }
 
 // ── Formatting ──────────────────────────────────────────────────────────────
@@ -331,10 +461,12 @@ export function mastheadDate(now: Date = new Date()): string {
 }
 
 /**
- * The "ENTRY 47" counter (G1): summed across the active journal's tickers,
- * i.e. "entries in this journal". Exact once /api/journal/journals returns
- * `totalEntryCount`.
+ * The "ENTRY 47" counter: every entry you've written, across every journal.
+ *
+ * Counts the entries themselves rather than the `entryCount` field so the number
+ * is the length of the history the page can actually open — one fact, not two
+ * that can drift.
  */
 export function totalEntryCount(tickers: DiaryTicker[]): number {
-  return tickers.reduce((sum, t) => sum + t.entryCount, 0);
+  return tickers.reduce((sum, t) => sum + t.entries.length, 0);
 }

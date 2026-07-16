@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { BookmarkPlus, PenLine, Check, Loader2, Search, X } from "lucide-react";
-import { useJournals } from "@/hooks/useJournals";
-import { useJournalDetail } from "@/hooks/useJournalDetail";
+import { useJournalTree } from "@/hooks/useJournalTree";
 import { useJournalMutations } from "@/hooks/useJournalMutations";
 import { apiCall } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
@@ -34,17 +33,34 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
   const router = useRouter();
 
   // Resolve the Tracking journal (defaults are created lazily on first GET).
-  const { data: journals } = useJournals();
-  const trackingId = useMemo(() => journals?.find((j) => j.kind === "tracking")?.id ?? null, [journals]);
-  const { data: trackingDetail, refetch: refetchTracking } = useJournalDetail(trackingId);
+  // One read carries the journals, their tickers and every entry, so tracking
+  // state and the drawer's timeline come from the same fetch.
+  const { data: journalTree, refetch: refetchTracking } = useJournalTree();
+  const tracking = useMemo(
+    () => journalTree?.find((j) => j.kind === "tracking") ?? null,
+    [journalTree],
+  );
+  const trackingId = tracking?.id ?? null;
   const { addTickers, mutating } = useJournalMutations();
 
   const trackedTicker = useMemo(
-    () => trackingDetail?.tickers.find((t) => t.ticker.toUpperCase() === ticker.toUpperCase()) ?? null,
-    [trackingDetail, ticker],
+    () => tracking?.tickers.find((t) => t.ticker.toUpperCase() === ticker.toUpperCase()) ?? null,
+    [tracking, ticker],
   );
   const inTracking = trackedTicker != null;
   const entryCount = trackedTicker?.entryCount ?? 0;
+
+  // This bar is the Tracking journal's view of a stock, so the drawer shows
+  // Tracking's entries only — not the cross-journal story the diary tells.
+  const trackedEntries = useMemo(
+    () =>
+      trackingId && tracking
+        ? (trackedTicker?.entries ?? [])
+            .map((entry) => ({ entry, journalId: trackingId, journalName: tracking.name }))
+            .sort((a, b) => new Date(b.entry.createdAt).getTime() - new Date(a.entry.createdAt).getTime())
+        : [],
+    [trackedTicker, trackingId, tracking],
+  );
 
   const [showJournal, setShowJournal] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
@@ -418,6 +434,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
       {showJournal && trackingId && (
         <TickerEntriesPanel
           journalId={trackingId}
+          entries={trackedEntries}
           ticker={ticker}
           market={trackedTicker?.market ?? null}
           onClose={() => setShowJournal(false)}

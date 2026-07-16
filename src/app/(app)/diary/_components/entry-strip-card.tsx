@@ -1,6 +1,6 @@
 "use client";
 
-import { entryStatus, entryExcerpt, relativeTime, primaryJournal, ENTRY_STATUS_CONFIG } from "../_lib/diary-derive";
+import { entryStatus, tickerExcerpt, relativeTime, primaryJournal, ENTRY_STATUS_CONFIG } from "../_lib/diary-derive";
 import type { DiaryTicker } from "../_lib/diary-derive";
 import { JournalBadge } from "./journal-badge";
 
@@ -17,7 +17,9 @@ interface EntryStripCardProps {
 // different axes (health vs. status) and could contradict each other.
 export function EntryStripCard({ t, onClick }: EntryStripCardProps) {
   const status = entryStatus(t);
-  const excerpt = entryExcerpt(t.latestEntry);
+  // The thesis wins over a newer note: this card sits under "Your thesis", so
+  // quoting the note would contradict the section it's filed in.
+  const excerpt = tickerExcerpt(t);
   const { label, color } = ENTRY_STATUS_CONFIG[status];
   const journal = primaryJournal(t);
 

@@ -51,42 +51,36 @@ export default function DiaryPage() {
     setActiveId(watchlistJournals.find((j) => j.isDefault)?.id ?? watchlistJournals[0].id);
   }, [watchlistJournals, activeId]);
 
-  const entryCount = useMemo(() => totalEntryCount(d.tickers), [d.tickers]);
-
-  // The journals the open drawer reads from. Cross-journal rows (the strip,
-  // holdings, what's-changed) carry their full membership; rows from the
-  // single-journal sections carry none, so they fall back to the active journal.
-  const openTickerSources = useMemo(() => {
-    if (!openTicker) return undefined;
-    if (openTicker.journals.length > 0) {
-      return openTicker.journals.map((j) => ({ id: j.id, name: j.name }));
-    }
-    const fallback = d.journals.find((j) => j.id === activeId);
-    return fallback ? [{ id: fallback.id, name: fallback.name }] : undefined;
-  }, [openTicker, d.journals, activeId]);
+  // Every entry, not the active journal's: the masthead counts the diary, and
+  // scoping it to a journal made "ENTRY 47" jump whenever you switched pills.
+  const entryCount = useMemo(() => totalEntryCount(d.allTickers), [d.allTickers]);
 
   // Held here, not in the carousel: the nav now renders in the section header,
   // so both need to read the same position.
-  const carousel = useCarouselPos(d.pending.length);
+  const carousel = useCarouselPos(d.toWrite.length);
 
-  // The panel is the one place entries are read/edited, so it must refresh both
-  // the journal (entry counts, health) and the strip after a change.
-  function handlePanelChanged() {
-    d.refetchDetail();
-    d.refetchJournals();
-    d.refetchAllTickers(); // the strip spans journals; it goes stale too
-  }
+  // One request backs the page, so any write refreshes all of it — counts,
+  // health, sections and the open drawer's entries alike.
+  const handlePanelChanged = d.refetch;
 
-  // Resolve against the cross-journal set first: these callers (what's-changed,
-  // holdings) are portfolio-wide, so their tickers often aren't in the active
-  // journal and would otherwise silently no-op. The all-journal row also carries
-  // the membership the panel needs to open the right journal.
+  // Every row is cross-journal now, so a single lookup serves every caller
+  // (what's-changed, holdings, the strip) and carries the membership the drawer
+  // needs to open the right journal.
   function openByTicker(ticker: string) {
-    const match =
-      d.allTickers.find((t) => t.ticker.toUpperCase() === ticker.toUpperCase()) ??
-      d.tickers.find((t) => t.ticker.toUpperCase() === ticker.toUpperCase());
+    const match = d.allTickers.find((t) => t.ticker.toUpperCase() === ticker.toUpperCase());
     if (match) setOpenTicker(match);
   }
+
+  // The drawer renders from the row's own entries, so it must re-read that row
+  // after a write — `openTicker` is a snapshot taken when the card was clicked,
+  // and would otherwise show a stale timeline until reopened.
+  const openRow = useMemo(
+    () =>
+      openTicker
+        ? d.allTickers.find((t) => t.ticker.toUpperCase() === openTicker.ticker.toUpperCase()) ?? openTicker
+        : null,
+    [openTicker, d.allTickers],
+  );
 
   return (
     <div className="min-h-screen bg-[var(--qc-bg)] font-sans">
@@ -99,8 +93,9 @@ export default function DiaryPage() {
           </div>
         )}
 
+        {/* Thesis-or-blank only; note-only tickers are the watchlist's story. */}
         <EntriesStrip
-          tickers={d.allTickers}
+          tickers={d.thesisTickers}
           loading={d.allTickersLoading && d.allTickers.length === 0}
           onPick={setOpenTicker}
         />
@@ -129,18 +124,18 @@ export default function DiaryPage() {
               height rather than ending wherever its content happens to stop. */}
           <div className="flex min-w-0 flex-col">
             <KeepWritingHeader
-              pendingCount={d.pending.length}
+              pendingCount={d.toWrite.length}
               dates={d.entryDates}
-              nav={<ComposerCarouselNav tickers={d.pending} pos={carousel} />}
+              nav={<ComposerCarouselNav tickers={d.toWrite} pos={carousel} />}
             />
-            {activeId && (
-              <ComposerCarousel
-                tickers={d.pending}
-                journalId={activeId}
-                onSaved={handlePanelChanged}
-                pos={carousel}
-              />
-            )}
+            {/* Not gated on activeId: the queue spans journals, so it has work
+                to show before (and independently of) a journal being selected. */}
+            <ComposerCarousel
+              tickers={d.toWrite}
+              fallbackJournalId={activeId}
+              onSaved={handlePanelChanged}
+              pos={carousel}
+            />
           </div>
         </div>
 
@@ -148,10 +143,13 @@ export default function DiaryPage() {
           {/* The switcher renders even with no active journal: it carries
               "Create new watchlist", which is the only way out if the last
               selectable journal goes away. */}
+          {/* Cross-journal now (note-only tickers, wherever filed), so it no
+              longer waits on a selected journal — `activeId` only says where a
+              newly-added ticker gets written. */}
           <WatchlistTable
-            tickers={activeId ? d.watchlist : []}
+            tickers={d.watchlist}
             journalId={activeId}
-            loading={Boolean(activeId) && d.detailLoading && d.tickers.length === 0}
+            loading={d.allTickersLoading && d.allTickers.length === 0}
             onOpen={setOpenTicker}
             onChanged={handlePanelChanged}
             switcher={
@@ -160,7 +158,7 @@ export default function DiaryPage() {
                 activeId={activeId}
                 onSelect={setActiveId}
                 onCreate={() => setCreateOpen(true)}
-                onChanged={d.refetchJournals}
+                onChanged={d.refetch}
                 // Move off the doomed journal before its refetch lands.
                 onDeleted={(id) => { if (id === activeId) setActiveId(null); }}
               />
@@ -169,19 +167,17 @@ export default function DiaryPage() {
         </div>
       </main>
 
-      {/* Read every journal the ticker is in: a card quotes the newest entry
+      {/* Shows every journal the ticker is in: a card quotes the newest entry
           across all of them, so a drawer scoped to one journal would contradict
           the card it was opened from. Writes still go to a single journal —
-          `primaryJournal` (Holdings-first) picks it, and the composer names it.
-          Rows from the single-journal sections carry no membership, so they fall
-          back to the active journal they came from. */}
-      {openTicker && (primaryJournal(openTicker)?.id ?? activeId) && (
+          `primaryJournal` (Holdings-first) picks it, and the composer names it. */}
+      {openRow && (primaryJournal(openRow)?.id ?? activeId) && (
         <TickerEntriesPanel
-          journalId={primaryJournal(openTicker)?.id ?? activeId!}
-          sources={openTickerSources}
-          ticker={openTicker.ticker}
-          market={openTicker.market}
-          name={openTicker.name}
+          journalId={primaryJournal(openRow)?.id ?? activeId!}
+          entries={openRow.entries}
+          ticker={openRow.ticker}
+          market={openRow.market}
+          name={openRow.name}
           onClose={() => setOpenTicker(null)}
           onChanged={handlePanelChanged}
         />
@@ -192,7 +188,7 @@ export default function DiaryPage() {
           onClose={() => setCreateOpen(false)}
           onCreated={(journal) => {
             setCreateOpen(false);
-            d.refetchJournals();
+            d.refetch();
             setActiveId(journal.id); // land on what you just made
           }}
         />

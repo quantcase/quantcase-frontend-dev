@@ -2,58 +2,81 @@
 
 import { useMemo } from "react";
 
-import { useJournals } from "@/hooks/useJournals";
-import { useJournalDetail } from "@/hooks/useJournalDetail";
-import { useAllJournalTickers } from "@/hooks/useAllJournalTickers";
+import { useJournalTree, flattenTickers, toJournals } from "@/hooks/useJournalTree";
 import { useSmallcaseHoldings } from "@/hooks/useSmallcaseHoldings";
 import { useModSynopsis } from "@/hooks/useModSynopsis";
 import { useWhatsMoving } from "@/hooks/useWhatsMoving";
 import { useStocks } from "@/hooks/useStocks";
 
-import { joinTickers, joinAllTickers, entryDates } from "../_lib/diary-derive";
+import {
+  joinAllTickers,
+  entryDates,
+  needsEntryQueue,
+  hasThesisOrNeedsEntry,
+  sortForStrip,
+} from "../_lib/diary-derive";
 import type { DiaryTicker } from "../_lib/diary-derive";
 import type { WhatsMovingItem } from "@/types/investor-dashboard";
-import type { Journal } from "@/types/journal";
 
 // Everything the diary page reads, fanned out in one place so the page itself
 // stays a layout concern. Follows the house dashboard pattern: hooks are called
 // unconditionally, panels degrade to empty rather than gating the whole page on
 // a global spinner.
 //
-// Only `journals` and `detail` are load-bearing — the rest (holdings, names,
+// Only the journal tree is load-bearing — the rest (holdings, names,
 // what's-moving) enrich rows and are allowed to arrive late or not at all.
 
-/** Stable identity for the "no journals yet" case — a fresh `[]` per render
- *  would retrigger the cross-journal fan-out (and its holdings sync) forever. */
-const EMPTY_JOURNALS: Journal[] = [];
 export function useDiaryData(activeJournalId: string | null) {
-  const journals = useJournals();
-  const detail = useJournalDetail(activeJournalId); // null ⇒ skips fetching
+  // One request for the whole diary: journals, their tickers, and every entry.
+  // Sections, the composer queue, the strip and the drawer are all derived from
+  // this — nothing here re-fetches per journal or per ticker.
+  const tree = useJournalTree();
   const holdings = useSmallcaseHoldings();
   const mod = useModSynopsis();
   const moving = useWhatsMoving(6);
   const { stocks } = useStocks();
 
-  // The entries strip spans every journal — a card badges the journal it's filed
-  // under, which is only a fact worth printing if the strip can show more than
-  // one. Everything else on the page stays scoped to the active journal.
-  const journalList = journals.data ?? EMPTY_JOURNALS;
-  const all = useAllJournalTickers(journalList);
+  const journals = useMemo(() => toJournals(tree.data), [tree.data]);
 
-  const tickers: DiaryTicker[] = useMemo(
-    () => joinTickers(detail.data?.tickers ?? [], holdings.data, mod.data, stocks),
-    [detail.data, holdings.data, mod.data, stocks],
-  );
-
+  // One row per ticker, carrying its full journal membership and history.
   const allTickers: DiaryTicker[] = useMemo(
-    () => joinAllTickers(all.data ?? [], holdings.data, mod.data, stocks),
-    [all.data, holdings.data, mod.data, stocks],
+    () => joinAllTickers(flattenTickers(tree.data), holdings.data, mod.data, stocks),
+    [tree.data, holdings.data, mod.data, stocks],
   );
 
-  const owned = useMemo(() => tickers.filter((t) => t.holding !== null), [tickers]);
-  const watchlist = useMemo(() => tickers.filter((t) => t.holding === null), [tickers]);
-  const pending = useMemo(() => tickers.filter((t) => t.pending), [tickers]);
-  const dates = useMemo(() => entryDates(tickers), [tickers]);
+  // The active journal's roster — a filter over rows already in hand, not a
+  // second fetch. Backs "On your watchlist" and scopes "what's changed".
+  const tickers: DiaryTicker[] = useMemo(
+    () =>
+      activeJournalId
+        ? allTickers.filter((t) => t.journals.some((j) => j.id === activeJournalId))
+        : [],
+    [allTickers, activeJournalId],
+  );
+
+  // Every entry, everywhere — the streak counts days you wrote, not days you
+  // wrote in the selected journal.
+  const dates = useMemo(() => entryDates(allTickers), [allTickers]);
+
+  // "Your thesis": what you've reasoned about, plus the blanks still asking to
+  // be written. Cross-journal — it's about your writing, wherever it's filed.
+  const thesisTickers = useMemo(
+    () => sortForStrip(allTickers).filter(hasThesisOrNeedsEntry),
+    [allTickers],
+  );
+
+  // "On your watchlist": the selected journal's roster, in full. Deliberately
+  // unfiltered — the tab is the list, so its count must match what it renders.
+  // A ticker with a thesis appears here *and* under "Your thesis"; the two
+  // sections answer different questions (what's in this list vs. what have I
+  // argued) and are meant to overlap.
+  const watchlist = useMemo(() => sortForStrip(tickers), [tickers]);
+
+  // The composer queue mirrors the entries strip: same cross-journal source, same
+  // "needs entry" axis, just filtered to the unwritten ones. A stock needs an
+  // entry wherever it's filed, and the journal pills below only scope the
+  // watchlist section.
+  const toWrite = useMemo(() => needsEntryQueue(allTickers), [allTickers]);
 
   // What's-moving is portfolio-wide; scope it to the active journal so the feed
   // is about what the user is actually writing about. No timestamp on these
@@ -66,24 +89,20 @@ export function useDiaryData(activeJournalId: string | null) {
   }, [moving.data, tickers]);
 
   return {
-    journals: journals.data ?? [],
-    journalsLoading: journals.loading,
-    journalsError: journals.error,
-    refetchJournals: journals.refetch,
+    journals,
+    journalsError: tree.error,
 
-    journal: detail.data?.journal ?? null,
-    tickers,
-    owned,
     watchlist,
-    pending,
     entryDates: dates,
-    detailLoading: detail.loading,
-    detailError: detail.error,
-    refetchDetail: detail.refetch,
 
     allTickers,
-    allTickersLoading: all.loading,
-    refetchAllTickers: all.refetch,
+    allTickersLoading: tree.loading,
+    toWrite,
+    thesisTickers,
+
+    /** One read backs the whole page, so one refetch refreshes all of it —
+     *  every mutation calls this. */
+    refetch: tree.refetch,
 
     holdings: holdings.data,
     holdingsLoading: holdings.loading,

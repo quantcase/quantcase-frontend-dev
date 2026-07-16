@@ -11,6 +11,7 @@ import { entryExcerpt, relativeTime } from "../_lib/diary-derive";
 import type { DiaryTicker } from "../_lib/diary-derive";
 
 interface WatchlistTableProps {
+  /** The selected journal's tickers, in full. */
   tickers: DiaryTicker[];
   /** Null when no journal is selected — the switcher still renders, the table doesn't. */
   journalId: string | null;
@@ -25,7 +26,11 @@ interface WatchlistTableProps {
   switcher?: React.ReactNode;
 }
 
-// Stocks in this journal that aren't in the portfolio — tracked, not owned.
+// The selected watchlist, rendered whole: every ticker in that journal, whatever
+// you have or haven't written about it. The tab's count is the row count — no
+// filtering here, or the pill would promise rows the table doesn't show. Only
+// the Holdings journal is excluded, and that happens upstream by dropping it
+// from the switcher entirely.
 export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged, switcher }: WatchlistTableProps) {
   const { addTickers, removeTicker, mutating } = useJournalMutations();
   const [adding, setAdding] = useState(false);
@@ -51,11 +56,9 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
       <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="eyebrow">On your watchlist</div>
-          {journalId && !loading && (
+          {!loading && tickers.length > 0 && (
             <div className="mt-1 text-[13px] text-ink-2">
-              {tickers.length === 0
-                ? "Nothing tracked yet"
-                : `${tickers.length} ${tickers.length === 1 ? "stock" : "stocks"} you're tracking, not yet owned`}
+              {`${tickers.length} ${tickers.length === 1 ? "stock" : "stocks"} you're tracking`}
             </div>
           )}
         </div>
@@ -81,24 +84,32 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
         <div className="mb-3 rounded-md border border-down bg-down-soft px-3 py-2 text-[12px] text-down">{error}</div>
       )}
 
-      {!journalId ? null : loading ? (
+      {/* Not gated on `journalId`: these rows span journals, so they render
+          whether or not one is selected. Only the add/remove controls need a
+          journal to write to. */}
+      {loading ? (
         <div className="rounded-xl border border-hair bg-card p-5">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="skeleton-shimmer mb-3 h-8 rounded last:mb-0" />
           ))}
         </div>
       ) : tickers.length === 0 ? (
-        <IdeasEmpty existing={existing} onPick={handleAdd} busy={mutating} />
+        <IdeasEmpty existing={existing} onPick={handleAdd} busy={mutating} canAdd={Boolean(journalId)} />
       ) : (
         <div className="overflow-hidden rounded-xl border border-hair bg-card">
           <div className="grid grid-cols-[1.2fr_1fr_2fr_auto] gap-4 border-b border-hair px-5 py-3">
-            <span className="eyebrow">Holding</span>
+            <span className="eyebrow">Company</span>
             <span className="eyebrow">Sector</span>
-            <span className="eyebrow">Note</span>
+            <span className="eyebrow">Notes</span>
             <span className="eyebrow w-[132px] text-right">Added</span>
           </div>
 
           {tickers.map((t) => {
+            // Literally the latest entry, note or thesis — this column is
+            // "Latest", so recency wins. The strip card prefers the thesis
+            // instead, but that card is filed under "Your thesis" and would
+            // contradict its section by quoting a note; a roster row has no
+            // such claim to contradict.
             const note = entryExcerpt(t.latestEntry);
             const confirming = confirmTicker === t.ticker;
 
@@ -121,7 +132,7 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
                       &ldquo;{note}&rdquo;
                     </span>
                   ) : (
-                    <span className="text-[12px] text-ink-3">No note yet</span>
+                    <span className="text-[12px] text-ink-3">Nothing written yet</span>
                   )}
                 </button>
 
@@ -257,7 +268,9 @@ function AddTickerCombo({
 // A rotating window of Nifty50 ideas so the table is never a dead end.
 // Carried over from the retired ideas-empty-state.
 
-function IdeasEmpty({ existing, onPick, busy }: { existing: string[]; onPick: (t: string) => void; busy: boolean }) {
+function IdeasEmpty({
+  existing, onPick, busy, canAdd,
+}: { existing: string[]; onPick: (t: string) => void; busy: boolean; canAdd: boolean }) {
   const existingSet = useMemo(() => new Set(existing.map((t) => t.toUpperCase())), [existing]);
   const [offset, setOffset] = useState(0);
 
@@ -268,9 +281,9 @@ function IdeasEmpty({ existing, onPick, busy }: { existing: string[]; onPick: (t
 
   return (
     <div className="rounded-xl border border-dashed border-hair px-6 py-12 text-center">
-      <div className="mb-1.5 text-[17px] font-medium text-ink">Nothing tracked yet</div>
+      <div className="mb-1.5 text-[17px] font-medium text-ink">Nothing here yet</div>
       <p className="mx-auto mb-5 max-w-[400px] text-[13px] leading-[1.5] text-ink-2">
-        Add a stock you&rsquo;re thinking about — the reasoning is the point, not the position.
+        Add a stock to this watchlist to start following it.
       </p>
 
       <div className="flex flex-wrap justify-center gap-1.5">
@@ -278,7 +291,7 @@ function IdeasEmpty({ existing, onPick, busy }: { existing: string[]; onPick: (t
           <button
             key={t}
             onClick={() => onPick(t)}
-            disabled={busy}
+            disabled={busy || !canAdd}
             className="mono rounded-md border border-hair bg-card px-2.5 py-1 text-[11px] text-ink-2 transition-colors hover:border-ink-3 hover:text-ink disabled:opacity-60"
           >
             + {t}

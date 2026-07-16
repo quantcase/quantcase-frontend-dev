@@ -119,10 +119,14 @@ export type EntryBody = NoteBody | ThesisBody;
 
 // ── Domain constants + derivations ──────────────────────────────────────────
 
+// Mirrors the L3 lens set per dimension (/api/post-html-analysis, layer_id=l3).
+// Keep these labels in sync with the lens `name`s the L3 layer emits — they are
+// what a thesis stores in `subFactors`, so a drift here silently writes
+// sub-factors that no longer match any lens.
 export const SUB_FACTORS: Record<Dimension, string[]> = {
-  M: ["Guidance Accuracy", "Capital Allocation", "Disclosure Honesty"],
-  O: ["Industry Tailwind", "Distribution Strength", "Competitive Edge", "TAM Expansion"],
-  D: ["Valuation", "Earnings Growth/Quality", "P/E Re-rating Potential", "Risk-Reward"],
+  M: ["Guidance Credibility", "Capital Allocation", "Disclosure Honesty", "Promoter Activity"],
+  O: ["Industry Analysis", "Competition", "Financial Strength", "Customer Distribution"],
+  D: ["Earnings Forecast", "PE Rerating Potential"],
 };
 
 export const DIMENSION_LABEL: Record<Dimension, string> = {

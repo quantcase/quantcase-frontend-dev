@@ -32,18 +32,22 @@ export const CONV_LABELS: { label: string; desc: string }[] = [
 
 // ── Sub-factor hint copy (keyed by the exact sub-factor label) ──────────────
 
+// Keys must match the SUB_FACTORS labels in @/types/journal exactly — a missed
+// key just renders no hint, so update both together when the L3 lens set changes.
 export const SF_HINTS: Record<string, string> = {
-  "Guidance Accuracy":       "Management has consistently delivered on forward guidance — or consistently missed. Check how closely revenue/margin actuals tracked what was said.",
+  // M
+  "Guidance Credibility":    "Management has consistently delivered on forward guidance — or consistently missed. Check how closely revenue/margin actuals tracked what was said.",
   "Capital Allocation":      "Where does surplus cash go — buybacks, dividends, acquisitions, or capex? Compounders allocate capital to highest-return uses.",
   "Disclosure Honesty":      "Does management acknowledge headwinds early, or bury negatives? Tone in concalls, change in auditor, related-party transactions.",
-  "Industry Tailwind":       "Is demand for this product/service structurally growing? Is this a sunrise sector or a sunset one with temporary revival?",
-  "Distribution Strength":   "How deep is the reach — geographically and across customer segments? A strong distribution moat is hard to replicate.",
-  "Competitive Edge":        "What stops competitors from taking share? Brand, switching costs, network effects, patents, regulatory moats.",
-  "TAM Expansion":           "Is the total addressable market growing through new geographies, new customer segments, or adjacent products?",
-  "Valuation":               "Is the stock cheap vs intrinsic value, vs sector peers, and vs its own historical multiples?",
-  "Earnings Growth/Quality": "Is EPS growing — and is that growth real (operating leverage, volume) vs manufactured (buybacks, one-offs)?",
-  "P/E Re-rating Potential": "Is there a specific trigger — debt paydown, margin improvement, sector rotation — that could cause the multiple to expand?",
-  "Risk-Reward":             "At the current price, what do you make in the bull case vs what you lose in the bear case? Is the skew favourable?",
+  "Promoter Activity":       "What are the promoters doing with their own stake — buying, pledging, or selling? Their actions signal conviction the concall may not.",
+  // O
+  "Industry Analysis":       "Is demand for this product/service structurally growing? Is this a sunrise sector or a sunset one with temporary revival?",
+  "Competition":             "What stops competitors from taking share? Brand, switching costs, network effects, patents, regulatory moats.",
+  "Financial Strength":      "How solid is the balance sheet — leverage, cash generation, working-capital discipline? Can it fund growth without dilution?",
+  "Customer Distribution":   "How deep is the reach — geographically and across customer segments? Is revenue concentrated in a few customers, or well spread?",
+  // D
+  "Earnings Forecast":       "Where are earnings headed over the next few quarters, and is that growth real (operating leverage, volume) vs manufactured (buybacks, one-offs)?",
+  "PE Rerating Potential":   "Is there a specific trigger — debt paydown, margin improvement, sector rotation — that could cause the multiple to expand?",
 };
 
 // ── Thesis health → StatusBadge sentiment ───────────────────────────────────

@@ -618,6 +618,36 @@
   }
 }
 
+/* ── Conviction range (diary composer) ──────────────────────────────
+   The base input[type=range] rules paint an opaque --qc-hair track, so a
+   gradient on the element itself is invisible. This paints the filled portion
+   onto the track instead, driven by --qc-fill-pct set inline by the component.
+   Violet = interactive/brand: conviction is how sure you are, not good/bad. */
+.qc-conviction-range::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    var(--qc-brand-accent) 0%,
+    var(--qc-brand-accent) var(--qc-fill-pct, 0%),
+    var(--qc-hair) var(--qc-fill-pct, 0%),
+    var(--qc-hair) 100%
+  ) !important;
+}
+.qc-conviction-range::-moz-range-track {
+  background: linear-gradient(
+    to right,
+    var(--qc-brand-accent) 0%,
+    var(--qc-brand-accent) var(--qc-fill-pct, 0%),
+    var(--qc-hair) var(--qc-fill-pct, 0%),
+    var(--qc-hair) 100%
+  ) !important;
+}
+.qc-conviction-range::-webkit-slider-thumb {
+  background: var(--qc-brand-accent) !important;
+}
+.qc-conviction-range::-moz-range-thumb {
+  background: var(--qc-brand-accent) !important;
+}
+
 /* ── Golden card ────────────────────────────────────────────────── */
 .qc-golden-card {
   background: linear-gradient(180deg, var(--qc-golden-grad-from) 0%, var(--qc-golden-grad-to) 100%);

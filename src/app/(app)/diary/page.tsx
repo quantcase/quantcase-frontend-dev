@@ -53,6 +53,18 @@ export default function DiaryPage() {
 
   const entryCount = useMemo(() => totalEntryCount(d.tickers), [d.tickers]);
 
+  // The journals the open drawer reads from. Cross-journal rows (the strip,
+  // holdings, what's-changed) carry their full membership; rows from the
+  // single-journal sections carry none, so they fall back to the active journal.
+  const openTickerSources = useMemo(() => {
+    if (!openTicker) return undefined;
+    if (openTicker.journals.length > 0) {
+      return openTicker.journals.map((j) => ({ id: j.id, name: j.name }));
+    }
+    const fallback = d.journals.find((j) => j.id === activeId);
+    return fallback ? [{ id: fallback.id, name: fallback.name }] : undefined;
+  }, [openTicker, d.journals, activeId]);
+
   // Held here, not in the carousel: the nav now renders in the section header,
   // so both need to read the same position.
   const carousel = useCarouselPos(d.pending.length);
@@ -157,14 +169,16 @@ export default function DiaryPage() {
         </div>
       </main>
 
-      {/* Open the ticker's OWN journal, not the active one: the strip now spans
-          every journal, so a card can be from Holdings while the switcher sits
-          on Tracking — reading `activeId` here would show the wrong entries.
+      {/* Read every journal the ticker is in: a card quotes the newest entry
+          across all of them, so a drawer scoped to one journal would contradict
+          the card it was opened from. Writes still go to a single journal —
+          `primaryJournal` (Holdings-first) picks it, and the composer names it.
           Rows from the single-journal sections carry no membership, so they fall
           back to the active journal they came from. */}
       {openTicker && (primaryJournal(openTicker)?.id ?? activeId) && (
         <TickerEntriesPanel
           journalId={primaryJournal(openTicker)?.id ?? activeId!}
+          sources={openTickerSources}
           ticker={openTicker.ticker}
           market={openTicker.market}
           name={openTicker.name}

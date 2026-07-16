@@ -201,10 +201,20 @@ export function entryExcerpt(entry: JournalEntry | null): string | null {
   return entry.type === "thesis" ? entry.thesis : entry.noteText;
 }
 
-/** Pending first, then most-recently-touched. The queue should surface work. */
+/**
+ * Written first, then most-recently-touched within each group.
+ *
+ * Keyed on `entryStatus` — the same axis the card's rail and label render — so a
+ * card's position and its own label can never disagree. It deliberately is *not*
+ * keyed on `pending`, which is thesis-only (`latestThesisHealth === null`): a
+ * ticker with notes but no thesis is pending yet reads "Written" and quotes the
+ * note, and sorting it as unwritten put it among the blanks.
+ */
 export function sortForStrip(tickers: DiaryTicker[]): DiaryTicker[] {
   return [...tickers].sort((a, b) => {
-    if (a.pending !== b.pending) return a.pending ? -1 : 1;
+    const aWritten = entryStatus(a) === "written";
+    const bWritten = entryStatus(b) === "written";
+    if (aWritten !== bWritten) return aWritten ? -1 : 1;
     return touchedAt(b) - touchedAt(a);
   });
 }

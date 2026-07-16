@@ -15,7 +15,7 @@ interface EntriesStripProps {
 const VISIBLE = 5;
 
 export function EntriesStrip({ tickers, loading, onPick }: EntriesStripProps) {
-  // Pending first, then most-recently-touched — the strip should lead with work.
+  // Written first, then most-recently-touched — the strip leads with your words.
   const cards = useMemo(() => sortForStrip(tickers).slice(0, VISIBLE), [tickers]);
 
   if (loading) {

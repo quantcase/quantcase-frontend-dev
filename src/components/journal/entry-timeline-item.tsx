@@ -14,11 +14,14 @@ import type { JournalEntry } from "@/types/journal";
 interface Props {
   entry: JournalEntry;
   journalId: string;
+  /** The journal this entry is filed under. Set only when the surrounding list
+   *  spans several — null keeps the badge off a single-journal timeline. */
+  journalName?: string | null;
   ticker: string;
   onChanged: () => void;
 }
 
-export function EntryTimelineItem({ entry, journalId, ticker, onChanged }: Props) {
+export function EntryTimelineItem({ entry, journalId, journalName, ticker, onChanged }: Props) {
   const { deleteEntry, evaluateEntry, mutating } = useJournalMutations();
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -61,6 +64,11 @@ export function EntryTimelineItem({ entry, journalId, ticker, onChanged }: Props
             </span>
           )}
           {isThesis && <ThesisHealthBadge health={entry.thesisHealth} />}
+          {/* Which journal this is filed under — neutral chrome, not a semantic
+              color: health is the only meaning this row carries. */}
+          {journalName && (
+            <span className="text-[10px] text-ink-3">{journalName}</span>
+          )}
         </div>
         <span className="shrink-0 font-mono text-[10px] text-ink-3">{timeAgo(entry.createdAt)}</span>
       </div>

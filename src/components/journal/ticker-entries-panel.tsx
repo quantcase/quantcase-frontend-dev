@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X, Plus } from "lucide-react";
-import { useTickerEntries } from "@/hooks/useTickerEntries";
+import { useTickerEntriesAcross } from "@/hooks/useTickerEntriesAcross";
+import type { EntrySource } from "@/hooks/useTickerEntriesAcross";
 import { EntryTimelineItem } from "./entry-timeline-item";
 import { EntryComposer } from "./entry-composer";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,13 @@ import { fmtSignedPct } from "@/lib/portfolio-format";
 import type { TickerMarket } from "@/types/journal";
 
 interface Props {
+  /** The journal new entries are written to, and — unless `sources` is given —
+   *  the only one read from. */
   journalId: string;
+  /** Journals to read entries from, for the cross-journal view: a ticker in both
+   *  Holdings and Tracking has one story, told in two places. Omit for the
+   *  single-journal panel (`journalId` alone). Writes still go to `journalId`. */
+  sources?: EntrySource[];
   ticker: string;
   /** Optional market snapshot to show in the panel header. */
   market?: TickerMarket | null;
@@ -23,9 +30,22 @@ interface Props {
   onChanged?: () => void;
 }
 
-export function TickerEntriesPanel({ journalId, ticker, market, name, onClose, onChanged }: Props) {
-  const { data: entries, loading, refetch } = useTickerEntries(journalId, ticker);
+export function TickerEntriesPanel({ journalId, sources, ticker, market, name, onClose, onChanged }: Props) {
+  // Single-journal callers pass no `sources`; read from `journalId` alone so the
+  // panel on a stock page keeps showing exactly that journal's entries.
+  const readFrom: EntrySource[] = useMemo(
+    () => sources ?? [{ id: journalId, name: "" }],
+    [sources, journalId],
+  );
+  const { data: entries, loading, refetch } = useTickerEntriesAcross(readFrom, ticker);
   const [composing, setComposing] = useState(false);
+
+  // Only worth naming the journal on each entry when the list actually spans
+  // more than one — otherwise the badge states a fact the header already implies.
+  const showJournalBadge = readFrom.length > 1;
+  const writeTargetName = showJournalBadge
+    ? readFrom.find((s) => s.id === journalId)?.name ?? null
+    : null;
 
   // Close on Escape
   useEffect(() => {
@@ -80,7 +100,11 @@ export function TickerEntriesPanel({ journalId, ticker, market, name, onClose, o
           {/* Composer (toggled) */}
           {composing ? (
             <div className="mb-5 rounded-xl border border-hair bg-secondary/40 p-4">
-              <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">New entry</div>
+              {/* Name the write target when the list spans journals — otherwise
+                  "New entry" silently picks one of several. */}
+              <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
+                New entry{writeTargetName ? ` · ${writeTargetName}` : ""}
+              </div>
               <EntryComposer
                 journalId={journalId}
                 ticker={ticker}
@@ -111,11 +135,15 @@ export function TickerEntriesPanel({ journalId, ticker, market, name, onClose, o
             </div>
           ) : (
             <div className="flex flex-col gap-2.5">
-              {entries.map((entry) => (
+              {entries.map((row) => (
                 <EntryTimelineItem
-                  key={entry.id}
-                  entry={entry}
-                  journalId={journalId}
+                  key={row.entry.id}
+                  entry={row.entry}
+                  // Its own journal, not the write target: editing an entry filed
+                  // under Holdings from a drawer that composes into Tracking must
+                  // still update it where it lives.
+                  journalId={row.journalId}
+                  journalName={showJournalBadge ? row.journalName : null}
                   ticker={ticker}
                   onChanged={afterChange}
                 />

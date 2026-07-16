@@ -52,7 +52,7 @@ export function EverythingYouOwn({
           {!notConnected && holdings.length > 0 && (
             <Button variant="pill" size="sm" onClick={onSync} disabled={syncing} aria-label="Refresh holdings">
               {syncing ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
-              Refresh
+              Sync Holdings
             </Button>
           )}
           <TabToggle options={["List", "Chart"]} value={view} onChange={setView} variant="outline" />

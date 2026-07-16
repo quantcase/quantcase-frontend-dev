@@ -23,6 +23,13 @@ interface Props {
    * with the card the drawer was opened from).
    */
   entries: SourcedEntry[];
+  /**
+   * Whether `entries` is settled. An unsettled list is `[]` too, so without this
+   * the drawer can't tell "no entries" from "not loaded yet" — and it opens the
+   * composer on the former. Defaults to true for callers that hold their entries
+   * before the drawer mounts.
+   */
+  entriesReady?: boolean;
   ticker: string;
   /** Optional market snapshot to show in the panel header. */
   market?: TickerMarket | null;
@@ -34,8 +41,22 @@ interface Props {
   onChanged?: () => void;
 }
 
-export function TickerEntriesPanel({ journalId, entries, ticker, market, name, onClose, onChanged }: Props) {
-  const [composing, setComposing] = useState(false);
+export function TickerEntriesPanel({ journalId, entries, entriesReady = true, ticker, market, name, onClose, onChanged }: Props) {
+  // Nothing to read means nothing to click through to write it: open the
+  // composer for an empty ticker. Not a `useState` initializer — callers that
+  // fetch mount this drawer before their entries land, and an initializer would
+  // read that transient `[]` and open the composer over a timeline that's about
+  // to arrive. Latched so it only ever fires on the first settled read, leaving
+  // the user free to close it (and keeping it shut after they delete the last
+  // entry, which is a deletion, not an invitation to write).
+  const settledEmpty = entriesReady && entries.length === 0;
+  const [composing, setComposing] = useState(settledEmpty);
+  const [autoOpened, setAutoOpened] = useState(settledEmpty);
+  useEffect(() => {
+    if (autoOpened || !settledEmpty) return;
+    setAutoOpened(true);
+    setComposing(true);
+  }, [autoOpened, settledEmpty]);
 
   // Only worth naming the journal on each entry when the list actually spans
   // more than one — otherwise the badge states a fact the header already implies.
@@ -127,8 +148,11 @@ export function TickerEntriesPanel({ journalId, entries, ticker, market, name, o
           </div>
 
           {entries.length === 0 ? (
+            // The "above" is the button; with the composer open it's the form
+            // itself, and telling someone to write in the box they're already
+            // looking at is noise.
             <div className="rounded-lg border border-dashed border-hair px-4 py-8 text-center text-[13px] text-ink-3">
-              No entries yet. Add your first note or thesis above.
+              {composing ? "No entries yet." : "No entries yet. Add your first note or thesis above."}
             </div>
           ) : (
             <div className="flex flex-col gap-2.5">

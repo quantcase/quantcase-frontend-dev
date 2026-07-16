@@ -35,7 +35,13 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
   // Resolve the Tracking journal (defaults are created lazily on first GET).
   // One read carries the journals, their tickers and every entry, so tracking
   // state and the drawer's timeline come from the same fetch.
-  const { data: journalTree, refetch: refetchTracking } = useJournalTree();
+  const { data: journalTree, loading: journalLoading, refetch: refetchTracking } = useJournalTree();
+  // The tree is fetched here, so the drawer can mount before entries exist and
+  // must be told the difference between "none" and "not yet". Sticky rather than
+  // `!journalLoading`: refetch flips loading back on after every write, and the
+  // entries we already hold don't stop being real while it's in flight.
+  const journalSettled = useRef(false);
+  if (!journalLoading) journalSettled.current = true;
   const tracking = useMemo(
     () => journalTree?.find((j) => j.kind === "tracking") ?? null,
     [journalTree],
@@ -435,6 +441,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
         <TickerEntriesPanel
           journalId={trackingId}
           entries={trackedEntries}
+          entriesReady={journalSettled.current}
           ticker={ticker}
           market={trackedTicker?.market ?? null}
           onClose={() => setShowJournal(false)}

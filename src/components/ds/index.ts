@@ -13,6 +13,12 @@ export { DarkGradientCard } from "./DarkGradientCard";
 export { GradientPanel } from "./GradientPanel";
 export type { GradientTone } from "./GradientPanel";
 export { CardShell } from "./CardShell";
+export {
+  DecisionIntelligenceShell,
+  DecisionSection,
+  DecisionEyebrow,
+  DecisionDivider,
+} from "./DecisionIntelligenceShell";
 export { CommonCard } from "./CommonCard";
 export { GoldenCard } from "./GoldenCard";
 export { LimeGradientCard } from "./LimeGradientCard";

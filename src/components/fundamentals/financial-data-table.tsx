@@ -1,3 +1,6 @@
+"use client";
+
+import { useLayoutEffect, useRef } from "react";
 import type { FinancialRow, FinancialTable } from "@/types/financials";
 
 function fmt(value: number | null | undefined, format?: string, key?: string): string {
@@ -16,9 +19,17 @@ export function FinancialDataTable({
   table: FinancialTable;
   cashFlowMode?: boolean;
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Latest periods sit on the right, so open scrolled to the end.
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [table]);
+
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left" style={{ borderCollapse: "collapse" }}>
+    <div className="overflow-x-auto" ref={scrollRef}>
+      <table className="min-w-full w-max text-left" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
         <thead>
           <tr>
             <th
@@ -34,6 +45,7 @@ export function FinancialDataTable({
                 minWidth: 160,
                 background: "var(--qc-card)",
                 fontFamily: "'IBM Plex Mono', monospace",
+                zIndex: 1,
               }}
             >
               Item
@@ -85,6 +97,8 @@ export function FinancialDataTable({
                     padding: "8px 12px 8px 0",
                     whiteSpace: "nowrap",
                     background: rowBg,
+                    zIndex: 1,
+                    minWidth: 160,
                   }}
                 >
                   {row.label}

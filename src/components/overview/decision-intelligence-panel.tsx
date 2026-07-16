@@ -5,8 +5,13 @@ import type { InsightData } from "@/types/analysis";
 import type { TechnicalsResponse } from "@/types/technicals";
 import type { ScreenerData } from "@/types/screener";
 import type { OverviewAnalysis } from "@/types/overview";
-import { MonoEyebrow } from "./primitives";
 import { SignalCard, type SignalTooltip } from "./signal-card";
+import {
+  DecisionIntelligenceShell,
+  DecisionSection,
+  DecisionEyebrow,
+  DecisionDivider,
+} from "@/components/ds";
 
 interface Props {
   management: InsightData | null;
@@ -321,38 +326,13 @@ export function DecisionIntelligencePanel({
   const displayAlerts = alerts.slice(0, 5);
 
   return (
-    <div
-      style={{
-        background: "var(--qc-section)",
-        border: "1px solid var(--qc-hair)",
-        borderRadius: 18,
-        padding: 14,
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-      }}
-    >
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <MonoEyebrow>Decision Intelligence</MonoEyebrow>
-      </div>
-
+    <DecisionIntelligenceShell>
       {/* Overall Rating card — prominent */}
-      <div
-        style={{
-          background: "var(--qc-card)",
-          border: `1.5px solid ${ratingColor}40`,
-          borderRadius: 12,
-          padding: "14px 14px 12px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-        }}
-      >
+      <DecisionSection style={{ borderColor: `${ratingColor}40` }}>
         {/* Top row: label + composite score */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div>
-            <MonoEyebrow style={{ marginBottom: 5 }}>Overall Rating</MonoEyebrow>
+            <DecisionEyebrow className="mb-[5px]">Overall Rating</DecisionEyebrow>
             <span
               style={{
                 fontFamily: "var(--qc-font-sans)",
@@ -458,23 +438,13 @@ export function DecisionIntelligencePanel({
             )}
           </div>
         )}
-      </div>
+      </DecisionSection>
 
       {/* QuantCase Framework + Fundamentals + Technicals — shared white card */}
-      <div
-        style={{
-          background: "var(--qc-card)",
-          border: "1px solid var(--qc-hair)",
-          borderRadius: 12,
-          padding: "12px 12px 10px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-        }}
-      >
+      <DecisionSection className="gap-3">
         {/* QuantCase Framework */}
         <div>
-          <MonoEyebrow style={{ marginBottom: 6 }}>QuantCase Framework</MonoEyebrow>
+          <DecisionEyebrow className="mb-1.5">QuantCase Framework</DecisionEyebrow>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
             <SignalCard
               label="Management"
@@ -497,12 +467,11 @@ export function DecisionIntelligencePanel({
           </div>
         </div>
 
-        {/* Divider */}
-        <div style={{ height: 1, background: "var(--qc-hair)" }} />
+        <DecisionDivider />
 
         {/* Fundamentals */}
         <div>
-          <MonoEyebrow style={{ marginBottom: 6 }}>Fundamentals</MonoEyebrow>
+          <DecisionEyebrow className="mb-1.5">Fundamentals</DecisionEyebrow>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
             {fundamentalChips.map(({ label, value, sentiment = "neutral" }) => (
               <SignalCard key={label} label={label} value={value} sentiment={sentiment} />
@@ -510,12 +479,11 @@ export function DecisionIntelligencePanel({
           </div>
         </div>
 
-        {/* Divider */}
-        <div style={{ height: 1, background: "var(--qc-hair)" }} />
+        <DecisionDivider />
 
         {/* Technicals */}
         <div>
-          <MonoEyebrow style={{ marginBottom: 6 }}>Technicals</MonoEyebrow>
+          <DecisionEyebrow className="mb-1.5">Technicals</DecisionEyebrow>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 5 }}>
             <SignalCard
               label="Structure"
@@ -543,27 +511,25 @@ export function DecisionIntelligencePanel({
             />
           </div>
         </div>
-      </div>
+      </DecisionSection>
 
       {/* Key Alerts */}
       {displayAlerts.length > 0 && (
-        <div
-          style={{
-            background: "var(--qc-card)",
-            border: "1px solid var(--qc-hair)",
-            borderRadius: 10,
-            padding: "10px 12px 4px",
-          }}
-        >
-          <MonoEyebrow style={{ marginBottom: 8 }}>Key Alerts</MonoEyebrow>
-          <div style={{ height: 1, background: "var(--qc-hair)", marginBottom: 4 }} />
-          {displayAlerts.map((a, i) => (
-            <div key={i} style={{ borderBottom: i < displayAlerts.length - 1 ? "1px solid var(--qc-hair-2)" : "none" }}>
-              <AlertRow source={a.source} text={a.text} sentiment={a.sentiment} />
-            </div>
-          ))}
-        </div>
+        <DecisionSection className="gap-2">
+          <DecisionEyebrow>Key Alerts</DecisionEyebrow>
+          <DecisionDivider />
+          <div className="flex flex-col">
+            {displayAlerts.map((a, i) => (
+              <div
+                key={i}
+                style={{ borderBottom: i < displayAlerts.length - 1 ? "1px solid var(--qc-hair-2)" : "none" }}
+              >
+                <AlertRow source={a.source} text={a.text} sentiment={a.sentiment} />
+              </div>
+            ))}
+          </div>
+        </DecisionSection>
       )}
-    </div>
+    </DecisionIntelligenceShell>
   );
 }

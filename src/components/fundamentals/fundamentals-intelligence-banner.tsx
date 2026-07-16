@@ -1,8 +1,15 @@
 "use client";
 
-import { Brain, AlertTriangle, Zap } from "lucide-react";
+import { AlertTriangle, Zap } from "lucide-react";
 import type { FundamentalsIntelligence } from "@/types/financials";
 import { SignalCard } from "@/components/overview/signal-card";
+import { cn } from "@/lib/utils";
+import {
+  DecisionIntelligenceShell,
+  DecisionSection,
+  DecisionEyebrow,
+  DecisionDivider,
+} from "@/components/ds";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -39,141 +46,62 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
   const conviction = convictionConfig(fi.convictionLevel);
 
   return (
-    <div style={{
-      background: "var(--qc-section)",
-      border: "1px solid var(--qc-hair)",
-      borderRadius: 18,
-      padding: 8,
-      display: "flex",
-      flexDirection: "column",
-      gap: 8,
-    }}>
-
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 6px 2px" }}>
-        <div style={{
-          padding: 6, borderRadius: 8, display: "grid", placeItems: "center",
-          border: "1px solid var(--qc-hair)",
-          background: "var(--qc-chip)",
-        }}>
-          <Brain style={{ width: 14, height: 14, color: "var(--qc-ink)" }} />
-        </div>
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "0.01em" }}>
-          Decision Intelligence
+    <DecisionIntelligenceShell
+      headerAction={
+        <span className="flex-shrink-0 rounded-full bg-[var(--qc-ink)] px-2.5 py-1 text-[13px] font-bold tracking-[0.02em] text-white">
+          {fi.fundamentalGrade}
         </span>
-      </div>
+      }
+    >
+      {/* ── 1. Tag + Actionable Insight ── */}
+      <DecisionSection accent>
+        <div>
+          <DecisionEyebrow className="mb-1.5">Tag</DecisionEyebrow>
+          <p className="m-0 text-[15px] font-semibold leading-[1.3] text-ink">{fi.tag}</p>
+        </div>
 
-      {/* ── 1. Grade + Tag + Actionable Insight ── */}
-      <div style={{
-        background: "var(--qc-card)",
-        border: "1px solid var(--qc-hair)",
-        borderRadius: 14,
-        overflow: "hidden",
-        position: "relative",
-      }}>
-        <div style={{
-          position: "absolute", inset: "auto 0 0 0", height: "50%",
-          background: "linear-gradient(180deg, transparent 0%, var(--qc-lime) 100%)",
-          zIndex: 0, pointerEvents: "none",
-        }} />
+        <DecisionDivider />
 
-        <div style={{ position: "relative", zIndex: 1, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
-
-          {/* Tag + Grade row */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-            <div>
-              <div style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const, marginBottom: 6,
-              }}>
-                Tag
-              </div>
-              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "var(--qc-ink)", lineHeight: 1.3 }}>
-                {fi.tag}
-              </p>
-            </div>
-            <div style={{
-              padding: "4px 10px",
-              background: "var(--qc-ink)",
-              borderRadius: 999,
-              flexShrink: 0,
-            }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: "0.02em" }}>
-                {fi.fundamentalGrade}
-              </span>
-            </div>
-          </div>
-
-          {/* Separator */}
-          <div style={{ height: 1, background: "var(--qc-hair)" }} />
-
-          {/* Actionable Insight */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
-            }}>
-              Actionable Insight
-            </div>
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", lineHeight: 1.45, letterSpacing: "-0.005em" }}>
-              {fi.actionableInsight.action}
+        {/* Actionable Insight */}
+        <div className="flex flex-col gap-1.5">
+          <DecisionEyebrow>Actionable Insight</DecisionEyebrow>
+          <p className="m-0 text-[14px] font-medium leading-[1.45] tracking-[-0.005em] text-ink">
+            {fi.actionableInsight.action}
+          </p>
+          {fi.actionableInsight.rationale && (
+            <p className="m-0 text-[12px] leading-[1.55] text-ink">
+              {fi.actionableInsight.rationale}
             </p>
-            {fi.actionableInsight.rationale && (
-              <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>
-                {fi.actionableInsight.rationale}
-              </p>
-            )}
-          </div>
-
-          {/* Bias */}
-          {fi.actionBias && (
-            <>
-              <div style={{ height: 1, background: "var(--qc-hair)" }} />
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-                  letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
-                }}>
-                  Bias
-                </div>
-                <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>
-                  {fi.actionBias}
-                </p>
-                {fi.actionableInsight.existingHolderAction && (
-                  <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>
-                    {fi.actionableInsight.existingHolderAction}
-                  </p>
-                )}
-                {fi.actionableInsight.reEvaluateCondition && (
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>
-                    Re-evaluate: {fi.actionableInsight.reEvaluateCondition}
-                  </p>
-                )}
-              </div>
-            </>
           )}
         </div>
-      </div>
+
+        {/* Bias */}
+        {fi.actionBias && (
+          <>
+            <DecisionDivider />
+            <div className="flex flex-col gap-1.5">
+              <DecisionEyebrow>Bias</DecisionEyebrow>
+              <p className="m-0 text-[12px] leading-[1.55] text-ink">{fi.actionBias}</p>
+              {fi.actionableInsight.existingHolderAction && (
+                <p className="m-0 text-[12px] leading-[1.55] text-ink">
+                  {fi.actionableInsight.existingHolderAction}
+                </p>
+              )}
+              {fi.actionableInsight.reEvaluateCondition && (
+                <p className="m-0 text-[11px] leading-[1.5] text-ink-2">
+                  Re-evaluate: {fi.actionableInsight.reEvaluateCondition}
+                </p>
+              )}
+            </div>
+          </>
+        )}
+      </DecisionSection>
 
       {/* ── 2. Signal Breakdown ── */}
-      <div style={{
-        background: "var(--qc-card)",
-        border: "1px solid var(--qc-hair)",
-        borderRadius: 14,
-        padding: "14px 16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <Zap style={{ width: 11, height: 11, color: "var(--qc-ink-2)" }} />
-          <span style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-            letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
-          }}>
-            Signal Breakdown
-          </span>
-        </div>
+      <DecisionSection>
+        <DecisionEyebrow icon={<Zap className="size-[11px] text-ink-2" />}>
+          Signal Breakdown
+        </DecisionEyebrow>
         <div className="grid grid-cols-2 gap-2.5">
           {Object.entries(fi.signals).map(([key, value]) => {
             const hints = SIGNAL_METRIC_HINTS[key] ?? [];
@@ -193,60 +121,43 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
         </div>
 
         {/* Conviction Meter */}
-        <div style={{ borderTop: "1px solid var(--qc-hair)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
-            }}>
-              Conviction
+        <div className="flex flex-col gap-1.5 border-t border-hair pt-2.5">
+          <div className="flex items-center justify-between">
+            <DecisionEyebrow>Conviction</DecisionEyebrow>
+            <span className="text-[11px] font-semibold" style={{ color: conviction.color }}>
+              {fi.convictionLevel}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: conviction.color }}>{fi.convictionLevel}</span>
           </div>
-          <div style={{ height: 4, borderRadius: 999, background: "rgba(0,0,0,0.10)", overflow: "hidden" }}>
-            <div style={{ height: "100%", borderRadius: 999, width: conviction.width, background: conviction.barColor, transition: "width .4s" }} />
+          <div className="h-1 overflow-hidden rounded-full bg-black/10">
+            <div
+              className="h-full rounded-full transition-[width] duration-[400ms]"
+              style={{ width: conviction.width, background: conviction.barColor }}
+            />
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div className="flex justify-between">
             {["Low", "Medium", "High"].map((l) => (
-              <span key={l} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--qc-ink-2)" }}>{l}</span>
+              <span key={l} className="font-mono text-[9px] text-ink-2">
+                {l}
+              </span>
             ))}
           </div>
         </div>
-      </div>
+      </DecisionSection>
 
       {/* ── 3. Risk Alerts + What Can Change ── */}
       {(fi.riskAlerts.length > 0 || fi.whatCanChange.length > 0) && (
-        <div style={{
-          background: "var(--qc-card)",
-          border: "1px solid var(--qc-hair)",
-          borderRadius: 14,
-          padding: "14px 16px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-        }}>
+        <DecisionSection>
           {fi.riskAlerts.length > 0 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <AlertTriangle style={{ width: 11, height: 11, color: "var(--qc-ink-2)" }} />
-                <span style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                  letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
-                }}>
-                  Risk Alerts
-                </span>
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <div className="flex flex-col gap-2">
+              <DecisionEyebrow icon={<AlertTriangle className="size-[11px] text-ink-2" />}>
+                Risk Alerts
+              </DecisionEyebrow>
+              <div className="flex flex-wrap gap-1.5">
                 {fi.riskAlerts.map((alert, i) => (
-                  <span key={i} style={{
-                    padding: "3px 8px",
-                    fontSize: 11,
-                    fontWeight: 500,
-                    borderRadius: 4,
-                    background: "var(--qc-down-soft)",
-                    color: "var(--qc-down)",
-                    border: "1px solid rgba(178, 58, 47, 0.20)",
-                  }}>
+                  <span
+                    key={i}
+                    className="rounded-sm border border-down/20 bg-down-soft px-2 py-[3px] text-[11px] font-medium text-down"
+                  >
                     {alert}
                   </span>
                 ))}
@@ -256,32 +167,28 @@ export function FundamentalsIntelligenceBanner({ fi }: Props) {
 
           {fi.whatCanChange.length > 0 && (
             <>
-              {fi.riskAlerts.length > 0 && <div style={{ height: 1, background: "var(--qc-hair)" }} />}
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <span style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                  letterSpacing: ".16em", color: "var(--qc-ink-2)", textTransform: "uppercase" as const,
-                }}>
-                  What Can Change
-                </span>
-                <div style={{ display: "flex", flexDirection: "column" }}>
+              {fi.riskAlerts.length > 0 && <DecisionDivider />}
+              <div className="flex flex-col gap-2">
+                <DecisionEyebrow>What Can Change</DecisionEyebrow>
+                <div className="flex flex-col">
                   {fi.whatCanChange.map((item, i) => (
-                    <div key={i} style={{
-                      display: "flex", alignItems: "flex-start", gap: 8,
-                      padding: "5px 0",
-                      borderBottom: i < fi.whatCanChange.length - 1 ? "1px solid var(--qc-hair)" : "none",
-                    }}>
-                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--qc-ink-2)", flexShrink: 0, marginTop: 5 }} />
-                      <p style={{ margin: 0, fontSize: 12, color: "var(--qc-ink)", lineHeight: 1.55 }}>{item}</p>
+                    <div
+                      key={i}
+                      className={cn(
+                        "flex items-start gap-2 py-[5px]",
+                        i < fi.whatCanChange.length - 1 && "border-b border-hair"
+                      )}
+                    >
+                      <span className="mt-[5px] size-[5px] flex-shrink-0 rounded-full bg-[var(--qc-ink-2)]" />
+                      <p className="m-0 text-[12px] leading-[1.55] text-ink">{item}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </>
           )}
-        </div>
+        </DecisionSection>
       )}
-
-    </div>
+    </DecisionIntelligenceShell>
   );
 }

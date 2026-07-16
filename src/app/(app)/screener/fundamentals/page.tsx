@@ -2,12 +2,6 @@
 
 import React, { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  ShieldCheck,
-  AlertTriangle,
-  Lightbulb,
-  Zap,
-} from "lucide-react";
 import { TabularCard } from "@/components/molecules/tabular-card";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { AssetActionBar } from "@/components/molecules/asset-action-bar";
@@ -38,37 +32,23 @@ function Shimmer({ style, rounded = 8 }: { style?: React.CSSProperties; rounded?
 function FundamentalsPageSkeleton() {
   return (
     <div className="px-4 pt-6 pb-8 space-y-6">
-      {/* Two-col: charts + DI panel */}
+      {/* Full-width charts card */}
+      <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+        <Shimmer style={{ height: 10, width: "25%" }} rounded={4} />
+        <Shimmer style={{ height: 280 }} rounded={10} />
+      </div>
+      {/* Two-col: Growth & Returns + DI panel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-[14px] items-start">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Charts card */}
-          <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-            <Shimmer style={{ height: 10, width: "25%" }} rounded={4} />
-            <Shimmer style={{ height: 280 }} rounded={10} />
-          </div>
-          {/* SWOT */}
-          <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-            <Shimmer style={{ height: 10, width: "20%" }} rounded={4} />
-            <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: 8 }}>
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <Shimmer style={{ height: 24 }} rounded={6} />
-                  {Array.from({ length: 3 }).map((_, j) => <Shimmer key={j} style={{ height: 13 }} rounded={4} />)}
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Growth & Returns */}
-          <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-            <Shimmer style={{ height: 10, width: "28%" }} rounded={4} />
-            <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: 8 }}>
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <Shimmer style={{ height: 13 }} rounded={4} />
-                  {Array.from({ length: 4 }).map((_, j) => <Shimmer key={j} style={{ height: 13 }} rounded={4} />)}
-                </div>
-              ))}
-            </div>
+        {/* Growth & Returns */}
+        <div className="lg:col-span-2" style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+          <Shimmer style={{ height: 10, width: "28%" }} rounded={4} />
+          <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: 8 }}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <Shimmer style={{ height: 13 }} rounded={4} />
+                {Array.from({ length: 4 }).map((_, j) => <Shimmer key={j} style={{ height: 13 }} rounded={4} />)}
+              </div>
+            ))}
           </div>
         </div>
         {/* DI panel */}
@@ -96,7 +76,6 @@ function FundamentalsPageSkeleton() {
 
 const FUNDAMENTALS_NAV = [
   { id: "section-charts",           label: "Charts" },
-  { id: "section-swot",             label: "SWOT Analysis" },
   { id: "section-pnl",              label: "Profit & Loss" },
   { id: "section-balance-sheet",    label: "Balance Sheet" },
   { id: "section-cash-flow",        label: "Cash Flow" },
@@ -104,75 +83,6 @@ const FUNDAMENTALS_NAV = [
   { id: "section-shareholding",     label: "Shareholding Pattern" },
   { id: "section-growth-returns",   label: "Growth & Returns" },
 ];
-
-import type { FundamentalsSwot } from "@/types/financials";
-
-const SWOT_CONFIG = [
-  { key: "strengths"    as const, icon: ShieldCheck,   label: "Strengths",     color: "var(--qc-up)" },
-  { key: "weaknesses"   as const, icon: AlertTriangle,  label: "Weaknesses",    color: "var(--qc-down)" },
-  { key: "opportunities"as const, icon: Lightbulb,      label: "Opportunities", color: "var(--qc-warn)" },
-  { key: "threats"      as const, icon: Zap,            label: "Threats",       color: "var(--qc-ink-2)" },
-];
-
-function SwotSection({ swot }: { swot: FundamentalsSwot }) {
-  return (
-    <div id="section-swot">
-      <SectionPanel title="SWOT Analysis" subtitle="Strategic assessment across four dimensions">
-        <div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-          style={{
-            gap: 1,
-            background: "var(--qc-hair)",
-            borderRadius: 10,
-            overflow: "hidden",
-            margin: "-16px",
-          }}
-        >
-          {SWOT_CONFIG.map(({ key, icon: Icon, label, color }) => (
-            <div key={key} style={{ background: "var(--qc-card)", padding: "16px 18px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                <div
-                  style={{
-                    padding: 5,
-                    borderRadius: 6,
-                    border: "1px solid var(--qc-hair)",
-                    background: "var(--qc-chip)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon size={14} style={{ color: "var(--qc-ink-2)" }} />
-                </div>
-                <span
-                  style={{
-                    fontFamily: "var(--qc-font-mono)",
-                    fontSize: "var(--qc-fz-10)",
-                    fontWeight: "var(--qc-w-semi)",
-                    textTransform: "uppercase",
-                    letterSpacing: "var(--qc-track-eyebrow-l)",
-                    color,
-                  }}
-                >
-                  {label}
-                </span>
-              </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-                {swot[key].map((item) => (
-                  <li key={item.title} style={{ lineHeight: 1.45 }}>
-                    <span style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)" }}>{item.title}</span>
-                    {" — "}
-                    <span style={{ fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-2)" }}>{item.description}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </SectionPanel>
-    </div>
-  );
-}
 
 function FinancialsContent() {
   const searchParams = useSearchParams();
@@ -230,25 +140,22 @@ function FinancialsContent() {
     <ScreenerPageShell navItems={FUNDAMENTALS_NAV} companyInfo={companyInfo}>
       <div className="px-4 pt-6 pb-8 space-y-6">
 
-        {/* Two-column section: Left (Charts, SWOT, Growth & Returns) + Right (Decision Intelligence) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[14px] items-start">
+        {/* Full-width charts */}
+        {chartsData && (
+          <div id="section-charts">
+            <MultiLineBarComboChart
+              chartGroups={chartsData.chartGroups}
+              height={300}
+              title="Charts & Trends"
+            />
+          </div>
+        )}
+
+        {/* Two-column section: Left (Growth & Returns, P&L) + Right (Decision Intelligence) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[14px] items-start">
 
           {/* Left column */}
-          <div className="lg:col-span-2 space-y-6">
-
-            {/* Price / PE / Sales chart */}
-            {chartsData && (
-              <div id="section-charts">
-                <MultiLineBarComboChart
-                  chartGroups={chartsData.chartGroups}
-                  height={300}
-                  title="Charts & Trends"
-                />
-              </div>
-            )}
-
-            {/* SWOT Analysis */}
-            {fi?.swot && <SwotSection swot={fi.swot} />}
+          <div className="min-w-0 space-y-6">
 
             {/* Growth & Returns */}
             <div id="section-growth-returns">
@@ -297,50 +204,50 @@ function FinancialsContent() {
               </SectionPanel>
             </div>
 
+            {/* P&L Table */}
+            <div id="section-pnl">
+              <TabularCard
+                title="Profit & Loss"
+                subtitle="All values in INR Crores"
+                tabs={pnlView === "table" ? ["Quarterly", "Annual"] : undefined}
+                defaultTab="Annual"
+                headerAction={<ViewToggle view={pnlView} onChange={setPnlView} />}
+              >
+                {(activeTab) =>
+                  pnlView === "chart" ? (
+                    <PnLChart table={quarterly} />
+                  ) : (
+                    <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
+                  )
+                }
+              </TabularCard>
+            </div>
+
+            {/* Balance Sheet */}
+            <div id="section-balance-sheet">
+              <TabularCard
+                title="Balance Sheet"
+                subtitle="All values in INR Crores"
+                headerAction={<ViewToggle view={balanceSheetView} onChange={setBalanceSheetView} />}
+              >
+                {balanceSheetView === "chart" ? (
+                  <BalanceSheetTreemap table={balanceSheet.annual} />
+                ) : (
+                  <FinancialDataTable table={balanceSheet.annual} />
+                )}
+              </TabularCard>
+            </div>
+
           </div>
 
           {/* Right column: Decision Intelligence (no sticky) */}
-          <div>
+          <div className="min-w-0">
             {fi && <FundamentalsIntelligenceBanner fi={fi} />}
           </div>
 
         </div>
 
         {/* Full-width sections stacked below */}
-
-        {/* P&L Table */}
-        <div id="section-pnl">
-          <TabularCard
-            title="Profit & Loss"
-            subtitle="All values in INR Crores"
-            tabs={pnlView === "table" ? ["Quarterly", "Annual"] : undefined}
-            defaultTab="Quarterly"
-            headerAction={<ViewToggle view={pnlView} onChange={setPnlView} />}
-          >
-            {(activeTab) =>
-              pnlView === "chart" ? (
-                <PnLChart table={quarterly} />
-              ) : (
-                <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
-              )
-            }
-          </TabularCard>
-        </div>
-
-        {/* Balance Sheet */}
-        <div id="section-balance-sheet">
-          <TabularCard
-            title="Balance Sheet"
-            subtitle="All values in INR Crores"
-            headerAction={<ViewToggle view={balanceSheetView} onChange={setBalanceSheetView} />}
-          >
-            {balanceSheetView === "chart" ? (
-              <BalanceSheetTreemap table={balanceSheet.annual} />
-            ) : (
-              <FinancialDataTable table={balanceSheet.annual} />
-            )}
-          </TabularCard>
-        </div>
 
         {/* Cash Flow */}
         <div id="section-cash-flow">

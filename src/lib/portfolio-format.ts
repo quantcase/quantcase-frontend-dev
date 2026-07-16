@@ -14,6 +14,19 @@ export function fmtLakhs(n: number) {
   return `₹${fmt(n)}`;
 }
 
+/**
+ * A share price: ₹2,130.60 / ₹32.72 / "—" when unpriced.
+ *
+ * Deliberately not `fmtLakhs`, which compacts (₹2,130.6 → "₹2.1 K") — that's
+ * right for a position's total value but wrong for a quote, where the rupees
+ * are the number you're reading. Two decimals throughout, since paise are
+ * meaningful on a low-priced scrip.
+ */
+export function fmtPrice(n: number | null | undefined) {
+  if (n == null) return "—";
+  return `₹${fmt(n, 2)}`;
+}
+
 // Signed percent with a direction arrow: 9.1 → "↑9.1%", -1.4 → "↓1.4%".
 export function fmtSignedPct(pct: number, digits = 1) {
   const arrow = pct >= 0 ? "↑" : "↓";

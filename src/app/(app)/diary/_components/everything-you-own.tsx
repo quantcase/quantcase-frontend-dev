@@ -1,14 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Loader2, RefreshCw, Search } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Loader2, RefreshCw, Search } from "lucide-react";
+import { Popover } from "radix-ui";
 
 import { TabToggle } from "@/components/molecules/tab-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { fmt, fmtLakhs, fmtSignedPct, brokerLabel } from "@/lib/portfolio-format";
+import { fmtLakhs, fmtPrice, fmtSignedPct, brokerLabel } from "@/lib/portfolio-format";
 import { brokerAccountCount } from "../_lib/diary-derive";
 import type { SmallcaseHoldingsData, SmallcaseHolding } from "@/types/smallcase";
+import type { TickerMetrics } from "@/hooks/useTickerMetrics";
 
 const PAGE_SIZE = 8;
 
@@ -20,10 +22,16 @@ interface EverythingYouOwnProps {
   onSync: () => void;
   onConnect: () => void;
   onPick: (ticker: string) => void;
+  /**
+   * CMP by uppercased ticker. The holdings API has no price of its own — it
+   * sends a position's value, not the quote behind it — so the column is joined
+   * in from the bulk ticker read. Absent until that lands.
+   */
+  metrics: Map<string, TickerMetrics>;
 }
 
 export function EverythingYouOwn({
-  data, loading, notConnected, syncing, onSync, onConnect, onPick,
+  data, loading, notConnected, syncing, onSync, onConnect, onPick, metrics,
 }: EverythingYouOwnProps) {
   const [view, setView] = useState("List");
 
@@ -68,7 +76,7 @@ export function EverythingYouOwn({
       ) : notConnected || holdings.length === 0 ? (
         <ConnectPrompt onConnect={onConnect} />
       ) : view === "List" ? (
-        <HoldingsList holdings={holdings} onPick={onPick} />
+        <HoldingsList holdings={holdings} onPick={onPick} metrics={metrics} />
       ) : (
         <AllocationChart holdings={holdings} total={totalValue} />
       )}
@@ -78,18 +86,42 @@ export function EverythingYouOwn({
 
 // ── List ─────────────────────────────────────────────────────────────────────
 
-function HoldingsList({ holdings, onPick }: { holdings: SmallcaseHolding[]; onPick: (t: string) => void }) {
+function HoldingsList({
+  holdings, onPick, metrics,
+}: { holdings: SmallcaseHolding[]; onPick: (t: string) => void; metrics: Map<string, TickerMetrics> }) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
+  // Empty = no broker constraint, which is not the same as "none selected".
+  const [pickedBrokers, setPickedBrokers] = useState<Set<string>>(new Set());
+
+  // Only the brokers actually holding something — offering an empty filter is noise.
+  const brokerOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const h of holdings) {
+      const slug = (h.broker ?? "").toLowerCase();
+      if (slug && !seen.has(slug)) seen.set(slug, brokerLabel(h.broker));
+    }
+    return [...seen].map(([slug, label]) => ({ slug, label })).sort((a, b) => a.label.localeCompare(b.label));
+  }, [holdings]);
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return holdings;
-    // Ticker and name are both how someone recalls a position.
-    return holdings.filter(
-      (h) => h.ticker.toLowerCase().includes(q) || (h.name?.toLowerCase().includes(q) ?? false),
-    );
-  }, [holdings, query]);
+    return holdings.filter((h) => {
+      if (pickedBrokers.size > 0 && !pickedBrokers.has((h.broker ?? "").toLowerCase())) return false;
+      if (!q) return true;
+      // Ticker and name are both how someone recalls a position.
+      return h.ticker.toLowerCase().includes(q) || (h.name?.toLowerCase().includes(q) ?? false);
+    });
+  }, [holdings, query, pickedBrokers]);
+
+  function toggleBroker(slug: string) {
+    setPickedBrokers((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(slug)) next.add(slug);
+      return next;
+    });
+    setPage(0);
+  }
 
   const pageCount = Math.max(Math.ceil(matches.length / PAGE_SIZE), 1);
   // Filtering shrinks the list under a page we may already be past.
@@ -101,8 +133,8 @@ function HoldingsList({ holdings, onPick }: { holdings: SmallcaseHolding[]; onPi
 
   return (
     <div className="overflow-hidden rounded-xl border border-hair bg-card">
-      <div className="border-b border-hair px-5 py-3">
-        <div className="relative">
+      <div className="flex items-center gap-2 border-b border-hair px-5 py-3">
+        <div className="relative flex-1">
           <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-ink-3" />
           <Input
             value={query}
@@ -112,18 +144,28 @@ function HoldingsList({ holdings, onPick }: { holdings: SmallcaseHolding[]; onPi
             className="h-8 border-hair pl-8 text-[13px]"
           />
         </div>
+        {/* Only worth showing once there's more than one account to tell apart. */}
+        {brokerOptions.length > 1 && (
+          <BrokerFilter
+            options={brokerOptions}
+            picked={pickedBrokers}
+            onToggle={toggleBroker}
+            onClear={() => { setPickedBrokers(new Set()); setPage(0); }}
+          />
+        )}
       </div>
 
-      <div className="grid grid-cols-[1.7fr_1fr_0.6fr_1fr] gap-3 border-b border-hair px-5 py-3">
+      <div className="grid grid-cols-[2fr_1fr_1fr] gap-3 border-b border-hair px-5 py-3">
         <span className="eyebrow">Holding</span>
+        <span className="eyebrow text-right">CMP</span>
         <span className="eyebrow text-right">Amount</span>
-        <span className="eyebrow text-right">Qty</span>
-        <span className="eyebrow text-right">Broker</span>
       </div>
 
       {rows.length === 0 && (
         <div className="px-5 py-10 text-center text-[13px] text-ink-2">
-          Nothing matches &ldquo;{query.trim()}&rdquo;.
+          {query.trim()
+            ? <>Nothing matches &ldquo;{query.trim()}&rdquo;.</>
+            : "No holdings at the selected brokers."}
         </div>
       )}
 
@@ -131,12 +173,18 @@ function HoldingsList({ holdings, onPick }: { holdings: SmallcaseHolding[]; onPi
         <button
           key={h.id}
           onClick={() => onPick(h.ticker)}
-          className="grid w-full grid-cols-[1.7fr_1fr_0.6fr_1fr] items-center gap-3 border-b border-hair px-5 py-3.5 text-left transition-colors hover:bg-secondary"
+          className="grid w-full grid-cols-[2fr_1fr_1fr] items-center gap-3 border-b border-hair px-5 py-3.5 text-left transition-colors hover:bg-secondary"
         >
           <span className="min-w-0">
             <span className="mono block truncate text-[12px] font-semibold text-ink">{h.ticker}</span>
             {/* name is nullable on the API; the ticker already carries identity */}
             {h.name && <span className="block truncate text-[12px] text-ink-3">{h.name}</span>}
+          </span>
+
+          {/* Joined in by ticker, so it's blank for a scrip the backend doesn't
+              know (`notFound`) and until the metrics request lands. */}
+          <span className="mono text-right text-[13px] text-ink-2">
+            {fmtPrice(metrics.get(h.ticker.trim().toUpperCase())?.cmp)}
           </span>
 
           <span className="text-right">
@@ -147,13 +195,6 @@ function HoldingsList({ holdings, onPick }: { holdings: SmallcaseHolding[]; onPi
                 {fmtSignedPct(h.pnl_pct)}
               </span>
             )}
-          </span>
-
-          <span className="mono text-right text-[13px] text-ink-2">{fmt(h.quantity)}</span>
-
-          <span className="flex items-center justify-end gap-1.5">
-            <span aria-hidden className="size-1.5 shrink-0 rounded-full" style={{ background: brokerDot(h.broker) }} />
-            <span className="truncate text-[12px] text-ink-2">{brokerLabel(h.broker)}</span>
           </span>
         </button>
       ))}
@@ -190,6 +231,71 @@ function HoldingsList({ holdings, onPick }: { holdings: SmallcaseHolding[]; onPi
         </div>
       )}
     </div>
+  );
+}
+
+// ── Broker filter ────────────────────────────────────────────────────────────
+
+function BrokerFilter({
+  options, picked, onToggle, onClear,
+}: {
+  options: { slug: string; label: string }[];
+  picked: Set<string>;
+  onToggle: (slug: string) => void;
+  onClear: () => void;
+}) {
+  // Naming the broker when it's the only one picked beats a bare "1" count.
+  const summary =
+    picked.size === 0 ? "All brokers"
+    : picked.size === 1 ? (options.find((o) => picked.has(o.slug))?.label ?? "1 broker")
+    : `${picked.size} brokers`;
+
+  return (
+    <Popover.Root>
+      <Popover.Trigger asChild>
+        <Button variant="pill" size="sm" className="shrink-0 text-[13px]" aria-label="Filter by broker">
+          {summary}
+          <ChevronDown aria-hidden className="size-3.5 text-ink-3" />
+        </Button>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          align="end"
+          sideOffset={6}
+          className="z-50 min-w-[180px] rounded-lg border border-hair bg-card p-1 shadow-[var(--qc-shadow-shell)]"
+        >
+          {options.map((o) => {
+            const on = picked.has(o.slug);
+            return (
+              <button
+                key={o.slug}
+                type="button"
+                role="menuitemcheckbox"
+                aria-checked={on}
+                onClick={() => onToggle(o.slug)}
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-secondary"
+              >
+                <Check aria-hidden className={`size-3.5 shrink-0 text-ink ${on ? "" : "invisible"}`} />
+                <span aria-hidden className="size-1.5 shrink-0 rounded-full" style={{ background: brokerDot(o.slug) }} />
+                <span className="truncate text-[13px] text-ink">{o.label}</span>
+              </button>
+            );
+          })}
+          {picked.size > 0 && (
+            <>
+              <div className="my-1 border-t border-hair" />
+              <button
+                type="button"
+                onClick={onClear}
+                className="w-full rounded-md px-2 py-1.5 text-left text-[12px] text-ink-2 transition-colors hover:bg-secondary"
+              >
+                Clear filter
+              </button>
+            </>
+          )}
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }
 

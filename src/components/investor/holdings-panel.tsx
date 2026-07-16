@@ -235,7 +235,10 @@ export function HoldingsPanel({
         }}
       >
         <MonoLabel size={10} tracking="0.14em" color="var(--qc-ink-3)">
-          {isShadow ? "Trackers" : "Your Holdings"} · {stockCount} {stockCount === 1 ? "stock" : "stocks"}
+          {/* A linked broker means these are real holdings, even in the window
+              before the first sync lands and `isShadow` is still true. */}
+          {isShadow && !brokerConnected ? "Trackers" : "Your Holdings"} · {stockCount}{" "}
+          {stockCount === 1 ? "stock" : "stocks"}
           {fundCount > 0 && ` · ${fundCount} mutual fund${fundCount === 1 ? "" : "s"}`}
         </MonoLabel>
 

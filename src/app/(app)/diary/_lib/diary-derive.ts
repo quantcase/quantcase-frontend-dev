@@ -2,11 +2,12 @@
 // function here is deterministic given its args so the page can be reasoned
 // about (and tested) without a network.
 //
-// The diary joins four independently-fetched sources onto one view model:
+// The diary joins five independently-fetched sources onto one view model:
 //   journal tree    → the journals, their tickers, and every entry (camelCase API)
 //   smallcase       → holdings: name / qty / broker / value (snake_case API)
 //   mod synopsis    → bulk ticker→company name + M/O/D scores
 //   stocks universe → fallback name + industry
+//   ticker metrics  → CMP, for any list of tickers
 // Beware the naming split: journal is camelCase, portfolio/smallcase snake_case.
 
 import { isPending } from "@/types/journal";
@@ -15,6 +16,7 @@ import type { OwnedJournalTicker } from "@/hooks/useJournalTree";
 import type { SmallcaseHolding, SmallcaseHoldingsData } from "@/types/smallcase";
 import type { ModSynopsis, ModBreakdownRow } from "@/types/investor-dashboard";
 import type { StockOption } from "@/hooks/useStocks";
+import type { TickerMetrics } from "@/hooks/useTickerMetrics";
 
 // ── View model ──────────────────────────────────────────────────────────────
 
@@ -60,6 +62,15 @@ export interface DiaryTicker {
   /** The matching holding, or null when this is watchlist-only (not owned). */
   holding: SmallcaseHolding | null;
   mod: ModBreakdownRow | null;
+  /**
+   * Live market row from the bulk ticker API — the CMP column's source. Null
+   * until it lands, or if the backend doesn't know the ticker (`notFound`).
+   *
+   * The journal tree also carries a price (`market.ltp`), but only for tickers
+   * in a journal; this covers holdings too, so one column has one source rather
+   * than two that can disagree.
+   */
+  metrics: TickerMetrics | null;
   /** Journals this ticker belongs to. Empty for single-journal views that don't
    *  fan out; the strip badge renders the first (see `primaryJournal`). */
   journals: JournalRef[];
@@ -104,6 +115,7 @@ export function joinTickers(
   holdings: SmallcaseHoldingsData | null,
   mod: ModSynopsis | null,
   stocks: StockOption[],
+  metrics: Map<string, TickerMetrics> = new Map(),
 ): DiaryTicker[] {
   const byHolding = indexBy(holdings?.holdings, (h) => h.ticker);
   const byMod = indexBy(mod?.breakdown, (r) => r.symbol);
@@ -134,6 +146,7 @@ export function joinTickers(
       pending: isPending(t),
       holding,
       mod: modRow,
+      metrics: metrics.get(k) ?? null,
       journals: [journal],
     };
   });
@@ -154,12 +167,13 @@ export function joinAllTickers(
   holdings: SmallcaseHoldingsData | null,
   mod: ModSynopsis | null,
   stocks: StockOption[],
+  metrics: Map<string, TickerMetrics> = new Map(),
 ): DiaryTicker[] {
   const merged = new Map<string, DiaryTicker>();
 
   for (const row of rows) {
     const ref: JournalRef = { id: row.journalId, name: row.journalName, kind: row.journalKind };
-    const [joined] = joinTickers([row], ref, holdings, mod, stocks);
+    const [joined] = joinTickers([row], ref, holdings, mod, stocks, metrics);
     const k = key(row.ticker);
     const prev = merged.get(k);
 

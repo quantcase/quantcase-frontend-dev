@@ -117,6 +117,7 @@ export default function DiaryPage() {
               onSync={d.syncHoldings}
               onConnect={() => setConnectOpen(true)}
               onPick={openByTicker}
+              metrics={d.metrics}
             />
           </div>
 

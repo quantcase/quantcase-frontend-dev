@@ -7,6 +7,7 @@ import { useSmallcaseHoldings } from "@/hooks/useSmallcaseHoldings";
 import { useModSynopsis } from "@/hooks/useModSynopsis";
 import { useWhatsMoving } from "@/hooks/useWhatsMoving";
 import { useStocks } from "@/hooks/useStocks";
+import { useTickerMetrics } from "@/hooks/useTickerMetrics";
 
 import {
   joinAllTickers,
@@ -38,10 +39,25 @@ export function useDiaryData(activeJournalId: string | null) {
 
   const journals = useMemo(() => toJournals(tree.data), [tree.data]);
 
+  // Every ticker on the page: journal rows ∪ holdings. The union matters —
+  // holdings carry no price of their own, and most aren't in a journal, so
+  // scoping this to the tree would leave the table it's for mostly blank.
+  const metricTickers = useMemo(
+    () => [
+      ...flattenTickers(tree.data).map((t) => t.ticker),
+      ...(holdings.data?.holdings ?? []).map((h) => h.ticker),
+    ],
+    [tree.data, holdings.data],
+  );
+
+  // One bulk read for CMP/PE/market-cap across all of them. Enrichment, like
+  // names and sectors — it may arrive late, and both tables render without it.
+  const metrics = useTickerMetrics(metricTickers);
+
   // One row per ticker, carrying its full journal membership and history.
   const allTickers: DiaryTicker[] = useMemo(
-    () => joinAllTickers(flattenTickers(tree.data), holdings.data, mod.data, stocks),
-    [tree.data, holdings.data, mod.data, stocks],
+    () => joinAllTickers(flattenTickers(tree.data), holdings.data, mod.data, stocks, metrics.data),
+    [tree.data, holdings.data, mod.data, stocks, metrics.data],
   );
 
   // The active journal's roster — a filter over rows already in hand, not a
@@ -106,6 +122,8 @@ export function useDiaryData(activeJournalId: string | null) {
 
     holdings: holdings.data,
     holdingsLoading: holdings.loading,
+    /** CMP/PE/market-cap by uppercased ticker — the holdings table's price source. */
+    metrics: metrics.data,
     brokerNotConnected: holdings.notConnected,
     syncHoldings: holdings.sync,
     holdingsSyncing: holdings.syncing,

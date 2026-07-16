@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useStocks } from "@/hooks/useStocks";
 import { useJournalMutations } from "@/hooks/useJournalMutations";
 import { NIFTY50_TICKERS } from "@/lib/journal-ideas";
+import { fmtPrice } from "@/lib/portfolio-format";
 import { entryExcerpt, relativeTime } from "../_lib/diary-derive";
 import type { DiaryTicker } from "../_lib/diary-derive";
 
@@ -97,9 +98,10 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
         <IdeasEmpty existing={existing} onPick={handleAdd} busy={mutating} canAdd={Boolean(journalId)} />
       ) : (
         <div className="overflow-hidden rounded-xl border border-hair bg-card">
-          <div className="grid grid-cols-[1.2fr_1fr_2fr_auto] gap-4 border-b border-hair px-5 py-3">
+          <div className="grid grid-cols-[1.2fr_1fr_0.7fr_2fr_auto] gap-4 border-b border-hair px-5 py-3">
             <span className="eyebrow">Company</span>
             <span className="eyebrow">Sector</span>
+            <span className="eyebrow text-right">CMP</span>
             <span className="eyebrow">Notes</span>
             <span className="eyebrow w-[132px] text-right">Added</span>
           </div>
@@ -116,7 +118,7 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
             return (
               <div
                 key={t.ticker}
-                className="grid grid-cols-[1.2fr_1fr_2fr_auto] items-center gap-4 border-b border-hair px-5 py-3.5 last:border-0 hover:bg-secondary"
+                className="grid grid-cols-[1.2fr_1fr_0.7fr_2fr_auto] items-center gap-4 border-b border-hair px-5 py-3.5 last:border-0 hover:bg-secondary"
               >
                 <button onClick={() => onOpen(t)} className="min-w-0 text-left">
                   <span className="mono block truncate text-[12px] font-semibold text-ink">{t.ticker}</span>
@@ -125,6 +127,10 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
                 </button>
 
                 <span className="truncate text-[12px] text-ink-2">{t.sector ?? "—"}</span>
+
+                {/* Metrics arrive on their own request — an em-dash until they do,
+                    same as an unknown ticker. Magnitude, not sentiment: plain ink. */}
+                <span className="mono text-right text-[13px] text-ink">{fmtPrice(t.metrics?.cmp)}</span>
 
                 <button onClick={() => onOpen(t)} className="min-w-0 text-left">
                   {note ? (

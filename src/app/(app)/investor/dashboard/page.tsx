@@ -6,7 +6,6 @@ import OnboardingPage from "@/app/(onboarding)/onboarding/page";
 import { MODSynopsisCard } from "@/components/investor/mod-synopsis-card";
 import { MODBreakdownDrawer } from "@/components/investor/mod-breakdown-drawer";
 import { HoldingsPanel } from "@/components/investor/holdings-panel";
-import { WhatsMovingFeed } from "@/components/investor/whats-moving-feed";
 import { DiscoverScreens } from "@/components/investor/discover-screens";
 import { ResearchHero } from "@/components/investor/research-hero";
 import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
@@ -16,7 +15,6 @@ import { useUser } from "@/components/providers/UserContext";
 import { brokerLabel } from "@/lib/portfolio-format";
 import { useModSynopsis } from "@/hooks/useModSynopsis";
 import { usePortfolioSummary } from "@/hooks/usePortfolioSummary";
-import { useWhatsMoving } from "@/hooks/useWhatsMoving";
 import { useDiscoverScreens } from "@/hooks/useDiscoverScreens";
 import { useMarketIndices } from "@/hooks/useMarketIndices";
 import type { ModPillar, ModSubScore } from "@/types/investor-dashboard";
@@ -111,7 +109,6 @@ function InvestorDashboardContent() {
   // Dashboard widget data
   const { data: modSynopsis } = useModSynopsis();
   const { data: summary } = usePortfolioSummary();
-  const { data: whatsMoving, loading: whatsMovingLoading } = useWhatsMoving(4);
   const { data: discover } = useDiscoverScreens();
   const { data: indices } = useMarketIndices();
 
@@ -140,8 +137,7 @@ function InvestorDashboardContent() {
     deal: row.deal,
   }));
 
-  // ── Whats-moving & discover ─────────────────────────────────────────────────
-  const movingItems = whatsMoving?.items ?? [];
+  // ── Discover ────────────────────────────────────────────────────────────────
   const discoverScreens = discover?.screens ?? [];
 
   // ── Market indices (header) ─────────────────────────────────────────────────
@@ -188,7 +184,7 @@ function InvestorDashboardContent() {
             ROW 1 — MOD Synopsis (left) + Holdings (right)
         ═══════════════════════════════════════════════════════════════ */}
         <section
-          className="grid grid-cols-1 lg:grid-cols-[5fr_6fr] gap-3.5 mb-3.5 items-stretch"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 mb-3.5 items-stretch"
         >
           <MODSynopsisCard
             overallScore={modSynopsis?.overall_score ?? 0}
@@ -231,14 +227,7 @@ function InvestorDashboardContent() {
         </section>
 
         {/* ════════════════════════════════════════════════════════════
-            ROW 3 — What's Moving (full width)
-        ═══════════════════════════════════════════════════════════════ */}
-        <section className="mb-3.5">
-          <WhatsMovingFeed count={movingItems.length} items={movingItems} loading={whatsMovingLoading} />
-        </section>
-
-        {/* ════════════════════════════════════════════════════════════
-            ROW 4 — Discover Screens (full width)
+            ROW 3 — Discover Screens (full width)
         ═══════════════════════════════════════════════════════════════ */}
         <section className="mb-3.5">
           <DiscoverScreens screens={discoverScreens} />

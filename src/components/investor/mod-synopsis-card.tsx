@@ -32,15 +32,17 @@ function ScoreTile({ label, score, rating }: SubScore) {
   const tier = ratingTier(rating) as "up" | "warn" | "down" | "neutral";
   const barTier = tier === "neutral" ? undefined : tier;
   return (
-    <div className="flex min-w-0 flex-1 flex-col rounded-[10px] border border-hair bg-card px-4 pb-3 pt-3.5">
+    <div className="flex min-w-0 flex-1 flex-col gap-3 rounded-[10px] border border-hair bg-card px-4 pb-4 pt-3.5">
       <MonoLabel size={9} tracking="0.12em" color="var(--qc-ink-3)">
         {label}
       </MonoLabel>
-      <div className="my-1.5 font-mono text-[26px] font-medium leading-none text-ink">
-        {score}
+      <div className="flex flex-col gap-2.5">
+        <div className="font-mono text-[26px] font-medium leading-none text-ink">
+          {score}
+        </div>
+        <RatingBadge label={rating} className="self-start" />
       </div>
-      <RatingBadge label={rating} className="self-start" />
-      <div className="mt-2.5">
+      <div className="mt-auto pt-1">
         <ScoreGauge value={score} shape="bar" tier={barTier} strokeWidth={3} />
       </div>
     </div>
@@ -54,7 +56,7 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, dragging
       {/* Header — mono label + optional upload button */}
       <div className="flex items-center justify-between">
         <MonoLabel size={10} tracking="0.14em" color="var(--qc-ink-3)">
-          {isShadow ? "Trackers · MOD Synopsis" : "Your Portfolio · MOD Synopsis"}
+          {isShadow && !brokerConnected ? "Trackers · MOD Synopsis" : "Your Holdings · MOD Synopsis"}
         </MonoLabel>
         {/* The "connected" confirmation pill lives once, on the Holdings panel.
             Here we only surface the connect CTA when not yet linked. */}
@@ -77,7 +79,7 @@ export function MODSynopsisCard({ headline, subScores, draggingSymbols, dragging
       />
 
       {/* Sub-score tiles */}
-      <div className="flex flex-1 gap-2">
+      <div className="flex flex-1 gap-3">
         {subScores.map((s) => (
           <ScoreTile key={s.label} {...s} />
         ))}

@@ -144,8 +144,7 @@ function HoldingsList({
             className="h-8 border-hair pl-8 text-[13px]"
           />
         </div>
-        {/* Only worth showing once there's more than one account to tell apart. */}
-        {brokerOptions.length > 1 && (
+        {brokerOptions.length > 0 && (
           <BrokerFilter
             options={brokerOptions}
             picked={pickedBrokers}
@@ -155,8 +154,10 @@ function HoldingsList({
         )}
       </div>
 
-      <div className="grid grid-cols-[2fr_1fr_1fr] gap-3 border-b border-hair px-5 py-3">
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3 border-b border-hair px-5 py-3">
         <span className="eyebrow">Holding</span>
+        <span className="eyebrow text-right">Avg Buy</span>
+        <span className="eyebrow text-right">Invested</span>
         <span className="eyebrow text-right">CMP</span>
         <span className="eyebrow text-right">Amount</span>
       </div>
@@ -173,13 +174,19 @@ function HoldingsList({
         <button
           key={h.id}
           onClick={() => onPick(h.ticker)}
-          className="grid w-full grid-cols-[2fr_1fr_1fr] items-center gap-3 border-b border-hair px-5 py-3.5 text-left transition-colors hover:bg-secondary"
+          className="grid w-full grid-cols-[2fr_1fr_1fr_1fr_1fr] items-center gap-3 border-b border-hair px-5 py-3.5 text-left transition-colors hover:bg-secondary"
         >
           <span className="min-w-0">
             <span className="mono block truncate text-[12px] font-semibold text-ink">{h.ticker}</span>
             {/* name is nullable on the API; the ticker already carries identity */}
             {h.name && <span className="block truncate text-[12px] text-ink-3">{h.name}</span>}
           </span>
+
+          {/* Cost basis, straight off the holding — both keys are non-null, so
+              these columns always render even when the live price hasn't. */}
+          <span className="mono text-right text-[13px] text-ink-2">{fmtPrice(h.avg_price)}</span>
+
+          <span className="mono text-right text-[13px] text-ink-2">{fmtLakhs(h.invested_value)}</span>
 
           {/* Joined in by ticker, so it's blank for a scrip the backend doesn't
               know (`notFound`) and until the metrics request lands. */}

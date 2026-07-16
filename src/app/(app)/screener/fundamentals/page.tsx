@@ -38,9 +38,9 @@ function FundamentalsPageSkeleton() {
         <Shimmer style={{ height: 280 }} rounded={10} />
       </div>
       {/* Two-col: Growth & Returns + DI panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-[14px] items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[14px] items-start">
         {/* Growth & Returns */}
-        <div className="lg:col-span-2" style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
           <Shimmer style={{ height: 10, width: "28%" }} rounded={4} />
           <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: 8 }}>
             {Array.from({ length: 4 }).map((_, i) => (
@@ -54,8 +54,7 @@ function FundamentalsPageSkeleton() {
         {/* DI panel */}
         <div style={{ border: "1px solid var(--qc-hair)", borderRadius: 14, background: "var(--qc-card)", padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
           <Shimmer style={{ height: 10, width: "40%" }} rounded={4} />
-          <Shimmer style={{ height: 52 }} rounded={10} />
-          {Array.from({ length: 5 }).map((_, i) => <Shimmer key={i} style={{ height: 40 }} rounded={8} />)}
+          {Array.from({ length: 3 }).map((_, i) => <Shimmer key={i} style={{ height: 40 }} rounded={8} />)}
         </div>
       </div>
       {/* P&L table */}
@@ -151,15 +150,16 @@ function FinancialsContent() {
           </div>
         )}
 
-        {/* Two-column section: Left (Growth & Returns, P&L) + Right (Decision Intelligence) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[14px] items-start">
+        {/* Two-column section: Left (Growth & Returns) + Right (Decision Intelligence).
+            Both columns stretch to the taller of the two so the cards end level. */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[14px] items-stretch">
 
           {/* Left column */}
-          <div className="min-w-0 space-y-6">
+          <div className="min-w-0 flex">
 
             {/* Growth & Returns */}
-            <div id="section-growth-returns">
-              <SectionPanel title="Growth & Returns" subtitle="Compounded growth rates and return metrics">
+            <div id="section-growth-returns" className="flex-1">
+              <SectionPanel className="h-full" title="Growth & Returns" subtitle="Compounded growth rates and return metrics">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                   <GrowthStatCard
                     title="Compounded Sales Growth"
@@ -204,50 +204,50 @@ function FinancialsContent() {
               </SectionPanel>
             </div>
 
-            {/* P&L Table */}
-            <div id="section-pnl">
-              <TabularCard
-                title="Profit & Loss"
-                subtitle="All values in INR Crores"
-                tabs={pnlView === "table" ? ["Quarterly", "Annual"] : undefined}
-                defaultTab="Annual"
-                headerAction={<ViewToggle view={pnlView} onChange={setPnlView} />}
-              >
-                {(activeTab) =>
-                  pnlView === "chart" ? (
-                    <PnLChart table={quarterly} />
-                  ) : (
-                    <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
-                  )
-                }
-              </TabularCard>
-            </div>
-
-            {/* Balance Sheet */}
-            <div id="section-balance-sheet">
-              <TabularCard
-                title="Balance Sheet"
-                subtitle="All values in INR Crores"
-                headerAction={<ViewToggle view={balanceSheetView} onChange={setBalanceSheetView} />}
-              >
-                {balanceSheetView === "chart" ? (
-                  <BalanceSheetTreemap table={balanceSheet.annual} />
-                ) : (
-                  <FinancialDataTable table={balanceSheet.annual} />
-                )}
-              </TabularCard>
-            </div>
-
           </div>
 
           {/* Right column: Decision Intelligence (no sticky) */}
-          <div className="min-w-0">
-            {fi && <FundamentalsIntelligenceBanner fi={fi} />}
+          <div className="min-w-0 flex">
+            {fi && <FundamentalsIntelligenceBanner fi={fi} className="flex-1" />}
           </div>
 
         </div>
 
         {/* Full-width sections stacked below */}
+
+        {/* P&L Table */}
+        <div id="section-pnl">
+          <TabularCard
+            title="Profit & Loss"
+            subtitle="All values in INR Crores"
+            tabs={pnlView === "table" ? ["Quarterly", "Annual"] : undefined}
+            defaultTab="Annual"
+            headerAction={<ViewToggle view={pnlView} onChange={setPnlView} />}
+          >
+            {(activeTab) =>
+              pnlView === "chart" ? (
+                <PnLChart table={quarterly} />
+              ) : (
+                <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
+              )
+            }
+          </TabularCard>
+        </div>
+
+        {/* Balance Sheet */}
+        <div id="section-balance-sheet">
+          <TabularCard
+            title="Balance Sheet"
+            subtitle="All values in INR Crores"
+            headerAction={<ViewToggle view={balanceSheetView} onChange={setBalanceSheetView} />}
+          >
+            {balanceSheetView === "chart" ? (
+              <BalanceSheetTreemap table={balanceSheet.annual} />
+            ) : (
+              <FinancialDataTable table={balanceSheet.annual} />
+            )}
+          </TabularCard>
+        </div>
 
         {/* Cash Flow */}
         <div id="section-cash-flow">

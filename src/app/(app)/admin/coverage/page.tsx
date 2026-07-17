@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ElementType } from "react";
 import Link from "next/link";
-import { Layers, ArrowRight, HelpCircle } from "lucide-react";
+import { Layers, ArrowRight, HelpCircle, ListTree, SlidersHorizontal, BookMarked } from "lucide-react";
 import { L1MultiDispatchTab } from "./_components/L1MultiDispatchTab";
 import { L2MultiDispatchTab } from "./_components/L2MultiDispatchTab";
 import { L3MultiDispatchTab } from "./_components/L3MultiDispatchTab";
@@ -19,6 +19,51 @@ const TABS: { id: CoverageTab; label: string }[] = [
   { id: "daily", label: "Daily Runs" },
   { id: "prowess", label: "Prowess Ingestion" },
 ];
+
+const ADMIN_LINKS = [
+  {
+    href: "/admin/company-groups",
+    icon: Layers,
+    title: "Company Groups",
+    subtitle: "Manual ticker lists, live filters, and KPI-filter groups, reusable across L1, L2, and L3 dispatch.",
+  },
+  {
+    href: "/admin/kpis",
+    icon: BookMarked,
+    title: "KPI Catalogue",
+    subtitle: "Raw values, computed formulas, and fallback chains — every Prowess CSV column maps to a KPI here.",
+  },
+  {
+    href: "/admin/kpi-groups",
+    icon: ListTree,
+    title: "KPI Groups",
+    subtitle: "Parent/child tree for organizing KPIs into screener table/chart sections.",
+  },
+  {
+    href: "/admin/kpi-filters",
+    icon: SlidersHorizontal,
+    title: "KPI Filters",
+    subtitle: "Reusable KPI threshold conditions — attach them to a KPI-filter company group to build membership.",
+  },
+];
+
+function AdminLinkCard({ href, icon: Icon, title, subtitle }: { href: string; icon: ElementType; title: string; subtitle: string }) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-4 rounded-[10px] border border-hair bg-card px-5 py-4 hover:border-ink transition-colors group"
+    >
+      <div className="flex size-10 items-center justify-center rounded-[8px] bg-ink shrink-0">
+        <Icon className="size-5 text-[var(--qc-on-dark)]" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[14px] font-semibold text-ink">{title}</p>
+        <p className="text-[12px] text-ink-3 mt-0.5">{subtitle}</p>
+      </div>
+      <ArrowRight className="size-4 text-ink-3 group-hover:text-ink transition-colors shrink-0" />
+    </Link>
+  );
+}
 
 export default function CoveragePage() {
   const [activeTab, setActiveTab] = useState<CoverageTab>("l1");
@@ -44,24 +89,13 @@ export default function CoveragePage() {
         </button>
       </div>
 
-      {/* Manage Company Groups — prominent, top of page: manual ticker lists and live filters
-          reusable across L1/L2/L3, managed in one place regardless of which lens tab is open. */}
-      <Link
-        href="/admin/company-groups"
-        className="flex items-center gap-4 rounded-[10px] border border-hair bg-card px-5 py-4 hover:border-ink transition-colors group"
-      >
-        <div className="flex size-10 items-center justify-center rounded-[8px] bg-ink shrink-0">
-          <Layers className="size-5 text-[var(--qc-on-dark)]" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-semibold text-ink">Company Groups</p>
-          <p className="text-[12px] text-ink-3 mt-0.5">
-            Manual ticker lists and live filters, reusable across L1, L2, and L3 dispatch — create,
-            edit, and tag them here.
-          </p>
-        </div>
-        <ArrowRight className="size-4 text-ink-3 group-hover:text-ink transition-colors shrink-0" />
-      </Link>
+      {/* Admin data management — company groups, KPI catalogue, KPI groups, KPI filters. Managed
+          in one place regardless of which dispatch tab is open below. */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {ADMIN_LINKS.map((link) => (
+          <AdminLinkCard key={link.href} {...link} />
+        ))}
+      </div>
 
       {/* Tab strip */}
       <div className="flex border-b border-hair">

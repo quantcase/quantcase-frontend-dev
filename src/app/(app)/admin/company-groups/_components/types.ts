@@ -1,10 +1,13 @@
 // ── Company Groups — shapes per "Company Groups — Admin Guide" ──────────────
 
-export type FilterType = "manual" | "dynamic";
+export type FilterType = "manual" | "dynamic" | "kpi_filter";
 
 export interface ManualFilterConfig {
   tickers: string[];
 }
+
+/** kpi_filter groups carry no inline config — membership comes from attached KpiFilters + recompute. */
+export type KpiFilterGroupConfig = Record<string, never>;
 
 export interface NameRangeFilter {
   from: string;
@@ -60,7 +63,7 @@ export interface DynamicFilterConfig {
   industries?: string[];
 }
 
-export type FilterConfig = ManualFilterConfig | DynamicFilterConfig;
+export type FilterConfig = ManualFilterConfig | DynamicFilterConfig | KpiFilterGroupConfig;
 
 export interface CompanyGroup {
   id: string;
@@ -82,4 +85,16 @@ export interface ResolveResult {
 
 export function isManualConfig(g: Pick<CompanyGroup, "filter_type" | "filter_config">): g is CompanyGroup & { filter_config: ManualFilterConfig } {
   return g.filter_type === "manual";
+}
+
+// ── kpi_filter — group built from attached KpiFilters (AND-combined) + explicit recompute ────────
+
+export interface AttachedKpiFilter {
+  id: string;
+  kpi_filter_slug: string;
+}
+
+export interface RecomputeResult {
+  matched: number;
+  symbols: string[];
 }

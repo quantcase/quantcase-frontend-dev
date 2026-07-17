@@ -502,27 +502,9 @@ export interface PipelineSignalsResponse {
   signals: PipelineSignal[];
 }
 
-// ── Prowess ingestion — KPI catalogue + CSV upload ───────────────────────────
-
-export interface Kpi {
-  id?: string;
-  abbr: string;
-  full_form: string;
-  denomination: string;
-  kpi_type: string;
-  industry: string[];
-  prowess_name: string;
-}
-
-export interface KpisResponse {
-  success: true;
-  data: Kpi[];
-}
-
-export interface KpiCreateResponse {
-  success: true;
-  data: Kpi;
-}
+// ── Prowess ingestion — CSV upload ───────────────────────────────────────────
+// KPI catalogue types (Kpi, KpisResponse, KpiCreateResponse) now live under
+// admin/kpis/_components/types.ts — see /admin/kpis.
 
 export type ProwessMode = "annual" | "quarterly" | "daily" | "index";
 

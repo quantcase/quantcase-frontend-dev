@@ -6,6 +6,8 @@ import { apiCall, apiPost, apiPut } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { TagMultiPicker } from "@/components/molecules/tag-multi-picker";
 import { CheckboxField } from "@/components/molecules/checkbox-field";
+import { KpiFilter } from "@/app/(app)/admin/kpi-filters/_components/types";
+import { KpiFilterAttachPanel } from "./KpiFilterAttachPanel";
 import {
   CompanyGroup,
   FilterType,
@@ -38,6 +40,7 @@ interface Props {
   open: boolean;
   group: CompanyGroup | null;
   companies: string[];
+  kpiFilters: KpiFilter[];
   onClose: () => void;
   onSaved: () => void;
 }
@@ -228,7 +231,7 @@ function WindowedDocFilterBlock({
 
 // Parent must remount this component (e.g. via a `key` that changes on each open) so these
 // initial-state values re-derive from `group` fresh every time the dialog opens.
-export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Props) {
+export function GroupFormDialog({ open, group, companies, kpiFilters, onClose, onSaved }: Props) {
   const dyn = group && !isManualConfig(group) ? (group.filter_config as DynamicFilterConfig) : null;
 
   const [name, setName] = useState(group?.name ?? "");
@@ -271,6 +274,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
 
   function buildFilterConfig(): FilterConfig {
     if (filterType === "manual") return { tickers: manualTickers };
+    if (filterType === "kpi_filter") return {};
     const cfg: DynamicFilterConfig = {};
     if (nameRangeEnabled) cfg.nameRange = { from: nameFrom.trim().toUpperCase() || "A", to: nameTo.trim().toUpperCase() || "Z" };
     if (transcriptEnabled) cfg.transcript = transcript;
@@ -402,7 +406,7 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
           <div>
             <label className={LABEL_CLS}>Type</label>
             <div className="inline-flex rounded-md border border-hair p-0.5 bg-secondary">
-              {(["manual", "dynamic"] as const).map((t) => (
+              {(["manual", "dynamic", "kpi_filter"] as const).map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -411,14 +415,17 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                     filterType === t ? "bg-card text-ink shadow-sm" : "text-ink-3 hover:text-ink"
                   }`}
                 >
-                  {t === "manual" ? "Manual list" : "Filter-based"}
+                  {t === "manual" ? "Manual list" : t === "dynamic" ? "Live filter" : "KPI filter"}
                 </button>
               ))}
             </div>
             <p className="text-[11px] text-ink-3 mt-1.5">
-              {filterType === "manual"
-                ? "A fixed ticker list — static until you edit it."
-                : "Recomputed live every time this group is used — never a frozen snapshot. Every filter below is ANDed together; there's no OR — if you need that, make two groups."}
+              {filterType === "manual" &&
+                "A fixed ticker list — static until you edit it."}
+              {filterType === "dynamic" &&
+                "Recomputed live every time this group is used — never a frozen snapshot. Every filter below is ANDed together; there's no OR — if you need that, make two groups."}
+              {filterType === "kpi_filter" &&
+                "Built from one or more KPI threshold conditions (AND-combined). Static after each Recompute — attaching or detaching a condition alone doesn't change membership until you explicitly recompute."}
             </p>
           </div>
 
@@ -572,6 +579,16 @@ export function GroupFormDialog({ open, group, companies, onClose, onSaved }: Pr
                 </div>
               )}
             </div>
+          )}
+
+          {filterType === "kpi_filter" && (
+            currentSlug ? (
+              <KpiFilterAttachPanel groupSlug={currentSlug} kpiFilters={kpiFilters} />
+            ) : (
+              <div className="rounded-md border border-hair bg-secondary px-3 py-2 text-[12px] text-ink-3">
+                Save the group first, then attach KPI filters.
+              </div>
+            )
           )}
 
           {resolveResult && (

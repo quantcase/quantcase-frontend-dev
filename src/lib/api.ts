@@ -49,6 +49,21 @@ export function apiAuthPost<T>(url: string, callbacks: ApiCallbacks<T>, body?: u
     .finally(() => onComplete?.());
 }
 
+/** PUT with Bearer token — expects { success } envelope, surfaces json.error on non-2xx */
+export function apiAuthPut<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknown): void {
+  const { onStart, onSuccess, onError, onComplete } = callbacks;
+  onStart?.();
+  fetch(url, { method: "PUT", headers: authHeaders(), body: body ? JSON.stringify(body) : undefined })
+    .then(async (res) => {
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
+      if (!json?.success) throw new Error(json?.error ?? "Unexpected response");
+      onSuccess(json);
+    })
+    .catch((err) => onError(err.message ?? "Failed to update"))
+    .finally(() => onComplete?.());
+}
+
 /** PATCH with Bearer token */
 export function apiAuthPatch<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknown): void {
   const { onStart, onSuccess, onError, onComplete } = callbacks;

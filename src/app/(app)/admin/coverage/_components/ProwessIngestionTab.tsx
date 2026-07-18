@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AlertCircle, CheckCircle2, Loader2, Upload } from "lucide-react";
 import { apiAuthUpload } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { MetricTile } from "@/components/molecules/metric-tile";
-import { KpiCatalogueModal } from "./KpiCatalogueModal";
 import {
   ProwessFinancialReport,
   ProwessIngestReport,
@@ -157,7 +157,6 @@ function MarketReportView({ report }: { report: ProwessMarketReport }) {
 }
 
 export function ProwessIngestionTab() {
-  const [showKpiCatalogue, setShowKpiCatalogue] = useState(false);
 
   const [mode, setMode] = useState<ProwessMode>("annual");
   const [file, setFile] = useState<File | null>(null);
@@ -232,12 +231,13 @@ export function ProwessIngestionTab() {
           Upload a Prowess CSV export to preview, then insert. Preview never writes to the DB — always
           review the report (and resolve any unmatched columns) before running.
         </p>
-        <button
-          onClick={() => setShowKpiCatalogue(true)}
+        <Link
+          href="/admin/kpis"
+          target="_blank"
           className="rounded-md border border-hair bg-card px-3 py-1.5 text-[12px] font-medium text-ink hover:border-[var(--qc-ink)] transition-colors shrink-0"
         >
           KPI Catalogue
-        </button>
+        </Link>
       </div>
 
       <div className="rounded-[10px] border border-hair bg-secondary p-2">
@@ -332,8 +332,6 @@ export function ProwessIngestionTab() {
           ? <FinancialReportView report={previewReport} />
           : <MarketReportView report={previewReport} />
       )}
-
-      {showKpiCatalogue && <KpiCatalogueModal onClose={() => setShowKpiCatalogue(false)} />}
     </div>
   );
 }

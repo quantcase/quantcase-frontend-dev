@@ -6,6 +6,7 @@ import { apiCall, apiDelete, rawFetch } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { CompanyGroup, ResolveResult, isManualConfig } from "./_components/types";
 import { GroupFormDialog } from "./_components/GroupFormDialog";
+import { KpiFilter, KpiFiltersResponse } from "@/app/(app)/admin/kpi-filters/_components/types";
 
 const BASE = `${BACKEND_URL}/admin/company-groups`;
 
@@ -17,6 +18,9 @@ function FilterSummary({ group }: { group: CompanyGroup }) {
   if (isManualConfig(group)) {
     const count = group.filter_config.tickers?.length ?? 0;
     return <span className="text-[12px] text-ink-3">{count} ticker{count !== 1 ? "s" : ""}, manual</span>;
+  }
+  if (group.filter_type === "kpi_filter") {
+    return <span className="text-[12px] text-ink-3">KPI filter group — see detail to view attached conditions</span>;
   }
   const cfg = group.filter_config as Record<string, unknown>;
   const parts: string[] = [];
@@ -114,6 +118,7 @@ export default function CompanyGroupsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [companies, setCompanies] = useState<string[]>([]);
+  const [kpiFilters, setKpiFilters] = useState<KpiFilter[]>([]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<CompanyGroup | null>(null);
@@ -133,6 +138,13 @@ export default function CompanyGroupsPage() {
   useEffect(() => {
     rawFetch<L1OptionsForCompanies>(`${BACKEND_URL}/admin/pipeline-dispatch/l1-multi/options`, {
       onSuccess: (res) => setCompanies(res.companies ?? []),
+      onError: () => {},
+    });
+  }, []);
+
+  useEffect(() => {
+    apiCall<KpiFiltersResponse>(`${BACKEND_URL}/admin/kpi-filters`, {
+      onSuccess: (res) => setKpiFilters(res.data ?? []),
       onError: () => {},
     });
   }, []);
@@ -219,6 +231,7 @@ export default function CompanyGroupsPage() {
         open={dialogOpen}
         group={editingGroup}
         companies={companies}
+        kpiFilters={kpiFilters}
         onClose={() => setDialogOpen(false)}
         onSaved={loadGroups}
       />

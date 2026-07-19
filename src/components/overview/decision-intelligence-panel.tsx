@@ -5,6 +5,8 @@ import type { InsightData } from "@/types/analysis";
 import type { TechnicalsResponse } from "@/types/technicals";
 import type { ScreenerData } from "@/types/screener";
 import type { OverviewAnalysis } from "@/types/overview";
+import type { IndicatorId } from "@/types/technicals";
+import { findIndicator } from "@/lib/technicals-indicators";
 import { SignalCard, type SignalTooltip } from "./signal-card";
 import {
   DecisionIntelligenceShell,
@@ -256,20 +258,27 @@ export function DecisionIntelligencePanel({
   // Optional hover tooltips for the Technicals cards, sourced from the
   // decision-intelligence indicators (explanation + watchout) when available.
   const techIndicators = technicalsData?.decisionIntelligence?.indicators ?? [];
-  function techTip(...keywords: string[]): SignalTooltip | undefined {
-    const ind = techIndicators.find((i) =>
-      keywords.some((k) => i.name.toLowerCase().includes(k.toLowerCase()))
-    );
+  const stockType = technicalsData?.stockClassification?.stock_type ?? null;
+
+  // Keyed on the stable indicator id — the previous fuzzy name match could
+  // resolve "structure" to Trend Quality depending on array order.
+  function techTip(id: IndicatorId): SignalTooltip | undefined {
+    const ind = findIndicator(techIndicators, id);
     if (!ind?.explanation) return undefined;
+    const watch =
+      stockType === "Value"
+        ? ind.valueWatchout ?? ind.growthWatchout
+        : ind.growthWatchout ?? ind.valueWatchout;
     return {
       title: ind.name,
       description: ind.explanation,
-      watch: ind.growthWatchout ?? ind.valueWatchout ?? undefined,
+      watch: watch ?? undefined,
     };
   }
 
   // Key alerts — simple source + one-line text
   const di = technicalsData?.decisionIntelligence;
+  const techScores = technicalsData?.scores ?? null;
   const reAlerts = re?.decisionContext?.alerts ?? [];
 
   type Alert = { source: string; text: string; sentiment: "positive" | "negative" | "neutral" };
@@ -489,27 +498,40 @@ export function DecisionIntelligencePanel({
               label="Structure"
               value={structureZone}
               sentiment={techSent(structureZone)}
-              tooltip={techTip("structure", "trend quality")}
+              tooltip={techTip("price_architecture")}
             />
             <SignalCard
               label="Trend"
               value={trendDir}
               sentiment={techSent(trendDir)}
-              tooltip={techTip("trend")}
+              tooltip={techTip("trend_direction")}
             />
             <SignalCard
               label="Timing"
               value={`RSI ${technicalsData?.momentum?.rsi?.value != null ? Math.round(technicalsData.momentum.rsi.value) : "—"}`}
               sentiment="neutral"
-              tooltip={techTip("timing", "momentum", "rsi")}
+              tooltip={techTip("momentum")}
             />
             <SignalCard
               label="Rel. Str."
               value={rsNifty}
               sentiment={techSent(rsNifty)}
-              tooltip={techTip("relative strength", "rel. str", "leadership")}
+              tooltip={techTip("relative_strength")}
             />
+            {techScores && (
+              <SignalCard
+                label="Tech Score"
+                value={`${techScores.final_score} (${techScores.grade})`}
+                sentiment={techScores.final_score >= 70 ? "positive" : techScores.final_score >= 50 ? "neutral" : "negative"}
+              />
+            )}
           </div>
+          {/* The AI narrative lands asynchronously; the raw technicals above are live. */}
+          {technicalsData && !di && (
+            <span style={{ display: "block", marginTop: 6, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)" }}>
+              AI view generating…
+            </span>
+          )}
         </div>
       </DecisionSection>
 

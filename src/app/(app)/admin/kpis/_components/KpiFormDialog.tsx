@@ -74,6 +74,7 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
   // Preview against real data (edit mode only — the endpoint resolves a persisted KPI)
   const [previewSymbol, setPreviewSymbol] = useState("");
   const [previewFrequency, setPreviewFrequency] = useState<KpiFrequency | "">("");
+  const [resampleMode, setResampleMode] = useState<"" | "average" | "latest">("");
   const [previewing, setPreviewing] = useState(false);
   const [previewResult, setPreviewResult] = useState<PreviewResult | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -179,6 +180,7 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
     if (!isEdit || !previewSymbol.trim()) return;
     const params = new URLSearchParams({ symbol: previewSymbol.trim().toUpperCase() });
     if (previewFrequency) params.set("frequency", previewFrequency);
+    if (frequency === "daily" && resampleMode) params.set("resample_mode", resampleMode);
     apiAuthGet<PreviewResponse>(`${BASE}/${kpi!.abbr}/preview?${params}`, {
       onStart: () => { setPreviewing(true); setPreviewError(null); },
       onSuccess: (res) => setPreviewResult(res.data),
@@ -192,13 +194,16 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
       abbr: abbr.trim().toUpperCase(),
       full_form: fullForm.trim(),
       formula_expression: mode === "computed" ? formula.trim() || null : null,
-      frequency: frequency || undefined,
-      fallback_abbrs: fallbackAbbrs.length > 0 ? fallbackAbbrs : undefined,
-      unit_label: unitLabel.trim() || undefined,
-      kpi_type: kpiType.trim(),
-      denomination: denomination.trim(),
-      description: description.trim() || undefined,
-      prowess_name: mode === "raw" ? prowessName.trim() || undefined : undefined,
+      // The backend only touches fields present as a key in the body — omitted/undefined always
+      // means "leave unchanged," never "clear." To actually clear a field we must send an
+      // explicit null (or [] for the array field), not let it collapse to undefined.
+      frequency: frequency || null,
+      fallback_abbrs: fallbackAbbrs,
+      unit_label: unitLabel.trim() || null,
+      kpi_type: kpiType.trim() || null,
+      denomination: denomination.trim() || null,
+      description: description.trim() || null,
+      prowess_name: mode === "raw" ? prowessName.trim() || null : null,
     };
 
     const callbacks = {
@@ -215,7 +220,11 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
     }
   }
 
-  const canSave = abbr.trim() && fullForm.trim() && kpiType.trim() && denomination.trim();
+  const missingFields = [
+    !abbr.trim() && "Abbr",
+    !fullForm.trim() && "Full Form",
+  ].filter((f): f is string => !!f);
+  const canSave = missingFields.length === 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
@@ -470,6 +479,28 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
                     <option value="daily">Daily</option>
                   </select>
                 </div>
+                {frequency === "daily" && (
+                  <div>
+                    <label className="text-[10px] text-ink-3 block mb-1">Resample</label>
+                    <div className="inline-flex rounded-md border border-hair p-0.5 bg-secondary">
+                      {([
+                        { value: "" as const, label: "Default" },
+                        { value: "average" as const, label: "Average" },
+                      ]).map((opt) => (
+                        <button
+                          key={opt.label}
+                          type="button"
+                          onClick={() => setResampleMode(opt.value)}
+                          className={`px-3 py-1.5 text-[12px] font-medium rounded-[5px] transition-colors ${
+                            resampleMode === opt.value ? "bg-card text-ink shadow-sm" : "text-ink-3 hover:text-ink"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={runPreview}
@@ -501,22 +532,17 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 text-[12px] text-ink">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Period</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">As of</span>
                     {previewResult.period ? (
                       <span className="font-mono">
-                        {previewResult.source === "computed" && "as of "}
-                        {previewResult.period.fiscal_year} {previewResult.period.quarter}
+                        {previewResult.period.frequency === "daily"
+                          ? previewResult.period.date
+                          : `${previewResult.period.quarter} ${previewResult.period.fiscal_year}`}
                       </span>
                     ) : (
                       <span className="text-ink-3">not returned for this preview</span>
                     )}
                   </div>
-                  {previewResult.source === "computed" && previewResult.period && (
-                    <p className="text-[10px] text-ink-3">
-                      Most recent period among this formula&apos;s direct inputs — not a guaranteed
-                      single ground-truth date.
-                    </p>
-                  )}
                   {previewResult.trace.length > 0 && (
                     <div className="space-y-1">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Built from</p>
@@ -541,6 +567,10 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
           {error ? (
             <div className="flex items-start gap-1.5 text-[12px] text-down max-w-[420px]">
               <AlertCircle className="size-3.5 shrink-0 mt-px" /> {error}
+            </div>
+          ) : missingFields.length > 0 ? (
+            <div className="flex items-start gap-1.5 text-[12px] text-warn max-w-[420px]">
+              <AlertCircle className="size-3.5 shrink-0 mt-px" /> Missing required: {missingFields.join(", ")}
             </div>
           ) : <span />}
           <div className="flex items-center gap-2 shrink-0">

@@ -2,8 +2,10 @@ export interface FinancialRow {
   key: string;
   label: string;
   values: (number | null)[];
-  highlight?: boolean;
   format?: "percent" | "number";
+  /** Same shape recursively — present only on rows with a drill-down. */
+  children?: FinancialRow[];
+  meta?: { expandable?: boolean };
 }
 
 export interface FinancialTable {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, Loader2, AlertCircle, Upload } from "lucide-react";
 import { apiCall, apiPost, apiPut } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
@@ -270,6 +270,21 @@ export function GroupFormDialog({ open, group, companies, kpiFilters, onClose, o
   const [resolveResult, setResolveResult] = useState<ResolveResult | null>(null);
   const [resolving, setResolving] = useState(false);
 
+  function doResolve(slug: string) {
+    apiCall<{ success: boolean; data: ResolveResult }>(`${BASE}/${slug}/resolve`, {
+      onStart: () => setResolving(true),
+      onSuccess: (res) => setResolveResult(res.data),
+      onError: () => {},
+      onComplete: () => setResolving(false),
+    });
+  }
+
+  // Show the group's actual current membership on open, not just after a save in this dialog —
+  // otherwise an already-computed group looks unresolved until you touch something.
+  useEffect(() => {
+    if (currentSlug) doResolve(currentSlug);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!open) return null;
 
   function buildFilterConfig(): FilterConfig {
@@ -329,15 +344,6 @@ export function GroupFormDialog({ open, group, companies, kpiFilters, onClose, o
     const file = e.target.files?.[0];
     if (file) handleCsvFile(file);
     e.target.value = "";
-  }
-
-  function doResolve(slug: string) {
-    apiCall<{ success: boolean; data: ResolveResult }>(`${BASE}/${slug}/resolve`, {
-      onStart: () => setResolving(true),
-      onSuccess: (res) => setResolveResult(res.data),
-      onError: () => {},
-      onComplete: () => setResolving(false),
-    });
   }
 
   function handleSave() {

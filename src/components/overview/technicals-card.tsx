@@ -647,7 +647,9 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
           barPct: rsBarPct,
         },
         {
-          label: "vs Nifty IT",
+          // Label follows the actual sector index — it used to be hardcoded to
+          // "vs Nifty IT" regardless of the stock's sector.
+          label: `vs ${re?.dominanceEngine?.leadership?.vsSector?.sectorTicker ?? "Sector"}`,
           value: re?.dominanceEngine?.leadership?.vsSector?.signal
             ? humanize(re.dominanceEngine.leadership.vsSector.signal)
             : "—",

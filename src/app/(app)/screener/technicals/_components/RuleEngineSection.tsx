@@ -3,6 +3,8 @@ import { TrendingUp, AlertCircle } from "lucide-react";
 import type {
   RuleEngine,
   RelativeStrengthSingle,
+  SectorVsIndexStrength,
+  SmaDistancePct,
   StructureEngineData,
   TrendEngineData,
   TimingEngineData,
@@ -10,19 +12,10 @@ import type {
   DirectionalBiasIndicator,
   DecisionIntelligence,
   DecisionIntelligenceIndicator,
+  IndicatorId,
 } from "@/types/technicals";
+import { describeSectorLeadership, watchoutFor } from "@/lib/technicals-indicators";
 import type { EngineTab } from "./TechnicalsRuleEngine";
-
-function resolveWatchout(
-  indicators: DecisionIntelligenceIndicator[] | undefined,
-  name: string,
-  perspective: "GROWTH" | "VALUE",
-): string | null {
-  if (!indicators) return null;
-  const match = indicators.find((ind) => ind.name === name);
-  if (!match) return null;
-  return perspective === "GROWTH" ? match.growthWatchout : match.valueWatchout;
-}
 
 function smaPositionColor(pos: string): string {
   if (pos === "ABOVE") return "var(--qc-up)";
@@ -84,6 +77,8 @@ function EngineCard({
   metrics,
   output,
   watchout,
+  /** Shown when `output` is null. Pass null to omit the block entirely. */
+  emptyOutput = "No data available.",
 }: {
   title: string;
   subtitle?: string;
@@ -91,6 +86,7 @@ function EngineCard({
   metrics?: React.ReactNode;
   output: string | null;
   watchout: string | null;
+  emptyOutput?: string | null;
 }) {
   const variant = getBadgeVariant(badge ?? null);
   const badgeLabel = badge ? badge.replace(/_/g, " ") : null;
@@ -125,23 +121,25 @@ function EngineCard({
       {metrics && <div className="flex flex-wrap gap-1.5">{metrics}</div>}
 
       {/* INTERPRETATION */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-1">
-          <TrendingUp className="h-3 w-3" style={{ color: "var(--qc-ink-2)" }} />
-          <span style={{ fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "var(--qc-font-mono)" }}>
-            Interpretation
-          </span>
+      {(output || emptyOutput) && (
+        <div className="space-y-1">
+          <div className="flex items-center gap-1">
+            <TrendingUp className="h-3 w-3" style={{ color: "var(--qc-ink-2)" }} />
+            <span style={{ fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "var(--qc-font-mono)" }}>
+              Interpretation
+            </span>
+          </div>
+          {output ? (
+            <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.6, fontFamily: "var(--qc-font-sans)" }}>
+              {output.split("\n").map((line, i, arr) => (
+                <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+              ))}
+            </p>
+          ) : (
+            <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-sans)" }}>{emptyOutput}</p>
+          )}
         </div>
-        {output ? (
-          <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.6, fontFamily: "var(--qc-font-sans)" }}>
-            {output.split("\n").map((line, i, arr) => (
-              <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
-            ))}
-          </p>
-        ) : (
-          <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-sans)" }}>No data available.</p>
-        )}
-      </div>
+      )}
 
       {/* WATCHOUTS */}
       {watchout && (
@@ -168,7 +166,7 @@ function formatVolume(v: number): string {
   return v.toFixed(0);
 }
 
-function StructureEnginePanel({ engine, perspective, indicators, avgVolume20d }: { engine: StructureEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined; avgVolume20d?: number }) {
+function StructureEnginePanel({ engine, perspective, indicators, avgVolume20d, wyckoffGrowthWarning }: { engine: StructureEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined; avgVolume20d?: number; wyckoffGrowthWarning?: string | null }) {
   const mp = engine.marketStructure;
   const cp = engine.participation;
   const pa = engine.priceStructure;
@@ -176,12 +174,22 @@ function StructureEnginePanel({ engine, perspective, indicators, avgVolume20d }:
 
   return (
     <div className="space-y-4">
+      {/* Surfaced here — next to the Wyckoff phase it contradicts — rather than
+          duplicated alongside the stock-type chip. */}
+      {wyckoffGrowthWarning && (
+        <div className="flex items-start gap-2 rounded-[8px] px-3 py-2" style={{ background: "var(--qc-warn-soft)" }}>
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: "var(--qc-warn)" }} />
+          <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-warn)", lineHeight: 1.55, fontFamily: "var(--qc-font-sans)" }}>
+            {wyckoffGrowthWarning}
+          </p>
+        </div>
+      )}
       <EngineCard
         title="Market Structure"
         subtitle="Wyckoff Phase"
         badge={mp.wyckoffPhase}
         output={isGrowth ? mp.growthOutput : mp.valueOutput}
-        watchout={resolveWatchout(indicators, "Market Structure", perspective)}
+        watchout={watchoutFor(indicators, "market_structure", perspective)}
       />
       <EngineCard
         title="Capital Participation"
@@ -193,14 +201,14 @@ function StructureEnginePanel({ engine, perspective, indicators, avgVolume20d }:
           {avgVolume20d != null && <MetricPill label="Avg Vol (20D)" value={formatVolume(avgVolume20d)} valueColor="var(--qc-ink)" />}
         </>}
         output={isGrowth ? cp.growthOutput : cp.valueOutput}
-        watchout={resolveWatchout(indicators, "Capital Participation", perspective)}
+        watchout={watchoutFor(indicators, "capital_participation", perspective)}
       />
       <EngineCard
         title="Price Structure"
         subtitle="Support & Resistance"
         badge={pa.zone ?? "N/A"}
         output={isGrowth ? pa.growthOutput : pa.valueOutput}
-        watchout={resolveWatchout(indicators, "Price Architecture", perspective)}
+        watchout={watchoutFor(indicators, "price_architecture", perspective)}
       />
     </div>
   );
@@ -225,7 +233,15 @@ function deriveTrendSummaryLine(db: DirectionalBiasIndicator): string {
   return `${regime} with Short Term trend ${st}. Intermediate trend is ${it} and Long Term trend is ${lt}.`;
 }
 
-function TrendEnginePanel({ engine, perspective, indicators }: { engine: TrendEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined }) {
+/** `priceVsSMA*` stays the source of truth for direction; the pct adds magnitude. */
+function smaPillValue(position: string, distancePct: number | null | undefined): string {
+  const dir = position === "ABOVE" ? "UP" : "DOWN";
+  if (distancePct == null) return dir;
+  const sign = distancePct >= 0 ? "+" : "";
+  return `${dir} ${sign}${distancePct.toFixed(1)}%`;
+}
+
+function TrendEnginePanel({ engine, perspective, indicators, smaDistancePct }: { engine: TrendEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined; smaDistancePct?: SmaDistancePct | null }) {
   const db = engine.trendDirection;
   const tm = engine.trendQuality;
   const isGrowth = perspective === "GROWTH";
@@ -239,13 +255,13 @@ function TrendEnginePanel({ engine, perspective, indicators }: { engine: TrendEn
         subtitle="SMA 20 / 50 / 100 / 200"
         badge={deriveTrendDirectionBadge(db)}
         metrics={<>
-          <MetricPill label="SMA 20" value={db.priceVsSMA20 === "ABOVE" ? "UP" : "DOWN"} valueColor={smaPositionColor(db.priceVsSMA20)} />
-          <MetricPill label="SMA 50" value={db.priceVsSMA50 === "ABOVE" ? "UP" : "DOWN"} valueColor={smaPositionColor(db.priceVsSMA50)} />
-          <MetricPill label="SMA 100" value={db.priceVsSMA100 === "ABOVE" ? "UP" : "DOWN"} valueColor={smaPositionColor(db.priceVsSMA100)} />
-          <MetricPill label="SMA 200" value={db.priceVsSMA200 === "ABOVE" ? "UP" : "DOWN"} valueColor={smaPositionColor(db.priceVsSMA200)} />
+          <MetricPill label="SMA 20" value={smaPillValue(db.priceVsSMA20, smaDistancePct?.sma20)} valueColor={smaPositionColor(db.priceVsSMA20)} />
+          <MetricPill label="SMA 50" value={smaPillValue(db.priceVsSMA50, smaDistancePct?.sma50)} valueColor={smaPositionColor(db.priceVsSMA50)} />
+          <MetricPill label="SMA 100" value={smaPillValue(db.priceVsSMA100, smaDistancePct?.sma100)} valueColor={smaPositionColor(db.priceVsSMA100)} />
+          <MetricPill label="SMA 200" value={smaPillValue(db.priceVsSMA200, smaDistancePct?.sma200)} valueColor={smaPositionColor(db.priceVsSMA200)} />
         </>}
         output={trendOutput}
-        watchout={resolveWatchout(indicators, "Trend Direction", perspective)}
+        watchout={watchoutFor(indicators, "trend_direction", perspective)}
       />
       <EngineCard
         title="Trend Quality"
@@ -257,7 +273,7 @@ function TrendEnginePanel({ engine, perspective, indicators }: { engine: TrendEn
           <MetricPill label="Band" value={tm.adxBand} valueColor="var(--qc-ink-2)" />
         </>}
         output={isGrowth ? tm.growthOutput : tm.valueOutput}
-        watchout={resolveWatchout(indicators, "Trend Quality", perspective)}
+        watchout={watchoutFor(indicators, "trend_quality", perspective)}
       />
     </div>
   );
@@ -282,7 +298,7 @@ function TimingEnginePanel({ engine, perspective, indicators }: { engine: Timing
         badge={rsiLabel(mt.rsiZone)}
         metrics={<MetricPill label="RSI" value={mt.rsi.toFixed(2)} valueColor={mt.rsiZone === "0-30" ? "var(--qc-up)" : mt.rsiZone === "70-100" ? "var(--qc-down)" : "var(--qc-ink)"} />}
         output={isGrowth ? mt.growthOutput : mt.valueOutput}
-        watchout={resolveWatchout(indicators, "Momentum", perspective)}
+        watchout={watchoutFor(indicators, "momentum", perspective)}
       />
       <EngineCard
         title="Volatility"
@@ -293,13 +309,13 @@ function TimingEnginePanel({ engine, perspective, indicators }: { engine: Timing
           <MetricPill label="Direction" value={vr.expanding ? "Expanding" : "Contracting"} valueColor={vr.expanding ? "var(--qc-down)" : "var(--qc-up)"} />
         </>}
         output={isGrowth ? vr.growthOutput : vr.valueOutput}
-        watchout={resolveWatchout(indicators, "Volatility", perspective)}
+        watchout={watchoutFor(indicators, "volatility", perspective)}
       />
     </div>
   );
 }
 
-function RelativeStrengthCard({ title, subtitle, rs, perspective, indicatorName, indicators }: { title: string; subtitle: string; rs: RelativeStrengthSingle; perspective: "GROWTH" | "VALUE"; indicatorName: string; indicators: DecisionIntelligenceIndicator[] | undefined }) {
+function RelativeStrengthCard({ title, subtitle, rs, perspective, indicatorId, indicators, emptyOutput }: { title: string; subtitle: string; rs: RelativeStrengthSingle; perspective: "GROWTH" | "VALUE"; indicatorId: IndicatorId; indicators: DecisionIntelligenceIndicator[] | undefined; emptyOutput?: string | null }) {
   const isGrowth = perspective === "GROWTH";
   const hasData = rs.signal !== null;
   return (
@@ -312,16 +328,42 @@ function RelativeStrengthCard({ title, subtitle, rs, perspective, indicatorName,
         <MetricPill label="Prev CRS" value={rs.prevCrsValue?.toFixed(2) ?? "—"} />
       </> : undefined}
       output={isGrowth ? rs.growthOutput : rs.valueOutput}
-      watchout={resolveWatchout(indicators, indicatorName, perspective)}
+      watchout={watchoutFor(indicators, indicatorId, perspective)}
+      emptyOutput={emptyOutput}
+    />
+  );
+}
+
+/**
+ * Third RS leg: is the sector itself leading the market? Ships no narrative or
+ * watchouts, so the interpretation is derived client-side.
+ */
+function SectorVsNiftyCard({ rs }: { rs: SectorVsIndexStrength }) {
+  return (
+    <EngineCard
+      title="Sector vs Nifty"
+      subtitle={rs.sectorTicker ?? "Sector Index"}
+      badge={rs.signal ?? "N/A"}
+      metrics={rs.signal ? <>
+        <MetricPill label="CRS" value={rs.crsValue?.toFixed(2) ?? "—"} />
+        <MetricPill label="Prev CRS" value={rs.prevCrsValue?.toFixed(2) ?? "—"} />
+      </> : undefined}
+      output={describeSectorLeadership(rs)}
+      watchout={null}
+      emptyOutput={null}
     />
   );
 }
 
 function DominanceEnginePanel({ engine, perspective, indicators }: { engine: DominanceEngineData; perspective: "GROWTH" | "VALUE"; indicators: DecisionIntelligenceIndicator[] | undefined }) {
+  const sectorNifty = engine.leadership.vsSectorNifty;
+
   return (
     <div className="space-y-4">
-      <RelativeStrengthCard title="Relative Strength vs Nifty" subtitle="Price Ratio vs Index" rs={engine.leadership.vsNifty} perspective={perspective} indicatorName="Relative Strength" indicators={indicators} />
-      <RelativeStrengthCard title="Relative Strength vs Sector" subtitle="Price Ratio vs Sector ETF" rs={engine.leadership.vsSector} perspective={perspective} indicatorName="Relative Strength" indicators={indicators} />
+      <RelativeStrengthCard title="Relative Strength vs Nifty" subtitle="Price Ratio vs Index" rs={engine.leadership.vsNifty} perspective={perspective} indicatorId="relative_strength" indicators={indicators} />
+      <RelativeStrengthCard title="Relative Strength vs Sector" subtitle="Price Ratio vs Sector ETF" rs={engine.leadership.vsSector} perspective={perspective} indicatorId="relative_strength" indicators={indicators} emptyOutput="Sector data unavailable." />
+      {/* Absent for sectors with no NSE index — render nothing rather than an empty card. */}
+      {sectorNifty && <SectorVsNiftyCard rs={sectorNifty} />}
     </div>
   );
 }
@@ -332,22 +374,26 @@ export function RuleEngineSection({
   activeEngine,
   activePerspective,
   avgVolume20d,
+  smaDistancePct,
+  wyckoffGrowthWarning,
 }: {
   ruleEngine: RuleEngine;
   decisionIntelligence?: DecisionIntelligence;
   activeEngine: EngineTab;
   activePerspective: "GROWTH" | "VALUE";
   avgVolume20d?: number;
+  smaDistancePct?: SmaDistancePct | null;
+  wyckoffGrowthWarning?: string | null;
 }) {
   const diIndicators = decisionIntelligence?.indicators;
 
   return (
     <>
       {activeEngine === "STRUCTURE" && (
-        <StructureEnginePanel engine={ruleEngine.structureEngine} perspective={activePerspective} indicators={diIndicators} avgVolume20d={avgVolume20d} />
+        <StructureEnginePanel engine={ruleEngine.structureEngine} perspective={activePerspective} indicators={diIndicators} avgVolume20d={avgVolume20d} wyckoffGrowthWarning={wyckoffGrowthWarning} />
       )}
       {activeEngine === "TREND" && (
-        <TrendEnginePanel engine={ruleEngine.trendEngine} perspective={activePerspective} indicators={diIndicators} />
+        <TrendEnginePanel engine={ruleEngine.trendEngine} perspective={activePerspective} indicators={diIndicators} smaDistancePct={smaDistancePct} />
       )}
       {activeEngine === "TIMING" && (
         <TimingEnginePanel engine={ruleEngine.timingEngine} perspective={activePerspective} indicators={diIndicators} />

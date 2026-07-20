@@ -1,7 +1,8 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useCallback, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { X } from "lucide-react";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { AssetActionBar } from "@/components/molecules/asset-action-bar";
 import { useTechnicals } from "@/hooks/useTechnicals";
@@ -9,9 +10,14 @@ import { usePrices } from "@/hooks/usePrices";
 import { useScreenerData } from "@/hooks/useScreenerData";
 import { CandlestickChart, type ChartMode } from "./_components/CandlestickChart";
 import { DecisionIntelligenceBanner } from "./_components/DecisionIntelligenceBanner";
+import { DecisionIntelligenceState } from "./_components/DecisionIntelligenceState";
+import { LevelsToWatchCard } from "./_components/LevelsToWatchCard";
 import { TechnicalsRuleEngine, type EngineTab } from "./_components/TechnicalsRuleEngine";
 import { LevelsStrip } from "./_components/LevelsStrip";
 import { SectionPanel } from "@/components/molecules/section-panel";
+
+/** Each refresh costs an LLM job, so rate-limit the button client-side too. */
+const REFRESH_COOLDOWN_MS = 60_000;
 
 // ─── Inline skeleton components ───────────────────────────────────────────────
 
@@ -90,8 +96,24 @@ function TechnicalsContent() {
     setChartMode(tab);
   };
 
-  const { data, derived, loading, error } = useTechnicals(symbol);
+  const {
+    data, derived, loading, error,
+    insightStatus, insightProgress, isUpdating, isRefreshing, refreshError, refresh,
+  } = useTechnicals(symbol);
   const { prices, indicators, loading: pricesLoading, error: pricesError } = usePrices(symbol);
+
+  const [dismissedRefreshError, setDismissedRefreshError] = useState(false);
+  const lastRefreshAtRef = useRef(0);
+
+  const handleRefresh = useCallback(() => {
+    const now = Date.now();
+    if (now - lastRefreshAtRef.current < REFRESH_COOLDOWN_MS) return;
+    lastRefreshAtRef.current = now;
+    setDismissedRefreshError(false);
+    refresh();
+  }, [refresh]);
+
+  const refreshDisabled = isRefreshing || insightStatus === "generating";
   const { data: screenerData } = useScreenerData(symbol);
   const companyInfo = screenerData?.company
     ? { name: screenerData.company.name, exchange: screenerData.company.exchange, sector: screenerData.company.sector, industry: screenerData.company.industry }
@@ -172,9 +194,15 @@ function TechnicalsContent() {
             </div>
             {!loading && data?.ruleEngine && (
               <div id="section-rule-engine">
+                {/* key={symbol} resets the Growth/Value toggle to the new
+                    ticker's classification default instead of resyncing via an
+                    effect, which would fight a manual selection. */}
                 <TechnicalsRuleEngine
+                  key={symbol}
                   ruleEngine={data.ruleEngine}
-                  decisionIntelligence={data.decisionIntelligence}
+                  decisionIntelligence={data.decisionIntelligence ?? undefined}
+                  stockClassification={data.stockClassification ?? null}
+                  smaDistancePct={data.smaDistancePct ?? null}
                   activeEngine={activeEngine}
                   onEngineChange={handleEngineChange}
                   avgVolume20d={data.price.avgVolume20d}
@@ -183,11 +211,49 @@ function TechnicalsContent() {
             )}
             {loading && <TechnicalsRuleEngineSkeleton />}
           </div>
-          <div className="lg:sticky lg:top-28">
+          <div className="lg:sticky lg:top-28 flex flex-col gap-[14px]">
             {loading ? (
               <TechnicalsDecisionSkeleton />
-            ) : data?.decisionIntelligence ? (
-              <DecisionIntelligenceBanner di={data.decisionIntelligence} />
+            ) : data ? (
+              <>
+                {refreshError && !dismissedRefreshError && (
+                  <div
+                    className="flex items-start justify-between gap-2 rounded-[10px] border px-3 py-2"
+                    style={{ borderColor: "var(--qc-hair)", background: "var(--qc-down-soft)" }}
+                  >
+                    <span style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-down)", lineHeight: 1.5, fontFamily: "var(--qc-font-sans)" }}>
+                      Couldn&apos;t refresh the analysis: {refreshError}
+                    </span>
+                    <button onClick={() => setDismissedRefreshError(true)} aria-label="Dismiss">
+                      <X style={{ width: 12, height: 12, color: "var(--qc-down)" }} />
+                    </button>
+                  </div>
+                )}
+
+                {data.decisionIntelligence ? (
+                  <DecisionIntelligenceBanner
+                    di={data.decisionIntelligence}
+                    stockType={data.stockClassification?.stock_type ?? null}
+                    scores={data.scores}
+                    isUpdating={isUpdating}
+                    onRefresh={handleRefresh}
+                    refreshDisabled={refreshDisabled}
+                  />
+                ) : (
+                  <DecisionIntelligenceState
+                    status={insightStatus === "ready" ? "generating" : insightStatus}
+                    progress={insightProgress}
+                    onRetry={handleRefresh}
+                    isRefreshing={isRefreshing}
+                    scores={data.scores}
+                  />
+                )}
+
+                <LevelsToWatchCard
+                  levels={data.decisionIntelligence?.levelsToWatch ?? null}
+                  cmp={data.price.cmp}
+                />
+              </>
             ) : null}
           </div>
         </div>

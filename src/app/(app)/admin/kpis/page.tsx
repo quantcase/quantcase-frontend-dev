@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { AlertCircle, Loader2, Plus, RefreshCw, Search } from "lucide-react";
+import { AlertCircle, List, Loader2, Network, Plus, RefreshCw, Search } from "lucide-react";
 import { apiAuthGet } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { Kpi, KpiResponse, KpisResponse } from "./_components/types";
 import { KpiFormDialog } from "./_components/KpiFormDialog";
-import { KpiGroupTreeResponse, flattenTree } from "../kpi-groups/_components/types";
+import { KpiCatalogueTree } from "./_components/KpiCatalogueTree";
+import { KpiGroupNode, KpiGroupTreeResponse, flattenTree } from "../kpi-groups/_components/types";
 
 const BASE = `${BACKEND_URL}/admin/kpis`;
 
@@ -14,7 +15,8 @@ export default function KpisPage() {
   const [search, setSearch] = useState("");
   const [includeAllSources, setIncludeAllSources] = useState(false);
   const [coreOnly, setCoreOnly] = useState(false);
-  const [coreAbbrs, setCoreAbbrs] = useState<Set<string> | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "tree">("list");
+  const [kpiGroupTree, setKpiGroupTree] = useState<KpiGroupNode[] | null>(null);
   const [kpis, setKpis] = useState<Kpi[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,20 +40,21 @@ export default function KpisPage() {
 
   useEffect(() => { load("", false); }, [load]);
 
-  // "Core metrics only" — KPIs referenced as a leaf (kpi_abbr) somewhere in the KPI Groups tree,
-  // filtered client-side (no dedicated backend endpoint for this).
+  // Backs both "Core metrics only" (flat-table filter) and the Tree view (browse by KPI Group,
+  // used to find KPIs the flat/paginated list makes hard to locate — e.g. Reserves).
   useEffect(() => {
-    if (!coreOnly || coreAbbrs) return;
+    if (!(coreOnly || viewMode === "tree") || kpiGroupTree) return;
     apiAuthGet<KpiGroupTreeResponse>(`${BACKEND_URL}/admin/kpi-groups/tree`, {
-      onSuccess: (res) => {
-        const abbrs = flattenTree(res.data ?? [])
-          .map((n) => n.kpi_abbr)
-          .filter((a): a is string => !!a);
-        setCoreAbbrs(new Set(abbrs));
-      },
+      onSuccess: (res) => setKpiGroupTree(res.data ?? []),
       onError: () => {},
     });
-  }, [coreOnly, coreAbbrs]);
+  }, [coreOnly, viewMode, kpiGroupTree]);
+
+  const coreAbbrs = useMemo(() => {
+    if (!kpiGroupTree) return null;
+    const abbrs = flattenTree(kpiGroupTree).map((n) => n.kpi_abbr).filter((a): a is string => !!a);
+    return new Set(abbrs);
+  }, [kpiGroupTree]);
 
   function openCreate() {
     setEditingKpi(null);
@@ -59,9 +62,9 @@ export default function KpisPage() {
     setDialogKey((k) => k + 1);
   }
 
-  function openEdit(kpi: Kpi) {
-    setFetchingEdit(kpi.abbr);
-    apiAuthGet<KpiResponse>(`${BASE}/${kpi.abbr}`, {
+  function openEditByAbbr(abbr: string) {
+    setFetchingEdit(abbr);
+    apiAuthGet<KpiResponse>(`${BASE}/${abbr}`, {
       onSuccess: (res) => {
         setEditingKpi(res.data);
         setDialogOpen(true);
@@ -70,6 +73,10 @@ export default function KpisPage() {
       onError: (err) => setError(err),
       onComplete: () => setFetchingEdit(null),
     });
+  }
+
+  function openEdit(kpi: Kpi) {
+    openEditByAbbr(kpi.abbr);
   }
 
   const abbrOptions = kpis.map((k) => k.abbr);
@@ -125,15 +132,34 @@ export default function KpisPage() {
             />
             Include all sources
           </label>
-          <label className="flex items-center gap-1.5 text-[12px] text-ink-3 pb-2.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={coreOnly}
-              onChange={(e) => setCoreOnly(e.target.checked)}
-              className="size-3.5"
-            />
-            Core metrics only
-          </label>
+          {viewMode === "list" && (
+            <label className="flex items-center gap-1.5 text-[12px] text-ink-3 pb-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={coreOnly}
+                onChange={(e) => setCoreOnly(e.target.checked)}
+                className="size-3.5"
+              />
+              Core metrics only
+            </label>
+          )}
+          <div className="inline-flex rounded-md border border-hair p-0.5 bg-secondary mb-2.5">
+            {([
+              { mode: "list" as const, icon: List, label: "List" },
+              { mode: "tree" as const, icon: Network, label: "Tree" },
+            ]).map(({ mode, icon: Icon, label }) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setViewMode(mode)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium rounded-[5px] transition-colors ${
+                  viewMode === mode ? "bg-card text-ink shadow-sm" : "text-ink-3 hover:text-ink"
+                }`}
+              >
+                <Icon className="size-3.5" /> {label}
+              </button>
+            ))}
+          </div>
         </div>
         <button
           onClick={() => load(search, includeAllSources)}
@@ -151,6 +177,16 @@ export default function KpisPage() {
         </div>
       )}
 
+      {viewMode === "tree" ? (
+        !kpiGroupTree ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => <div key={i} className="h-10 rounded-[8px] bg-secondary animate-pulse" />)}
+          </div>
+        ) : (
+          <KpiCatalogueTree nodes={kpiGroupTree} onSelectLeaf={openEditByAbbr} fetchingAbbr={fetchingEdit} />
+        )
+      ) : (
+        <>
       {loading && visibleKpis.length === 0 && (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => <div key={i} className="h-10 rounded-[8px] bg-secondary animate-pulse" />)}
@@ -206,6 +242,8 @@ export default function KpisPage() {
             </tbody>
           </table>
         </div>
+      )}
+        </>
       )}
 
       <KpiFormDialog

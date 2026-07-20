@@ -2,7 +2,7 @@
 
 import { useState, type ElementType } from "react";
 import Link from "next/link";
-import { Layers, ArrowRight, HelpCircle, ListTree, SlidersHorizontal, BookMarked } from "lucide-react";
+import { Layers, ArrowRight, HelpCircle, ListTree, SlidersHorizontal, BookMarked, LayoutGrid } from "lucide-react";
 import { L1MultiDispatchTab } from "./_components/L1MultiDispatchTab";
 import { L2MultiDispatchTab } from "./_components/L2MultiDispatchTab";
 import { L3MultiDispatchTab } from "./_components/L3MultiDispatchTab";
@@ -44,6 +44,12 @@ const ADMIN_LINKS = [
     icon: SlidersHorizontal,
     title: "KPI Filters",
     subtitle: "Reusable KPI threshold conditions — attach them to a KPI-filter company group to build membership.",
+  },
+  {
+    href: "/admin/screen-configs",
+    icon: LayoutGrid,
+    title: "Screen Configs",
+    subtitle: "Which metrics show on which screener section, in what order and formatting — no deploy needed.",
   },
 ];
 

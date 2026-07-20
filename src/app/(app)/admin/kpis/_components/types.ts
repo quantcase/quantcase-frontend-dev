@@ -12,8 +12,8 @@ export interface Kpi {
   /** Ordered — tried in turn if this metric resolves null. */
   fallback_abbrs?: string[];
   unit_label?: string;
-  kpi_type: string;
-  denomination: string;
+  kpi_type?: string | null;
+  denomination?: string | null;
   description?: string;
   prowess_name?: string;
 }
@@ -54,24 +54,16 @@ export interface PreviewTraceItem {
   fallbackAbbr?: string | null;
 }
 
-export interface PreviewPeriod {
-  frequency: string;
-  /** Already formatted (e.g. "FY2025") — render as-is, no date parsing. */
-  fiscal_year: string;
-  /** Already formatted (e.g. "Q4") — render as-is, no date parsing. */
-  quarter: string;
-}
+/** Always one self-describing shape or the other — never a frequency/fields mismatch. */
+export type PreviewPeriod =
+  | { frequency: "daily"; date: string }
+  | { frequency: "annual" | "quarterly"; fiscal_year: string; quarter: string };
 
 export interface PreviewResult {
   abbr: string;
   value: number | null;
   source: string;
   fallbackAbbr?: string | null;
-  /**
-   * For source "computed", this is the most recent period among the formula's direct inputs —
-   * an "as of" period, not a guaranteed single ground-truth date (a multi-term formula's inputs
-   * can in principle land on different periods with sparse data).
-   */
   period?: PreviewPeriod | null;
   formula_expression?: string | null;
   frequency?: KpiFrequency | null;

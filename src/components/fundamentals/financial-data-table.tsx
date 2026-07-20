@@ -1,7 +1,10 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { FinancialRow, FinancialTable } from "@/types/financials";
+
+// No highlight field from the API anymore — these are the rows that used to carry it.
+const HIGHLIGHTED_LABELS = new Set(["Operating Profit", "Net Profit", "Total Liabilities", "Total Assets"]);
 
 function fmt(value: number | null | undefined, format?: string, key?: string): string {
   if (value === null || value === undefined) return "—";
@@ -12,6 +15,24 @@ function fmt(value: number | null | undefined, format?: string, key?: string): s
   return value.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
+interface FlatRow {
+  row: FinancialRow;
+  depth: number;
+  hasChildren: boolean;
+}
+
+function flattenRows(rows: FinancialRow[], expanded: Set<string>, depth = 0): FlatRow[] {
+  const out: FlatRow[] = [];
+  for (const row of rows) {
+    const hasChildren = !!row.children && row.children.length > 0;
+    out.push({ row, depth, hasChildren });
+    if (hasChildren && expanded.has(row.key)) {
+      out.push(...flattenRows(row.children!, expanded, depth + 1));
+    }
+  }
+  return out;
+}
+
 export function FinancialDataTable({
   table,
   cashFlowMode = false,
@@ -20,12 +41,24 @@ export function FinancialDataTable({
   cashFlowMode?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  function toggle(key: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   // Latest periods sit on the right, so open scrolled to the end.
   useLayoutEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollLeft = el.scrollWidth;
   }, [table]);
+
+  const flatRows = flattenRows(table.rows, expanded);
 
   return (
     <div className="overflow-x-auto" ref={scrollRef}>
@@ -71,8 +104,10 @@ export function FinancialDataTable({
           </tr>
         </thead>
         <tbody>
-          {table.rows.map((row: FinancialRow, idx: number) => {
-            const isHighlighted = row.highlight;
+          {flatRows.map(({ row, depth, hasChildren }, idx) => {
+            const isHighlighted = depth === 0 && HIGHLIGHTED_LABELS.has(row.label);
+            const isExpandable = !!row.meta?.expandable && hasChildren;
+            const isExpanded = expanded.has(row.key);
             const rowBg = isHighlighted
               ? "var(--qc-section)"
               : idx % 2 === 0
@@ -93,18 +128,56 @@ export function FinancialDataTable({
                   style={{
                     fontSize: 13,
                     fontWeight: isHighlighted ? 600 : 400,
-                    color: isHighlighted ? "var(--qc-ink)" : "var(--qc-ink)",
+                    color: "var(--qc-ink)",
                     padding: "8px 12px 8px 0",
+                    paddingLeft: depth * 20,
                     whiteSpace: "nowrap",
                     background: rowBg,
                     zIndex: 1,
                     minWidth: 160,
                   }}
                 >
-                  {row.label}
+                  {isExpandable ? (
+                    <button
+                      onClick={() => toggle(row.key)}
+                      className="flex items-center gap-1.5 text-left"
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: 0,
+                        font: "inherit",
+                        color: "inherit",
+                        fontWeight: "inherit",
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 16,
+                          height: 16,
+                          borderRadius: 4,
+                          border: "1px solid var(--qc-hair)",
+                          background: "var(--qc-section)",
+                          fontSize: 10,
+                          color: "var(--qc-ink-2)",
+                          flexShrink: 0,
+                          transition: "transform 0.15s",
+                          transform: isExpanded ? "rotate(90deg)" : "none",
+                        }}
+                      >
+                        ›
+                      </span>
+                      {row.label}
+                    </button>
+                  ) : (
+                    row.label
+                  )}
                 </td>
                 {row.values.map((val, vi) => {
-                  let cellColor = isHighlighted ? "var(--qc-ink)" : "var(--qc-ink)";
+                  let cellColor = "var(--qc-ink)";
                   if (cashFlowMode && val !== null && val !== undefined) {
                     cellColor = val >= 0 ? "var(--qc-up)" : "var(--qc-down)";
                   }

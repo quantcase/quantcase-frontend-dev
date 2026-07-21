@@ -162,6 +162,37 @@ export function HelpModal({ onClose }: Props) {
               <div className="border-t border-hair" />
 
               <section className="space-y-3">
+                <h4 className="text-[11px] font-semibold uppercase tracking-wider text-ink">Prowess Coverage</h4>
+
+                <div>
+                  <p className="text-ink font-medium mb-0.5">What it does</p>
+                  <p>Checks, per ticker, exactly what&rsquo;s physically stored in <code>prowess_values_new</code> (P&amp;L/Balance Sheet/Cashflow KPIs, annual &amp; quarterly) and <code>nse_equity_new</code> (daily rows + date range). It reports raw values only — no fallback chains or computed formulas run here, so a false/missing KPI on this page can still show up on the screener or an insight page once those layers are applied on top.</p>
+                </div>
+
+                <div>
+                  <p className="text-ink font-medium mb-0.5">Year/quarter matrix</p>
+                  <p>Each KPI carries its full period-by-period history, not just a single yes/no — expanding a ticker shows an Annual and a Quarterly table per group, rows are every period on record (e.g. &ldquo;FY2021&rdquo;, &ldquo;FY2025-Q4&rdquo;) and columns are KPI abbrs, so you can see exactly which years/quarters are missing for a given KPI rather than just whether it exists at all.</p>
+                </div>
+
+                <div>
+                  <p className="text-ink font-medium mb-0.5">KPI Set</p>
+                  <p><span className="font-medium text-ink">Default</span> checks the backend&rsquo;s built-in P&amp;L/Balance Sheet/Cashflow KPI lists. <span className="font-medium text-ink">Custom KPIs</span> overrides all three entirely — every abbr you add is checked as one &ldquo;custom&rdquo; group against both annual and quarterly.</p>
+                </div>
+
+                <div>
+                  <p className="text-ink font-medium mb-0.5">Unmatched tickers</p>
+                  <p>When <code>prowessName</code> comes back null, the ticker couldn&rsquo;t be matched to any Prowess company name — every <code>prowess.*</code> flag for that row will be false, so treat it as &ldquo;not linked&rdquo; rather than &ldquo;linked but empty.&rdquo;</p>
+                </div>
+
+                <div>
+                  <p className="text-ink font-medium mb-0.5">Pagination</p>
+                  <p>Unlike L1/L2/L3, this endpoint doesn&rsquo;t return a cross-page ticker total — Next is enabled whenever the current page came back full, since that&rsquo;s the only signal available that more pages might exist.</p>
+                </div>
+              </section>
+
+              <div className="border-t border-hair" />
+
+              <section className="space-y-3">
                 <h4 className="text-[11px] font-semibold uppercase tracking-wider text-ink">Company Groups</h4>
 
                 <div>

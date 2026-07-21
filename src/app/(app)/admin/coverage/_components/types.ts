@@ -554,3 +554,71 @@ export interface ProwessIngestResponse {
   success: true;
   data: ProwessIngestReport;
 }
+
+// ── Prowess Coverage — raw DB availability report (no calculations) ─────────
+// GET /admin/prowess/coverage/options + POST /admin/prowess/coverage/preview.
+// Reports only what's physically stored in prowess_values_new/nse_equity_new —
+// a false/null here can still be true elsewhere in the app once fallbacks or
+// computed formulas are applied on top of the raw value.
+
+export interface ProwessCoverageKpiSet {
+  annual: string[];
+  quarterly: string[];
+}
+
+export interface ProwessCoverageDefaultKpiSets {
+  pnl: ProwessCoverageKpiSet;
+  balanceSheet: ProwessCoverageKpiSet;
+  cashflow: ProwessCoverageKpiSet;
+}
+
+export interface ProwessCoverageOptionsResponse {
+  defaultTickers: string[];
+  companies: string[];
+  companyGroups: L1CompanyGroupOption[];
+  defaultKpiSets: ProwessCoverageDefaultKpiSets;
+}
+
+export interface ProwessCoverageRequest {
+  groupSlug?: string;
+  tickers?: string[];
+  all?: boolean;
+  startFrom?: string;
+  /** Overrides the 3 default sets entirely — checked as one "custom" group against both annual & quarterly. */
+  kpis?: string[];
+  page?: number;
+  pageSize?: number;
+}
+
+export interface ProwessCoverageNse {
+  rowCount: number;
+  firstDate: string | null;
+  lastDate: string | null;
+}
+
+/** Period label (annual: "FY2021"; quarterly: "FY2025-Q4") → present in DB for this KPI/ticker. */
+export type ProwessCoverageHistory = Record<string, boolean>;
+
+/** KPI abbr → full per-period presence history. */
+export type ProwessCoverageKpiHistory = Record<string, ProwessCoverageHistory>;
+
+export interface ProwessCoverageGroup {
+  annual: ProwessCoverageKpiHistory;
+  quarterly: ProwessCoverageKpiHistory;
+}
+
+export interface ProwessCoverageTickerRow {
+  symbol: string;
+  /** Null if this ticker couldn't be matched to a Prowess company name — every prowess.* flag will be false. */
+  prowessName: string | null;
+  nse: ProwessCoverageNse;
+  /** Keyed by "pnl"/"balanceSheet"/"cashflow", or "custom" when the request passed an explicit `kpis` list. */
+  prowess: Record<string, ProwessCoverageGroup>;
+}
+
+export interface ProwessCoverageResponse {
+  /** This page's tickers only — no cross-page total is returned by this endpoint. */
+  tickers: string[];
+  kpiSets: Record<string, ProwessCoverageKpiSet>;
+  perTicker: ProwessCoverageTickerRow[];
+}

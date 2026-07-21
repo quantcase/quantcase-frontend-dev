@@ -73,33 +73,34 @@ function resolveChartColors() {
     muted:   readQC("--qc-ink-3", "#7C6998"),
     up:      readQC("--qc-up", "#15803D"),
     down:    readQC("--qc-down", "#B91C1C"),
+    blue:    readQC("--qc-blue", "#3A6BEF"),
     border:  readQC("--qc-hair", "#E4DCF0"),
     grid:    readQC("--qc-hair", "#EDE8F5"),
     card:    readQC("--qc-card", "#FFFFFF"),
-    smaAccent: readQC("--qc-brand-accent", "#9333EA"),
   };
 }
 type ChartColors = ReturnType<typeof resolveChartColors>;
 
 function buildOverlayConfigs(C: ChartColors): Record<ChartMode, LineConfig[]> {
   return {
+    // SMA colour convention (fixed): 20 = blue, 50 = red, 100 = green, 200 = black.
     DEFAULT: [
       { key: "sma50",  color: C.down,    lineWidth: 1, title: "SMA 50" },
       { key: "sma200", color: C.heading, lineWidth: 2, title: "SMA 200" },
     ],
     STRUCTURE: [],
     TREND: [
-      { key: "sma20",  color: C.muted,      lineWidth: 1, title: "SMA 20" },
-      { key: "sma50",  color: C.smaAccent,  lineWidth: 1, title: "SMA 50" },
-      { key: "sma100", color: "#6B21A8",    lineWidth: 1, title: "SMA 100" }, // darker SMA shade — decorative, no token
-      { key: "sma200", color: C.heading,    lineWidth: 2, title: "SMA 200" },
+      { key: "sma20",  color: C.blue,    lineWidth: 1, title: "SMA 20" },
+      { key: "sma50",  color: C.down,    lineWidth: 1, title: "SMA 50" },
+      { key: "sma100", color: C.up,      lineWidth: 1, title: "SMA 100" },
+      { key: "sma200", color: C.heading, lineWidth: 2, title: "SMA 200" },
     ],
     TIMING: [
       { key: "bbUpper",  color: C.muted,   lineWidth: 1, title: "BB Upper" },
       { key: "bbMiddle", color: C.heading, lineWidth: 1, title: "BB Mid" },
       { key: "bbLower",  color: C.muted,   lineWidth: 1, title: "BB Lower" },
     ],
-    "RELATIVE STRENGTH": [],
+    DOMINANCE: [],
   };
 }
 
@@ -109,7 +110,7 @@ function buildOscillatorConfigs(C: ChartColors): Record<ChartMode, OscillatorCon
     STRUCTURE: { key: "cmf14", color: C.heading, title: "CMF (14)", height: 80 },
     TREND:     { key: "adx14", color: C.heading, title: "ADX (14)", height: 80 },
     TIMING:    { key: "bbWidth" as keyof PriceIndicators, color: C.heading, title: "BB Width", height: 80 },
-    "RELATIVE STRENGTH": null,
+    DOMINANCE: null,
   };
 }
 
@@ -232,7 +233,10 @@ export function CandlestickChart({
       },
       crosshair: { mode: CrosshairMode.Normal },
       rightPriceScale: { borderColor: C.border },
-      timeScale: { borderColor: C.border, timeVisible: true },
+      // rightOffset keeps whitespace between the last candle and the price axis
+      // so the last-value labels (SMA/SR/close tags) don't sit on top of the
+      // most recent candles. fitContent() folds this offset into its range.
+      timeScale: { borderColor: C.border, timeVisible: true, rightOffset: 12 },
       width: containerRef.current.clientWidth,
       height: 380,
     });
@@ -496,7 +500,7 @@ export function CandlestickChart({
 
     // Main pane overlays
     for (const cfg of OVERLAY_CONFIGS[chartMode]) {
-      const data = toLineData(indicators[cfg.key]);
+      const data = toLineData(indicators[cfg.key] ?? []);
       if (data.length === 0) continue;
       const s = chart.addSeries(LineSeries, {
         color: cfg.color,
@@ -579,11 +583,34 @@ export function CandlestickChart({
           rsiMarkersRef.current = createSeriesMarkers(rsiSeries, markers);
         }
       }
+    } else if (chartMode === "DOMINANCE") {
+      // Dominance: 3 comparative relative-strength (CRS) lines share one pane.
+      // Only the legs the backend actually ships are drawn (empty → skipped).
+      const crsConfigs: { key: keyof PriceIndicators; color: string; title: string }[] = [
+        { key: "crsStockVsNifty",  color: C.heading, title: "Stock vs Nifty" },
+        { key: "crsStockVsSector", color: C.blue,    title: "Stock vs Sector" },
+        { key: "crsSectorVsNifty", color: C.muted,   title: "Sector vs Nifty" },
+      ];
+      const crsSeries = crsConfigs
+        .map((cfg) => ({ cfg, data: toLineData(indicators[cfg.key] ?? []) }))
+        .filter((x) => x.data.length > 0);
+      if (crsSeries.length > 0) {
+        subPanesRef.current.push(chart.addPane());
+        for (const { cfg, data } of crsSeries) {
+          const s = chart.addSeries(LineSeries, {
+            color: cfg.color, lineWidth: 1 as const, title: cfg.title,
+            priceLineVisible: false, lastValueVisible: true, crosshairMarkerVisible: false,
+          }, 1);
+          s.setData(data);
+          overlayMapRef.current.set(cfg.title, { series: s, isOsc: true });
+          nextLegend.push({ key: cfg.title, title: cfg.title, color: cfg.color, isOsc: true, visible: true });
+        }
+      }
     } else {
       // Single oscillator pane for all other modes
       const oscCfg = OSCILLATOR_CONFIGS[chartMode];
       if (oscCfg) {
-        const data = toLineData(indicators[oscCfg.key]);
+        const data = toLineData(indicators[oscCfg.key] ?? []);
         const s = addOscPane(1, data, oscCfg.color, oscCfg.title, oscCfg.title);
         if (s && firstDate && lastDate) {
           if (oscCfg.key === "cmf14") {

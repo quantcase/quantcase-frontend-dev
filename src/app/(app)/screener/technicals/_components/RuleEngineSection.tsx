@@ -398,7 +398,7 @@ export function RuleEngineSection({
       {activeEngine === "TIMING" && (
         <TimingEnginePanel engine={ruleEngine.timingEngine} perspective={activePerspective} indicators={diIndicators} />
       )}
-      {activeEngine === "RELATIVE STRENGTH" && (
+      {activeEngine === "DOMINANCE" && (
         <DominanceEnginePanel engine={ruleEngine.dominanceEngine} perspective={activePerspective} indicators={diIndicators} />
       )}
     </>

@@ -9,14 +9,15 @@ import type {
   StockClassification,
 } from "@/types/technicals";
 
-const ENGINE_TABS = ["STRUCTURE", "TREND", "TIMING", "RELATIVE STRENGTH"] as const;
+const ENGINE_TABS = ["STRUCTURE", "TREND", "TIMING", "DOMINANCE"] as const;
 export type EngineTab = typeof ENGINE_TABS[number];
 
 const TAB_SUMMARY_KEY: Record<EngineTab, keyof DecisionIntelligence["ruleEngine"]["tabSummaries"]> = {
   STRUCTURE: "structure",
   TREND: "trend",
   TIMING: "timing",
-  "RELATIVE STRENGTH": "relativeStrength",
+  // Backend still keys this summary as `relativeStrength`; the tab is labelled Dominance.
+  DOMINANCE: "relativeStrength",
 };
 
 interface Props {

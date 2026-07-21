@@ -180,6 +180,7 @@ export function MultiLineBarComboChart({
     });
   }
 
+  const hasBars = activeGroup.barSeries.length > 0;
   const hasLines = activeGroup.lineSeries.length > 0;
   // Derive axis labels: explicit prop/group field > first series name fallback
   const resolvedLeftLabel =
@@ -212,25 +213,27 @@ export function MultiLineBarComboChart({
             tickLine={false}
           />
 
-          {/* Left Y-axis — bars */}
-          <YAxis
-            yAxisId="left"
-            orientation="left"
-            tick={{ fontSize: 10, fill: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}
-            axisLine={false}
-            tickLine={false}
-            tickFormatter={fmtTick}
-            width={resolvedLeftLabel ? 60 : 40}
-            domain={([dataMin, dataMax]: [number, number]) => {
-              const padding = (dataMax - dataMin) * 0.1 || Math.abs(dataMin) * 0.1 || 1;
-              return [dataMin - padding, dataMax + padding];
-            }}
-            label={
-              resolvedLeftLabel
-                ? { value: resolvedLeftLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 10, fill: "var(--qc-ink-2)", textAnchor: "middle", fontFamily: "'IBM Plex Mono', monospace" } }
-                : undefined
-            }
-          />
+          {/* Left Y-axis — bars (only when the group has bar series) */}
+          {hasBars && (
+            <YAxis
+              yAxisId="left"
+              orientation="left"
+              tick={{ fontSize: 10, fill: "var(--qc-ink-2)", fontFamily: "'IBM Plex Mono', monospace" }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={fmtTick}
+              width={resolvedLeftLabel ? 60 : 40}
+              domain={([dataMin, dataMax]: [number, number]) => {
+                const padding = (dataMax - dataMin) * 0.1 || Math.abs(dataMin) * 0.1 || 1;
+                return [dataMin - padding, dataMax + padding];
+              }}
+              label={
+                resolvedLeftLabel
+                  ? { value: resolvedLeftLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 10, fill: "var(--qc-ink-2)", textAnchor: "middle", fontFamily: "'IBM Plex Mono', monospace" } }
+                  : undefined
+              }
+            />
+          )}
 
           {/* Right Y-axis — lines */}
           {hasLines && (

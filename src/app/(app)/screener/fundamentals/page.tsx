@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { TabularCard } from "@/components/molecules/tabular-card";
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
@@ -100,6 +100,17 @@ function FinancialsContent() {
     ? { name: screenerData.company.name, exchange: screenerData.company.exchange, sector: screenerData.company.sector, industry: screenerData.company.industry }
     : null;
 
+  // Show P/E only on the "PE Ratio" chart — drop the Earnings Yield bar series.
+  const chartGroups = useMemo(
+    () =>
+      chartsData?.chartGroups.map((g) =>
+        g.group === "PE Ratio"
+          ? { ...g, barSeries: g.barSeries.filter((s) => s.dataKey !== "EARNINGS_YIELD_DAILY") }
+          : g
+      ) ?? null,
+    [chartsData]
+  );
+
   if (!symbol) {
     return (
       <ScreenerPageShell navItems={FUNDAMENTALS_NAV} companyInfo={companyInfo}>
@@ -140,10 +151,10 @@ function FinancialsContent() {
       <div className="px-4 pt-6 pb-8 space-y-6">
 
         {/* Full-width charts */}
-        {chartsData && (
+        {chartGroups && (
           <div id="section-charts">
             <MultiLineBarComboChart
-              chartGroups={chartsData.chartGroups}
+              chartGroups={chartGroups}
               height={300}
               title="Charts & Trends"
             />

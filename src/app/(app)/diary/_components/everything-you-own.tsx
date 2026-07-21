@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, ChevronDown, ChevronLeft, ChevronRight, Loader2, RefreshCw, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Loader2, Pencil, RefreshCw, Search } from "lucide-react";
 import { Popover } from "radix-ui";
 
 import { TabToggle } from "@/components/molecules/tab-toggle";
@@ -89,6 +90,7 @@ export function EverythingYouOwn({
 function HoldingsList({
   holdings, onPick, metrics,
 }: { holdings: SmallcaseHolding[]; onPick: (t: string) => void; metrics: Map<string, TickerMetrics> }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
   // Empty = no broker constraint, which is not the same as "none selected".
@@ -154,12 +156,13 @@ function HoldingsList({
         )}
       </div>
 
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3 border-b border-hair px-5 py-3">
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-3 border-b border-hair px-5 py-3">
         <span className="eyebrow">Holding</span>
         <span className="eyebrow text-right">Avg Buy</span>
         <span className="eyebrow text-right">Invested</span>
         <span className="eyebrow text-right">CMP</span>
         <span className="eyebrow text-right">Amount</span>
+        <span aria-hidden className="w-6" />
       </div>
 
       {rows.length === 0 && (
@@ -170,11 +173,23 @@ function HoldingsList({
         </div>
       )}
 
-      {rows.map((h) => (
-        <button
+      {rows.map((h) => {
+        // Row opens the stock's overview page; the pencil opens the journal
+        // drawer. A plain button can't wrap the pencil button, so the row is a
+        // keyboard-activatable div and the pencil stops the event bubbling.
+        const openOverview = () =>
+          router.push(`/screener/overview?symbol=${encodeURIComponent(h.ticker)}`);
+
+        return (
+        <div
           key={h.id}
-          onClick={() => onPick(h.ticker)}
-          className="grid w-full grid-cols-[2fr_1fr_1fr_1fr_1fr] items-center gap-3 border-b border-hair px-5 py-3.5 text-left transition-colors hover:bg-secondary"
+          role="button"
+          tabIndex={0}
+          onClick={openOverview}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openOverview(); }
+          }}
+          className="grid w-full cursor-pointer grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] items-center gap-3 border-b border-hair px-5 py-3.5 text-left transition-colors hover:bg-secondary"
         >
           <span className="min-w-0">
             <span className="mono block truncate text-[12px] font-semibold text-ink">{h.ticker}</span>
@@ -203,8 +218,20 @@ function HoldingsList({
               </span>
             )}
           </span>
-        </button>
-      ))}
+
+          {/* Journal, not overview — stop the row's navigation from firing too */}
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={(e) => { e.stopPropagation(); onPick(h.ticker); }}
+            aria-label={`Open journal for ${h.ticker}`}
+            className="text-ink-3 hover:text-ink"
+          >
+            <Pencil className="size-3.5" />
+          </Button>
+        </div>
+        );
+      })}
 
       {matches.length > 0 && (
         <div className="flex items-center justify-between gap-3 px-5 py-3">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Search, Plus, Loader2, Pencil, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ interface WatchlistTableProps {
 // the Holdings journal is excluded, and that happens upstream by dropping it
 // from the switcher entirely.
 export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged, switcher }: WatchlistTableProps) {
+  const router = useRouter();
   const { addTickers, removeTicker, mutating } = useJournalMutations();
   const [adding, setAdding] = useState(false);
   const [confirmTicker, setConfirmTicker] = useState<string | null>(null);
@@ -56,7 +58,7 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
     <section>
       <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="eyebrow">On your watchlist</div>
+          <div className="eyebrow">On your trackers</div>
           {!loading && tickers.length > 0 && (
             <div className="mt-1 text-[13px] text-ink-2">
               {`${tickers.length} ${tickers.length === 1 ? "stock" : "stocks"} you're tracking`}
@@ -74,7 +76,7 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
         ) : (
           <Button size="sm" onClick={() => setAdding(true)}>
             <Plus className="size-3.5" />
-            Add to watchlist
+            Add to tracker
           </Button>
         ))}
       </div>
@@ -115,16 +117,29 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
             const note = entryExcerpt(t.latestEntry);
             const confirming = confirmTicker === t.ticker;
 
+            // Row opens the stock's overview page; the pencil opens the journal
+            // drawer. The row is a keyboard-activatable div (a button can't wrap
+            // the action buttons), and every action stops the event bubbling so
+            // it doesn't also navigate.
+            const openOverview = () =>
+              router.push(`/screener/overview?symbol=${encodeURIComponent(t.ticker)}`);
+
             return (
               <div
                 key={t.ticker}
-                className="grid grid-cols-[1.2fr_1fr_0.7fr_2fr_auto] items-center gap-4 border-b border-hair px-5 py-3.5 last:border-0 hover:bg-secondary"
+                role="button"
+                tabIndex={0}
+                onClick={openOverview}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openOverview(); }
+                }}
+                className="grid cursor-pointer grid-cols-[1.2fr_1fr_0.7fr_2fr_auto] items-center gap-4 border-b border-hair px-5 py-3.5 last:border-0 hover:bg-secondary"
               >
-                <button onClick={() => onOpen(t)} className="min-w-0 text-left">
+                <span className="min-w-0">
                   <span className="mono block truncate text-[12px] font-semibold text-ink">{t.ticker}</span>
                   {/* Universe fetch can land after the journal — fall back to the ticker */}
                   {t.name && <span className="block truncate text-[12px] text-ink-3">{t.name}</span>}
-                </button>
+                </span>
 
                 <span className="truncate text-[12px] text-ink-2">{t.sector ?? "—"}</span>
 
@@ -132,7 +147,7 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
                     same as an unknown ticker. Magnitude, not sentiment: plain ink. */}
                 <span className="mono text-right text-[13px] text-ink">{fmtPrice(t.metrics?.cmp)}</span>
 
-                <button onClick={() => onOpen(t)} className="min-w-0 text-left">
+                <span className="min-w-0">
                   {note ? (
                     <span className="serif line-clamp-2 text-[13px] italic leading-[1.45] text-ink-2">
                       &ldquo;{note}&rdquo;
@@ -140,20 +155,20 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
                   ) : (
                     <span className="text-[12px] text-ink-3">Nothing written yet</span>
                   )}
-                </button>
+                </span>
 
                 <span className="flex w-[132px] items-center justify-end gap-2">
                   {confirming ? (
                     <>
                       <button
-                        onClick={() => handleRemove(t.ticker)}
+                        onClick={(e) => { e.stopPropagation(); handleRemove(t.ticker); }}
                         disabled={mutating}
                         className="rounded-md bg-down px-2.5 py-1 text-[11px] font-medium text-[var(--qc-on-dark)] disabled:opacity-60"
                       >
                         {mutating ? <Loader2 className="size-3 animate-spin" /> : "Remove"}
                       </button>
                       <button
-                        onClick={() => setConfirmTicker(null)}
+                        onClick={(e) => { e.stopPropagation(); setConfirmTicker(null); }}
                         aria-label="Cancel"
                         className="flex size-6 items-center justify-center rounded-md border border-hair text-ink-2"
                       >
@@ -163,13 +178,18 @@ export function WatchlistTable({ tickers, journalId, loading, onOpen, onChanged,
                   ) : (
                     <>
                       <span className="mono text-[11px] text-ink-3">{relativeTime(t.addedAt)}</span>
-                      <Button variant="ghost" size="icon-xs" onClick={() => onOpen(t)} aria-label={`Edit ${t.ticker} note`}>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={(e) => { e.stopPropagation(); onOpen(t); }}
+                        aria-label={`Open journal for ${t.ticker}`}
+                      >
                         <Pencil className="size-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon-xs"
-                        onClick={() => setConfirmTicker(t.ticker)}
+                        onClick={(e) => { e.stopPropagation(); setConfirmTicker(t.ticker); }}
                         aria-label={`Remove ${t.ticker}`}
                         className="text-ink-3 hover:text-down"
                       >

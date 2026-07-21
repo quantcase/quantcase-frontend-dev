@@ -169,7 +169,7 @@ export function JournalTabs({ journals, activeId, onSelect, onCreate, onChanged,
           className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-hair px-4 py-1.5 text-[13px] text-ink-2 transition-colors hover:border-ink-3 hover:text-ink"
         >
           <Plus className="size-3.5" />
-          Create new watchlist
+          Create new tracker
         </button>
       </div>
 

@@ -30,6 +30,12 @@ export interface PriceIndicators {
   cmf14: IndicatorPoint[];
   rsi14: IndicatorPoint[];
   adx14: IndicatorPoint[];
+  // Comparative Relative Strength (CRS) lines for the Dominance bucket. Shipped
+  // in the same `indicators` payload as the rest; optional so pre-CRS payloads
+  // (backend not yet updated) still typecheck and simply render no lines.
+  crsStockVsNifty?: IndicatorPoint[];
+  crsStockVsSector?: IndicatorPoint[];
+  crsSectorVsNifty?: IndicatorPoint[];
 }
 
 interface PricesResponse {

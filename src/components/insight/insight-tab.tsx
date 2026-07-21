@@ -287,9 +287,12 @@ function InsightDashboard({
     setActiveLensSlug(slug);
   }, []);
 
-  // The grid shows native lenses plus any injected (cloned) ones. Guard against a
-  // duplicate slug in case the backend ever starts serving the injected lens too.
-  const gridLenses = injectedLenses.length
+  // Scorecard lenses = native lenses plus any injected (cloned) ones — this drives
+  // the radar axes + score-breakdown tiles so the cloned Industry lens still shows
+  // there. The bottom "…lenses" section grid, however, lists native lenses ONLY
+  // (see below), so the clone is intentionally absent from that card. Guard against
+  // a duplicate slug in case the backend ever starts serving the injected lens too.
+  const scorecardLenses = injectedLenses.length
     ? [...insight.lenses, ...injectedLenses.filter((l) => !insight.lenses.some((n) => n.slug === l.slug))]
     : insight.lenses;
 
@@ -308,13 +311,15 @@ function InsightDashboard({
     <>
       <div className="px-3 sm:px-6 pt-3 space-y-3">
         <div id="section-score">
-          <InsightScorecard insight={insight} verdictLabel={TYPE_VERDICT_LABELS[type]} onLensClick={handleLensClick} lenses={gridLenses} />
+          <InsightScorecard insight={insight} verdictLabel={TYPE_VERDICT_LABELS[type]} onLensClick={handleLensClick} lenses={scorecardLenses} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.2fr]" style={{ gap: 12, alignItems: "stretch" }}>
-          {gridLenses.length > 0 && (
+          {insight.lenses.length > 0 && (
             <div id="section-lenses" style={{ display: "flex", flexDirection: "column" }}>
-              <InsightLenses lenses={gridLenses} heading={lensHeading} onLensClick={handleLensClick} />
+              {/* Native lenses only — the cloned Industry lens lives on the scorecard
+                  radar/tiles above, not in this per-pillar lens grid. */}
+              <InsightLenses lenses={insight.lenses} heading={lensHeading} onLensClick={handleLensClick} />
             </div>
           )}
           {insight.signal_map.length > 0 && (

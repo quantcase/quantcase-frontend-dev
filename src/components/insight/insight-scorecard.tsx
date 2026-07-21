@@ -439,6 +439,15 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
 
   const hoveredLens = hoveredVertex !== null ? scorecardLenses[hoveredVertex] ?? null : null;
 
+  // Foot of the dark verdict panel: the three semantic pill groups from the L3
+  // verdict — strengths (positive), concerns, and watch-fors — each dotted by
+  // its own meaning (green / red / amber).
+  const verdictPoints: { text: string; sentiment: "positive" | "concern" | "watch" }[] = [
+    ...insight.evidence.map((text) => ({ text, sentiment: "positive" as const })),
+    ...insight.concerns.map((text) => ({ text, sentiment: "concern" as const })),
+    ...insight.watch_outs.map((text) => ({ text, sentiment: "watch" as const })),
+  ];
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 12 }}>
@@ -482,10 +491,13 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
               )}
             </div>
 
-            {insight.key_signals.length > 0 && (
+            {verdictPoints.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 24 }}>
-                {insight.key_signals.map((s, i) => {
-                  const dotColor = s.sentiment === "positive" ? "var(--qc-up)" : s.sentiment === "negative" ? "var(--qc-down)" : "var(--qc-ink-3)";
+                {verdictPoints.map((p, i) => {
+                  const dotColor =
+                    p.sentiment === "positive" ? "var(--qc-up)"
+                    : p.sentiment === "concern" ? "var(--qc-down)"
+                    : "var(--qc-warn)";
                   return (
                     <motion.span
                       key={i}
@@ -501,7 +513,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
                       }}
                     >
                       <span style={{ width: 6, height: 6, borderRadius: "50%", background: dotColor, flexShrink: 0 }} />
-                      {s.label}
+                      {p.text}
                     </motion.span>
                   );
                 })}
@@ -556,18 +568,22 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
                 {insight.subtitle && renderMd(insight.subtitle)}
               </h3>
 
-              {insight.thesis && (
-                <p style={{
-                  margin: 0,
-                  fontSize: "var(--qc-fz-11)",
-                  color: "var(--qc-ink-3)",
-                  lineHeight: 1.7,
-                  fontFamily: "var(--qc-font-sans)",
-                  borderLeft: "2px solid var(--qc-hair)",
-                  paddingLeft: 10,
-                }}>
-                  {renderMd(insight.thesis)}
-                </p>
+              {insight.thesis_points.length > 0 && (
+                <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+                  {insight.thesis_points.map((point, i) => (
+                    <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 9 }}>
+                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--qc-ink-3)", flexShrink: 0, marginTop: 6 }} />
+                      <span style={{
+                        fontSize: "var(--qc-fz-12)",
+                        color: "var(--qc-ink-2)",
+                        lineHeight: 1.5,
+                        fontFamily: "var(--qc-font-sans)",
+                      }}>
+                        {renderMd(point)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>

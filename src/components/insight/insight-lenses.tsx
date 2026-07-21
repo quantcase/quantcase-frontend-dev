@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Target, Eye, TrendingUp, BarChart2,
@@ -54,6 +55,61 @@ function ExpandIcon() {
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M10 2h4v4M6 14H2v-4M14 2l-5 5M2 14l5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+// Lens description clamped to 2 lines. When the text is longer than the clamp,
+// hovering reveals the full copy in a signal-box-style popover (mirrors the
+// Signals tiles). Cards whose description fits show no tooltip.
+function LensDescription({ text, name, accentColor }: { text: string; name: string; accentColor: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+  const [hover, setHover] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setOverflowing(el.scrollHeight - el.clientHeight > 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text]);
+
+  return (
+    <div
+      style={{ position: "relative" }}
+      onMouseEnter={overflowing ? () => setHover(true) : undefined}
+      onMouseLeave={overflowing ? () => setHover(false) : undefined}
+    >
+      <p
+        ref={ref}
+        style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-2)", lineHeight: 1.6, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontFamily: "var(--qc-font-sans)" }}
+      >
+        {renderMd(text)}
+      </p>
+
+      {overflowing && hover && (
+        <div
+          style={{
+            position: "absolute", left: 0, right: 0, bottom: "100%", marginBottom: 8,
+            zIndex: 50, borderRadius: 10, border: "1px solid var(--qc-hair)",
+            background: "var(--qc-card)", boxShadow: "0 8px 24px rgba(0,0,0,0.12)", overflow: "hidden",
+          }}
+        >
+          <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-section)", borderLeft: `3px solid ${accentColor}` }}>
+            <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>
+              {name}
+            </p>
+          </div>
+          <div style={{ padding: "10px 12px" }}>
+            <p style={{ margin: 0, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.55, fontFamily: "var(--qc-font-sans)" }}>
+              {renderMd(text)}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -138,10 +194,8 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
               {/* Divider */}
               <div style={{ marginBottom: 18, borderTop: "1px dashed var(--qc-hair)" }} />
 
-              {/* Description */}
-              <p style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-2)", lineHeight: 1.6, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontFamily: "var(--qc-font-sans)" }}>
-                {renderMd(lens.description)}
-              </p>
+              {/* Description — clamped to 2 lines, hover-expands when it overflows */}
+              <LensDescription text={lens.description} name={lens.name} accentColor={accentColor} />
 
               {/* Hover expand icon */}
               {isClickable && (

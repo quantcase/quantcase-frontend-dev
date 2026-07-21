@@ -159,39 +159,41 @@ function TechnicalsContent() {
           ) : null}
         </div>
 
-        {/* Row 1: Price Chart + Rule Engine (left) + Decision Intelligence (right) */}
+        {/* Row 1: Price Chart — full width */}
+        <div id="section-price-chart">
+          {loading ? (
+            <TechnicalsChartSkeleton />
+          ) : (
+            <SectionPanel
+              title="Price Chart"
+              headerAction={
+                chartMode !== "DEFAULT" ? (
+                  <button
+                    onClick={() => setChartMode("DEFAULT")}
+                    className="px-2.5 py-1 rounded-[8px] font-mono text-[10px] uppercase tracking-[0.14em] border transition-colors"
+                    style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)", color: "var(--qc-ink)" }}
+                  >
+                    Default View
+                  </button>
+                ) : null
+              }
+            >
+              <CandlestickChart
+                prices={prices}
+                indicators={indicators}
+                chartMode={chartMode}
+                loading={pricesLoading}
+                error={pricesError}
+                supportResistance={data!.supportResistance}
+                structureEngine={data!.ruleEngine?.structureEngine}
+              />
+            </SectionPanel>
+          )}
+        </div>
+
+        {/* Row 2: Rule Engine (left) + Decision Intelligence (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[14px] items-start">
-          <div className="flex flex-col gap-[14px] min-w-0">
-            <div id="section-price-chart">
-              {loading ? (
-                <TechnicalsChartSkeleton />
-              ) : (
-                <SectionPanel
-                  title="Price Chart"
-                  headerAction={
-                    chartMode !== "DEFAULT" ? (
-                      <button
-                        onClick={() => setChartMode("DEFAULT")}
-                        className="px-2.5 py-1 rounded-[8px] font-mono text-[10px] uppercase tracking-[0.14em] border transition-colors"
-                        style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)", color: "var(--qc-ink)" }}
-                      >
-                        Default View
-                      </button>
-                    ) : null
-                  }
-                >
-                  <CandlestickChart
-                    prices={prices}
-                    indicators={indicators}
-                    chartMode={chartMode}
-                    loading={pricesLoading}
-                    error={pricesError}
-                    supportResistance={data!.supportResistance}
-                    structureEngine={data!.ruleEngine?.structureEngine}
-                  />
-                </SectionPanel>
-              )}
-            </div>
+          <div className="min-w-0">
             {!loading && data?.ruleEngine && (
               <div id="section-rule-engine">
                 {/* key={symbol} resets the Growth/Value toggle to the new

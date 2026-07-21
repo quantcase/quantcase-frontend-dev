@@ -48,17 +48,20 @@ export function adaptL3Result(raw: L3Result): InsightData {
     // verdict card / band chip read `verdict` + `verdict_band`.
     verdict: r.verdict?.rating ?? "",
     verdict_band: r.verdict_band ?? "",
-    // Dark hero panel: serif headline + supporting line.
+    // Dark verdict panel: serif thesis headline + the verdict body paragraph.
     headline: r.thesis?.headline ?? "",
     subtitle: r.thesis?.title ?? "",
-    description: r.verdict?.headline ?? "",
+    description: r.verdict?.body ?? "",
     key_signals: deriveKeySignals(r.signal_map ?? []),
     lenses: normalizeLenses(r.lenses ?? []),
     signal_map: r.signal_map ?? [],
-    // thesis.body is now a paragraph array — join into the single string the
-    // thesis blurb slot expects.
+    // thesis.body is a 3-item paragraph array. Keep both the raw array (white
+    // radar card bullets) and the joined string (legacy blurb slot).
     thesis: (r.thesis?.body ?? []).join("\n\n"),
+    thesis_points: r.thesis?.body ?? [],
+    // Verdict pill groups shown at the foot of the dark panel.
     evidence: r.verdict?.strengths ?? [],
+    concerns: r.verdict?.concerns ?? [],
     watch_outs: r.verdict?.watch_for ?? [],
     analyzed_at: raw.updated_at ?? "",
   };

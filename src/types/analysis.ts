@@ -38,7 +38,14 @@ export interface InsightData {
   lenses: InsightLens[];
   signal_map: InsightSignalMapItem[];
   thesis: string;
+  // thesis.body as its raw paragraph array — the white radar card renders these
+  // as the "3 bullets of thesis body". `thesis` keeps the joined string form for
+  // any legacy consumer.
+  thesis_points: string[];
+  // verdict.strengths / concerns / watch_for — the three semantic pill groups at
+  // the foot of the dark verdict panel (positive / concern / watch dots).
   evidence: string[];
+  concerns: string[];
   watch_outs: string[];
   analyzed_at: string;
 }

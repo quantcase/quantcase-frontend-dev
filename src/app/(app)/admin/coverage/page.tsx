@@ -8,9 +8,10 @@ import { L2MultiDispatchTab } from "./_components/L2MultiDispatchTab";
 import { L3MultiDispatchTab } from "./_components/L3MultiDispatchTab";
 import { DailyRunsTab } from "./_components/DailyRunsTab";
 import { ProwessIngestionTab } from "./_components/ProwessIngestionTab";
+import { ProwessCoverageTab } from "./_components/ProwessCoverageTab";
 import { HelpModal } from "./_components/HelpModal";
 
-type CoverageTab = "l1" | "l2" | "l3" | "daily" | "prowess";
+type CoverageTab = "l1" | "l2" | "l3" | "daily" | "prowess" | "prowess-coverage";
 
 const TABS: { id: CoverageTab; label: string }[] = [
   { id: "l1", label: "L1" },
@@ -18,6 +19,7 @@ const TABS: { id: CoverageTab; label: string }[] = [
   { id: "l3", label: "L3 / L4" },
   { id: "daily", label: "Daily Runs" },
   { id: "prowess", label: "Prowess Ingestion" },
+  { id: "prowess-coverage", label: "Prowess Coverage" },
 ];
 
 const ADMIN_LINKS = [
@@ -125,6 +127,7 @@ export default function CoveragePage() {
       {activeTab === "l3" && <L3MultiDispatchTab />}
       {activeTab === "daily" && <DailyRunsTab />}
       {activeTab === "prowess" && <ProwessIngestionTab />}
+      {activeTab === "prowess-coverage" && <ProwessCoverageTab />}
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
     </div>

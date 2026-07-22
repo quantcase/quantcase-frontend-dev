@@ -145,7 +145,17 @@ export function HelpModal({ onClose }: Props) {
 
                 <div>
                   <p className="text-ink font-medium mb-0.5">Discovered URLs</p>
-                  <p>Every URL from every scrape in the last N days (default 14) — there&rsquo;s no &ldquo;pending&rdquo; status, this is just a flat review list. The same URL can reappear across days if re-scraped. <span className="font-medium text-ink">Source</span> shows &ldquo;BSE Original&rdquo; (straight from the filing) vs &ldquo;Resolved&rdquo; (extracted from a cover-letter PDF).</p>
+                  <p>Every URL from every scrape in the last N days (default 14) — a flat review list. The same URL can reappear across days if re-scraped. <span className="font-medium text-ink">Source</span> shows &ldquo;BSE Original&rdquo; (straight from the filing) vs &ldquo;Resolved&rdquo; (extracted from a cover-letter PDF).</p>
+                </div>
+
+                <div>
+                  <p className="text-ink font-medium mb-0.5">PDF metadata &amp; status</p>
+                  <p>Each row now shows the resolved PDF&rsquo;s page count and file size, plus a status pill: <span className="font-medium text-up">Resolved</span> (PDF downloaded &amp; parsed), <span className="font-medium text-warn">Pending</span> (404/timeout from BSE&rsquo;s CDN propagation delay — it&rsquo;ll resolve on a later run), or <span className="font-medium text-down">Not a PDF</span> (downloaded but not a PDF). Rows discovered before metadata capture show <span className="font-medium text-ink">Unresolved</span> and backfill as future runs re-encounter them.</p>
+                </div>
+
+                <div>
+                  <p className="text-ink font-medium mb-0.5">Filters</p>
+                  <p>Beyond the days window and Hide approved, you can filter by <span className="font-medium text-ink">Status</span>, <span className="font-medium text-ink">page count</span>, and <span className="font-medium text-ink">file size (MB)</span>. Note a numeric bound excludes any row whose metadata isn&rsquo;t known yet — to find not-yet-downloaded candidates use <span className="font-medium text-ink">Status = Pending</span> instead of a size/page filter.</p>
                 </div>
 
                 <div>
@@ -156,6 +166,11 @@ export function HelpModal({ onClose }: Props) {
                 <div>
                   <p className="text-ink font-medium mb-0.5">Approve</p>
                   <p>Writes the URL into the real earnings_calls or annual_reports table. Idempotent — re-approving the same URL just overwrites the same field, safe to click twice.</p>
+                </div>
+
+                <div>
+                  <p className="text-ink font-medium mb-0.5">Dismiss / Restore</p>
+                  <p><span className="font-medium text-ink">Dismiss</span> soft-deletes a candidate (with an optional reason) so it drops out of the review list — useful for junk or duplicate filings. It&rsquo;s reversible: tick <span className="font-medium text-ink">Show dismissed</span> to bring hidden rows back into view, then <span className="font-medium text-ink">Restore</span> any of them. Both are idempotent and never touch the real tables — dismissing only affects this review list.</p>
                 </div>
               </section>
 

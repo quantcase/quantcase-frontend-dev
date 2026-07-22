@@ -337,6 +337,13 @@ export interface BseDiscoveryRunsResponse {
 export type BseDocType = "transcript" | "ppt" | "annual_report";
 export type BseUrlSource = "bse_original" | "resolved";
 
+/**
+ * PDF-resolution status. `resolved` = PDF downloaded & parsed; `pending` = 404/timeout (BSE CDN
+ * propagation delay, will resolve on a later run); `non_pdf` = downloaded but not a PDF. Null for
+ * any URL discovered before metadata capture existed — populates as runs re-encounter it.
+ */
+export type BseUrlStatus = "resolved" | "pending" | "non_pdf";
+
 export interface BseSuggested {
   company: string | null;
   fiscal_year: string;
@@ -354,15 +361,51 @@ export interface BseDiscoveredUrl {
   suggested: BseSuggested;
   /** This exact URL is already saved in earnings_calls/annual_reports. */
   alreadyApproved: boolean;
+  /** PDF page count. Null if not yet resolved (see `status`). */
+  page_count: number | null;
+  /** PDF file size in bytes. Null if unknown. */
+  file_size: number | null;
+  /** PDF-resolution status. Null on rows discovered before metadata capture existed. */
+  status: BseUrlStatus | null;
+  /** Soft-deleted — hidden from the list unless showDismissed is on. */
+  dismissed: boolean;
+  dismissed_reason: string | null;
+  dismissed_at: string | null;
   /** What's currently stored for (company, fiscal_year, quarter), if anything. Null if nothing's there yet or suggested.company couldn't be matched. */
   existingUrl: string | null;
   /** Whether approving this candidate would replace existingUrl. */
   willOverwrite: boolean;
 }
 
+/** Query filters for GET /admin/bse-discovery/urls. Numeric bounds exclude rows with unknown metadata. */
+export interface BseDiscoveryUrlFilters {
+  days: number;
+  hideApproved: boolean;
+  showDismissed: boolean;
+  minPages?: number;
+  maxPages?: number;
+  /** Bytes. */
+  minSize?: number;
+  maxSize?: number;
+  status?: BseUrlStatus;
+}
+
 export interface BseDiscoveryUrlsResponse {
   count: number;
   urls: BseDiscoveredUrl[];
+}
+
+export interface BseDismissResponse {
+  success: true;
+  dismissed: {
+    url: string;
+    reason: string | null;
+    dismissed_at: string;
+  };
+}
+
+export interface BseUndismissResponse {
+  success: true;
 }
 
 /** GET /admin/bse-discovery/preview?url=<candidateUrl>&page=<n> — fetched on-demand per row. */

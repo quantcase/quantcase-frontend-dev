@@ -14,8 +14,12 @@ import {
 } from "./types";
 import { ConfigEditor } from "./ConfigEditor";
 import { ConfigPreviewModal } from "./ConfigPreviewModal";
+import { TechnicalsSkillPanel } from "./TechnicalsSkillPanel";
 
 const CONFIGS_API = `${BACKEND_URL}/api/post-html-analysis/configs`;
+// The technicals skill lives on a different backend surface (/admin/skills);
+// its row renders a self-contained panel instead of the post-HTML ConfigEditor.
+const TECHNICALS_ROW_KEY = "skill:technical-intelligence";
 
 interface Props {
   ticker: string | null;
@@ -101,11 +105,27 @@ export function ConfigsPanel({ ticker }: Props) {
             </button>
           );
         })}
+
+        {/* Technicals skill — separate backend surface; active state lives in its panel. */}
+        <button
+          onClick={() => setSelectedKey(TECHNICALS_ROW_KEY)}
+          className={`w-full flex items-center gap-2 px-4 py-3 text-left border-b border-hair transition-colors ${
+            selectedKey === TECHNICALS_ROW_KEY ? "bg-secondary" : "hover:bg-secondary"
+          }`}
+        >
+          <Circle className="size-1.5 shrink-0 fill-ink-3 text-ink-3" />
+          <div className="min-w-0">
+            <p className="text-[12px] font-medium text-ink truncate">Technicals</p>
+            <p className="text-[10px] text-ink-3 uppercase tracking-wide">skill / technical-intelligence</p>
+          </div>
+        </button>
       </div>
 
       {/* Editor */}
       <div className="flex-1 overflow-hidden">
-        {selected ? (
+        {selectedKey === TECHNICALS_ROW_KEY ? (
+          <TechnicalsSkillPanel ticker={ticker} />
+        ) : selected ? (
           <ConfigEditor
             key={selectedKey}
             config={selected}

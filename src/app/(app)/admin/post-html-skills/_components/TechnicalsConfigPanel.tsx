@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { AlertCircle, Circle, Loader2 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
 import { apiAuthGet, apiAuthPut } from "@/lib/api";
-import { TabToggle } from "@/components/molecules/tab-toggle";
 import {
   TechnicalsSkill,
   SkillsListResponse,
@@ -13,20 +12,17 @@ import {
   TECHNICALS_SKILL_SLUG,
 } from "./technicals-config-types";
 import { TechnicalsConfigEditor } from "./TechnicalsConfigEditor";
-import { TechnicalsBulkPanel } from "./TechnicalsBulkPanel";
 
 const SKILLS_API = `${BACKEND_URL}/admin/skills`;
-type SubTab = "Config" | "Bulk Analysis";
 
-interface Props {
-  ticker: string | null;
-}
-
-export function TechnicalsSkillPanel({ ticker }: Props) {
+/**
+ * TechnicalsConfigPanel — the Technicals row of the Configs page. Config editing
+ * only; the Technicals bulk-analysis dispatch flow lives on the Dispatch page.
+ */
+export function TechnicalsConfigPanel() {
   const [skill, setSkill] = useState<TechnicalsSkill | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sub, setSub] = useState<SubTab>("Config");
 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -72,8 +68,6 @@ export function TechnicalsSkillPanel({ ticker }: Props) {
         <span className="text-[10px] font-medium rounded-sm px-1.5 py-0.5 bg-secondary text-ink-3 uppercase tracking-wide">
           skill / {TECHNICALS_SKILL_SLUG}
         </span>
-        <div className="flex-1" />
-        <TabToggle variant="outline" options={["Config", "Bulk Analysis"]} value={sub} onChange={(v) => setSub(v as SubTab)} />
       </div>
 
       {loading && (
@@ -92,11 +86,7 @@ export function TechnicalsSkillPanel({ ticker }: Props) {
 
       {!loading && !error && skill && (
         <div className="flex-1 overflow-hidden">
-          {sub === "Config" ? (
-            <TechnicalsConfigEditor key={skill.id} skill={skill} saving={saving} saveError={saveError} onSave={handleSave} />
-          ) : (
-            <TechnicalsBulkPanel initialTicker={ticker} />
-          )}
+          <TechnicalsConfigEditor key={skill.id} skill={skill} saving={saving} saveError={saveError} onSave={handleSave} />
         </div>
       )}
     </div>

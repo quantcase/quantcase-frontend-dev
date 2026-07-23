@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 export interface StockMOD {
@@ -175,7 +176,17 @@ function TableHeader() {
   );
 }
 
+/** M / O / D donut columns → the management/opportunity/deal insight pages */
+const SCORE_LINKS = [
+  { key: "management", label: "management", path: "management" },
+  { key: "opportunity", label: "opportunity", path: "opportunity" },
+  { key: "deal", label: "deal", path: "deal" },
+] as const;
+
 function StockRow({ stock, index }: { stock: StockMOD; index: number }) {
+  const sym = encodeURIComponent(stock.symbol);
+  const donutScores = [stock.management, stock.opportunity, stock.deal];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
@@ -192,8 +203,15 @@ function StockRow({ stock, index }: { stock: StockMOD; index: number }) {
         padding: "10px 12px",
       }}
     >
-      {/* Symbol + Name */}
-      <div style={{ minWidth: 0, overflow: "hidden" }}>
+      {/* Symbol + Name → overview */}
+      <Link
+        href={`/screener/overview?symbol=${sym}`}
+        title={`Open ${stock.symbol} overview`}
+        style={{
+          minWidth: 0, overflow: "hidden", display: "block",
+          textDecoration: "none", cursor: "pointer",
+        }}
+      >
         <div style={{
           fontSize: "var(--qc-fz-13)", fontWeight: "var(--qc-w-semi)",
           fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink)",
@@ -208,13 +226,18 @@ function StockRow({ stock, index }: { stock: StockMOD; index: number }) {
         }}>
           {stock.name}
         </div>
-      </div>
+      </Link>
 
-      {/* M / O / D donuts */}
-      {[stock.management, stock.opportunity, stock.deal].map((score, i) => (
-        <div key={i} style={{ display: "flex", justifyContent: "center" }}>
-          <DonutScore score={score} size={38} />
-        </div>
+      {/* M / O / D donuts → management / opportunity / deal */}
+      {SCORE_LINKS.map((col, i) => (
+        <Link
+          key={col.key}
+          href={`/screener/${col.path}?symbol=${sym}`}
+          title={`Open ${stock.symbol} ${col.label}`}
+          style={{ display: "flex", justifyContent: "center", cursor: "pointer" }}
+        >
+          <DonutScore score={donutScores[i]} size={38} />
+        </Link>
       ))}
 
       {/* Weight badge */}

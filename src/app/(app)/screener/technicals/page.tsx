@@ -192,7 +192,7 @@ function TechnicalsContent() {
         </div>
 
         {/* Row 2: Rule Engine (left) + Decision Intelligence (right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[14px] items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-[14px] items-start">
           <div className="min-w-0">
             {!loading && data?.ruleEngine && (
               <div id="section-rule-engine">

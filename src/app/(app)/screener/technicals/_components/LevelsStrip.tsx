@@ -43,13 +43,19 @@ const SUB_COLOR: Record<SubColorToken, string> = {
 
 function MetricCell({ label, value, sub, subColor, highlight, tooltip }: MetricItem) {
   return (
-    <div className="relative flex flex-col gap-0.5 px-5 py-2 group">
-      <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--qc-ink-2)" }}>
+    <div
+      className="relative flex flex-col gap-0.5 px-5 py-2 group"
+      style={highlight ? { background: "var(--qc-golden-grad-from)" } : undefined}
+    >
+      <span
+        className="font-mono text-[10px] uppercase tracking-[0.14em]"
+        style={{ color: highlight ? "var(--qc-golden-ink)" : "var(--qc-ink-2)" }}
+      >
         {label}
       </span>
       <span
         className="text-base whitespace-nowrap"
-        style={{ color: "var(--qc-ink)", fontWeight: highlight ? 700 : 600 }}
+        style={{ color: highlight ? "var(--qc-golden-ink)" : "var(--qc-ink)", fontWeight: highlight ? 700 : 600 }}
       >
         {value}
       </span>

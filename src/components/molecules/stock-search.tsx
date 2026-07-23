@@ -9,9 +9,10 @@ import { cn } from "@/lib/utils";
 const MAX_SUGGESTIONS = 8;
 
 /**
- * Compact stock search for the diary masthead. Mirrors the dashboard research
- * hero's flow — filter the pre-loaded universe client-side, navigate to the
- * overview screener on select — but rendered light-on-light for the diary.
+ * Compact stock search shared across the diary masthead and screener page
+ * headers. Mirrors the dashboard research hero's flow — filter the pre-loaded
+ * universe client-side, navigate to the overview screener on select — rendered
+ * light-on-light.
  */
 export function StockSearch() {
   const router = useRouter();

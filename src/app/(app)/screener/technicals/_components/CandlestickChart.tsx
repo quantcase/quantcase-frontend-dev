@@ -71,6 +71,7 @@ function resolveChartColors() {
   return {
     heading: readQC("--qc-ink", "#1A0A2E"),
     muted:   readQC("--qc-ink-3", "#7C6998"),
+    muted2:  readQC("--qc-ink-2", "#5A4A6E"),
     up:      readQC("--qc-up", "#15803D"),
     down:    readQC("--qc-down", "#B91C1C"),
     blue:    readQC("--qc-blue", "#3A6BEF"),
@@ -630,14 +631,22 @@ export function CandlestickChart({
             overlayMapRef.current.set("__adx_15", { series: adx15Line, isOsc: true });
           }
           if (oscCfg.key === "rsi14") {
+            // Overbought/oversold boundaries: darker, dashed
             for (const [refVal, label] of [[30, "__rsi_30"], [70, "__rsi_70"]] as const) {
               const refLine = chart.addSeries(LineSeries, {
-                color: C.muted, lineWidth: 1, lineStyle: 2,
+                color: C.muted2, lineWidth: 1, lineStyle: 2,
                 priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
               }, 1);
               refLine.setData([{ time: firstDate, value: refVal }, { time: lastDate, value: refVal }]);
               overlayMapRef.current.set(label, { series: refLine, isOsc: true });
             }
+            // Midline (50): dim, dotted
+            const midLine = chart.addSeries(LineSeries, {
+              color: C.muted, lineWidth: 1, lineStyle: 1,
+              priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, title: "",
+            }, 1);
+            midLine.setData([{ time: firstDate, value: 50 }, { time: lastDate, value: 50 }]);
+            overlayMapRef.current.set("__rsi_50", { series: midLine, isOsc: true });
             const divergences = detectRsiDivergences(prices, indicators.rsi14);
             if (divergences.length > 0) {
               const markers: SeriesMarker<Time>[] = divergences.map((d) => ({
@@ -669,7 +678,7 @@ export function CandlestickChart({
       }
       if (avgVolData.length > 0) {
         const avgVolSeries = chart.addSeries(LineSeries, {
-          color: C.muted,
+          color: C.muted2,
           lineWidth: 1,
           priceScaleId: "volume",
           priceLineVisible: false,
@@ -679,7 +688,7 @@ export function CandlestickChart({
         });
         avgVolSeries.setData(avgVolData);
         overlayMapRef.current.set("Avg Vol (20)", { series: avgVolSeries, isOsc: false });
-        nextLegend.push({ key: "Avg Vol (20)", title: "Avg Vol (20)", color: C.muted, isOsc: false, visible: true });
+        nextLegend.push({ key: "Avg Vol (20)", title: "Avg Vol (20)", color: C.muted2, isOsc: false, visible: true });
       }
     }
 

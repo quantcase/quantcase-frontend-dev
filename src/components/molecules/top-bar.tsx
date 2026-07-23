@@ -6,6 +6,10 @@ import { ChevronRight, Eye, CandlestickChart, BookOpen, Sparkles, LayoutDashboar
 import { Suspense, useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { StockSearch } from "@/components/molecules/stock-search";
+
+/** Terminal tabs that carry a stock search in the top-bar's right rail. */
+const HEADER_SEARCH_PATHS = ["/screener/fundamentals", "/screener/technicals"];
 
 const INDUSTRY_TABS = [
   { id: "dashboard",         label: "Dashboard" },
@@ -174,6 +178,9 @@ function TopBarInner() {
 
   if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin || isInvestorDashboard || isDiary) return null;
 
+  // Right rail: stock search on the terminal pages that opt in.
+  const rightZone: React.ReactNode = HEADER_SEARCH_PATHS.includes(pathname) ? <StockSearch /> : null;
+
   let leftZone: React.ReactNode = null;
 
   if (isIndustryTerminal) {
@@ -330,8 +337,15 @@ function TopBarInner() {
       }) as any}
       transition={{ duration: 0.25, ease: "easeInOut" }}
     >
-      <div className="flex h-full items-center overflow-x-auto scrollbar-none min-w-0 w-full">
-        {leftZone}
+      <div className="flex h-full items-center min-w-0 w-full">
+        <div className="flex h-full items-center overflow-x-auto scrollbar-none min-w-0">
+          {leftZone}
+        </div>
+        {rightZone && (
+          <div className="ml-auto shrink-0 pl-3 w-[200px] sm:w-[300px]">
+            {rightZone}
+          </div>
+        )}
       </div>
     </motion.header>
   );

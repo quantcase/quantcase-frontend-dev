@@ -102,9 +102,11 @@ function convictionBarColor(level: string | undefined): string {
 function SignalTile({
   indicator,
   stockType,
+  tooltipAlign = "left",
 }: {
   indicator: DecisionIntelligenceIndicator;
   stockType: StockTypeLabel | null;
+  tooltipAlign?: "left" | "right";
 }) {
   // stock_type picks the lens; Mixed (the common case) falls back to whichever exists.
   const watchout =
@@ -117,6 +119,7 @@ function SignalTile({
       label={indicator.name}
       value={indicator.tag}
       sentiment={toSignalSentiment(indicator.sentiment)}
+      tooltipAlign={tooltipAlign}
       tooltip={
         indicator.explanation
           ? {
@@ -253,9 +256,8 @@ export function DecisionIntelligenceBanner({
 
         {/* TAG banner */}
         <div style={{ background: tc, padding: "10px 14px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 3 }}>
-            <p style={{ margin: 0, fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.12em" }}>TAG</p>
-            {di.breakoutQuality && (
+          {di.breakoutQuality && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8, marginBottom: 3 }}>
               <span style={{
                 fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)",
                 textTransform: "uppercase", letterSpacing: "0.1em",
@@ -264,8 +266,8 @@ export function DecisionIntelligenceBanner({
               }}>
                 {di.breakoutQuality}
               </span>
-            )}
-          </div>
+            </div>
+          )}
           <p style={{ margin: 0, fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-semi)", color: "#fff", lineHeight: 1.3, fontFamily: "var(--qc-font-sans)" }}>{di.tag}</p>
           {di.currentRegime?.label && (
             <p style={{ margin: "4px 0 0", fontSize: "var(--qc-fz-11)", color: "rgba(255,255,255,0.85)", lineHeight: 1.4, fontFamily: "var(--qc-font-sans)" }}>
@@ -281,7 +283,7 @@ export function DecisionIntelligenceBanner({
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
             {[
               { label: "Lens", value: di.lens, sub: null },
-              { label: "Ideal For", value: di.idealFor, sub: di.playbook !== "No Setup" ? di.playbook : null },
+              { label: "Ideal For", value: di.idealFor, sub: null },
               { label: "Timeframe", value: di.timeframe, sub: null },
             ].map(({ label, value, sub }) => (
               <div key={label}>
@@ -388,8 +390,13 @@ export function DecisionIntelligenceBanner({
 
           {/* Signal grid */}
           <div className="grid grid-cols-2 gap-2">
-            {di.indicators.map((ind) => (
-              <SignalTile key={ind.id ?? ind.name} indicator={ind} stockType={stockType} />
+            {di.indicators.map((ind, i) => (
+              <SignalTile
+                key={ind.id ?? ind.name}
+                indicator={ind}
+                stockType={stockType}
+                tooltipAlign={i % 2 === 1 ? "right" : "left"}
+              />
             ))}
           </div>
 

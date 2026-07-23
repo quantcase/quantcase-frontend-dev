@@ -55,6 +55,13 @@ export interface SignalCardProps {
   metrics?: SignalMetric[];
   /** Where the tooltip is anchored relative to the card. Defaults to "top". */
   tooltipSide?: "top" | "bottom";
+  /**
+   * Horizontal edge the tooltip is pinned to. "left" grows the popover
+   * rightward (default); "right" pins it to the card's right edge and grows
+   * leftward — use for right-column cards so the popover doesn't clip past the
+   * container/viewport edge.
+   */
+  tooltipAlign?: "left" | "right";
 }
 
 // ─── Sentiment tokens ─────────────────────────────────────────────────────────
@@ -97,6 +104,7 @@ export function SignalCard({
   tooltip,
   metrics,
   tooltipSide = "top",
+  tooltipAlign = "left",
 }: SignalCardProps) {
   const [tip, setTip] = useState(false);
   const resolvedSentiment = sentiment ?? inferSentiment(value);
@@ -183,7 +191,7 @@ export function SignalCard({
           className="signal-card-tooltip"
           style={{
             position: "absolute",
-            left: 0,
+            [tooltipAlign === "right" ? "right" : "left"]: 0,
             [tooltipSide === "top" ? "bottom" : "top"]: "100%",
             [tooltipSide === "top" ? "marginBottom" : "marginTop"]: 6,
             zIndex: 50,

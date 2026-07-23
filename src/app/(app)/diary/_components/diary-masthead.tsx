@@ -2,7 +2,7 @@
 
 import { Display } from "@/components/ds";
 import { mastheadDate } from "../_lib/diary-derive";
-import { StockSearch } from "./stock-search";
+import { StockSearch } from "@/components/molecules/stock-search";
 
 interface DiaryMastheadProps {
   /** Running entry count for the active journal; hidden while unknown. */

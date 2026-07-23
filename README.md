@@ -1,37 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QuantCase Frontend
 
-## Getting Started
+AI-powered investment-research terminal for Indian equities. QuantCase turns company disclosures
+(earnings-call transcripts, filings) into structured, scored research across analysis factors —
+management quality, opportunity, deal/valuation — and delivers it through a stock screener, investor
+dashboards, and an advisor (WealthOS) workspace.
 
-First, run the development server:
+Built with **Next.js 16** (App Router), **React 19**, **TypeScript**, **Tailwind CSS v4**, and
+**shadcn/ui**. It talks to a separate QuantCase backend over a simple REST API.
+
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # → http://localhost:3000
 ```
 
+In local dev the app expects a backend on **`http://localhost:8000`** for data-driven pages (the URL
+is environment-switched in [`src/lib/constants.ts`](src/lib/constants.ts)). No `.env` file is
+required — see [Getting started](docs/getting-started.md) for details.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script | Purpose |
+|--------|---------|
+| `npm run dev` | Dev server (HMR) |
+| `npm run build` | Production build |
+| `npm run start` | Serve a production build |
+| `npm run lint` | ESLint |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Documentation
 
-## Learn More
+Full documentation lives in [`docs/`](docs/README.md):
 
-To learn more about Next.js, take a look at the following resources:
+- [Getting started](docs/getting-started.md) — setup, scripts, config, backend expectation
+- [Architecture](docs/architecture.md) — stack, App Router layout, route map, provider stack
+- [Routing & auth](docs/routing-and-auth.md) — `AuthGuard`, account types, access flows
+- [Data fetching](docs/data-fetching.md) — the `api.ts` callback pattern, hooks, adapters
+- [Async job pipeline](docs/async-jobs.md) — how AI analysis jobs are triggered and polled
+- [Components](docs/components.md) — the `ui/` → `ds/` → `molecules/` → features layers
+- [Design system](docs/design-system.md) — the `--qc-*` token language and primitives
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+For contributor/agent conventions and the design-system contract, see
+[`CLAUDE.md`](CLAUDE.md). Archived design mockups and backend/product specs live in
+[`extras/`](extras/README.md) (not part of the live frontend).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project layout
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
+```
+src/
+  app/          App Router routes (route groups: (app), (onboarding))
+  components/   ui/ · ds/ · molecules/ · feature dirs
+  hooks/        data-fetching + job-polling hooks
+  lib/          api.ts, constants.ts, adapters, utils
+  types/        TypeScript types (models/ holds a small older set)
+docs/           this documentation
+extras/         archived mockups, specs, notes
+```

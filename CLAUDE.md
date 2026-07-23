@@ -67,6 +67,7 @@ Follows atomic design under [src/components/](src/components/):
 
 ### Key Files
 
+- [docs/README.md](docs/README.md) — Documentation hub (setup, architecture, flows, pipelines, components)
 - [src/lib/constants.ts](src/lib/constants.ts) — Backend URL, predefined call IDs
 - [src/lib/utils.ts](src/lib/utils.ts) — Date formatting, badge variant helpers
 - [src/types/management.ts](src/types/management.ts) — Core TypeScript types for the management dashboard

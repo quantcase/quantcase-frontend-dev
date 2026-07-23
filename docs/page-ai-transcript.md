@@ -1,5 +1,12 @@
-Build a Next.js page route for /ai-transcript:
+# AI Transcript — Analysis Flow Spec
 
+[← Back to docs hub](README.md) · related: [Async jobs](async-jobs.md) · [Pipeline & layers](pipeline-layers.md)
+
+> [!NOTE]
+> A flow spec for the AI transcript-analysis experience (the `/summary` + `/transcript` surfaces). The
+> trigger→poll→animate mechanics are documented in [Async job pipeline](async-jobs.md).
+
+Build a Next.js page route for /ai-transcript:
 
 User selects an earnings call transcript from a dropdown
 

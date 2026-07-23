@@ -1,5 +1,9 @@
 # Getting started
 
+**Prerequisites, install, dev/build/lint scripts, config files, and the local-backend expectation.**
+
+[← Back to docs hub](README.md)
+
 ## Prerequisites
 
 - **Node.js 22.x** (developed on 22.13). No version is pinned in `package.json`; use the current LTS.
@@ -64,4 +68,5 @@ in [`src/lib/constants.ts`](../src/lib/constants.ts): `BACKEND_URL`, `GOOGLE_CLI
 
 - Understand the app shape → [Architecture](architecture.md)
 - Understand how the UI gets its data → [Data fetching](data-fetching.md)
+- Understand the core analysis model → [Pipeline & analysis layers](pipeline-layers.md)
 - Build new UI the right way → [Components](components.md) + [Design system](design-system.md)

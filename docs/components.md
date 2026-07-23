@@ -1,9 +1,22 @@
 # Components
 
+**The atomic-design layers (`ui/` → `ds/` → `molecules/` → feature dirs) and where to build new UI.**
+
+[← Back to docs hub](README.md)
+
 UI follows **atomic design** under [`src/components/`](../src/components/). Layers build upward:
 `ui/` (primitives) → `ds/` (the QuantCase design system) → `molecules/` (composed chrome/widgets) →
 feature directories. **Build new UI from `ds/`**, dropping to token utilities only when composing
 something genuinely new. See [Design system](design-system.md) for the tokens these layers consume.
+
+```mermaid
+flowchart LR
+    UI["ui/<br/>shadcn primitives"] --> DS["ds/<br/>QuantCase design system"]
+    DS --> MOL["molecules/<br/>composed chrome & widgets"]
+    MOL --> FEAT["feature dirs/<br/>screener · investor · wealthos · …"]
+    TOK["--qc-* tokens<br/>globals.css"] -.-> UI
+    TOK -.-> DS
+```
 
 ## `ui/` — shadcn/ui primitives
 
@@ -68,6 +81,16 @@ Other feature dirs: `dashboard/`, `wealthos/`, `opportunity/` (the largest), `mo
 `signin/`, `register/`, `ic-report/`, and `providers/` (`AuthGuard`, `UserContext`, `ThemeProvider`,
 `PaywallProvider`, `OnboardingGuard`, `IntercomProvider`).
 
+Each feature dir maps to a module doc: [Screener](screener.md) · [Investor](investor.md) ·
+[Diary & Journal](diary-journal.md) · [WealthOS](wealthos.md) · [Model builder](model-builder.md) ·
+[Platform flows](platform-flows.md) · [Admin](admin.md).
+
+> [!CAUTION]
+> **`opportunity/`, `deal/`, and `management/` hold unwired legacy card libraries.** They're an older
+> factor-detail surface **superseded by the unified `InsightTab`** and not imported by any route. New factor
+> UI belongs in [`insight/`](../src/components/insight/) — see
+> [Screener → the shared insight engine](screener.md#the-shared-insight-engine).
+
 ## Types
 
 Component/data shapes live in [`src/types/`](../src/types/). The hub is
@@ -76,3 +99,11 @@ wire shapes `L3*` / `L4*`). Other notable files: `management.ts` (scores + job/p
 `overview.ts`, `deal.ts`, `opportunity.ts`, `screener.ts`, `technicals.ts`, `wyckoff.ts`,
 `industry-intelligence.ts`, `journal.ts`, `wealthos.ts`, `auth.ts`. A small older set of models is in
 [`src/models/`](../src/models/) (`summary.ts`, `call.ts`).
+
+---
+
+### Related docs
+
+- [Design system](design-system.md) — the `--qc-*` tokens these layers consume.
+- [`../CLAUDE.md`](../CLAUDE.md) — the design-system contract new UI must follow.
+- Feature modules: [Screener](screener.md) · [Investor](investor.md) · [WealthOS](wealthos.md) · [Admin](admin.md)

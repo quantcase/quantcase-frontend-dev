@@ -1,5 +1,9 @@
 # Async job pipeline
 
+**How AI analysis jobs are triggered and polled (the BullMQ flow), and how progress is animated.**
+
+[← Back to docs hub](README.md)
+
 AI analysis is slow (tens of seconds), so the backend runs it as **BullMQ jobs** and the frontend
 **polls** for completion while animating a progress bar. Three hooks implement variations of the same
 trigger → poll → animate → complete loop.
@@ -33,6 +37,14 @@ Shared characteristics across all three hooks:
 - **Terminal states:** all jobs `completed` → `progress = 100`, stop, fire `onComplete`. Any job
   `failed` → stop, surface the error. Both intervals are cleared on unmount.
 - **Job status:** `type JobStatus = "pending" | "processing" | "completed" | "failed"`.
+
+> [!WARNING]
+> This trigger→poll model applies to the **L1/L2** dispatch and the factor-page triggers, which return a
+> `jobId` / `run_id` and expose a real status endpoint (`GET /api/jobs/{jobId}`). The **L3/L4
+> (`post-html-analysis`) queue is different — it has no job-status endpoint.** Its dispatch UI re-polls
+> `GET /api/post-html-analysis?ticker=&layer_id=` and treats a fresher `updated_at` as completion (~3 min
+> timeout). See [Admin → Post-HTML-skills](admin.md#3-post-html-skills-l3--l4--technicals) and
+> [Pipeline & layers](pipeline-layers.md#triggering-analysis-async-jobs).
 
 ## The three hooks
 
@@ -89,3 +101,11 @@ as `Step "<label>" failed`, and on all-steps-completed does `window.location.rel
   [`analyze-prompt.tsx`](../src/components/management/analyze-prompt.tsx) /
   [`reanalyze-button.tsx`](../src/components/management/reanalyze-button.tsx); progress renders through
   [`ui/progress.tsx`](../src/components/ui/progress.tsx).
+
+---
+
+### Related docs
+
+- [Pipeline & analysis layers](pipeline-layers.md) — what each job produces.
+- [Admin & content-ops](admin.md) — bulk dispatch of the same jobs.
+- [Data fetching](data-fetching.md) — the `api.ts` layer these hooks call.

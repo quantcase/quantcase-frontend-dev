@@ -67,7 +67,11 @@ Follows atomic design under [src/components/](src/components/):
 
 ### Key Files
 
-- [docs/README.md](docs/README.md) — Documentation hub (setup, architecture, flows, pipelines, components)
+- [docs/README.md](docs/README.md) — Documentation hub with a visual map linking every doc below
+- [docs/pipeline-layers.md](docs/pipeline-layers.md) — 🔑 The `L1→L2→L3→L4` analysis pipeline & KPI data model (the core mental model)
+- [docs/admin.md](docs/admin.md) — Admin content-ops console (skills/plugins, KPI system, coverage/ingestion)
+- [docs/screener.md](docs/screener.md) — Every `?symbol=` sub-page + the shared insight engine
+- Module docs: [investor](docs/investor.md), [diary-journal](docs/diary-journal.md), [wealthos](docs/wealthos.md), [model-builder](docs/model-builder.md), [platform-flows](docs/platform-flows.md)
 - [src/lib/constants.ts](src/lib/constants.ts) — Backend URL, predefined call IDs
 - [src/lib/utils.ts](src/lib/utils.ts) — Date formatting, badge variant helpers
 - [src/types/management.ts](src/types/management.ts) — Core TypeScript types for the management dashboard

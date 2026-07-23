@@ -1,5 +1,9 @@
 # Routing & auth
 
+**`AuthGuard`, account types and access flows, admin gating, and the URL-param state convention.**
+
+[← Back to docs hub](README.md)
+
 ## The auth model
 
 Auth is **token-based, client-side**. On sign-in the backend issues a bearer token that the app stores
@@ -11,6 +15,22 @@ There is **no middleware**. Access control is enforced client-side by
 it wraps every authenticated page.
 
 ## AuthGuard flow
+
+```mermaid
+flowchart TD
+    START["pathname change"] --> PUB{"public path?<br/>/ · /signin · /register"}
+    PUB -->|yes| RENDER["render"]
+    PUB -->|no| TOK{"qc_at token?"}
+    TOK -->|no| SIGNIN["→ /signin"]
+    TOK -->|yes| CACHE["synchronous cached guards<br/>(localStorage)"]
+    CACHE --> OB{"onboarding<br/>== false?"}
+    OB -->|yes| ONB["→ /onboarding"]
+    OB -->|no| ADMIN{"admin path<br/>w/o privileges?"}
+    ADMIN -->|yes| HOME["→ account home"]
+    ADMIN -->|no| ME["GET /api/auth/me"]
+    ME -->|401| CLEAR["clear tokens → /signin"]
+    ME -->|ok| HYDRATE["setFromMe → re-apply guards → render"]
+```
 
 On every pathname change, `AuthGuard`:
 
@@ -81,3 +101,11 @@ Navigation carries context in query params rather than router state or a store:
 
 Pages read them via `useSearchParams()` inside a `<Suspense>` boundary (see the pattern in
 [`insight-tab.tsx`](../src/components/insight/insight-tab.tsx)).
+
+---
+
+### Related docs
+
+- [Platform flows](platform-flows.md) — onboarding, billing/paywall, and the auth screens themselves.
+- [Data fetching](data-fetching.md) — how `authFetch` attaches the token and handles 401.
+- [Architecture](architecture.md) — where `AuthGuard` sits in the provider stack.

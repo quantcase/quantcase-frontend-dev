@@ -1,8 +1,23 @@
 # Data fetching
 
+**The `api.ts` callback pattern, the `{ success, data }` envelope, the hook convention, and adapters.**
+
+[← Back to docs hub](README.md)
+
 All network access goes through one small module — [`src/lib/api.ts`](../src/lib/api.ts) — and is
 consumed by custom hooks. There is no React Query / SWR and no data store; each hook owns its own
 `loading`/`error`/`data` state.
+
+```mermaid
+flowchart LR
+    C["Component"] --> H["Hook<br/>useX()"]
+    H --> API["api.ts helper<br/>apiCall / apiPost / raw*"]
+    API --> AF["authFetch<br/>+ Bearer token"]
+    AF --> BE["Backend"]
+    BE --> AD["Adapter<br/>adaptL3/L4Results"]
+    AD --> H
+    H --> C
+```
 
 ## The callback pattern
 
@@ -54,6 +69,13 @@ apiCall<L3AnalysisResponse>(url, {
 
 Rule of thumb: use `apiCall`/`apiPost`/… for the standard `{ success, data }` API; reach for the
 `raw*` helpers only when an endpoint deliberately returns a bare payload or a binary file.
+
+> [!NOTE]
+> The low-level [`authFetch`](../src/lib/api.ts) wrapper is **also exported** and used directly by several
+> hooks/pages (e.g. [`lib/billing.ts`](../src/lib/billing.ts), [`useModels`](../src/hooks/useModels.ts), the
+> MF detail page). It injects the Bearer token, redirects to `/signin?next=…` on **401**, and adds no
+> `Content-Type` (so callers control it — needed for multipart). A **403** is intentionally *not* handled
+> here — pages surface it themselves.
 
 ## The hook convention
 
@@ -126,3 +148,11 @@ No Redux/Zustand. Global state is **React Context only**:
 
 Everything else is local to a component or its hook. Long-running server work (AI analysis) is handled
 by the polling hooks in [Async job pipeline](async-jobs.md).
+
+---
+
+### Related docs
+
+- [Pipeline & analysis layers](pipeline-layers.md) — what the L3/L4 endpoints and adapters produce.
+- [Async job pipeline](async-jobs.md) — the trigger → poll → animate hooks.
+- [Routing & auth](routing-and-auth.md) — the token/session model `authFetch` relies on.

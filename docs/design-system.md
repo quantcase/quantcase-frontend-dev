@@ -1,6 +1,13 @@
 # QuantCase Design System
 
+[← Back to docs hub](README.md) · see also [Components](components.md) and the design-system contract in [`../CLAUDE.md`](../CLAUDE.md)
+
 This document captures the full design language, CSS variables, component patterns, and implementation guidelines for QuantCase — inspired by the lime-green UI visible in the screenshots. Use this as the authoritative reference when redesigning or building new pages.
+
+> [!IMPORTANT]
+> The single source of truth for tokens is [`src/app/globals.css`](../src/app/globals.css) — all `--qc-*`
+> custom properties are defined there and everything else derives from them. Never hardcode hex or raw
+> Tailwind palette colors in app UI.
 
 ---
 

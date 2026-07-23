@@ -1,6 +1,11 @@
-Build a Next.js page route for /management:
+# 📊 Management Factor Dashboard — Widget Specification
 
-# 📊 Management Factor Dashboard — Widget Specification (Single File)
+[← Back to docs hub](README.md) · part of the [Screener](screener.md) terminal · engine: [`insight-tab.tsx`](../src/components/insight/insight-tab.tsx)
+
+> [!NOTE]
+> This is a **widget-level spec** for the `/screener/management` factor page. For how the page is wired
+> (the shared L3 insight engine and its siblings `opportunity`/`deal`), see [Screener](screener.md); for
+> the analysis data behind it, see [Pipeline & layers](pipeline-layers.md).
 
 This document defines all frontend widgets shown in the Management Factor UI.
 

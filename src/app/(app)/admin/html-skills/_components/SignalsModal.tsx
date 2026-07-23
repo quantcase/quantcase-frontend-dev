@@ -17,6 +17,7 @@ import {
 } from "@tanstack/react-table";
 import { SIGNAL_TYPE_LABELS, SignalType, API_BASE } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 
 interface SignalMeasure {
   role: string;
@@ -96,7 +97,7 @@ export function SignalsModal({ slug, ticker, historic, onClose }: Props) {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`${BACKEND_URL}${API_BASE}/${slug}/signals/${ticker}?historic=${historic}`)
+    authFetch(`${BACKEND_URL}${API_BASE}/${slug}/signals/${ticker}?historic=${historic}`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);

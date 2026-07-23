@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { IndustryIntelligenceData } from "@/types/industry-intelligence";
+import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 import sampleData from "../../temp/config/industry-intelligence-response.json";
 
 interface State {
@@ -36,7 +38,7 @@ export function useIndustryIntelligence() {
     let cancelled = false;
     setState({ data: null, loading: true, error: null });
 
-    fetch("http://localhost:8000/api/industry-intelligence")
+    authFetch(`${BACKEND_URL}/api/industry-intelligence`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<IndustryIntelligenceData>;

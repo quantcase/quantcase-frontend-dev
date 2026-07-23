@@ -19,11 +19,38 @@ function authHeaders(extra?: Record<string, string>): Record<string, string> {
   };
 }
 
+// Auth keys cleared on 401 — kept in sync with AuthGuard's cleanup.
+const AUTH_KEYS = ["qc_at", "qc_rt", "qc_account_type", "qc_onboarding_completed"];
+
+function clearAuthAndRedirect(): void {
+  if (typeof window === "undefined") return;
+  AUTH_KEYS.forEach((k) => localStorage.removeItem(k));
+  const { pathname, search } = window.location;
+  if (pathname === "/signin") return; // already there — avoid a loop
+  window.location.href = `/signin?next=${encodeURIComponent(pathname + search)}`;
+}
+
+/**
+ * fetch wrapper: injects the Bearer token and redirects to /signin on 401.
+ * Adds no Content-Type, so callers keep control (needed for multipart uploads).
+ * 403 (e.g. "Admin access required") is intentionally NOT handled here.
+ */
+export async function authFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  const token = getAuthToken();
+  const headers = {
+    ...(init.headers as Record<string, string> | undefined),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  const res = await fetch(url, { ...init, headers });
+  if (res.status === 401) clearAuthAndRedirect();
+  return res;
+}
+
 /** GET with Bearer token — expects { success, data } envelope */
 export function apiAuthGet<T>(url: string, callbacks: ApiCallbacks<T>): void {
   const { onStart, onSuccess, onError, onComplete } = callbacks;
   onStart?.();
-  fetch(url, { headers: authHeaders() })
+  authFetch(url, { headers: authHeaders() })
     .then(async (res) => {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
@@ -38,7 +65,7 @@ export function apiAuthGet<T>(url: string, callbacks: ApiCallbacks<T>): void {
 export function apiAuthPost<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknown): void {
   const { onStart, onSuccess, onError, onComplete } = callbacks;
   onStart?.();
-  fetch(url, { method: "POST", headers: authHeaders(), body: body ? JSON.stringify(body) : undefined })
+  authFetch(url, { method: "POST", headers: authHeaders(), body: body ? JSON.stringify(body) : undefined })
     .then(async (res) => {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
@@ -53,7 +80,7 @@ export function apiAuthPost<T>(url: string, callbacks: ApiCallbacks<T>, body?: u
 export function apiAuthPut<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknown): void {
   const { onStart, onSuccess, onError, onComplete } = callbacks;
   onStart?.();
-  fetch(url, { method: "PUT", headers: authHeaders(), body: body ? JSON.stringify(body) : undefined })
+  authFetch(url, { method: "PUT", headers: authHeaders(), body: body ? JSON.stringify(body) : undefined })
     .then(async (res) => {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
@@ -68,7 +95,7 @@ export function apiAuthPut<T>(url: string, callbacks: ApiCallbacks<T>, body?: un
 export function apiAuthPatch<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknown): void {
   const { onStart, onSuccess, onError, onComplete } = callbacks;
   onStart?.();
-  fetch(url, { method: "PATCH", headers: authHeaders(), body: body ? JSON.stringify(body) : undefined })
+  authFetch(url, { method: "PATCH", headers: authHeaders(), body: body ? JSON.stringify(body) : undefined })
     .then(async (res) => {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
@@ -83,7 +110,7 @@ export function apiAuthPatch<T>(url: string, callbacks: ApiCallbacks<T>, body?: 
 export function apiAuthDelete<T>(url: string, callbacks: ApiCallbacks<T>): void {
   const { onStart, onSuccess, onError, onComplete } = callbacks;
   onStart?.();
-  fetch(url, { method: "DELETE", headers: authHeaders() })
+  authFetch(url, { method: "DELETE", headers: authHeaders() })
     .then(async (res) => {
       if (res.status === 204) { onSuccess({ success: true } as T); return; }
       const json = await res.json();
@@ -99,7 +126,7 @@ export function apiAuthUpload<T>(url: string, callbacks: ApiCallbacks<T>, formDa
   const { onStart, onSuccess, onError, onComplete } = callbacks;
   const token = getAuthToken();
   onStart?.();
-  fetch(url, {
+  authFetch(url, {
     method: "POST",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
@@ -124,7 +151,7 @@ export function apiCall<T>(url: string, callbacks: ApiCallbacks<T>): void {
 
   onStart?.();
 
-  fetch(url, { headers: authHeaders() })
+  authFetch(url, { headers: authHeaders() })
     .then(res => {
       if (!res.ok) {
         throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
@@ -153,7 +180,7 @@ export function rawFetch<T>(url: string, callbacks: ApiCallbacks<T>): void {
 
   onStart?.();
 
-  fetch(url, { headers: authHeaders() })
+  authFetch(url, { headers: authHeaders() })
     .then((res) => {
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
       return res.json();
@@ -171,7 +198,7 @@ export function rawPost<T>(url: string, callbacks: ApiCallbacks<T>, body?: unkno
 
   onStart?.();
 
-  fetch(url, {
+  authFetch(url, {
     method: 'POST',
     headers: authHeaders(),
     body: body ? JSON.stringify(body) : undefined,
@@ -193,7 +220,7 @@ export function rawPut<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknow
 
   onStart?.();
 
-  fetch(url, {
+  authFetch(url, {
     method: 'PUT',
     headers: authHeaders(),
     body: body ? JSON.stringify(body) : undefined,
@@ -221,7 +248,7 @@ export function rawPostDownload(url: string, callbacks: DownloadCallbacks, body:
 
   onStart?.();
 
-  fetch(url, {
+  authFetch(url, {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify(body),
@@ -247,7 +274,7 @@ export function apiPut<T>(url: string, callbacks: ApiCallbacks<T>, body?: unknow
 
   onStart?.();
 
-  fetch(url, {
+  authFetch(url, {
     method: 'PUT',
     headers: authHeaders(),
     body: body ? JSON.stringify(body) : undefined,
@@ -272,7 +299,7 @@ export function apiDelete<T>(url: string, callbacks: ApiCallbacks<T>): void {
 
   onStart?.();
 
-  fetch(url, { method: 'DELETE', headers: authHeaders() })
+  authFetch(url, { method: 'DELETE', headers: authHeaders() })
     .then(res => {
       if (!res.ok) throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
       if (res.status === 204) return { success: true };
@@ -297,7 +324,7 @@ export function apiPost<T>(url: string, callbacks: ApiCallbacks<T>, body?: unkno
 
   onStart?.();
 
-  fetch(url, {
+  authFetch(url, {
     method: 'POST',
     headers: authHeaders(),
     body: body ? JSON.stringify(body) : undefined,

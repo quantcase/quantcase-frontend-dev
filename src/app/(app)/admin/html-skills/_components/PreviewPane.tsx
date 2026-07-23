@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Play, Loader2, AlertCircle } from "lucide-react";
 import { TestTicker, RunResponse, RunJobResponse, JobStatusResponse, API_BASE } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 
 export interface PreviewControls {
   running: boolean;
@@ -38,7 +39,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
   // Incremental runs need a base to build on; without one they'd just produce a confusing, context-free output.
   useEffect(() => {
     setHasBase(null);
-    fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}`)
+    authFetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}`)
       .then((res) => setHasBase(res.status !== 404))
       .catch(() => {});
   }, [slug, ticker]);
@@ -49,7 +50,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
     setResult(null);
     setError(null);
     if (!fiscalYear || !quarter) return;
-    fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}/${fiscalYear}/${quarter}?historic=${historic}`)
+    authFetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}/${fiscalYear}/${quarter}?historic=${historic}`)
       .then(async (res) => {
         if (res.status === 404) return;
         const json = await res.json();
@@ -65,7 +66,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
   }, [slug, ticker, historic, fiscalYear, quarter]);
 
   async function fetchOutput() {
-    const res = await fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}/${fiscalYear}/${quarter}?historic=${historic}`);
+    const res = await authFetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}/${fiscalYear}/${quarter}?historic=${historic}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
     const output = json as RunResponse["output"];
@@ -86,7 +87,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
     setRunning(true);
     setError(null);
 
-    fetch(`${BACKEND_URL}${API_BASE}/${slug}/run`, {
+    authFetch(`${BACKEND_URL}${API_BASE}/${slug}/run`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ticker, callId, force, historic, ...(configKey ? { configKey } : {}) }),
@@ -98,7 +99,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
 
         pollRef.current = setInterval(async () => {
           try {
-            const statusRes = await fetch(`${BACKEND_URL}/api/jobs/${job.id}`);
+            const statusRes = await authFetch(`${BACKEND_URL}/api/jobs/${job.id}`);
             const statusJson: JobStatusResponse = await statusRes.json();
             const status = statusJson.data?.status;
             if (status === "completed") {

@@ -18,6 +18,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 import type {
   MutualFundDetailResponse,
   MutualFundDetail,
@@ -919,7 +920,7 @@ export default function MutualFundDetailPage() {
   useEffect(() => {
     if (!amfiCode) return;
     setLoading(true);
-    fetch(`${BACKEND_URL}/api/mutual-funds/${amfiCode}`)
+    authFetch(`${BACKEND_URL}/api/mutual-funds/${amfiCode}`)
       .then(res => {
         if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
         return res.json() as Promise<MutualFundDetailResponse>;

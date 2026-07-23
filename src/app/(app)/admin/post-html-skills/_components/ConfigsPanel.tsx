@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { AlertCircle, Circle } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
-import { rawFetch, rawPut } from "@/lib/api";
+import { rawFetch, rawPut, authFetch } from "@/lib/api";
 import { TickerSearch, TickerOption } from "../../html-skills/_components/TickerSearch";
 import { FAVORITE_TICKERS } from "../../html-skills/_components/types";
 import {
@@ -46,7 +46,7 @@ export function ConfigsPanel() {
   const [preview, setPreview] = useState<PostHtmlConfigPreviewResponse | null>(null);
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/transcript/stocks`)
+    authFetch(`${BACKEND_URL}/api/transcript/stocks`)
       .then(async (res) => {
         const json: StocksApiResponseLite = await res.json();
         setTickerOptions((json.data ?? []).map((s) => ({ symbol: s.company, name: s.company_name || s.company })));

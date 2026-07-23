@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 
 interface ScoreVerdict {
   score: number;
@@ -46,7 +47,7 @@ export function useScreenerPeers(symbol: string) {
     setError(null);
     setData(null);
 
-    fetch(`${BACKEND_URL}/api/screener/${symbol}/peers`)
+    authFetch(`${BACKEND_URL}/api/screener/${symbol}/peers`)
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to fetch peers: ${res.status}`);
         return res.json() as Promise<ScreenerPeersResponse>;

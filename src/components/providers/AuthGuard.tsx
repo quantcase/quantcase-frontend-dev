@@ -28,7 +28,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const token = localStorage.getItem("qc_at");
     if (!token) {
-      router.push("/signin");
+      router.push(`/signin?next=${encodeURIComponent(pathname)}`);
       return;
     }
 
@@ -61,7 +61,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           localStorage.removeItem("qc_rt");
           localStorage.removeItem("qc_account_type");
           localStorage.removeItem("qc_onboarding_completed");
-          router.push("/signin");
+          router.push(`/signin?next=${encodeURIComponent(pathname)}`);
           return;
         }
         if (!res.ok) return;

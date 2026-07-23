@@ -1,4 +1,5 @@
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 import type {
   BillingConfig,
   BillingProduct,
@@ -66,7 +67,7 @@ export async function getBillingConfig(): Promise<BillingConfig> {
 
 /** GET /api/billing/products — list products and their prices. */
 export async function getProducts(): Promise<BillingProduct[]> {
-  const res = await fetch(`${BILLING}/products`, { headers: authHeaders() });
+  const res = await authFetch(`${BILLING}/products`, { headers: authHeaders() });
   return unwrap<BillingProduct[]>(res, "Failed to load plans");
 }
 
@@ -78,7 +79,7 @@ export async function createSubscribeOrder(
   priceId: string,
   couponCode?: string,
 ): Promise<SubscribeResponse> {
-  const res = await fetch(`${BILLING}/subscribe`, {
+  const res = await authFetch(`${BILLING}/subscribe`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({ price_id: priceId, ...(couponCode ? { coupon_code: couponCode } : {}) }),
@@ -95,7 +96,7 @@ export async function verifyPayment(payload: {
   razorpay_payment_id: string;
   razorpay_signature: string;
 }): Promise<VerifyResponse> {
-  const res = await fetch(`${BILLING}/verify`, {
+  const res = await authFetch(`${BILLING}/verify`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify(payload),
@@ -108,7 +109,7 @@ export async function validateCoupon(
   couponCode: string,
   priceId: string,
 ): Promise<CouponValidation> {
-  const res = await fetch(`${BILLING}/coupons/validate`, {
+  const res = await authFetch(`${BILLING}/coupons/validate`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({ coupon_code: couponCode, price_id: priceId }),
@@ -118,6 +119,6 @@ export async function validateCoupon(
 
 /** GET /api/billing/subscription — current subscription status / access state. */
 export async function getSubscription(): Promise<Subscription> {
-  const res = await fetch(`${BILLING}/subscription`, { headers: authHeaders() });
+  const res = await authFetch(`${BILLING}/subscription`, { headers: authHeaders() });
   return unwrap<Subscription>(res, "Failed to load subscription");
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Loader2, AlertCircle, ChevronLeft, ChevronRight, Pin, PinOff } from "lucide-react";
 import { OutputHistoryResponse, OutputHistoryRow, API_BASE } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 
 interface Props {
@@ -28,7 +29,7 @@ export function OutputHistoryModal({ slug, ticker, pinnedFiscalYear, pinnedQuart
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}/history?page=${page}&size=${PAGE_SIZE}`)
+    authFetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}/history?page=${page}&size=${PAGE_SIZE}`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);

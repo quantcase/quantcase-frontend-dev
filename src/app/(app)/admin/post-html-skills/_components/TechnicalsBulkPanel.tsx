@@ -5,7 +5,7 @@ import {
   AlertCircle, X, Play, Loader2, CheckCircle2, XCircle, ChevronDown, RotateCcw,
 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
-import { apiAuthPost, rawFetch } from "@/lib/api";
+import { apiAuthPost, rawFetch, authFetch } from "@/lib/api";
 import { normalizeTechnicals } from "@/lib/technicals-normalize";
 import type { TechnicalsApiResponse, TechnicalsResponse } from "@/types/technicals";
 import { CheckboxField } from "@/components/molecules/checkbox-field";
@@ -57,7 +57,7 @@ export function TechnicalsBulkPanel({ initialTicker }: Props) {
   const [details, setDetails] = useState<Record<string, DetailState>>({});
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/transcript/stocks`)
+    authFetch(`${BACKEND_URL}/api/transcript/stocks`)
       .then(async (res) => {
         const json: StocksApiResponseLite = await res.json();
         setCompanies((json.data ?? []).map((s) => s.company));

@@ -7,6 +7,7 @@ import {
   AlertTriangle, Eye,
 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 import type {
   DrhpApiResponse, DrhpRecord, DrhpRedFlagsAndRisks, DrhpInsight,
   DrhpIntelligenceData, DrhpIntelligenceFlag,
@@ -369,7 +370,7 @@ export default function PreIpoDetailPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${BACKEND_URL}/api/private-equity/drhp-analyses?id=${id}`)
+    authFetch(`${BACKEND_URL}/api/private-equity/drhp-analyses?id=${id}`)
       .then((r) => r.json())
       .then((json: DrhpApiResponse) => {
         if (cancelled) return;

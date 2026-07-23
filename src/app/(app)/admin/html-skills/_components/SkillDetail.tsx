@@ -24,6 +24,7 @@ import {
   MARKET_DATA_MONTHS_OPTIONS,
 } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 
 const ALL_TRANSCRIPT_SIGNAL_TYPES = Object.keys(TRANSCRIPT_SIGNAL_TYPE_LABELS) as TranscriptSignalType[];
 const ALL_PPT_SIGNAL_TYPES = Object.keys(PPT_SIGNAL_TYPE_LABELS) as PptSignalType[];
@@ -109,7 +110,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
       params.set("slug", skill.slug);
       params.set("historic", "false");
     }
-    fetch(`${BACKEND_URL}${API_BASE}/signals/count/${ticker}?${params}`)
+    authFetch(`${BACKEND_URL}${API_BASE}/signals/count/${ticker}?${params}`)
       .then(async (res) => {
         if (!res.ok) return;
         const json: SignalCountsResponse = await res.json();

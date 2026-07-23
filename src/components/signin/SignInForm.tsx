@@ -9,6 +9,12 @@ import { GoogleSignInButton } from "@/components/molecules/google-signin-button"
 import { usesInvestorFlow, type AccountType } from "@/components/providers/UserContext";
 import type { GoogleAuthResponse } from "@/types/auth";
 
+/** Only allow internal, non-signin return paths — guards against open redirects. */
+function safeNext(raw: string | null): string | null {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.startsWith("/signin")) return null;
+  return raw;
+}
+
 function FormField({
   id,
   label,
@@ -66,6 +72,7 @@ export function SignInForm() {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   async function routeAfterAuth(accessToken: string, acctType: string | undefined) {
+    const next = safeNext(new URLSearchParams(window.location.search).get("next"));
     if (acctType) localStorage.setItem("qc_account_type", acctType);
 
     // Always fetch /api/auth/me to get onboarding state and resolve accountType if missing
@@ -86,9 +93,17 @@ export function SignInForm() {
         return;
       }
 
+      if (next) {
+        router.push(next);
+        return;
+      }
       router.push(usesInvestorFlow((resolvedType ?? null) as AccountType) ? "/investor/dashboard" : "/dashboard");
     } else {
       // Fallback: route based on signin response accountType
+      if (next) {
+        router.push(next);
+        return;
+      }
       router.push(usesInvestorFlow((acctType ?? null) as AccountType) ? "/investor/dashboard" : "/dashboard");
     }
   }

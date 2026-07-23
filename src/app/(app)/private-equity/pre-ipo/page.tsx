@@ -6,6 +6,7 @@ import {
   Upload, FileText, ArrowLeft, AlertCircle, ChevronRight,
 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 import type { DrhpApiResponse, DrhpRecord, DrhpListApiResponse } from "@/types/drhp";
 import { VerdictBadge } from "@/components/drhp/verdict-badge";
 
@@ -140,7 +141,7 @@ export default function PreIpoPage() {
   const [pastAnalyses, setPastAnalyses] = useState<DrhpRecord[]>([]);
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/private-equity/drhp-analyses`)
+    authFetch(`${BACKEND_URL}/api/private-equity/drhp-analyses`)
       .then((r) => r.json())
       .then((json: DrhpListApiResponse) => {
         if (json.success) setPastAnalyses(json.data);
@@ -157,7 +158,7 @@ export default function PreIpoPage() {
     formData.append("document", file);
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/private-equity/drhp-analyser`, {
+      const res = await authFetch(`${BACKEND_URL}/api/private-equity/drhp-analyser`, {
         method: "POST",
         body: formData,
       });

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 
 interface ScoreVerdict {
   score: number;
@@ -60,7 +61,7 @@ function chunk<T>(items: T[], size: number): T[][] {
 async function fetchChunk(tickers: string[], signal: AbortSignal): Promise<TickerMetricsResponse> {
   // POST rather than the GET form: a portfolio can outgrow a query string, and
   // this path has no such ceiling below the API's own 100-ticker cap.
-  const res = await fetch(`${BACKEND_URL}/api/tickers`, {
+  const res = await authFetch(`${BACKEND_URL}/api/tickers`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ tickers }),

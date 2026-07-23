@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 
 interface Props {
   slug: string;
@@ -26,7 +27,7 @@ export function LensHtmlPreview({ slug, ticker }: Props) {
       setError(null);
       setLoading(true);
       try {
-        const res = await fetch(`${BACKEND_URL}/api/html-skills/${slug}/outputs/${ticker}`);
+        const res = await authFetch(`${BACKEND_URL}/api/html-skills/${slug}/outputs/${ticker}`);
         if (cancelled) return;
         if (res.status === 404) { setError("No output available yet for this lens."); return; }
         const json = await res.json();

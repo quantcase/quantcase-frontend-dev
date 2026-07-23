@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { AlertCircle, X, Play, Loader2, RefreshCw, CheckCircle2, Clock } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
-import { rawFetch, rawPost } from "@/lib/api";
+import { rawFetch, rawPost, authFetch } from "@/lib/api";
 import { CheckboxField } from "@/components/molecules/checkbox-field";
 import { TabToggle } from "@/components/molecules/tab-toggle";
 import { TickerSearch, TickerOption } from "../../html-skills/_components/TickerSearch";
@@ -59,7 +59,7 @@ export function PostHtmlDispatchPanel() {
   }
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/transcript/stocks`)
+    authFetch(`${BACKEND_URL}/api/transcript/stocks`)
       .then(async (res) => {
         const json: StocksApiResponseLite = await res.json();
         setTickerOptions((json.data ?? []).map((s) => ({ symbol: s.company, name: s.company_name || s.company })));

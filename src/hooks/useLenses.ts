@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 import { LENS_DISPLAY_NAME } from "@/lib/analysis-adapter";
 
 // Apply the frontend-only lens display-name overrides (shared with the L3 adapter)
@@ -119,7 +120,7 @@ export function useLenses(ticker: string): UseLensesResult {
     setLoading(true);
     setError(null);
 
-    fetch(`${BACKEND_URL}/api/lenses?ticker=${ticker}`)
+    authFetch(`${BACKEND_URL}/api/lenses?ticker=${ticker}`)
       .then((r) => r.json())
       .then((data: LensesApiResponse) => {
         setLenses(relabelLensDetails(data.categories ?? { management: [], opportunity: [], deal: [] }));
@@ -166,7 +167,7 @@ export function useFinancialStrength(ticker: string): UseFinancialStrengthResult
     setLoading(true);
     setError(null);
 
-    fetch(`${BACKEND_URL}/api/opportunity/financial-strength?ticker=${ticker}`)
+    authFetch(`${BACKEND_URL}/api/opportunity/financial-strength?ticker=${ticker}`)
       .then((r) => r.json())
       .then((res: { success: boolean; data: FinancialStrengthData }) => {
         setData(res.data ?? null);

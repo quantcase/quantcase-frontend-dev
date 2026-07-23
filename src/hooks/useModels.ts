@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 import type { StoredModel, PortfolioData } from "@/types/portfolio";
 
 type CreateModelInput = Omit<PortfolioData, "id">;
@@ -28,7 +29,7 @@ export function useModels(): UseModelsReturn {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`${BACKEND_URL}/api/models`)
+    authFetch(`${BACKEND_URL}/api/models`)
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to fetch models: ${res.status}`);
         return res.json();
@@ -39,7 +40,7 @@ export function useModels(): UseModelsReturn {
   }, [tick]);
 
   const createModel = useCallback(async (input: CreateModelInput): Promise<StoredModel> => {
-    const res = await fetch(`${BACKEND_URL}/api/models`, {
+    const res = await authFetch(`${BACKEND_URL}/api/models`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
@@ -52,7 +53,7 @@ export function useModels(): UseModelsReturn {
   }, []);
 
   const updateModel = useCallback(async (id: string, patch: Partial<StoredModel>): Promise<void> => {
-    const res = await fetch(`${BACKEND_URL}/api/models/${id}`, {
+    const res = await authFetch(`${BACKEND_URL}/api/models/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
@@ -64,7 +65,7 @@ export function useModels(): UseModelsReturn {
   }, []);
 
   const deleteModel = useCallback(async (id: string): Promise<void> => {
-    const res = await fetch(`${BACKEND_URL}/api/models/${id}`, { method: "DELETE" });
+    const res = await authFetch(`${BACKEND_URL}/api/models/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error(`Failed to delete model: ${res.status}`);
     setModels((prev) => prev.filter((m) => m.id !== id));
   }, []);

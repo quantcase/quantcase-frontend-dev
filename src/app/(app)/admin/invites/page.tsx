@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AlertCircle, CheckCircle2, Clock, Loader2, Mail, XCircle } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 import type { AdminInviteResponse, AdminInviteResult } from "@/types/auth";
 
 const BASE = `${BACKEND_URL}/admin/invites`;
@@ -54,7 +55,7 @@ export default function AdminInvitesPage() {
     setSending(true);
     setError(null);
 
-    fetch(BASE, {
+    authFetch(BASE, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ emails }),

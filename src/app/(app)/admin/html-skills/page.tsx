@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, X, Play, Loader2, Save, Circle, ChevronDown, FileDown, History, Radio, HelpCircle, Layers, Trash2 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 import { HtmlSkill, TestTicker, FAVORITE_TICKERS, CATEGORY_LABELS, API_BASE, PromptDryRunResponse, HtmlSkillConfig, ConfigListResponse } from "./_components/types";
 import { TickerSearch, TickerOption } from "./_components/TickerSearch";
 import type { StocksApiResponse } from "@/types/screener";
@@ -64,7 +65,7 @@ function HtmlSkillsPage() {
 
   const loadSkills = useCallback(() => {
     setLoading(true);
-    fetch(`${BACKEND_URL}${API_BASE}?includeInactive=true`)
+    authFetch(`${BACKEND_URL}${API_BASE}?includeInactive=true`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
@@ -79,7 +80,7 @@ function HtmlSkillsPage() {
   // ── Load saved configs for the selected skill ──────────────────────────────
 
   const loadConfigs = useCallback((slug: string) => {
-    fetch(`${BACKEND_URL}${API_BASE}/${slug}/configs`)
+    authFetch(`${BACKEND_URL}${API_BASE}/${slug}/configs`)
       .then(async (res) => {
         const json: ConfigListResponse = await res.json();
         if (!res.ok) throw new Error((json as unknown as { error?: string })?.error ?? `${res.status}`);
@@ -128,7 +129,7 @@ function HtmlSkillsPage() {
   // ── Load stocks for ticker search ──────────────────────────────────────────
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/transcript/stocks`)
+    authFetch(`${BACKEND_URL}/api/transcript/stocks`)
       .then(async (res) => {
         const json: StocksApiResponse = await res.json();
         setTickerOptions(
@@ -143,7 +144,7 @@ function HtmlSkillsPage() {
   useEffect(() => {
     setSkillDirty(false);
     if (!selectedSlug) { setSelectedSkill(null); return; }
-    fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}`)
+    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
@@ -158,7 +159,7 @@ function HtmlSkillsPage() {
     if (!selectedSlug) return;
     setSaving(true);
     setSaveError(null);
-    fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}`, {
+    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),
@@ -179,7 +180,7 @@ function HtmlSkillsPage() {
     if (!selectedSlug) return;
     setSaving(true);
     setSaveError(null);
-    fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs/${key}`, {
+    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs/${key}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),
@@ -217,7 +218,7 @@ function HtmlSkillsPage() {
       historic_max_market_data_months: selectedSkill.historic_max_market_data_months,
       model: null, max_tokens: null, strip_html: null,
     };
-    fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs`, {
+    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -235,7 +236,7 @@ function HtmlSkillsPage() {
 
   function handleDeleteConfig(key: string) {
     if (!selectedSlug) return;
-    fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs/${key}`, { method: "DELETE" })
+    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs/${key}`, { method: "DELETE" })
       .then(async (res) => {
         if (!res.ok) {
           const json = await res.json().catch(() => null);
@@ -260,7 +261,7 @@ function HtmlSkillsPage() {
       const params = new URLSearchParams({ callId });
       if (historic) params.set("historic", "true");
       if (configKey) params.set("configKey", configKey);
-      const res = await fetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/prompt/${ticker}?${params}`);
+      const res = await authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/prompt/${ticker}?${params}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
 

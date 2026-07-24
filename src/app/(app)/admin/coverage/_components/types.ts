@@ -665,3 +665,64 @@ export interface ProwessCoverageResponse {
   kpiSets: Record<string, ProwessCoverageKpiSet>;
   perTicker: ProwessCoverageTickerRow[];
 }
+
+// ── Prowess Daily — direct CMIE batch trigger (async submit → poll → resolve) ──
+// Alternative to the CSV upload above — no file needed, backend submits a fixed query file to
+// CMIE's live Prowess batch API and the frontend polls until it resolves. Ingestion into
+// nse_equity_new happens automatically server-side the moment status flips to "completed" —
+// there's no separate confirm/upload step here.
+
+export type ProwessBatchStatus = "pending" | "completed" | "failed";
+
+export interface ProwessBatchFile {
+  file: string;
+  type: string;
+  recordsParsed: number;
+  /** Typically large (thousands) — this query's domain is Prowess's whole company universe, most
+   * not NSE-listed/tracked by this app, so a high count here is normal, not an error. */
+  skippedName: number;
+  nrowExpected: number;
+}
+
+export interface ProwessBatchResult {
+  files: ProwessBatchFile[];
+  totalRowsIngested: number;
+}
+
+export interface ProwessBatch {
+  token: string;
+  status: ProwessBatchStatus;
+  /** Present once status is "completed". */
+  result?: ProwessBatchResult | null;
+  /** Present when status is "failed" — human-readable, safe to surface directly. */
+  error?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ProwessBatchTriggerResponse {
+  success: true;
+  data: ProwessBatch & { sendResponse?: Record<string, unknown> };
+}
+
+export interface ProwessBatchCheckResponse {
+  success: true;
+  data: ProwessBatch;
+}
+
+/** GET /admin/prowess/batch/:token — read-only DB state, no live CMIE call (unlike /check). */
+export interface ProwessBatchGetResponse {
+  success: true;
+  data: ProwessBatch;
+}
+
+/** GET /admin/prowess/batch[?status=pending] — recent/pending batch list. */
+export interface ProwessBatchListResponse {
+  success: true;
+  data: ProwessBatch[];
+}
+
+export interface ProwessBatchAbortResponse {
+  success: true;
+  data?: unknown;
+}

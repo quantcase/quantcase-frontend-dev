@@ -66,7 +66,12 @@ export function KpiFilterFormDialog({ open, filter, abbrOptions, onClose, onSave
     }
   }
 
-  const canSave = label.trim() && kpiAbbr.trim() && value.trim() && (operator !== "between" || valueMax.trim());
+  const canSave =
+    label.trim() &&
+    kpiAbbr.trim() &&
+    value.trim() &&
+    (operator !== "between" || valueMax.trim()) &&
+    (isEdit || !!frequency);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
@@ -121,13 +126,19 @@ export function KpiFilterFormDialog({ open, filter, abbrOptions, onClose, onSave
               </select>
             </div>
             <div>
-              <label className={LABEL_CLS}>Frequency (optional)</label>
+              <label className={LABEL_CLS}>Frequency{isEdit ? " (optional)" : ""}</label>
               <select value={frequency ?? ""} onChange={(e) => setFrequency((e.target.value || null) as typeof frequency)} className={INPUT_CLS}>
-                <option value="">Any</option>
+                {/* "Any" only makes sense once a filter already exists — creating one now requires
+                    an explicit frequency (backend 422s a create without it); PUT stays optional/partial. */}
+                {!isEdit && <option value="" disabled>Select…</option>}
+                {isEdit && <option value="">Any</option>}
                 <option value="annual">Annual</option>
                 <option value="quarterly">Quarterly</option>
                 <option value="daily">Daily</option>
               </select>
+              {!isEdit && !frequency && (
+                <p className="text-[11px] text-warn mt-1">Required when creating a filter.</p>
+              )}
             </div>
           </div>
 

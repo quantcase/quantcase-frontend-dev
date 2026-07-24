@@ -35,6 +35,11 @@ function SectionRow({ section, onEdit, onDelete }: {
           <span className="text-[10px] uppercase tracking-wider font-semibold text-ink-3 bg-secondary rounded-sm px-1.5 py-0.5">
             {section.decimal_places != null ? `${section.decimal_places}dp` : "no default dp"}
           </span>
+          {section.frequency && (
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-ink-3 bg-secondary rounded-sm px-1.5 py-0.5">
+              {section.frequency}
+            </span>
+          )}
         </div>
       </div>
       <div className="shrink-0 flex items-center gap-1">

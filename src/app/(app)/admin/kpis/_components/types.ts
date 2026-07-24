@@ -8,6 +8,7 @@ export interface Kpi {
   full_form: string;
   /** Omit/null = raw leaf, value comes from a Prowess CSV column. Present = computed metric. */
   formula_expression?: string | null;
+  /** Legacy/unused — POST/PUT /admin/kpis silently ignores this now. Not editable in the form. */
   frequency?: KpiFrequency | null;
   /** Ordered — tried in turn if this metric resolves null. */
   fallback_abbrs?: string[];
@@ -51,6 +52,8 @@ export interface PreviewTraceItem {
   abbr: string;
   value: number | null;
   source: string;
+  /** Which financial statement this value was resolved from, e.g. "consolidated"/"standalone". */
+  source_type?: string | null;
   fallbackAbbr?: string | null;
 }
 
@@ -63,9 +66,13 @@ export interface PreviewResult {
   abbr: string;
   value: number | null;
   source: string;
+  /** Which financial statement this value was resolved from, e.g. "consolidated"/"standalone". */
+  source_type?: string | null;
   fallbackAbbr?: string | null;
   period?: PreviewPeriod | null;
   formula_expression?: string | null;
+  /** Echoes back the (now-required) `?frequency=` query param actually used to resolve this
+   * preview — no longer a fixed property of the KPI itself. */
   frequency?: KpiFrequency | null;
   trace: PreviewTraceItem[];
 }

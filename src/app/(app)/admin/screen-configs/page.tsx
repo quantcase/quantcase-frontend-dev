@@ -12,12 +12,17 @@ const BASE = `${BACKEND_URL}/admin/screen-configs`;
 
 interface CompanyGroupsRaw { success: boolean; data: { slug: string; name: string }[] }
 
-function SectionRow({ section, onEdit, onDelete }: {
+function SectionRow({ section, companyGroups, onEdit, onDelete }: {
   section: ScreenConfig;
+  companyGroups: CompanyGroupOption[];
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const pinnedGroupName = section.company_group_slug
+    ? companyGroups.find((g) => g.slug === section.company_group_slug)?.name ?? section.company_group_slug
+    : null;
+
   return (
     <div className="rounded-[8px] border border-hair bg-card px-4 py-3 flex items-center gap-4">
       <div className="flex-1 min-w-0">
@@ -38,6 +43,19 @@ function SectionRow({ section, onEdit, onDelete }: {
           {section.frequency && (
             <span className="text-[10px] uppercase tracking-wider font-semibold text-ink-3 bg-secondary rounded-sm px-1.5 py-0.5">
               {section.frequency}
+            </span>
+          )}
+          {section.variant_of_key && (
+            <span
+              title={`Overrides ${section.variant_of_key} for this group only`}
+              className="text-[10px] uppercase tracking-wider font-semibold text-blue bg-blue-soft rounded-sm px-1.5 py-0.5"
+            >
+              variant of {section.variant_of_key}
+            </span>
+          )}
+          {pinnedGroupName && (
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-blue bg-blue-soft rounded-sm px-1.5 py-0.5">
+              {pinnedGroupName}
             </span>
           )}
         </div>
@@ -203,7 +221,7 @@ export default function ScreenConfigsPage() {
                 <Loader2 className="size-4 animate-spin text-ink-3" />
               </div>
             )}
-            <SectionRow section={s} onEdit={() => openEdit(s)} onDelete={() => handleDelete(s.key)} />
+            <SectionRow section={s} companyGroups={companyGroups} onEdit={() => openEdit(s)} onDelete={() => handleDelete(s.key)} />
           </div>
         ))}
       </div>
@@ -214,6 +232,7 @@ export default function ScreenConfigsPage() {
         section={editingSection}
         abbrOptions={abbrOptions}
         companyGroups={companyGroups}
+        existingKeys={sections.map((s) => s.key)}
         onClose={() => setDialogOpen(false)}
         onSaved={() => load(search)}
       />

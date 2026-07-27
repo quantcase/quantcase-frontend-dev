@@ -19,14 +19,17 @@ interface Props {
   section: ScreenConfig | null;
   abbrOptions: string[];
   companyGroups: CompanyGroupOption[];
+  /** Every existing section key, for the "Variant of" picker. */
+  existingKeys: string[];
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGroups, onClose, onSaved }: Props) {
+export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGroups, existingKeys, onClose, onSaved }: Props) {
   const isEdit = !!section;
 
   const [key, setKey] = useState(section?.key ?? "");
+  const [keyTouched, setKeyTouched] = useState(isEdit);
   const [label, setLabel] = useState(section?.label ?? "");
   const [endpoint, setEndpoint] = useState(section?.endpoint ?? "");
   const [periodsShown, setPeriodsShown] = useState(section?.periods_shown != null ? String(section.periods_shown) : "");
@@ -34,9 +37,22 @@ export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGrou
   const [frequency, setFrequency] = useState<ScreenConfigFrequency | "">(section?.frequency ?? "");
   const [kpiGroupSlug, setKpiGroupSlug] = useState(section?.kpi_group_slug ?? "");
 
+  // Variant pinning — an alternate section that overrides the base key for one company group.
+  const [isVariant, setIsVariant] = useState(!!section?.variant_of_key);
+  const [variantOfKey, setVariantOfKey] = useState(section?.variant_of_key ?? "");
+  const [pinnedGroupSlug, setPinnedGroupSlug] = useState(section?.company_group_slug ?? "");
+
   const [currentKey, setCurrentKey] = useState<string | null>(section?.key ?? null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Convenience only, never overrides a manually-edited Key — mirrors the backend's own
+  // "<base>.<group>" convention from its example payload, on new (non-edit) sections.
+  useEffect(() => {
+    if (isEdit || keyTouched || !isVariant || !variantOfKey.trim() || !pinnedGroupSlug.trim()) return;
+    setKey(`${variantOfKey.trim()}.${pinnedGroupSlug.trim()}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isVariant, variantOfKey, pinnedGroupSlug]);
 
   const [kpiGroupTree, setKpiGroupTree] = useState<KpiGroupNode[]>([]);
   useEffect(() => {
@@ -58,6 +74,8 @@ export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGrou
       decimal_places: decimalPlaces.trim() ? Number(decimalPlaces) : null,
       frequency: frequency || null,
       kpi_group_slug: kpiGroupSlug.trim() || null,
+      variant_of_key: isVariant ? variantOfKey.trim() || null : null,
+      company_group_slug: isVariant ? pinnedGroupSlug.trim() || null : null,
     };
 
     const callbacks = {
@@ -77,7 +95,10 @@ export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGrou
     }
   }
 
-  const canSave = key.trim().length > 0 && label.trim().length > 0;
+  const canSave =
+    key.trim().length > 0 &&
+    label.trim().length > 0 &&
+    (!isVariant || (variantOfKey.trim().length > 0 && pinnedGroupSlug.trim().length > 0));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
@@ -102,7 +123,7 @@ export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGrou
             <label className={LABEL_CLS}>Key</label>
             <input
               value={key}
-              onChange={(e) => setKey(e.target.value)}
+              onChange={(e) => { setKey(e.target.value); setKeyTouched(true); }}
               disabled={isEdit}
               list="screen-config-known-keys"
               placeholder="financials.pnl.annual"
@@ -189,6 +210,44 @@ export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGrou
               When set, this section&rsquo;s rows come from that KPI Group branch&rsquo;s children (managed via
               /admin/kpi-groups) instead of the manually attached metrics below.
             </p>
+          </div>
+
+          <div className="rounded-md border border-hair bg-secondary px-3 py-2.5 space-y-2.5">
+            <label className="flex items-center gap-2 text-[12px] font-medium text-ink cursor-pointer">
+              <input type="checkbox" checked={isVariant} onChange={(e) => setIsVariant(e.target.checked)} />
+              Pin as a variant for one company group
+            </label>
+            <p className="text-[11px] text-ink-3">
+              An alternate section the resolver picks instead of the base key, for companies in the
+              chosen group only — e.g. a different KPI Group branch/decimal formatting just for that group.
+            </p>
+
+            {isVariant && (
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className={LABEL_CLS}>Variant of (base key)</label>
+                  <input
+                    value={variantOfKey}
+                    onChange={(e) => setVariantOfKey(e.target.value)}
+                    list="screen-config-existing-keys"
+                    placeholder="financials.pnl.quarterly"
+                    className={`${INPUT_CLS} font-mono`}
+                  />
+                  <datalist id="screen-config-existing-keys">
+                    {existingKeys.filter((k) => k !== currentKey).map((k) => <option key={k} value={k} />)}
+                  </datalist>
+                </div>
+                <div>
+                  <label className={LABEL_CLS}>Company Group</label>
+                  <select value={pinnedGroupSlug} onChange={(e) => setPinnedGroupSlug(e.target.value)} className={INPUT_CLS}>
+                    <option value="">Select a group…</option>
+                    {companyGroups.map((g) => (
+                      <option key={g.slug} value={g.slug}>{g.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
           {currentKey ? (

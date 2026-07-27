@@ -7,6 +7,8 @@
 
 export type SeriesType = "line" | "bar";
 
+export type ScreenConfigFrequency = "annual" | "quarterly" | "daily";
+
 /** The 12 sections wired into the live screener today. Free-text key is still allowed. */
 export const KNOWN_SECTION_KEYS = [
   "financials.pnl.annual",
@@ -50,6 +52,8 @@ export interface ScreenConfig {
   periods_shown?: number | null;
   /** Default rounding for every metric in this section, unless a specific item overrides it. */
   decimal_places?: number | null;
+  /** Which cadence this section resolves at. null = backend picks its own default. */
+  frequency?: ScreenConfigFrequency | null;
   /** Present (possibly empty) on GET /:key; absent on the list response. */
   items?: ScreenConfigItem[];
   /**

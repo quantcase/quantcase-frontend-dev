@@ -6,7 +6,7 @@ import { apiAuthGet, apiAuthPost, apiAuthPut } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { ScreenConfigItemsPanel } from "./ScreenConfigItemsPanel";
 import { ScreenConfigKpiGroupRowsPanel } from "./ScreenConfigKpiGroupRowsPanel";
-import { CompanyGroupOption, KNOWN_SECTION_KEYS, ScreenConfig, ScreenConfigResponse } from "./types";
+import { CompanyGroupOption, KNOWN_SECTION_KEYS, ScreenConfig, ScreenConfigFrequency, ScreenConfigResponse } from "./types";
 import { KpiGroupNode, KpiGroupTreeResponse, flattenTree } from "../../kpi-groups/_components/types";
 
 const BASE = `${BACKEND_URL}/admin/screen-configs`;
@@ -31,6 +31,7 @@ export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGrou
   const [endpoint, setEndpoint] = useState(section?.endpoint ?? "");
   const [periodsShown, setPeriodsShown] = useState(section?.periods_shown != null ? String(section.periods_shown) : "");
   const [decimalPlaces, setDecimalPlaces] = useState(section?.decimal_places != null ? String(section.decimal_places) : "2");
+  const [frequency, setFrequency] = useState<ScreenConfigFrequency | "">(section?.frequency ?? "");
   const [kpiGroupSlug, setKpiGroupSlug] = useState(section?.kpi_group_slug ?? "");
 
   const [currentKey, setCurrentKey] = useState<string | null>(section?.key ?? null);
@@ -55,6 +56,7 @@ export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGrou
       endpoint: endpoint.trim() || null,
       periods_shown: periodsShown.trim() ? Number(periodsShown) : null,
       decimal_places: decimalPlaces.trim() ? Number(decimalPlaces) : null,
+      frequency: frequency || null,
       kpi_group_slug: kpiGroupSlug.trim() || null,
     };
 
@@ -158,6 +160,21 @@ export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGrou
               />
               <p className="text-[11px] text-ink-3 mt-1">Applies to every metric here unless overridden per item.</p>
             </div>
+          </div>
+
+          <div>
+            <label className={LABEL_CLS}>Frequency</label>
+            <select
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value as ScreenConfigFrequency | "")}
+              className={INPUT_CLS}
+            >
+              <option value="">Backend default</option>
+              <option value="annual">Annual</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="daily">Daily</option>
+            </select>
+            <p className="text-[11px] text-ink-3 mt-1">Which cadence this section resolves at.</p>
           </div>
 
           <div>

@@ -51,7 +51,6 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
   const [kpiType, setKpiType] = useState(kpi?.kpi_type ?? "");
   const [unitLabel, setUnitLabel] = useState(kpi?.unit_label ?? "");
   const [description, setDescription] = useState(kpi?.description ?? "");
-  const [frequency, setFrequency] = useState<KpiFrequency | "">(kpi?.frequency ?? "");
 
   const [mode, setMode] = useState<"raw" | "computed">(kpi?.formula_expression ? "computed" : "raw");
   const [prowessName, setProwessName] = useState(kpi?.prowess_name ?? "");
@@ -73,7 +72,8 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
 
   // Preview against real data (edit mode only — the endpoint resolves a persisted KPI)
   const [previewSymbol, setPreviewSymbol] = useState("");
-  const [previewFrequency, setPreviewFrequency] = useState<KpiFrequency | "">("");
+  // Required by the backend now (no more silent default to "annual") — always has a value.
+  const [previewFrequency, setPreviewFrequency] = useState<KpiFrequency>("annual");
   const [resampleMode, setResampleMode] = useState<"" | "average" | "latest">("");
   const [previewing, setPreviewing] = useState(false);
   const [previewResult, setPreviewResult] = useState<PreviewResult | null>(null);
@@ -178,9 +178,9 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
 
   function runPreview() {
     if (!isEdit || !previewSymbol.trim()) return;
-    const params = new URLSearchParams({ symbol: previewSymbol.trim().toUpperCase() });
-    if (previewFrequency) params.set("frequency", previewFrequency);
-    if (frequency === "daily" && resampleMode) params.set("resample_mode", resampleMode);
+    // frequency is required by the backend now — always sent, never omitted.
+    const params = new URLSearchParams({ symbol: previewSymbol.trim().toUpperCase(), frequency: previewFrequency });
+    if (previewFrequency === "daily" && resampleMode) params.set("resample_mode", resampleMode);
     apiAuthGet<PreviewResponse>(`${BASE}/${kpi!.abbr}/preview?${params}`, {
       onStart: () => { setPreviewing(true); setPreviewError(null); },
       onSuccess: (res) => setPreviewResult(res.data),
@@ -197,7 +197,6 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
       // The backend only touches fields present as a key in the body — omitted/undefined always
       // means "leave unchanged," never "clear." To actually clear a field we must send an
       // explicit null (or [] for the array field), not let it collapse to undefined.
-      frequency: frequency || null,
       fallback_abbrs: fallbackAbbrs,
       unit_label: unitLabel.trim() || null,
       kpi_type: kpiType.trim() || null,
@@ -271,15 +270,6 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
             <div>
               <label className={LABEL_CLS}>Unit Label</label>
               <input value={unitLabel} onChange={(e) => setUnitLabel(e.target.value)} placeholder="%" className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Frequency</label>
-              <select value={frequency} onChange={(e) => setFrequency(e.target.value as KpiFrequency | "")} className={INPUT_CLS}>
-                <option value="">Not set</option>
-                <option value="annual">Annual</option>
-                <option value="quarterly">Quarterly</option>
-                <option value="daily">Daily</option>
-              </select>
             </div>
           </div>
 
@@ -472,14 +462,13 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
                 </div>
                 <div>
                   <label className="text-[10px] text-ink-3 block mb-1">Frequency</label>
-                  <select value={previewFrequency} onChange={(e) => setPreviewFrequency(e.target.value as KpiFrequency | "")} className={`${INPUT_CLS} w-32`}>
-                    <option value="">KPI default</option>
+                  <select value={previewFrequency} onChange={(e) => setPreviewFrequency(e.target.value as KpiFrequency)} className={`${INPUT_CLS} w-32`}>
                     <option value="annual">Annual</option>
                     <option value="quarterly">Quarterly</option>
                     <option value="daily">Daily</option>
                   </select>
                 </div>
-                {frequency === "daily" && (
+                {previewFrequency === "daily" && (
                   <div>
                     <label className="text-[10px] text-ink-3 block mb-1">Resample</label>
                     <div className="inline-flex rounded-md border border-hair p-0.5 bg-secondary">
@@ -527,6 +516,11 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
                     <span className="text-[10px] uppercase tracking-wider text-ink-3 bg-card rounded-sm px-1.5 py-0.5 border border-hair">
                       {previewResult.source}
                     </span>
+                    {previewResult.source_type && (
+                      <span className="text-[10px] uppercase tracking-wider text-ink-3 bg-card rounded-sm px-1.5 py-0.5 border border-hair">
+                        {previewResult.source_type}
+                      </span>
+                    )}
                     {previewResult.fallbackAbbr && (
                       <span className="text-[10px] text-warn">via fallback: {previewResult.fallbackAbbr}</span>
                     )}
@@ -551,7 +545,7 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
                           <span className="font-mono text-ink">{t.abbr}</span>
                           <span className="text-ink-3">= {t.value ?? "—"}</span>
                           <span className="text-[10px] text-ink-3">
-                            ({t.source}{t.fallbackAbbr ? `, via ${t.fallbackAbbr}` : ""})
+                            ({t.source}{t.source_type ? `, ${t.source_type}` : ""}{t.fallbackAbbr ? `, via ${t.fallbackAbbr}` : ""})
                           </span>
                         </div>
                       ))}

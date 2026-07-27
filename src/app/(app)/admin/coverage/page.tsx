@@ -55,20 +55,20 @@ const ADMIN_LINKS = [
   },
 ];
 
+// Compact — icon + title only, one row, no fixed column that leaves a ragged empty grid cell when
+// the link count doesn't divide evenly. Subtitle survives as a native tooltip, not dropped.
 function AdminLinkCard({ href, icon: Icon, title, subtitle }: { href: string; icon: ElementType; title: string; subtitle: string }) {
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 rounded-[10px] border border-hair bg-card px-5 py-4 hover:border-ink transition-colors group"
+      title={subtitle}
+      className="flex items-center gap-2 rounded-md border border-hair bg-card pl-2 pr-3 py-1.5 hover:border-ink transition-colors group shrink-0"
     >
-      <div className="flex size-10 items-center justify-center rounded-[8px] bg-ink shrink-0">
-        <Icon className="size-5 text-[var(--qc-on-dark)]" />
+      <div className="flex size-6 items-center justify-center rounded-[6px] bg-ink shrink-0">
+        <Icon className="size-3.5 text-[var(--qc-on-dark)]" />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[14px] font-semibold text-ink">{title}</p>
-        <p className="text-[12px] text-ink-3 mt-0.5">{subtitle}</p>
-      </div>
-      <ArrowRight className="size-4 text-ink-3 group-hover:text-ink transition-colors shrink-0" />
+      <span className="text-[12.5px] font-medium text-ink whitespace-nowrap">{title}</span>
+      <ArrowRight className="size-3 text-ink-3 group-hover:text-ink transition-colors shrink-0" />
     </Link>
   );
 }
@@ -78,7 +78,7 @@ export default function CoveragePage() {
   const [showHelp, setShowHelp] = useState(false);
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-6 space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-[22px] font-[400] text-[var(--qc-ink)]">Pipeline Coverage</h1>
@@ -98,36 +98,42 @@ export default function CoveragePage() {
       </div>
 
       {/* Admin data management — company groups, KPI catalogue, KPI groups, KPI filters. Managed
-          in one place regardless of which dispatch tab is open below. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {ADMIN_LINKS.map((link) => (
-          <AdminLinkCard key={link.href} {...link} />
-        ))}
+          in one place regardless of which dispatch tab is open below. A compact wrapping toolbar,
+          not a grid, so 5 links never leave a ragged empty cell. */}
+      <div className="space-y-1.5">
+        <p className="eyebrow">Admin Data</p>
+        <div className="flex flex-wrap gap-1.5">
+          {ADMIN_LINKS.map((link) => (
+            <AdminLinkCard key={link.href} {...link} />
+          ))}
+        </div>
       </div>
 
-      {/* Tab strip */}
-      <div className="flex border-b border-hair">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === tab.id
-                ? "border-ink text-ink"
-                : "border-transparent text-ink-3 hover:text-ink"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Dispatch/coverage workspace — visually separated from the reference links above */}
+      <div className="pt-1 border-t border-hair space-y-4">
+        <div className="flex border-b border-hair">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                activeTab === tab.id
+                  ? "border-ink text-ink"
+                  : "border-transparent text-ink-3 hover:text-ink"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-      {activeTab === "l1" && <L1MultiDispatchTab />}
-      {activeTab === "l2" && <L2MultiDispatchTab />}
-      {activeTab === "l3" && <L3MultiDispatchTab />}
-      {activeTab === "daily" && <DailyRunsTab />}
-      {activeTab === "prowess" && <ProwessIngestionTab />}
-      {activeTab === "prowess-coverage" && <ProwessCoverageTab />}
+        {activeTab === "l1" && <L1MultiDispatchTab />}
+        {activeTab === "l2" && <L2MultiDispatchTab />}
+        {activeTab === "l3" && <L3MultiDispatchTab />}
+        {activeTab === "daily" && <DailyRunsTab />}
+        {activeTab === "prowess" && <ProwessIngestionTab />}
+        {activeTab === "prowess-coverage" && <ProwessCoverageTab />}
+      </div>
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
     </div>

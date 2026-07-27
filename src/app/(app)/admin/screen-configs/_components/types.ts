@@ -62,6 +62,16 @@ export interface ScreenConfig {
    * CRUD on that branch instead. null/omitted = this section is still ScreenConfigItem-driven.
    */
   kpi_group_slug?: string | null;
+  /**
+   * Marks this ScreenConfig as a variant of another section's key (e.g.
+   * "financials.pnl.quarterly.<group>" variant_of_key: "financials.pnl.quarterly"). Paired with
+   * `company_group_slug` below so the resolver picks this variant instead of the base section for
+   * companies in that group. Section-level — distinct from ScreenConfigItem.company_group_slug,
+   * which only filters visibility of a single row, not which whole section resolves.
+   */
+  variant_of_key?: string | null;
+  /** Company group this variant is pinned to. Only meaningful alongside `variant_of_key`. */
+  company_group_slug?: string | null;
 }
 
 export interface ScreenConfigsResponse {

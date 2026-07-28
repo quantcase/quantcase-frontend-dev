@@ -28,9 +28,9 @@ function isFinancialReport(r: ProwessIngestReport): r is ProwessFinancialReport 
 }
 
 function FinancialReportView({ report }: { report: ProwessFinancialReport }) {
-  const sourceTypeEntries = Object.entries(report.rowsBySourceType);
   const kpiEntries = Object.entries(report.rowsByKpi);
   const indicatorEntries = Object.entries(report.dynamicIndicatorsMatched);
+  const thinIngestion = report.totalRows === 0 || kpiEntries.length === 0;
 
   return (
     <div className="space-y-3">
@@ -39,6 +39,26 @@ function FinancialReportView({ report }: { report: ProwessFinancialReport }) {
         <MetricTile label="Columns in CSV" value={String(report.columnsInCsv)} />
         <MetricTile label="Total Rows" value={report.totalRows.toLocaleString("en-IN")} />
       </div>
+
+      {report.mode === "annual" && (
+        <div className="flex flex-wrap items-center gap-2 text-[12px]">
+          <span className="rounded-sm bg-secondary border border-hair px-2 py-1 text-ink">
+            Section: <span className="font-mono font-medium">{report.sourceType === "C" ? "Consolidated" : "Standalone"}</span>
+          </span>
+          <span className="rounded-sm bg-secondary border border-hair px-2 py-1 text-ink">
+            Fiscal years: <span className="font-mono font-medium">{report.fiscalYears.join(", ") || "—"}</span>
+          </span>
+        </div>
+      )}
+
+      {thinIngestion && (
+        <div className="flex items-center gap-2 rounded-md border border-warn bg-warn-soft px-4 py-3 text-[12px] text-warn">
+          <AlertCircle className="size-3.5 shrink-0" />
+          {report.totalRows === 0
+            ? "0 rows were resolved from this file — success doesn't mean the shape matched. Check the CSV before running."
+            : "Rows were parsed but none could be attributed to a known KPI — check the CSV shape before running."}
+        </div>
+      )}
 
       {report.insertStats && (
         <div className="flex items-center gap-2 rounded-md border border-up bg-up-soft px-4 py-3 text-sm text-up">
@@ -67,11 +87,11 @@ function FinancialReportView({ report }: { report: ProwessFinancialReport }) {
         </div>
       )}
 
-      {sourceTypeEntries.length > 0 && (
+      {report.mode === "quarterly" && Object.entries(report.rowsBySourceType).length > 0 && (
         <div>
           <p className="text-[10px] uppercase tracking-wider text-ink-3 mb-1.5">Rows by Source Type</p>
           <div className="flex flex-wrap gap-1.5">
-            {sourceTypeEntries.map(([k, v]) => (
+            {Object.entries(report.rowsBySourceType).map(([k, v]) => (
               <span key={k} className="rounded-sm bg-secondary border border-hair px-2 py-1 text-[11px] text-ink">
                 <span className="font-mono font-medium">{k}</span> — {v.toLocaleString("en-IN")}
               </span>

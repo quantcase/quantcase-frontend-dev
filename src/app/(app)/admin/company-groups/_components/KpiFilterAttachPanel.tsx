@@ -38,7 +38,7 @@ export function KpiFilterAttachPanel({ groupSlug, kpiFilters }: Props) {
 
   useEffect(() => { loadAttached(); }, [groupSlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const attachedSlugs = new Set(attached.map((a) => a.kpi_filter_slug));
+  const attachedSlugs = new Set(attached.map((a) => a.kpi_filter.slug));
   const unattached = kpiFilters.filter((f) => !attachedSlugs.has(f.slug));
 
   function attach() {
@@ -95,11 +95,11 @@ export function KpiFilterAttachPanel({ groupSlug, kpiFilters }: Props) {
         ) : (
           <div className="space-y-1.5">
             {attached.map((a) => {
-              const meta = kpiFilters.find((f) => f.slug === a.kpi_filter_slug);
+              const meta = a.kpi_filter;
               return (
                 <div key={a.id} className="flex items-center justify-between gap-2 rounded-md bg-secondary px-2.5 py-1.5">
                   <span className="text-[12px] text-ink">
-                    <span className="font-medium">{meta?.label ?? a.kpi_filter_slug}</span>
+                    <span className="font-medium">{meta?.label ?? a.kpi_filter_id}</span>
                     {meta && <span className="text-ink-3 font-mono"> — {meta.kpi_abbr} {formatCondition(meta)}</span>}
                   </span>
                   <button type="button" onClick={() => detach(a.id)} className="text-ink-3 hover:text-down shrink-0">

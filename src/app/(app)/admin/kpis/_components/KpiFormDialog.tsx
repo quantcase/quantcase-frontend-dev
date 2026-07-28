@@ -47,9 +47,9 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
 
   const [abbr, setAbbr] = useState(kpi?.abbr ?? "");
   const [fullForm, setFullForm] = useState(kpi?.full_form ?? "");
-  const [denomination, setDenomination] = useState(kpi?.denomination ?? "");
-  const [kpiType, setKpiType] = useState(kpi?.kpi_type ?? "");
-  const [unitLabel, setUnitLabel] = useState(kpi?.unit_label ?? "");
+  const denomination = kpi?.denomination ?? "";
+  const kpiType = kpi?.kpi_type ?? "";
+  const unitLabel = kpi?.unit_label ?? "";
   const [description, setDescription] = useState(kpi?.description ?? "");
 
   const [mode, setMode] = useState<"raw" | "computed">(kpi?.formula_expression ? "computed" : "raw");
@@ -258,18 +258,6 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
             <div>
               <label className={LABEL_CLS}>Full Form</label>
               <input value={fullForm} onChange={(e) => setFullForm(e.target.value)} placeholder="Net Debt to Equity" className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Denomination</label>
-              <input value={denomination} onChange={(e) => setDenomination(e.target.value)} placeholder="ratio" className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>KPI Type</label>
-              <input value={kpiType} onChange={(e) => setKpiType(e.target.value)} placeholder="profit_lines" className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Unit Label</label>
-              <input value={unitLabel} onChange={(e) => setUnitLabel(e.target.value)} placeholder="%" className={INPUT_CLS} />
             </div>
           </div>
 

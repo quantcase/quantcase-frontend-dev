@@ -562,22 +562,39 @@ export interface ProwessInsertStatsMarket {
   inserted: number;
 }
 
-export interface ProwessFinancialReport {
-  mode: "annual" | "quarterly";
+export interface ProwessFinancialReportBase {
   table: "prowess_values_new";
   inserted: boolean;
   companiesInCsv: number;
   columnsInCsv: number;
   /** CSV column name → matched KPI abbr. */
   dynamicIndicatorsMatched: Record<string, string>;
-  /** CSV columns that didn't match any known KPI — create it (§ KPI Catalogue) and re-preview. */
+  /**
+   * CSV columns that didn't match any known KPI — create it (§ KPI Catalogue) and re-preview.
+   * success:true no longer implies every column matched — this (and rowsByKpi) is the real
+   * signal of ingestion quality, not the success flag.
+   */
   unmatchedColumns: string[];
   totalRows: number;
-  rowsBySourceType: Record<string, number>;
   rowsByKpi: Record<string, number>;
   /** Only present once /run has actually inserted. */
   insertStats?: ProwessInsertStatsFinancial;
 }
+
+export interface ProwessAnnualReport extends ProwessFinancialReportBase {
+  mode: "annual";
+  /** One file = one section now — "C" (Consolidated) or "S" (Standalone). */
+  sourceType: "C" | "S";
+  /** Fiscal years spanned by this file, e.g. ["FY2015", ..., "FY2026"]. */
+  fiscalYears: string[];
+}
+
+export interface ProwessQuarterlyReport extends ProwessFinancialReportBase {
+  mode: "quarterly";
+  rowsBySourceType: Record<string, number>;
+}
+
+export type ProwessFinancialReport = ProwessAnnualReport | ProwessQuarterlyReport;
 
 export interface ProwessMarketReport {
   mode: "daily" | "index";

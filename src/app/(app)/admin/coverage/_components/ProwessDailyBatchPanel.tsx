@@ -12,6 +12,7 @@ import {
   ProwessBatchListResponse,
   ProwessBatchAbortResponse,
 } from "./types";
+import { SchedulerControl } from "./SchedulerControl";
 
 const BASE = `${BACKEND_URL}/admin/prowess/batch`;
 const POLL_MS = 12000;
@@ -232,6 +233,8 @@ export function ProwessDailyBatchPanel() {
           confirm step.
         </p>
       </div>
+
+      <SchedulerControl slug="prowess-daily-batch" label="Prowess Daily" />
 
       {/* Trigger */}
       <div className="rounded-[10px] border border-hair bg-card p-4 space-y-3">

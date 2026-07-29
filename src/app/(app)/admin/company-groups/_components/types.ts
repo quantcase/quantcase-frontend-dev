@@ -1,5 +1,7 @@
 // ── Company Groups — shapes per "Company Groups — Admin Guide" ──────────────
 
+import { KpiFilter } from "@/app/(app)/admin/kpi-filters/_components/types";
+
 export type FilterType = "manual" | "dynamic" | "kpi_filter";
 
 export interface ManualFilterConfig {
@@ -91,7 +93,8 @@ export function isManualConfig(g: Pick<CompanyGroup, "filter_type" | "filter_con
 
 export interface AttachedKpiFilter {
   id: string;
-  kpi_filter_slug: string;
+  kpi_filter_id: string;
+  kpi_filter: KpiFilter;
 }
 
 export interface RecomputeResult {

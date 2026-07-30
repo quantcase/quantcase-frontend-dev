@@ -12,6 +12,7 @@ import { CandlestickChart, type ChartMode } from "./_components/CandlestickChart
 import { DecisionIntelligenceBanner } from "./_components/DecisionIntelligenceBanner";
 import { DecisionIntelligenceState } from "./_components/DecisionIntelligenceState";
 import { LevelsToWatchCard } from "./_components/LevelsToWatchCard";
+import { WhatCanChangeCard } from "./_components/WhatCanChangeCard";
 import { TechnicalsRuleEngine, type EngineTab } from "./_components/TechnicalsRuleEngine";
 import { LevelsStrip } from "./_components/LevelsStrip";
 import { SectionPanel } from "@/components/molecules/section-panel";
@@ -193,7 +194,7 @@ function TechnicalsContent() {
 
         {/* Row 2: Rule Engine (left) + Decision Intelligence (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-[14px] items-start">
-          <div className="min-w-0">
+          <div className="min-w-0 flex flex-col gap-[14px]">
             {!loading && data?.ruleEngine && (
               <div id="section-rule-engine">
                 {/* key={symbol} resets the Growth/Value toggle to the new
@@ -212,6 +213,18 @@ function TechnicalsContent() {
               </div>
             )}
             {loading && <TechnicalsRuleEngineSkeleton />}
+
+            {/* These two fill the whitespace the rule engine leaves under it,
+                rather than stacking under the sticky Decision Intelligence column. */}
+            {!loading && data && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] items-start">
+                <WhatCanChangeCard items={data.decisionIntelligence?.whatCanChange} />
+                <LevelsToWatchCard
+                  levels={data.decisionIntelligence?.levelsToWatch ?? null}
+                  cmp={data.price.cmp}
+                />
+              </div>
+            )}
           </div>
           <div className="lg:sticky lg:top-28 flex flex-col gap-[14px]">
             {loading ? (
@@ -250,11 +263,6 @@ function TechnicalsContent() {
                     scores={data.scores}
                   />
                 )}
-
-                <LevelsToWatchCard
-                  levels={data.decisionIntelligence?.levelsToWatch ?? null}
-                  cmp={data.price.cmp}
-                />
               </>
             ) : null}
           </div>

@@ -79,7 +79,6 @@ export default function KpisPage() {
     openEditByAbbr(kpi.abbr);
   }
 
-  const abbrOptions = kpis.map((k) => k.abbr);
   const visibleKpis = useMemo(
     () => (coreOnly && coreAbbrs ? kpis.filter((k) => coreAbbrs.has(k.abbr)) : kpis),
     [kpis, coreOnly, coreAbbrs]
@@ -244,7 +243,6 @@ export default function KpisPage() {
         key={dialogKey}
         open={dialogOpen}
         kpi={editingKpi}
-        abbrOptions={abbrOptions}
         onClose={() => setDialogOpen(false)}
         onSaved={() => load(search, includeAllSources)}
       />

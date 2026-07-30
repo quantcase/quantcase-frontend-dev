@@ -7,7 +7,6 @@ import { BACKEND_URL } from "@/lib/constants";
 import { KpiGroupTree } from "./_components/KpiGroupTree";
 import { KpiGroupFormDialog } from "./_components/KpiGroupFormDialog";
 import { CompanyGroupOption, KpiGroupListResponse, KpiGroupNode, KpiGroupTreeResponse, findAncestorPath } from "./_components/types";
-import { KpisResponse } from "../kpis/_components/types";
 
 const BASE = `${BACKEND_URL}/admin/kpi-groups`;
 
@@ -23,7 +22,6 @@ export default function KpiGroupsPage() {
   const [searching, setSearching] = useState(false);
 
   const [companyGroups, setCompanyGroups] = useState<CompanyGroupOption[]>([]);
-  const [abbrOptions, setAbbrOptions] = useState<string[]>([]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingNode, setEditingNode] = useState<KpiGroupNode | null>(null);
@@ -44,10 +42,6 @@ export default function KpiGroupsPage() {
   useEffect(() => {
     rawFetch<CompanyGroupsRaw>(`${BACKEND_URL}/admin/company-groups`, {
       onSuccess: (res) => setCompanyGroups((res.data ?? []).map((g) => ({ slug: g.slug, name: g.name }))),
-      onError: () => {},
-    });
-    apiAuthGet<KpisResponse>(`${BACKEND_URL}/admin/kpis?limit=500`, {
-      onSuccess: (res) => setAbbrOptions((res.data ?? []).map((k) => k.abbr)),
       onError: () => {},
     });
   }, []);
@@ -199,7 +193,6 @@ export default function KpiGroupsPage() {
         node={editingNode}
         defaultParentId={defaultParentId}
         tree={tree}
-        abbrOptions={abbrOptions}
         companyGroups={companyGroups}
         onClose={() => setDialogOpen(false)}
         onSaved={loadTree}

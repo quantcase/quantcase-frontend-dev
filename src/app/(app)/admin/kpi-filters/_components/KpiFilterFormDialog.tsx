@@ -15,7 +15,6 @@ const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text
 interface Props {
   open: boolean;
   filter: KpiFilter | null;
-  abbrOptions: string[];
   onClose: () => void;
   onSaved: () => void;
 }
@@ -24,7 +23,7 @@ function slugify(s: string) {
   return s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
-export function KpiFilterFormDialog({ open, filter, abbrOptions, onClose, onSaved }: Props) {
+export function KpiFilterFormDialog({ open, filter, onClose, onSaved }: Props) {
   const isEdit = !!filter;
 
   const [label, setLabel] = useState(filter?.label ?? "");
@@ -113,7 +112,7 @@ export function KpiFilterFormDialog({ open, filter, abbrOptions, onClose, onSave
 
           <div>
             <label className={LABEL_CLS}>KPI Abbr</label>
-            <KpiAbbrPicker options={abbrOptions} value={kpiAbbr} onChange={setKpiAbbr} />
+            <KpiAbbrPicker value={kpiAbbr} onChange={setKpiAbbr} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">

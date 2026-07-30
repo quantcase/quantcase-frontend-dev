@@ -6,7 +6,6 @@ import { apiAuthDelete, apiAuthGet, rawFetch } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { ScreenConfigFormDialog } from "./_components/ScreenConfigFormDialog";
 import { CompanyGroupOption, ScreenConfig, ScreenConfigResponse, ScreenConfigsResponse } from "./_components/types";
-import { KpisResponse } from "../kpis/_components/types";
 
 const BASE = `${BACKEND_URL}/admin/screen-configs`;
 
@@ -85,7 +84,6 @@ export default function ScreenConfigsPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  const [abbrOptions, setAbbrOptions] = useState<string[]>([]);
   const [companyGroups, setCompanyGroups] = useState<CompanyGroupOption[]>([]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -107,10 +105,6 @@ export default function ScreenConfigsPage() {
   useEffect(() => { load(""); }, [load]);
 
   useEffect(() => {
-    apiAuthGet<KpisResponse>(`${BACKEND_URL}/admin/kpis?limit=500`, {
-      onSuccess: (res) => setAbbrOptions((res.data ?? []).map((k) => k.abbr)),
-      onError: () => {},
-    });
     rawFetch<CompanyGroupsRaw>(`${BACKEND_URL}/admin/company-groups`, {
       onSuccess: (res) => setCompanyGroups((res.data ?? []).map((g) => ({ slug: g.slug, name: g.name }))),
       onError: () => {},
@@ -230,7 +224,6 @@ export default function ScreenConfigsPage() {
         key={dialogKey}
         open={dialogOpen}
         section={editingSection}
-        abbrOptions={abbrOptions}
         companyGroups={companyGroups}
         existingKeys={sections.map((s) => s.key)}
         onClose={() => setDialogOpen(false)}

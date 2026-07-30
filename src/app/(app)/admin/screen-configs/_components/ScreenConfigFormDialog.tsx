@@ -17,7 +17,6 @@ const LABEL_CLS = "block text-[10px] font-semibold uppercase tracking-wider text
 interface Props {
   open: boolean;
   section: ScreenConfig | null;
-  abbrOptions: string[];
   companyGroups: CompanyGroupOption[];
   /** Every existing section key, for the "Variant of" picker. */
   existingKeys: string[];
@@ -25,7 +24,7 @@ interface Props {
   onSaved: () => void;
 }
 
-export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGroups, existingKeys, onClose, onSaved }: Props) {
+export function ScreenConfigFormDialog({ open, section, companyGroups, existingKeys, onClose, onSaved }: Props) {
   const isEdit = !!section;
 
   const [key, setKey] = useState(section?.key ?? "");
@@ -254,14 +253,12 @@ export function ScreenConfigFormDialog({ open, section, abbrOptions, companyGrou
             kpiGroupSlug.trim() ? (
               <ScreenConfigKpiGroupRowsPanel
                 branchSlug={kpiGroupSlug.trim()}
-                abbrOptions={abbrOptions}
                 companyGroups={companyGroups}
               />
             ) : (
               <ScreenConfigItemsPanel
                 sectionKey={currentKey}
                 sectionDecimalPlaces={decimalPlaces.trim() ? Number(decimalPlaces) : null}
-                abbrOptions={abbrOptions}
                 companyGroups={companyGroups}
               />
             )

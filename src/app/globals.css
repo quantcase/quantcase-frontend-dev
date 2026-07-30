@@ -417,6 +417,23 @@
     --qc-blue:        #3A6BEF;
     --qc-blue-soft:   #E9EEFE;
 
+    /* Categorical palette — identity only.
+       For charts whose segments are *categories* (industry, market-cap band),
+       where the color says "a different group" and nothing about good/bad. Kept
+       deliberately outside the semantic ramp above: never render an up/down/warn
+       meaning with these, and never render a category with --qc-up/-down/-warn.
+       Rotated in order and dark enough throughout for white labels; the leftover
+       "Others"/unknown bucket uses --qc-ink-3 instead, so the remainder reads as
+       remainder. */
+    --qc-cat-1: #3B4CDB;  /* blue    */
+    --qc-cat-2: #1F5C3A;  /* forest  */
+    --qc-cat-3: #7C2FE0;  /* violet  */
+    --qc-cat-4: #B4731A;  /* ochre   */
+    --qc-cat-5: #2E7D75;  /* teal    */
+    --qc-cat-6: #A81F55;  /* crimson */
+    --qc-cat-7: #1A1A1A;  /* ink     */
+    --qc-cat-8: #7A3B1E;  /* brown   */
+
     --qc-brand-pill-bg-1: #F4FBDD;
     --qc-brand-pill-bg-2: var(--qc-lime-soft);
     --qc-brand-pill-edge: var(--qc-lime-edge);
@@ -748,3 +765,4 @@
   );
   animation: qc-shimmer 1.6s ease-in-out infinite;
 }
+

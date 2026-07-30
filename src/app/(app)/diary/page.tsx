@@ -8,6 +8,7 @@ import { ConnectPortfolioModal } from "@/components/investor/connect-portfolio-m
 import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
 
 import { DiaryMasthead } from "./_components/diary-masthead";
+import { YourBookOverview } from "./_components/your-book-overview";
 import { EntriesStrip } from "./_components/entries-strip";
 import { ChangedSinceCard } from "./_components/changed-since-card";
 import { EverythingYouOwn } from "./_components/everything-you-own";
@@ -92,6 +93,20 @@ export default function DiaryPage() {
             {d.journalsError}
           </div>
         )}
+
+        {/* Opens "Your thesis" with the money at stake: every holding as a block
+            sized by what's in it, cut by whether its reasoning still holds. The
+            cards below are the same question one name at a time. */}
+        <YourBookOverview
+          holdings={d.holdings}
+          tickers={d.allTickers}
+          metrics={d.metrics}
+          mod={d.mod}
+          summary={d.summary}
+          loading={d.holdingsLoading}
+          notConnected={d.brokerNotConnected}
+          onPick={openByTicker}
+        />
 
         {/* Thesis-or-blank only; note-only tickers are the watchlist's story. */}
         <EntriesStrip

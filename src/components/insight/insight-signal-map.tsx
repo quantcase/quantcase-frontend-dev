@@ -1,41 +1,49 @@
 "use client";
 
 import type { InsightSignalMapItem } from "@/types/analysis";
-import { SectionHeader } from "@/components/ds";
+import { SectionPanel } from "@/components/molecules/section-panel";
 import { SignalCard } from "@/components/overview/signal-card";
 
 interface InsightSignalMapProps {
   signals: InsightSignalMapItem[];
   heading?: string;
+  subtitle?: string;
 }
 
-export function InsightSignalMap({ signals, heading }: InsightSignalMapProps) {
+export function InsightSignalMap({ signals, heading, subtitle }: InsightSignalMapProps) {
   if (!signals.length) return null;
 
-  return (
-    <div
-      className="rounded-[10px] p-2"
-      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", display: "flex", flexDirection: "column", flex: 1 }}
-    >
-      <SectionHeader label={heading ?? "Signals"} count={signals.length} style={{ marginBottom: 0, padding: "10px 12px 16px" }} />
+  // With enough tiles the rows are sized evenly to fill the card, so this column
+  // ends level with the (taller) lenses column beside it. Sparse lists keep their
+  // natural rows so a 2- or 3-signal card doesn't balloon. The tile itself is
+  // never resized — it's centred in its row — since SignalCard is shared.
+  const fillHeight = signals.length >= 5;
 
-      {/* Inner card with 2-col grid */}
+  return (
+    // Header matches the fundamentals page cards (SectionPanel: sans title +
+    // subtitle), so every research card across the screener reads the same.
+    <SectionPanel
+      className="flex-1"
+      title={heading ?? "Signals"}
+      subtitle={subtitle ?? "Positive and caution signals"}
+      contentClassName="min-w-0"
+    >
       <div
-        className="rounded-[10px] p-3"
-        style={{ background: "var(--qc-card)", flex: 1 }}
+        className="grid grid-cols-1 sm:grid-cols-2"
+        style={{ gap: 10, height: "100%", gridAutoRows: fillHeight ? "1fr" : "auto" }}
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 10 }}>
-          {signals.map((s, i) => (
+        {signals.map((s, i) => (
+          <div key={i} style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <SignalCard
-              key={i}
               label={(s.category ?? s.label ?? "Signal").toUpperCase()}
               value={s.summary ?? s.signal}
               sentiment={s.sentiment}
               tooltip={s.signal ? { description: s.signal } : undefined}
+              tooltipAlign="right"
             />
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-    </div>
+    </SectionPanel>
   );
 }

@@ -188,7 +188,6 @@ export default function KpiFiltersPage() {
         key={dialogKey}
         open={dialogOpen}
         filter={editingFilter}
-        abbrOptions={abbrOptions}
         onClose={() => setDialogOpen(false)}
         onSaved={() => load(search, kpiAbbrFilter)}
       />

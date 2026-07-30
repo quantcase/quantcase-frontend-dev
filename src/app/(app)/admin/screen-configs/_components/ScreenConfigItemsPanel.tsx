@@ -12,7 +12,6 @@ const BASE = `${BACKEND_URL}/admin/screen-configs`;
 interface Props {
   sectionKey: string;
   sectionDecimalPlaces?: number | null;
-  abbrOptions: string[];
   companyGroups: CompanyGroupOption[];
 }
 
@@ -70,7 +69,7 @@ function ItemRow({ item, companyGroups, onEdit, onDelete }: {
   );
 }
 
-export function ScreenConfigItemsPanel({ sectionKey, sectionDecimalPlaces, abbrOptions, companyGroups }: Props) {
+export function ScreenConfigItemsPanel({ sectionKey, sectionDecimalPlaces, companyGroups }: Props) {
   const [items, setItems] = useState<ScreenConfigItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -154,7 +153,6 @@ export function ScreenConfigItemsPanel({ sectionKey, sectionDecimalPlaces, abbrO
         sectionKey={sectionKey}
         item={editingItem}
         sectionDecimalPlaces={sectionDecimalPlaces}
-        abbrOptions={abbrOptions}
         companyGroups={companyGroups}
         onClose={() => setDialogOpen(false)}
         onSaved={load}

@@ -23,13 +23,12 @@ interface Props {
   node: KpiGroupNode | null;
   defaultParentId: string | null;
   tree: KpiGroupNode[];
-  abbrOptions: string[];
   companyGroups: CompanyGroupOption[];
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function KpiGroupFormDialog({ open, node, defaultParentId, tree, abbrOptions, companyGroups, onClose, onSaved }: Props) {
+export function KpiGroupFormDialog({ open, node, defaultParentId, tree, companyGroups, onClose, onSaved }: Props) {
   const isEdit = !!node;
 
   const [label, setLabel] = useState(node?.label ?? "");
@@ -173,7 +172,7 @@ export function KpiGroupFormDialog({ open, node, defaultParentId, tree, abbrOpti
           {isLeaf && (
             <div>
               <label className={LABEL_CLS}>KPI Abbr</label>
-              <KpiAbbrPicker options={abbrOptions} value={kpiAbbr} onChange={setKpiAbbr} />
+              <KpiAbbrPicker value={kpiAbbr} onChange={setKpiAbbr} />
             </div>
           )}
 

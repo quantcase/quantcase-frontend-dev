@@ -13,14 +13,13 @@ const BASE = `${BACKEND_URL}/admin/kpi-groups`;
 
 interface Props {
   branchSlug: string;
-  abbrOptions: string[];
   companyGroups: CompanyGroupOption[];
 }
 
 // Rows for a financials.pnl/.balance-sheet/.cashflow section come straight from a KpiGroup
 // branch's children — this reuses the same tree CRUD as the standalone /admin/kpi-groups page,
 // scoped to just that branch, so add/edit/delete/reparent here is exactly "manage rows".
-export function ScreenConfigKpiGroupRowsPanel({ branchSlug, abbrOptions, companyGroups }: Props) {
+export function ScreenConfigKpiGroupRowsPanel({ branchSlug, companyGroups }: Props) {
   const [fullTree, setFullTree] = useState<KpiGroupNode[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,7 +116,6 @@ export function ScreenConfigKpiGroupRowsPanel({ branchSlug, abbrOptions, company
         node={editingNode}
         defaultParentId={defaultParentId}
         tree={fullTree}
-        abbrOptions={abbrOptions}
         companyGroups={companyGroups}
         onClose={() => setDialogOpen(false)}
         onSaved={load}

@@ -24,7 +24,6 @@ interface Props {
   sectionKey: string;
   item: ScreenConfigItem | null;
   sectionDecimalPlaces?: number | null;
-  abbrOptions: string[];
   companyGroups: CompanyGroupOption[];
   onClose: () => void;
   onSaved: () => void;
@@ -35,7 +34,6 @@ export function ScreenConfigItemFormDialog({
   sectionKey,
   item,
   sectionDecimalPlaces,
-  abbrOptions,
   companyGroups,
   onClose,
   onSaved,
@@ -100,7 +98,7 @@ export function ScreenConfigItemFormDialog({
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           <div>
             <label className={LABEL_CLS}>KPI Abbr</label>
-            <KpiAbbrPicker options={abbrOptions} value={kpiAbbr} onChange={setKpiAbbr} disabled={isEdit} />
+            <KpiAbbrPicker value={kpiAbbr} onChange={setKpiAbbr} disabled={isEdit} />
             {isEdit && <p className="text-[11px] text-ink-3 mt-1">Detach and re-attach to point this row at a different KPI.</p>}
           </div>
 

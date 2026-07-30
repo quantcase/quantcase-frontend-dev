@@ -26,7 +26,6 @@ const FUNCTIONS = ["CAGR(", "AVG(", "SUM(", "DELTA(", "MAX(", "MIN(", "COALESCE(
 interface Props {
   open: boolean;
   kpi: Kpi | null;
-  abbrOptions: string[];
   onClose: () => void;
   onSaved: () => void;
 }
@@ -42,7 +41,7 @@ function tokenAtCursor(text: string, pos: number): { token: string; start: numbe
   return { token, start, end };
 }
 
-export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Props) {
+export function KpiFormDialog({ open, kpi, onClose, onSaved }: Props) {
   const isEdit = !!kpi;
 
   const [abbr, setAbbr] = useState(kpi?.abbr ?? "");
@@ -416,7 +415,7 @@ export function KpiFormDialog({ open, kpi, abbrOptions, onClose, onSaved }: Prop
             )}
             <div className="flex items-center gap-2">
               <div className="flex-1">
-                <KpiAbbrPicker options={abbrOptions} value={addFallback} onChange={setAddFallback} placeholder="Search KPI to add as fallback…" />
+                <KpiAbbrPicker value={addFallback} onChange={setAddFallback} placeholder="Search KPI to add as fallback…" />
               </div>
               <button
                 type="button"

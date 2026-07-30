@@ -1,11 +1,10 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import OnboardingPage from "@/app/(onboarding)/onboarding/page";
-import { MODSynopsisCard } from "@/components/investor/mod-synopsis-card";
+import { PortfolioStatStrip } from "@/components/investor/portfolio-stat-strip";
 import { MODBreakdownDrawer } from "@/components/investor/mod-breakdown-drawer";
-import { HoldingsPanel } from "@/components/investor/holdings-panel";
 import { DiscoverScreens } from "@/components/investor/discover-screens";
 import { ResearchHero } from "@/components/investor/research-hero";
 import { UploadPortfolioModal } from "@/components/investor/upload-portfolio-modal";
@@ -17,6 +16,7 @@ import { useModSynopsis } from "@/hooks/useModSynopsis";
 import { usePortfolioSummary } from "@/hooks/usePortfolioSummary";
 import { useDiscoverScreens } from "@/hooks/useDiscoverScreens";
 import { useMarketIndices } from "@/hooks/useMarketIndices";
+import { useJournalTree, flattenTickers } from "@/hooks/useJournalTree";
 import type { ModPillar, ModSubScore } from "@/types/investor-dashboard";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -46,24 +46,6 @@ function toCardSubScores(subs: ModSubScore[]): { label: string; score: number; r
     .map((p) => subs.find((s) => s.pillar === p))
     .filter((s): s is ModSubScore => Boolean(s))
     .map((s) => ({ label: pillarLabel(s.pillar), score: s.score, rating: s.rating }));
-}
-
-// Build the serif headline for the MOD synopsis card from the overall score + weakest pillar.
-function buildModHeadline(overall: number, subs: ModSubScore[], weakest: ModPillar | null): string {
-  // Emphasis = serif-italic ink (was off-palette brand-accent purple — accent drift).
-  const gold = (t: string) => `<span style="font-style:italic">${t}</span>`;
-  const strongest = [...subs].sort((a, b) => b.score - a.score)[0];
-  const strongText = strongest ? `strong on ${strongest.pillar}` : "";
-  if (!weakest) {
-    return strongText
-      ? `Your book scores ${gold(`${overall}/100`)} — ${strongText}.`
-      : `Your book scores ${gold(`${overall}/100`)}.`;
-  }
-  const weakSub = subs.find((s) => s.pillar === weakest);
-  const weakText = weakSub && weakSub.rating === "STRETCHED"
-    ? `${gold(`stretched on ${weakest}`)}.`
-    : `${gold(`soft on ${weakest}`)}.`;
-  return `Your book scores ${gold(`${overall}/100`)} — ${strongText}, ${weakText}`;
 }
 
 // Format a market index value, e.g. 24318 → "24,318"
@@ -111,6 +93,21 @@ function InvestorDashboardContent() {
   const { data: summary } = usePortfolioSummary();
   const { data: discover } = useDiscoverScreens();
   const { data: indices } = useMarketIndices();
+  const { data: journalTree } = useJournalTree();
+
+  // ── Diary nudge ─────────────────────────────────────────────────────────────
+  // Tickers in the diary with no thesis written *anywhere* — a name written up in
+  // one journal isn't "unwritten" just because another journal row lacks a thesis.
+  const unwrittenCount = useMemo(() => {
+    const written = new Set<string>();
+    const seen = new Set<string>();
+    for (const t of flattenTickers(journalTree)) {
+      const key = t.ticker.toUpperCase();
+      seen.add(key);
+      if (t.latestThesisHealth !== null) written.add(key);
+    }
+    return [...seen].filter((k) => !written.has(k)).length;
+  }, [journalTree]);
 
   // Holdings (user portfolio)
   const userHoldings = userPortfolio?.holdings ?? [];
@@ -125,9 +122,6 @@ function InvestorDashboardContent() {
 
   // ── MOD synopsis (portfolio-level) ──────────────────────────────────────────
   const modSubScores = modSynopsis ? toCardSubScores(modSynopsis.sub_scores) : [];
-  const modHeadline = modSynopsis
-    ? buildModHeadline(modSynopsis.overall_score, modSynopsis.sub_scores, modSynopsis.weakest_pillar)
-    : "";
   const modBreakdown = (modSynopsis?.breakdown ?? []).map((row) => ({
     symbol: row.symbol,
     name: row.name,
@@ -150,12 +144,12 @@ function InvestorDashboardContent() {
         {/* ── Page header ───────────────────────────────────────────────── */}
         {/* Single search surface only — the research hero below is the primary
             entry point, so the header no longer duplicates a stock search. */}
-        <header className="mb-[22px]">
-          <h1 className="m-0 text-[30px] font-medium leading-[1.15] tracking-[var(--qc-track-display)] text-ink">
+        <header className="mb-3.5">
+          <h1 className="m-0 text-[21px] font-semibold leading-[1.2] tracking-[var(--qc-track-display)] text-ink">
             {greeting}
-            {firstName && <>, <span className="font-medium">{firstName}</span></>}
+            {firstName && <>, <span className="font-semibold">{firstName}</span></>}
           </h1>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-3">
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-3">
             <span>{todayMeta}</span>
             {[
               { label: "NIFTY", idx: nifty },
@@ -181,40 +175,21 @@ function InvestorDashboardContent() {
         </header>
 
         {/* ════════════════════════════════════════════════════════════
-            ROW 1 — MOD Synopsis (left) + Holdings (right)
+            ROW 1 — Compact portfolio glance strip (book · MOD · holdings)
         ═══════════════════════════════════════════════════════════════ */}
-        <section
-          className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 mb-3.5 items-stretch"
-        >
-          <MODSynopsisCard
-            overallScore={modSynopsis?.overall_score ?? 0}
-            headline={modHeadline}
-            subScores={modSubScores}
-            draggingSymbols={modSynopsis?.dragging_symbols ?? []}
-            draggingLabel={modSynopsis?.weakest_pillar ? pillarLabel(modSynopsis.weakest_pillar) : undefined}
-            onOpenBreakdown={() => setModDrawerOpen(true)}
-            isShadow={isUserPortfolioMissing}
-            brokerConnected={brokerConnected}
-            brokerLabel={connectedBrokerLabel}
-            onUploadPortfolio={() => setConnectModalOpen(true)}
-          />
-
-          <HoldingsPanel
-            stockCount={summary?.stock_count ?? userStockCount}
-            fundCount={summary?.fund_count ?? 0}
+        <section className="mb-3.5">
+          <PortfolioStatStrip
             equityValue={summary?.equity_value ?? 0}
-            investedValue={summary?.invested_value ?? 0}
-            todayChangeValue={summary?.today_change_value ?? null}
-            todayChangePct={summary?.today_change_pct ?? null}
-            ytdChangePct={summary?.ytd_change_pct ?? null}
-            return6mPct={summary?.return_6m_pct ?? null}
-            valueTrend={summary?.value_trend ?? []}
-            capSegments={summary?.cap_segments ?? []}
-            industrySegments={summary?.industry_segments ?? []}
-            approximate={summary?.source === "firstparty"}
-            isShadow={isUserPortfolioMissing}
+            changePct={summary?.today_change_pct ?? summary?.ytd_change_pct ?? null}
+            changeLabel={summary?.today_change_pct != null ? "Today's" : "YTD"}
+            modScore={modSynopsis?.overall_score ?? null}
+            subScores={modSubScores}
+            stockCount={summary?.stock_count ?? userStockCount}
             brokerConnected={brokerConnected}
             brokerLabel={connectedBrokerLabel}
+            unwrittenCount={unwrittenCount}
+            isShadow={isUserPortfolioMissing}
+            onOpenBreakdown={() => setModDrawerOpen(true)}
             onUploadPortfolio={() => setConnectModalOpen(true)}
           />
         </section>

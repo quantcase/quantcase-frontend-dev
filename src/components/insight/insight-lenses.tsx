@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import type { InsightLens } from "@/types/analysis";
 import { renderMd } from "@/lib/render-md";
-import { SectionHeader, StatusBadge, type StatusSentiment } from "@/components/ds";
+import { StatusBadge, type StatusSentiment } from "@/components/ds";
+import { SectionPanel } from "@/components/molecules/section-panel";
 
 const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
   "guidance-credibility": Target,
@@ -31,6 +32,7 @@ const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
 interface InsightLensesProps {
   lenses: InsightLens[];
   heading?: string;
+  subtitle?: string;
   onLensClick?: (slug: string) => void;
 }
 
@@ -113,20 +115,21 @@ function LensDescription({ text, name, accentColor }: { text: string; name: stri
   );
 }
 
-export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesProps) {
+export function InsightLenses({ lenses, heading, subtitle, onLensClick }: InsightLensesProps) {
   if (!lenses.length) return null;
 
   return (
-    <div
-      className="rounded-[10px] p-2"
-      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", display: "flex", flexDirection: "column", flex: 1 }}
+    // Header matches the fundamentals page cards (SectionPanel: sans title +
+    // subtitle), so every research card across the screener reads the same.
+    <SectionPanel
+      className="flex-1"
+      title={heading ?? "Lenses"}
+      subtitle={subtitle ?? `Scored assessment across ${lenses.length} analytical ${lenses.length === 1 ? "lens" : "lenses"}`}
+      contentClassName="min-w-0"
     >
-      <SectionHeader label={heading ?? "Lenses"} count={lenses.length} style={{ marginBottom: 0, padding: "10px 12px 16px" }} />
-
       {/* Grid of individually color-coded cards. Exactly 3 lenses sit in a single
           row of 3; any other count uses 2 columns (so 4 → 2x2). Full class strings
           kept static so Tailwind's JIT doesn't purge them. */}
-      <div className="rounded-[10px] p-3" style={{ background: "var(--qc-card)", flex: 1 }}>
       <div
         className={`grid grid-cols-1 ${lenses.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
         style={{ gap: 10, height: "100%" }}
@@ -211,7 +214,6 @@ export function InsightLenses({ lenses, heading, onLensClick }: InsightLensesPro
           );
         })}
       </div>
-      </div>
-    </div>
+    </SectionPanel>
   );
 }

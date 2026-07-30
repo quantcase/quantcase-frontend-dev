@@ -242,6 +242,33 @@ function DecisionPreview() {
   );
 }
 
+// Vertical connector used only in the stacked (mobile/tablet) layout, where the
+// measured fan-out lines don't apply: sources sit above the engine and outputs
+// below it, so a single spine with a travelling dot reads the flow direction
+// without eight lines crossing each other in a 380px-wide column.
+const SPINE_H = 22; // keep the travelling dot's y-range in step with the spine height
+
+function MobileSpine() {
+  return (
+    <div
+      aria-hidden
+      className="relative mx-auto w-px lg:hidden"
+      style={{
+        height: SPINE_H,
+        background:
+          "linear-gradient(180deg, rgba(185,138,62,0) 0%, rgba(185,138,62,0.5) 50%, rgba(185,138,62,0) 100%)",
+      }}
+    >
+      <motion.span
+        className="absolute left-1/2 top-0 h-1.5 w-1.5 -translate-x-1/2 rounded-full"
+        style={{ background: "#D4A95F" }}
+        animate={{ y: [0, SPINE_H], opacity: [0, 1, 1, 0] }}
+        transition={{ duration: 1.4, repeat: Infinity, ease: "linear" }}
+      />
+    </div>
+  );
+}
+
 function EngineDiagram() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<HTMLDivElement>(null);
@@ -252,6 +279,17 @@ function EngineDiagram() {
   type Geometry = { w: number; h: number; sources: Pt[]; outputs: Pt[]; engine: Pt; engineR: number };
   const [geometry, setGeometry] = useState<Geometry | null>(null);
   const measureRef = useRef<() => void>(() => {});
+  // null until measured on the client, so SSR never paints the desktop-only
+  // connector overlay on a phone.
+  const [isStacked, setIsStacked] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)"); // Tailwind `lg`
+    const apply = () => setIsStacked(!mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
     function measure() {
@@ -291,6 +329,7 @@ function EngineDiagram() {
   // connector lines track the card's edge continuously instead of jumping once the
   // (batched, lower-frequency) ResizeObserver callback eventually fires.
   useEffect(() => {
+    if (isStacked !== false) return; // no overlay lines to track in the stacked layout
     let raf = 0;
     const start = performance.now();
     const durationMs = 550; // slightly longer than the card's 0.45s expand transition
@@ -302,7 +341,7 @@ function EngineDiagram() {
     }
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [activeOutput]);
+  }, [activeOutput, isStacked]);
 
   useEffect(() => {
     if (!inView) return;
@@ -314,9 +353,10 @@ function EngineDiagram() {
 
   return (
     <div ref={wrapRef} className="relative">
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] items-center gap-y-8 lg:gap-x-16">
-        {/* Left: source list */}
-        <div className="order-2 lg:order-1 grid grid-cols-2 lg:grid-cols-1 gap-2.5 lg:max-w-[300px] lg:ml-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] items-center gap-y-1.5 sm:gap-y-3 lg:gap-y-0 lg:gap-x-16">
+        {/* Left (top when stacked): source list. Two columns while stacked so all eight
+            inputs, the engine and the outputs share one mobile viewport. */}
+        <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5 sm:gap-2.5 w-full lg:max-w-[300px] lg:ml-auto">
           {inputSources.map((s, i) => (
             <motion.div
               key={s.label}
@@ -326,25 +366,27 @@ function EngineDiagram() {
               initial={{ opacity: 0, x: -16 }}
               animate={inView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.1 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 flex items-center gap-3 rounded-xl px-4 py-3"
+              className="relative z-10 flex items-center gap-2 rounded-lg px-2 py-1.5 sm:gap-3 sm:rounded-xl sm:px-4 sm:py-3"
               style={{ border: "1px solid rgba(14,26,43,0.09)", background: "#EEEAE0" }}
             >
               <div
-                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
+                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md sm:h-8 sm:w-8 sm:rounded-lg [&_svg]:size-3 sm:[&_svg]:size-[15px]"
                 style={{ background: "rgba(185,138,62,0.10)", color: "#B98A3E" }}
               >
-                <s.Icon size={15} strokeWidth={1.6} />
+                <s.Icon strokeWidth={1.6} />
               </div>
-              <span className="text-[13px] leading-tight" style={{ ...sans, color: "rgba(14,26,43,0.68)" }}>
+              <span className="min-w-0 text-[10.5px] leading-tight sm:text-[13px]" style={{ ...sans, color: "rgba(14,26,43,0.68)" }}>
                 {s.label}
               </span>
             </motion.div>
           ))}
         </div>
 
+        <MobileSpine />
+
         {/* Center: engine node (connector lines are drawn in the shared overlay SVG below) */}
-        <div className="order-1 lg:order-2 mx-auto flex items-center justify-center py-6 lg:py-0" style={{ width: 168, height: 168 }}>
-          <div ref={engineRef} className="relative flex items-center justify-center" style={{ width: 96, height: 96 }}>
+        <div className="mx-auto flex h-[104px] w-[104px] items-center justify-center sm:h-[168px] sm:w-[168px]">
+          <div ref={engineRef} className="relative flex h-[68px] w-[68px] items-center justify-center sm:h-24 sm:w-24">
             {/* Expanding pulse rings (HTML, since they're purely decorative and don't need pixel-perfect anchoring).
                 Keyframe arrays (rather than a single initial->animate tween) so the loop eases back to its
                 start state instead of snapping once it hits the outer scale. */}
@@ -367,16 +409,16 @@ function EngineDiagram() {
             {/* Rotating dashed rings */}
             {inView && (
               <motion.span
-                className="absolute rounded-full"
-                style={{ inset: -14, border: "1px dashed rgba(185,138,62,0.4)" }}
+                className="absolute -inset-2.5 rounded-full sm:-inset-[14px]"
+                style={{ border: "1px dashed rgba(185,138,62,0.4)" }}
                 animate={{ rotate: 360 }}
                 transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
               />
             )}
             {inView && (
               <motion.span
-                className="absolute rounded-full"
-                style={{ inset: -6, border: "1px dashed rgba(185,138,62,0.3)" }}
+                className="absolute -inset-1 rounded-full sm:-inset-1.5"
+                style={{ border: "1px dashed rgba(185,138,62,0.3)" }}
                 animate={{ rotate: -360 }}
                 transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
               />
@@ -384,8 +426,8 @@ function EngineDiagram() {
             {/* Glow */}
             <span
               aria-hidden
-              className="absolute rounded-full"
-              style={{ inset: -60, background: "radial-gradient(circle, rgba(185,138,62,0.30) 0%, rgba(185,138,62,0.08) 55%, transparent 75%)" }}
+              className="absolute -inset-9 rounded-full sm:-inset-[60px]"
+              style={{ background: "radial-gradient(circle, rgba(185,138,62,0.30) 0%, rgba(185,138,62,0.08) 55%, transparent 75%)" }}
             />
             {/* Core */}
             <motion.div
@@ -398,18 +440,20 @@ function EngineDiagram() {
                 border: "1px solid rgba(185,138,62,0.55)",
               }}
             >
-              <span className="text-[9px] uppercase leading-none" style={{ ...mono, letterSpacing: "0.16em", color: "rgba(245,240,230,0.55)" }}>
+              <span className="text-[7px] uppercase leading-none sm:text-[9px]" style={{ ...mono, letterSpacing: "0.16em", color: "rgba(245,240,230,0.55)" }}>
                 QC
               </span>
-              <span className="mt-1.5 text-[15px] leading-tight" style={{ ...serif, color: "#F5F0E6", fontStyle: "italic" }}>
+              <span className="mt-1 text-[12px] leading-tight sm:mt-1.5 sm:text-[15px]" style={{ ...serif, color: "#F5F0E6", fontStyle: "italic" }}>
                 Engine
               </span>
             </motion.div>
           </div>
         </div>
 
-        {/* Right: output cards */}
-        <div className="order-3 flex flex-col gap-2.5 lg:max-w-[300px]">
+        <MobileSpine />
+
+        {/* Right (bottom when stacked): output cards */}
+        <div className="flex flex-col gap-1.5 w-full sm:gap-2.5 lg:max-w-[300px]">
           {outputs.map((o, i) => {
             const isActive = inView && activeOutput === i;
             return (
@@ -421,7 +465,7 @@ function EngineDiagram() {
                 initial={{ opacity: 0, x: 16 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.3 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 rounded-xl px-4 py-3.5 overflow-hidden"
+                className="relative z-10 overflow-hidden rounded-lg px-2.5 py-2 sm:rounded-xl sm:px-4 sm:py-3.5"
                 style={{
                   border: isActive ? "1px solid rgba(185,138,62,0.45)" : "1px solid rgba(14,26,43,0.09)",
                   background: isActive ? "#F3E9D8" : "#EEEAE0",
@@ -429,7 +473,7 @@ function EngineDiagram() {
                   transition: "border-color 0.5s ease, background 0.5s ease, box-shadow 0.5s ease",
                 }}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2 sm:gap-3">
                   <AnimatePresence>
                     {isActive && (
                       <motion.span
@@ -443,20 +487,20 @@ function EngineDiagram() {
                     )}
                   </AnimatePresence>
                   <div
-                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md sm:h-9 sm:w-9 sm:rounded-lg [&_svg]:size-[13px] sm:[&_svg]:size-4"
                     style={{
                       background: isActive ? "rgba(185,138,62,0.16)" : "rgba(14,26,43,0.05)",
                       color: isActive ? "#B98A3E" : "rgba(14,26,43,0.45)",
                       transition: "background 0.5s ease, color 0.5s ease",
                     }}
                   >
-                    <o.Icon size={16} strokeWidth={1.6} />
+                    <o.Icon strokeWidth={1.6} />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[13.5px]" style={{ ...sans, color: "#0E1A2B", fontWeight: 500 }}>
+                    <div className="text-[11.5px] sm:text-[13.5px]" style={{ ...sans, color: "#0E1A2B", fontWeight: 500 }}>
                       {o.label}
                     </div>
-                    <div className="mt-0.5 text-[11.5px] leading-snug" style={{ ...sans, color: "rgba(14,26,43,0.45)" }}>
+                    <div className="mt-0.5 text-[10px] leading-snug sm:text-[11.5px]" style={{ ...sans, color: "rgba(14,26,43,0.45)" }}>
                       {o.desc}
                     </div>
                   </div>
@@ -472,7 +516,7 @@ function EngineDiagram() {
                       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                       className="overflow-hidden"
                     >
-                      <div className="ml-12 mt-3 pt-3" style={{ borderTop: "1px solid rgba(14,26,43,0.08)" }}>
+                      <div className="ml-9 mt-2 pt-2 sm:ml-12 sm:mt-3 sm:pt-3" style={{ borderTop: "1px solid rgba(14,26,43,0.08)" }}>
                         <o.Preview />
                       </div>
                     </motion.div>
@@ -486,8 +530,11 @@ function EngineDiagram() {
 
       {/* Shared overlay SVG: connector lines from measured card positions to/from the engine rim.
           `geometry` is re-measured every animation frame while a card expands/collapses
-          (see the rAF effect above), so lines track the card's edge continuously. */}
-      {geometry && (() => {
+          (see the rAF effect above), so lines track the card's edge continuously.
+          Side-by-side layout only — the anchors assume sources sit left of the engine and
+          outputs right of it, which is false once the grid stacks (<lg). There, `MobileSpine`
+          carries the flow instead. */}
+      {geometry && isStacked === false && (() => {
         const g = geometry;
         return (
           <svg
@@ -596,7 +643,7 @@ export default function LandingPoweredByAi() {
         }}
       />
 
-      <div className="relative mx-auto max-w-[1280px] px-8 md:px-12">
+      <div className="relative mx-auto max-w-[1280px] px-5 sm:px-8 md:px-12">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -666,7 +713,7 @@ export default function LandingPoweredByAi() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="relative mt-14 rounded-2xl px-6 py-10 md:px-10 md:py-14"
+          className="relative mt-8 rounded-2xl px-3 py-5 sm:mt-14 sm:px-6 sm:py-10 md:px-10 md:py-14"
           style={{ border: "1px solid rgba(14,26,43,0.09)", background: "rgba(14,26,43,0.03)" }}
         >
           <EngineDiagram />

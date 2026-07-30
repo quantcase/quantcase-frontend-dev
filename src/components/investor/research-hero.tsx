@@ -115,11 +115,11 @@ export function ResearchHero() {
   return (
     <DarkGradientCard
       radius={14}
-      style={{ padding: "56px 24px 60px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}
+      style={{ padding: "44px 24px 48px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}
     >
       <h2
         style={{
-          fontSize: "var(--qc-fz-44)",
+          fontSize: "var(--qc-fz-30)",
           fontWeight: "var(--qc-w-medium)",
           letterSpacing: "var(--qc-track-display)",
           color: "var(--qc-on-dark)",
@@ -135,13 +135,13 @@ export function ResearchHero() {
           fontSize: "var(--qc-fz-14)",
           color: "rgba(255,255,255,0.6)",
           fontFamily: "var(--qc-font-sans)",
-          margin: "14px 0 28px",
+          margin: "10px 0 22px",
         }}
       >
         Search a company to open its screener, or pick a research basket below.
       </p>
 
-      <div ref={wrapperRef} style={{ position: "relative", width: "100%", maxWidth: 620 }}>
+      <div ref={wrapperRef} style={{ position: "relative", width: "100%", maxWidth: 560 }}>
         <div ref={inputWrapRef} style={{ position: "relative", display: "flex", alignItems: "center" }}>
           <Search
             style={{ position: "absolute", left: 20, width: 18, height: 18, color: "rgba(255,255,255,0.5)" }}
@@ -160,7 +160,7 @@ export function ResearchHero() {
             autoComplete="off"
             style={{
               width: "100%",
-              padding: "16px 64px 16px 52px",
+              padding: "13px 60px 13px 50px",
               fontSize: "var(--qc-fz-14)",
               borderRadius: 999,
               background: "rgba(255,255,255,0.07)",

@@ -161,12 +161,12 @@ function InsightScorecardSkeleton() {
 function InsightLensesSkeleton() {
   return (
     <div className="rounded-[10px] p-2" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", display: "flex", flexDirection: "column", flex: 1 }}>
-      {/* SectionHeader: large 34px serif heading + count pip */}
-      <div style={{ padding: "10px 12px 16px", display: "flex", alignItems: "flex-end", gap: 10 }}>
-        <Shimmer style={{ height: 34, width: 260 }} rounded={5} />
-        <Shimmer style={{ height: 22, width: 28, marginBottom: 3 }} rounded={4} />
+      {/* SectionPanel header: sans title + subtitle */}
+      <div style={{ padding: "4px 8px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
+        <Shimmer style={{ height: 13, width: 200 }} rounded={4} />
+        <Shimmer style={{ height: 11, width: 300 }} rounded={4} />
       </div>
-      <div className="rounded-[10px] p-3" style={{ background: "var(--qc-card)", flex: 1 }}>
+      <div className="rounded-[10px] p-4" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)", flex: 1 }}>
         <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 10 }}>
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} style={{
@@ -199,12 +199,12 @@ function InsightLensesSkeleton() {
 function InsightSignalMapSkeleton() {
   return (
     <div className="rounded-[10px] p-2" style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", display: "flex", flexDirection: "column", flex: 1 }}>
-      {/* SectionHeader: large serif heading + count pip */}
-      <div style={{ padding: "10px 12px 16px", display: "flex", alignItems: "flex-end", gap: 10 }}>
-        <Shimmer style={{ height: 34, width: 100 }} rounded={5} />
-        <Shimmer style={{ height: 22, width: 28, marginBottom: 3 }} rounded={4} />
+      {/* SectionPanel header: sans title + subtitle */}
+      <div style={{ padding: "4px 8px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
+        <Shimmer style={{ height: 13, width: 90 }} rounded={4} />
+        <Shimmer style={{ height: 11, width: 220 }} rounded={4} />
       </div>
-      <div className="rounded-[10px] p-3" style={{ background: "var(--qc-card)", flex: 1 }}>
+      <div className="rounded-[10px] p-4" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)", flex: 1 }}>
         <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 10 }}>
           {Array.from({ length: 8 }).map((_, i) => (
             /* SignalTile: colored bg border + label + sentiment value */
@@ -250,6 +250,14 @@ const TYPE_VERDICT_LABELS: Record<InsightType, string> = {
   management: "MANAGEMENT VERDICT",
   opportunity: "OPPORTUNITY VERDICT",
   deal: "DEAL VERDICT",
+};
+
+// Card subtitles — the second line of the fundamentals-style card header. Kept
+// short so they never wrap past one line in the card header.
+const TYPE_LENS_SUBTITLES: Record<InsightType, string> = {
+  management: "Scored assessment across each management lens",
+  opportunity: "Scored assessment across each opportunity lens",
+  deal: "Scored assessment across each deal lens",
 };
 
 // ─── Empty / error states ──────────────────────────────────────────────────────
@@ -305,7 +313,7 @@ function InsightDashboard({
         ?? null
     : null;
 
-  const lensHeading = `${TYPE_LABELS[type]} lenses`;
+  const lensHeading = `${TYPE_LABELS[type]} Lenses`;
 
   return (
     <>
@@ -319,12 +327,12 @@ function InsightDashboard({
             <div id="section-lenses" style={{ display: "flex", flexDirection: "column" }}>
               {/* Native lenses only — the cloned Industry lens lives on the scorecard
                   radar/tiles above, not in this per-pillar lens grid. */}
-              <InsightLenses lenses={insight.lenses} heading={lensHeading} onLensClick={handleLensClick} />
+              <InsightLenses lenses={insight.lenses} heading={lensHeading} subtitle={TYPE_LENS_SUBTITLES[type]} onLensClick={handleLensClick} />
             </div>
           )}
           {insight.signal_map.length > 0 && (
             <div id="section-signal-map" style={{ display: "flex", flexDirection: "column" }}>
-              <InsightSignalMap signals={insight.signal_map} heading="Signals" />
+              <InsightSignalMap signals={insight.signal_map} heading="Signals" subtitle="Positive and caution signals" />
             </div>
           )}
         </div>

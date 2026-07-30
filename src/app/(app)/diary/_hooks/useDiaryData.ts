@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useJournalTree, flattenTickers, toJournals } from "@/hooks/useJournalTree";
 import { useSmallcaseHoldings } from "@/hooks/useSmallcaseHoldings";
 import { useModSynopsis } from "@/hooks/useModSynopsis";
+import { usePortfolioSummary } from "@/hooks/usePortfolioSummary";
 import { useWhatsMoving } from "@/hooks/useWhatsMoving";
 import { useStocks } from "@/hooks/useStocks";
 import { useTickerMetrics } from "@/hooks/useTickerMetrics";
@@ -34,6 +35,10 @@ export function useDiaryData(activeJournalId: string | null) {
   const tree = useJournalTree();
   const holdings = useSmallcaseHoldings();
   const mod = useModSynopsis();
+  // Today / YTD / invested for the "Your book" header. The smallcase payload
+  // carries a total and a lifetime P&L but no day or YTD move, so the period
+  // numbers come from the portfolio summary instead of being computed here.
+  const summary = usePortfolioSummary();
   const moving = useWhatsMoving(6);
   const { stocks } = useStocks();
 
@@ -122,6 +127,10 @@ export function useDiaryData(activeJournalId: string | null) {
 
     holdings: holdings.data,
     holdingsLoading: holdings.loading,
+    /** Portfolio-level M/O/D — the "Your book" pillar cards and score clause. */
+    mod: mod.data,
+    /** Period returns + invested value for the "Your book" header meta line. */
+    summary: summary.data,
     /** CMP/PE/market-cap by uppercased ticker — the holdings table's price source. */
     metrics: metrics.data,
     brokerNotConnected: holdings.notConnected,

@@ -743,3 +743,51 @@ export interface ProwessBatchAbortResponse {
   success: true;
   data?: unknown;
 }
+
+// ── Scheduler jobs — auto/manual cron control for the Daily Runs tabs ────────
+// GET/PUT /admin/scheduler-jobs/:slug, POST /admin/scheduler-jobs/:slug/run,
+// GET /admin/scheduler-jobs/:slug/runs?limit=. Cron is always parsed in Asia/Kolkata
+// server-side — the frontend sends/shows IST times as-is, no timezone conversion.
+// NOTE: GET/PUT /:slug return the job object directly (no success/data envelope) —
+// use rawFetch/rawPut, not apiAuthGet/apiAuthPut.
+
+export type SchedulerJobSlug = "bse-discovery" | "prowess-daily-batch";
+
+export interface SchedulerJob {
+  id: string;
+  slug: SchedulerJobSlug;
+  name: string;
+  description: string;
+  job_type: string;
+  cron_expression: string;
+  is_active: boolean;
+  config: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SchedulerRunStatus = "running" | "completed" | "failed";
+
+export interface SchedulerJobRun {
+  id: string;
+  job_id: string;
+  status: SchedulerRunStatus;
+  started_at: string | null;
+  ended_at: string | null;
+  records_processed: number | null;
+  error: string | null;
+  metadata: Record<string, unknown> | null;
+}
+
+/** GET /admin/scheduler-jobs/:slug/runs?limit= — raw {count, runs} envelope, no success/data wrapper. */
+export interface SchedulerJobRunsResponse {
+  count: number;
+  runs: SchedulerJobRun[];
+}
+
+/** POST /admin/scheduler-jobs/:slug/run — the one scheduler-jobs endpoint that DOES use success. */
+export interface SchedulerJobTriggerResponse {
+  success: true;
+  message: string;
+  run_id: string;
+}

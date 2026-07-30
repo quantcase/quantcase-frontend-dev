@@ -32,6 +32,7 @@ import {
 } from "./types";
 import { UploadPdfModal, UploadPrefill } from "./UploadPdfModal";
 import { BsePreviewModal } from "./BsePreviewModal";
+import { SchedulerControl } from "./SchedulerControl";
 
 const BASE = `${BACKEND_URL}/admin/bse-discovery`;
 
@@ -567,6 +568,10 @@ export function BseDiscoveryPanel() {
           explicitly. Approving is idempotent, so it&rsquo;s safe to click twice.
         </p>
       </div>
+
+      {/* Schedule config only — trigger + run history below (Run Discovery / Run History) already
+          read the same scheduler_runs rows via the bespoke /admin/bse-discovery endpoints. */}
+      <SchedulerControl slug="bse-discovery" label="BSE Discovery" hideRunSection />
 
       {/* Trigger */}
       <div className="rounded-[10px] border border-hair bg-card p-4 space-y-3">

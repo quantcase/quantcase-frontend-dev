@@ -207,9 +207,6 @@ export default function KpisPage() {
                 <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Abbr</th>
                 <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Full Form</th>
                 <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Source</th>
-                <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Frequency</th>
-                <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">KPI Type</th>
-                <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Unit</th>
                 <th className="px-3 py-2 text-left text-[10px] uppercase tracking-wider text-ink-3">Fallbacks</th>
               </tr>
             </thead>
@@ -233,9 +230,6 @@ export default function KpisPage() {
                       {k.formula_expression ? "Computed" : "Raw"}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-ink-3 whitespace-nowrap">{k.frequency ?? "—"}</td>
-                  <td className="px-3 py-2 text-ink-3 whitespace-nowrap">{k.kpi_type}</td>
-                  <td className="px-3 py-2 text-ink-3 whitespace-nowrap">{k.unit_label ?? "—"}</td>
                   <td className="px-3 py-2 text-ink-3 whitespace-nowrap">{k.fallback_abbrs?.length ?? 0}</td>
                 </tr>
               ))}

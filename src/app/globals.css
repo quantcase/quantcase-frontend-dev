@@ -21,6 +21,14 @@
   --gold-glow:    #D4A95F;
 }
 
+/* The landing page is built from full-bleed sections with oversized decorative
+   glows/marquees that deliberately run past the viewport. `clip` (not `hidden`)
+   because clip does NOT create a scroll container, so the `lg:sticky` column in
+   LandingResearchDesk keeps working. Vertical stays visible. */
+.landing-root {
+  overflow-x: clip;
+}
+
 /* Selection */
 .landing-root ::selection {
   background: #0e1a2b;

@@ -56,9 +56,9 @@ const calibrations = [
 ];
 
 const metrics = [
-  { num: 50, suffix: "K+", label: "Documents read", decimals: 0, Icon: FileText, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
-  { num: 600, suffix: "K+", label: "Signals analyzed", decimals: 0, Icon: Zap, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
-  { num: 20, suffix: "K+", label: "Guidance promises tracked", decimals: 0, Icon: MessageSquareQuote, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
+  { num: 100, suffix: "M+", label: "Signals", decimals: 0, Icon: Zap, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
+  { num: 6, suffix: "M+", label: "Pages", decimals: 0, Icon: FileText, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
+  { num: 100, suffix: "K+", label: "Milestones tracked", decimals: 0, Icon: MessageSquareQuote, iconBg: "rgba(185,138,62,0.08)", iconColor: "#B98A3E", iconBorder: "rgba(185,138,62,0.20)" },
 ];
 
 function AnimatedNumber({ to, suffix, decimals }: { to: number; suffix: string; decimals: number }) {
@@ -670,8 +670,8 @@ export default function LandingPoweredByAi() {
               margin: 0,
             }}
           >
-            Reads everything{" "}
-            <span style={{ color: "rgba(14,26,43,0.45)", fontStyle: "italic" }}>you don&apos;t have time to.</span>
+            Nobody reads 400 pages of an annual report.{" "}
+            <span style={{ color: "rgba(14,26,43,0.45)", fontStyle: "italic" }}>We read 6 million.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-base" style={{ ...sans, color: "rgba(14,26,43,0.55)" }}>
             Hundreds of documents per company: peer comparisons, sector filings, years of earnings history; all read together, never

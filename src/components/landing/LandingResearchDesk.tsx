@@ -9,18 +9,18 @@ const sans: React.CSSProperties = { fontFamily: "'Geist', system-ui, sans-serif"
 const steps = [
   {
     num: "01",
-    title: "It reads the full picture.",
-    desc: "Earnings calls, management guidance, filings, price action — ingested and cross-referenced automatically. It remembers every promise management made last quarter. And whether they kept it.",
+    title: "Know in seconds, what normally takes hours.",
+    desc: "Earnings calls, management guidance, filings and price action — ingested and cross-referenced the day they drop. Hours of reading, resolved into one screen.",
   },
   {
     num: "02",
-    title: "It scores every stock.",
-    desc: "Three independent lenses — Management, Opportunity, Deal — each scored separately, then combined into a single conviction score out of 100. No black box. Every number traceable to a reason.",
+    title: "Hold your assets to a better framework.",
+    desc: "Management, Opportunity and Deal — each scored on its own, then combined into a single conviction score out of 100. No black box. Every number traces back to a line in a filing.",
   },
   {
     num: "03",
-    title: "It holds management accountable.",
-    desc: "Guidance credibility updates after every earnings cycle. If a management team misses what they promised, the score reflects it — before the market does.",
+    title: "Stress tests your thesis.",
+    desc: "Write down why you bought it. Quantcase checks that reason every quarter — and when management misses what they promised, the score moves before the market does.",
   },
 ];
 

@@ -48,7 +48,7 @@ export default function LandingHero() {
         >
           <span className="h-px w-12" style={{ background: "rgba(185,138,62,0.7)" }} />
           <span className="text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.28em", color: "#B98A3E" }}>
-            The Quantcase thesis
+            Institutional-grade equity research
           </span>
         </motion.div>
 
@@ -71,15 +71,30 @@ export default function LandingHero() {
           <span className="serif-italic" style={{ color: "rgba(14,26,43,0.85)" }}>Now for everyone.</span>
         </motion.h1>
 
-        {/* Subtext */}
-        <motion.p
+        {/* Subtext — statement, aside, payoff. Lines 1 and 3 carry the weight; line 2
+            sits back so the pause after "100 million signals" reads as a beat rather
+            than a broken margin. The 1.75× gap before line 3 is deliberate: it is what
+            makes that last line land. Do not normalise it. */}
+        <motion.div
           custom={2} initial="hidden" animate="show" variants={fadeUp}
-          className="mt-8 max-w-xl text-base md:text-lg"
-          style={{ ...sans, color: "#3A4B61", lineHeight: 1.55 }}
+          className="mt-10 max-w-2xl md:mt-12"
+          style={{
+            ...sans,
+            fontSize: "clamp(1.0625rem, 1.5vw, 1.375rem)",
+            lineHeight: 1.45,
+            letterSpacing: "-0.011em",
+          }}
         >
-          Top investors don&apos;t have better instincts. They have a repeatable
-          process. Quantcase is that process, built into a single score.
-        </motion.p>
+          <p style={{ margin: 0, color: "rgba(14,26,43,0.90)", fontWeight: 500 }}>
+            Great investors predict. From patterns, not hunches.
+          </p>
+          <p style={{ margin: "0.85rem 0 0", color: "rgba(14,26,43,0.58)" }}>
+            So does Quantcase — across 100 million signals.
+          </p>
+          <p style={{ margin: "1.5rem 0 0", color: "rgba(14,26,43,0.82)" }}>
+            Every earnings call. Every annual report. Every quarter.
+          </p>
+        </motion.div>
 
         {/* CTAs */}
         <motion.div

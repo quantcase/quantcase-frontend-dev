@@ -88,7 +88,7 @@ export default function LandingHero() {
               `p { font-size: 14px }`, and a direct rule beats an inherited one, so
               a fontSize on this wrapper would be silently ignored. */}
           <p style={{ ...subtext, margin: 0, color: "rgba(14,26,43,0.90)", fontWeight: 500 }}>
-            Great investors predict. From patterns, not hunches.
+            Great investors pre-empt. From patterns, not hunches.
           </p>
           <p style={{ ...subtext, margin: "0.3rem 0 0", color: "rgba(14,26,43,0.58)" }}>
             So does Quantcase — across 100 million signals.

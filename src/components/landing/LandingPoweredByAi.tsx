@@ -673,10 +673,6 @@ export default function LandingPoweredByAi() {
             Nobody reads 400 pages of an annual report.{" "}
             <span style={{ color: "rgba(14,26,43,0.45)", fontStyle: "italic" }}>We read 6 million.</span>
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-base" style={{ ...sans, color: "rgba(14,26,43,0.55)" }}>
-            Hundreds of documents per company: peer comparisons, sector filings, years of earnings history; all read together, never
-            in isolation; distilled into a single, decisive verdict.
-          </p>
         </motion.div>
 
         {/* Marquee */}
@@ -800,7 +796,7 @@ export default function LandingPoweredByAi() {
             {/* Footer note */}
             <div className="px-7 py-4" style={{ borderTop: "1px solid rgba(14,26,43,0.06)" }}>
               <p className="text-[12px] leading-relaxed" style={{ ...sans, color: "rgba(14,26,43,0.35)", margin: 0 }}>
-                Every prediction is tracked against real outcomes and recalibrated continuously.
+                Every pre-emptive signal is tracked against real outcomes and recalibrated continuously.
               </p>
             </div>
           </motion.div>

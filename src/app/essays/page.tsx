@@ -263,7 +263,8 @@ export default function EssaysPage() {
               <div>
                 <div className="text-[10px] uppercase mb-4" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Product</div>
                 <ul className="space-y-3 text-sm" style={{ padding: 0 }}>
-                  {[["Framework", "/#framework"], ["Engine", "/#engine"], ["Example", "/#example"], ["Portfolio", "/#portfolio"]].map(([label, href]) => (
+                  {/* ["Example", "/#example"] removed while LandingLiveExample is hidden — restore with it. */}
+                  {[["Framework", "/#framework"], ["Engine", "/#engine"], ["Portfolio", "/#portfolio"]].map(([label, href]) => (
                     <li key={label} style={{ listStyleType: "none", marginLeft: 0 }}>
                       <Link href={href} className="lp-footer-link">{label}</Link>
                     </li>

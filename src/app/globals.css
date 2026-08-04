@@ -69,6 +69,13 @@
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
+/* Alternating rows read as a field of logos rather than one ticker strip. */
+.marquee-track--reverse { animation-direction: reverse; }
+/* Hover anywhere in a row to hold it still and read the names. */
+.marquee-row:hover .marquee-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}
 
 /* Nav link underline reveal */
 .nav-link {

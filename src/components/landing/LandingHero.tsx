@@ -21,6 +21,12 @@ const mono: React.CSSProperties = {
 const sans: React.CSSProperties = {
   fontFamily: "'Geist', system-ui, sans-serif",
 };
+const subtext: React.CSSProperties = {
+  ...sans,
+  fontSize: "clamp(0.9375rem, 1.35vw, 1.375rem)",
+  lineHeight: 1.45,
+  letterSpacing: "-0.011em",
+};
 
 export default function LandingHero() {
   return (
@@ -71,27 +77,23 @@ export default function LandingHero() {
           <span className="serif-italic" style={{ color: "rgba(14,26,43,0.85)" }}>Now for everyone.</span>
         </motion.h1>
 
-        {/* Subtext — statement, aside, payoff. Lines 1 and 3 carry the weight; line 2
-            sits back so the pause after "100 million signals" reads as a beat rather
-            than a broken margin. The 1.75× gap before line 3 is deliberate: it is what
-            makes that last line land. Do not normalise it. */}
+        {/* Subtext — statement, aside, payoff. Lines 1 and 2 are one thought: the aside
+            sits tight under the statement so they read as a pair. Line 3 is set well
+            apart — that break is what makes the last line land. Do not normalise it. */}
         <motion.div
           custom={2} initial="hidden" animate="show" variants={fadeUp}
-          className="mt-10 max-w-2xl md:mt-12"
-          style={{
-            ...sans,
-            fontSize: "clamp(1.0625rem, 1.5vw, 1.375rem)",
-            lineHeight: 1.45,
-            letterSpacing: "-0.011em",
-          }}
+          className="mt-10 max-w-5xl md:mt-12"
         >
-          <p style={{ margin: 0, color: "rgba(14,26,43,0.90)", fontWeight: 500 }}>
+          {/* Size/leading must live on each <p>: globals.css sets a base-layer
+              `p { font-size: 14px }`, and a direct rule beats an inherited one, so
+              a fontSize on this wrapper would be silently ignored. */}
+          <p style={{ ...subtext, margin: 0, color: "rgba(14,26,43,0.90)", fontWeight: 500 }}>
             Great investors predict. From patterns, not hunches.
           </p>
-          <p style={{ margin: "0.85rem 0 0", color: "rgba(14,26,43,0.58)" }}>
+          <p style={{ ...subtext, margin: "0.3rem 0 0", color: "rgba(14,26,43,0.58)" }}>
             So does Quantcase — across 100 million signals.
           </p>
-          <p style={{ margin: "1.5rem 0 0", color: "rgba(14,26,43,0.82)" }}>
+          <p style={{ ...subtext, margin: "2rem 0 0", color: "rgba(14,26,43,0.82)" }}>
             Every earnings call. Every annual report. Every quarter.
           </p>
         </motion.div>
@@ -111,25 +113,6 @@ export default function LandingHero() {
             See how it works
             <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
           </a>
-          <a
-            href="#framework"
-            className="text-sm underline-offset-4 hover:underline"
-            style={{ ...sans, color: "#0E1A2B" }}
-          >
-            Read the framework
-          </a>
-        </motion.div>
-
-        {/* Trust badges */}
-        <motion.div
-          custom={4} initial="hidden" animate="show" variants={fadeUp}
-          className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-3 text-[11px] uppercase"
-          style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.55)" }}
-        >
-          <span className="inline-flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full animate-pulse-soft" style={{ background: "#B98A3E" }} />
-            Indian Equities
-          </span>
         </motion.div>
       </div>
 

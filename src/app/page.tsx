@@ -3,7 +3,8 @@ import LandingHero from "@/components/landing/LandingHero";
 import LandingResearchDesk from "@/components/landing/LandingResearchDesk";
 import LandingModFramework from "@/components/landing/LandingModFramework";
 import LandingPoweredByAi from "@/components/landing/LandingPoweredByAi";
-import LandingLiveExample from "@/components/landing/LandingLiveExample";
+// Temporarily hidden — re-enable when the live example is ready to show.
+// import LandingLiveExample from "@/components/landing/LandingLiveExample";
 import LandingPortfolio from "@/components/landing/LandingPortfolio";
 import LandingJournal from "@/components/landing/LandingJournal";
 import LandingFinalCta from "@/components/landing/LandingFinalCta";
@@ -18,7 +19,7 @@ export default function HomePage() {
         <LandingResearchDesk />
         <LandingModFramework />
         <LandingPoweredByAi />
-        <LandingLiveExample />
+        {/* <LandingLiveExample /> */}
         <LandingPortfolio />
         <LandingJournal />
         <LandingFinalCta />

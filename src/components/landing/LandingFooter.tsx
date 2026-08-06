@@ -1,4 +1,5 @@
-const serif: React.CSSProperties = { fontFamily: "var(--font-instrument-serif, 'Instrument Serif', serif)" };
+import Image from "next/image";
+
 const mono: React.CSSProperties = { fontFamily: "'Geist Mono', 'JetBrains Mono', ui-monospace, monospace" };
 const sans: React.CSSProperties = { fontFamily: "'Geist', system-ui, sans-serif" };
 
@@ -10,7 +11,13 @@ export default function LandingFooter() {
         {/* Brand row — full width on mobile */}
         <div className="mb-10 md:mb-0 md:grid md:grid-cols-12 md:gap-8">
           <div className="md:col-span-5">
-            <div className="text-2xl" style={{ ...serif, color: "#0E1A2B", fontWeight: 400 }}>Quantcase</div>
+            <Image
+              src="/logos/logo-text-dark.png"
+              alt="Quantcase"
+              width={169}
+              height={39}
+              className="h-[32px] w-auto"
+            />
             <p className="mt-3 max-w-sm text-sm" style={{ ...sans, color: "#3A4B61" }}>
               The algorithm behind every great investor. Indian equities, scored on Management, Opportunity, Deal.
             </p>
@@ -22,8 +29,8 @@ export default function LandingFooter() {
           <div>
             <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Product</div>
             <ul className="mt-4 space-y-3 text-sm" style={{ padding: 0 }}>
-              {/* ["Example", "#example"] removed while LandingLiveExample is hidden — restore with it. */}
-              {[["Framework", "#framework"], ["Engine", "#engine"], ["Portfolio", "#portfolio"]].map(([label, href]) => (
+              {/* ["Example", "/#example"] removed while LandingLiveExample is hidden — restore with it. */}
+              {[["Framework", "/#framework"], ["Engine", "/#engine"], ["Portfolio", "/#portfolio"]].map(([label, href]) => (
                 <li key={label} style={{ listStyleType: "none", marginLeft: 0 }}>
                   <a href={href} className="lp-footer-link">{label}</a>
                 </li>
@@ -48,8 +55,8 @@ export default function LandingFooter() {
           <div className="md:col-span-3">
             <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Product</div>
             <ul className="mt-5 space-y-3 text-sm" style={{ padding: 0 }}>
-              {/* ["Example", "#example"] removed while LandingLiveExample is hidden — restore with it. */}
-              {[["Framework", "#framework"], ["Engine", "#engine"], ["Portfolio", "#portfolio"]].map(([label, href]) => (
+              {/* ["Example", "/#example"] removed while LandingLiveExample is hidden — restore with it. */}
+              {[["Framework", "/#framework"], ["Engine", "/#engine"], ["Portfolio", "/#portfolio"]].map(([label, href]) => (
                 <li key={label} style={{ listStyleType: "none", marginLeft: 0 }}>
                   <a href={href} className="lp-footer-link">{label}</a>
                 </li>

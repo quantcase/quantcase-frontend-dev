@@ -1,8 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
+import LandingFooter from "@/components/landing/LandingFooter";
 
 const serif: React.CSSProperties = { fontFamily: "var(--font-instrument-serif, 'Instrument Serif', serif)" };
 const mono: React.CSSProperties = { fontFamily: "'Geist Mono', 'JetBrains Mono', ui-monospace, monospace" };
@@ -49,10 +52,17 @@ function Navbar({ scrolled }: { scrolled: boolean }) {
       <div className="mx-auto flex max-w-[1280px] items-center justify-between px-8 py-4 md:px-12">
         <Link
           href="/"
-          className="text-xl tracking-tight"
-          style={{ ...serif, color: "#0E1A2B", textDecoration: "none" }}
+          className="flex items-center gap-2.5"
+          style={{ textDecoration: "none" }}
         >
-          Quantcase
+          <Image
+            src="/logos/logo-text-dark.png"
+            alt="Quantcase"
+            width={169}
+            height={39}
+            className="h-[30px] w-auto"
+            priority
+          />
         </Link>
 
         <nav className="hidden items-center gap-10 md:flex">
@@ -249,51 +259,7 @@ export default function EssaysPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative" style={{ borderTop: "1px solid rgba(14,26,43,0.08)", background: "#EFE8D8" }}>
-        <div className="mx-auto max-w-[1280px] px-8 py-12 md:py-16 md:px-12">
-          <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
-            <div>
-              <div className="text-2xl" style={{ ...serif, color: "#0E1A2B", fontWeight: 400 }}>Quantcase</div>
-              <p className="mt-3 max-w-xs text-sm" style={{ ...sans, color: "#3A4B61" }}>
-                The algorithm behind every great investor.
-              </p>
-            </div>
-            <div className="flex gap-16">
-              <div>
-                <div className="text-[10px] uppercase mb-4" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Product</div>
-                <ul className="space-y-3 text-sm" style={{ padding: 0 }}>
-                  {/* ["Example", "/#example"] removed while LandingLiveExample is hidden — restore with it. */}
-                  {[["Framework", "/#framework"], ["Engine", "/#engine"], ["Portfolio", "/#portfolio"]].map(([label, href]) => (
-                    <li key={label} style={{ listStyleType: "none", marginLeft: 0 }}>
-                      <Link href={href} className="lp-footer-link">{label}</Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <div className="text-[10px] uppercase mb-4" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Company</div>
-                <ul className="space-y-3 text-sm" style={{ padding: 0 }}>
-                  {["About", "Essays", "Careers", "Contact"].map((l) => (
-                    <li key={l} style={{ listStyleType: "none", marginLeft: 0 }}>
-                      <a href="#" className="lp-footer-link">{l}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="hairline mt-12 md:mt-16" />
-          <div
-            className="mt-6 flex flex-col items-start justify-between gap-3 text-[10px] uppercase md:flex-row md:items-center"
-            style={{ ...mono, letterSpacing: "0.18em", color: "rgba(14,26,43,0.50)" }}
-          >
-            <span>© 2026 Quantcase · All rights reserved</span>
-            <span className="leading-relaxed" style={{ letterSpacing: "0.12em" }}>Not investment advice.</span>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }

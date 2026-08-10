@@ -9,8 +9,9 @@ export function fmt(n: number, digits = 0) {
 
 // Compact INR: ₹2.4 L / ₹38.0 K / ₹450
 export function fmtLakhs(n: number) {
-  if (n >= 100000) return `₹${(n / 100000).toFixed(1)} L`;
-  if (n >= 1000) return `₹${(n / 1000).toFixed(1)} K`;
+  if (n >= 10000000) return `₹${Number((n / 10000000).toFixed(2))} CR`;
+  if (n >= 100000) return `₹${Number((n / 100000).toFixed(2))} L`;
+  if (n >= 1000) return `₹${Number((n / 1000).toFixed(1))} K`;
   return `₹${fmt(n)}`;
 }
 

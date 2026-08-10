@@ -286,12 +286,12 @@ function FactorConvictionScore({ score, verdict }: { score: number | undefined; 
   const scoreText = score != null ? `${(verdict || "UNKNOWN").toUpperCase()} — ${score}/100` : (verdict || "UNKNOWN").toUpperCase();
 
   return (
-    <div className="rounded-[10px] p-4 flex flex-col gap-3" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)", flexShrink: 0 }}>
+    <div className="rounded-[10px] px-4 py-3 flex flex-col gap-2" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)", flexShrink: 0 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Conviction</span>
         <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: barColor, fontFamily: "var(--qc-font-sans)" }}>{scoreText}</span>
       </div>
-      <div style={{ height: 5, borderRadius: 999, background: "rgba(0,0,0,0.08)", overflow: "hidden" }}>
+      <div style={{ height: 4, borderRadius: 999, background: "rgba(0,0,0,0.08)", overflow: "hidden" }}>
         <div style={{ height: "100%", borderRadius: 999, width: barWidth, background: barColor, transition: "width .4s" }} />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between" }}>

@@ -243,18 +243,18 @@ function HoldingsList({
         </div>
       </div>
 
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] items-center gap-3 border-t border-hair bg-secondary/50 px-5 py-3.5 text-left">
-        <span className="eyebrow min-w-0">Total</span>
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] items-center gap-3 border-t-2 border-hair bg-[#EFEFEF] dark:bg-secondary/70 px-5 py-4 text-left shadow-[0_-2px_10px_rgba(0,0,0,0.02)]">
+        <span className="eyebrow min-w-0 font-bold tracking-wider">TOTAL</span>
         <span />
         
-        <span className="mono text-right text-[13px] font-semibold text-ink">
+        <span className="mono text-right text-[13px] font-bold text-ink">
           {fmtLakhs(totalInvested)}
         </span>
 
         <span />
 
         <span className="text-right">
-          <span className="mono block text-[13px] font-semibold text-ink">
+          <span className="mono block text-[13px] font-bold text-ink">
             {fmtLakhs(totalValue)}
           </span>
           <span className={`mono block text-[11px] ${totalPnlPct >= 0 ? "text-up" : "text-down"}`}>

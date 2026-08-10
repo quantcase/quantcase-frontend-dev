@@ -204,7 +204,6 @@ export function CandlestickChart({
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
   const subPanesRef = useRef<IPaneApi<Time>[]>([]);
   const srLinesRef = useRef<ISeriesApi<"Line">[]>([]);
 
@@ -214,6 +213,33 @@ export function CandlestickChart({
   const [legendItems, setLegendItems] = useState<LegendItem[]>([]);
 
   const ohlcBarRef = useRef<HTMLDivElement>(null);
+  const latestCandleRef = useRef<any>(null);
+
+  const renderOhlcBar = useCallback((data: { open: number; high: number; low: number; close: number } | null) => {
+    if (!data || !ohlcBarRef.current) return;
+    const C = resolveChartColors();
+    const chg = data.close - data.open;
+    const chgPct = data.open !== 0 ? (chg / data.open) * 100 : 0;
+    const sign = chg >= 0 ? "+" : "";
+    const chgColor = chg >= 0 ? C.up : C.down;
+    const tiles = [
+      { label: "O", value: data.open.toFixed(2), color: C.heading },
+      { label: "H", value: data.high.toFixed(2), color: C.up },
+      { label: "L", value: data.low.toFixed(2), color: C.down },
+      { label: "C", value: data.close.toFixed(2), color: C.heading },
+      { label: "CHG", value: `${sign}${chg.toFixed(2)}`, color: chgColor },
+      { label: "CHG%", value: `${sign}${chgPct.toFixed(2)}%`, color: chgColor },
+    ];
+    ohlcBarRef.current.innerHTML = tiles.map((t, i) =>
+      `<div style="display:flex;flex-direction:column;align-items:flex-start;${i < tiles.length - 1 ? `padding-right:8px;border-right:1px solid ${C.border};margin-right:2px` : ""}">
+        <span style="font-size:9px;color:${C.muted};font-weight:500;text-transform:uppercase;letter-spacing:0.08em;line-height:1.2">${t.label}</span>
+        <span style="font-size:11px;color:${t.color};font-weight:600;line-height:1.4;white-space:nowrap">${t.value}</span>
+      </div>`
+    ).join("");
+    ohlcBarRef.current.style.display = "flex";
+    ohlcBarRef.current.style.flexWrap = "wrap";
+    ohlcBarRef.current.style.gap = "4px";
+  }, []);
 
   // Initialize chart once
   useEffect(() => {
@@ -277,57 +303,16 @@ export function CandlestickChart({
     ro.observe(containerRef.current);
 
     chart.subscribeCrosshairMove((param) => {
-      const tooltip = tooltipRef.current;
-      if (!tooltip) return;
-      if (!param.time || !param.seriesData.size) { tooltip.style.display = "none"; return; }
+      if (!param.time || !param.seriesData.size) { 
+        renderOhlcBar(latestCandleRef.current);
+        return; 
+      }
       const data = param.seriesData.get(candleSeries) as CandlestickData | undefined;
-      if (!data) { tooltip.style.display = "none"; return; }
-
-      const container = containerRef.current!;
-      const { x, y } = param.point ?? { x: 0, y: 0 };
-      tooltip.style.display = "block";
-      tooltip.style.left = `${Math.min(x + 16, container.clientWidth - 200)}px`;
-      tooltip.style.top = `${Math.max(y - 80, 8)}px`;
-
-      const dateStr = typeof data.time === "string"
-        ? data.time
-        : new Date((data.time as number) * 1000).toISOString().slice(0, 10);
-
-      const mainRows: string[] = [];
-      const oscRows: string[] = [];
-
-      overlayMapRef.current.forEach(({ series, isOsc }, title) => {
-        const d = param.seriesData.get(series) as { value: number } | undefined;
-        if (!d) return;
-        const opts = series.options() as { color?: string };
-        const color = opts.color ?? C.muted;
-        const row = `<span style="color:${C.muted}">${title}</span><span style="color:${color};font-weight:500">${d.value.toFixed(2)}</span>`;
-        if (isOsc) oscRows.push(row); else mainRows.push(row);
-      });
-
-      // Volume tooltip
-      const volData = param.seriesData.get(volumeSeries) as { value: number } | undefined;
-      const volRow = volData
-        ? `<span style="color:${C.muted}">Vol</span><span style="color:${C.heading};font-weight:500">${formatVolume(volData.value)}</span>`
-        : "";
-
-      const divider = oscRows.length
-        ? `<div style="border-top:1px solid ${C.border};margin:5px 0"></div>`
-        : "";
-
-      tooltip.innerHTML = `
-        <div style="font-size:10px;font-weight:600;color:${C.heading};margin-bottom:5px;font-family:IBM Plex Mono,monospace;text-transform:uppercase;letter-spacing:0.12em">${dateStr}</div>
-        <div style="display:grid;grid-template-columns:auto auto;column-gap:12px;row-gap:3px;font-size:11px">
-          <span style="color:${C.muted}">O</span><span style="color:${C.heading};font-weight:500">${data.open.toFixed(2)}</span>
-          <span style="color:${C.muted}">H</span><span style="color:${C.up};font-weight:500">${data.high.toFixed(2)}</span>
-          <span style="color:${C.muted}">L</span><span style="color:${C.down};font-weight:500">${data.low.toFixed(2)}</span>
-          <span style="color:${C.muted}">C</span><span style="color:${C.heading};font-weight:500">${data.close.toFixed(2)}</span>
-          ${volRow}
-          ${mainRows.join("")}
-        </div>
-        ${divider}
-        ${oscRows.length ? `<div style="display:grid;grid-template-columns:auto auto;column-gap:12px;row-gap:3px;font-size:11px">${oscRows.join("")}</div>` : ""}
-      `;
+      if (!data) { 
+        renderOhlcBar(latestCandleRef.current);
+        return; 
+      }
+      renderOhlcBar(data);
     });
 
     return () => {
@@ -359,30 +344,11 @@ export function CandlestickChart({
       close: p.close,
     })));
 
-    // Write latest candle OHLC directly to DOM — never changes on hover
+    // Write latest candle OHLC directly to DOM
     const last = sorted[sorted.length - 1];
-    if (last && ohlcBarRef.current) {
-      const chg = last.close - last.open;
-      const chgPct = last.open !== 0 ? (chg / last.open) * 100 : 0;
-      const sign = chg >= 0 ? "+" : "";
-      const chgColor = chg >= 0 ? C.up : C.down;
-      const tiles = [
-        { label: "O", value: last.open.toFixed(2), color: C.heading },
-        { label: "H", value: last.high.toFixed(2), color: C.up },
-        { label: "L", value: last.low.toFixed(2), color: C.down },
-        { label: "C", value: last.close.toFixed(2), color: C.heading },
-        { label: "CHG", value: `${sign}${chg.toFixed(2)}`, color: chgColor },
-        { label: "CHG%", value: `${sign}${chgPct.toFixed(2)}%`, color: chgColor },
-      ];
-      ohlcBarRef.current.innerHTML = tiles.map((t, i) =>
-        `<div style="display:flex;flex-direction:column;align-items:flex-start;${i < tiles.length - 1 ? `padding-right:8px;border-right:1px solid ${C.border};margin-right:2px` : ""}">
-          <span style="font-size:9px;color:${C.muted};font-weight:500;text-transform:uppercase;letter-spacing:0.08em;line-height:1.2">${t.label}</span>
-          <span style="font-size:11px;color:${t.color};font-weight:600;line-height:1.4;white-space:nowrap">${t.value}</span>
-        </div>`
-      ).join("");
-      ohlcBarRef.current.style.display = "flex";
-      ohlcBarRef.current.style.flexWrap = "wrap";
-      ohlcBarRef.current.style.gap = "4px";
+    if (last) {
+      latestCandleRef.current = last;
+      renderOhlcBar(last);
     }
 
     // Volume bars colored by candle direction
@@ -785,11 +751,6 @@ export function CandlestickChart({
         </div>
       )}
 
-      <div
-        ref={tooltipRef}
-        className="pointer-events-none absolute z-20 hidden rounded-[8px] border px-3 py-2 shadow-md backdrop-blur-sm"
-        style={{ background: "rgba(255,255,255,0.92)", borderColor: "var(--qc-hair)", minWidth: 160 }}
-      />
     </div>
   );
 }

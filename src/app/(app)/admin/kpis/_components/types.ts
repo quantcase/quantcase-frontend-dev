@@ -17,6 +17,7 @@ export interface Kpi {
   denomination?: string | null;
   description?: string;
   prowess_name?: string;
+  quarterly_prowess_name?: string;
 }
 
 export interface KpisResponse {

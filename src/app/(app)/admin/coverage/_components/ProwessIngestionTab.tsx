@@ -87,11 +87,11 @@ function FinancialReportView({ report }: { report: ProwessFinancialReport }) {
         </div>
       )}
 
-      {report.mode === "quarterly" && Object.entries(report.rowsBySourceType).length > 0 && (
+      {report.mode === "quarterly" && Object.entries(report.rowsBySourceType ?? {}).length > 0 && (
         <div>
           <p className="text-[10px] uppercase tracking-wider text-ink-3 mb-1.5">Rows by Source Type</p>
           <div className="flex flex-wrap gap-1.5">
-            {Object.entries(report.rowsBySourceType).map(([k, v]) => (
+            {Object.entries(report.rowsBySourceType ?? {}).map(([k, v]) => (
               <span key={k} className="rounded-sm bg-secondary border border-hair px-2 py-1 text-[11px] text-ink">
                 <span className="font-mono font-medium">{k}</span> — {v.toLocaleString("en-IN")}
               </span>

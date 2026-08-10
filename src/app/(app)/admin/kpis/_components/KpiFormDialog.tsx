@@ -53,6 +53,7 @@ export function KpiFormDialog({ open, kpi, onClose, onSaved }: Props) {
 
   const [mode, setMode] = useState<"raw" | "computed">(kpi?.formula_expression ? "computed" : "raw");
   const [prowessName, setProwessName] = useState(kpi?.prowess_name ?? "");
+  const [quarterlyProwessName, setQuarterlyProwessName] = useState(kpi?.quarterly_prowess_name ?? "");
   const [formula, setFormula] = useState(kpi?.formula_expression ?? "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -202,6 +203,7 @@ export function KpiFormDialog({ open, kpi, onClose, onSaved }: Props) {
       denomination: denomination.trim() || null,
       description: description.trim() || null,
       prowess_name: mode === "raw" ? prowessName.trim() || null : null,
+      quarterly_prowess_name: mode === "raw" ? quarterlyProwessName.trim() || null : null,
     };
 
     const callbacks = {
@@ -290,14 +292,25 @@ export function KpiFormDialog({ open, kpi, onClose, onSaved }: Props) {
           </div>
 
           {mode === "raw" ? (
-            <div>
-              <label className={LABEL_CLS}>Prowess Name (CSV column)</label>
-              <input
-                value={prowessName}
-                onChange={(e) => setProwessName(e.target.value)}
-                placeholder="Net Debt/Equity"
-                className={`${INPUT_CLS} font-mono`}
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={LABEL_CLS}>Annual CSV column name</label>
+                <input
+                  value={prowessName}
+                  onChange={(e) => setProwessName(e.target.value)}
+                  placeholder="Net Debt/Equity"
+                  className={`${INPUT_CLS} font-mono`}
+                />
+              </div>
+              <div>
+                <label className={LABEL_CLS}>Quarterly CSV column name</label>
+                <input
+                  value={quarterlyProwessName}
+                  onChange={(e) => setQuarterlyProwessName(e.target.value)}
+                  placeholder="Total income"
+                  className={`${INPUT_CLS} font-mono`}
+                />
+              </div>
             </div>
           ) : (
             <div className="space-y-2">

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fmtLakhs, fmtPrice, fmtSignedPct, brokerLabel } from "@/lib/portfolio-format";
 import { brokerAccountCount } from "../_lib/diary-derive";
-import type { SmallcaseHoldingsData, SmallcaseHolding } from "@/types/smallcase";
+import type { SmallcaseHoldingsData, SmallcaseHolding, SmallcasePortfolioSummary } from "@/types/smallcase";
 import type { TickerMetrics } from "@/hooks/useTickerMetrics";
 
 const PAGE_SIZE = 8;
@@ -45,7 +45,7 @@ export function EverythingYouOwn({
   const totalValue = data?.portfolio?.total_value ?? holdings.reduce((s, h) => s + h.display_value, 0);
 
   return (
-    <section>
+    <section className="flex min-h-0 flex-1 flex-col">
       <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="eyebrow">Everything you own</div>
@@ -77,7 +77,7 @@ export function EverythingYouOwn({
       ) : notConnected || holdings.length === 0 ? (
         <ConnectPrompt onConnect={onConnect} />
       ) : view === "List" ? (
-        <HoldingsList holdings={holdings} onPick={onPick} metrics={metrics} />
+        <HoldingsList holdings={holdings} portfolio={data?.portfolio} onPick={onPick} metrics={metrics} />
       ) : (
         <AllocationChart holdings={holdings} total={totalValue} />
       )}
@@ -88,11 +88,11 @@ export function EverythingYouOwn({
 // ── List ─────────────────────────────────────────────────────────────────────
 
 function HoldingsList({
-  holdings, onPick, metrics,
-}: { holdings: SmallcaseHolding[]; onPick: (t: string) => void; metrics: Map<string, TickerMetrics> }) {
+  holdings, portfolio, onPick, metrics,
+}: { holdings: SmallcaseHolding[]; portfolio: SmallcasePortfolioSummary | null | undefined; onPick: (t: string) => void; metrics: Map<string, TickerMetrics> }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [page, setPage] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE * 2);
   // Empty = no broker constraint, which is not the same as "none selected".
   const [pickedBrokers, setPickedBrokers] = useState<Set<string>>(new Set());
 
@@ -122,25 +122,23 @@ function HoldingsList({
       if (!next.delete(slug)) next.add(slug);
       return next;
     });
-    setPage(0);
+    setVisibleCount(PAGE_SIZE * 2);
   }
 
-  const pageCount = Math.max(Math.ceil(matches.length / PAGE_SIZE), 1);
-  // Filtering shrinks the list under a page we may already be past.
-  const safePage = Math.min(page, pageCount - 1);
-  const rows = matches.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
+  const rows = matches.slice(0, visibleCount);
 
-  const first = matches.length === 0 ? 0 : safePage * PAGE_SIZE + 1;
-  const last = safePage * PAGE_SIZE + rows.length;
+  const totalInvested = portfolio?.total_invested ?? holdings.reduce((s, h) => s + h.invested_value, 0);
+  const totalValue = portfolio?.total_value ?? holdings.reduce((s, h) => s + h.display_value, 0);
+  const totalPnlPct = portfolio?.total_pnl_pct ?? (totalInvested > 0 ? ((totalValue - totalInvested) / totalInvested) * 100 : 0);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-hair bg-card">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-hair bg-card">
       <div className="flex items-center gap-2 border-b border-hair px-5 py-3">
         <div className="relative flex-1">
           <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-ink-3" />
           <Input
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setPage(0); }}
+            onChange={(e) => { setQuery(e.target.value); setVisibleCount(PAGE_SIZE * 2); }}
             placeholder="Search holdings"
             aria-label="Search holdings"
             className="h-8 border-hair pl-8 text-[13px]"
@@ -151,7 +149,7 @@ function HoldingsList({
             options={brokerOptions}
             picked={pickedBrokers}
             onToggle={toggleBroker}
-            onClear={() => { setPickedBrokers(new Set()); setPage(0); }}
+            onClear={() => { setPickedBrokers(new Set()); setVisibleCount(PAGE_SIZE * 2); }}
           />
         )}
       </div>
@@ -165,105 +163,107 @@ function HoldingsList({
         <span aria-hidden className="w-6" />
       </div>
 
-      {rows.length === 0 && (
-        <div className="px-5 py-10 text-center text-[13px] text-ink-2">
-          {query.trim()
-            ? <>Nothing matches &ldquo;{query.trim()}&rdquo;.</>
-            : "No holdings at the selected brokers."}
-        </div>
-      )}
-
-      {rows.map((h) => {
-        // Row opens the stock's overview page; the pencil opens the journal
-        // drawer. A plain button can't wrap the pencil button, so the row is a
-        // keyboard-activatable div and the pencil stops the event bubbling.
-        const openOverview = () =>
-          router.push(`/screener/overview?symbol=${encodeURIComponent(h.ticker)}`);
-
-        return (
+      <div className="flex-1 lg:relative">
         <div
-          key={h.id}
-          role="button"
-          tabIndex={0}
-          onClick={openOverview}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openOverview(); }
+          className="max-h-[500px] overflow-y-auto lg:absolute lg:inset-0 lg:max-h-none"
+          onScroll={(e) => {
+            const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+            if (scrollHeight - scrollTop <= clientHeight + 50) {
+              if (visibleCount < matches.length) setVisibleCount(v => v + PAGE_SIZE);
+            }
           }}
-          className="grid w-full cursor-pointer grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] items-center gap-3 border-b border-hair px-5 py-3.5 text-left transition-colors hover:bg-secondary"
         >
-          <span className="min-w-0">
-            <span className="mono block truncate text-[12px] font-semibold text-ink">{h.ticker}</span>
-            {/* name is nullable on the API; the ticker already carries identity */}
-            {h.name && <span className="block truncate text-[12px] text-ink-3">{h.name}</span>}
-          </span>
+        {rows.length === 0 && (
+          <div className="px-5 py-10 text-center text-[13px] text-ink-2">
+            {query.trim()
+              ? <>Nothing matches &ldquo;{query.trim()}&rdquo;.</>
+              : "No holdings at the selected brokers."}
+          </div>
+        )}
 
-          {/* Cost basis, straight off the holding — both keys are non-null, so
-              these columns always render even when the live price hasn't. */}
-          <span className="mono text-right text-[13px] text-ink-2">{fmtPrice(h.avg_price)}</span>
+        {rows.map((h) => {
+          // Row opens the stock's overview page; the pencil opens the journal
+          // drawer. A plain button can't wrap the pencil button, so the row is a
+          // keyboard-activatable div and the pencil stops the event bubbling.
+          const openOverview = () =>
+            router.push(`/screener/overview?symbol=${encodeURIComponent(h.ticker)}`);
 
-          <span className="mono text-right text-[13px] text-ink-2">{fmtLakhs(h.invested_value)}</span>
-
-          {/* Joined in by ticker, so it's blank for a scrip the backend doesn't
-              know (`notFound`) and until the metrics request lands. */}
-          <span className="mono text-right text-[13px] text-ink-2">
-            {fmtPrice(metrics.get(h.ticker.trim().toUpperCase())?.cmp)}
-          </span>
-
-          <span className="text-right">
-            {/* display_value is never null — current_value is, without a live price */}
-            <span className="mono block text-[13px] text-ink">{fmtLakhs(h.display_value)}</span>
-            {h.pnl_pct != null && (
-              <span className={`mono block text-[11px] ${h.pnl_pct >= 0 ? "text-up" : "text-down"}`}>
-                {fmtSignedPct(h.pnl_pct)}
-              </span>
-            )}
-          </span>
-
-          {/* Journal, not overview — stop the row's navigation from firing too */}
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={(e) => { e.stopPropagation(); onPick(h.ticker); }}
-            aria-label={`Open journal for ${h.ticker}`}
-            className="text-ink-3 hover:text-ink"
+          return (
+          <div
+            key={h.id}
+            role="button"
+            tabIndex={0}
+            onClick={openOverview}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openOverview(); }
+            }}
+            className="grid w-full cursor-pointer grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] items-center gap-3 border-b border-hair last:border-b-0 px-5 py-3.5 text-left transition-colors hover:bg-secondary"
           >
-            <Pencil className="size-3.5" />
-          </Button>
-        </div>
-        );
-      })}
-
-      {matches.length > 0 && (
-        <div className="flex items-center justify-between gap-3 px-5 py-3">
-          <span className="text-[12px] text-ink-3">
-            <span className="mono">{first}&ndash;{last}</span> of <span className="mono">{matches.length}</span>
-          </span>
-
-          <span className="flex items-center gap-2">
-            <Button
-              variant="pill"
-              size="icon-sm"
-              onClick={() => setPage(safePage - 1)}
-              disabled={safePage === 0}
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-            <span className="mono text-[12px] text-ink-2">
-              {safePage + 1} / {pageCount}
+            <span className="min-w-0">
+              <span className="mono block truncate text-[12px] font-semibold text-ink">{h.ticker}</span>
+              {/* name is nullable on the API; the ticker already carries identity */}
+              {h.name && <span className="block truncate text-[12px] text-ink-3">{h.name}</span>}
             </span>
+
+            {/* Cost basis, straight off the holding — both keys are non-null, so
+                these columns always render even when the live price hasn't. */}
+            <span className="mono text-right text-[13px] text-ink-2">{fmtPrice(h.avg_price)}</span>
+
+            <span className="mono text-right text-[13px] text-ink-2">{fmtLakhs(h.invested_value)}</span>
+
+            {/* Joined in by ticker, so it's blank for a scrip the backend doesn't
+                know (`notFound`) and until the metrics request lands. */}
+            <span className="mono text-right text-[13px] text-ink-2">
+              {fmtPrice(metrics.get(h.ticker.trim().toUpperCase())?.cmp)}
+            </span>
+
+            <span className="text-right">
+              {/* display_value is never null — current_value is, without a live price */}
+              <span className="mono block text-[13px] text-ink">{fmtLakhs(h.display_value)}</span>
+              {h.pnl_pct != null && (
+                <span className={`mono block text-[11px] ${h.pnl_pct >= 0 ? "text-up" : "text-down"}`}>
+                  {fmtSignedPct(h.pnl_pct)}
+                </span>
+              )}
+            </span>
+
+            {/* Journal, not overview — stop the row's navigation from firing too */}
             <Button
-              variant="pill"
-              size="icon-sm"
-              onClick={() => setPage(safePage + 1)}
-              disabled={safePage >= pageCount - 1}
-              aria-label="Next page"
+              variant="ghost"
+              size="icon-xs"
+              onClick={(e) => { e.stopPropagation(); onPick(h.ticker); }}
+              aria-label={`Open journal for ${h.ticker}`}
+              className="text-ink-3 hover:text-ink"
             >
-              <ChevronRight className="size-4" />
+              <Pencil className="size-3.5" />
             </Button>
-          </span>
+          </div>
+          );
+        })}
         </div>
-      )}
+      </div>
+
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] items-center gap-3 border-t border-hair bg-secondary/50 px-5 py-3.5 text-left">
+        <span className="eyebrow min-w-0">Total</span>
+        <span />
+        
+        <span className="mono text-right text-[13px] font-semibold text-ink">
+          {fmtLakhs(totalInvested)}
+        </span>
+
+        <span />
+
+        <span className="text-right">
+          <span className="mono block text-[13px] font-semibold text-ink">
+            {fmtLakhs(totalValue)}
+          </span>
+          <span className={`mono block text-[11px] ${totalPnlPct >= 0 ? "text-up" : "text-down"}`}>
+            {fmtSignedPct(totalPnlPct)}
+          </span>
+        </span>
+
+        <span aria-hidden className="w-6" />
+      </div>
     </div>
   );
 }

@@ -48,7 +48,7 @@ export function ComposerCard({ t, journalId, onSaved }: ComposerCardProps) {
   const [dim, setDim] = useState<Dimension>("M");
   const [subFactors, setSubFactors] = useState<string[]>([]);
   const [thesis, setThesis] = useState("");
-  const [conviction, setConviction] = useState(0);
+  const [conviction, setConviction] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
   const { read } = useQuantcaseRead(t.ticker, dim);
@@ -111,7 +111,7 @@ export function ComposerCard({ t, journalId, onSaved }: ComposerCardProps) {
 
       {/* ── Dimension ── */}
       <div>
-        <div className="eyebrow mb-2">Dimension</div>
+        <div className="eyebrow mb-2">Dimension that drove your decision</div>
         <TabToggle
           options={DIMS.map((d) => DIMENSION_LABEL[d])}
           value={DIMENSION_LABEL[dim]}

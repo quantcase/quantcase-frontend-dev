@@ -272,6 +272,37 @@ function CenteredMessage({ children, error }: { children: React.ReactNode; error
 
 // ─── Dashboard layout ──────────────────────────────────────────────────────────
 
+function FactorConvictionScore({ score, verdict }: { score: number | undefined; verdict: string | undefined }) {
+  const v = (verdict ?? "").toLowerCase();
+  let barColor = "var(--qc-warn)";
+  if (v === "strong") barColor = "var(--qc-up)";
+  else if (v === "moderate") barColor = "var(--qc-warn)";
+  else if (v === "cautious") barColor = "var(--qc-warn)";
+  else if (v === "weak") barColor = "var(--qc-down)";
+
+  const barWidth = score != null ? `${Math.min(100, Math.max(0, score))}%` : "50%";
+  
+  // Format the text: STRONG — 85/100
+  const scoreText = score != null ? `${(verdict || "UNKNOWN").toUpperCase()} — ${score}/100` : (verdict || "UNKNOWN").toUpperCase();
+
+  return (
+    <div className="rounded-[10px] p-4 flex flex-col gap-3" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)", flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Conviction</span>
+        <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: barColor, fontFamily: "var(--qc-font-sans)" }}>{scoreText}</span>
+      </div>
+      <div style={{ height: 5, borderRadius: 999, background: "rgba(0,0,0,0.08)", overflow: "hidden" }}>
+        <div style={{ height: "100%", borderRadius: 999, width: barWidth, background: barColor, transition: "width .4s" }} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        {["Low", "Medium", "High"].map((l) => (
+          <span key={l} style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)" }}>{l}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function InsightDashboard({
   insight,
   type,
@@ -331,8 +362,9 @@ function InsightDashboard({
             </div>
           )}
           {insight.signal_map.length > 0 && (
-            <div id="section-signal-map" style={{ display: "flex", flexDirection: "column" }}>
+            <div id="section-signal-map" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <InsightSignalMap signals={insight.signal_map} heading="Signals" subtitle="Positive and caution signals" />
+              <FactorConvictionScore score={insight.score} verdict={insight.verdict} />
             </div>
           )}
         </div>

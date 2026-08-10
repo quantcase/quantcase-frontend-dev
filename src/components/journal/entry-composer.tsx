@@ -52,7 +52,7 @@ export function EntryComposer({ journalId, ticker, editEntry, onSaved, onCancel 
   const [dim, setDim] = useState<Dimension | null>(editEntry?.type === "thesis" ? editEntry.dimension : null);
   const [subFactors, setSubFactors] = useState<string[]>(editEntry?.type === "thesis" ? editEntry.subFactors : []);
   const [thesis, setThesis] = useState(editEntry?.type === "thesis" ? editEntry.thesis : "");
-  const [conviction, setConviction] = useState<number>(editEntry?.type === "thesis" ? editEntry.conviction : 0);
+  const [conviction, setConviction] = useState<number>(editEntry?.type === "thesis" ? editEntry.conviction : 1);
 
   const [error, setError] = useState<string | null>(null);
 

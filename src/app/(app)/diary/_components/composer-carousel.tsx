@@ -192,7 +192,6 @@ export function ComposerCarousel({ tickers, fallbackJournalId, onSaved, pos }: C
               aria-hidden
               // Not just aria-hidden: without inert the hidden card's controls
               // stay tabbable behind the front one.
-              // @ts-expect-error — inert is valid HTML; React 19 types lag.
               inert={true}
               initial={false}
               animate={{ y: depth * 10, scale: 1 - depth * 0.04, opacity: 0.55 }}

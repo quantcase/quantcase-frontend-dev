@@ -53,7 +53,7 @@ export default function LandingNavbar() {
           ))}
         </nav>
 
-        <a href="/signin" className="lp-cta-btn group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium">
+        <a href="/request-access" className="lp-cta-btn group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium">
           Request access
           <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
         </a>

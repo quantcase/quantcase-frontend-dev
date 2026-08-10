@@ -591,7 +591,8 @@ export interface ProwessAnnualReport extends ProwessFinancialReportBase {
 
 export interface ProwessQuarterlyReport extends ProwessFinancialReportBase {
   mode: "quarterly";
-  rowsBySourceType: Record<string, number>;
+  /** Not always present in the backend response — guard with `?? {}` before reading. */
+  rowsBySourceType?: Record<string, number>;
 }
 
 export type ProwessFinancialReport = ProwessAnnualReport | ProwessQuarterlyReport;

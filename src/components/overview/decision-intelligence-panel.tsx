@@ -518,13 +518,6 @@ export function DecisionIntelligencePanel({
               sentiment={techSent(rsNifty)}
               tooltip={techTip("relative_strength")}
             />
-            {techScores && (
-              <SignalCard
-                label="Tech Score"
-                value={`${techScores.final_score} (${techScores.grade})`}
-                sentiment={techScores.final_score >= 70 ? "positive" : techScores.final_score >= 50 ? "neutral" : "negative"}
-              />
-            )}
           </div>
           {/* The AI narrative lands asynchronously; the raw technicals above are live. */}
           {technicalsData && !di && (

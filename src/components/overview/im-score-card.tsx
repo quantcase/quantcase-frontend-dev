@@ -162,12 +162,10 @@ function PatternCard({
   pattern,
   href,
   symbol,
-  isOverarching,
 }: {
   pattern: OverviewPillarPattern;
   href: string;
   symbol: string;
-  isOverarching: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   const sem = trendSemantics(pattern.trend);
@@ -242,38 +240,9 @@ function PatternCard({
             >
               {pattern.name}
             </span>
-            <span
-              style={{
-                fontFamily: "var(--qc-font-mono)",
-                fontSize: "var(--qc-fz-9)",
-                fontWeight: "var(--qc-w-semi)",
-                letterSpacing: ".08em",
-                textTransform: "uppercase",
-                padding: "2px 7px",
-                borderRadius: 5,
-                background: sem.badge.bg,
-                color: sem.badge.text,
-              }}
-            >
-              {sem.badge.label}
-            </span>
-            {isOverarching && (
-              <span
-                style={{
-                  fontFamily: "var(--qc-font-mono)",
-                  fontSize: "var(--qc-fz-9)",
-                  fontWeight: "var(--qc-w-semi)",
-                  letterSpacing: ".08em",
-                  textTransform: "uppercase",
-                  padding: "2px 7px",
-                  borderRadius: 5,
-                  background: "var(--qc-brand-accent-soft)",
-                  color: "var(--qc-brand-accent)",
-                }}
-              >
-                Overarching
-              </span>
-            )}
+            {routes.map((lens) => (
+              <RouteChip key={lens} pillar={pattern.pillar} lens={lens} />
+            ))}
           </div>
 
           <p
@@ -287,26 +256,6 @@ function PatternCard({
           >
             {pattern.snapshot}
           </p>
-
-          {routes.length > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
-              <span
-                style={{
-                  fontFamily: "var(--qc-font-mono)",
-                  fontSize: "var(--qc-fz-10)",
-                  letterSpacing: ".1em",
-                  textTransform: "uppercase",
-                  color: "var(--qc-ink-3)",
-                  marginRight: 2,
-                }}
-              >
-                Routes to
-              </span>
-              {routes.map((lens) => (
-                <RouteChip key={lens} pillar={pattern.pillar} lens={lens} />
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </Link>
@@ -444,8 +393,6 @@ export function IMScoreCard({ management, opportunity, deal, overviewData }: IMS
 
   // Order pattern cards by pillar score (impact), like Asian Paints "ranked by impact".
   const rankedPatterns = [...patterns].sort((a, b) => b.score - a.score);
-  // A pattern is "overarching" when it touches ≥2 lenses (moves more than one sub-factor).
-  const isOverarching = (p: OverviewPillarPattern) => p.lenses.length >= 2;
 
   const title = overviewData?.headline ?? "";
   const subtitle = overviewData?.subtitle ?? "";
@@ -523,7 +470,6 @@ export function IMScoreCard({ management, opportunity, deal, overviewData }: IMS
               pattern={p}
               href={PILLAR_META[p.pillar].href}
               symbol={symbol}
-              isOverarching={isOverarching(p)}
             />
           ))}
         </div>

@@ -324,4 +324,5 @@ export const MODEL_OPTIONS: { label: string; value: string }[] = [
   { label: "Haiku", value: "~anthropic/claude-haiku-latest" },
   { label: "Sonnet", value: "~anthropic/claude-sonnet-latest" },
   { label: "MiMo-2.5", value: "xiaomi/mimo-v2.5" },
+  { label: "DeepseekV4 Flash Lite", value: "~deepseek/deepseek-v4-flash-latest" },
 ];

@@ -340,7 +340,8 @@ function InsightDashboard({
   // still resolves its drawer content.
   // Add a slug alias map because L3 might return one slug while L2 API returns another.
   const SLUG_ALIASES: Record<string, string[]> = {
-    "pe-rerating-potential": ["earnings-quality", "earnings_quality"],
+    "pe-rerating-potential": ["earning-quality", "earnings-quality", "earnings_quality"],
+    "earning-quality": ["pe-rerating-potential"],
     "earnings-quality": ["pe-rerating-potential"],
     "earnings_quality": ["pe-rerating-potential"],
   };

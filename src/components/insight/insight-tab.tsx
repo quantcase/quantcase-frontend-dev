@@ -391,15 +391,36 @@ function InsightTabContent({ type }: { type: InsightType }) {
 
   const { getInsight, loading: insightLoading, error: insightError } = useAnalysis(symbol);
   const { data: screenerData } = useScreenerData(symbol);
-  const insight = getInsight(type);
+  let insight = getInsight(type);
 
   // Frontend-only clone: surface the Opportunity page's Industry Analysis lens on
   // the Deal page too. Pull it from the already-fetched opportunity insight so no
   // extra request is made and the card mirrors its source exactly.
+  const opportunityInsight = getInsight("opportunity");
   const injectedLenses =
     type === "deal"
-      ? (getInsight("opportunity")?.lenses ?? []).filter((l) => l.slug === INDUSTRY_LENS_SLUG)
+      ? (opportunityInsight?.lenses ?? []).filter((l) => l.slug === INDUSTRY_LENS_SLUG)
       : [];
+
+  // Patch the Deal insight's "Earnings Quality" lens with the actual data from the
+  // Opportunity "pe-rerating-potential" lens, because the Deal API currently returns
+  // an empty shell (score 0, "No data available").
+  if (type === "deal" && insight && opportunityInsight) {
+    const oppEarnings = opportunityInsight.lenses.find((l) => l.slug === "pe-rerating-potential");
+    if (oppEarnings) {
+      const dealEqAliases = ["earning-quality", "earnings-quality", "earnings_quality", "pe-rerating-potential"];
+      const patchedLenses = insight.lenses.map((l) => {
+        if (dealEqAliases.includes(l.slug)) {
+          return {
+            ...oppEarnings,
+            slug: l.slug, // keep original Deal slug so frontend routing stays consistent
+          };
+        }
+        return l;
+      });
+      insight = { ...insight, lenses: patchedLenses };
+    }
+  }
 
   const companyInfo = screenerData?.company
     ? { name: screenerData.company.name, exchange: screenerData.company.exchange, sector: screenerData.company.sector, industry: screenerData.company.industry }

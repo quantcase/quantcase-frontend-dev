@@ -338,9 +338,16 @@ function InsightDashboard({
   // Drawer detail lookup: prefer this pillar's details, but fall back to ANY
   // category so an injected/cloned lens (whose detail lives under another pillar)
   // still resolves its drawer content.
+  // Add a slug alias map because L3 might return one slug while L2 API returns another.
+  const SLUG_ALIASES: Record<string, string[]> = {
+    "pe-rerating-potential": ["earnings-quality", "earnings_quality"],
+    "earnings-quality": ["pe-rerating-potential"],
+    "earnings_quality": ["pe-rerating-potential"],
+  };
+
   const activeLens = activeLensSlug
-    ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug)
-        ?? Object.values(lensDetails).flat().find((l) => l.slug === activeLensSlug)
+    ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug))
+        ?? Object.values(lensDetails).flat().find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug))
         ?? null
     : null;
 

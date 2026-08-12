@@ -21,6 +21,9 @@ const LENS_SCALE = 100;
 // the drawer's own lookup in useLenses (LENS_DISPLAY_NAME there).
 export const LENS_DISPLAY_NAME: Record<string, string> = {
   "pe-rerating-potential": "Earnings Quality",
+  "earning-quality": "Earnings Quality",
+  "earnings-quality": "Earnings Quality",
+  "earnings_quality": "Earnings Quality",
 };
 
 function normalizeLenses(lenses: InsightLens[]): InsightLens[] {

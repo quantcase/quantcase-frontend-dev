@@ -26,6 +26,8 @@ const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
   "earnings-forecast": Zap,
   "pe-rerating-potential": RefreshCw,
   "earning-quality": Award,
+  "earnings-quality": Award,
+  "earnings_quality": Award,
   "target-price-matrix": DollarSign,
 };
 

@@ -27,7 +27,7 @@ export function LensHtmlPreview({ slug, ticker }: Props) {
       setError(null);
       setLoading(true);
       try {
-        const res = await authFetch(`${BACKEND_URL}/api/html-skills/${slug}/outputs/${ticker}`);
+        const res = await authFetch(`${BACKEND_URL}/api/html-incremental-skills/${slug}/outputs/${ticker}`);
         if (cancelled) return;
         if (res.status === 404) { setError("No output available yet for this lens."); return; }
         const json = await res.json();

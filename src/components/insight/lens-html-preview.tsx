@@ -15,6 +15,10 @@ function stripHtmlFences(raw: string): string {
 }
 
 export function LensHtmlPreview({ slug, ticker }: Props) {
+  // The L2 API might return "earning-quality" or "earnings-quality", but the HTML
+  // incremental skills API expects "earnings_quality" exactly.
+  const apiSlug = slug === "earning-quality" || slug === "earnings-quality" || slug === "pe-rerating-potential" ? "earnings_quality" : slug;
+
   const [html, setHtml] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +31,7 @@ export function LensHtmlPreview({ slug, ticker }: Props) {
       setError(null);
       setLoading(true);
       try {
-        const res = await authFetch(`${BACKEND_URL}/api/html-incremental-skills/${slug}/outputs/${ticker}`);
+        const res = await authFetch(`${BACKEND_URL}/api/html-incremental-skills/${apiSlug}/outputs/${ticker}`);
         if (cancelled) return;
         if (res.status === 404) { setError("No output available yet for this lens."); return; }
         const json = await res.json();

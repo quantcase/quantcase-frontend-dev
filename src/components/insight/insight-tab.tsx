@@ -326,15 +326,6 @@ function InsightDashboard({
     setActiveLensSlug(slug);
   }, []);
 
-  // Scorecard lenses = native lenses plus any injected (cloned) ones — this drives
-  // the radar axes + score-breakdown tiles so the cloned Industry lens still shows
-  // there. The bottom "…lenses" section grid, however, lists native lenses ONLY
-  // (see below), so the clone is intentionally absent from that card. Guard against
-  // a duplicate slug in case the backend ever starts serving the injected lens too.
-  const scorecardLenses = injectedLenses.length
-    ? [...insight.lenses, ...injectedLenses.filter((l) => !insight.lenses.some((n) => n.slug === l.slug))]
-    : insight.lenses;
-
   // Drawer detail lookup: prefer this pillar's details, but fall back to ANY
   // category so an injected/cloned lens (whose detail lives under another pillar)
   // still resolves its drawer content.
@@ -345,6 +336,33 @@ function InsightDashboard({
     "earnings-quality": ["pe-rerating-potential", "earning-quality", "earnings_quality"],
     "earnings_quality": ["pe-rerating-potential", "earning-quality", "earnings-quality"],
   };
+
+  // Patch L3 lenses with real scores/status/description from L2 (lensDetails)
+  // because L3 Deal API sometimes returns empty shell for earning-quality.
+  const patchedNativeLenses = insight.lenses.map(lens => {
+    const l2Match = lensDetails[type]?.find(l => l.slug === lens.slug || SLUG_ALIASES[lens.slug]?.includes(l.slug));
+    if (l2Match && l2Match.score != null && l2Match.score > 0 && l2Match.status) {
+      return {
+        ...lens,
+        score: l2Match.score,
+        status: l2Match.status,
+        // Only override description if L2 has a meaningful takeaway, otherwise keep L3 description.
+        description: l2Match.takeaway || l2Match.description || lens.description,
+      };
+    }
+    return lens;
+  });
+
+  // Scorecard lenses = native lenses plus any injected (cloned) ones — this drives
+  // the radar axes + score-breakdown tiles so the cloned Industry lens still shows
+  // there. The bottom "…lenses" section grid, however, lists native lenses ONLY
+  // (see below), so the clone is intentionally absent from that card. Guard against
+  // a duplicate slug in case the backend ever starts serving the injected lens too.
+  const scorecardLenses = injectedLenses.length
+    ? [...patchedNativeLenses, ...injectedLenses.filter((l) => !patchedNativeLenses.some((n) => n.slug === l.slug))]
+    : patchedNativeLenses;
+
+
 
   const activeLens = activeLensSlug
     ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug))
@@ -362,11 +380,11 @@ function InsightDashboard({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.2fr]" style={{ gap: 12, alignItems: "stretch" }}>
-          {insight.lenses.length > 0 && (
+          {patchedNativeLenses.length > 0 && (
             <div id="section-lenses" style={{ display: "flex", flexDirection: "column" }}>
               {/* Native lenses only — the cloned Industry lens lives on the scorecard
                   radar/tiles above, not in this per-pillar lens grid. */}
-              <InsightLenses lenses={insight.lenses} heading={lensHeading} subtitle={TYPE_LENS_SUBTITLES[type]} onLensClick={handleLensClick} />
+              <InsightLenses lenses={patchedNativeLenses} heading={lensHeading} subtitle={TYPE_LENS_SUBTITLES[type]} onLensClick={handleLensClick} />
             </div>
           )}
           {insight.signal_map.length > 0 && (
@@ -401,26 +419,6 @@ function InsightTabContent({ type }: { type: InsightType }) {
     type === "deal"
       ? (opportunityInsight?.lenses ?? []).filter((l) => l.slug === INDUSTRY_LENS_SLUG)
       : [];
-
-  // Patch the Deal insight's "Earnings Quality" lens with the actual data from the
-  // Opportunity "pe-rerating-potential" lens, because the Deal API currently returns
-  // an empty shell (score 0, "No data available").
-  if (type === "deal" && insight && opportunityInsight) {
-    const oppEarnings = opportunityInsight.lenses.find((l) => l.slug === "pe-rerating-potential");
-    if (oppEarnings) {
-      const dealEqAliases = ["earning-quality", "earnings-quality", "earnings_quality", "pe-rerating-potential"];
-      const patchedLenses = insight.lenses.map((l) => {
-        if (dealEqAliases.includes(l.slug)) {
-          return {
-            ...oppEarnings,
-            slug: l.slug, // keep original Deal slug so frontend routing stays consistent
-          };
-        }
-        return l;
-      });
-      insight = { ...insight, lenses: patchedLenses };
-    }
-  }
 
   const companyInfo = screenerData?.company
     ? { name: screenerData.company.name, exchange: screenerData.company.exchange, sector: screenerData.company.sector, industry: screenerData.company.industry }

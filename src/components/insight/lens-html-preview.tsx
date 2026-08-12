@@ -16,8 +16,8 @@ function stripHtmlFences(raw: string): string {
 
 export function LensHtmlPreview({ slug, ticker }: Props) {
   // The L2 API might return "earning-quality" or "earnings-quality", but the HTML
-  // incremental skills API expects "earnings_quality" exactly.
-  const apiSlug = slug === "earning-quality" || slug === "earnings-quality" || slug === "pe-rerating-potential" ? "earnings_quality" : slug;
+  // incremental skills API expects "pe-rerating-potential" exactly for this lens.
+  const apiSlug = slug === "earning-quality" || slug === "earnings-quality" || slug === "earnings_quality" ? "pe-rerating-potential" : slug;
 
   const [html, setHtml] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

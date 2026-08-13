@@ -58,9 +58,9 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [name, setName] = useState(isConfig ? config.name : skill.name);
   const [dataExtractionPrompt, setDataExtractionPrompt] = useState(isConfig ? config.data_extraction_prompt : (skill.data_extraction_prompt ?? ""));
   const [htmlTemplatePrompt, setHtmlTemplatePrompt] = useState(isConfig ? config.html_template_prompt : (skill.html_template_prompt ?? ""));
-  const [enableDataValidation, setEnableDataValidation] = useState(isConfig ? config.enable_data_validation : (skill.enable_data_validation ?? true));
+  const [enableDataValidation, setEnableDataValidation] = useState<boolean>(isConfig ? (config.enable_data_validation ?? true) : (skill.enable_data_validation ?? true));
   const [dataValidationLoops, setDataValidationLoops] = useState(isConfig ? config.data_validation_loops : (skill.data_validation_loops ?? 1));
-  const [enableHtmlValidation, setEnableHtmlValidation] = useState(isConfig ? config.enable_html_validation : (skill.enable_html_validation ?? false));
+  const [enableHtmlValidation, setEnableHtmlValidation] = useState<boolean>(isConfig ? (config.enable_html_validation ?? false) : (skill.enable_html_validation ?? false));
   const [extractionModel, setExtractionModel] = useState<string | null>(isConfig ? config.extraction_model : skill.extraction_model);
   const [factValidationModel, setFactValidationModel] = useState<string | null>(isConfig ? config.fact_validation_model : skill.fact_validation_model);
   const [htmlTemplateModel, setHtmlTemplateModel] = useState<string | null>(isConfig ? config.html_template_model : skill.html_template_model);
@@ -198,7 +198,16 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
     onDirtyChange?.(false);
   }
 
-  useImperativeHandle(ref, () => ({ save: handleSave }));
+  // Ensure the parent always gets the latest handleSave to avoid stale closures
+  useImperativeHandle(ref, () => ({ save: handleSave }), [
+    name, category, dataExtractionPrompt, htmlTemplatePrompt, enableDataValidation,
+    dataValidationLoops, enableHtmlValidation, extractionModel, factValidationModel,
+    htmlTemplateModel, visualQaModel, transcriptSignalTypes, pptSignalTypes,
+    annualReportSignalTypes, marketDataSignalTypes, maxTokens, maxTranscriptQtrs,
+    maxPptQtrs, maxAnnualReportYears, maxMarketDataMonths, historicMaxTranscriptQtrs,
+    historicMaxPptQtrs, historicMaxAnnualReportYears, historicMaxMarketDataMonths,
+    stripHtml, maxBaseAnalyses, isActive, isConfig
+  ]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">

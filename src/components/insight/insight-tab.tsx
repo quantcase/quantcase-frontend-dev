@@ -340,7 +340,11 @@ function InsightDashboard({
   // Patch L3 lenses with real scores/status/description from L2 (lensDetails)
   // because L3 Deal API sometimes returns empty shell for earning-quality.
   const patchedNativeLenses = insight.lenses.map(lens => {
-    const l2Match = lensDetails[type]?.find(l => l.slug === lens.slug || SLUG_ALIASES[lens.slug]?.includes(l.slug));
+    let l2Match = lensDetails[type]?.find(l => l.slug === lens.slug || SLUG_ALIASES[lens.slug]?.includes(l.slug));
+    if (!l2Match) {
+      l2Match = Object.values(lensDetails).flat().find(l => l.slug === lens.slug || SLUG_ALIASES[lens.slug]?.includes(l.slug));
+    }
+    
     if (l2Match && l2Match.score != null && l2Match.score > 0 && l2Match.status) {
       return {
         ...lens,
@@ -353,16 +357,30 @@ function InsightDashboard({
     return lens;
   });
 
+  const patchedInjectedLenses = injectedLenses.map(lens => {
+    let l2Match = lensDetails["opportunity"]?.find(l => l.slug === lens.slug || SLUG_ALIASES[lens.slug]?.includes(l.slug));
+    if (!l2Match) {
+      l2Match = Object.values(lensDetails).flat().find(l => l.slug === lens.slug || SLUG_ALIASES[lens.slug]?.includes(l.slug));
+    }
+    if (l2Match && l2Match.score != null && l2Match.score > 0 && l2Match.status) {
+      return {
+        ...lens,
+        score: l2Match.score,
+        status: l2Match.status,
+        description: l2Match.takeaway || l2Match.description || lens.description,
+      };
+    }
+    return lens;
+  });
+
   // Scorecard lenses = native lenses plus any injected (cloned) ones — this drives
   // the radar axes + score-breakdown tiles so the cloned Industry lens still shows
   // there. The bottom "…lenses" section grid, however, lists native lenses ONLY
   // (see below), so the clone is intentionally absent from that card. Guard against
   // a duplicate slug in case the backend ever starts serving the injected lens too.
-  const scorecardLenses = injectedLenses.length
-    ? [...patchedNativeLenses, ...injectedLenses.filter((l) => !patchedNativeLenses.some((n) => n.slug === l.slug))]
+  const scorecardLenses = patchedInjectedLenses.length
+    ? [...patchedNativeLenses, ...patchedInjectedLenses.filter((l) => !patchedNativeLenses.some((n) => n.slug === l.slug))]
     : patchedNativeLenses;
-
-
 
   const activeLens = activeLensSlug
     ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug))

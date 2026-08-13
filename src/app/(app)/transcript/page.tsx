@@ -110,9 +110,9 @@ function TranscriptContent() {
                     </span>
                   </div>
                   <div>
-                    <span className="" style={{ color: "var(--qc-ink-2)" }}>Quarter: </span>
+                    <span className="" style={{ color: "var(--qc-ink-2)" }}>Period: </span>
                     <span className="font-semibold" style={{ color: "var(--qc-ink)" }}>
-                      {data.data.fiscal_year} {data.data.quarter}
+                      {data.data.quarter ? `${data.data.quarter} ${data.data.fiscal_year}` : `${data.data.fiscal_year} Annual Report`}
                     </span>
                   </div>
                   <div>
@@ -256,7 +256,7 @@ function TranscriptContent() {
                 <div>
                   <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>Quarter</p>
                   <p className="text-sm font-semibold mt-0.5" style={{ color: "var(--qc-ink)" }}>
-                    {data.data.quarter}
+                    {data.data.quarter || 'Annual'}
                   </p>
                 </div>
                 <div>

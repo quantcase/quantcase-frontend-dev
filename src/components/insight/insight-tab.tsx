@@ -335,6 +335,8 @@ function InsightDashboard({
     "earning-quality": ["pe-rerating-potential", "earnings-quality", "earnings_quality"],
     "earnings-quality": ["pe-rerating-potential", "earning-quality", "earnings_quality"],
     "earnings_quality": ["pe-rerating-potential", "earning-quality", "earnings-quality"],
+    "industry": ["industry-analysis"],
+    "industry-analysis": ["industry"],
   };
 
   // Patch L3 lenses with real scores/status/description from L2 (lensDetails)
@@ -348,6 +350,7 @@ function InsightDashboard({
     if (l2Match && l2Match.score != null && l2Match.score > 0 && l2Match.status) {
       return {
         ...lens,
+        slug: l2Match.slug,
         score: l2Match.score,
         status: l2Match.status,
         // Only override description if L2 has a meaningful takeaway, otherwise keep L3 description.
@@ -365,6 +368,7 @@ function InsightDashboard({
     if (l2Match && l2Match.score != null && l2Match.score > 0 && l2Match.status) {
       return {
         ...lens,
+        slug: l2Match.slug,
         score: l2Match.score,
         status: l2Match.status,
         description: l2Match.takeaway || l2Match.description || lens.description,
@@ -435,7 +439,7 @@ function InsightTabContent({ type }: { type: InsightType }) {
   const opportunityInsight = getInsight("opportunity");
   const injectedLenses =
     type === "deal"
-      ? (opportunityInsight?.lenses ?? []).filter((l) => l.slug === INDUSTRY_LENS_SLUG)
+      ? (opportunityInsight?.lenses ?? []).filter((l) => l.slug === INDUSTRY_LENS_SLUG || l.slug === "industry")
       : [];
 
   const companyInfo = screenerData?.company

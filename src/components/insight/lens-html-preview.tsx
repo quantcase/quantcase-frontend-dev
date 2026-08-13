@@ -17,7 +17,11 @@ function stripHtmlFences(raw: string): string {
 export function LensHtmlPreview({ slug, ticker }: Props) {
   // The backend has deprecated pe-rerating-potential and merged its logic into earning-quality.
   // We map any legacy or alternative aliases to this new consolidated slug.
-  const apiSlug = slug === "pe-rerating-potential" || slug === "earnings-quality" || slug === "earnings_quality" ? "earning-quality" : slug;
+  let apiSlug = slug === "pe-rerating-potential" || slug === "earnings-quality" || slug === "earnings_quality" ? "earning-quality" : slug;
+
+  // Normalize all other slugs to kebab-case (dashes instead of underscores) because
+  // the HTML incremental skills API strictly expects kebab-case.
+  apiSlug = apiSlug.replace(/_/g, "-");
 
   const [html, setHtml] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

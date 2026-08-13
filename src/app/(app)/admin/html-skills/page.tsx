@@ -213,6 +213,7 @@ function HtmlSkillsPage() {
       key, name,
       data_extraction_prompt: selectedSkill.data_extraction_prompt ?? "",
       html_template_prompt: selectedSkill.html_template_prompt ?? "",
+      use_template_engine: selectedSkill.use_template_engine ?? true,
       enable_data_validation: selectedSkill.enable_data_validation ?? true,
       data_validation_loops: selectedSkill.data_validation_loops ?? 1,
       enable_html_validation: selectedSkill.enable_html_validation ?? false,

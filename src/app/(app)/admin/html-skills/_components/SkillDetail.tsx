@@ -58,6 +58,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [name, setName] = useState(isConfig ? config.name : skill.name);
   const [dataExtractionPrompt, setDataExtractionPrompt] = useState(isConfig ? config.data_extraction_prompt : (skill.data_extraction_prompt ?? ""));
   const [htmlTemplatePrompt, setHtmlTemplatePrompt] = useState(isConfig ? config.html_template_prompt : (skill.html_template_prompt ?? ""));
+  const [useTemplateEngine, setUseTemplateEngine] = useState<boolean>(isConfig ? (config.use_template_engine ?? true) : (skill.use_template_engine ?? true));
   const [enableDataValidation, setEnableDataValidation] = useState<boolean>(isConfig ? (config.enable_data_validation ?? true) : (skill.enable_data_validation ?? true));
   const [dataValidationLoops, setDataValidationLoops] = useState(isConfig ? config.data_validation_loops : (skill.data_validation_loops ?? 1));
   const [enableHtmlValidation, setEnableHtmlValidation] = useState<boolean>(isConfig ? (config.enable_html_validation ?? false) : (skill.enable_html_validation ?? false));
@@ -172,8 +173,9 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
     const pipelineFields = {
       data_extraction_prompt: dataExtractionPrompt,
       html_template_prompt: htmlTemplatePrompt,
+      use_template_engine: useTemplateEngine,
       enable_data_validation: enableDataValidation,
-      data_validation_loops: dataValidationLoops,
+      data_validation_loops: enableDataValidation ? dataValidationLoops : 0,
       enable_html_validation: enableHtmlValidation,
       extraction_model: extractionModel,
       fact_validation_model: factValidationModel,
@@ -200,7 +202,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
 
   // Ensure the parent always gets the latest handleSave to avoid stale closures
   useImperativeHandle(ref, () => ({ save: handleSave }), [
-    name, category, dataExtractionPrompt, htmlTemplatePrompt, enableDataValidation,
+    name, category, dataExtractionPrompt, htmlTemplatePrompt, useTemplateEngine, enableDataValidation,
     dataValidationLoops, enableHtmlValidation, extractionModel, factValidationModel,
     htmlTemplateModel, visualQaModel, transcriptSignalTypes, pptSignalTypes,
     annualReportSignalTypes, marketDataSignalTypes, maxTokens, maxTranscriptQtrs,
@@ -671,21 +673,32 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
 
           {activeTab === "template" && (
             <div className="flex-1 flex flex-col space-y-3">
-              <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
-                  Template Model
-                </label>
-                <select
-                  value={htmlTemplateModel ?? ""}
-                  onChange={(e) => { setHtmlTemplateModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
-                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-                >
-                  {isConfig && <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.html_template_model)?.label ?? skill.html_template_model})</option>}
-                  {MODEL_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
+              <div className="flex items-center gap-2 cursor-pointer pb-2">
+                <input
+                  type="checkbox"
+                  checked={useTemplateEngine}
+                  onChange={(e) => { setUseTemplateEngine(e.target.checked); mark(); }}
+                  className="rounded border-[var(--qc-border-default)] text-ink focus:ring-ink"
+                />
+                <span className="text-[12px] font-medium text-ink-2">Use Template Engine (Bypass LLM)</span>
               </div>
+              {!useTemplateEngine && (
+                <div>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                    Template Model
+                  </label>
+                  <select
+                    value={htmlTemplateModel ?? ""}
+                    onChange={(e) => { setHtmlTemplateModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
+                    className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                  >
+                    {isConfig && <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.html_template_model)?.label ?? skill.html_template_model})</option>}
+                    {MODEL_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="flex-1 flex flex-col">
                 <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
                   HTML Template Prompt

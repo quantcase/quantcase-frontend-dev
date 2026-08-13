@@ -54,6 +54,7 @@ export interface HtmlSkill {
   name: string;
   data_extraction_prompt: string;
   html_template_prompt: string;
+  use_template_engine: boolean;
   enable_data_validation: boolean;
   data_validation_loops: number;
   enable_html_validation: boolean;
@@ -124,6 +125,7 @@ export interface HtmlSkillConfig {
   name: string;
   data_extraction_prompt: string;
   html_template_prompt: string;
+  use_template_engine: boolean;
   enable_data_validation: boolean;
   data_validation_loops: number;
   enable_html_validation: boolean;

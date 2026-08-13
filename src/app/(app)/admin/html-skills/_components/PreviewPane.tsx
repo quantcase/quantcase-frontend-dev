@@ -33,7 +33,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunResponse | null>(null);
   const [hasBase, setHasBase] = useState<boolean | null>(null);
-  const [viewMode, setViewMode] = useState<"html" | "debug">("html");
+  const [viewMode, setViewMode] = useState<"html" | "json" | "audit">("html");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Unscoped existence check — does *any* output (historic or incremental) exist yet for this ticker?
@@ -175,10 +175,16 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
               Preview
             </button>
             <button
-              onClick={() => setViewMode("debug")}
-              className={`px-3 py-1.5 transition-colors ${viewMode === "debug" ? "bg-ink text-[var(--qc-on-dark)]" : "text-ink-3 hover:text-ink"}`}
+              onClick={() => setViewMode("json")}
+              className={`px-3 py-1.5 transition-colors ${viewMode === "json" ? "bg-ink text-[var(--qc-on-dark)]" : "text-ink-3 hover:text-ink"}`}
             >
-              Debug Trace
+              Extracted JSON
+            </button>
+            <button
+              onClick={() => setViewMode("audit")}
+              className={`px-3 py-1.5 transition-colors ${viewMode === "audit" ? "bg-ink text-[var(--qc-on-dark)]" : "text-ink-3 hover:text-ink"}`}
+            >
+              Audit Logs
             </button>
           </div>
         )}
@@ -192,22 +198,57 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
           />
         )}
         
-        {html && viewMode === "debug" && (
+        {html && viewMode === "json" && (
           <div className="w-full h-full overflow-y-auto p-6 bg-[var(--qc-card)] font-mono text-[12px] leading-relaxed text-[var(--qc-ink-2)]">
-            <h3 className="text-[14px] font-bold text-[var(--qc-ink)] mb-4">Pipeline Debug Trace</h3>
+            <h3 className="text-[14px] font-bold text-[var(--qc-ink)] mb-4">Extracted JSON Data</h3>
+            <div className="bg-[var(--qc-section)] rounded-md border border-[var(--qc-border-default)] p-4 overflow-x-auto">
+              <pre>{result?.output?.extracted_json ? JSON.stringify(result.output.extracted_json, null, 2) : "No JSON extracted"}</pre>
+            </div>
+          </div>
+        )}
+
+        {html && viewMode === "audit" && (
+          <div className="w-full h-full overflow-y-auto p-6 bg-[var(--qc-card)] font-mono text-[12px] leading-relaxed text-[var(--qc-ink-2)]">
+            <h3 className="text-[14px] font-bold text-[var(--qc-ink)] mb-4">Pipeline Audit Logs</h3>
             
             <div className="mb-6">
-              <h4 className="text-[12px] font-bold uppercase tracking-wider text-[var(--qc-ink-3)] mb-2">Extracted JSON</h4>
-              <div className="bg-[var(--qc-section)] rounded-md border border-[var(--qc-border-default)] p-4 overflow-x-auto">
-                <pre>{result?.output?.extracted_json ? JSON.stringify(result.output.extracted_json, null, 2) : "No JSON extracted"}</pre>
-              </div>
+              <h4 className="text-[12px] font-bold uppercase tracking-wider text-[var(--qc-ink-3)] mb-2 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue"></span>
+                Fact Validation Critiques
+              </h4>
+              {result?.output?.audit_logs?.fact_validation && result.output.audit_logs.fact_validation.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {result.output.audit_logs.fact_validation.map((log: any, i: number) => (
+                    <div key={i} className="bg-[var(--qc-section)] rounded-md border border-[var(--qc-border-default)] p-4">
+                      <pre className="whitespace-pre-wrap">{JSON.stringify(log, null, 2)}</pre>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-[var(--qc-section)] rounded-md border border-[var(--qc-border-default)] p-4 text-ink-3 italic">
+                  No fact validation issues found or validation was skipped.
+                </div>
+              )}
             </div>
-            
+
             <div>
-              <h4 className="text-[12px] font-bold uppercase tracking-wider text-[var(--qc-ink-3)] mb-2">Audit Logs</h4>
-              <div className="bg-[var(--qc-section)] rounded-md border border-[var(--qc-border-default)] p-4 overflow-x-auto">
-                <pre>{result?.output?.audit_logs ? JSON.stringify(result.output.audit_logs, null, 2) : "No audit logs"}</pre>
-              </div>
+              <h4 className="text-[12px] font-bold uppercase tracking-wider text-[var(--qc-ink-3)] mb-2 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-warn"></span>
+                Visual QA UI Bugs Caught
+              </h4>
+              {result?.output?.audit_logs?.visual_qa && result.output.audit_logs.visual_qa.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {result.output.audit_logs.visual_qa.map((log: any, i: number) => (
+                    <div key={i} className="bg-[var(--qc-section)] rounded-md border border-[var(--qc-border-default)] p-4">
+                      <pre className="whitespace-pre-wrap">{JSON.stringify(log, null, 2)}</pre>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-[var(--qc-section)] rounded-md border border-[var(--qc-border-default)] p-4 text-ink-3 italic">
+                  No visual bugs found or visual QA was skipped.
+                </div>
+              )}
             </div>
           </div>
         )}

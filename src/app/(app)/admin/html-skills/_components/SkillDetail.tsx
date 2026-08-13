@@ -72,7 +72,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>(isConfig ? config.annual_report_signal_types : skill.annual_report_signal_types);
   const [marketDataSignalTypes, setMarketDataSignalTypes] = useState<MarketDataSignalType[]>((isConfig ? config.market_data_signal_types : skill.market_data_signal_types) ?? []);
 
-  const [activeTab, setActiveTab] = useState<"extraction" | "template" | "settings">("extraction");
+  const [activeTab, setActiveTab] = useState<"extraction" | "template" | "fact_validation" | "visual_qa">("extraction");
   const [maxTokens, setMaxTokens] = useState<number | null>(isConfig ? config.max_tokens : skill.max_tokens);
   const [maxTranscriptQtrs, setMaxTranscriptQtrs] = useState<number | null>(isConfig ? config.max_transcript_qtrs : skill.max_transcript_qtrs);
   const [maxPptQtrs, setMaxPptQtrs] = useState<number | null>(isConfig ? config.max_ppt_qtrs : skill.max_ppt_qtrs);
@@ -612,17 +612,25 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
               HTML Template
             </button>
             <button
-              onClick={() => setActiveTab("settings")}
+              onClick={() => setActiveTab("fact_validation")}
               className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
-                activeTab === "settings" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                activeTab === "fact_validation" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
               }`}
             >
-              Pipeline Settings
+              Fact Validation
+            </button>
+            <button
+              onClick={() => setActiveTab("visual_qa")}
+              className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                activeTab === "visual_qa" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+              }`}
+            >
+              Visual QA
             </button>
           </div>
 
           {activeTab === "extraction" && (
-            <div className="flex-1 flex flex-col space-y-3">
+            <div className="flex-1 flex flex-col space-y-4 overflow-y-auto pr-1">
               <div>
                 <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
                   Extraction Model
@@ -638,22 +646,48 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   ))}
                 </select>
               </div>
-              <div className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col min-h-[200px]">
                 <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
                   Extraction Prompt
                 </label>
                 <textarea
                   value={dataExtractionPrompt}
                   onChange={(e) => { setDataExtractionPrompt(e.target.value); mark(); }}
-                  className="w-full flex-1 rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
+                  className="w-full h-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
                   placeholder="Enter the data extraction prompt..."
                 />
+              </div>
+              <div className="border border-[var(--qc-border-default)] rounded-md p-3 bg-secondary space-y-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={enableDataValidation}
+                    onChange={(e) => { setEnableDataValidation(e.target.checked); mark(); }}
+                    className="rounded border-[var(--qc-border-default)] text-ink focus:ring-ink"
+                  />
+                  <span className="text-[12px] font-medium text-ink-2">Enable Data Validation Loop</span>
+                </label>
+                {enableDataValidation && (
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                      Validation Loops
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={5}
+                      value={dataValidationLoops}
+                      onChange={(e) => { setDataValidationLoops(Number(e.target.value)); mark(); }}
+                      className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {activeTab === "template" && (
-            <div className="flex-1 flex flex-col space-y-3">
+            <div className="flex-1 flex flex-col space-y-4 overflow-y-auto pr-1">
               <div>
                 <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
                   Template Model
@@ -669,70 +703,18 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                   ))}
                 </select>
               </div>
-              <div className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col min-h-[200px]">
                 <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
                   HTML Template Prompt
                 </label>
                 <textarea
                   value={htmlTemplatePrompt}
                   onChange={(e) => { setHtmlTemplatePrompt(e.target.value); mark(); }}
-                  className="w-full flex-1 rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
+                  className="w-full h-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
                   placeholder="Enter the HTML template prompt..."
                 />
               </div>
-            </div>
-          )}
-
-          {activeTab === "settings" && (
-            <div className="space-y-6">
-              <div className="space-y-3 border p-4 rounded-md border-[var(--qc-border-default)] bg-secondary">
-                <h3 className="text-[13px] font-semibold text-ink">Data Validation</h3>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={enableDataValidation}
-                    onChange={(e) => { setEnableDataValidation(e.target.checked); mark(); }}
-                    className="rounded border-[var(--qc-border-default)] text-ink focus:ring-ink"
-                  />
-                  <span className="text-[12px] font-medium text-ink-2">Enable Data Validation</span>
-                </label>
-                
-                {enableDataValidation && (
-                  <>
-                    <div>
-                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
-                        Validation Passes
-                      </label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={5}
-                        value={dataValidationLoops}
-                        onChange={(e) => { setDataValidationLoops(Number(e.target.value)); mark(); }}
-                        className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
-                        Validation Model
-                      </label>
-                      <select
-                        value={factValidationModel ?? ""}
-                        onChange={(e) => { setFactValidationModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
-                        className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-                      >
-                        {isConfig && <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.fact_validation_model)?.label ?? skill.fact_validation_model})</option>}
-                        {MODEL_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>{o.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="space-y-3 border p-4 rounded-md border-[var(--qc-border-default)] bg-secondary">
-                <h3 className="text-[13px] font-semibold text-ink">HTML Validation (Visual QA)</h3>
+              <div className="border border-[var(--qc-border-default)] rounded-md p-3 bg-secondary">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -740,26 +722,54 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                     onChange={(e) => { setEnableHtmlValidation(e.target.checked); mark(); }}
                     className="rounded border-[var(--qc-border-default)] text-ink focus:ring-ink"
                   />
-                  <span className="text-[12px] font-medium text-ink-2">Enable HTML Validation</span>
+                  <span className="text-[12px] font-medium text-ink-2">Enable HTML Validation (Visual QA)</span>
                 </label>
-                
-                {enableHtmlValidation && (
-                  <div>
-                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
-                      Visual QA Model
-                    </label>
-                    <select
-                      value={visualQaModel ?? ""}
-                      onChange={(e) => { setVisualQaModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
-                      className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-                    >
-                      {isConfig && <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.visual_qa_model)?.label ?? skill.visual_qa_model})</option>}
-                      {MODEL_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "fact_validation" && (
+            <div className="flex-1 flex flex-col space-y-4">
+              <div className="text-[13px] text-ink-3 bg-blue-soft border border-blue/30 rounded-md p-3 mb-2">
+                This stage automatically runs to validate extracted facts against the original source text. The prompt is hardcoded in the backend pipeline.
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  Fact Validation Model
+                </label>
+                <select
+                  value={factValidationModel ?? ""}
+                  onChange={(e) => { setFactValidationModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {isConfig && <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.fact_validation_model)?.label ?? skill.fact_validation_model})</option>}
+                  {MODEL_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "visual_qa" && (
+            <div className="flex-1 flex flex-col space-y-4">
+              <div className="text-[13px] text-ink-3 bg-blue-soft border border-blue/30 rounded-md p-3 mb-2">
+                This stage renders the generated HTML and visually inspects it to catch UI bugs or layout issues. The prompt is hardcoded in the backend pipeline.
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  Visual QA Model
+                </label>
+                <select
+                  value={visualQaModel ?? ""}
+                  onChange={(e) => { setVisualQaModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {isConfig && <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.visual_qa_model)?.label ?? skill.visual_qa_model})</option>}
+                  {MODEL_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
           )}

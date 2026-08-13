@@ -33,6 +33,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunResponse | null>(null);
   const [hasBase, setHasBase] = useState<boolean | null>(null);
+  const [viewMode, setViewMode] = useState<"html" | "debug">("html");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Unscoped existence check — does *any* output (historic or incremental) exist yet for this ticker?
@@ -166,12 +167,49 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
         )}
 
         {html && (
+          <div className="absolute top-4 right-8 z-10 flex border border-[var(--qc-border-default)] rounded-md overflow-hidden bg-[var(--qc-card)] text-[12px] font-medium shadow-sm">
+            <button
+              onClick={() => setViewMode("html")}
+              className={`px-3 py-1.5 transition-colors ${viewMode === "html" ? "bg-ink text-[var(--qc-on-dark)]" : "text-ink-3 hover:text-ink"}`}
+            >
+              Preview
+            </button>
+            <button
+              onClick={() => setViewMode("debug")}
+              className={`px-3 py-1.5 transition-colors ${viewMode === "debug" ? "bg-ink text-[var(--qc-on-dark)]" : "text-ink-3 hover:text-ink"}`}
+            >
+              Debug Trace
+            </button>
+          </div>
+        )}
+
+        {html && viewMode === "html" && (
           <iframe
             srcDoc={html}
             className="w-full h-full border-none"
             sandbox="allow-scripts allow-same-origin"
             title={`Preview — ${slug} / ${ticker}`}
           />
+        )}
+        
+        {html && viewMode === "debug" && (
+          <div className="w-full h-full overflow-y-auto p-6 bg-[var(--qc-card)] font-mono text-[12px] leading-relaxed text-[var(--qc-ink-2)]">
+            <h3 className="text-[14px] font-bold text-[var(--qc-ink)] mb-4">Pipeline Debug Trace</h3>
+            
+            <div className="mb-6">
+              <h4 className="text-[12px] font-bold uppercase tracking-wider text-[var(--qc-ink-3)] mb-2">Extracted JSON</h4>
+              <div className="bg-[var(--qc-section)] rounded-md border border-[var(--qc-border-default)] p-4 overflow-x-auto">
+                <pre>{result?.output?.extracted_json ? JSON.stringify(result.output.extracted_json, null, 2) : "No JSON extracted"}</pre>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="text-[12px] font-bold uppercase tracking-wider text-[var(--qc-ink-3)] mb-2">Audit Logs</h4>
+              <div className="bg-[var(--qc-section)] rounded-md border border-[var(--qc-border-default)] p-4 overflow-x-auto">
+                <pre>{result?.output?.audit_logs ? JSON.stringify(result.output.audit_logs, null, 2) : "No audit logs"}</pre>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

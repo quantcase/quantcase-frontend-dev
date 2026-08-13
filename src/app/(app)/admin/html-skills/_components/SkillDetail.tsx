@@ -56,13 +56,23 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
 ) {
   const isConfig = config !== null;
   const [name, setName] = useState(isConfig ? config.name : skill.name);
-  const [prompt, setPrompt] = useState(isConfig ? config.skill_prompt : (skill.skill_prompt ?? ""));
+  const [dataExtractionPrompt, setDataExtractionPrompt] = useState(isConfig ? config.data_extraction_prompt : (skill.data_extraction_prompt ?? ""));
+  const [htmlTemplatePrompt, setHtmlTemplatePrompt] = useState(isConfig ? config.html_template_prompt : (skill.html_template_prompt ?? ""));
+  const [enableDataValidation, setEnableDataValidation] = useState(isConfig ? config.enable_data_validation : (skill.enable_data_validation ?? true));
+  const [dataValidationLoops, setDataValidationLoops] = useState(isConfig ? config.data_validation_loops : (skill.data_validation_loops ?? 1));
+  const [enableHtmlValidation, setEnableHtmlValidation] = useState(isConfig ? config.enable_html_validation : (skill.enable_html_validation ?? false));
+  const [extractionModel, setExtractionModel] = useState<string | null>(isConfig ? config.extraction_model : skill.extraction_model);
+  const [factValidationModel, setFactValidationModel] = useState<string | null>(isConfig ? config.fact_validation_model : skill.fact_validation_model);
+  const [htmlTemplateModel, setHtmlTemplateModel] = useState<string | null>(isConfig ? config.html_template_model : skill.html_template_model);
+  const [visualQaModel, setVisualQaModel] = useState<string | null>(isConfig ? config.visual_qa_model : skill.visual_qa_model);
+  
   const [category, setCategory] = useState<PluginCategory>(skill.category);
   const [transcriptSignalTypes, setTranscriptSignalTypes] = useState<TranscriptSignalType[]>(isConfig ? config.transcript_signal_types : skill.transcript_signal_types);
   const [pptSignalTypes, setPptSignalTypes] = useState<PptSignalType[]>(isConfig ? config.ppt_signal_types : skill.ppt_signal_types);
   const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>(isConfig ? config.annual_report_signal_types : skill.annual_report_signal_types);
   const [marketDataSignalTypes, setMarketDataSignalTypes] = useState<MarketDataSignalType[]>((isConfig ? config.market_data_signal_types : skill.market_data_signal_types) ?? []);
-  const [model, setModel] = useState<string | null>(isConfig ? config.model : skill.model);
+
+  const [activeTab, setActiveTab] = useState<"extraction" | "template" | "settings">("extraction");
   const [maxTokens, setMaxTokens] = useState<number | null>(isConfig ? config.max_tokens : skill.max_tokens);
   const [maxTranscriptQtrs, setMaxTranscriptQtrs] = useState<number | null>(isConfig ? config.max_transcript_qtrs : skill.max_transcript_qtrs);
   const [maxPptQtrs, setMaxPptQtrs] = useState<number | null>(isConfig ? config.max_ppt_qtrs : skill.max_ppt_qtrs);
@@ -158,15 +168,28 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
       historic_max_transcript_qtrs: historicMaxTranscriptQtrs, historic_max_ppt_qtrs: historicMaxPptQtrs,
       historic_max_annual_report_years: historicMaxAnnualReportYears, historic_max_market_data_months: historicMaxMarketDataMonths,
     };
+    
+    const pipelineFields = {
+      data_extraction_prompt: dataExtractionPrompt,
+      html_template_prompt: htmlTemplatePrompt,
+      enable_data_validation: enableDataValidation,
+      data_validation_loops: dataValidationLoops,
+      enable_html_validation: enableHtmlValidation,
+      extraction_model: extractionModel,
+      fact_validation_model: factValidationModel,
+      html_template_model: htmlTemplateModel,
+      visual_qa_model: visualQaModel,
+    };
+
     if (isConfig) {
       onSave({
-        name, skill_prompt: prompt, ...windowFields,
-        model, max_tokens: maxTokens, strip_html: stripHtml,
+        name, ...windowFields, ...pipelineFields,
+        max_tokens: maxTokens, strip_html: stripHtml,
       });
     } else {
       onSave({
-        name, skill_prompt: prompt, category, ...windowFields,
-        model, max_tokens: maxTokens,
+        name, category, ...windowFields, ...pipelineFields,
+        max_tokens: maxTokens,
         strip_html: stripHtml ?? true, max_base_analyses: maxBaseAnalyses,
         is_active: isActive,
       });
@@ -229,8 +252,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
           </div>
         )}
 
-        {/* Category (skill only) + Model + Max Tokens — Model/Max Tokens fall back to the skill's own value when left "Default" in config mode */}
-        <div className={isConfig ? "grid grid-cols-2 gap-3" : "grid grid-cols-3 gap-3"}>
+        <div className={isConfig ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-3"}>
           {!isConfig && (
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
@@ -247,23 +269,6 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
               </select>
             </div>
           )}
-          <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
-              Model
-            </label>
-            <select
-              value={model ?? ""}
-              onChange={(e) => { setModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
-              className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-            >
-              {isConfig && (
-                <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.model)?.label ?? skill.model})</option>
-              )}
-              {MODEL_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </div>
           <div>
             <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
               Max Tokens
@@ -587,18 +592,177 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
           </div>
         </div>
 
-        {/* Prompt */}
-        <div className="flex-1">
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
-            Skill Prompt
-          </label>
-          <textarea
-            value={prompt}
-            onChange={(e) => { setPrompt(e.target.value); mark(); }}
-            rows={18}
-            className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
-            placeholder="Enter the instructional prompt for this skill…"
-          />
+        {/* Tabbed Pipeline Configuration */}
+        <div className="flex-1 flex flex-col min-h-[400px]">
+          <div className="flex border-b border-[var(--qc-border-default)] mb-4">
+            <button
+              onClick={() => setActiveTab("extraction")}
+              className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                activeTab === "extraction" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+              }`}
+            >
+              Data Extraction
+            </button>
+            <button
+              onClick={() => setActiveTab("template")}
+              className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                activeTab === "template" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+              }`}
+            >
+              HTML Template
+            </button>
+            <button
+              onClick={() => setActiveTab("settings")}
+              className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                activeTab === "settings" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+              }`}
+            >
+              Pipeline Settings
+            </button>
+          </div>
+
+          {activeTab === "extraction" && (
+            <div className="flex-1 flex flex-col space-y-3">
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  Extraction Model
+                </label>
+                <select
+                  value={extractionModel ?? ""}
+                  onChange={(e) => { setExtractionModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {isConfig && <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.extraction_model)?.label ?? skill.extraction_model})</option>}
+                  {MODEL_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1 flex flex-col">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  Extraction Prompt
+                </label>
+                <textarea
+                  value={dataExtractionPrompt}
+                  onChange={(e) => { setDataExtractionPrompt(e.target.value); mark(); }}
+                  className="w-full flex-1 rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
+                  placeholder="Enter the data extraction prompt..."
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "template" && (
+            <div className="flex-1 flex flex-col space-y-3">
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  Template Model
+                </label>
+                <select
+                  value={htmlTemplateModel ?? ""}
+                  onChange={(e) => { setHtmlTemplateModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {isConfig && <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.html_template_model)?.label ?? skill.html_template_model})</option>}
+                  {MODEL_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1 flex flex-col">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  HTML Template Prompt
+                </label>
+                <textarea
+                  value={htmlTemplatePrompt}
+                  onChange={(e) => { setHtmlTemplatePrompt(e.target.value); mark(); }}
+                  className="w-full flex-1 rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
+                  placeholder="Enter the HTML template prompt..."
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "settings" && (
+            <div className="space-y-6">
+              <div className="space-y-3 border p-4 rounded-md border-[var(--qc-border-default)] bg-secondary">
+                <h3 className="text-[13px] font-semibold text-ink">Data Validation</h3>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={enableDataValidation}
+                    onChange={(e) => { setEnableDataValidation(e.target.checked); mark(); }}
+                    className="rounded border-[var(--qc-border-default)] text-ink focus:ring-ink"
+                  />
+                  <span className="text-[12px] font-medium text-ink-2">Enable Data Validation</span>
+                </label>
+                
+                {enableDataValidation && (
+                  <>
+                    <div>
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                        Validation Passes
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={5}
+                        value={dataValidationLoops}
+                        onChange={(e) => { setDataValidationLoops(Number(e.target.value)); mark(); }}
+                        className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                        Validation Model
+                      </label>
+                      <select
+                        value={factValidationModel ?? ""}
+                        onChange={(e) => { setFactValidationModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
+                        className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                      >
+                        {isConfig && <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.fact_validation_model)?.label ?? skill.fact_validation_model})</option>}
+                        {MODEL_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="space-y-3 border p-4 rounded-md border-[var(--qc-border-default)] bg-secondary">
+                <h3 className="text-[13px] font-semibold text-ink">HTML Validation (Visual QA)</h3>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={enableHtmlValidation}
+                    onChange={(e) => { setEnableHtmlValidation(e.target.checked); mark(); }}
+                    className="rounded border-[var(--qc-border-default)] text-ink focus:ring-ink"
+                  />
+                  <span className="text-[12px] font-medium text-ink-2">Enable HTML Validation</span>
+                </label>
+                
+                {enableHtmlValidation && (
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                      Visual QA Model
+                    </label>
+                    <select
+                      value={visualQaModel ?? ""}
+                      onChange={(e) => { setVisualQaModel(isConfig ? (e.target.value || null) : e.target.value); mark(); }}
+                      className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                    >
+                      {isConfig && <option value="">Default ({MODEL_OPTIONS.find((o) => o.value === skill.visual_qa_model)?.label ?? skill.visual_qa_model})</option>}
+                      {MODEL_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

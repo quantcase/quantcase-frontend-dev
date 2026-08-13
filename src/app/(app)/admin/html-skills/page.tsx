@@ -211,7 +211,11 @@ function HtmlSkillsPage() {
     // model/max_tokens/strip_html).
     const payload = {
       key, name,
-      skill_prompt: selectedSkill.skill_prompt ?? "",
+      data_extraction_prompt: selectedSkill.data_extraction_prompt ?? "",
+      html_template_prompt: selectedSkill.html_template_prompt ?? "",
+      enable_data_validation: selectedSkill.enable_data_validation ?? true,
+      data_validation_loops: selectedSkill.data_validation_loops ?? 1,
+      enable_html_validation: selectedSkill.enable_html_validation ?? false,
       transcript_signal_types: selectedSkill.transcript_signal_types,
       ppt_signal_types: selectedSkill.ppt_signal_types,
       annual_report_signal_types: selectedSkill.annual_report_signal_types,
@@ -224,7 +228,11 @@ function HtmlSkillsPage() {
       historic_max_ppt_qtrs: selectedSkill.historic_max_ppt_qtrs,
       historic_max_annual_report_years: selectedSkill.historic_max_annual_report_years,
       historic_max_market_data_months: selectedSkill.historic_max_market_data_months,
-      model: null, max_tokens: null, strip_html: null,
+      extraction_model: null,
+      fact_validation_model: null,
+      html_template_model: null,
+      visual_qa_model: null,
+      max_tokens: null, strip_html: null,
     };
     authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs`, {
       method: "POST",

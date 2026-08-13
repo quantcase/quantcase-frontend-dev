@@ -52,13 +52,20 @@ export interface HtmlSkill {
   id: string;
   slug: string;
   name: string;
-  skill_prompt?: string;
+  data_extraction_prompt: string;
+  html_template_prompt: string;
+  enable_data_validation: boolean;
+  data_validation_loops: number;
+  enable_html_validation: boolean;
+  extraction_model: string;
+  fact_validation_model: string;
+  html_template_model: string;
+  visual_qa_model: string;
   transcript_signal_types: TranscriptSignalType[];
   ppt_signal_types: PptSignalType[];
   annual_report_signal_types: AnnualReportSignalType[];
   market_data_signal_types: MarketDataSignalType[];
   category: PluginCategory;
-  model: string;
   max_tokens: number;
   max_transcript_qtrs: number | null;
   max_ppt_qtrs: number | null;
@@ -91,6 +98,11 @@ export interface HtmlSkillOutput {
   raw_html: string;
   text_summary: string;
   prompt_v: string;
+  extracted_json?: any;
+  audit_logs?: {
+    fact_validation: any[];
+    visual_qa: any[];
+  };
   model: string;
   input_tokens: number;
   output_tokens: number;
@@ -110,7 +122,15 @@ export interface HtmlSkillConfig {
   skill_id?: string;
   key: string;
   name: string;
-  skill_prompt: string;
+  data_extraction_prompt: string;
+  html_template_prompt: string;
+  enable_data_validation: boolean;
+  data_validation_loops: number;
+  enable_html_validation: boolean;
+  extraction_model: string | null;
+  fact_validation_model: string | null;
+  html_template_model: string | null;
+  visual_qa_model: string | null;
   transcript_signal_types: TranscriptSignalType[];
   ppt_signal_types: PptSignalType[];
   annual_report_signal_types: AnnualReportSignalType[];
@@ -124,7 +144,7 @@ export interface HtmlSkillConfig {
   historic_max_annual_report_years: number | null;
   historic_max_market_data_months: number | null;
   // null on these three (only these three) falls back to the skill's own value — execution knobs, not analysis behavior
-  model: string | null;
+  // null on these (only these) falls back to the skill's own value — execution knobs, not analysis behavior
   max_tokens: number | null;
   strip_html: boolean | null;
   is_active: boolean;

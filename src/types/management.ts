@@ -251,13 +251,15 @@ export interface TranscriptCall {
   basic_industry: string;
   fiscal_year: string;
   call_date: string;
-  quarter: string;
+  quarter: string | null;
   ppt_url: string;
+  source?: string;
 }
 
 export interface TranscriptCallsResponse {
   success: boolean;
   data: TranscriptCall[];
+  tier?: string | null;
 }
 
 // ─── Jobs ─────────────────────────────────────────────────────────────────────

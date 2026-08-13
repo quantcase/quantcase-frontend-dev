@@ -4,7 +4,7 @@ export interface CallData {
     id: string;
     company: string;
     fiscal_year: string;
-    quarter: string;
+    quarter: string | null;
     call_date: string;
     transcript_url: string | null;
     transcript_text: string | null;

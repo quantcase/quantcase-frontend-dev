@@ -5,6 +5,7 @@ import { TranscriptCall, TranscriptCallsResponse } from '@/types/management';
 
 export function useTranscriptCalls(symbol: string) {
   const [data, setData] = useState<TranscriptCall[]>([]);
+  const [tier, setTier] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,18 +19,21 @@ export function useTranscriptCalls(symbol: string) {
         setLoading(true);
         setError(null);
         setData([]);
+        setTier(null);
       },
       onSuccess: (response) => {
         setData(response.data);
+        setTier(response.tier ?? null);
         setLoading(false);
       },
       onError: (error) => {
         setError(error);
         setData([]);
+        setTier(null);
         setLoading(false);
       },
     });
   }, [symbol]);
 
-  return { data, loading, error };
+  return { data, tier, loading, error };
 }

@@ -39,7 +39,7 @@ function HtmlSkillsPage() {
   // Historic and Incremental each remember their own selected period independently
   const [historicCallId, setHistoricCallId] = useState<string | null>(() => searchParams.get("callId"));
   const [incrementalCallId, setIncrementalCallId] = useState<string | null>(null);
-  const { data: calls } = useTranscriptCalls(ticker ?? "");
+  const { data: calls, tier } = useTranscriptCalls(ticker ?? "");
   // Default true — mirrors the original (pre-incremental) behavior; flip off to opt into incremental base-context mode
   const [historic, setHistoric] = useState(true);
   const callId = historic ? historicCallId : incrementalCallId;
@@ -125,6 +125,14 @@ function HtmlSkillsPage() {
   useEffect(() => {
     if (previewControls?.hasBase === false) setHistoric(true);
   }, [previewControls?.hasBase]);
+
+  // ── Default to "t3" config for Tier 3 companies ─
+
+  useEffect(() => {
+    if (tier === "Tier 3" && configs.some(c => c.key === "t3")) {
+      setConfigKey("t3");
+    }
+  }, [tier, configs]);
 
   // ── Load stocks for ticker search ──────────────────────────────────────────
 
@@ -383,9 +391,18 @@ function HtmlSkillsPage() {
                     favorites={[...FAVORITE_TICKERS]}
                   />
 
+                  {ticker && tier && (
+                    <span 
+                      className="shrink-0 whitespace-nowrap rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide bg-blue-soft text-blue"
+                      title={tier === "Tier 3" ? "Only annual reports are available for this company." : undefined}
+                    >
+                      {tier}
+                    </span>
+                  )}
+
                   {/* Historic / Incremental — prominent, defaults to Historic (original behavior).
                       Incremental needs a base to build on, so it's unavailable until a first output exists. */}
-                  {ticker && (
+                  {ticker && tier !== "Tier 0" && tier !== "Tier 0.5" && (
                     <TabToggle
                       variant="outline"
                       options={previewControls?.hasBase === false ? ["Historic"] : ["Historic", "Incremental"]}
@@ -394,12 +411,14 @@ function HtmlSkillsPage() {
                       className="shrink-0"
                     />
                   )}
-                  {ticker && previewControls?.hasBase === false && (
+                  {ticker && previewControls?.hasBase === false && tier !== "Tier 0" && tier !== "Tier 0.5" && (
                     <span className="text-[11px] text-warn shrink-0">No base yet — run Historic first</span>
                   )}
 
                   {/* Pick the fiscal year/quarter that resolves to callId — Historic and Incremental each keep their own selection */}
-                  {ticker && (
+                  {ticker && (tier === "Tier 0" || tier === "Tier 0.5") ? (
+                    <span className="text-[12px] font-medium text-down shrink-0">This company is not eligible for HTML Skill execution.</span>
+                  ) : ticker && (
                     <div className="relative shrink-0">
                       <select
                         value={callId ?? ""}
@@ -413,7 +432,9 @@ function HtmlSkillsPage() {
                       >
                         {calls.length === 0 && <option value="">No calls</option>}
                         {calls.map((c) => (
-                          <option key={c.id} value={c.id}>{c.quarter} {c.fiscal_year}</option>
+                          <option key={c.id} value={c.id}>
+                            {c.quarter ? `${c.quarter} ${c.fiscal_year}` : `${c.fiscal_year} Annual Report`}
+                          </option>
                         ))}
                       </select>
                       <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-3 text-ink-3" />
@@ -425,7 +446,7 @@ function HtmlSkillsPage() {
                   {/* Export full prompt */}
                   <button
                     onClick={handleExportPrompt}
-                    disabled={exportingPrompt || !callId}
+                    disabled={exportingPrompt || !callId || tier === "Tier 0" || tier === "Tier 0.5"}
                     title="Export full prompt as .md"
                     className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-ink-3 hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
                   >
@@ -435,7 +456,7 @@ function HtmlSkillsPage() {
                   {/* Run */}
                   <button
                     onClick={() => previewControls?.run(true)}
-                    disabled={previewControls?.running || !callId}
+                    disabled={previewControls?.running || !callId || tier === "Tier 0" || tier === "Tier 0.5"}
                     className="flex items-center gap-1.5 rounded-md bg-ink px-3 py-1.5 text-[12px] font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
                   >
                     {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}

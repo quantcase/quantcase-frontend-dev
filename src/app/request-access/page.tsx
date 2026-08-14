@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { SignInHeroPanel } from "@/components/signin/SignInHeroPanel";
+import { BACKEND_URL } from "@/lib/constants";
 
 function FormField({
   id,
@@ -68,7 +69,7 @@ function RequestAccessForm() {
     setLoading(true);
     
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+      const backendUrl = BACKEND_URL;
       const res = await fetch(`${backendUrl}/api/request-access`, {
         method: "POST",
         headers: {

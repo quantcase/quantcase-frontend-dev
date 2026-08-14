@@ -68,7 +68,8 @@ function RequestAccessForm() {
     setLoading(true);
     
     try {
-      const res = await fetch("/api/request-access", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+      const res = await fetch(`${backendUrl}/api/request-access`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -84,11 +85,6 @@ function RequestAccessForm() {
 
       if (res.ok) {
         setSuccess(true);
-        setName("");
-        setProfession("");
-        setEmail("");
-        setMobile("");
-        setIncome("");
       } else {
         alert("Failed to submit request. Please try again.");
       }
@@ -100,35 +96,21 @@ function RequestAccessForm() {
     }
   }
 
+  if (success) {
+    return (
+      <div className="w-full max-w-[360px] text-center">
+        <h1 style={{ fontSize: 28, fontWeight: 500, color: "#0F172B", marginBottom: 12, letterSpacing: "-0.02em" }}>
+          Request Received
+        </h1>
+        <p style={{ fontSize: 15, color: "#3A4B61", lineHeight: 1.6 }}>
+          Thank you for your interest! We have received your request and will be in touch shortly.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <>
-      {success && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0, 0, 0, 0.4)" }}>
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-xl">
-            <h2 style={{ fontSize: 24, fontWeight: 600, color: "#0F172B", marginBottom: 12, letterSpacing: "-0.01em" }}>
-              Request Received
-            </h2>
-            <p style={{ fontSize: 15, color: "#3A4B61", lineHeight: 1.5, marginBottom: 24 }}>
-              Thank you for your interest! We have received your request and will be in touch shortly.
-            </p>
-            <button
-              onClick={() => setSuccess(false)}
-              className="w-full rounded-lg transition-all"
-              style={{
-                background: "#0F172B",
-                color: "#fff",
-                fontSize: 14,
-                fontWeight: 500,
-                padding: "10px 0",
-                boxShadow: "0 2px 8px rgba(15,23,43,0.15)",
-              }}
-            >
-              Okay
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="w-full max-w-[360px]">
+    <div className="w-full max-w-[360px]">
       {/* Mobile-only logo */}
       <div className="mb-10 lg:hidden">
         <Image
@@ -237,7 +219,6 @@ function RequestAccessForm() {
         </button>
       </form>
     </div>
-    </>
   );
 }
 

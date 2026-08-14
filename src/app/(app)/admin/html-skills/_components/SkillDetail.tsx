@@ -58,6 +58,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [name, setName] = useState(isConfig ? config.name : skill.name);
   const [dataExtractionPrompt, setDataExtractionPrompt] = useState(isConfig ? config.data_extraction_prompt : (skill.data_extraction_prompt ?? ""));
   const [htmlTemplatePrompt, setHtmlTemplatePrompt] = useState(isConfig ? config.html_template_prompt : (skill.html_template_prompt ?? ""));
+  const [htmlTemplateFilename, setHtmlTemplateFilename] = useState(isConfig ? (config.html_template_filename ?? "") : (skill.html_template_filename ?? ""));
   const [useTemplateEngine, setUseTemplateEngine] = useState<boolean>(isConfig ? (config.use_template_engine ?? true) : (skill.use_template_engine ?? true));
   const [enableDataValidation, setEnableDataValidation] = useState<boolean>(isConfig ? (config.enable_data_validation ?? true) : (skill.enable_data_validation ?? true));
   const [dataValidationLoops, setDataValidationLoops] = useState(isConfig ? config.data_validation_loops : (skill.data_validation_loops ?? 1));
@@ -173,6 +174,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
     const pipelineFields = {
       data_extraction_prompt: dataExtractionPrompt,
       html_template_prompt: htmlTemplatePrompt,
+      html_template_filename: htmlTemplateFilename || null,
       use_template_engine: useTemplateEngine,
       enable_data_validation: enableDataValidation,
       data_validation_loops: enableDataValidation ? dataValidationLoops : 0,
@@ -700,15 +702,32 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                 </div>
               )}
               <div className="flex-1 flex flex-col">
-                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
-                  HTML Template Prompt
-                </label>
-                <textarea
-                  value={htmlTemplatePrompt}
-                  onChange={(e) => { setHtmlTemplatePrompt(e.target.value); mark(); }}
-                  className="w-full flex-1 rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
-                  placeholder="Enter the HTML template prompt..."
-                />
+                {useTemplateEngine ? (
+                  <>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                      HTML Template Filename
+                    </label>
+                    <input
+                      type="text"
+                      value={htmlTemplateFilename}
+                      onChange={(e) => { setHtmlTemplateFilename(e.target.value); mark(); }}
+                      className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                      placeholder="e.g. guidance-credibility-dashboard.hbs"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                      HTML Template Prompt
+                    </label>
+                    <textarea
+                      value={htmlTemplatePrompt}
+                      onChange={(e) => { setHtmlTemplatePrompt(e.target.value); mark(); }}
+                      className="w-full flex-1 rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
+                      placeholder="Enter the HTML template prompt..."
+                    />
+                  </>
+                )}
               </div>
             </div>
           )}

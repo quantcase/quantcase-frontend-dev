@@ -39,6 +39,7 @@ interface Props {
   config: HtmlSkillConfig | null;
   ticker: TestTicker;
   historic: boolean;
+  skillMode?: "Detailed" | "Compressed";
   saving: boolean;
   saveError: string | null;
   onSave: (updates: Record<string, unknown>) => void;
@@ -51,9 +52,10 @@ export interface SkillDetailHandle {
 }
 
 export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDetail(
-  { skill, config, ticker, historic, saving, saveError, onSave, onDirtyChange, hideHeader },
+  { skill, config, ticker, historic, skillMode, saving, saveError, onSave, onDirtyChange, hideHeader },
   ref
 ) {
+  const isCompressed = skillMode === "Compressed";
   const isConfig = config !== null;
   const [name, setName] = useState(isConfig ? config.name : skill.name);
   const [dataExtractionPrompt, setDataExtractionPrompt] = useState(isConfig ? config.data_extraction_prompt : (skill.data_extraction_prompt ?? ""));
@@ -69,12 +71,12 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [visualQaModel, setVisualQaModel] = useState<string | null>(isConfig ? config.visual_qa_model : skill.visual_qa_model);
   
   const [category, setCategory] = useState<PluginCategory>(skill.category);
-  const [transcriptSignalTypes, setTranscriptSignalTypes] = useState<TranscriptSignalType[]>(isConfig ? config.transcript_signal_types : skill.transcript_signal_types);
-  const [pptSignalTypes, setPptSignalTypes] = useState<PptSignalType[]>(isConfig ? config.ppt_signal_types : skill.ppt_signal_types);
-  const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>(isConfig ? config.annual_report_signal_types : skill.annual_report_signal_types);
+  const [transcriptSignalTypes, setTranscriptSignalTypes] = useState<TranscriptSignalType[]>((isConfig ? config.transcript_signal_types : skill.transcript_signal_types) ?? []);
+  const [pptSignalTypes, setPptSignalTypes] = useState<PptSignalType[]>((isConfig ? config.ppt_signal_types : skill.ppt_signal_types) ?? []);
+  const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>((isConfig ? config.annual_report_signal_types : skill.annual_report_signal_types) ?? []);
   const [marketDataSignalTypes, setMarketDataSignalTypes] = useState<MarketDataSignalType[]>((isConfig ? config.market_data_signal_types : skill.market_data_signal_types) ?? []);
 
-  const [activeTab, setActiveTab] = useState<"extraction" | "template" | "fact_validation" | "visual_qa">("extraction");
+  const [activeTab, setActiveTab] = useState<"extraction" | "template" | "fact_validation" | "visual_qa" | "compression">(isCompressed ? "compression" : "extraction");
   const [maxTokens, setMaxTokens] = useState<number | null>(isConfig ? config.max_tokens : skill.max_tokens);
   const [maxTranscriptQtrs, setMaxTranscriptQtrs] = useState<number | null>(isConfig ? config.max_transcript_qtrs : skill.max_transcript_qtrs);
   const [maxPptQtrs, setMaxPptQtrs] = useState<number | null>(isConfig ? config.max_ppt_qtrs : skill.max_ppt_qtrs);
@@ -92,6 +94,12 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [pptCounts, setPptCounts] = useState<Record<string, number>>({});
   const [annualReportCounts, setAnnualReportCounts] = useState<Record<string, number>>({});
   const [countsBaseMissing, setCountsBaseMissing] = useState(false);
+
+  useEffect(() => {
+    if (isCompressed && (activeTab === "extraction" || activeTab === "fact_validation" || activeTab === "template" || activeTab === "visual_qa")) {
+      setActiveTab("compression");
+    }
+  }, [isCompressed, activeTab]);
 
   // No reset-on-skill/config-change effect needed — the parent remounts this component via
   // key={`${skill.slug}::${configKey}`}, so the useState initializers above already run fresh
@@ -185,7 +193,14 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
       visual_qa_model: visualQaModel,
     };
 
-    if (isConfig) {
+    if (isCompressed) {
+      // Compressed skills only care about the compression prompt, model, and template filename
+      onSave({
+        html_template_prompt: htmlTemplatePrompt,
+        html_template_model: htmlTemplateModel,
+        html_template_filename: htmlTemplateFilename || null,
+      });
+    } else if (isConfig) {
       onSave({
         name, ...windowFields, ...pipelineFields,
         max_tokens: maxTokens, strip_html: stripHtml,
@@ -265,124 +280,128 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
           </div>
         )}
 
-        <div className={isConfig ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-3"}>
-          {!isConfig && (
+        {!isCompressed && (
+          <div className={isConfig ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-3"}>
+            {!isConfig && (
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  Category
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => { setCategory(e.target.value as PluginCategory); mark(); }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {ALL_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
-                Category
+                Max Tokens
               </label>
-              <select
-                value={category}
-                onChange={(e) => { setCategory(e.target.value as PluginCategory); mark(); }}
+              <input
+                type="number"
+                value={maxTokens ?? ""}
+                placeholder={isConfig ? `Default (${skill.max_tokens})` : undefined}
+                onChange={(e) => {
+                  if (isConfig) setMaxTokens(e.target.value === "" ? null : Number(e.target.value));
+                  else setMaxTokens(Number(e.target.value));
+                  mark();
+                }}
                 className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-              >
-                {ALL_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
-                ))}
-              </select>
+              />
             </div>
-          )}
-          <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
-              Max Tokens
-            </label>
-            <input
-              type="number"
-              value={maxTokens ?? ""}
-              placeholder={isConfig ? `Default (${skill.max_tokens})` : undefined}
-              onChange={(e) => {
-                if (isConfig) setMaxTokens(e.target.value === "" ? null : Number(e.target.value));
-                else setMaxTokens(Number(e.target.value));
-                mark();
-              }}
-              className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-            />
           </div>
-        </div>
+        )}
 
         {/* Signal windows — bound to the historic_max_* fields when Historic is selected, the base max_* fields when Incremental is selected. Each mode saves to its own backend fields. */}
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">
-              Signal Windows
-            </span>
-            <span className={`rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${historic ? "bg-warn-soft text-warn" : "bg-secondary text-ink-2"}`}>
-              editing {historic ? "historic" : "incremental"} window
-            </span>
-            {!historic && countsBaseMissing && (
-              <span className="text-[11px] text-warn">No base yet — run Historic first</span>
-            )}
+        {!isCompressed && (
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">
+                Signal Windows
+              </span>
+              <span className={`rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${historic ? "bg-warn-soft text-warn" : "bg-secondary text-ink-2"}`}>
+                editing {historic ? "historic" : "incremental"} window
+              </span>
+              {!historic && countsBaseMissing && (
+                <span className="text-[11px] text-warn">No base yet — run Historic first</span>
+              )}
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              <div>
+                <label className="block text-[11px] text-ink-3 mb-1.5">Transcript Qtrs</label>
+                <select
+                  value={(historic ? historicMaxTranscriptQtrs : maxTranscriptQtrs) ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value === "" ? null : Number(e.target.value);
+                    if (historic) setHistoricMaxTranscriptQtrs(v); else setMaxTranscriptQtrs(v);
+                    mark();
+                  }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {QTR_OPTIONS.map((o) => (
+                    <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] text-ink-3 mb-1.5">PPT Qtrs</label>
+                <select
+                  value={(historic ? historicMaxPptQtrs : maxPptQtrs) ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value === "" ? null : Number(e.target.value);
+                    if (historic) setHistoricMaxPptQtrs(v); else setMaxPptQtrs(v);
+                    mark();
+                  }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {QTR_OPTIONS.map((o) => (
+                    <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] text-ink-3 mb-1.5">Annual Report Yrs</label>
+                <select
+                  value={(historic ? historicMaxAnnualReportYears : maxAnnualReportYears) ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value === "" ? null : Number(e.target.value);
+                    if (historic) setHistoricMaxAnnualReportYears(v); else setMaxAnnualReportYears(v);
+                    mark();
+                  }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {ANNUAL_OPTIONS.map((o) => (
+                    <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] text-ink-3 mb-1.5">Market Data Months</label>
+                <select
+                  value={(historic ? historicMaxMarketDataMonths : maxMarketDataMonths) ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value === "" ? null : Number(e.target.value);
+                    if (historic) setHistoricMaxMarketDataMonths(v); else setMaxMarketDataMonths(v);
+                    mark();
+                  }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {MARKET_DATA_MONTHS_OPTIONS.map((o) => (
+                    <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-4 gap-3">
-            <div>
-              <label className="block text-[11px] text-ink-3 mb-1.5">Transcript Qtrs</label>
-              <select
-                value={(historic ? historicMaxTranscriptQtrs : maxTranscriptQtrs) ?? ""}
-                onChange={(e) => {
-                  const v = e.target.value === "" ? null : Number(e.target.value);
-                  if (historic) setHistoricMaxTranscriptQtrs(v); else setMaxTranscriptQtrs(v);
-                  mark();
-                }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-              >
-                {QTR_OPTIONS.map((o) => (
-                  <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] text-ink-3 mb-1.5">PPT Qtrs</label>
-              <select
-                value={(historic ? historicMaxPptQtrs : maxPptQtrs) ?? ""}
-                onChange={(e) => {
-                  const v = e.target.value === "" ? null : Number(e.target.value);
-                  if (historic) setHistoricMaxPptQtrs(v); else setMaxPptQtrs(v);
-                  mark();
-                }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-              >
-                {QTR_OPTIONS.map((o) => (
-                  <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] text-ink-3 mb-1.5">Annual Report Yrs</label>
-              <select
-                value={(historic ? historicMaxAnnualReportYears : maxAnnualReportYears) ?? ""}
-                onChange={(e) => {
-                  const v = e.target.value === "" ? null : Number(e.target.value);
-                  if (historic) setHistoricMaxAnnualReportYears(v); else setMaxAnnualReportYears(v);
-                  mark();
-                }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-              >
-                {ANNUAL_OPTIONS.map((o) => (
-                  <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] text-ink-3 mb-1.5">Market Data Months</label>
-              <select
-                value={(historic ? historicMaxMarketDataMonths : maxMarketDataMonths) ?? ""}
-                onChange={(e) => {
-                  const v = e.target.value === "" ? null : Number(e.target.value);
-                  if (historic) setHistoricMaxMarketDataMonths(v); else setMaxMarketDataMonths(v);
-                  mark();
-                }}
-                className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
-              >
-                {MARKET_DATA_MONTHS_OPTIONS.map((o) => (
-                  <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Incremental base-context options — only relevant when previewing/running in incremental mode */}
-        {!historic && (
+        {!historic && !isCompressed && (
           <div className={isConfig ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-3"}>
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
@@ -437,209 +456,224 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
         )}
 
         {/* Signal types — four source-specific sections */}
-        <div className="space-y-3">
-          {/* Transcript */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
-                Transcript Signal Types
-              </label>
-              <button
-                onClick={() => {
-                  const allSelected = ALL_TRANSCRIPT_SIGNAL_TYPES.every((t) => transcriptSignalTypes.includes(t));
-                  setTranscriptSignalTypes(allSelected ? [] : [...ALL_TRANSCRIPT_SIGNAL_TYPES]);
-                  mark();
-                }}
-                className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
-              >
-                {ALL_TRANSCRIPT_SIGNAL_TYPES.every((t) => transcriptSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
-              </button>
+        {!isCompressed && (
+          <div className="space-y-3">
+            {/* Transcript */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
+                  Transcript Signal Types
+                </label>
+                <button
+                  onClick={() => {
+                    const allSelected = ALL_TRANSCRIPT_SIGNAL_TYPES.every((t) => transcriptSignalTypes.includes(t));
+                    setTranscriptSignalTypes(allSelected ? [] : [...ALL_TRANSCRIPT_SIGNAL_TYPES]);
+                    mark();
+                  }}
+                  className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
+                >
+                  {ALL_TRANSCRIPT_SIGNAL_TYPES.every((t) => transcriptSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {ALL_TRANSCRIPT_SIGNAL_TYPES.map((type) => {
+                  const active = transcriptSignalTypes.includes(type);
+                  const count = transcriptCounts[type];
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => toggleTranscriptSignal(type)}
+                      className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
+                        active
+                          ? "bg-ink text-[var(--qc-on-dark)] border-ink"
+                          : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
+                      }`}
+                    >
+                      {TRANSCRIPT_SIGNAL_TYPE_LABELS[type]}
+                      {count !== undefined && (
+                        <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-[var(--qc-on-dark)]" : "bg-secondary text-ink-3"}`}>
+                          {count.toLocaleString()}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {ALL_TRANSCRIPT_SIGNAL_TYPES.map((type) => {
-                const active = transcriptSignalTypes.includes(type);
-                const count = transcriptCounts[type];
-                return (
-                  <button
-                    key={type}
-                    onClick={() => toggleTranscriptSignal(type)}
-                    className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
-                      active
-                        ? "bg-ink text-[var(--qc-on-dark)] border-ink"
-                        : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
-                    }`}
-                  >
-                    {TRANSCRIPT_SIGNAL_TYPE_LABELS[type]}
-                    {count !== undefined && (
-                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-[var(--qc-on-dark)]" : "bg-secondary text-ink-3"}`}>
-                        {count.toLocaleString()}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+
+            {/* PPT */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
+                  PPT Signal Types
+                </label>
+                <button
+                  onClick={() => {
+                    const allSelected = ALL_PPT_SIGNAL_TYPES.every((t) => pptSignalTypes.includes(t));
+                    setPptSignalTypes(allSelected ? [] : [...ALL_PPT_SIGNAL_TYPES]);
+                    mark();
+                  }}
+                  className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
+                >
+                  {ALL_PPT_SIGNAL_TYPES.every((t) => pptSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {ALL_PPT_SIGNAL_TYPES.map((type) => {
+                  const active = pptSignalTypes.includes(type);
+                  const count = pptCounts[type];
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => togglePptSignal(type)}
+                      className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
+                        active
+                          ? "bg-ink text-[var(--qc-on-dark)] border-ink"
+                          : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
+                      }`}
+                    >
+                      {PPT_SIGNAL_TYPE_LABELS[type]}
+                      {count !== undefined && (
+                        <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-[var(--qc-on-dark)]" : "bg-secondary text-ink-3"}`}>
+                          {count.toLocaleString()}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Annual Report */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
+                  Annual Report Signal Types
+                </label>
+                <button
+                  onClick={() => {
+                    const allSelected = ALL_ANNUAL_REPORT_SIGNAL_TYPES.every((t) => annualReportSignalTypes.includes(t));
+                    setAnnualReportSignalTypes(allSelected ? [] : [...ALL_ANNUAL_REPORT_SIGNAL_TYPES]);
+                    mark();
+                  }}
+                  className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
+                >
+                  {ALL_ANNUAL_REPORT_SIGNAL_TYPES.every((t) => annualReportSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {ALL_ANNUAL_REPORT_SIGNAL_TYPES.map((type) => {
+                  const active = annualReportSignalTypes.includes(type);
+                  const count = annualReportCounts[type];
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => toggleAnnualReportSignal(type)}
+                      className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
+                        active
+                          ? "bg-ink text-[var(--qc-on-dark)] border-ink"
+                          : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
+                      }`}
+                    >
+                      {ANNUAL_REPORT_SIGNAL_TYPE_LABELS[type]}
+                      {count !== undefined && (
+                        <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-[var(--qc-on-dark)]" : "bg-secondary text-ink-3"}`}>
+                          {count.toLocaleString()}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Market Data */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
+                  Market Data Signal Types
+                </label>
+                <button
+                  onClick={() => {
+                    const allSelected = ALL_MARKET_DATA_SIGNAL_TYPES.every((t) => marketDataSignalTypes.includes(t));
+                    setMarketDataSignalTypes(allSelected ? [] : [...ALL_MARKET_DATA_SIGNAL_TYPES]);
+                    mark();
+                  }}
+                  className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
+                >
+                  {ALL_MARKET_DATA_SIGNAL_TYPES.every((t) => marketDataSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {ALL_MARKET_DATA_SIGNAL_TYPES.map((type) => {
+                  const active = marketDataSignalTypes.includes(type);
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => toggleMarketDataSignal(type)}
+                      className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
+                        active
+                          ? "bg-ink text-[var(--qc-on-dark)] border-ink"
+                          : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
+                      }`}
+                    >
+                      {MARKET_DATA_SIGNAL_TYPE_LABELS[type]}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
+        )}
 
-          {/* PPT */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
-                PPT Signal Types
-              </label>
-              <button
-                onClick={() => {
-                  const allSelected = ALL_PPT_SIGNAL_TYPES.every((t) => pptSignalTypes.includes(t));
-                  setPptSignalTypes(allSelected ? [] : [...ALL_PPT_SIGNAL_TYPES]);
-                  mark();
-                }}
-                className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
-              >
-                {ALL_PPT_SIGNAL_TYPES.every((t) => pptSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {ALL_PPT_SIGNAL_TYPES.map((type) => {
-                const active = pptSignalTypes.includes(type);
-                const count = pptCounts[type];
-                return (
-                  <button
-                    key={type}
-                    onClick={() => togglePptSignal(type)}
-                    className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
-                      active
-                        ? "bg-ink text-[var(--qc-on-dark)] border-ink"
-                        : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
-                    }`}
-                  >
-                    {PPT_SIGNAL_TYPE_LABELS[type]}
-                    {count !== undefined && (
-                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-[var(--qc-on-dark)]" : "bg-secondary text-ink-3"}`}>
-                        {count.toLocaleString()}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Annual Report */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
-                Annual Report Signal Types
-              </label>
-              <button
-                onClick={() => {
-                  const allSelected = ALL_ANNUAL_REPORT_SIGNAL_TYPES.every((t) => annualReportSignalTypes.includes(t));
-                  setAnnualReportSignalTypes(allSelected ? [] : [...ALL_ANNUAL_REPORT_SIGNAL_TYPES]);
-                  mark();
-                }}
-                className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
-              >
-                {ALL_ANNUAL_REPORT_SIGNAL_TYPES.every((t) => annualReportSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {ALL_ANNUAL_REPORT_SIGNAL_TYPES.map((type) => {
-                const active = annualReportSignalTypes.includes(type);
-                const count = annualReportCounts[type];
-                return (
-                  <button
-                    key={type}
-                    onClick={() => toggleAnnualReportSignal(type)}
-                    className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
-                      active
-                        ? "bg-ink text-[var(--qc-on-dark)] border-ink"
-                        : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
-                    }`}
-                  >
-                    {ANNUAL_REPORT_SIGNAL_TYPE_LABELS[type]}
-                    {count !== undefined && (
-                      <span className={`rounded-sm px-1 py-px text-[9px] font-semibold leading-none tabular-nums ${active ? "bg-white/20 text-[var(--qc-on-dark)]" : "bg-secondary text-ink-3"}`}>
-                        {count.toLocaleString()}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Market Data */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
-                Market Data Signal Types
-              </label>
-              <button
-                onClick={() => {
-                  const allSelected = ALL_MARKET_DATA_SIGNAL_TYPES.every((t) => marketDataSignalTypes.includes(t));
-                  setMarketDataSignalTypes(allSelected ? [] : [...ALL_MARKET_DATA_SIGNAL_TYPES]);
-                  mark();
-                }}
-                className="text-[10px] font-medium text-ink-3 hover:text-ink transition-colors"
-              >
-                {ALL_MARKET_DATA_SIGNAL_TYPES.every((t) => marketDataSignalTypes.includes(t)) ? "Deselect all" : "Select all"}
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {ALL_MARKET_DATA_SIGNAL_TYPES.map((type) => {
-                const active = marketDataSignalTypes.includes(type);
-                return (
-                  <button
-                    key={type}
-                    onClick={() => toggleMarketDataSignal(type)}
-                    className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-medium border transition-colors ${
-                      active
-                        ? "bg-ink text-[var(--qc-on-dark)] border-ink"
-                        : "bg-secondary text-ink-3 border-hair hover:border-ink hover:text-ink"
-                    }`}
-                  >
-                    {MARKET_DATA_SIGNAL_TYPE_LABELS[type]}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Tabbed Pipeline Configuration */}
+          {/* Tabbed Pipeline Configuration */}
         <div className="flex-1 flex flex-col min-h-[400px]">
           <div className="flex border-b border-[var(--qc-border-default)] mb-4">
-            <button
-              onClick={() => setActiveTab("extraction")}
-              className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
-                activeTab === "extraction" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
-              }`}
-            >
-              Data Extraction
-            </button>
-            <button
-              onClick={() => setActiveTab("template")}
-              className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
-                activeTab === "template" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
-              }`}
-            >
-              HTML Template
-            </button>
-            <button
-              onClick={() => setActiveTab("fact_validation")}
-              className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
-                activeTab === "fact_validation" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
-              }`}
-            >
-              Fact Validation
-            </button>
-            <button
-              onClick={() => setActiveTab("visual_qa")}
-              className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
-                activeTab === "visual_qa" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
-              }`}
-            >
-              Visual QA
-            </button>
+            {isCompressed ? (
+              <button
+                onClick={() => setActiveTab("compression")}
+                className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                  activeTab === "compression" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                }`}
+              >
+                Compression
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => setActiveTab("extraction")}
+                  className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                    activeTab === "extraction" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                  }`}
+                >
+                  Data Extraction
+                </button>
+                <button
+                  onClick={() => setActiveTab("template")}
+                  className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                    activeTab === "template" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                  }`}
+                >
+                  HTML Template
+                </button>
+                <button
+                  onClick={() => setActiveTab("fact_validation")}
+                  className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                    activeTab === "fact_validation" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                  }`}
+                >
+                  Fact Validation
+                </button>
+                <button
+                  onClick={() => setActiveTab("visual_qa")}
+                  className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                    activeTab === "visual_qa" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                  }`}
+                >
+                  Visual QA
+                </button>
+              </>
+            )}
           </div>
 
           {activeTab === "extraction" && (
@@ -819,6 +853,70 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                     </select>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+          {activeTab === "compression" && (
+            <div className="flex-1 flex flex-col space-y-4">
+              <div className="text-[13px] text-ink-3 bg-secondary border border-[var(--qc-border-default)] rounded-md p-3">
+                This prompt compresses the base L2 JSON into a condensed structure before rendering via the Handlebars template.
+              </div>
+
+              {/* Compression model */}
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  Compression Model
+                </label>
+                <select
+                  value={htmlTemplateModel ?? ""}
+                  onChange={(e) => { setHtmlTemplateModel(e.target.value || null); mark(); }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {MODEL_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Handlebars template filename */}
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  HTML Template Filename
+                </label>
+                <input
+                  type="text"
+                  value={htmlTemplateFilename}
+                  onChange={(e) => { setHtmlTemplateFilename(e.target.value); mark(); }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                  placeholder="e.g. guidance-credibility-compressed.hbs"
+                />
+              </div>
+
+              {/* Compression prompt */}
+              <div className="flex-1 flex flex-col">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  Compression Prompt
+                </label>
+                <textarea
+                  value={htmlTemplatePrompt}
+                  onChange={(e) => { setHtmlTemplatePrompt(e.target.value); mark(); }}
+                  className="w-full flex-1 min-h-[240px] rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
+                  placeholder="Enter the compression prompt that transforms base L2 JSON into condensed JSON..."
+                />
+              </div>
+
+              {/* Save button */}
+              <div className="flex items-center justify-between pt-1">
+                {saveError && <span className="text-[11px] text-down">{saveError}</span>}
+                <div className="flex-1" />
+                <button
+                  onClick={handleSave}
+                  disabled={saving || !dirty}
+                  className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-[12px] font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40"
+                >
+                  {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
+                  Save
+                </button>
               </div>
             </div>
           )}

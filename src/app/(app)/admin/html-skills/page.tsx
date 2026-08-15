@@ -42,6 +42,8 @@ function HtmlSkillsPage() {
   const { data: calls, tier } = useTranscriptCalls(ticker ?? "");
   // Default true — mirrors the original (pre-incremental) behavior; flip off to opt into incremental base-context mode
   const [historic, setHistoric] = useState(true);
+  const [skillMode, setSkillMode] = useState<"Detailed" | "Compressed">("Detailed");
+  const [isNewCompressedSkill, setIsNewCompressedSkill] = useState(false);
   const callId = historic ? historicCallId : incrementalCallId;
 
   const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
@@ -152,14 +154,49 @@ function HtmlSkillsPage() {
   useEffect(() => {
     setSkillDirty(false);
     if (!selectedSlug) { setSelectedSkill(null); return; }
-    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}`)
+    
+    const currentApiBase = skillMode === "Compressed" ? "/api/html-compressed-skills" : API_BASE;
+    const currentSlug = skillMode === "Compressed" ? `${selectedSlug}-compressed` : selectedSlug;
+    
+    authFetch(`${BACKEND_URL}${currentApiBase}/${currentSlug}`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
         setSelectedSkill(json);
+        if (skillMode === "Compressed") setIsNewCompressedSkill(false);
       })
-      .catch((err) => setError(err.message));
-  }, [selectedSlug]);
+      .catch((err) => {
+        if (skillMode === "Compressed") {
+          // If the compressed skill doesn't exist yet, we initialize a dummy one
+          const baseSkill = skills.find((s) => s.slug === selectedSlug);
+          if (baseSkill) {
+            setSelectedSkill({
+              id: "new",
+              slug: `${selectedSlug}-compressed`,
+              name: `${baseSkill.name} (Compressed)`,
+              category: baseSkill.category,
+              base_l2_skill_id: baseSkill.id,
+              html_template_prompt: "",
+              html_template_filename: `${selectedSlug}-compressed.hbs`,
+              is_active: true,
+              max_tokens: baseSkill.max_tokens,
+              use_template_engine: true,
+              transcript_signal_types: baseSkill.transcript_signal_types ?? [],
+              ppt_signal_types: baseSkill.ppt_signal_types ?? [],
+              annual_report_signal_types: baseSkill.annual_report_signal_types ?? [],
+              market_data_signal_types: baseSkill.market_data_signal_types ?? [],
+            } as any);
+            setIsNewCompressedSkill(true);
+            setError(null); // Clear error so UI renders the creation form
+          } else {
+            setSelectedSkill(null);
+            setError("Base skill not found.");
+          }
+        } else {
+          setError(err.message);
+        }
+      });
+  }, [selectedSlug, skillMode, skills]);
 
   // ── Save skill ─────────────────────────────────────────────────────────────
 
@@ -167,16 +204,31 @@ function HtmlSkillsPage() {
     if (!selectedSlug) return;
     setSaving(true);
     setSaveError(null);
-    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}`, {
-      method: "PUT",
+    const currentApiBase = skillMode === "Compressed" ? "/api/html-compressed-skills" : API_BASE;
+    const currentSlug = skillMode === "Compressed" ? `${selectedSlug}-compressed` : selectedSlug;
+    
+    const isCreating = skillMode === "Compressed" && isNewCompressedSkill;
+    const method = isCreating ? "POST" : "PUT";
+    const saveUrl = isCreating ? `${BACKEND_URL}${currentApiBase}` : `${BACKEND_URL}${currentApiBase}/${currentSlug}`;
+
+    // For POST, we must include required fields from selectedSkill (like base_l2_skill_id) that might not be in 'updates'
+    const payload = isCreating ? { ...selectedSkill, ...updates } : updates;
+
+    authFetch(saveUrl, {
+      method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
+      body: JSON.stringify(payload),
     })
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
         setSelectedSkill(json);
-        setSkills((prev) => prev.map((s) => (s.slug === selectedSlug ? { ...s, ...json } : s)));
+        if (skillMode === "Compressed") setIsNewCompressedSkill(false);
+        
+        // Only update the main skill list if we are saving the base skill
+        if (skillMode !== "Compressed") {
+          setSkills((prev) => prev.map((s) => (s.slug === selectedSlug ? { ...s, ...json } : s)));
+        }
       })
       .catch((err) => setSaveError(err.message))
       .finally(() => setSaving(false));
@@ -421,7 +473,16 @@ function HtmlSkillsPage() {
                       className="shrink-0"
                     />
                   )}
-                  {ticker && previewControls?.hasBase === false && tier !== "Tier 0" && tier !== "Tier 0.5" && (
+                  {ticker && tier !== "Tier 0" && tier !== "Tier 0.5" && (
+                    <TabToggle
+                      variant="outline"
+                      options={["Detailed", "Compressed"]}
+                      value={skillMode}
+                      onChange={(v) => setSkillMode(v as "Detailed" | "Compressed")}
+                      className="shrink-0"
+                    />
+                  )}
+                  {ticker && skillMode === "Detailed" && previewControls?.hasBase === false && tier !== "Tier 0" && tier !== "Tier 0.5" && (
                     <span className="text-[11px] text-warn shrink-0">No base yet — run Historic first</span>
                   )}
 
@@ -580,6 +641,7 @@ function HtmlSkillsPage() {
                 config={selectedConfig}
                 ticker={ticker ?? ""}
                 historic={historic}
+                skillMode={skillMode}
                 saving={saving}
                 saveError={saveError}
                 hideHeader
@@ -601,14 +663,15 @@ function HtmlSkillsPage() {
           <div className="flex-1 overflow-hidden">
             {selectedSkill && ticker ? (
               <PreviewPane
-                key={selectedSkill.slug}
-                slug={selectedSkill.slug}
+                key={`${selectedSkill.slug}::${skillMode}`}
+                slug={selectedSlug!}
                 ticker={ticker}
                 callId={callId}
                 fiscalYear={selectedCall?.fiscal_year ?? null}
                 quarter={selectedCall?.quarter ?? null}
                 historic={historic}
                 configKey={configKey}
+                skillMode={skillMode}
                 onControls={setPreviewControls}
               />
             ) : (

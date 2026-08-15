@@ -181,6 +181,10 @@ function HtmlSkillsPage() {
               is_active: true,
               max_tokens: baseSkill.max_tokens,
               use_template_engine: true,
+              transcript_signal_types: baseSkill.transcript_signal_types ?? [],
+              ppt_signal_types: baseSkill.ppt_signal_types ?? [],
+              annual_report_signal_types: baseSkill.annual_report_signal_types ?? [],
+              market_data_signal_types: baseSkill.market_data_signal_types ?? [],
             } as any);
             setIsNewCompressedSkill(true);
             setError(null); // Clear error so UI renders the creation form

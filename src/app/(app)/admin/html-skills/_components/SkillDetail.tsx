@@ -71,9 +71,9 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [visualQaModel, setVisualQaModel] = useState<string | null>(isConfig ? config.visual_qa_model : skill.visual_qa_model);
   
   const [category, setCategory] = useState<PluginCategory>(skill.category);
-  const [transcriptSignalTypes, setTranscriptSignalTypes] = useState<TranscriptSignalType[]>(isConfig ? config.transcript_signal_types : skill.transcript_signal_types);
-  const [pptSignalTypes, setPptSignalTypes] = useState<PptSignalType[]>(isConfig ? config.ppt_signal_types : skill.ppt_signal_types);
-  const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>(isConfig ? config.annual_report_signal_types : skill.annual_report_signal_types);
+  const [transcriptSignalTypes, setTranscriptSignalTypes] = useState<TranscriptSignalType[]>((isConfig ? config.transcript_signal_types : skill.transcript_signal_types) ?? []);
+  const [pptSignalTypes, setPptSignalTypes] = useState<PptSignalType[]>((isConfig ? config.ppt_signal_types : skill.ppt_signal_types) ?? []);
+  const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>((isConfig ? config.annual_report_signal_types : skill.annual_report_signal_types) ?? []);
   const [marketDataSignalTypes, setMarketDataSignalTypes] = useState<MarketDataSignalType[]>((isConfig ? config.market_data_signal_types : skill.market_data_signal_types) ?? []);
 
   const [activeTab, setActiveTab] = useState<"extraction" | "template" | "fact_validation" | "visual_qa">(isCompressed ? "template" : "extraction");

@@ -43,20 +43,24 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
   // Incremental runs need a base to build on; without one they'd just produce a confusing, context-free output.
   useEffect(() => {
     setHasBase(null);
-    const urlPath = skillMode === "Compressed" ? `/api/html-compressed-skills/${slug}-compressed` : `${API_BASE}/${slug}`;
+    // slug is always the BASE slug (e.g. "guidance-credibility").
+    // Compressed outputs live under /api/html-compressed-skills/<slug>-compressed
+    const urlPath = skillMode === "Compressed"
+      ? `/api/html-compressed-skills/${slug}-compressed`
+      : `${API_BASE}/${slug}`;
     authFetch(`${BACKEND_URL}${urlPath}/outputs/${ticker}`)
       .then((res) => setHasBase(res.status !== 404))
-      .catch(() => {});
+      .catch(() => setHasBase(null));
   }, [slug, ticker, skillMode]);
 
-  // For Compressed mode, check if detailed output exists to prevent errors.
+  // For Compressed mode, check if the base detailed L2 output exists (required to run compression).
   useEffect(() => {
+    setHasDetailedOutput(null);
     if (skillMode === "Compressed") {
+      // Base detailed output lives under /api/html-skills/<slug>/outputs/<ticker>
       authFetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}`)
         .then((res) => setHasDetailedOutput(res.status !== 404))
-        .catch(() => {});
-    } else {
-      setHasDetailedOutput(null);
+        .catch(() => setHasDetailedOutput(null));
     }
   }, [slug, ticker, skillMode]);
 
@@ -107,7 +111,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
       setError("Detailed view must be generated first before running the compressed flow.");
       return;
     }
-    if (!historic && hasBase === false) {
+    if (skillMode !== "Compressed" && !historic && hasBase === false) {
       setError("No base output exists for this ticker yet — run Historic first");
       return;
     }

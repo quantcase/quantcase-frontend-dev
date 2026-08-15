@@ -482,7 +482,7 @@ function HtmlSkillsPage() {
                       className="shrink-0"
                     />
                   )}
-                  {ticker && previewControls?.hasBase === false && tier !== "Tier 0" && tier !== "Tier 0.5" && (
+                  {ticker && skillMode === "Detailed" && previewControls?.hasBase === false && tier !== "Tier 0" && tier !== "Tier 0.5" && (
                     <span className="text-[11px] text-warn shrink-0">No base yet — run Historic first</span>
                   )}
 
@@ -663,8 +663,8 @@ function HtmlSkillsPage() {
           <div className="flex-1 overflow-hidden">
             {selectedSkill && ticker ? (
               <PreviewPane
-                key={selectedSkill.slug}
-                slug={selectedSkill.slug}
+                key={`${selectedSkill.slug}::${skillMode}`}
+                slug={selectedSlug!}
                 ticker={ticker}
                 callId={callId}
                 fiscalYear={selectedCall?.fiscal_year ?? null}

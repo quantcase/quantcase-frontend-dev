@@ -76,7 +76,7 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [annualReportSignalTypes, setAnnualReportSignalTypes] = useState<AnnualReportSignalType[]>((isConfig ? config.annual_report_signal_types : skill.annual_report_signal_types) ?? []);
   const [marketDataSignalTypes, setMarketDataSignalTypes] = useState<MarketDataSignalType[]>((isConfig ? config.market_data_signal_types : skill.market_data_signal_types) ?? []);
 
-  const [activeTab, setActiveTab] = useState<"extraction" | "template" | "fact_validation" | "visual_qa">(isCompressed ? "template" : "extraction");
+  const [activeTab, setActiveTab] = useState<"extraction" | "template" | "fact_validation" | "visual_qa" | "compression">(isCompressed ? "compression" : "extraction");
   const [maxTokens, setMaxTokens] = useState<number | null>(isConfig ? config.max_tokens : skill.max_tokens);
   const [maxTranscriptQtrs, setMaxTranscriptQtrs] = useState<number | null>(isConfig ? config.max_transcript_qtrs : skill.max_transcript_qtrs);
   const [maxPptQtrs, setMaxPptQtrs] = useState<number | null>(isConfig ? config.max_ppt_qtrs : skill.max_ppt_qtrs);
@@ -96,13 +96,10 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
   const [countsBaseMissing, setCountsBaseMissing] = useState(false);
 
   useEffect(() => {
-    if (isCompressed && (activeTab === "extraction" || activeTab === "fact_validation")) {
-      setActiveTab("template");
-    } else if (!isCompressed && activeTab === "template" && !skill.use_template_engine) {
-       // if we switch to detailed, and it uses LLM template, we might want to stay on template or extraction.
-       // It's safer to just let them switch back to extraction if they want.
+    if (isCompressed && (activeTab === "extraction" || activeTab === "fact_validation" || activeTab === "template" || activeTab === "visual_qa")) {
+      setActiveTab("compression");
     }
-  }, [isCompressed, activeTab, skill.use_template_engine]);
+  }, [isCompressed, activeTab]);
 
   // No reset-on-skill/config-change effect needed — the parent remounts this component via
   // key={`${skill.slug}::${configKey}`}, so the useState initializers above already run fresh
@@ -196,7 +193,14 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
       visual_qa_model: visualQaModel,
     };
 
-    if (isConfig) {
+    if (isCompressed) {
+      // Compressed skills only care about the compression prompt, model, and template filename
+      onSave({
+        html_template_prompt: htmlTemplatePrompt,
+        html_template_model: htmlTemplateModel,
+        html_template_filename: htmlTemplateFilename || null,
+      });
+    } else if (isConfig) {
       onSave({
         name, ...windowFields, ...pipelineFields,
         max_tokens: maxTokens, strip_html: stripHtml,
@@ -622,45 +626,54 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
           </div>
         )}
 
-        {/* Tabbed Pipeline Configuration */}
+          {/* Tabbed Pipeline Configuration */}
         <div className="flex-1 flex flex-col min-h-[400px]">
           <div className="flex border-b border-[var(--qc-border-default)] mb-4">
-            {!isCompressed && (
+            {isCompressed ? (
               <button
-                onClick={() => setActiveTab("extraction")}
+                onClick={() => setActiveTab("compression")}
                 className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
-                  activeTab === "extraction" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                  activeTab === "compression" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
                 }`}
               >
-                Data Extraction
+                Compression
               </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => setActiveTab("extraction")}
+                  className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                    activeTab === "extraction" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                  }`}
+                >
+                  Data Extraction
+                </button>
+                <button
+                  onClick={() => setActiveTab("template")}
+                  className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                    activeTab === "template" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                  }`}
+                >
+                  HTML Template
+                </button>
+                <button
+                  onClick={() => setActiveTab("fact_validation")}
+                  className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                    activeTab === "fact_validation" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                  }`}
+                >
+                  Fact Validation
+                </button>
+                <button
+                  onClick={() => setActiveTab("visual_qa")}
+                  className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
+                    activeTab === "visual_qa" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
+                  }`}
+                >
+                  Visual QA
+                </button>
+              </>
             )}
-            <button
-              onClick={() => setActiveTab("template")}
-              className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
-                activeTab === "template" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
-              }`}
-            >
-              HTML Template
-            </button>
-            {!isCompressed && (
-              <button
-                onClick={() => setActiveTab("fact_validation")}
-                className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
-                  activeTab === "fact_validation" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
-                }`}
-              >
-                Fact Validation
-              </button>
-            )}
-            <button
-              onClick={() => setActiveTab("visual_qa")}
-              className={`px-4 py-2 text-[12px] font-semibold tracking-wide border-b-2 transition-colors ${
-                activeTab === "visual_qa" ? "border-ink text-ink" : "border-transparent text-ink-3 hover:text-ink-2"
-              }`}
-            >
-              Visual QA
-            </button>
           </div>
 
           {activeTab === "extraction" && (
@@ -840,6 +853,70 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
                     </select>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+          {activeTab === "compression" && (
+            <div className="flex-1 flex flex-col space-y-4">
+              <div className="text-[13px] text-ink-3 bg-secondary border border-[var(--qc-border-default)] rounded-md p-3">
+                This prompt compresses the base L2 JSON into a condensed structure before rendering via the Handlebars template.
+              </div>
+
+              {/* Compression model */}
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  Compression Model
+                </label>
+                <select
+                  value={htmlTemplateModel ?? ""}
+                  onChange={(e) => { setHtmlTemplateModel(e.target.value || null); mark(); }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                >
+                  {MODEL_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Handlebars template filename */}
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  HTML Template Filename
+                </label>
+                <input
+                  type="text"
+                  value={htmlTemplateFilename}
+                  onChange={(e) => { setHtmlTemplateFilename(e.target.value); mark(); }}
+                  className="w-full rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2 text-[13px] text-[var(--qc-ink)] outline-none focus:border-hair-strong"
+                  placeholder="e.g. guidance-credibility-compressed.hbs"
+                />
+              </div>
+
+              {/* Compression prompt */}
+              <div className="flex-1 flex flex-col">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-1.5">
+                  Compression Prompt
+                </label>
+                <textarea
+                  value={htmlTemplatePrompt}
+                  onChange={(e) => { setHtmlTemplatePrompt(e.target.value); mark(); }}
+                  className="w-full flex-1 min-h-[240px] rounded-md border border-[var(--qc-border-default)] bg-card px-3 py-2.5 text-[12px] font-mono text-[var(--qc-ink)] leading-relaxed outline-none focus:border-hair-strong resize-none"
+                  placeholder="Enter the compression prompt that transforms base L2 JSON into condensed JSON..."
+                />
+              </div>
+
+              {/* Save button */}
+              <div className="flex items-center justify-between pt-1">
+                {saveError && <span className="text-[11px] text-down">{saveError}</span>}
+                <div className="flex-1" />
+                <button
+                  onClick={handleSave}
+                  disabled={saving || !dirty}
+                  className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-[12px] font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40"
+                >
+                  {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
+                  Save
+                </button>
               </div>
             </div>
           )}

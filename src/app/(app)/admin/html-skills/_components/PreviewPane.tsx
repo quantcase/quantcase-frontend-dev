@@ -5,6 +5,7 @@ import { Play, Loader2, AlertCircle } from "lucide-react";
 import { TestTicker, RunResponse, RunJobResponse, JobStatusResponse, API_BASE } from "./types";
 import { BACKEND_URL } from "@/lib/constants";
 import { authFetch } from "@/lib/api";
+import { TabToggle } from "@/components/molecules/tab-toggle";
 
 export interface PreviewControls {
   running: boolean;
@@ -29,6 +30,7 @@ function stripHtmlFences(raw: string): string {
 }
 
 export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, historic, configKey, onControls }: Props) {
+  const [skillMode, setSkillMode] = useState<"Detailed" | "Compressed">("Detailed");
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunResponse | null>(null);
@@ -40,10 +42,11 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
   // Incremental runs need a base to build on; without one they'd just produce a confusing, context-free output.
   useEffect(() => {
     setHasBase(null);
-    authFetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}`)
+    const urlPath = skillMode === "Compressed" ? `/api/html-compressed-skills/${slug}-compressed` : `${API_BASE}/${slug}`;
+    authFetch(`${BACKEND_URL}${urlPath}/outputs/${ticker}`)
       .then((res) => setHasBase(res.status !== 404))
       .catch(() => {});
-  }, [slug, ticker]);
+  }, [slug, ticker, skillMode]);
 
   // Exact-period fetch of the output to display — scoped to the selected call's fiscal_year/quarter,
   // not just "latest for this mode". 404 (no analysis for this exact period yet) means an empty preview.
@@ -51,7 +54,11 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
     setResult(null);
     setError(null);
     if (!fiscalYear || !quarter) return;
-    authFetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}/${fiscalYear}/${quarter}?historic=${historic}`)
+    const urlPath = skillMode === "Compressed" 
+      ? `/api/html-compressed-skills/${slug}-compressed/outputs/${ticker}?historic=${historic}`
+      : `${API_BASE}/${slug}/outputs/${ticker}/${fiscalYear}/${quarter}?historic=${historic}`;
+
+    authFetch(`${BACKEND_URL}${urlPath}`)
       .then(async (res) => {
         if (res.status === 404) return;
         const json = await res.json();
@@ -64,10 +71,14 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [slug, ticker, historic, fiscalYear, quarter]);
+  }, [slug, ticker, historic, fiscalYear, quarter, skillMode]);
 
   async function fetchOutput() {
-    const res = await authFetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}/${fiscalYear}/${quarter}?historic=${historic}`);
+    const urlPath = skillMode === "Compressed" 
+      ? `/api/html-compressed-skills/${slug}-compressed/outputs/${ticker}?historic=${historic}`
+      : `${API_BASE}/${slug}/outputs/${ticker}/${fiscalYear}/${quarter}?historic=${historic}`;
+
+    const res = await authFetch(`${BACKEND_URL}${urlPath}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
     const output = json as RunResponse["output"];
@@ -88,7 +99,11 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
     setRunning(true);
     setError(null);
 
-    authFetch(`${BACKEND_URL}${API_BASE}/${slug}/run`, {
+    const runUrlPath = skillMode === "Compressed"
+      ? `/api/html-compressed-skills/${slug}-compressed/run`
+      : `${API_BASE}/${slug}/run`;
+
+    authFetch(`${BACKEND_URL}${runUrlPath}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ticker, callId, force, historic, ...(configKey ? { configKey } : {}) }),
@@ -133,7 +148,7 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
   useEffect(() => {
     onControls({ running, result, hasBase, run: runSkill });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running, result, hasBase, callId, historic, fiscalYear, quarter, configKey]);
+  }, [running, result, hasBase, callId, historic, fiscalYear, quarter, configKey, skillMode]);
 
   const html = result?.output?.raw_html ?? null;
 
@@ -141,8 +156,17 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
     <div className="flex h-full flex-col overflow-hidden bg-[var(--qc-section)]">
       {/* Content */}
       <div className="flex-1 overflow-hidden relative">
+        <div className="absolute top-4 left-4 z-10 bg-[var(--qc-card)] shadow-sm rounded-md border border-[var(--qc-border-default)]">
+          <TabToggle
+            variant="outline"
+            options={["Detailed", "Compressed"]}
+            value={skillMode}
+            onChange={(v) => setSkillMode(v as "Detailed" | "Compressed")}
+          />
+        </div>
+
         {error && (
-          <div className="absolute inset-x-4 top-4 z-10 flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-[12px] text-down">
+          <div className="absolute inset-x-4 top-16 z-10 flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-[12px] text-down">
             <AlertCircle className="size-4 shrink-0" />
             {error}
           </div>

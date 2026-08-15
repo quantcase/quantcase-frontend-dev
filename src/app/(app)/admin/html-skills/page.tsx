@@ -42,6 +42,7 @@ function HtmlSkillsPage() {
   const { data: calls, tier } = useTranscriptCalls(ticker ?? "");
   // Default true — mirrors the original (pre-incremental) behavior; flip off to opt into incremental base-context mode
   const [historic, setHistoric] = useState(true);
+  const [skillMode, setSkillMode] = useState<"Detailed" | "Compressed">("Detailed");
   const callId = historic ? historicCallId : incrementalCallId;
 
   const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
@@ -152,14 +153,26 @@ function HtmlSkillsPage() {
   useEffect(() => {
     setSkillDirty(false);
     if (!selectedSlug) { setSelectedSkill(null); return; }
-    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}`)
+    
+    const currentApiBase = skillMode === "Compressed" ? "/api/html-compressed-skills" : API_BASE;
+    const currentSlug = skillMode === "Compressed" ? `${selectedSlug}-compressed` : selectedSlug;
+    
+    authFetch(`${BACKEND_URL}${currentApiBase}/${currentSlug}`)
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
         setSelectedSkill(json);
       })
-      .catch((err) => setError(err.message));
-  }, [selectedSlug]);
+      .catch((err) => {
+        if (skillMode === "Compressed") {
+          // If the compressed skill doesn't exist yet, we can either clear it or show an error
+          setSelectedSkill(null);
+          setError("Compressed skill not found for this base skill. It must be created first.");
+        } else {
+          setError(err.message);
+        }
+      });
+  }, [selectedSlug, skillMode]);
 
   // ── Save skill ─────────────────────────────────────────────────────────────
 
@@ -167,7 +180,10 @@ function HtmlSkillsPage() {
     if (!selectedSlug) return;
     setSaving(true);
     setSaveError(null);
-    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}`, {
+    const currentApiBase = skillMode === "Compressed" ? "/api/html-compressed-skills" : API_BASE;
+    const currentSlug = skillMode === "Compressed" ? `${selectedSlug}-compressed` : selectedSlug;
+
+    authFetch(`${BACKEND_URL}${currentApiBase}/${currentSlug}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),
@@ -176,7 +192,10 @@ function HtmlSkillsPage() {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
         setSelectedSkill(json);
-        setSkills((prev) => prev.map((s) => (s.slug === selectedSlug ? { ...s, ...json } : s)));
+        // Only update the main skill list if we are saving the base skill
+        if (skillMode !== "Compressed") {
+          setSkills((prev) => prev.map((s) => (s.slug === selectedSlug ? { ...s, ...json } : s)));
+        }
       })
       .catch((err) => setSaveError(err.message))
       .finally(() => setSaving(false));
@@ -421,6 +440,15 @@ function HtmlSkillsPage() {
                       className="shrink-0"
                     />
                   )}
+                  {ticker && tier !== "Tier 0" && tier !== "Tier 0.5" && (
+                    <TabToggle
+                      variant="outline"
+                      options={["Detailed", "Compressed"]}
+                      value={skillMode}
+                      onChange={(v) => setSkillMode(v as "Detailed" | "Compressed")}
+                      className="shrink-0"
+                    />
+                  )}
                   {ticker && previewControls?.hasBase === false && tier !== "Tier 0" && tier !== "Tier 0.5" && (
                     <span className="text-[11px] text-warn shrink-0">No base yet — run Historic first</span>
                   )}
@@ -580,6 +608,7 @@ function HtmlSkillsPage() {
                 config={selectedConfig}
                 ticker={ticker ?? ""}
                 historic={historic}
+                skillMode={skillMode}
                 saving={saving}
                 saveError={saveError}
                 hideHeader
@@ -609,6 +638,7 @@ function HtmlSkillsPage() {
                 quarter={selectedCall?.quarter ?? null}
                 historic={historic}
                 configKey={configKey}
+                skillMode={skillMode}
                 onControls={setPreviewControls}
               />
             ) : (

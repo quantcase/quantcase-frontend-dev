@@ -22,6 +22,7 @@ interface Props {
   quarter: string | null;
   historic: boolean;
   configKey: string | null;
+  skillMode: "Detailed" | "Compressed";
   onControls: (controls: PreviewControls) => void;
 }
 
@@ -29,12 +30,12 @@ function stripHtmlFences(raw: string): string {
   return raw.replace(/^```html\s*/i, "").replace(/\s*```\s*$/, "").trim();
 }
 
-export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, historic, configKey, onControls }: Props) {
-  const [skillMode, setSkillMode] = useState<"Detailed" | "Compressed">("Detailed");
+export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, historic, configKey, skillMode, onControls }: Props) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunResponse | null>(null);
   const [hasBase, setHasBase] = useState<boolean | null>(null);
+  const [hasDetailedOutput, setHasDetailedOutput] = useState<boolean | null>(null);
   const [viewMode, setViewMode] = useState<"html" | "json" | "audit">("html");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -46,6 +47,17 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
     authFetch(`${BACKEND_URL}${urlPath}/outputs/${ticker}`)
       .then((res) => setHasBase(res.status !== 404))
       .catch(() => {});
+  }, [slug, ticker, skillMode]);
+
+  // For Compressed mode, check if detailed output exists to prevent errors.
+  useEffect(() => {
+    if (skillMode === "Compressed") {
+      authFetch(`${BACKEND_URL}${API_BASE}/${slug}/outputs/${ticker}`)
+        .then((res) => setHasDetailedOutput(res.status !== 404))
+        .catch(() => {});
+    } else {
+      setHasDetailedOutput(null);
+    }
   }, [slug, ticker, skillMode]);
 
   // Exact-period fetch of the output to display — scoped to the selected call's fiscal_year/quarter,
@@ -89,6 +101,10 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
   function runSkill(force = false) {
     if (!callId) {
       setError("Select a call/period first");
+      return;
+    }
+    if (skillMode === "Compressed" && hasDetailedOutput === false) {
+      setError("Detailed view must be generated first before running the compressed flow.");
       return;
     }
     if (!historic && hasBase === false) {
@@ -156,17 +172,8 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
     <div className="flex h-full flex-col overflow-hidden bg-[var(--qc-section)]">
       {/* Content */}
       <div className="flex-1 overflow-hidden relative">
-        <div className="absolute top-4 left-4 z-10 bg-[var(--qc-card)] shadow-sm rounded-md border border-[var(--qc-border-default)]">
-          <TabToggle
-            variant="outline"
-            options={["Detailed", "Compressed"]}
-            value={skillMode}
-            onChange={(v) => setSkillMode(v as "Detailed" | "Compressed")}
-          />
-        </div>
-
         {error && (
-          <div className="absolute inset-x-4 top-16 z-10 flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-[12px] text-down">
+          <div className="absolute inset-x-4 top-4 z-10 flex items-center gap-2 rounded-md border border-down bg-down-soft px-4 py-3 text-[12px] text-down">
             <AlertCircle className="size-4 shrink-0" />
             {error}
           </div>

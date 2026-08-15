@@ -43,6 +43,7 @@ function HtmlSkillsPage() {
   // Default true — mirrors the original (pre-incremental) behavior; flip off to opt into incremental base-context mode
   const [historic, setHistoric] = useState(true);
   const [skillMode, setSkillMode] = useState<"Detailed" | "Compressed">("Detailed");
+  const [isNewCompressedSkill, setIsNewCompressedSkill] = useState(false);
   const callId = historic ? historicCallId : incrementalCallId;
 
   const [previewControls, setPreviewControls] = useState<PreviewControls | null>(null);
@@ -162,17 +163,36 @@ function HtmlSkillsPage() {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
         setSelectedSkill(json);
+        if (skillMode === "Compressed") setIsNewCompressedSkill(false);
       })
       .catch((err) => {
         if (skillMode === "Compressed") {
-          // If the compressed skill doesn't exist yet, we can either clear it or show an error
-          setSelectedSkill(null);
-          setError("Compressed skill not found for this base skill. It must be created first.");
+          // If the compressed skill doesn't exist yet, we initialize a dummy one
+          const baseSkill = skills.find((s) => s.slug === selectedSlug);
+          if (baseSkill) {
+            setSelectedSkill({
+              id: "new",
+              slug: `${selectedSlug}-compressed`,
+              name: `${baseSkill.name} (Compressed)`,
+              category: baseSkill.category,
+              base_l2_skill_id: baseSkill.id,
+              html_template_prompt: "",
+              html_template_filename: `${selectedSlug}-compressed.hbs`,
+              is_active: true,
+              max_tokens: baseSkill.max_tokens,
+              use_template_engine: true,
+            } as any);
+            setIsNewCompressedSkill(true);
+            setError(null); // Clear error so UI renders the creation form
+          } else {
+            setSelectedSkill(null);
+            setError("Base skill not found.");
+          }
         } else {
           setError(err.message);
         }
       });
-  }, [selectedSlug, skillMode]);
+  }, [selectedSlug, skillMode, skills]);
 
   // ── Save skill ─────────────────────────────────────────────────────────────
 
@@ -182,16 +202,25 @@ function HtmlSkillsPage() {
     setSaveError(null);
     const currentApiBase = skillMode === "Compressed" ? "/api/html-compressed-skills" : API_BASE;
     const currentSlug = skillMode === "Compressed" ? `${selectedSlug}-compressed` : selectedSlug;
+    
+    const isCreating = skillMode === "Compressed" && isNewCompressedSkill;
+    const method = isCreating ? "POST" : "PUT";
+    const saveUrl = isCreating ? `${BACKEND_URL}${currentApiBase}` : `${BACKEND_URL}${currentApiBase}/${currentSlug}`;
 
-    authFetch(`${BACKEND_URL}${currentApiBase}/${currentSlug}`, {
-      method: "PUT",
+    // For POST, we must include required fields from selectedSkill (like base_l2_skill_id) that might not be in 'updates'
+    const payload = isCreating ? { ...selectedSkill, ...updates } : updates;
+
+    authFetch(saveUrl, {
+      method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
+      body: JSON.stringify(payload),
     })
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
         setSelectedSkill(json);
+        if (skillMode === "Compressed") setIsNewCompressedSkill(false);
+        
         // Only update the main skill list if we are saving the base skill
         if (skillMode !== "Compressed") {
           setSkills((prev) => prev.map((s) => (s.slug === selectedSlug ? { ...s, ...json } : s)));

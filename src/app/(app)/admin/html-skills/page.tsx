@@ -240,7 +240,14 @@ function HtmlSkillsPage() {
     if (!selectedSlug) return;
     setSaving(true);
     setSaveError(null);
-    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs/${key}`, {
+
+    // Compressed skill configs live under a different route than base L2 configs.
+    const isCompressed = skillMode === "Compressed";
+    const saveUrl = isCompressed
+      ? `${BACKEND_URL}/api/html-compressed-skills/${selectedSlug}-compressed/configs/${key}`
+      : `${BACKEND_URL}${API_BASE}/${selectedSlug}/configs/${key}`;
+
+    authFetch(saveUrl, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),

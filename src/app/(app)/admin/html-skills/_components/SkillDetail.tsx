@@ -219,7 +219,8 @@ export const SkillDetail = forwardRef<SkillDetailHandle, Props>(function SkillDe
 
   // Ensure the parent always gets the latest handleSave to avoid stale closures
   useImperativeHandle(ref, () => ({ save: handleSave }), [
-    name, category, dataExtractionPrompt, htmlTemplatePrompt, useTemplateEngine, enableDataValidation,
+    name, category, dataExtractionPrompt, htmlTemplatePrompt, htmlTemplateFilename,
+    useTemplateEngine, enableDataValidation,
     dataValidationLoops, enableHtmlValidation, extractionModel, factValidationModel,
     htmlTemplateModel, visualQaModel, transcriptSignalTypes, pptSignalTypes,
     annualReportSignalTypes, marketDataSignalTypes, maxTokens, maxTranscriptQtrs,

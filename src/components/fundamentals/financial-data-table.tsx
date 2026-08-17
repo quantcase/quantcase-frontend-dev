@@ -4,7 +4,22 @@ import { useLayoutEffect, useRef, useState } from "react";
 import type { FinancialRow, FinancialTable } from "@/types/financials";
 
 // No highlight field from the API anymore — these are the rows that used to carry it.
-const HIGHLIGHTED_LABELS = new Set(["Operating Profit", "Net Profit", "Total Liabilities", "Total Assets"]);
+const HIGHLIGHTED_LABELS = new Set(
+  [
+    "Income from financial services",
+    "Operating Profit",
+    "Operating Profit (%)",
+    "Profit Before Tax (PBT)",
+    "Profit after tax (PAT)",
+    "Operating Income", "Gross Margin (%)",
+    "Operating Profit (%)",
+    "Profit Before Tax (PBT)",
+    "Profit after tax (PAT)",
+    "PAT (%)",
+    "Cash and cash equivalents as at the end of the year",
+    "Equity Capital", "Cash & Bank balance (short term)", "Total Liabilities", "Total Borrowings",
+  ].map((label) => label.trim().toLowerCase())
+);
 
 function fmt(value: number | null | undefined, format?: string, key?: string): string {
   if (value === null || value === undefined) return "—";
@@ -31,6 +46,10 @@ function flattenRows(rows: FinancialRow[], expanded: Set<string>, depth = 0): Fl
     }
   }
   return out;
+}
+
+function normalizeLabel(value: string) {
+  return value.trim().toLowerCase();
 }
 
 export function FinancialDataTable({
@@ -105,14 +124,15 @@ export function FinancialDataTable({
         </thead>
         <tbody>
           {flatRows.map(({ row, depth, hasChildren }, idx) => {
-            const isHighlighted = depth === 0 && HIGHLIGHTED_LABELS.has(row.label);
+            const isHighlighted = HIGHLIGHTED_LABELS.has(normalizeLabel(row.label));
+            // const isHighlighted = depth === 0 && HIGHLIGHTED_LABELS.has(row.label);
             const isExpandable = !!row.meta?.expandable && hasChildren;
             const isExpanded = expanded.has(row.key);
             const rowBg = isHighlighted
               ? "var(--qc-section)"
               : idx % 2 === 0
-              ? "var(--qc-card)"
-              : "var(--qc-section)";
+                ? "var(--qc-card)"
+                : "var(--qc-section)";
             return (
               <tr
                 key={row.key}

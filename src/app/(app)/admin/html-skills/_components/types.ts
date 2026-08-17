@@ -348,7 +348,9 @@ export const MODEL_OPTIONS: { label: string; value: string }[] = [
   { label: "Haiku", value: "~anthropic/claude-haiku-latest" },
   { label: "Sonnet", value: "~anthropic/claude-sonnet-latest" },
   { label: "MiMo-2.5", value: "xiaomi/mimo-v2.5" },
-  { label: "DeepseekV4 Flash Lite (High Reasoning)", value: "~deepseek/deepseek-v4-flash-latest:floor:high" },
-  { label: "DeepseekV4 Flash Lite (Low Reasoning)", value: "~deepseek/deepseek-v4-flash-latest:floor:low" },
-  { label: "DeepseekV4 Flash Lite (No Reasoning)", value: "~deepseek/deepseek-v4-flash-latest:floor" },
+  { label: "DeepseekV4 Flash Lite (High Reasoning)", value: "~deepseek/deepseek-v4-flash-latest:high" },
+  { label: "DeepseekV4 Flash Lite (Low Reasoning)", value: "~deepseek/deepseek-v4-flash-latest:low" },
+  { label: "DeepseekV4 Flash Lite (No Reasoning)", value: "~deepseek/deepseek-v4-flash-latest" },
+  { label: "DeepseekV4 Flash Lite (Floor/Cheapest)", value: "~deepseek/deepseek-v4-flash-latest:floor" },
+  { label: "Gemini 2.5 Flash (Vertex AI)", value: "gemini-2.5-flash" },
 ];

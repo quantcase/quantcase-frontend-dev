@@ -18,6 +18,7 @@ const MODEL_OPTIONS = [
   { label: "Claude Haiku", value: "~anthropic/claude-haiku-latest" },
   { label: "MiMo-2.5", value: "xiaomi/mimo-v2.5" },
   { label: "Gemini 2.5 Flash (Vertex AI)", value: "gemini-2.5-flash" },
+  { label: "Gemini 3.5 Flash (Vertex AI)", value: "gemini-3.5-flash" },
 ];
 
 interface Props {

@@ -353,4 +353,5 @@ export const MODEL_OPTIONS: { label: string; value: string }[] = [
   { label: "DeepseekV4 Flash Lite (No Reasoning)", value: "~deepseek/deepseek-v4-flash-latest" },
   { label: "DeepseekV4 Flash Lite (Floor/Cheapest)", value: "~deepseek/deepseek-v4-flash-latest:floor" },
   { label: "Gemini 2.5 Flash (Vertex AI)", value: "gemini-2.5-flash" },
+  { label: "Gemini 3.5 Flash (Vertex AI)", value: "gemini-3.5-flash" },
 ];

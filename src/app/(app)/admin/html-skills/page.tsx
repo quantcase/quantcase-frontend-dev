@@ -81,8 +81,10 @@ function HtmlSkillsPage() {
 
   // ── Load saved configs for the selected skill ──────────────────────────────
 
-  const loadConfigs = useCallback((slug: string) => {
-    authFetch(`${BACKEND_URL}${API_BASE}/${slug}/configs`)
+  const loadConfigs = useCallback((slug: string, mode: "Detailed" | "Compressed") => {
+    const apiBase = mode === "Compressed" ? "/api/html-compressed-skills" : API_BASE;
+    const effectiveSlug = mode === "Compressed" ? `${slug}-compressed` : slug;
+    authFetch(`${BACKEND_URL}${apiBase}/${effectiveSlug}/configs`)
       .then(async (res) => {
         const json: ConfigListResponse = await res.json();
         if (!res.ok) throw new Error((json as unknown as { error?: string })?.error ?? `${res.status}`);
@@ -94,8 +96,8 @@ function HtmlSkillsPage() {
   useEffect(() => {
     setConfigKey(null);
     if (!selectedSlug) { setConfigs([]); return; }
-    loadConfigs(selectedSlug);
-  }, [selectedSlug, loadConfigs]);
+    loadConfigs(selectedSlug, skillMode);
+  }, [selectedSlug, skillMode, loadConfigs]);
 
   // Drop the selected config if it was deleted/renamed out from under the dropdown
   useEffect(() => {
@@ -265,37 +267,54 @@ function HtmlSkillsPage() {
     if (!selectedSlug || !selectedSkill) return;
     setSaving(true);
     setSaveError(null);
-    // Seed the new config as an explicit copy of the skill's current settings — a starting point to
-    // tweak from, not an "inherit" relationship (configs never fall back to the skill except for
-    // model/max_tokens/strip_html).
-    const payload = {
-      key, name,
-      data_extraction_prompt: selectedSkill.data_extraction_prompt ?? "",
-      html_template_prompt: selectedSkill.html_template_prompt ?? "",
-      html_template_filename: selectedSkill.html_template_filename ?? null,
-      use_template_engine: selectedSkill.use_template_engine ?? true,
-      enable_data_validation: selectedSkill.enable_data_validation ?? true,
-      data_validation_loops: selectedSkill.data_validation_loops ?? 1,
-      enable_html_validation: selectedSkill.enable_html_validation ?? false,
-      transcript_signal_types: selectedSkill.transcript_signal_types,
-      ppt_signal_types: selectedSkill.ppt_signal_types,
-      annual_report_signal_types: selectedSkill.annual_report_signal_types,
-      market_data_signal_types: selectedSkill.market_data_signal_types,
-      max_transcript_qtrs: selectedSkill.max_transcript_qtrs,
-      max_ppt_qtrs: selectedSkill.max_ppt_qtrs,
-      max_annual_report_years: selectedSkill.max_annual_report_years,
-      max_market_data_months: selectedSkill.max_market_data_months,
-      historic_max_transcript_qtrs: selectedSkill.historic_max_transcript_qtrs,
-      historic_max_ppt_qtrs: selectedSkill.historic_max_ppt_qtrs,
-      historic_max_annual_report_years: selectedSkill.historic_max_annual_report_years,
-      historic_max_market_data_months: selectedSkill.historic_max_market_data_months,
-      extraction_model: null,
-      fact_validation_model: null,
-      html_template_model: null,
-      visual_qa_model: null,
-      max_tokens: null, strip_html: null,
-    };
-    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs`, {
+
+    const isCompressedMode = skillMode === "Compressed";
+
+    // Compressed skill configs only carry the three rendering fields — they have no signal windows,
+    // extraction prompts, or validation settings. L2 configs are seeded from the full skill state.
+    const payload = isCompressedMode
+      ? {
+          key, name,
+          html_template_prompt: selectedSkill.html_template_prompt ?? "",
+          html_template_filename: selectedSkill.html_template_filename ?? null,
+          html_template_model: selectedSkill.html_template_model ?? null,
+        }
+      : {
+          key, name,
+          // Seed the new config as an explicit copy of the skill's current settings — a starting
+          // point to tweak from, not an "inherit" relationship (configs never fall back to the
+          // skill except for model/max_tokens/strip_html).
+          data_extraction_prompt: selectedSkill.data_extraction_prompt ?? "",
+          html_template_prompt: selectedSkill.html_template_prompt ?? "",
+          html_template_filename: selectedSkill.html_template_filename ?? null,
+          use_template_engine: selectedSkill.use_template_engine ?? true,
+          enable_data_validation: selectedSkill.enable_data_validation ?? true,
+          data_validation_loops: selectedSkill.data_validation_loops ?? 1,
+          enable_html_validation: selectedSkill.enable_html_validation ?? false,
+          transcript_signal_types: selectedSkill.transcript_signal_types,
+          ppt_signal_types: selectedSkill.ppt_signal_types,
+          annual_report_signal_types: selectedSkill.annual_report_signal_types,
+          market_data_signal_types: selectedSkill.market_data_signal_types,
+          max_transcript_qtrs: selectedSkill.max_transcript_qtrs,
+          max_ppt_qtrs: selectedSkill.max_ppt_qtrs,
+          max_annual_report_years: selectedSkill.max_annual_report_years,
+          max_market_data_months: selectedSkill.max_market_data_months,
+          historic_max_transcript_qtrs: selectedSkill.historic_max_transcript_qtrs,
+          historic_max_ppt_qtrs: selectedSkill.historic_max_ppt_qtrs,
+          historic_max_annual_report_years: selectedSkill.historic_max_annual_report_years,
+          historic_max_market_data_months: selectedSkill.historic_max_market_data_months,
+          extraction_model: null,
+          fact_validation_model: null,
+          html_template_model: null,
+          visual_qa_model: null,
+          max_tokens: null, strip_html: null,
+        };
+
+    const createUrl = isCompressedMode
+      ? `${BACKEND_URL}/api/html-compressed-skills/${selectedSlug}-compressed/configs`
+      : `${BACKEND_URL}${API_BASE}/${selectedSlug}/configs`;
+
+    authFetch(createUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -303,7 +322,7 @@ function HtmlSkillsPage() {
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? `${res.status}`);
-        loadConfigs(selectedSlug);
+        loadConfigs(selectedSlug, skillMode);
         setConfigKey(json.key ?? key);
         setShowConfigsModal(false);
       })
@@ -313,14 +332,18 @@ function HtmlSkillsPage() {
 
   function handleDeleteConfig(key: string) {
     if (!selectedSlug) return;
-    authFetch(`${BACKEND_URL}${API_BASE}/${selectedSlug}/configs/${key}`, { method: "DELETE" })
+    const isCompressedMode = skillMode === "Compressed";
+    const deleteUrl = isCompressedMode
+      ? `${BACKEND_URL}/api/html-compressed-skills/${selectedSlug}-compressed/configs/${key}`
+      : `${BACKEND_URL}${API_BASE}/${selectedSlug}/configs/${key}`;
+    authFetch(deleteUrl, { method: "DELETE" })
       .then(async (res) => {
         if (!res.ok) {
           const json = await res.json().catch(() => null);
           throw new Error(json?.error ?? `${res.status}`);
         }
         if (configKey === key) setConfigKey(null);
-        loadConfigs(selectedSlug);
+        loadConfigs(selectedSlug, skillMode);
       })
       .catch((err) => setError(err.message));
   }

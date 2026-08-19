@@ -192,7 +192,8 @@ export interface L2RunTickerSummary {
 
 export interface L2RunMetadata {
   queued: number;
-  noSource: number;
+  noSource?: number;
+  skipped?: number;
   failed: number;
   tickerCount: number;
   perTicker: L2RunTickerSummary[];
@@ -211,6 +212,24 @@ export interface L2Run {
 export interface L2RunsResponse {
   count: number;
   runs: L2Run[];
+}
+
+// ── L2 Compressed multi-dispatch ──────────────────────────────────────────────
+
+export interface L2CompressedPreviewTickerRow {
+  ticker: string;
+  ready: boolean;
+  missing: string[];
+}
+
+export interface L2CompressedPreviewResponse {
+  slug: string;
+  historic: boolean;
+  tickerCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  perTicker: L2CompressedPreviewTickerRow[];
 }
 
 // ── L3/L4 multi-dispatch — shapes per "L3 multi-dispatch — Admin Guide" ──────

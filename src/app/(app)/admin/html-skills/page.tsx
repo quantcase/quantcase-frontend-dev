@@ -16,6 +16,7 @@ import { HelpModal } from "./_components/HelpModal";
 import { ConfigsModal } from "./_components/ConfigsModal";
 import { useTranscriptCalls } from "@/hooks/useTranscriptCalls";
 import { TabToggle } from "@/components/molecules/tab-toggle";
+import { HtmlSkillsBulkPanel } from "./_components/HtmlSkillsBulkPanel";
 
 export default function HtmlSkillsPageWrapper() {
   return (
@@ -51,6 +52,7 @@ function HtmlSkillsPage() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showConfigsModal, setShowConfigsModal] = useState(false);
+  const [bulkMode, setBulkMode] = useState(false);
 
   // Saved config bundles for the selected skill — feeds the "Use config" run-screen dropdown.
   // Omitting configKey on a run means the skill's own top-level fields are used, same as before configs existed.
@@ -476,6 +478,13 @@ function HtmlSkillsPage() {
               <>
                 {/* Row 1 — what to run, and go */}
                 <div className="flex items-center gap-3 min-w-0">
+                  <TabToggle
+                    variant="outline"
+                    options={["Single", "Bulk"]}
+                    value={bulkMode ? "Bulk" : "Single"}
+                    onChange={(v) => setBulkMode(v === "Bulk")}
+                    className="shrink-0 mr-2"
+                  />
                   <TickerSearch
                     value={ticker}
                     onChange={setTicker}
@@ -701,7 +710,17 @@ function HtmlSkillsPage() {
 
           {/* Right: preview or empty state */}
           <div className="flex-1 overflow-hidden">
-            {selectedSkill && ticker ? (
+            {selectedSkill && bulkMode ? (
+              <HtmlSkillsBulkPanel
+                skill={selectedSkill}
+                configs={configs}
+                skillMode={skillMode}
+                historic={historic}
+                onHistoricChange={setHistoric}
+                configKey={configKey}
+                onConfigChange={setConfigKey}
+              />
+            ) : selectedSkill && ticker ? (
               <PreviewPane
                 key={`${selectedSkill.slug}::${skillMode}`}
                 slug={selectedSlug!}

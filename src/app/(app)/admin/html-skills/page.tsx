@@ -554,6 +554,16 @@ function HtmlSkillsPage() {
                     {exportingPrompt ? <Loader2 className="size-3.5 animate-spin" /> : <FileDown className="size-3.5" />}
                   </button>
 
+                  {/* Regenerate HTML */}
+                  <button
+                    onClick={() => previewControls?.regenerate()}
+                    disabled={previewControls?.running || !callId || tier === "Tier 0" || tier === "Tier 0.5" || !previewControls?.result?.output?.extracted_json}
+                    className="flex items-center gap-1.5 rounded-md border border-[var(--qc-border-default)] px-3 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] hover:bg-[var(--qc-surface-hover)] transition-colors disabled:opacity-40 shrink-0"
+                  >
+                    {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
+                    Regenerate HTML
+                  </button>
+
                   {/* Run */}
                   <button
                     onClick={() => previewControls?.run(true)}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flag } from "lucide-react";
+import { TabToggle } from "@/components/molecules/tab-toggle";
 import type { LensDetail } from "@/hooks/useLenses";
 import { ReportErrorModal } from "@/components/molecules/report-error-modal";
 import { LensHtmlPreview } from "@/components/insight/lens-html-preview";
@@ -24,6 +25,7 @@ function statusSentiment(status: string | null | undefined): StatusSentiment {
 
 export function LensDrawer({ lens, onClose, ticker }: LensDrawerProps) {
   const [reportOpen, setReportOpen] = useState(false);
+  const [mode, setMode] = useState<"Compressed" | "Detailed">("Detailed");
 
   useEffect(() => {
     if (!lens) return;
@@ -71,32 +73,21 @@ export function LensDrawer({ lens, onClose, ticker }: LensDrawerProps) {
             {/* Header */}
             <div className="px-4 sm:px-6" style={{
               position: "sticky", top: 0, zIndex: 10,
-              background: "var(--qc-card)",
+              background: "var(--qc-section, #f5f5f5)",
               borderBottom: "1px solid var(--qc-hair)",
-              paddingTop: "18px", paddingBottom: "16px",
+              paddingTop: "8px", paddingBottom: "8px",
               display: "flex",
-              alignItems: "flex-start",
+              alignItems: "center",
               justifyContent: "space-between",
               gap: 16,
             }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <span style={{
-                    fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-bold)", letterSpacing: "var(--qc-track-eyebrow-l)",
-                    textTransform: "uppercase", color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)",
-                  }}>
-                    {lens.category} lens
-                  </span>
-                  {lens.status && (
-                    <StatusBadge label={lens.status} sentiment={sentiment} hideGlyph className="font-bold" />
-                  )}
-                </div>
-                <h2 style={{
-                  fontSize: "var(--qc-fz-22)", fontWeight: "var(--qc-w-regular)", margin: 0, lineHeight: 1.3,
-                  color: "var(--qc-ink)", fontFamily: "var(--qc-font-serif)",
-                }}>
-                  {lens.name}
-                </h2>
+              <div style={{ flex: 1, minWidth: 0, display: "flex" }}>
+                <TabToggle
+                  variant="outline"
+                  options={["Compressed", "Detailed"]}
+                  value={mode}
+                  onChange={(v) => setMode(v as "Compressed" | "Detailed")}
+                />
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                 <button
@@ -137,7 +128,7 @@ export function LensDrawer({ lens, onClose, ticker }: LensDrawerProps) {
             {/* Body — iframe-based HTML skill output */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
               {ticker ? (
-                <LensHtmlPreview slug={lens.slug} ticker={ticker} />
+                <LensHtmlPreview slug={lens.slug} ticker={ticker} mode={mode} />
               ) : (
                 <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <span style={{ color: "var(--qc-ink-3)", fontSize: "var(--qc-fz-13)", fontFamily: "var(--qc-font-sans)" }}>No ticker selected</span>

@@ -4,18 +4,18 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
 import { authFetch } from "@/lib/api";
-import { TabToggle } from "@/components/molecules/tab-toggle";
 
 interface Props {
   slug: string;
   ticker: string;
+  mode: "Compressed" | "Detailed";
 }
 
 function stripHtmlFences(raw: string): string {
   return raw.replace(/^```html\s*/i, "").replace(/\s*```\s*$/, "").trim();
 }
 
-export function LensHtmlPreview({ slug, ticker }: Props) {
+export function LensHtmlPreview({ slug, ticker, mode }: Props) {
   // The backend has deprecated pe-rerating-potential and merged its logic into earning-quality.
   // We map any legacy or alternative aliases to this new consolidated slug.
   let apiSlug = slug === "pe-rerating-potential" || slug === "earnings-quality" || slug === "earnings_quality" ? "earning-quality" : slug;
@@ -24,7 +24,6 @@ export function LensHtmlPreview({ slug, ticker }: Props) {
   // the HTML incremental skills API strictly expects kebab-case.
   apiSlug = apiSlug.replace(/_/g, "-");
 
-  const [mode, setMode] = useState<"Compressed" | "Detailed">("Compressed");
   const [html, setHtml] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,14 +74,6 @@ export function LensHtmlPreview({ slug, ticker }: Props) {
   if (error) {
     return (
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-        <div style={{ padding: "8px 16px", display: "flex", justifyContent: "flex-end", borderBottom: "1px solid var(--qc-hair, #e2e2e2)", background: "var(--qc-section, #f5f5f5)" }}>
-          <TabToggle
-            variant="outline"
-            options={["Compressed", "Detailed"]}
-            value={mode}
-            onChange={(v) => setMode(v as "Compressed" | "Detailed")}
-          />
-        </div>
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 0 }}>
           <span style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)" }}>{error}</span>
         </div>
@@ -94,14 +85,6 @@ export function LensHtmlPreview({ slug, ticker }: Props) {
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-      <div style={{ padding: "8px 16px", display: "flex", justifyContent: "flex-end", borderBottom: "1px solid var(--qc-hair, #e2e2e2)", background: "var(--qc-section, #f5f5f5)" }}>
-        <TabToggle
-          variant="outline"
-          options={["Compressed", "Detailed"]}
-          value={mode}
-          onChange={(v) => setMode(v as "Compressed" | "Detailed")}
-        />
-      </div>
       <iframe
         srcDoc={html}
         style={{ flex: 1, width: "100%", border: "none", minHeight: 0 }}

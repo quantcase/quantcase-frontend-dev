@@ -12,7 +12,6 @@ export interface PreviewControls {
   result: RunResponse | null;
   hasBase: boolean | null; // null = unknown/checking, false = no output exists yet for this ticker in any mode
   run: (force?: boolean) => void;
-  regenerate: () => void;
 }
 
 interface Props {
@@ -166,71 +165,8 @@ export function PreviewPane({ slug, ticker, callId, fiscalYear, quarter, histori
       });
   }
 
-  async function regenerateSkill() {
-    if (skillMode === "Compressed" && hasDetailedOutput === false) {
-      setError("No base detailed output exists for this ticker yet — run Detailed mode first");
-      return;
-    }
-    if (!historic && hasBase === false && skillMode === "Detailed") {
-      setError("No base output exists for this ticker yet — run Historic first");
-      return;
-    }
-    if (!result?.output?.extracted_json) {
-      setError("No JSON exists for this output yet — run the pipeline first");
-      return;
-    }
-    if (pollRef.current) clearInterval(pollRef.current);
-    setRunning(true);
-    setError(null);
-
-    const runUrlPath = skillMode === "Compressed"
-      ? `/api/html-compressed-skills/${slug}-compressed/regenerate-html`
-      : `${API_BASE}/${slug}/regenerate-html`;
-
-    authFetch(`${BACKEND_URL}${runUrlPath}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ticker, callId, historic, ...(configKey ? { configKey } : {}) }),
-    })
-      .then(async (res) => {
-        const json = await res.json();
-        if (!res.ok) throw new Error(json?.error ?? `${res.status} ${res.statusText}`);
-        const { job } = json as RunJobResponse;
-
-        pollRef.current = setInterval(async () => {
-          try {
-            const statusRes = await authFetch(`${BACKEND_URL}/api/jobs/${job.id}`);
-            const statusJson: JobStatusResponse = await statusRes.json();
-            const status = statusJson.data?.status;
-            if (status === "completed") {
-              clearInterval(pollRef.current!);
-              pollRef.current = null;
-              const output = await fetchOutput();
-              setResult({ cached: false, output });
-              setHasBase(true);
-              setRunning(false);
-            } else if (status === "failed") {
-              clearInterval(pollRef.current!);
-              pollRef.current = null;
-              setError(statusJson.data?.error ?? statusJson.data?.failedReason ?? "Regeneration failed");
-              setRunning(false);
-            }
-          } catch (err) {
-            clearInterval(pollRef.current!);
-            pollRef.current = null;
-            setError(err instanceof Error ? err.message : "Failed to check job status");
-            setRunning(false);
-          }
-        }, 2000);
-      })
-      .catch((err) => {
-        setError(err.message ?? "Regeneration failed");
-        setRunning(false);
-      });
-  }
-
   useEffect(() => {
-    onControls({ running, result, hasBase, run: runSkill, regenerate: regenerateSkill });
+    onControls({ running, result, hasBase, run: runSkill });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running, result, hasBase, callId, historic, fiscalYear, quarter, configKey, skillMode]);
 

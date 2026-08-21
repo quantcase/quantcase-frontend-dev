@@ -6,18 +6,22 @@ import { Layers, ArrowRight, HelpCircle, ListTree, SlidersHorizontal, BookMarked
 import { L1MultiDispatchTab } from "./_components/L1MultiDispatchTab";
 import { L2MultiDispatchTab } from "./_components/L2MultiDispatchTab";
 import { L2CompressedMultiDispatchTab } from "./_components/L2CompressedMultiDispatchTab";
+import { L2HtmlRegenerationTab } from "./_components/L2HtmlRegenerationTab";
+import { L2CompressedHtmlRegenerationTab } from "./_components/L2CompressedHtmlRegenerationTab";
 import { L3MultiDispatchTab } from "./_components/L3MultiDispatchTab";
 import { DailyRunsTab } from "./_components/DailyRunsTab";
 import { ProwessIngestionTab } from "./_components/ProwessIngestionTab";
 import { ProwessCoverageTab } from "./_components/ProwessCoverageTab";
 import { HelpModal } from "./_components/HelpModal";
 
-type CoverageTab = "l1" | "l2" | "l2-compressed" | "l3" | "daily" | "prowess" | "prowess-coverage";
+type CoverageTab = "l1" | "l2" | "l2-compressed" | "l2-html-regen" | "l2-compressed-html-regen" | "l3" | "daily" | "prowess" | "prowess-coverage";
 
 const TABS: { id: CoverageTab; label: string }[] = [
   { id: "l1", label: "L1" },
   { id: "l2", label: "L2" },
+  { id: "l2-html-regen", label: "L2 HTML Regen" },
   { id: "l2-compressed", label: "L2.5" },
+  { id: "l2-compressed-html-regen", label: "L2.5 HTML Regen" },
   { id: "l3", label: "L3 / L4" },
   { id: "daily", label: "Daily Runs" },
   { id: "prowess", label: "Prowess Ingestion" },
@@ -113,7 +117,7 @@ export default function CoveragePage() {
 
       {/* Dispatch/coverage workspace — visually separated from the reference links above */}
       <div className="pt-1 border-t border-hair space-y-4">
-        <div className="flex border-b border-hair">
+        <div className="flex border-b border-hair overflow-x-auto">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -131,7 +135,9 @@ export default function CoveragePage() {
 
         {activeTab === "l1" && <L1MultiDispatchTab />}
         {activeTab === "l2" && <L2MultiDispatchTab />}
+        {activeTab === "l2-html-regen" && <L2HtmlRegenerationTab />}
         {activeTab === "l2-compressed" && <L2CompressedMultiDispatchTab />}
+        {activeTab === "l2-compressed-html-regen" && <L2CompressedHtmlRegenerationTab />}
         {activeTab === "l3" && <L3MultiDispatchTab />}
         {activeTab === "daily" && <DailyRunsTab />}
         {activeTab === "prowess" && <ProwessIngestionTab />}

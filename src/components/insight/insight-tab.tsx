@@ -411,7 +411,7 @@ function InsightDashboard({
           )}
           {insight.signal_map.length > 0 && (
             <div id="section-signal-map" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <InsightSignalMap signals={insight.signal_map} heading="Signals" subtitle="Positive and caution signals" />
+              <InsightSignalMap signals={type === 'deal' ? insight.signal_map.slice(0, 6) : insight.signal_map} heading="Signals" subtitle="Positive and caution signals" />
               <FactorConvictionScore score={insight.score} verdict={insight.verdict} />
             </div>
           )}

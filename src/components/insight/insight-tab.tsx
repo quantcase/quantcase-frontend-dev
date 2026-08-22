@@ -14,6 +14,7 @@ import { InsightLenses } from "@/components/insight/insight-lenses";
 import { InsightSignalMap } from "@/components/insight/insight-signal-map";
 import { InsightEmptyState } from "@/components/insight/insight-empty-state";
 import { LensDrawer } from "@/components/insight/lens-drawer";
+import { SectionPanel } from "@/components/molecules/section-panel";
 
 import type { InsightType, InsightLens } from "@/types/analysis";
 import { QC } from "@/lib/chart-tokens";
@@ -372,6 +373,7 @@ function InsightDashboard({
               {/* Native lenses only — the cloned Industry lens lives on the scorecard
                   radar/tiles above, not in this per-pillar lens grid. */}
               <InsightLenses lenses={patchedNativeLenses} heading={lensHeading} subtitle={TYPE_LENS_SUBTITLES[type]} onLensClick={handleLensClick} />
+              {type === 'deal' && <DealScenarioCards />}
             </div>
           )}
           {insight.signal_map.length > 0 && (
@@ -385,6 +387,65 @@ function InsightDashboard({
 
       <LensDrawer lens={activeLens} onClose={() => setActiveLensSlug(null)} ticker={ticker} isBfsi={isBfsi} />
     </>
+  );
+}
+
+function DealScenarioCards() {
+  return (
+    <div className="mt-4">
+      <SectionPanel
+        title="Scenario Analysis"
+        subtitle="Probability-weighted outcomes"
+        contentClassName="min-w-0"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Bear Card */}
+          <div className="flex flex-col p-4 rounded-[10px] bg-[var(--qc-card)] border border-[var(--qc-hair)]" style={{ borderTop: "3px solid var(--qc-down)" }}>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[11px] font-bold tracking-[0.05em] text-[var(--qc-down)]">BEAR</span>
+              <span className="text-[13px] font-semibold text-[var(--qc-ink-2)]">220x</span>
+            </div>
+            <div className="flex items-baseline gap-1 mb-2">
+              <span className="text-2xl font-bold text-[var(--qc-ink)]">20</span>
+              <span className="text-sm font-semibold text-[var(--qc-ink-3)]">%</span>
+            </div>
+            <p className="text-[12px] text-[var(--qc-ink-2)] leading-[1.4] m-0">
+              Downside: Slower growth, high gold volatility
+            </p>
+          </div>
+
+          {/* Base Card */}
+          <div className="flex flex-col p-4 rounded-[10px] bg-[var(--qc-card)] border border-[var(--qc-hair)]" style={{ borderTop: "3px solid var(--qc-blue)" }}>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[11px] font-bold tracking-[0.05em] text-[var(--qc-blue)]">BASE</span>
+              <span className="text-[13px] font-semibold text-[var(--qc-ink-2)]">190x</span>
+            </div>
+            <div className="flex items-baseline gap-1 mb-2">
+              <span className="text-2xl font-bold text-[var(--qc-ink)]">55</span>
+              <span className="text-sm font-semibold text-[var(--qc-ink-3)]">%</span>
+            </div>
+            <p className="text-[12px] text-[var(--qc-ink-2)] leading-[1.4] m-0">
+              Central: Steady expansion, margin leverage
+            </p>
+          </div>
+
+          {/* Bull Card */}
+          <div className="flex flex-col p-4 rounded-[10px] bg-[var(--qc-card)] border border-[var(--qc-hair)]" style={{ borderTop: "3px solid var(--qc-up)" }}>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[11px] font-bold tracking-[0.05em] text-[var(--qc-up)]">BULL</span>
+              <span className="text-[13px] font-semibold text-[var(--qc-ink-2)]">150x</span>
+            </div>
+            <div className="flex items-baseline gap-1 mb-2">
+              <span className="text-2xl font-bold text-[var(--qc-ink)]">25</span>
+              <span className="text-sm font-semibold text-[var(--qc-ink-3)]">%</span>
+            </div>
+            <p className="text-[12px] text-[var(--qc-ink-2)] leading-[1.4] m-0">
+              Upside: Rapid scale, margin expansion
+            </p>
+          </div>
+        </div>
+      </SectionPanel>
+    </div>
   );
 }
 

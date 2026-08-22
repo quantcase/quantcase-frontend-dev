@@ -15,10 +15,11 @@ export function OnboardingGuard({ children }: { children: React.ReactNode }) {
     }
 
     const onboardingDone = localStorage.getItem("qc_onboarding_completed");
-    if (onboardingDone === "true") {
-      router.replace("/investor/dashboard");
-      return;
-    }
+    // Temporarily disabled so you can preview the onboarding UI
+    // if (onboardingDone === "true") {
+    //   router.replace("/investor/dashboard");
+    //   return;
+    // }
 
     setReady(true);
   }, [router]);

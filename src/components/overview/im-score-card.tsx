@@ -289,16 +289,20 @@ function LensGridColumn({ pattern, symbol }: { pattern: OverviewPillarPattern; s
         {pattern.lenses.map((lens, i) => {
           const tone = toneColor(ratingTone(lens.rating));
           return (
-            <div
+            <Link
               key={lens.lens}
+              href={`${meta.href}?symbol=${encodeURIComponent(symbol)}&lens=${encodeURIComponent(lens.lens)}`}
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: 10,
-                padding: "10px 0",
+                padding: "10px 4px",
                 borderTop: i === 0 ? "none" : "1px solid var(--qc-hair)",
+                textDecoration: "none",
+                borderRadius: 4,
               }}
+              className="hover:bg-[var(--qc-surface-hover)] transition-colors"
             >
               <span
                 style={{
@@ -328,7 +332,7 @@ function LensGridColumn({ pattern, symbol }: { pattern: OverviewPillarPattern; s
               >
                 {lens.rating || "—"}
               </span>
-            </div>
+            </Link>
           );
         })}
       </div>

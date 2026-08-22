@@ -125,8 +125,7 @@ export function InsightLenses({ lenses, heading, subtitle, onLensClick }: Insigh
     // subtitle), so every research card across the screener reads the same.
     <SectionPanel
       className="flex-1"
-      title={heading ?? "Lenses"}
-      subtitle={subtitle ?? `Scored assessment across ${lenses.length} analytical ${lenses.length === 1 ? "lens" : "lenses"}`}
+      title={subtitle ?? `Scored assessment across ${lenses.length} analytical ${lenses.length === 1 ? "lens" : "lenses"}`}
       contentClassName="min-w-0"
     >
       {/* Grid of individually color-coded cards. Exactly 3 lenses sit in a single
@@ -201,6 +200,26 @@ export function InsightLenses({ lenses, heading, subtitle, onLensClick }: Insigh
 
               {/* Description — clamped to 2 lines, hover-expands when it overflows */}
               <LensDescription text={lens.description} name={lens.name} accentColor={accentColor} />
+
+              {(lens.slug === 'earnings-forecast' || lens.slug === 'earnings-quality' || lens.slug === 'earnings_forecast' || lens.slug === 'earnings_quality') && (
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  <div className="flex flex-col p-2.5 rounded-lg bg-[var(--qc-bg)] border border-[var(--qc-hair)]" style={{ borderTop: "2px solid var(--qc-down)" }}>
+                    <span className="text-[9px] font-bold tracking-wider text-[var(--qc-down)] mb-1">BEAR</span>
+                    <span className="text-lg font-bold leading-none mb-1 text-[var(--qc-ink)]">20%</span>
+                    <span className="text-[10px] text-[var(--qc-ink-2)] font-medium">220x</span>
+                  </div>
+                  <div className="flex flex-col p-2.5 rounded-lg bg-[var(--qc-bg)] border border-[var(--qc-hair)]" style={{ borderTop: "2px solid var(--qc-blue)" }}>
+                    <span className="text-[9px] font-bold tracking-wider text-[var(--qc-blue)] mb-1">BASE</span>
+                    <span className="text-lg font-bold leading-none mb-1 text-[var(--qc-ink)]">55%</span>
+                    <span className="text-[10px] text-[var(--qc-ink-2)] font-medium">190x</span>
+                  </div>
+                  <div className="flex flex-col p-2.5 rounded-lg bg-[var(--qc-bg)] border border-[var(--qc-hair)]" style={{ borderTop: "2px solid var(--qc-up)" }}>
+                    <span className="text-[9px] font-bold tracking-wider text-[var(--qc-up)] mb-1">BULL</span>
+                    <span className="text-lg font-bold leading-none mb-1 text-[var(--qc-ink)]">25%</span>
+                    <span className="text-[10px] text-[var(--qc-ink-2)] font-medium">150x</span>
+                  </div>
+                </div>
+              )}
 
               {/* Hover expand icon */}
               {isClickable && (

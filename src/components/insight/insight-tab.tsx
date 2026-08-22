@@ -376,7 +376,7 @@ function InsightDashboard({
           )}
           {insight.signal_map.length > 0 && (
             <div id="section-signal-map" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <InsightSignalMap signals={type === 'deal' ? insight.signal_map.slice(0, 6) : insight.signal_map} heading="Signals" subtitle="Positive and caution signals" />
+              <InsightSignalMap signals={type === 'deal' ? insight.signal_map.slice(0, 6) : insight.signal_map} />
               <FactorConvictionScore score={insight.score} verdict={insight.verdict} />
             </div>
           )}
@@ -437,17 +437,9 @@ function InsightTabContent({ type }: { type: InsightType }) {
   // above already covers the common no-analysis case.
   if (insightError && !insight) return <CenteredMessage error>Error: {insightError}</CenteredMessage>;
 
-  // Underline sub-tabs so screener scaffolding matches Overview (audit: this page
-  // dropped the secondary nav). Only include sections that actually render.
-  const navItems = [
-    { id: "section-score", label: `${TYPE_LABELS[type]} Score` },
-    insight.lenses.length > 0 && { id: "section-lenses", label: `${TYPE_LABELS[type]} Lenses` },
-    insight.signal_map.length > 0 && { id: "section-signal-map", label: "Signals" },
-  ].filter((x): x is { id: string; label: string } => Boolean(x));
-
   return (
     <>
-      <ScreenerPageShell companyInfo={companyInfo} navItems={navItems}>
+      <ScreenerPageShell companyInfo={companyInfo}>
         <InsightDashboard insight={insight} type={type} ticker={symbol} screenerData={screenerData} injectedLenses={injectedLenses} />
       </ScreenerPageShell>
       <AssetActionBar ticker={symbol} />

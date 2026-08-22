@@ -125,8 +125,7 @@ export function InsightLenses({ lenses, heading, subtitle, onLensClick }: Insigh
     // subtitle), so every research card across the screener reads the same.
     <SectionPanel
       className="flex-1"
-      title={heading ?? "Lenses"}
-      subtitle={subtitle ?? `Scored assessment across ${lenses.length} analytical ${lenses.length === 1 ? "lens" : "lenses"}`}
+      title={subtitle ?? `Scored assessment across ${lenses.length} analytical ${lenses.length === 1 ? "lens" : "lenses"}`}
       contentClassName="min-w-0"
     >
       {/* Grid of individually color-coded cards. Exactly 3 lenses sit in a single

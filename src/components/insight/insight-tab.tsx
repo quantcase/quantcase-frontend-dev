@@ -1,7 +1,7 @@
 "use client";
 
-import React, { Suspense, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { Suspense, useState, useCallback, useEffect } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { useLenses } from "@/hooks/useLenses";
 import { useScreenerData } from "@/hooks/useScreenerData";
@@ -303,13 +303,13 @@ function FactorConvictionScore({ score, verdict }: { score: number | undefined; 
     </div>
   );
 }
-
 function InsightDashboard({
   insight,
   type,
   ticker,
   screenerData,
   injectedLenses = [],
+  initialLensSlug = null,
 }: {
   insight: import("@/types/analysis").InsightData;
   type: InsightType;
@@ -318,14 +318,34 @@ function InsightDashboard({
   // Lenses cloned from another pillar (e.g. Industry Analysis onto Deal). Rendered
   // in the grid after the native lenses; the drawer resolves their detail below.
   injectedLenses?: InsightLens[];
+  initialLensSlug?: string | null;
 }) {
-  const [activeLensSlug, setActiveLensSlug] = useState<string | null>(null);
+  const [activeLensSlug, setActiveLensSlug] = useState<string | null>(initialLensSlug);
   const { lenses: lensDetails } = useLenses(ticker);
   const isBfsi = screenerData?.company?.isBfsi ?? false;
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (initialLensSlug) {
+      setActiveLensSlug(initialLensSlug);
+    }
+  }, [initialLensSlug]);
 
   const handleLensClick = useCallback((slug: string) => {
     setActiveLensSlug(slug);
   }, []);
+
+  const handleClose = useCallback(() => {
+    setActiveLensSlug(null);
+    if (searchParams.has("lens")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("lens");
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [router, pathname, searchParams]);
 
   // Drawer detail lookup: prefer this pillar's details, but fall back to ANY
   // category so an injected/cloned lens (whose detail lives under another pillar)
@@ -353,8 +373,8 @@ function InsightDashboard({
     : patchedNativeLenses;
 
   const activeLens = activeLensSlug
-    ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug))
-        ?? Object.values(lensDetails).flat().find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug))
+    ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug) || l.name === activeLensSlug)
+        ?? Object.values(lensDetails).flat().find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug) || l.name === activeLensSlug)
         ?? null
     : null;
 
@@ -384,7 +404,7 @@ function InsightDashboard({
         </div>
       </div>
 
-      <LensDrawer lens={activeLens} onClose={() => setActiveLensSlug(null)} ticker={ticker} isBfsi={isBfsi} />
+      <LensDrawer lens={activeLens} onClose={handleClose} ticker={ticker} isBfsi={isBfsi} />
     </>
   );
 }
@@ -423,6 +443,8 @@ function InsightTabContent({ type }: { type: InsightType }) {
   // No completed analysis for this asset yet (endpoint returned no result for
   // this type, or a not-found/404). Show a clean "check back later" empty state
   // inside the normal shell so the company header + action bar stay consistent.
+  const initialLensSlug = searchParams.get("lens") || null;
+
   if (!insight) {
     return (
       <>
@@ -434,14 +456,10 @@ function InsightTabContent({ type }: { type: InsightType }) {
     );
   }
 
-  // Non-empty error that isn't just "no data" — surface it, but the empty state
-  // above already covers the common no-analysis case.
-  if (insightError && !insight) return <CenteredMessage error>Error: {insightError}</CenteredMessage>;
-
   return (
     <>
       <ScreenerPageShell companyInfo={companyInfo}>
-        <InsightDashboard insight={insight} type={type} ticker={symbol} screenerData={screenerData} injectedLenses={injectedLenses} />
+        <InsightDashboard insight={insight} type={type} ticker={symbol} screenerData={screenerData} injectedLenses={injectedLenses} initialLensSlug={initialLensSlug} />
       </ScreenerPageShell>
       <AssetActionBar ticker={symbol} />
     </>

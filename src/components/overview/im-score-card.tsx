@@ -7,6 +7,8 @@ import { ChevronRight } from "lucide-react";
 import type { InsightData } from "@/types/analysis";
 import type { OverviewAnalysis, OverviewPillarPattern } from "@/types/overview";
 import { SectionShell } from "./primitives";
+import { StatusBadge } from "@/components/ds";
+import { lensSentiment } from "@/components/insight/insight-lenses";
 
 interface IMScoreCardProps {
   management: InsightData | null;
@@ -263,7 +265,7 @@ function PatternCard({
 }
 
 // ── Twelve-lenses grid ────────────────────────────────────────────────────────
-function LensGridColumn({ pattern, symbol }: { pattern: OverviewPillarPattern; symbol: string }) {
+function LensGridColumn({ pattern, symbol, l3Data }: { pattern: OverviewPillarPattern; symbol: string; l3Data: InsightData | null }) {
   const meta = PILLAR_META[pattern.pillar];
   const dest = `${meta.href}?symbol=${encodeURIComponent(symbol)}`;
 
@@ -287,7 +289,11 @@ function LensGridColumn({ pattern, symbol }: { pattern: OverviewPillarPattern; s
       </Link>
       <div style={{ display: "flex", flexDirection: "column" }}>
         {pattern.lenses.map((lens, i) => {
-          const tone = toneColor(ratingTone(lens.rating));
+          const l3Lens = l3Data?.lenses.find((l) => l.slug === lens.lens || l.name === lens.lens);
+          const statusStr = l3Lens?.status || "—";
+          const pct = l3Lens && l3Lens.max_score > 0 ? (l3Lens.score / l3Lens.max_score) * 100 : 0;
+          const sentiment = lensSentiment(l3Lens?.status, pct);
+          
           return (
             <Link
               key={lens.lens}
@@ -317,21 +323,12 @@ function LensGridColumn({ pattern, symbol }: { pattern: OverviewPillarPattern; s
               >
                 {lens.lens}
               </span>
-              <span
-                style={{
-                  flexShrink: 0,
-                  fontFamily: "var(--qc-font-sans)",
-                  fontSize: "var(--qc-fz-11)",
-                  fontWeight: "var(--qc-w-semi)",
-                  letterSpacing: ".01em",
-                  padding: "2px 9px",
-                  borderRadius: 6,
-                  background: tone.bg,
-                  color: tone.text,
-                }}
-              >
-                {lens.rating || "—"}
-              </span>
+              <StatusBadge
+                label={statusStr === "—" ? statusStr : statusStr.toUpperCase()}
+                sentiment={sentiment}
+                hideGlyph
+                className="shrink-0 self-start"
+              />
             </Link>
           );
         })}
@@ -498,7 +495,13 @@ export function IMScoreCard({ management, opportunity, deal, overviewData }: IMS
           {(["management", "opportunity", "deal"] as PillarKey[]).map((key) => {
             const p = patterns.find((x) => x.pillar === key);
             if (!p) return <div key={key} />;
-            return <LensGridColumn key={key} pattern={p} symbol={symbol} />;
+            
+            let l3Data = null;
+            if (key === "management") l3Data = management;
+            else if (key === "opportunity") l3Data = opportunity;
+            else if (key === "deal") l3Data = deal;
+
+            return <LensGridColumn key={key} pattern={p} symbol={symbol} l3Data={l3Data} />;
           })}
         </div>
 

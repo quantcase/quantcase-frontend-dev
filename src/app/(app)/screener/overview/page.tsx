@@ -141,15 +141,6 @@ function OverviewContent() {
               )}
             </div>
 
-{/* Technicals */}
-            <div id="section-technicals">
-              {technicalsLoading ? (
-                <TechnicalsCardSkeleton />
-              ) : technicalsData ? (
-                <TechnicalsCard data={technicalsData} overviewSummary={overviewData?.technical_summary ?? null} />
-              ) : null}
-            </div>
-
           </div>
 
           {/* ── Right column: Decision Intelligence ── */}
@@ -174,6 +165,15 @@ function OverviewContent() {
 
         {/* Full-width sections below the 2-column grid */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "0 16px" }}>
+
+          {/* Technicals */}
+          <div id="section-technicals">
+            {technicalsLoading ? (
+              <TechnicalsCardSkeleton />
+            ) : technicalsData ? (
+              <TechnicalsCard data={technicalsData} overviewSummary={overviewData?.technical_summary ?? null} />
+            ) : null}
+          </div>
 
           {/* Price Levels */}
           {technicalsData && <PriceLevelsSection data={technicalsData} overviewSummary={overviewData?.technical_summary ?? null} />}

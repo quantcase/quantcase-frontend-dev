@@ -38,7 +38,7 @@ interface InsightLensesProps {
   onLensClick?: (slug: string) => void;
 }
 
-function lensSentiment(status: string | undefined, pct: number): StatusSentiment {
+export function lensSentiment(status: string | undefined, pct: number): StatusSentiment {
   const s = (status ?? "").toLowerCase();
   const isPositive = s === "strong" || s === "stable" || s === "disciplined" || (!s && pct >= 70);
   const isWarn = s === "moderate" || s === "mixed" || s === "reactive" || (!s && pct >= 40 && pct < 70);

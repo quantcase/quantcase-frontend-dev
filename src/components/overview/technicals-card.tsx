@@ -9,7 +9,7 @@ function humanize(val: string | null | undefined): string {
   return val.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function signalSentiment(signal: string | null | undefined): "up" | "down" | "neutral" {
+function signalSentiment(signal: string | null | undefined): "up" | "down" | "neutral" | "warn" {
   if (!signal) return "neutral";
   const s = signal.toUpperCase();
   if (
@@ -25,16 +25,18 @@ function signalSentiment(signal: string | null | undefined): "up" | "down" | "ne
   return "neutral";
 }
 
-function sentColor(s: "up" | "down" | "neutral"): string {
+function sentColor(s: "up" | "down" | "neutral" | "warn"): string {
   if (s === "up") return "var(--qc-up, #1F7A4A)";
   if (s === "down") return "var(--qc-down, #B23A2F)";
+  if (s === "warn") return "var(--qc-warn, #B4731A)";
   return "var(--qc-ink)";
 }
 
-function sentBg(s: "up" | "down" | "neutral"): string {
+function sentBg(s: "up" | "down" | "neutral" | "warn"): string {
   if (s === "up") return "var(--qc-up-soft, #EAF4EE)";
   if (s === "down") return "var(--qc-down-soft, #FDECEA)";
-  return "var(--qc-warn-soft, #FEF3E2)";
+  if (s === "warn") return "var(--qc-warn-soft, #FEF3E2)";
+  return "var(--qc-surface, #F5F5F5)";
 }
 
 function fp(val: number | null | undefined): string {
@@ -47,14 +49,14 @@ function fp(val: number | null | undefined): string {
 interface StateCardRow {
   label: string;
   value: string;
-  valueSentiment?: "up" | "down" | "neutral";
+  valueSentiment?: "up" | "down" | "neutral" | "warn";
   barPct?: number; // 0–100, renders a position-indicator bar when present
 }
 
 interface StateCardProps {
   label: string;
   verdict: string;
-  verdictSentiment: "up" | "down" | "neutral";
+  verdictSentiment: "up" | "down" | "neutral" | "warn";
   rows: StateCardRow[];
   description: string;
 }
@@ -683,8 +685,9 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
 
   return {
     card: (
-      <SectionShell>
-        {summary ? (
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px]" style={{ gap: 16, alignItems: "stretch" }}>
+        {/* Left side: 4 Cards */}
+        <SectionShell>
           <div style={{ marginBottom: 14 }}>
             <div
               style={{
@@ -693,28 +696,125 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
                 letterSpacing: "var(--qc-track-eyebrow-l)",
                 textTransform: "uppercase",
                 color: "var(--qc-ink)",
-                marginBottom: 8,
               }}
             >
-              Technicals
+              TECHNICALS
             </div>
-            <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", lineHeight: 1.6 }}>
-              {overviewSummary ? <InlineMd text={summary} /> : summary}
-            </p>
           </div>
-        ) : (
-          <SectionLabel>Technicals</SectionLabel>
-        )}
+          
+          <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10, minWidth: 0 }}>
+            <StateCard
+              label="STRUCTURE"
+              verdict="Near Resistance"
+              verdictSentiment="warn"
+              rows={[
+                { label: "52W Position", value: "Mid (54%)", valueSentiment: "neutral", barPct: 54 },
+                { label: "vs SMA 50", value: "12.2%", valueSentiment: "up" },
+                { label: "vs SMA 200", value: "6.3%", valueSentiment: "up" },
+              ]}
+              description="Price sits above SMA 200 in Re-Accumulation phase. SMA 50 holding as support."
+            />
+            <StateCard
+              label="TREND"
+              verdict="Sideways"
+              verdictSentiment="warn"
+              rows={[
+                { label: "ADX (14)", value: "17.7 - Weak", valueSentiment: "down", barPct: 35 },
+                { label: "+DI / -DI", value: "15-25 & Rising", valueSentiment: "down" },
+                { label: "MFI (14)", value: "Positive flow", valueSentiment: "up" },
+              ]}
+              description="ADX below 25 — weak trend. Money flow: positive flow."
+            />
+            <StateCard
+              label="TIMING"
+              verdict="70-100"
+              verdictSentiment="neutral"
+              rows={[
+                { label: "RSI (14)", value: "73 - 70-100", valueSentiment: "down", barPct: 73 },
+                { label: "MACD", value: "Above", valueSentiment: "down" },
+                { label: "Stochastic", value: "96 - Overbought", valueSentiment: "neutral" },
+              ]}
+              description="RSI at 73 is overbought. MACD above signals near-term weakness."
+            />
+            <StateCard
+              label="REL. STRENGTH"
+              verdict="Outperforming"
+              verdictSentiment="up"
+              rows={[
+                { label: "vs Nifty 50", value: "Outperforming", valueSentiment: "up" },
+                { label: "vs Nifty Transportation & Logistics Index", value: "Outp...", valueSentiment: "up" },
+                { label: "RS Rank", value: "66 / 100", valueSentiment: "neutral" },
+              ]}
+              description="Lagging ahead of broader index and outperforming vs sector over 6 months."
+            />
+          </div>
+        </SectionShell>
 
-        {/* 4-column state cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10, minWidth: 0 }}>
-          {stateCards.map((card) => (
-            <StateCard key={card.label} {...card} />
-          ))}
+        {/* Right side: Key Alerts */}
+        <div
+          style={{
+            background: "var(--qc-card)",
+            border: "1px solid var(--qc-hair)",
+            borderRadius: 18,
+            padding: "18px 20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+          }}
+        >
+          <div>
+            <span
+              style={{
+                display: "inline-block",
+                fontFamily: "var(--qc-font-mono)",
+                fontSize: "var(--qc-fz-10)",
+                letterSpacing: ".1em",
+                textTransform: "uppercase",
+                background: "var(--qc-down-soft, #FDECEA)",
+                color: "var(--qc-down, #B23A2F)",
+                padding: "4px 8px",
+                borderRadius: 4,
+                fontWeight: "var(--qc-w-semi)",
+              }}
+            >
+              KEY ALERTS
+            </span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {[
+              "Directional Bias: Price should continue holding above 50 and 100 SMA.",
+              "Volatility Regime: Volatility Regime expansion without upside progress is cautionary.",
+              "Relative Strength: Relative strength vs Index or Sector should remain stable or improve.",
+              "Price Architecture: Support levels should hold.",
+              "Market Phase: High volume during Mark-Up supports continuation. High volume during Distribution signals supply emergence."
+            ].map((text, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <span
+                  style={{
+                    alignSelf: "flex-start",
+                    fontFamily: "var(--qc-font-mono)",
+                    fontSize: "var(--qc-fz-9)",
+                    letterSpacing: ".1em",
+                    textTransform: "uppercase",
+                    background: "var(--qc-down-soft, #FDECEA)",
+                    color: "var(--qc-down, #B23A2F)",
+                    padding: "2px 6px",
+                    borderRadius: 4,
+                  }}
+                >
+                  TECHNICAL
+                </span>
+                <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink)", lineHeight: 1.5 }}>
+                  {text}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-      </SectionShell>
+      </div>
     ),
-    priceLevels: (
+        priceLevels: (
       <PriceLevelsBar
         markers={markers}
         rangeMin={low52w}

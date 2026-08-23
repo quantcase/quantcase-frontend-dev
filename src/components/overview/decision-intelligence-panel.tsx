@@ -528,23 +528,6 @@ export function DecisionIntelligencePanel({
         </div>
       </DecisionSection>
 
-      {/* Key Alerts */}
-      {displayAlerts.length > 0 && (
-        <DecisionSection className="gap-2">
-          <DecisionEyebrow>Key Alerts</DecisionEyebrow>
-          <DecisionDivider />
-          <div className="flex flex-col">
-            {displayAlerts.map((a, i) => (
-              <div
-                key={i}
-                style={{ borderBottom: i < displayAlerts.length - 1 ? "1px solid var(--qc-hair-2)" : "none" }}
-              >
-                <AlertRow source={a.source} text={a.text} sentiment={a.sentiment} />
-              </div>
-            ))}
-          </div>
-        </DecisionSection>
-      )}
     </DecisionIntelligenceShell>
   );
 }

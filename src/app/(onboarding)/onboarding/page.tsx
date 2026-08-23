@@ -84,13 +84,9 @@ export default function OnboardingV3() {
   color: inherit;
   line-height: normal;
 }
-#onboarding-root input, #onboarding-root button {
-  color: inherit;
-  font-family: inherit;
-  line-height: normal;
-}
 
-#onboarding-root{background:#060D18;min-height:100vh;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+
+#onboarding-root{background:#060D18;min-height:100vh;display:flex;flex-direction:column;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
 
 /* ---------- flow map ---------- */
 .map{max-width:1240px;margin:0 auto;padding:26px 40px 0}

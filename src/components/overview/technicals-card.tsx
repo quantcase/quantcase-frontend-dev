@@ -47,10 +47,11 @@ function fp(val: number | null | undefined): string {
 // ─── Compact State Card ───────────────────────────────────────────────────────
 
 interface StateCardRow {
-  label: string;
-  value: string;
+  label: React.ReactNode;
+  value: React.ReactNode;
   valueSentiment?: "up" | "down" | "neutral" | "warn";
   barPct?: number; // 0–100, renders a position-indicator bar when present
+  subLabel?: string;
 }
 
 interface StateCardProps {
@@ -58,7 +59,7 @@ interface StateCardProps {
   verdict: string;
   verdictSentiment: "up" | "down" | "neutral" | "warn";
   rows: StateCardRow[];
-  description: string;
+  description: React.ReactNode;
 }
 
 function StateCard({ label, verdict, verdictSentiment, rows, description }: StateCardProps) {
@@ -135,7 +136,7 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
                 </span>
               </div>
               {row.barPct != null && (
-                <div style={{ position: "relative", height: 4, background: "var(--qc-chip, #F2F1EC)", borderRadius: 999 }}>
+                <div style={{ position: "relative", height: 4, background: "var(--qc-chip, #F2F1EC)", borderRadius: 999, marginTop: 4 }}>
                   <div
                     style={{
                       position: "absolute",
@@ -162,6 +163,11 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
                   />
                 </div>
               )}
+              {row.subLabel && (
+                <div style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-3)", marginTop: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {row.subLabel}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -170,7 +176,7 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
         <div style={{ borderTop: "1px solid var(--qc-hair-2)", paddingTop: 8 }}>
           <TooltipRoot>
             <TooltipTrigger asChild>
-              <p
+              <div
                 style={{
                   margin: 0,
                   fontFamily: "var(--qc-font-sans)",
@@ -178,14 +184,14 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
                   color: "var(--qc-ink-2)",
                   lineHeight: 1.5,
                   display: "-webkit-box",
-                  WebkitLineClamp: 2,
+                  WebkitLineClamp: 4,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
                   cursor: "default",
                 }}
               >
                 {description}
-              </p>
+              </div>
             </TooltipTrigger>
             <TooltipContent side="bottom" style={{ maxWidth: 220 }}>
               {description}
@@ -569,98 +575,108 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
   const stateCards = [
     {
       label: "STRUCTURE",
-      verdict: "Near Resistance",
-      verdictSentiment: "warn" as const,
+      verdict: "Distribution",
+      verdictSentiment: "down" as const,
       rows: [
         {
-          label: "52W Position",
-          value: "Mid (54%)",
-          valueSentiment: "neutral" as const,
-          barPct: 54,
+          label: "Phase",
+          value: "Re-Distribution",
+          valueSentiment: "down" as const,
         },
         {
-          label: "vs SMA 50",
-          value: "12.2%",
-          valueSentiment: "up" as const,
+          label: "CMF (20)",
+          value: "-0.11",
+          valueSentiment: "down" as const,
         },
         {
-          label: "vs SMA 200",
-          value: "6.3%",
-          valueSentiment: "up" as const,
+          label: <span style={{ whiteSpace: "pre-wrap" }}>{"Avg Volume\n(20D)"}</span>,
+          value: "0.82x — Below Avg",
+          valueSentiment: "warn" as const,
+        },
+        {
+          label: "Support / Resistance",
+          value: "Near Support",
+          barPct: 15,
+          subLabel: "Support ₹1,240 · Resistance ₹1,410",
         },
       ],
-      description: "Price sits above SMA 200 in Re-Accumulation phase. SMA 50 holding as support.",
+      description: (
+        <>
+          Price is compressing just above support with <strong style={{ color: "var(--qc-down)", fontWeight: "var(--qc-w-medium)" }}>money flow turning negative.</strong> Below-average volume shows a lack of conviction on either side.
+        </>
+      ),
     },
     {
       label: "TREND",
-      verdict: "Sideways",
-      verdictSentiment: "warn" as const,
+      verdict: "Downtrend",
+      verdictSentiment: "down" as const,
       rows: [
+        { label: "vs SMA 20", value: "-2.4%", valueSentiment: "down" as const },
+        { label: "vs SMA 50", value: "-1.9%", valueSentiment: "down" as const },
+        { label: "vs SMA 100", value: "-4.6%", valueSentiment: "down" as const },
+        { label: "vs SMA 200", value: "-6.8%", valueSentiment: "down" as const },
         {
           label: "ADX (14)",
-          value: "17.7 - Weak",
+          value: "26.6 — Strong",
           valueSentiment: "down" as const,
-          barPct: 35,
-        },
-        {
-          label: "+DI / -DI",
-          value: "15-25 & Rising",
-          valueSentiment: "down" as const,
-        },
-        {
-          label: "MFI (14)",
-          value: "Positive flow",
-          valueSentiment: "up" as const,
+          barPct: 60,
         },
       ],
-      description: "ADX below 25 — weak trend. Money flow: positive flow.",
+      description: (
+        <>
+          Price sits <strong style={{ color: "var(--qc-down)", fontWeight: "var(--qc-w-medium)" }}>below all four major moving averages,</strong> and ADX above 25 confirms an active, strengthening trend. Bearish until SMA 50 is reclaimed.
+        </>
+      ),
     },
     {
       label: "TIMING",
-      verdict: "70-100",
-      verdictSentiment: "neutral" as const,
+      verdict: "30-50",
+      verdictSentiment: "warn" as const,
       rows: [
         {
           label: "RSI (14)",
-          value: "73 - 70-100",
-          valueSentiment: "down" as const,
-          barPct: 73,
+          value: "49 — 30-50",
+          barPct: 49,
         },
         {
-          label: "MACD",
-          value: "Above",
-          valueSentiment: "down" as const,
-        },
-        { 
-          label: "Stochastic", 
-          value: "96 - Overbought",
-          valueSentiment: "neutral" as const,
+          label: "BB Width (20)",
+          value: "3.8% — Squeeze",
+          valueSentiment: "warn" as const,
+          barPct: 15,
         },
       ],
-      description: "RSI at 73 is overbought. MACD above signals near-term weakness.",
+      description: (
+        <>
+          RSI at 49 is neutral with no directional bias. Band width sits near <strong style={{ color: "var(--qc-warn)", fontWeight: "var(--qc-w-medium)" }}>multi-month lows</strong> — a volatility squeeze that typically precedes an expansion move.
+        </>
+      ),
     },
     {
-      label: "REL. STRENGTH",
-      verdict: "Outperforming",
-      verdictSentiment: "up" as const,
+      label: "DOMINANCE",
+      verdict: "Underperforming",
+      verdictSentiment: "down" as const,
       rows: [
         {
-          label: "vs Nifty 50",
+          label: "Stock vs Sector",
+          value: "Underperforming",
+          valueSentiment: "down" as const,
+        },
+        {
+          label: "Stock vs Nifty 50",
+          value: "Underperforming",
+          valueSentiment: "down" as const,
+        },
+        {
+          label: "Sector vs Nifty 50",
           value: "Outperforming",
           valueSentiment: "up" as const,
         },
-        {
-          label: "vs Nifty Transportation & Logistics Index",
-          value: "Outp...",
-          valueSentiment: "up" as const,
-        },
-        {
-          label: "RS Rank",
-          value: "66 / 100",
-          valueSentiment: "neutral" as const,
-        },
       ],
-      description: "Lagging ahead of broader index and outperforming vs sector over 6 months.",
+      description: (
+        <>
+          Stock is lagging <strong style={{ color: "var(--qc-down)", fontWeight: "var(--qc-w-medium)" }}>both its sector and the broader index,</strong> even as the sector itself outperforms Nifty — sector strength has not yet passed through to the stock.
+        </>
+      ),
     },
   ];
 

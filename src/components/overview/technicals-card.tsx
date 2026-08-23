@@ -221,7 +221,11 @@ const MIN_LABEL_GAP = 120; // minimum horizontal gap between label centres
 
 function spreadLabelPositions(
   markers: (PriceLevelMarker & { dotX: number })[],
+  minX: number,
+  maxX: number,
 ): (PriceLevelMarker & { dotX: number; labelX: number })[] {
+  if (markers.length === 0) return [];
+
   // Sort by dotX so we nudge left→right
   const sorted = [...markers].map((m) => ({ ...m, labelX: m.dotX }));
   sorted.sort((a, b) => a.dotX - b.dotX);
@@ -233,11 +237,28 @@ function spreadLabelPositions(
       sorted[i].labelX = prev.labelX + MIN_LABEL_GAP;
     }
   }
-  // Backward pass: pull left if we overshot the right edge (clamp is handled per-render)
-  for (let i = sorted.length - 2; i >= 0; i--) {
-    const next = sorted[i + 1];
-    if (next.labelX - sorted[i].labelX < MIN_LABEL_GAP) {
-      sorted[i].labelX = next.labelX - MIN_LABEL_GAP;
+
+  // If the rightmost element exceeds maxX, pull it back to maxX
+  // and ripple the adjustment backwards
+  if (sorted[sorted.length - 1].labelX > maxX) {
+    sorted[sorted.length - 1].labelX = maxX;
+    for (let i = sorted.length - 2; i >= 0; i--) {
+      const next = sorted[i + 1];
+      if (next.labelX - sorted[i].labelX < MIN_LABEL_GAP) {
+        sorted[i].labelX = next.labelX - MIN_LABEL_GAP;
+      }
+    }
+  }
+
+  // If the leftmost element is now less than minX, push it forward to minX
+  // and ripple forwards
+  if (sorted[0].labelX < minX) {
+    sorted[0].labelX = minX;
+    for (let i = 1; i < sorted.length; i++) {
+      const prev = sorted[i - 1];
+      if (sorted[i].labelX - prev.labelX < MIN_LABEL_GAP) {
+        sorted[i].labelX = prev.labelX + MIN_LABEL_GAP;
+      }
     }
   }
 
@@ -305,8 +326,8 @@ function PriceLevelsBar({
 
   // Attach dotX to each marker, then spread label positions per side
   const withDotX = markers.map((m) => ({ ...m, dotX: toX(m.value) }));
-  const topSpread = spreadLabelPositions(withDotX.filter((m) => m.side === "top"));
-  const botSpread = spreadLabelPositions(withDotX.filter((m) => m.side === "bottom"));
+  const topSpread = spreadLabelPositions(withDotX.filter((m) => m.side === "top"), PAD, W - PAD);
+  const botSpread = spreadLabelPositions(withDotX.filter((m) => m.side === "bottom"), PAD, W - PAD);
 
   // Clamp label centres so they stay within the SVG width
   const clampLX = (lx: number) => Math.max(PAD, Math.min(W - PAD, lx));

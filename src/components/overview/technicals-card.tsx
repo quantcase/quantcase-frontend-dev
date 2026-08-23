@@ -572,111 +572,161 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
   // RS bar: signals → approximate pct (outperform ~75, underperform ~25, neutral ~50)
   const rsBarPct = rsSentiment === "up" ? 75 : rsSentiment === "down" ? 20 : 50;
 
+  // HELPERS FOR DYNAMIC DATA
+  const formatVol = (v: number | null | undefined) => {
+    if (v == null) return "—";
+    if (v >= 10000000) return (v / 10000000).toFixed(2) + "Cr";
+    if (v >= 100000) return (v / 100000).toFixed(2) + "L";
+    if (v >= 1000) return (v / 1000).toFixed(2) + "K";
+    return v.toString();
+  };
+
+  const getSmaPct = (smaVal: number) => {
+    if (!smaVal) return "—";
+    const pct = ((cmp - smaVal) / smaVal) * 100;
+    return `${pct > 0 ? "+" : ""}${pct.toFixed(1)}%`;
+  };
+
+  const getSmaSent = (smaVal: number): "up" | "down" | "neutral" | "warn" => {
+    if (!smaVal) return "neutral";
+    return cmp >= smaVal ? "up" : "down";
+  };
+
+  const deriveTrendBadge = (db: { priceVsSMA20?: string; priceVsSMA50?: string; priceVsSMA100?: string; priceVsSMA200?: string } | undefined | null) => {
+    if (!db) return "Mixed";
+    const positions = [db.priceVsSMA20, db.priceVsSMA50, db.priceVsSMA100, db.priceVsSMA200];
+    const aboveCount = positions.filter(p => p === "ABOVE").length;
+    if (aboveCount === 4) return "Bullish";
+    if (aboveCount === 3) return "Mostly Bullish";
+    if (aboveCount === 1) return "Mostly Bearish";
+    if (aboveCount === 0) return "Bearish";
+    return "Mixed";
+  };
+
+  // EXTRACT RULE ENGINE
+  const struct = re?.structureEngine;
+  const trendEng = re?.trendEngine;
+  const timing = re?.timingEngine;
+  const dom = re?.dominanceEngine;
+
+  // STRUCTURE
+  const wyckoffVal = struct?.marketStructure?.wyckoffPhase ?? "";
+  const structureVerdict = humanize(wyckoffVal) || "Neutral";
+  const structureSent = signalSentiment(structureVerdict);
+  const cmfVal = struct?.participation?.cmf;
+  const avgVol = data.price.avgVolume20d;
+  const volSig = struct?.participation?.volumeSignal;
+  const zone = struct?.priceStructure?.zone ?? "Unknown Zone";
+  const s1Val = sr.pivotPoints?.s1 ?? sr.static?.support?.[0] ?? sr.fibonacci?.[0] ?? cmp;
+  const r1Val = sr.pivotPoints?.r1 ?? sr.static?.resistance?.[0] ?? sr.fibonacci?.[1] ?? cmp;
+  let srPct = 0;
+  if (r1Val > s1Val) srPct = Math.min(100, Math.max(0, ((cmp - s1Val) / (r1Val - s1Val)) * 100));
+
+  // TREND
+  const trendBadge = deriveTrendBadge(trendEng?.trendDirection);
+  const trendSent = signalSentiment(trendBadge);
+  const adxVal = trendEng?.trendQuality?.adx ?? 0;
+  const adxBand = trendEng?.trendQuality?.adxBand ?? "";
+
+  // TIMING
+  const rsiVal = timing?.momentum?.rsi ?? momentum.rsi.value;
+  const rsiZ = timing?.momentum?.rsiZone ?? momentum.rsi.zone;
+  const bbw = timing?.volatility?.bbWidth ?? 0;
+  const bbwCond = timing?.volatility?.condition ?? "";
+
+  // DOMINANCE
+  const vsSec = dom?.leadership?.vsSector?.signal ?? "N/A";
+  const vsNifty = dom?.leadership?.vsNifty?.signal ?? "N/A";
+  const secVsNifty = dom?.leadership?.vsSectorNifty?.signal ?? "N/A";
+
   const stateCards = [
     {
       label: "STRUCTURE",
-      verdict: "Distribution",
-      verdictSentiment: "down" as const,
+      verdict: structureVerdict,
+      verdictSentiment: structureSent,
       rows: [
         {
           label: "Phase",
-          value: "Re-Distribution",
-          valueSentiment: "down" as const,
+          value: humanize(wyckoffVal),
+          valueSentiment: structureSent,
         },
         {
           label: "CMF (20)",
-          value: "-0.11",
-          valueSentiment: "down" as const,
+          value: cmfVal != null ? cmfVal.toFixed(2) : "—",
+          valueSentiment: cmfVal != null && cmfVal > 0 ? "up" as const : "down" as const,
         },
         {
           label: <span style={{ whiteSpace: "pre-wrap" }}>{"Avg Volume\n(20D)"}</span>,
-          value: "0.82x — Below Avg",
-          valueSentiment: "warn" as const,
+          value: `${formatVol(avgVol)} — ${humanize(volSig)}`,
+          valueSentiment: volSig === "BELOW_AVERAGE" ? "warn" as const : "up" as const,
         },
         {
           label: "Support / Resistance",
-          value: "Near Support",
-          barPct: 15,
-          subLabel: "Support ₹1,240 · Resistance ₹1,410",
+          value: humanize(zone),
+          barPct: srPct,
+          subLabel: `Support ₹${fp(s1Val)} · Resistance ₹${fp(r1Val)}`,
         },
       ],
-      description: (
-        <>
-          Price is compressing just above support with <strong style={{ color: "var(--qc-down)", fontWeight: "var(--qc-w-medium)" }}>money flow turning negative.</strong> Below-average volume shows a lack of conviction on either side.
-        </>
-      ),
+      description: struct?.marketStructure?.growthOutput ?? struct?.marketStructure?.valueOutput ?? re?.decisionContext?.summary ?? "No structural data available.",
     },
     {
       label: "TREND",
-      verdict: "Downtrend",
-      verdictSentiment: "down" as const,
+      verdict: trendBadge,
+      verdictSentiment: trendSent,
       rows: [
-        { label: "vs SMA 20", value: "-2.4%", valueSentiment: "down" as const },
-        { label: "vs SMA 50", value: "-1.9%", valueSentiment: "down" as const },
-        { label: "vs SMA 100", value: "-4.6%", valueSentiment: "down" as const },
-        { label: "vs SMA 200", value: "-6.8%", valueSentiment: "down" as const },
+        { label: "vs SMA 20", value: getSmaPct(ma.sma[20]), valueSentiment: getSmaSent(ma.sma[20]) },
+        { label: "vs SMA 50", value: getSmaPct(ma.sma[50]), valueSentiment: getSmaSent(ma.sma[50]) },
+        { label: "vs SMA 100", value: getSmaPct(ma.sma[100]), valueSentiment: getSmaSent(ma.sma[100]) },
+        { label: "vs SMA 200", value: getSmaPct(ma.sma[200]), valueSentiment: getSmaSent(ma.sma[200]) },
         {
           label: "ADX (14)",
-          value: "26.6 — Strong",
-          valueSentiment: "down" as const,
-          barPct: 60,
+          value: `${adxVal.toFixed(1)} — ${humanize(adxBand)}`,
+          valueSentiment: adxVal > 25 ? trendSent : "neutral" as const,
+          barPct: Math.min(100, (adxVal / 60) * 100),
         },
       ],
-      description: (
-        <>
-          Price sits <strong style={{ color: "var(--qc-down)", fontWeight: "var(--qc-w-medium)" }}>below all four major moving averages,</strong> and ADX above 25 confirms an active, strengthening trend. Bearish until SMA 50 is reclaimed.
-        </>
-      ),
+      description: trendEng?.trendDirection?.growthOutput ?? trendEng?.trendDirection?.valueOutput ?? "No trend data available.",
     },
     {
       label: "TIMING",
-      verdict: "30-50",
-      verdictSentiment: "warn" as const,
+      verdict: humanize(rsiZ),
+      verdictSentiment: rsiVal > 70 || rsiVal < 30 ? "warn" as const : "neutral" as const,
       rows: [
         {
           label: "RSI (14)",
-          value: "49 — 30-50",
-          barPct: 49,
+          value: `${rsiVal.toFixed(0)} — ${humanize(rsiZ)}`,
+          barPct: rsiVal,
         },
         {
           label: "BB Width (20)",
-          value: "3.8% — Squeeze",
+          value: `${(bbw * 100).toFixed(1)}% — ${humanize(bbwCond)}`,
           valueSentiment: "warn" as const,
-          barPct: 15,
         },
       ],
-      description: (
-        <>
-          RSI at 49 is neutral with no directional bias. Band width sits near <strong style={{ color: "var(--qc-warn)", fontWeight: "var(--qc-w-medium)" }}>multi-month lows</strong> — a volatility squeeze that typically precedes an expansion move.
-        </>
-      ),
+      description: timing?.momentum?.growthOutput ?? timing?.momentum?.valueOutput ?? "No timing data available.",
     },
     {
       label: "DOMINANCE",
-      verdict: "Underperforming",
-      verdictSentiment: "down" as const,
+      verdict: humanize(vsNifty),
+      verdictSentiment: signalSentiment(vsNifty),
       rows: [
         {
           label: "Stock vs Sector",
-          value: "Underperforming",
-          valueSentiment: "down" as const,
+          value: humanize(vsSec),
+          valueSentiment: signalSentiment(vsSec),
         },
         {
           label: "Stock vs Nifty 50",
-          value: "Underperforming",
-          valueSentiment: "down" as const,
+          value: humanize(vsNifty),
+          valueSentiment: signalSentiment(vsNifty),
         },
         {
           label: "Sector vs Nifty 50",
-          value: "Outperforming",
-          valueSentiment: "up" as const,
+          value: humanize(secVsNifty),
+          valueSentiment: signalSentiment(secVsNifty),
         },
       ],
-      description: (
-        <>
-          Stock is lagging <strong style={{ color: "var(--qc-down)", fontWeight: "var(--qc-w-medium)" }}>both its sector and the broader index,</strong> even as the sector itself outperforms Nifty — sector strength has not yet passed through to the stock.
-        </>
-      ),
+      description: dom?.leadership?.vsSector?.growthOutput ?? dom?.leadership?.vsNifty?.growthOutput ?? "No dominance data available.",
     },
   ];
 

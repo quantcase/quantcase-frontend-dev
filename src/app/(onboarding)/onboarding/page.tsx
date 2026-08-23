@@ -73,13 +73,24 @@ export default function OnboardingV3() {
   };
 
   return (
-    <>
+    <div id="onboarding-root">
       <style dangerouslySetInnerHTML={{ __html: `
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap");
 :root{--navy:#0C1626;--navy2:#101E33;--navy3:#16283F;--ink:#F2F5F9;--muted:#8FA0B4;--dim:#5C6E84;
 --tan:#C8925C;--tan2:#E0A96D;--pos:#4ADE80;--neg:#F87171;--line:rgba(255,255,255,.10);
 --serif:'Playfair Display',Georgia,serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--sans:'Inter',sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#060D18;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+#onboarding-root h1, #onboarding-root h2, #onboarding-root h3, #onboarding-root h4, #onboarding-root h5, #onboarding-root h6, #onboarding-root p {
+  color: inherit;
+  line-height: normal;
+}
+#onboarding-root input, #onboarding-root button {
+  color: inherit;
+  font-family: inherit;
+  line-height: normal;
+}
+
+#onboarding-root{background:#060D18;min-height:100vh;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
 
 /* ---------- flow map ---------- */
 .map{max-width:1240px;margin:0 auto;padding:26px 40px 0}
@@ -101,7 +112,7 @@ body{background:#060D18;font-family:var(--sans);color:var(--ink);-webkit-font-sm
 /* ---------- app ---------- */
 .app{max-width:1240px;margin:24px auto 60px;border:1px solid var(--line);border-radius:14px;overflow:hidden;min-height:790px;display:flex;flex-direction:column;position:relative;
 background:radial-gradient(900px 520px at 82% -8%,rgba(200,146,92,.10),transparent 62%),linear-gradient(170deg,var(--navy3),var(--navy2) 45%,var(--navy))}
-header{display:flex;justify-content:space-between;align-items:center;padding:20px 32px}
+#onboarding-root header{display:flex;justify-content:space-between;align-items:center;padding:20px 32px}
 .logo{display:flex;align-items:center;gap:11px}.logo .mark{width:30px;height:30px}
 .logo .wd{font-family:var(--serif);font-size:23px;color:#fff}
 .help{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--dim);text-decoration:none;padding:7px 12px;border-radius:6px}
@@ -115,8 +126,8 @@ header{display:flex;justify-content:space-between;align-items:center;padding:20p
 .screen.on{display:flex}
 @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--tan);margin-bottom:13px}
-h1{font-family:var(--serif);font-size:44px;font-weight:600;line-height:1.12;max-width:780px}
-h1 em{font-style:italic;color:var(--tan2)}
+#onboarding-root h1{color:var(--ink);font-family:var(--serif);font-size:44px;font-weight:600;line-height:1.12;max-width:780px}
+#onboarding-root h1 em{font-style:italic;color:var(--tan2)}
 .lede{font-size:15.5px;color:var(--muted);margin-top:11px;max-width:620px;line-height:1.55}
 
 /* ===== step 1 doors ===== */
@@ -270,35 +281,9 @@ background:linear-gradient(180deg,#F4EDE3,#E6DACA);color:#0C1626;display:flex;al
 .link:hover{color:var(--muted);text-decoration:underline}
 @media(max-width:960px){.mapgrid{grid-template-columns:1fr}.arrow{display:none}.mcol{margin-bottom:12px}
 .pickwrap,.donegrid,.mods,.paths,.scope,.scorecard{grid-template-columns:1fr}.doors{flex-direction:column}
-h1{font-size:30px}.map,.later{padding:20px}.app{margin:16px;border-radius:12px}.stage{padding:22px 20px}
+#onboarding-root h1{font-size:30px}.map,.later{padding:20px}.app{margin:16px;border-radius:12px}.stage{padding:22px 20px}
 header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.bgrid{grid-template-columns:repeat(2,1fr)}}
 ` }} />
-      <div className="map">
-        <h5>THE PATH IN</h5>
-        <div className="sh">Depending on your choice, your watchlist and journal will be driven by our picks, or by your actual holdings.</div>
-        <div className="mapgrid">
-          <div className="mcol">
-            <div className="mstep">STEP 1</div>
-            <div className="mbox"><b>A. Pick three</b><span>Start fresh, tell us what to watch</span></div>
-            <div className="mbox"><b>B. Import holdings</b><span>Connect your broker</span></div>
-          </div>
-          <div className="arrow">→</div>
-          <div className="mcol">
-            <div className="mstep">STEP 2</div>
-            <div className="mbox a"><b>A. See the scores</b><span>For the three you picked</span></div>
-            <div className="mbox b"><b>B. See the scores</b><span>For everything you own</span></div>
-          </div>
-          <div className="arrow">→</div>
-          <div className="mcol">
-            <div className="mstep">STEP 3</div>
-            <div className="mbox a"><b>A. Live watchlist</b><span>Track your picks going forward</span></div>
-            <div className="mbox b"><b>B. Auto-journal</b><span>Rebuilt retroactively from your trade history</span></div>
-          </div>
-        </div>
-        <div className="later">
-          <div className="laterbox"><b>THE OTHER PATH ISN'T LOST</b>You can always connect your broker later from Settings, or manually add/remove stocks from your watchlist. We ask now simply to set up your dashboard so it's useful from minute one.</div>
-        </div>
-      </div>
 
       <div className="app">
         <header>
@@ -527,6 +512,6 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

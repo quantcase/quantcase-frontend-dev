@@ -1,12 +1,14 @@
 "use client";
 
+import { ReactNode } from "react";
+import { Brain } from "lucide-react";
 import type { InsightSignalMapItem } from "@/types/analysis";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { SignalCard } from "@/components/overview/signal-card";
 
 interface InsightSignalMapProps {
   signals: InsightSignalMapItem[];
-  heading?: string;
+  heading?: ReactNode;
   subtitle?: string;
 }
 
@@ -24,8 +26,19 @@ export function InsightSignalMap({ signals, heading, subtitle }: InsightSignalMa
     // subtitle), so every research card across the screener reads the same.
     <SectionPanel
       className="flex-1"
-      title={heading ?? "Signals"}
-      subtitle={subtitle ?? "Positive and caution signals"}
+      title={
+        heading ?? (
+          <div className="flex items-center gap-2">
+            <div className="grid place-items-center rounded-md border border-hair bg-[var(--qc-chip)] p-1.5">
+              <Brain className="size-3.5 text-ink" />
+            </div>
+            <span className="text-[13px] font-semibold tracking-[0.01em] text-ink">
+              Decision Intelligence
+            </span>
+          </div>
+        )
+      }
+      subtitle={subtitle}
       contentClassName="min-w-0"
     >
       <div

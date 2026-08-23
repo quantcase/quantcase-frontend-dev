@@ -9,7 +9,7 @@ function humanize(val: string | null | undefined): string {
   return val.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function signalSentiment(signal: string | null | undefined): "up" | "down" | "neutral" {
+function signalSentiment(signal: string | null | undefined): "up" | "down" | "neutral" | "warn" {
   if (!signal) return "neutral";
   const s = signal.toUpperCase();
   if (
@@ -25,16 +25,18 @@ function signalSentiment(signal: string | null | undefined): "up" | "down" | "ne
   return "neutral";
 }
 
-function sentColor(s: "up" | "down" | "neutral"): string {
+function sentColor(s: "up" | "down" | "neutral" | "warn"): string {
   if (s === "up") return "var(--qc-up, #1F7A4A)";
   if (s === "down") return "var(--qc-down, #B23A2F)";
+  if (s === "warn") return "var(--qc-warn, #B4731A)";
   return "var(--qc-ink)";
 }
 
-function sentBg(s: "up" | "down" | "neutral"): string {
+function sentBg(s: "up" | "down" | "neutral" | "warn"): string {
   if (s === "up") return "var(--qc-up-soft, #EAF4EE)";
   if (s === "down") return "var(--qc-down-soft, #FDECEA)";
-  return "var(--qc-warn-soft, #FEF3E2)";
+  if (s === "warn") return "var(--qc-warn-soft, #FEF3E2)";
+  return "var(--qc-surface, #F5F5F5)";
 }
 
 function fp(val: number | null | undefined): string {
@@ -45,18 +47,19 @@ function fp(val: number | null | undefined): string {
 // ─── Compact State Card ───────────────────────────────────────────────────────
 
 interface StateCardRow {
-  label: string;
-  value: string;
-  valueSentiment?: "up" | "down" | "neutral";
+  label: React.ReactNode;
+  value: React.ReactNode;
+  valueSentiment?: "up" | "down" | "neutral" | "warn";
   barPct?: number; // 0–100, renders a position-indicator bar when present
+  subLabel?: string;
 }
 
 interface StateCardProps {
   label: string;
   verdict: string;
-  verdictSentiment: "up" | "down" | "neutral";
+  verdictSentiment: "up" | "down" | "neutral" | "warn";
   rows: StateCardRow[];
-  description: string;
+  description: React.ReactNode;
 }
 
 function StateCard({ label, verdict, verdictSentiment, rows, description }: StateCardProps) {
@@ -133,7 +136,7 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
                 </span>
               </div>
               {row.barPct != null && (
-                <div style={{ position: "relative", height: 4, background: "var(--qc-chip, #F2F1EC)", borderRadius: 999 }}>
+                <div style={{ position: "relative", height: 4, background: "var(--qc-chip, #F2F1EC)", borderRadius: 999, marginTop: 4 }}>
                   <div
                     style={{
                       position: "absolute",
@@ -160,6 +163,11 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
                   />
                 </div>
               )}
+              {row.subLabel && (
+                <div style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-3)", marginTop: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {row.subLabel}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -168,7 +176,7 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
         <div style={{ borderTop: "1px solid var(--qc-hair-2)", paddingTop: 8 }}>
           <TooltipRoot>
             <TooltipTrigger asChild>
-              <p
+              <div
                 style={{
                   margin: 0,
                   fontFamily: "var(--qc-font-sans)",
@@ -176,14 +184,14 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
                   color: "var(--qc-ink-2)",
                   lineHeight: 1.5,
                   display: "-webkit-box",
-                  WebkitLineClamp: 2,
+                  WebkitLineClamp: 4,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
                   cursor: "default",
                 }}
               >
                 {description}
-              </p>
+              </div>
             </TooltipTrigger>
             <TooltipContent side="bottom" style={{ maxWidth: 220 }}>
               {description}
@@ -213,7 +221,11 @@ const MIN_LABEL_GAP = 120; // minimum horizontal gap between label centres
 
 function spreadLabelPositions(
   markers: (PriceLevelMarker & { dotX: number })[],
+  minX: number,
+  maxX: number,
 ): (PriceLevelMarker & { dotX: number; labelX: number })[] {
+  if (markers.length === 0) return [];
+
   // Sort by dotX so we nudge left→right
   const sorted = [...markers].map((m) => ({ ...m, labelX: m.dotX }));
   sorted.sort((a, b) => a.dotX - b.dotX);
@@ -225,11 +237,28 @@ function spreadLabelPositions(
       sorted[i].labelX = prev.labelX + MIN_LABEL_GAP;
     }
   }
-  // Backward pass: pull left if we overshot the right edge (clamp is handled per-render)
-  for (let i = sorted.length - 2; i >= 0; i--) {
-    const next = sorted[i + 1];
-    if (next.labelX - sorted[i].labelX < MIN_LABEL_GAP) {
-      sorted[i].labelX = next.labelX - MIN_LABEL_GAP;
+
+  // If the rightmost element exceeds maxX, pull it back to maxX
+  // and ripple the adjustment backwards
+  if (sorted[sorted.length - 1].labelX > maxX) {
+    sorted[sorted.length - 1].labelX = maxX;
+    for (let i = sorted.length - 2; i >= 0; i--) {
+      const next = sorted[i + 1];
+      if (next.labelX - sorted[i].labelX < MIN_LABEL_GAP) {
+        sorted[i].labelX = next.labelX - MIN_LABEL_GAP;
+      }
+    }
+  }
+
+  // If the leftmost element is now less than minX, push it forward to minX
+  // and ripple forwards
+  if (sorted[0].labelX < minX) {
+    sorted[0].labelX = minX;
+    for (let i = 1; i < sorted.length; i++) {
+      const prev = sorted[i - 1];
+      if (sorted[i].labelX - prev.labelX < MIN_LABEL_GAP) {
+        sorted[i].labelX = prev.labelX + MIN_LABEL_GAP;
+      }
     }
   }
 
@@ -297,8 +326,8 @@ function PriceLevelsBar({
 
   // Attach dotX to each marker, then spread label positions per side
   const withDotX = markers.map((m) => ({ ...m, dotX: toX(m.value) }));
-  const topSpread = spreadLabelPositions(withDotX.filter((m) => m.side === "top"));
-  const botSpread = spreadLabelPositions(withDotX.filter((m) => m.side === "bottom"));
+  const topSpread = spreadLabelPositions(withDotX.filter((m) => m.side === "top"), PAD, W - PAD);
+  const botSpread = spreadLabelPositions(withDotX.filter((m) => m.side === "bottom"), PAD, W - PAD);
 
   // Clamp label centres so they stay within the SVG width
   const clampLX = (lx: number) => Math.max(PAD, Math.min(W - PAD, lx));
@@ -564,105 +593,161 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
   // RS bar: signals → approximate pct (outperform ~75, underperform ~25, neutral ~50)
   const rsBarPct = rsSentiment === "up" ? 75 : rsSentiment === "down" ? 20 : 50;
 
+  // HELPERS FOR DYNAMIC DATA
+  const formatVol = (v: number | null | undefined) => {
+    if (v == null) return "—";
+    if (v >= 10000000) return (v / 10000000).toFixed(2) + "Cr";
+    if (v >= 100000) return (v / 100000).toFixed(2) + "L";
+    if (v >= 1000) return (v / 1000).toFixed(2) + "K";
+    return v.toString();
+  };
+
+  const getSmaPct = (smaVal: number) => {
+    if (!smaVal) return "—";
+    const pct = ((cmp - smaVal) / smaVal) * 100;
+    return `${pct > 0 ? "+" : ""}${pct.toFixed(1)}%`;
+  };
+
+  const getSmaSent = (smaVal: number): "up" | "down" | "neutral" | "warn" => {
+    if (!smaVal) return "neutral";
+    return cmp >= smaVal ? "up" : "down";
+  };
+
+  const deriveTrendBadge = (db: { priceVsSMA20?: string; priceVsSMA50?: string; priceVsSMA100?: string; priceVsSMA200?: string } | undefined | null) => {
+    if (!db) return "Mixed";
+    const positions = [db.priceVsSMA20, db.priceVsSMA50, db.priceVsSMA100, db.priceVsSMA200];
+    const aboveCount = positions.filter(p => p === "ABOVE").length;
+    if (aboveCount === 4) return "Bullish";
+    if (aboveCount === 3) return "Mostly Bullish";
+    if (aboveCount === 1) return "Mostly Bearish";
+    if (aboveCount === 0) return "Bearish";
+    return "Mixed";
+  };
+
+  // EXTRACT RULE ENGINE
+  const struct = re?.structureEngine;
+  const trendEng = re?.trendEngine;
+  const timing = re?.timingEngine;
+  const dom = re?.dominanceEngine;
+
+  // STRUCTURE
+  const wyckoffVal = struct?.marketStructure?.wyckoffPhase ?? "";
+  const structureVerdict = humanize(wyckoffVal) || "Neutral";
+  const structureSent = signalSentiment(structureVerdict);
+  const cmfVal = struct?.participation?.cmf;
+  const avgVol = data.price.avgVolume20d;
+  const volSig = struct?.participation?.volumeSignal;
+  const zone = struct?.priceStructure?.zone ?? "Unknown Zone";
+  const s1Val = sr.pivotPoints?.s1 ?? sr.static?.support?.[0] ?? sr.fibonacci?.[0] ?? cmp;
+  const r1Val = sr.pivotPoints?.r1 ?? sr.static?.resistance?.[0] ?? sr.fibonacci?.[1] ?? cmp;
+  let srPct = 0;
+  if (r1Val > s1Val) srPct = Math.min(100, Math.max(0, ((cmp - s1Val) / (r1Val - s1Val)) * 100));
+
+  // TREND
+  const trendBadge = deriveTrendBadge(trendEng?.trendDirection);
+  const trendSent = signalSentiment(trendBadge);
+  const adxVal = trendEng?.trendQuality?.adx ?? 0;
+  const adxBand = trendEng?.trendQuality?.adxBand ?? "";
+
+  // TIMING
+  const rsiVal = timing?.momentum?.rsi ?? momentum.rsi.value;
+  const rsiZ = timing?.momentum?.rsiZone ?? momentum.rsi.zone;
+  const bbw = timing?.volatility?.bbWidth ?? 0;
+  const bbwCond = timing?.volatility?.condition ?? "";
+
+  // DOMINANCE
+  const vsSec = dom?.leadership?.vsSector?.signal ?? "N/A";
+  const vsNifty = dom?.leadership?.vsNifty?.signal ?? "N/A";
+  const secVsNifty = dom?.leadership?.vsSectorNifty?.signal ?? "N/A";
+
   const stateCards = [
     {
-      label: "Structure",
-      verdict: structureZone,
-      verdictSentiment: structureSentiment,
+      label: "STRUCTURE",
+      verdict: structureVerdict,
+      verdictSentiment: structureSent,
       rows: [
         {
-          label: "52W Position",
-          value: `Mid (${pos52w}%)`,
-          valueSentiment: pos52w > 66 ? "up" as const : pos52w < 33 ? "down" as const : "neutral" as const,
-          barPct: pos52w,
+          label: "Phase",
+          value: humanize(wyckoffVal),
+          valueSentiment: structureSent,
         },
         {
-          label: "vs SMA 50",
-          value: ma.sma[50] ? `${(((cmp - ma.sma[50]) / ma.sma[50]) * 100).toFixed(1)}%` : "—",
-          valueSentiment: aboveSMA50 ? "up" as const : "down" as const,
+          label: "CMF (20)",
+          value: cmfVal != null ? cmfVal.toFixed(2) : "—",
+          valueSentiment: cmfVal != null && cmfVal > 0 ? "up" as const : "down" as const,
         },
         {
-          label: "vs SMA 200",
-          value: ma.sma[200] ? `${(((cmp - ma.sma[200]) / ma.sma[200]) * 100).toFixed(1)}%` : "—",
-          valueSentiment: aboveSMA200 ? "up" as const : "down" as const,
+          label: <span style={{ whiteSpace: "pre-wrap" }}>{"Avg Volume\n(20D)"}</span>,
+          value: `${formatVol(avgVol)} — ${humanize(volSig)}`,
+          valueSentiment: volSig === "BELOW_AVERAGE" ? "warn" as const : "up" as const,
+        },
+        {
+          label: "Support / Resistance",
+          value: humanize(zone),
+          barPct: srPct,
+          subLabel: `Support ₹${fp(s1Val)} · Resistance ₹${fp(r1Val)}`,
         },
       ],
-      description: structureDesc,
+      description: struct?.marketStructure?.growthOutput ?? struct?.marketStructure?.valueOutput ?? re?.decisionContext?.summary ?? "No structural data available.",
     },
     {
-      label: "Trend",
-      verdict: humanize(trend.direction),
-      verdictSentiment: trendSentiment,
+      label: "TREND",
+      verdict: trendBadge,
+      verdictSentiment: trendSent,
       rows: [
+        { label: "vs SMA 20", value: getSmaPct(ma.sma[20]), valueSentiment: getSmaSent(ma.sma[20]) },
+        { label: "vs SMA 50", value: getSmaPct(ma.sma[50]), valueSentiment: getSmaSent(ma.sma[50]) },
+        { label: "vs SMA 100", value: getSmaPct(ma.sma[100]), valueSentiment: getSmaSent(ma.sma[100]) },
+        { label: "vs SMA 200", value: getSmaPct(ma.sma[200]), valueSentiment: getSmaSent(ma.sma[200]) },
         {
           label: "ADX (14)",
-          value: adxLabel,
-          valueSentiment: trendSentiment,
-          barPct: adxBarPct,
-        },
-        {
-          label: "+DI / −DI",
-          value: diLabel ?? "—",
-          valueSentiment: diLabel?.includes("Bulls") ? "up" as const : "down" as const,
-        },
-        {
-          label: "MFI (14)",
-          value: mfiLabel ?? "—",
-          valueSentiment: mfiLabel?.includes("Positive") ? "up" as const : "down" as const,
+          value: `${adxVal.toFixed(1)} — ${humanize(adxBand)}`,
+          valueSentiment: adxVal > 25 ? trendSent : "neutral" as const,
+          barPct: Math.min(100, (adxVal / 60) * 100),
         },
       ],
-      description: trendDesc,
+      description: trendEng?.trendDirection?.growthOutput ?? trendEng?.trendDirection?.valueOutput ?? "No trend data available.",
     },
     {
-      label: "Timing",
-      verdict: rsiZone.replace(/_/g, " "),
-      verdictSentiment: "neutral" as const,
+      label: "TIMING",
+      verdict: humanize(rsiZ),
+      verdictSentiment: rsiVal > 70 || rsiVal < 30 ? "warn" as const : "neutral" as const,
       rows: [
         {
           label: "RSI (14)",
-          value: rsiValue == null ? "—" : `${rsiValue.toFixed(0)} — ${humanize(rsiZone)}`,
-          valueSentiment: "neutral" as const,
-          barPct: rsiBarPct,
+          value: `${rsiVal.toFixed(0)} — ${humanize(rsiZ)}`,
+          barPct: rsiVal,
         },
         {
-          label: "MACD",
-          value: macdCross ? humanize(macdCross) : "—",
-          valueSentiment: macdCross?.toLowerCase().includes("bull") ? "up" as const : "down" as const,
+          label: "BB Width (20)",
+          value: `${(bbw * 100).toFixed(1)}% — ${humanize(bbwCond)}`,
+          valueSentiment: "warn" as const,
         },
-        { label: "Stochastic", value: stochLabel },
       ],
-      description: timingDesc,
+      description: timing?.momentum?.growthOutput ?? timing?.momentum?.valueOutput ?? "No timing data available.",
     },
     {
-      label: "Rel. Strength",
-      verdict: humanize(rsVsNiftySignal ?? data.signals.overall),
-      verdictSentiment: rsSentiment,
+      label: "DOMINANCE",
+      verdict: humanize(vsNifty),
+      verdictSentiment: signalSentiment(vsNifty),
       rows: [
         {
-          label: "vs Nifty 50",
-          value: re?.dominanceEngine?.leadership?.vsNifty?.signal
-            ? humanize(re.dominanceEngine.leadership.vsNifty.signal)
-            : "—",
-          valueSentiment: rsSentiment,
-          barPct: rsBarPct,
+          label: "Stock vs Sector",
+          value: humanize(vsSec),
+          valueSentiment: signalSentiment(vsSec),
         },
         {
-          // Label follows the actual sector index — it used to be hardcoded to
-          // "vs Nifty IT" regardless of the stock's sector.
-          label: `vs ${re?.dominanceEngine?.leadership?.vsSector?.sectorTicker ?? "Sector"}`,
-          value: re?.dominanceEngine?.leadership?.vsSector?.signal
-            ? humanize(re.dominanceEngine.leadership.vsSector.signal)
-            : "—",
-          valueSentiment: signalSentiment(rsVsSectorSignal),
+          label: "Stock vs Nifty 50",
+          value: humanize(vsNifty),
+          valueSentiment: signalSentiment(vsNifty),
         },
         {
-          label: "RS Rank",
-          value: data.signals.components?.trend != null
-            ? `${data.signals.components.trend} / 100`
-            : data.signals.score != null ? `${data.signals.score} / 100` : "—",
+          label: "Sector vs Nifty 50",
+          value: humanize(secVsNifty),
+          valueSentiment: signalSentiment(secVsNifty),
         },
       ],
-      description: rsDesc,
+      description: dom?.leadership?.vsSector?.growthOutput ?? dom?.leadership?.vsNifty?.growthOutput ?? "No dominance data available.",
     },
   ];
 

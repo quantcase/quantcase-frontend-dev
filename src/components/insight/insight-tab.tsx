@@ -1,7 +1,7 @@
 "use client";
 
-import React, { Suspense, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { Suspense, useState, useCallback, useEffect } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { useLenses } from "@/hooks/useLenses";
 import { useScreenerData } from "@/hooks/useScreenerData";
@@ -14,6 +14,7 @@ import { InsightLenses } from "@/components/insight/insight-lenses";
 import { InsightSignalMap } from "@/components/insight/insight-signal-map";
 import { InsightEmptyState } from "@/components/insight/insight-empty-state";
 import { LensDrawer } from "@/components/insight/lens-drawer";
+import { SectionPanel } from "@/components/molecules/section-panel";
 
 import type { InsightType, InsightLens } from "@/types/analysis";
 import { QC } from "@/lib/chart-tokens";
@@ -255,9 +256,9 @@ const TYPE_VERDICT_LABELS: Record<InsightType, string> = {
 // Card subtitles — the second line of the fundamentals-style card header. Kept
 // short so they never wrap past one line in the card header.
 const TYPE_LENS_SUBTITLES: Record<InsightType, string> = {
-  management: "Scored assessment across each management lens",
-  opportunity: "Scored assessment across each opportunity lens",
-  deal: "Scored assessment across each deal lens",
+  management: "Scored assessment across each Management Lens",
+  opportunity: "Scored assessment across each Opportunity Lens",
+  deal: "Scored assessment across each Deal Lens",
 };
 
 // ─── Empty / error states ──────────────────────────────────────────────────────
@@ -302,13 +303,13 @@ function FactorConvictionScore({ score, verdict }: { score: number | undefined; 
     </div>
   );
 }
-
 function InsightDashboard({
   insight,
   type,
   ticker,
   screenerData,
   injectedLenses = [],
+  initialLensSlug = null,
 }: {
   insight: import("@/types/analysis").InsightData;
   type: InsightType;
@@ -317,14 +318,34 @@ function InsightDashboard({
   // Lenses cloned from another pillar (e.g. Industry Analysis onto Deal). Rendered
   // in the grid after the native lenses; the drawer resolves their detail below.
   injectedLenses?: InsightLens[];
+  initialLensSlug?: string | null;
 }) {
-  const [activeLensSlug, setActiveLensSlug] = useState<string | null>(null);
+  const [activeLensSlug, setActiveLensSlug] = useState<string | null>(initialLensSlug);
   const { lenses: lensDetails } = useLenses(ticker);
   const isBfsi = screenerData?.company?.isBfsi ?? false;
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (initialLensSlug) {
+      setActiveLensSlug(initialLensSlug);
+    }
+  }, [initialLensSlug]);
 
   const handleLensClick = useCallback((slug: string) => {
     setActiveLensSlug(slug);
   }, []);
+
+  const handleClose = useCallback(() => {
+    setActiveLensSlug(null);
+    if (searchParams.has("lens")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("lens");
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [router, pathname, searchParams]);
 
   // Drawer detail lookup: prefer this pillar's details, but fall back to ANY
   // category so an injected/cloned lens (whose detail lives under another pillar)
@@ -352,8 +373,8 @@ function InsightDashboard({
     : patchedNativeLenses;
 
   const activeLens = activeLensSlug
-    ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug))
-        ?? Object.values(lensDetails).flat().find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug))
+    ? (lensDetails[type] ?? []).find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug) || l.name === activeLensSlug)
+        ?? Object.values(lensDetails).flat().find((l) => l.slug === activeLensSlug || SLUG_ALIASES[activeLensSlug]?.includes(l.slug) || l.name === activeLensSlug)
         ?? null
     : null;
 
@@ -376,14 +397,14 @@ function InsightDashboard({
           )}
           {insight.signal_map.length > 0 && (
             <div id="section-signal-map" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <InsightSignalMap signals={type === 'deal' ? insight.signal_map.slice(0, 6) : insight.signal_map} heading="Signals" subtitle="Positive and caution signals" />
+              <InsightSignalMap signals={type === 'deal' ? insight.signal_map.slice(0, 6) : insight.signal_map} />
               <FactorConvictionScore score={insight.score} verdict={insight.verdict} />
             </div>
           )}
         </div>
       </div>
 
-      <LensDrawer lens={activeLens} onClose={() => setActiveLensSlug(null)} ticker={ticker} isBfsi={isBfsi} />
+      <LensDrawer lens={activeLens} onClose={handleClose} ticker={ticker} isBfsi={isBfsi} />
     </>
   );
 }
@@ -422,6 +443,8 @@ function InsightTabContent({ type }: { type: InsightType }) {
   // No completed analysis for this asset yet (endpoint returned no result for
   // this type, or a not-found/404). Show a clean "check back later" empty state
   // inside the normal shell so the company header + action bar stay consistent.
+  const initialLensSlug = searchParams.get("lens") || null;
+
   if (!insight) {
     return (
       <>
@@ -433,22 +456,10 @@ function InsightTabContent({ type }: { type: InsightType }) {
     );
   }
 
-  // Non-empty error that isn't just "no data" — surface it, but the empty state
-  // above already covers the common no-analysis case.
-  if (insightError && !insight) return <CenteredMessage error>Error: {insightError}</CenteredMessage>;
-
-  // Underline sub-tabs so screener scaffolding matches Overview (audit: this page
-  // dropped the secondary nav). Only include sections that actually render.
-  const navItems = [
-    { id: "section-score", label: `${TYPE_LABELS[type]} Score` },
-    insight.lenses.length > 0 && { id: "section-lenses", label: `${TYPE_LABELS[type]} Lenses` },
-    insight.signal_map.length > 0 && { id: "section-signal-map", label: "Signals" },
-  ].filter((x): x is { id: string; label: string } => Boolean(x));
-
   return (
     <>
-      <ScreenerPageShell companyInfo={companyInfo} navItems={navItems}>
-        <InsightDashboard insight={insight} type={type} ticker={symbol} screenerData={screenerData} injectedLenses={injectedLenses} />
+      <ScreenerPageShell companyInfo={companyInfo}>
+        <InsightDashboard insight={insight} type={type} ticker={symbol} screenerData={screenerData} injectedLenses={injectedLenses} initialLensSlug={initialLensSlug} />
       </ScreenerPageShell>
       <AssetActionBar ticker={symbol} />
     </>

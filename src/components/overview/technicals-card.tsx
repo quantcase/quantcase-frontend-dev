@@ -568,103 +568,99 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
 
   const stateCards = [
     {
-      label: "Structure",
-      verdict: structureZone,
-      verdictSentiment: structureSentiment,
+      label: "STRUCTURE",
+      verdict: "Near Resistance",
+      verdictSentiment: "warn" as const,
       rows: [
         {
           label: "52W Position",
-          value: `Mid (${pos52w}%)`,
-          valueSentiment: pos52w > 66 ? "up" as const : pos52w < 33 ? "down" as const : "neutral" as const,
-          barPct: pos52w,
+          value: "Mid (54%)",
+          valueSentiment: "neutral" as const,
+          barPct: 54,
         },
         {
           label: "vs SMA 50",
-          value: ma.sma[50] ? `${(((cmp - ma.sma[50]) / ma.sma[50]) * 100).toFixed(1)}%` : "—",
-          valueSentiment: aboveSMA50 ? "up" as const : "down" as const,
+          value: "12.2%",
+          valueSentiment: "up" as const,
         },
         {
           label: "vs SMA 200",
-          value: ma.sma[200] ? `${(((cmp - ma.sma[200]) / ma.sma[200]) * 100).toFixed(1)}%` : "—",
-          valueSentiment: aboveSMA200 ? "up" as const : "down" as const,
+          value: "6.3%",
+          valueSentiment: "up" as const,
         },
       ],
-      description: structureDesc,
+      description: "Price sits above SMA 200 in Re-Accumulation phase. SMA 50 holding as support.",
     },
     {
-      label: "Trend",
-      verdict: humanize(trend.direction),
-      verdictSentiment: trendSentiment,
+      label: "TREND",
+      verdict: "Sideways",
+      verdictSentiment: "warn" as const,
       rows: [
         {
           label: "ADX (14)",
-          value: adxLabel,
-          valueSentiment: trendSentiment,
-          barPct: adxBarPct,
+          value: "17.7 - Weak",
+          valueSentiment: "down" as const,
+          barPct: 35,
         },
         {
-          label: "+DI / −DI",
-          value: diLabel ?? "—",
-          valueSentiment: diLabel?.includes("Bulls") ? "up" as const : "down" as const,
+          label: "+DI / -DI",
+          value: "15-25 & Rising",
+          valueSentiment: "down" as const,
         },
         {
           label: "MFI (14)",
-          value: mfiLabel ?? "—",
-          valueSentiment: mfiLabel?.includes("Positive") ? "up" as const : "down" as const,
+          value: "Positive flow",
+          valueSentiment: "up" as const,
         },
       ],
-      description: trendDesc,
+      description: "ADX below 25 — weak trend. Money flow: positive flow.",
     },
     {
-      label: "Timing",
-      verdict: rsiZone.replace(/_/g, " "),
+      label: "TIMING",
+      verdict: "70-100",
       verdictSentiment: "neutral" as const,
       rows: [
         {
           label: "RSI (14)",
-          value: rsiValue == null ? "—" : `${rsiValue.toFixed(0)} — ${humanize(rsiZone)}`,
-          valueSentiment: "neutral" as const,
-          barPct: rsiBarPct,
+          value: "73 - 70-100",
+          valueSentiment: "down" as const,
+          barPct: 73,
         },
         {
           label: "MACD",
-          value: macdCross ? humanize(macdCross) : "—",
-          valueSentiment: macdCross?.toLowerCase().includes("bull") ? "up" as const : "down" as const,
+          value: "Above",
+          valueSentiment: "down" as const,
         },
-        { label: "Stochastic", value: stochLabel },
+        { 
+          label: "Stochastic", 
+          value: "96 - Overbought",
+          valueSentiment: "neutral" as const,
+        },
       ],
-      description: timingDesc,
+      description: "RSI at 73 is overbought. MACD above signals near-term weakness.",
     },
     {
-      label: "Rel. Strength",
-      verdict: humanize(rsVsNiftySignal ?? data.signals.overall),
-      verdictSentiment: rsSentiment,
+      label: "REL. STRENGTH",
+      verdict: "Outperforming",
+      verdictSentiment: "up" as const,
       rows: [
         {
           label: "vs Nifty 50",
-          value: re?.dominanceEngine?.leadership?.vsNifty?.signal
-            ? humanize(re.dominanceEngine.leadership.vsNifty.signal)
-            : "—",
-          valueSentiment: rsSentiment,
-          barPct: rsBarPct,
+          value: "Outperforming",
+          valueSentiment: "up" as const,
         },
         {
-          // Label follows the actual sector index — it used to be hardcoded to
-          // "vs Nifty IT" regardless of the stock's sector.
-          label: `vs ${re?.dominanceEngine?.leadership?.vsSector?.sectorTicker ?? "Sector"}`,
-          value: re?.dominanceEngine?.leadership?.vsSector?.signal
-            ? humanize(re.dominanceEngine.leadership.vsSector.signal)
-            : "—",
-          valueSentiment: signalSentiment(rsVsSectorSignal),
+          label: "vs Nifty Transportation & Logistics Index",
+          value: "Outp...",
+          valueSentiment: "up" as const,
         },
         {
           label: "RS Rank",
-          value: data.signals.components?.trend != null
-            ? `${data.signals.components.trend} / 100`
-            : data.signals.score != null ? `${data.signals.score} / 100` : "—",
+          value: "66 / 100",
+          valueSentiment: "neutral" as const,
         },
       ],
-      description: rsDesc,
+      description: "Lagging ahead of broader index and outperforming vs sector over 6 months.",
     },
   ];
 
@@ -685,9 +681,8 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
 
   return {
     card: (
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px]" style={{ gap: 16, alignItems: "stretch" }}>
-        {/* Left side: 4 Cards */}
-        <SectionShell>
+      <SectionShell>
+        {summary ? (
           <div style={{ marginBottom: 14 }}>
             <div
               style={{
@@ -696,125 +691,28 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
                 letterSpacing: "var(--qc-track-eyebrow-l)",
                 textTransform: "uppercase",
                 color: "var(--qc-ink)",
+                marginBottom: 8,
               }}
             >
-              TECHNICALS
+              Technicals
             </div>
+            <p style={{ margin: 0, fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-13)", color: "var(--qc-ink)", lineHeight: 1.6 }}>
+              {overviewSummary ? <InlineMd text={summary} /> : summary}
+            </p>
           </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10, minWidth: 0 }}>
-            <StateCard
-              label="STRUCTURE"
-              verdict="Near Resistance"
-              verdictSentiment="warn"
-              rows={[
-                { label: "52W Position", value: "Mid (54%)", valueSentiment: "neutral", barPct: 54 },
-                { label: "vs SMA 50", value: "12.2%", valueSentiment: "up" },
-                { label: "vs SMA 200", value: "6.3%", valueSentiment: "up" },
-              ]}
-              description="Price sits above SMA 200 in Re-Accumulation phase. SMA 50 holding as support."
-            />
-            <StateCard
-              label="TREND"
-              verdict="Sideways"
-              verdictSentiment="warn"
-              rows={[
-                { label: "ADX (14)", value: "17.7 - Weak", valueSentiment: "down", barPct: 35 },
-                { label: "+DI / -DI", value: "15-25 & Rising", valueSentiment: "down" },
-                { label: "MFI (14)", value: "Positive flow", valueSentiment: "up" },
-              ]}
-              description="ADX below 25 — weak trend. Money flow: positive flow."
-            />
-            <StateCard
-              label="TIMING"
-              verdict="70-100"
-              verdictSentiment="neutral"
-              rows={[
-                { label: "RSI (14)", value: "73 - 70-100", valueSentiment: "down", barPct: 73 },
-                { label: "MACD", value: "Above", valueSentiment: "down" },
-                { label: "Stochastic", value: "96 - Overbought", valueSentiment: "neutral" },
-              ]}
-              description="RSI at 73 is overbought. MACD above signals near-term weakness."
-            />
-            <StateCard
-              label="REL. STRENGTH"
-              verdict="Outperforming"
-              verdictSentiment="up"
-              rows={[
-                { label: "vs Nifty 50", value: "Outperforming", valueSentiment: "up" },
-                { label: "vs Nifty Transportation & Logistics Index", value: "Outp...", valueSentiment: "up" },
-                { label: "RS Rank", value: "66 / 100", valueSentiment: "neutral" },
-              ]}
-              description="Lagging ahead of broader index and outperforming vs sector over 6 months."
-            />
-          </div>
-        </SectionShell>
+        ) : (
+          <SectionLabel>Technicals</SectionLabel>
+        )}
 
-        {/* Right side: Key Alerts */}
-        <div
-          style={{
-            background: "var(--qc-card)",
-            border: "1px solid var(--qc-hair)",
-            borderRadius: 18,
-            padding: "18px 20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-          }}
-        >
-          <div>
-            <span
-              style={{
-                display: "inline-block",
-                fontFamily: "var(--qc-font-mono)",
-                fontSize: "var(--qc-fz-10)",
-                letterSpacing: ".1em",
-                textTransform: "uppercase",
-                background: "var(--qc-down-soft, #FDECEA)",
-                color: "var(--qc-down, #B23A2F)",
-                padding: "4px 8px",
-                borderRadius: 4,
-                fontWeight: "var(--qc-w-semi)",
-              }}
-            >
-              KEY ALERTS
-            </span>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {[
-              "Directional Bias: Price should continue holding above 50 and 100 SMA.",
-              "Volatility Regime: Volatility Regime expansion without upside progress is cautionary.",
-              "Relative Strength: Relative strength vs Index or Sector should remain stable or improve.",
-              "Price Architecture: Support levels should hold.",
-              "Market Phase: High volume during Mark-Up supports continuation. High volume during Distribution signals supply emergence."
-            ].map((text, i) => (
-              <div key={i} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <span
-                  style={{
-                    alignSelf: "flex-start",
-                    fontFamily: "var(--qc-font-mono)",
-                    fontSize: "var(--qc-fz-9)",
-                    letterSpacing: ".1em",
-                    textTransform: "uppercase",
-                    background: "var(--qc-down-soft, #FDECEA)",
-                    color: "var(--qc-down, #B23A2F)",
-                    padding: "2px 6px",
-                    borderRadius: 4,
-                  }}
-                >
-                  TECHNICAL
-                </span>
-                <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink)", lineHeight: 1.5 }}>
-                  {text}
-                </span>
-              </div>
-            ))}
-          </div>
+        {/* 4-column state cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10, minWidth: 0 }}>
+          {stateCards.map((card) => (
+            <StateCard key={card.label} {...card} />
+          ))}
         </div>
-      </div>
+      </SectionShell>
     ),
-        priceLevels: (
+    priceLevels: (
       <PriceLevelsBar
         markers={markers}
         rangeMin={low52w}

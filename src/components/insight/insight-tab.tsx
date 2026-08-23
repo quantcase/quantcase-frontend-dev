@@ -256,9 +256,9 @@ const TYPE_VERDICT_LABELS: Record<InsightType, string> = {
 // Card subtitles — the second line of the fundamentals-style card header. Kept
 // short so they never wrap past one line in the card header.
 const TYPE_LENS_SUBTITLES: Record<InsightType, string> = {
-  management: "Scored assessment across each management lens",
-  opportunity: "Scored assessment across each opportunity lens",
-  deal: "Scored assessment across each deal lens",
+  management: "Scored assessment across each Management lens",
+  opportunity: "Scored assessment across each Opportunity lens",
+  deal: "Scored assessment across each Deal lens",
 };
 
 // ─── Empty / error states ──────────────────────────────────────────────────────

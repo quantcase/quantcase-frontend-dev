@@ -68,7 +68,7 @@ function EmphasisTitle({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         p.startsWith("*") && p.endsWith("*") && p.length > 2 ? (
-          <em key={i} style={{ fontStyle: "italic", color: "var(--qc-brand-chip)", fontWeight: "var(--qc-w-medium)" }}>
+          <em key={i} style={{ fontStyle: "normal", color: "var(--qc-ink)", fontWeight: "var(--qc-w-medium)" }}>
             {p.slice(1, -1)}
           </em>
         ) : (

@@ -59,7 +59,7 @@ interface StateCardProps {
   verdict: string;
   verdictSentiment: "up" | "down" | "neutral" | "warn";
   rows: StateCardRow[];
-  description: React.ReactNode;
+  description?: React.ReactNode;
 }
 
 function StateCard({ label, verdict, verdictSentiment, rows, description }: StateCardProps) {
@@ -172,32 +172,33 @@ function StateCard({ label, verdict, verdictSentiment, rows, description }: Stat
           ))}
         </div>
 
-        {/* Separator + description clamped to 2 lines with tooltip */}
-        <div style={{ borderTop: "1px solid var(--qc-hair-2)", paddingTop: 8 }}>
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <div
-                style={{
-                  margin: 0,
-                  fontFamily: "var(--qc-font-sans)",
-                  fontSize: "var(--qc-fz-11)",
-                  color: "var(--qc-ink-2)",
-                  lineHeight: 1.5,
-                  display: "-webkit-box",
-                  WebkitLineClamp: 4,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  cursor: "default",
-                }}
-              >
+        {description && (
+          <div style={{ borderTop: "1px solid var(--qc-hair-2)", paddingTop: 8 }}>
+            <TooltipRoot>
+              <TooltipTrigger asChild>
+                <div
+                  style={{
+                    margin: 0,
+                    fontFamily: "var(--qc-font-sans)",
+                    fontSize: "var(--qc-fz-11)",
+                    color: "var(--qc-ink-2)",
+                    lineHeight: 1.5,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 4,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    cursor: "default",
+                  }}
+                >
+                  {description}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" style={{ maxWidth: 220 }}>
                 {description}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" style={{ maxWidth: 220 }}>
-              {description}
-            </TooltipContent>
-          </TooltipRoot>
-        </div>
+              </TooltipContent>
+            </TooltipRoot>
+          </div>
+        )}
       </div>
     </TooltipProvider>
   );
@@ -638,8 +639,8 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
   const avgVol = data.price.avgVolume20d;
   const volSig = struct?.participation?.volumeSignal;
   const zone = struct?.priceStructure?.zone ?? "Unknown Zone";
-  const s1Val = sr.pivotPoints?.s1 ?? sr.static?.support?.[0] ?? sr.fibonacci?.[0] ?? cmp;
-  const r1Val = sr.pivotPoints?.r1 ?? sr.static?.resistance?.[0] ?? sr.fibonacci?.[1] ?? cmp;
+  const s1Val = sr.static?.support?.[0] ?? cmp;
+  const r1Val = sr.static?.resistance?.[0] ?? cmp;
   let srPct = 0;
   if (r1Val > s1Val) srPct = Math.min(100, Math.max(0, ((cmp - s1Val) / (r1Val - s1Val)) * 100));
 
@@ -678,7 +679,7 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
         },
         {
           label: <span style={{ whiteSpace: "pre-wrap" }}>{"Avg Volume\n(20D)"}</span>,
-          value: `${formatVol(avgVol)} — ${humanize(volSig)}`,
+          value: humanize(volSig),
           valueSentiment: volSig === "BELOW_AVERAGE" ? "warn" as const : "up" as const,
         },
         {
@@ -688,7 +689,6 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
           subLabel: `Support ₹${fp(s1Val)} · Resistance ₹${fp(r1Val)}`,
         },
       ],
-      description: struct?.marketStructure?.growthOutput ?? struct?.marketStructure?.valueOutput ?? re?.decisionContext?.summary ?? "No structural data available.",
     },
     {
       label: "TREND",
@@ -706,7 +706,6 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
           barPct: Math.min(100, (adxVal / 60) * 100),
         },
       ],
-      description: trendEng?.trendDirection?.growthOutput ?? trendEng?.trendDirection?.valueOutput ?? "No trend data available.",
     },
     {
       label: "TIMING",
@@ -720,11 +719,10 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
         },
         {
           label: "BB Width (20)",
-          value: `${(bbw * 100).toFixed(1)}% — ${humanize(bbwCond)}`,
+          value: humanize(bbwCond),
           valueSentiment: "warn" as const,
         },
       ],
-      description: timing?.momentum?.growthOutput ?? timing?.momentum?.valueOutput ?? "No timing data available.",
     },
     {
       label: "DOMINANCE",
@@ -747,7 +745,6 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
           valueSentiment: signalSentiment(secVsNifty),
         },
       ],
-      description: dom?.leadership?.vsSector?.growthOutput ?? dom?.leadership?.vsNifty?.growthOutput ?? "No dominance data available.",
     },
   ];
 

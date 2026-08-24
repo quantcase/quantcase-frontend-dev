@@ -46,20 +46,20 @@ export function LevelsToWatchCard({ levels, cmp }: Props) {
               className="flex items-center justify-between gap-3 py-2"
               style={{ borderBottom: i < rows.length - 1 ? "1px solid var(--qc-hair)" : "none" }}
             >
-              <div className="flex flex-col gap-0.5 min-w-0">
-                <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              <div className="flex items-center gap-2 min-w-0">
+                <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em", flexShrink: 0 }}>
                   {heading}
                 </span>
-                <span style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)", lineHeight: 1.4 }}>
+                <span className="truncate" style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)", lineHeight: 1.4 }}>
                   {level.label}
                 </span>
               </div>
-              <div className="flex flex-col items-end gap-0.5 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>
                   {fmtPrice(level.price)}
                 </span>
                 <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: above ? "var(--qc-up)" : "var(--qc-down)" }}>
-                  {above ? "+" : ""}{distPct.toFixed(1)}%
+                  ({above ? "+" : ""}{distPct.toFixed(1)}%)
                 </span>
               </div>
             </div>

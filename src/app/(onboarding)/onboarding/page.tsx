@@ -106,7 +106,37 @@ export default function OnboardingV3() {
 .ochip .ok{color:var(--pos);font-size:13px}
 .s3grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:30px;margin-top:18px;align-items:start}
 .paper{--jbg:#EAE8E3;--jsurf:#FFF;--jink:#1A1520;--jink2:#4A4453;--jink3:#8B8593;--jrule:#E2DFD9;--jrule2:#D6D2CB;--vio:#8A6DCA;}
-.jcard{position:relative;background:var(--jsurf);border:1px solid var(--jrule2);border-radius:16px;padding:26px 28px;color:var(--jink);}
+.jcard {
+  position: relative;
+  background: var(--jsurf);
+  border: 1px solid var(--jrule2);
+  border-radius: 16px;
+  padding: 26px 28px;
+  color: var(--jink);
+  z-index: 10;
+}
+.jcard::before, .jcard::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: var(--jsurf);
+  border: 1px solid var(--jrule2);
+  border-radius: 16px;
+  z-index: -1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.jcard::before {
+  bottom: -8px;
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+.jcard::after {
+  bottom: -16px;
+  transform: scale(0.94);
+  opacity: 0.6;
+}
 .thesisWrap{margin-top:26px;background:var(--jbg);border:1px solid var(--jrule2);border-radius:16px;padding:20px 0 18px}
 .thesisHead{display:flex;align-items:baseline;gap:14px;padding:0 22px;margin-bottom:14px}
 .thesisHead .t{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--jink3);font-weight:600}

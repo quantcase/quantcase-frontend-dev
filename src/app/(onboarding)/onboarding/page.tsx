@@ -26,6 +26,7 @@ export default function OnboardingV3() {
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [q, setQ] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [tradingEnabled, setTradingEnabled] = useState(false);
 
   const [thesisDraft, setThesisDraft] = useState<ThesisFieldsState>({
     dim: "M",
@@ -482,8 +483,8 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                       <h3>Trade from here too?</h3>
                       <p>Right now we can only read. Acting on a signal without switching apps is a different permission — we'll ask the first time you tap Buy, not before.</p>
                       <div className="act">
-                        <button className="mini" style={{ padding: "6px 10px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--line)", borderRadius: "6px", fontSize: "10px", fontFamily: "var(--mono)", color: "var(--tan)" }}>ENABLE TRADING</button>
-                        <button className="laterbtn" style={{ fontSize: "11px", color: "var(--dim)", background: "none", border: "none" }}>Ask me later</button>
+                        <button className="mini transition-all" onClick={() => setTradingEnabled(!tradingEnabled)} style={{ padding: "6px 10px", background: tradingEnabled ? "rgba(74,222,128,0.1)" : "rgba(255,255,255,0.05)", border: `1px solid ${tradingEnabled ? "var(--pos)" : "var(--line)"}`, borderRadius: "6px", fontSize: "10px", fontFamily: "var(--mono)", color: tradingEnabled ? "var(--pos)" : "var(--tan)" }}>{tradingEnabled ? "✓ TRADING ENABLED" : "ENABLE TRADING"}</button>
+                        {!tradingEnabled && <button className="laterbtn" style={{ fontSize: "11px", color: "var(--dim)", background: "none", border: "none" }}>Ask me later</button>}
                       </div>
                     </div>
                   ) : (

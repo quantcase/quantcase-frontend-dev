@@ -114,6 +114,7 @@ export default function OnboardingV3() {
   padding: 26px 28px;
   color: var(--jink);
   z-index: 10;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
 }
 .stack-wrap {
   position: relative;
@@ -127,6 +128,10 @@ export default function OnboardingV3() {
   margin: 0 auto;
   height: 60px;
   border-radius: 16px 16px 0 0;
+  background: var(--jsurf);
+  border: 1px solid var(--jrule2);
+  border-bottom: none;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
 }
 .thesisWrap{margin-top:26px;background:var(--jbg);border:1px solid var(--jrule2);border-radius:16px;padding:20px 0 18px}
 .thesisHead{display:flex;align-items:baseline;gap:14px;padding:0 22px;margin-bottom:14px}
@@ -505,10 +510,10 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
               <div className="s3grid">
                 <div className="paper">
                   <div className="stack-wrap">
-                    <div className="stack-layer" style={{ background: '#EE6153', width: '80%', top: '-36px' }}></div>
-                    <div className="stack-layer" style={{ background: '#36BCD2', width: '85%', top: '-27px' }}></div>
-                    <div className="stack-layer" style={{ background: '#7A5276', width: '90%', top: '-18px' }}></div>
-                    <div className="stack-layer" style={{ background: '#F4C553', width: '95%', top: '-9px' }}></div>
+                    <div className="stack-layer" style={{ width: '80%', top: '-36px' }}></div>
+                    <div className="stack-layer" style={{ width: '85%', top: '-27px' }}></div>
+                    <div className="stack-layer" style={{ width: '90%', top: '-18px' }}></div>
+                    <div className="stack-layer" style={{ width: '95%', top: '-9px' }}></div>
                     <div className="jcard">
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "4px" }}>
                       <div style={{ fontSize: "24px", fontFamily: "var(--serif)" }}>{mode === "import" ? "HDFCBANK" : "ZOMATO"}</div>

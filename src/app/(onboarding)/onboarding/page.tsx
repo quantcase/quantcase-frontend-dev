@@ -115,27 +115,18 @@ export default function OnboardingV3() {
   color: var(--jink);
   z-index: 10;
 }
-.jcard::before, .jcard::after {
-  content: '';
+.stack-wrap {
+  position: relative;
+  margin-top: 36px;
+  z-index: 1;
+}
+.stack-layer {
   position: absolute;
   left: 0;
   right: 0;
-  height: 100%;
-  background: var(--jsurf);
-  border: 1px solid var(--jrule2);
-  border-radius: 16px;
-  z-index: -1;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-.jcard::before {
-  bottom: -8px;
-  transform: scale(0.97);
-  opacity: 0.9;
-}
-.jcard::after {
-  bottom: -16px;
-  transform: scale(0.94);
-  opacity: 0.6;
+  margin: 0 auto;
+  height: 60px;
+  border-radius: 16px 16px 0 0;
 }
 .thesisWrap{margin-top:26px;background:var(--jbg);border:1px solid var(--jrule2);border-radius:16px;padding:20px 0 18px}
 .thesisHead{display:flex;align-items:baseline;gap:14px;padding:0 22px;margin-bottom:14px}
@@ -359,6 +350,29 @@ background:linear-gradient(180deg,#F4EDE3,#E6DACA);color:#0C1626;display:flex;al
 .pickwrap,.donegrid,.mods,.paths,.scope,.scorecard{grid-template-columns:1fr}.doors{flex-direction:column}
 #onboarding-root h1{font-size:30px}.map,.later{padding:20px}.stage{padding:22px 20px}
 header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.bgrid{grid-template-columns:repeat(2,1fr)}}
+
+@media (max-width: 640px) {
+  .bar {
+    flex-direction: column-reverse;
+    gap: 16px;
+    align-items: stretch;
+    padding-bottom: 32px;
+  }
+  .cta {
+    flex-direction: column-reverse;
+    width: 100%;
+    gap: 12px;
+  }
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .skip, .back {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+  }
+}
 ` }} />
 
       <div className="app">
@@ -490,7 +504,12 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
 
               <div className="s3grid">
                 <div className="paper">
-                  <div className="jcard">
+                  <div className="stack-wrap">
+                    <div className="stack-layer" style={{ background: '#EE6153', width: '80%', top: '-36px' }}></div>
+                    <div className="stack-layer" style={{ background: '#36BCD2', width: '85%', top: '-27px' }}></div>
+                    <div className="stack-layer" style={{ background: '#7A5276', width: '90%', top: '-18px' }}></div>
+                    <div className="stack-layer" style={{ background: '#F4C553', width: '95%', top: '-9px' }}></div>
+                    <div className="jcard">
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "4px" }}>
                       <div style={{ fontSize: "24px", fontFamily: "var(--serif)" }}>{mode === "import" ? "HDFCBANK" : "ZOMATO"}</div>
                       <div style={{ textAlign: "right" }}>
@@ -512,6 +531,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                     
                     <OnboardingThesisFields value={thesisDraft} onChange={setThesisDraft} dimScores={mode === "import" ? { M: 71, O: 61, D: 58 } : { M: 80, O: 85, D: 78 }} />
                   </div>
+                </div>
                 </div>
 
                 <div className="rail">

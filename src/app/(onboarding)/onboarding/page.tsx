@@ -98,6 +98,34 @@ export default function OnboardingV3() {
 
 #onboarding-root{background:#060D18;height:100vh;overflow:hidden;display:flex;flex-direction:column;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
 
+
+.outcome{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;margin-top:16px;}
+.ochip{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:8px;padding:9px 13px;font-size:12.5px;color:var(--muted)}
+.ochip b{font-family:var(--serif);font-size:16px;color:var(--ink);line-height:1}
+.ochip .ok{color:var(--pos);font-size:13px}
+.s3grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:30px;margin-top:18px;align-items:start}
+.paper{--jbg:#EAE8E3;--jsurf:#FFF;--jink:#1A1520;--jink2:#4A4453;--jink3:#8B8593;--jrule:#E2DFD9;--jrule2:#D6D2CB;--vio:#8A6DCA;}
+.jcard{position:relative;background:var(--jsurf);border:1px solid var(--jrule2);border-radius:16px;padding:26px 28px;color:var(--jink);}
+.thesisWrap{margin-top:26px;background:var(--jbg);border:1px solid var(--jrule2);border-radius:16px;padding:20px 0 18px}
+.thesisHead{display:flex;align-items:baseline;gap:14px;padding:0 22px;margin-bottom:14px}
+.thesisHead .t{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--jink3);font-weight:600}
+.thesisHead .keep{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--jink3)}
+.thesisHead .keep b{color:var(--vio)}
+.trow{display:flex;gap:12px;overflow-x:auto;padding:4px 22px 8px;scrollbar-width:thin}
+.trow::-webkit-scrollbar{height:6px}
+.trow::-webkit-scrollbar-thumb{background:var(--jrule2);border-radius:4px}
+.rail{display:flex;flex-direction:column;gap:12px}
+.why{border:1px solid rgba(200,146,92,.32);background:linear-gradient(150deg,rgba(200,146,92,.11),rgba(200,146,92,.02));border-radius:11px;padding:18px}
+.why h4{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--tan);margin-bottom:11px}
+.why p{font-size:12.5px;color:var(--muted);line-height:1.6}
+.why p b{color:var(--ink)}
+.ask{border:1px solid var(--line);border-radius:11px;padding:18px;background:rgba(255,255,255,.028)}
+.ask .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--dim)}
+.ask h3{font-size:15px;font-weight:600;margin-top:8px}
+.ask p{font-size:12px;color:var(--muted);line-height:1.5;margin-top:7px}
+.ask .act{margin-top:14px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+@media(max-width:1040px){.s3grid{grid-template-columns:1fr}}
+
 /* ---------- flow map ---------- */
 .map{max-width:1240px;margin:0 auto;padding:26px 40px 0}
 .map h5{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--tan);margin-bottom:6px}
@@ -392,70 +420,111 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
             </section>
           )}
 
-          {step === 3 && mode === "pick" && (
+                    {step === 3 && (
             <section className="screen on">
-              <div className="eyebrow">03 — YOU'RE SET</div>
-              <h1>Your watchlist is live.<br/>We'll tell you <em>when something changes.</em></h1>
-              <p className="lede">You'll get an alert the moment a score moves — and the sentence explaining why.</p>
-              <div className="summary">
-                {picks.map((p) => (
-                  <div key={p.t} className="scard">
-                    <span className="tk">{p.t}</span>
-                    <span className="sc" style={{ color: col(p.s) }}>{p.s}</span>
-                    <span className="dl" style={{ color: p.s >= 70 ? "#4ADE80" : "#F87171" }}>{p.s >= 70 ? "▲" : "▼"} TRACKING</span>
-                  </div>
-                ))}
-              </div>
-              <div className="donegrid">
-                <div className="opt hero">
-                  <div className="tag">THE BIGGER HALF · READ-ONLY</div>
-                  <h3>Now do the ones you actually own</h3>
-                  <p>You're watching {sel.size}. Import your holdings and we'll score every one, flag the ones whose story changed, and write your journal backwards from trades you've already made.</p>
-                  <div className="act"><button className="mini" onClick={() => setIsImportOpen(true)}>IMPORT MY HOLDINGS</button><button className="laterbtn" onClick={() => router.push("/investor/dashboard")}>Maybe later</button></div>
-                  <div className="trust">NO TRADING PERMISSION</div>
+              <div className="eyebrow">03 — YOUR FIRST ENTRY</div>
+              <h1>
+                We know <em>what</em> and <em>when</em>.<br/>Only you know <em>why</em>.
+              </h1>
+              <p className="lede">
+                {mode === "import" 
+                  ? "You bought HDFCBANK on 12 Mar 26 at ₹1,610 — we rebuilt that much from your trade history. We've drafted the reason too; correct it or accept it."
+                  : "We've pre-filled a thesis for your top pick from its strongest factor. Change a word or leave it — either way it gets checked against reality later."}
+              </p>
+              
+              {mode === "import" ? (
+                <div className="outcome">
+                  <div className="ochip"><span className="ok">✓</span><b>{PORT.length}</b> holdings scored</div>
+                  <div className="ochip"><span className="ok">✓</span>Buy dates &amp; score history <b>recovered</b></div>
+                  <div className="ochip"><span className="ok">✓</span>Read-only · <b>no</b> trading access</div>
                 </div>
-                <div className="opt">
-                  <div className="tag">OPTIONAL</div>
-                  <h3>Keep a decision journal</h3>
-                  <p>Write down why you bought. We resurface it when the score changes, so you can check your thesis against what actually happened.</p>
-                  <div className="act"><button className="mini">TURN ON JOURNAL</button><button className="laterbtn">Maybe later</button></div>
-                  <div className="trust">PRIVATE TO YOU · NEVER SHARED</div>
+              ) : (
+                <div className="outcome">
+                  <div className="ochip"><span className="ok">✓</span><b>3</b> stocks tracked</div>
+                  <div className="ochip"><span className="ok">✓</span>Alerts on every <b>score move</b></div>
                 </div>
-              </div>
-            </section>
-          )}
+              )}
 
-          {step === 3 && mode === "import" && (
-            <section className="screen on">
-              <div className="eyebrow">03 — YOU'RE SET</div>
-              <h1><span>{PORT.length}</span> holdings scored. <em>And a journal you didn't have to write.</em></h1>
-              <p className="lede">Rebuilt from your own trade history — what you bought, when, and what the score was that day.</p>
-              <div className="scorecard">
-                <div className="dialbox">
-                  <svg width="160" height="160"><circle cx="80" cy="80" r="66" stroke="rgba(255,255,255,.08)" strokeWidth="10" fill="none"/>
-                  <circle cx="80" cy="80" r="66" stroke="#C8925C" strokeWidth="10" fill="none" strokeLinecap="round" strokeDasharray="414.7" strokeDashoffset="120"/></svg>
-                  <div className="dnum"><b>71</b><span>PORTFOLIO AVG</span></div>
-                </div>
-                <div>
-                  <div className="bench">
-                    <div className="brow"><span className="k">Your portfolio</span><span className="bar"><i style={{ width: "71%", background: "#C8925C" }}></i></span><span className="v" style={{ color: "#C8925C" }}>71</span></div>
-                    <div className="brow"><span className="k">Nifty 50 average</span><span className="bar"><i style={{ width: "66%", background: "#5C6E84" }}></i></span><span className="v" style={{ color: "#8FA0B4" }}>66</span></div>
-                    <div className="brow"><span className="k">Your best holding</span><span className="bar"><i style={{ width: "84%", background: "#4ADE80" }}></i></span><span className="v" style={{ color: "#4ADE80" }}>84</span></div>
-                    <div className="brow"><span className="k">Your worst holding</span><span className="bar"><i style={{ width: "41%", background: "#F87171" }}></i></span><span className="v" style={{ color: "#F87171" }}>41</span></div>
+              <div className="s3grid">
+                <div className="paper">
+                  <div className="jcard">
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "4px" }}>
+                      <div style={{ fontSize: "24px", fontFamily: "var(--serif)" }}>{mode === "import" ? "HDFCBANK" : "ZOMATO"}</div>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--jink)" }}>{mode === "import" ? "₹1,742.30" : "₹182.40"}</div>
+                        <div style={{ fontSize: "9.5px", fontFamily: "var(--mono)", color: "var(--pos)", letterSpacing: ".05em" }}>↑8.2% <span style={{ color: "var(--jink3)" }}>· MOD 78</span></div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "12px", color: "var(--jink2)", marginBottom: "16px" }}>{mode === "import" ? "HDFC Bank Ltd. · Private Banks" : "Zomato Ltd. · Internet"}</div>
+                    <div style={{ display: "flex", gap: "16px", fontSize: "10px", fontFamily: "var(--mono)", letterSpacing: ".1em", marginBottom: "20px" }}>
+                      <span style={{ color: "var(--jink)" }}>MANAGEMENT <b style={{ color: "var(--jink)" }}>{mode === "import" ? "71" : "80"}</b></span>
+                      <span style={{ color: "var(--jink)" }}>OPPORTUNITY <b style={{ color: "var(--jink)" }}>{mode === "import" ? "61" : "85"}</b></span>
+                      <span style={{ color: "var(--jink)" }}>DEAL <b style={{ color: "var(--jink)" }}>{mode === "import" ? "58" : "78"}</b></span>
+                    </div>
+                    <div style={{ background: "#F6F5F3", borderRadius: "6px", padding: "8px 12px", fontSize: "11px", color: "var(--jink2)", marginBottom: "24px" }}>
+                      {mode === "import" 
+                        ? <>📌 Bought <b>40 sh</b> on <b>12 Mar 26</b> at <b>₹1,610</b> — score was <b>84</b> then, <b>78</b> now.</>
+                        : <>👁 You're <b>watching</b> this, not holding it. The watch thesis converts to a position entry if you buy.</>}
+                    </div>
+                    
+                    <WizardThesisFields value={thesisDraft} onChange={setThesisDraft} dimScores={mode === "import" ? { M: 71, O: 61, D: 58 } : { M: 80, O: 85, D: 78 }} />
                   </div>
-                  <div className="flags"><b>Three holdings need a look.</b> <span className="w">YESBANK (41)</span>, <span className="w">VODAIDEA (44)</span> and <span className="w">PAYTM (52)</span> all sit below 55 — and in every case Management is what's dragging. Worth understanding before it repeats.</div>
+                </div>
+
+                <div className="rail">
+                  <div className="why">
+                    <h4>WHY THIS MATTERS</h4>
+                    <p>A score tells you <b>what changed</b>. Your note tells you <b>whether it changes anything for you</b>. We put the two side by side every time the number moves — the only way to find out if your reasoning was any good.</p>
+                  </div>
+                  {mode === "import" ? (
+                    <div className="ask">
+                      <div className="tag">LAST ONE · SEPARATE PERMISSION</div>
+                      <h3>Trade from here too?</h3>
+                      <p>Right now we can only read. Acting on a signal without switching apps is a different permission — we'll ask the first time you tap Buy, not before.</p>
+                      <div className="act">
+                        <button className="mini" style={{ padding: "6px 10px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--line)", borderRadius: "6px", fontSize: "10px", fontFamily: "var(--mono)", color: "var(--tan)" }}>ENABLE TRADING</button>
+                        <button className="laterbtn" style={{ fontSize: "11px", color: "var(--dim)", background: "none", border: "none" }}>Ask me later</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="ask">
+                      <div className="tag">THE BIGGER HALF · READ-ONLY</div>
+                      <h3>Do the ones you own</h3>
+                      <p>Import your holdings and every card arrives with the buy date, the score then and the score now already filled — you only write the reason.</p>
+                      <div className="act">
+                        <button className="mini" style={{ padding: "6px 10px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--line)", borderRadius: "6px", fontSize: "10px", fontFamily: "var(--mono)", color: "var(--tan)" }} onClick={() => setIsImportOpen(true)}>IMPORT MY HOLDINGS</button>
+                        <button className="laterbtn" style={{ fontSize: "11px", color: "var(--dim)", background: "none", border: "none" }}>Maybe later</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="jhead"><span className="t">YOUR JOURNAL — REBUILT FROM YOUR TRADES</span><span className="n">NOTHING TO WRITE</span></div>
-              <div className="jent"><div className="dt">12 MAR 26</div><div className="bd"><div className="ttl">Bought <u>HDFCBANK</u> · 40 sh @ ₹1,610</div><div className="dsc">Score was <b>84</b> the day you bought. It's <b>78</b> now — Management fell after a promised disclosure didn't arrive. Business performance unchanged.</div></div><div className="then">84 → <b style={{ color: "#C8925C" }}>78</b></div></div>
-              <div className="jent"><div className="dt">04 NOV 25</div><div className="bd"><div className="ttl">Bought <u>YESBANK</u> · 900 sh @ ₹21.40</div><div className="dsc">Score was <b>49</b> the day you bought — already bottom decile. It's <b>41</b> now. <b>Your longest-held low score.</b></div></div><div className="then">49 → <b style={{ color: "#F87171" }}>41</b></div></div>
-              <div className="donegrid" style={{ gridTemplateColumns: "1fr" }}>
-                <div className="opt">
-                  <div className="tag">LAST ONE · SEPARATE PERMISSION</div>
-                  <h3>Want to trade from here too?</h3>
-                  <p>Right now we can only read. If you'd like to act on a signal without switching apps, that's a separate permission — and we'll ask for it the first time you tap Buy, not before.</p>
-                  <div className="act"><button className="mini">ENABLE TRADING NOW</button><button className="laterbtn">Ask me when I need it</button></div>
-                  <div className="trust">SEBI-REGISTERED · MONEY STAYS IN YOUR DEMAT</div>
+
+              <div className="paper">
+                <div className="thesisWrap">
+                  <div className="thesisHead">
+                    <span className="t">Your thesis</span>
+                    <span className="keep">KEEP WRITING · <b>{mode === "import" ? "14 TO GO" : "2 TO GO"}</b></span>
+                  </div>
+                  <div className="trow">
+                    {(mode === "import" ? ["HDFCBANK", "INFY", "RELIANCE", "ICICIBANK", "TITAN"] : Array.from(sel)).map((t) => (
+                      <div key={t} style={{ flex: "0 0 240px", background: "#FFF", border: "1px solid #D6D2CB", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                          <b style={{ fontSize: "13px", color: "var(--jink)" }}>{t}</b>
+                          <span style={{ fontSize: "9px", fontFamily: "var(--mono)", color: "var(--jink3)" }}>NOT WRITTEN</span>
+                        </div>
+                        <div style={{ fontSize: "11px", color: "var(--jink3)", lineHeight: 1.5, marginBottom: "16px", flex: 1 }}>
+                          {mode === "import"
+                            ? "40 sh · 12 Mar 26 · score 84 → 78\nThe facts are here. The reason is up to you." 
+                            : "Score 81\nThe facts are here. The reason is up to you."}
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "10px", color: "var(--jink3)", fontFamily: "var(--mono)" }}>
+                          <span>■ Holdings</span>
+                          <span style={{ color: "var(--vio)", fontWeight: 600 }}>WRITE →</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </section>

@@ -12,6 +12,8 @@ import type { InsightLens } from "@/types/analysis";
 import { renderMd } from "@/lib/render-md";
 import { StatusBadge, type StatusSentiment } from "@/components/ds";
 import { SectionPanel } from "@/components/molecules/section-panel";
+import { BACKEND_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/api";
 
 const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
   "guidance-credibility": Target,
@@ -36,6 +38,7 @@ interface InsightLensesProps {
   heading?: string;
   subtitle?: string;
   onLensClick?: (slug: string) => void;
+  ticker?: string;
 }
 
 export function lensSentiment(status: string | undefined, pct: number): StatusSentiment {
@@ -62,10 +65,73 @@ function ExpandIcon() {
   );
 }
 
+function LensScenarios({ slug, ticker }: { slug: string; ticker: string }) {
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let apiSlug = slug === "pe-rerating-potential" || slug === "earnings-quality" || slug === "earnings_quality" ? "earning-quality" : slug;
+    apiSlug = apiSlug.replace(/_/g, "-");
+    
+    const endpoint = `/api/html-incremental-skills/${apiSlug}/outputs/${ticker}`;
+    
+    authFetch(`${BACKEND_URL}${endpoint}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+      })
+      .then((json) => {
+        if (!cancelled && json?.output?.extracted_json) {
+          setData(json.output.extracted_json);
+        } else if (!cancelled && json?.extracted_json) {
+          setData(json.extracted_json); // Just in case it's flat
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch scenarios", err);
+      });
+      
+    return () => { cancelled = true; };
+  }, [slug, ticker]);
+
+  const isEf = slug === 'earnings-forecast' || slug === 'earnings_forecast';
+  
+  const getVal = (c: string) => {
+    if (!data) return { main: "-", sub: null };
+    if (isEf) {
+      const s = data.scenarios?.find((s: any) => s.case === c);
+      return { main: s?.cagr ?? "-", sub: null };
+    } else {
+      const s = data.probability_fan?.segments?.find((s: any) => s.class === c);
+      return { main: s?.prob ?? "-", sub: s?.['p/e'] ?? null };
+    }
+  };
+
+  const bear = getVal('bear');
+  const base = getVal('base');
+  const bull = getVal('bull');
+
+  const Box = ({ title, colorClass, main, sub, borderCol }: { title: string, colorClass: string, main: string, sub: string | null, borderCol: string }) => (
+    <div className="flex flex-col p-2.5 rounded-lg bg-[var(--qc-bg)] border border-[var(--qc-hair)]" style={{ borderTop: `2px solid ${borderCol}` }}>
+      <span className={`text-[9px] font-bold tracking-wider ${colorClass} mb-1`}>{title}</span>
+      <span className="text-lg font-bold leading-none mb-1 text-[var(--qc-ink)]">{main}</span>
+      {sub && <span className="text-[10px] text-[var(--qc-ink-2)] font-medium">{sub}</span>}
+    </div>
+  );
+
+  return (
+    <div className="mt-4 grid grid-cols-3 gap-2">
+      <Box title="BEAR" colorClass="text-[var(--qc-down)]" main={bear.main} sub={bear.sub} borderCol="var(--qc-down)" />
+      <Box title="BASE" colorClass="text-[var(--qc-blue)]" main={base.main} sub={base.sub} borderCol="var(--qc-blue)" />
+      <Box title="BULL" colorClass="text-[var(--qc-up)]" main={bull.main} sub={bull.sub} borderCol="var(--qc-up)" />
+    </div>
+  );
+}
+
 // Lens description clamped to 2 lines. When the text is longer than the clamp,
 // hovering reveals the full copy in a signal-box-style popover (mirrors the
 // Signals tiles). Cards whose description fits show no tooltip.
-function LensDescription({ text, name, accentColor }: { text: string; name: string; accentColor: string }) {
+function LensDescription({ text, name, accentColor, disableHover }: { text: string; name: string; accentColor: string; disableHover?: boolean }) {
   const ref = useRef<HTMLParagraphElement>(null);
   const [overflowing, setOverflowing] = useState(false);
   const [hover, setHover] = useState(false);
@@ -88,12 +154,12 @@ function LensDescription({ text, name, accentColor }: { text: string; name: stri
     >
       <p
         ref={ref}
-        style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-2)", lineHeight: 1.6, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontFamily: "var(--qc-font-sans)" }}
+        style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-2)", lineHeight: 1.6, margin: 0, display: disableHover ? "block" : "-webkit-box", WebkitLineClamp: disableHover ? undefined : 2, WebkitBoxOrient: disableHover ? undefined : "vertical", overflow: disableHover ? "visible" : "hidden", fontFamily: "var(--qc-font-sans)" }}
       >
         {renderMd(text)}
       </p>
 
-      {overflowing && hover && (
+      {overflowing && hover && !disableHover && (
         <div
           style={{
             position: "absolute", left: 0, right: 0, bottom: "100%", marginBottom: 8,
@@ -117,7 +183,7 @@ function LensDescription({ text, name, accentColor }: { text: string; name: stri
   );
 }
 
-export function InsightLenses({ lenses, heading, subtitle, onLensClick }: InsightLensesProps) {
+export function InsightLenses({ lenses, heading, subtitle, onLensClick, ticker }: InsightLensesProps) {
   if (!lenses.length) return null;
 
   return (
@@ -142,6 +208,8 @@ export function InsightLenses({ lenses, heading, subtitle, onLensClick }: Insigh
           const statusLabel = (lens.status || (pct >= 70 ? "STRONG" : pct >= 40 ? "MODERATE" : "NEUTRAL")).toUpperCase();
           const isClickable = !!onLensClick;
           const Icon = LENS_ICON_CONFIG[lens.slug];
+          const isEarnings = lens.slug === 'earnings-forecast' || lens.slug === 'earnings-quality' || lens.slug === 'earnings_forecast' || lens.slug === 'earnings_quality';
+
           return (
             <motion.div
               key={lens.slug}
@@ -199,26 +267,10 @@ export function InsightLenses({ lenses, heading, subtitle, onLensClick }: Insigh
               <div style={{ marginBottom: 18, borderTop: "1px dashed var(--qc-hair)" }} />
 
               {/* Description — clamped to 2 lines, hover-expands when it overflows */}
-              <LensDescription text={lens.description} name={lens.name} accentColor={accentColor} />
+              <LensDescription text={lens.description} name={lens.name} accentColor={accentColor} disableHover={isEarnings} />
 
-              {(lens.slug === 'earnings-forecast' || lens.slug === 'earnings-quality' || lens.slug === 'earnings_forecast' || lens.slug === 'earnings_quality') && (
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  <div className="flex flex-col p-2.5 rounded-lg bg-[var(--qc-bg)] border border-[var(--qc-hair)]" style={{ borderTop: "2px solid var(--qc-down)" }}>
-                    <span className="text-[9px] font-bold tracking-wider text-[var(--qc-down)] mb-1">BEAR</span>
-                    <span className="text-lg font-bold leading-none mb-1 text-[var(--qc-ink)]">20%</span>
-                    <span className="text-[10px] text-[var(--qc-ink-2)] font-medium">220x</span>
-                  </div>
-                  <div className="flex flex-col p-2.5 rounded-lg bg-[var(--qc-bg)] border border-[var(--qc-hair)]" style={{ borderTop: "2px solid var(--qc-blue)" }}>
-                    <span className="text-[9px] font-bold tracking-wider text-[var(--qc-blue)] mb-1">BASE</span>
-                    <span className="text-lg font-bold leading-none mb-1 text-[var(--qc-ink)]">55%</span>
-                    <span className="text-[10px] text-[var(--qc-ink-2)] font-medium">190x</span>
-                  </div>
-                  <div className="flex flex-col p-2.5 rounded-lg bg-[var(--qc-bg)] border border-[var(--qc-hair)]" style={{ borderTop: "2px solid var(--qc-up)" }}>
-                    <span className="text-[9px] font-bold tracking-wider text-[var(--qc-up)] mb-1">BULL</span>
-                    <span className="text-lg font-bold leading-none mb-1 text-[var(--qc-ink)]">25%</span>
-                    <span className="text-[10px] text-[var(--qc-ink-2)] font-medium">150x</span>
-                  </div>
-                </div>
+              {isEarnings && ticker && (
+                <LensScenarios slug={lens.slug} ticker={ticker} />
               )}
 
               {/* Hover expand icon */}

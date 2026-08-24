@@ -392,7 +392,7 @@ function InsightDashboard({
             <div id="section-lenses" style={{ display: "flex", flexDirection: "column" }}>
               {/* Native lenses only — the cloned Industry lens lives on the scorecard
                   radar/tiles above, not in this per-pillar lens grid. */}
-              <InsightLenses lenses={patchedNativeLenses} heading={lensHeading} subtitle={TYPE_LENS_SUBTITLES[type]} onLensClick={handleLensClick} />
+              <InsightLenses lenses={patchedNativeLenses} heading={lensHeading} subtitle={TYPE_LENS_SUBTITLES[type]} onLensClick={handleLensClick} ticker={ticker} />
             </div>
           )}
           {insight.signal_map.length > 0 && (

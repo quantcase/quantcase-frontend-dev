@@ -145,8 +145,20 @@ export default function OnboardingV3() {
 .laterbox b{color:var(--tan2);font-family:var(--mono);font-size:10px;letter-spacing:.15em;margin-right:8px}
 
 /* ---------- app ---------- */
-.app{flex:1;width:100%;margin:0;border:none;border-radius:0;overflow:hidden;display:flex;flex-direction:column;position:relative;
-background:radial-gradient(900px 520px at 82% -8%,rgba(200,146,92,.10),transparent 62%),linear-gradient(170deg,var(--navy3),var(--navy2) 45%,var(--navy))}
+.app {
+  flex: 1;
+  width: 100%;
+  max-width: 1240px;
+  margin: 16px auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: radial-gradient(900px 520px at 82% -8%, rgba(200,146,92,.10), transparent 62%), linear-gradient(170deg, var(--navy3), var(--navy2) 45%, var(--navy));
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+}
 #onboarding-root header{display:flex;justify-content:space-between;align-items:center;padding:20px 32px}
 .logo{display:flex;align-items:center;gap:11px}
 .help{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--dim);text-decoration:none;padding:7px 12px;border-radius:6px}

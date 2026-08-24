@@ -82,36 +82,55 @@ export default function OnboardingV3() {
 
   const topPick = mode === "import" ? [...PORT].sort((a,b)=>b.s-a.s)[0] : [...picks].sort((a,b)=>b.s-a.s)[0];
 
+  const [isSaved, setIsSaved] = useState(false);
+
+  const saveAndComplete = (onSuccessCallback: () => void) => {
+    setIsSubmitting(true);
+    const payload = {
+      mode,
+      pickedTickers: mode === "pick" ? Array.from(sel) : [],
+      thesis: isSaved ? undefined : { // Don't save thesis again if already saved
+        ticker: topPick?.t,
+        dimension: thesisDraft.dim,
+        sub_factors: thesisDraft.subFactors,
+        thesis_text: thesisDraft.thesis,
+        conviction: thesisDraft.conviction
+      }
+    };
+
+    apiAuthPost(
+      `${BACKEND_URL}/api/onboarding/complete`,
+      {
+        onSuccess: () => {
+          onSuccessCallback();
+        },
+        onError: (err) => {
+          console.error("Failed to complete onboarding:", err);
+          setIsSubmitting(false);
+        }
+      },
+      payload
+    );
+  };
+
+  const handleSaveEntry = () => {
+    saveAndComplete(() => {
+      setIsSaved(true);
+      setIsSubmitting(false);
+    });
+  };
+
   const handleNext = () => {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      setIsSubmitting(true);
-      const payload = {
-        mode,
-        pickedTickers: mode === "pick" ? Array.from(sel) : [],
-        thesis: {
-          ticker: topPick?.t,
-          dimension: thesisDraft.dim,
-          sub_factors: thesisDraft.subFactors,
-          thesis_text: thesisDraft.thesis,
-          conviction: thesisDraft.conviction
-        }
-      };
-
-      apiAuthPost(
-        `${BACKEND_URL}/api/onboarding/complete`,
-        {
-          onSuccess: () => {
-            router.push("/investor/dashboard");
-          },
-          onError: (err) => {
-            console.error("Failed to complete onboarding:", err);
-            setIsSubmitting(false);
-          }
-        },
-        payload
-      );
+      if (isSaved) {
+        router.push(`/screener/overview?symbol=${topPick?.t}`);
+      } else {
+        saveAndComplete(() => {
+          router.push(`/screener/overview?symbol=${topPick?.t}`);
+        });
+      }
     }
   };
 
@@ -546,31 +565,41 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
               <div className="s3grid">
                 <div className="paper">
                   <div className="stack-wrap">
-                    <div className="stack-layer" style={{ width: '80%', top: '-36px' }}></div>
-                    <div className="stack-layer" style={{ width: '85%', top: '-27px' }}></div>
                     <div className="stack-layer" style={{ width: '90%', top: '-18px' }}></div>
                     <div className="stack-layer" style={{ width: '95%', top: '-9px' }}></div>
-                    <div className="jcard">
+                    <div className="jcard" style={{ position: 'relative' }}>
+                      {isSaved && (
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255, 255, 255, 0.95)', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>
+                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--pos)" strokeWidth="2"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          <h3 style={{ marginTop: '16px', fontFamily: 'var(--serif)', fontSize: '20px', color: 'var(--ink)' }}>Entry saved</h3>
+                          <p style={{ marginTop: '8px', fontSize: '13px', color: 'var(--ink-3)', textAlign: 'center', maxWidth: '80%' }}>Your thesis has been securely stored. You can view it in your dashboard.</p>
+                        </div>
+                      )}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "4px" }}>
-                      <div style={{ fontSize: "24px", fontFamily: "var(--serif)" }}>{mode === "import" ? "HDFCBANK" : "ZOMATO"}</div>
+                      <div style={{ fontSize: "24px", fontFamily: "var(--serif)" }}>{topPick?.t || "TICKER"}</div>
                       <div style={{ textAlign: "right" }}>
                         <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--jink)" }}>{mode === "import" ? "₹1,742.30" : "₹182.40"}</div>
-                        <div style={{ fontSize: "9.5px", fontFamily: "var(--mono)", color: "var(--pos)", letterSpacing: ".05em" }}>↑8.2% <span style={{ color: "var(--jink3)" }}>· MOD 78</span></div>
+                        <div style={{ fontSize: "9.5px", fontFamily: "var(--mono)", color: "var(--pos)", letterSpacing: ".05em" }}>↑8.2% <span style={{ color: "var(--jink3)" }}>· MOD {topPick?.s || 0}</span></div>
                       </div>
                     </div>
-                    <div style={{ fontSize: "12px", color: "var(--jink2)", marginBottom: "16px" }}>{mode === "import" ? "HDFC Bank Ltd. · Private Banks" : "Zomato Ltd. · Internet"}</div>
+                    <div style={{ fontSize: "12px", color: "var(--jink2)", marginBottom: "16px" }}>{topPick?.n || ""}</div>
                     <div style={{ display: "flex", gap: "16px", fontSize: "10px", fontFamily: "var(--mono)", letterSpacing: ".1em", marginBottom: "20px" }}>
-                      <span style={{ color: "var(--jink)" }}>MANAGEMENT <b style={{ color: "var(--jink)" }}>{mode === "import" ? "71" : "80"}</b></span>
-                      <span style={{ color: "var(--jink)" }}>OPPORTUNITY <b style={{ color: "var(--jink)" }}>{mode === "import" ? "61" : "85"}</b></span>
-                      <span style={{ color: "var(--jink)" }}>DEAL <b style={{ color: "var(--jink)" }}>{mode === "import" ? "58" : "78"}</b></span>
+                      <span style={{ color: "var(--jink)" }}>MANAGEMENT <b style={{ color: "var(--jink)" }}>{topPick?.m || 0}</b></span>
+                      <span style={{ color: "var(--jink)" }}>OPPORTUNITY <b style={{ color: "var(--jink)" }}>{topPick?.o || 0}</b></span>
+                      <span style={{ color: "var(--jink)" }}>DEAL <b style={{ color: "var(--jink)" }}>{topPick?.d || 0}</b></span>
                     </div>
                     <div style={{ background: "#F6F5F3", borderRadius: "6px", padding: "8px 12px", fontSize: "11px", color: "var(--jink2)", marginBottom: "24px" }}>
                       {mode === "import" 
-                        ? <>📌 Bought <b>40 sh</b> on <b>12 Mar 26</b> at <b>₹1,610</b> — score was <b>84</b> then, <b>78</b> now.</>
+                        ? <>📌 Bought <b>40 sh</b> on <b>12 Mar 26</b> at <b>₹1,610</b> — score was <b>84</b> then, <b>{topPick?.s || 0}</b> now.</>
                         : <>👁 You're <b>watching</b> this, not holding it. The watch thesis converts to a position entry if you buy.</>}
                     </div>
                     
-                    <OnboardingThesisFields value={thesisDraft} onChange={setThesisDraft} dimScores={mode === "import" ? { M: 71, O: 61, D: 58 } : { M: 80, O: 85, D: 78 }} />
+                    <OnboardingThesisFields 
+                      value={thesisDraft} 
+                      onChange={setThesisDraft} 
+                      dimScores={{ M: topPick?.m || 0, O: topPick?.o || 0, D: topPick?.d || 0 }} 
+                      onSave={handleSaveEntry}
+                    />
                   </div>
                 </div>
                 </div>

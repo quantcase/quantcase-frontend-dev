@@ -217,7 +217,7 @@ function TechnicalsContent() {
             {/* These two fill the whitespace the rule engine leaves under it,
                 rather than stacking under the sticky Decision Intelligence column. */}
             {!loading && data && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] items-stretch">
                 <WhatCanChangeCard items={data.decisionIntelligence?.whatCanChange} />
                 <LevelsToWatchCard
                   levels={data.decisionIntelligence?.levelsToWatch ?? null}

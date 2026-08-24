@@ -31,7 +31,7 @@ export function LevelsToWatchCard({ levels, cmp }: Props) {
   if (rows.length === 0) return null;
 
   return (
-    <div style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 14, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+    <div style={{ height: "100%", background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 14, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
       <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
         Levels To Watch
       </span>

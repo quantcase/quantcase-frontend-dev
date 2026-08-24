@@ -89,7 +89,7 @@ export default function OnboardingV3() {
 :root{--navy:#0C1626;--navy2:#101E33;--navy3:#16283F;--ink:#F2F5F9;--muted:#8FA0B4;--dim:#5C6E84;
 --tan:#C8925C;--tan2:#E0A96D;--pos:#4ADE80;--neg:#F87171;--line:rgba(255,255,255,.10);
 --serif:'Playfair Display',Georgia,serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--sans:'Inter',sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}
+
 #onboarding-root h1, #onboarding-root h2, #onboarding-root h3, #onboarding-root h4, #onboarding-root h5, #onboarding-root h6, #onboarding-root p {
   color: inherit;
   line-height: normal;

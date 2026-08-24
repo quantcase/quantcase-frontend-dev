@@ -57,9 +57,9 @@ export function OnboardingThesisFields({ value, onChange, dimScores , onSave }: 
   const lastHint = subFactors.length > 0 ? SF_HINTS[subFactors[subFactors.length - 1]] : null;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col">
       {/* Q1 — dimension */}
-      <div>
+      <div className="mb-10">
         <div className="mb-4 flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-2">
           <QNum n={1} /> Which dimension drove your decision to buy?
         </div>
@@ -102,7 +102,7 @@ export function OnboardingThesisFields({ value, onChange, dimScores , onSave }: 
 
       {/* Q2 — sub-factors */}
       {dim && (
-        <div>
+        <div className="mb-10">
           <div
             className="mb-2 flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.14em]"
             style={{ color: dimColor(dim) }}
@@ -131,7 +131,7 @@ export function OnboardingThesisFields({ value, onChange, dimScores , onSave }: 
 
       {/* Q3 — thesis text */}
       {dim && (
-        <div>
+        <div className="mb-10">
           <div className="mb-2 flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-2">
             <QNum n={3} /> Write your thesis in one or two sentences
           </div>
@@ -178,7 +178,7 @@ export function OnboardingThesisFields({ value, onChange, dimScores , onSave }: 
 
       {/* Q4 — conviction */}
       {dim && (
-        <div>
+        <div className="mb-10">
           <div className="mb-2 flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-2">
             <QNum n={4} /> How much conviction do you have?
           </div>

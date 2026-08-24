@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Check } from "lucide-react";
-import { WizardThesisFields, type ThesisFieldsState } from "@/components/journal/wizard-thesis-fields";
+import { OnboardingThesisFields, type ThesisFieldsState } from "./onboarding-thesis-fields";
 
 const STOCKS = [
   {t:'ZOMATO',n:'Zomato Ltd',w:'High growth potential',s:81,m:80,o:85,d:78},
@@ -467,7 +467,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                         : <>👁 You're <b>watching</b> this, not holding it. The watch thesis converts to a position entry if you buy.</>}
                     </div>
                     
-                    <WizardThesisFields value={thesisDraft} onChange={setThesisDraft} dimScores={mode === "import" ? { M: 71, O: 61, D: 58 } : { M: 80, O: 85, D: 78 }} />
+                    <OnboardingThesisFields value={thesisDraft} onChange={setThesisDraft} dimScores={mode === "import" ? { M: 71, O: 61, D: 58 } : { M: 80, O: 85, D: 78 }} />
                   </div>
                 </div>
 
@@ -497,18 +497,16 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
 
-              <div className="paper">
-                <div className="thesisWrap">
+                  <div className="paper" style={{ marginTop: 0 }}>
+                    <div className="thesisWrap" style={{ marginTop: 0 }}>
                   <div className="thesisHead">
                     <span className="t">Your thesis</span>
                     <span className="keep">KEEP WRITING · <b>{mode === "import" ? "14 TO GO" : "2 TO GO"}</b></span>
                   </div>
-                  <div className="trow">
+                  <div className="trow" style={{ flexDirection: "column", padding: "0 22px 18px", overflow: "visible" }}>
                     {(mode === "import" ? ["HDFCBANK", "INFY", "RELIANCE", "ICICIBANK", "TITAN"] : Array.from(sel)).map((t) => (
-                      <div key={t} style={{ flex: "0 0 240px", background: "#FFF", border: "1px solid #D6D2CB", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column" }}>
+                      <div key={t} style={{ background: "#FFF", border: "1px solid #D6D2CB", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
                           <b style={{ fontSize: "13px", color: "var(--jink)" }}>{t}</b>
                           <span style={{ fontSize: "9px", fontFamily: "var(--mono)", color: "var(--jink3)" }}>NOT WRITTEN</span>
@@ -524,6 +522,8 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                         </div>
                       </div>
                     ))}
+                  </div>
+                    </div>
                   </div>
                 </div>
               </div>

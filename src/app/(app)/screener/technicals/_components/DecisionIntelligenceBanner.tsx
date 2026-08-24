@@ -424,13 +424,13 @@ export function DecisionIntelligenceBanner({
       {/* "What Can Change" lives in the left column alongside Levels To Watch —
           see the technicals page layout. */}
 
-      {/* Wyckoff button */}
-      {symbol && (
+      {/* Wyckoff button - Hidden as requested */}
+      {/* {symbol && (
         <ShellButton icon={TrendingUp} label="Wyckoff Analysis" onClick={() => router.push(`/screener/wyckoff?symbol=${symbol}`)} />
-      )}
+      )} */}
 
-      {/* Utility row — regenerate the insight / inspect the payload behind it */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+      {/* Utility row — regenerate the insight / inspect the payload behind it - Hidden as requested */}
+      {/* <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         <ShellButton
           icon={RefreshCw}
           label="Refresh"
@@ -444,7 +444,7 @@ export function DecisionIntelligenceBanner({
           onClick={() => setShowRaw(true)}
           title="View the raw Decision Intelligence payload"
         />
-      </div>
+      </div> */}
 
       {showRaw && (
         <RawDataDialog

@@ -47,20 +47,29 @@ function hasContent(insight: ActionableInsight | null): boolean {
  */
 function defaultHorizon(di: DecisionIntelligence): Horizon {
   const scored = di.idealForScores;
-  let preferred: Horizon = "SWING";
+  let preferred: Horizon | null = null;
 
   if (scored) {
-    const ranked: [Horizon, number][] = [
-      ["SWING", scored.swing ?? 0],
-      ["POSITIONAL", scored.positional ?? 0],
-      ["INVESTOR", scored.investor ?? 0],
-    ];
-    // Ties resolve to the earlier entry, i.e. the shorter horizon.
-    preferred = ranked.reduce((best, cur) => (cur[1] > best[1] ? cur : best))[0];
-  } else {
+    const swingScore = scored.swing ?? 0;
+    const posScore = scored.positional ?? 0;
+    const invScore = scored.investor ?? 0;
+    
+    const maxScore = Math.max(swingScore, posScore, invScore);
+    const maxCount = [swingScore, posScore, invScore].filter((s) => s === maxScore).length;
+
+    if (maxCount === 1) {
+      if (swingScore === maxScore) preferred = "SWING";
+      else if (posScore === maxScore) preferred = "POSITIONAL";
+      else preferred = "INVESTOR";
+    }
+  }
+
+  if (!preferred) {
     const hint = `${di.idealFor ?? ""} ${di.timeframe ?? ""}`.toLowerCase();
-    if (hint.includes("investor")) preferred = "INVESTOR";
-    else if (hint.includes("positional")) preferred = "POSITIONAL";
+    if (hint.includes("swing")) preferred = "SWING";
+    else if (hint.includes("position")) preferred = "POSITIONAL";
+    else if (hint.includes("investor")) preferred = "INVESTOR";
+    else preferred = "SWING";
   }
 
   if (hasContent(insightFor(di, preferred))) return preferred;

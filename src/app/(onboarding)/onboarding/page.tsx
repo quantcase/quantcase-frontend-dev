@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const STOCKS = [
   {t:'ZOMATO',n:'Zomato Ltd',w:'High growth potential',s:81,m:80,o:85,d:78},
@@ -86,7 +87,7 @@ export default function OnboardingV3() {
 }
 
 
-#onboarding-root{background:#060D18;min-height:100vh;display:flex;flex-direction:column;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+#onboarding-root{background:#060D18;height:100vh;overflow:hidden;display:flex;flex-direction:column;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
 
 /* ---------- flow map ---------- */
 .map{max-width:1240px;margin:0 auto;padding:26px 40px 0}
@@ -106,18 +107,17 @@ export default function OnboardingV3() {
 .laterbox b{color:var(--tan2);font-family:var(--mono);font-size:10px;letter-spacing:.15em;margin-right:8px}
 
 /* ---------- app ---------- */
-.app{max-width:1240px;margin:24px auto 60px;border:1px solid var(--line);border-radius:14px;overflow:hidden;min-height:790px;display:flex;flex-direction:column;position:relative;
+.app{flex:1;width:100%;margin:0;border:none;border-radius:0;overflow:hidden;display:flex;flex-direction:column;position:relative;
 background:radial-gradient(900px 520px at 82% -8%,rgba(200,146,92,.10),transparent 62%),linear-gradient(170deg,var(--navy3),var(--navy2) 45%,var(--navy))}
 #onboarding-root header{display:flex;justify-content:space-between;align-items:center;padding:20px 32px}
-.logo{display:flex;align-items:center;gap:11px}.logo .mark{width:30px;height:30px}
-.logo .wd{font-family:var(--serif);font-size:23px;color:#fff}
+.logo{display:flex;align-items:center;gap:11px}
 .help{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--dim);text-decoration:none;padding:7px 12px;border-radius:6px}
 .help:hover{color:var(--muted);background:rgba(255,255,255,.04)}
 .prog{padding:0 32px 4px;display:flex;align-items:center;gap:14px}
 .track{flex:1;height:2px;background:rgba(255,255,255,.09);border-radius:2px;overflow:hidden}
 .fill{height:100%;background:linear-gradient(90deg,var(--tan),var(--tan2));width:33.3%;transition:width .5s cubic-bezier(.4,0,.2,1)}
 .pct{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);white-space:nowrap}
-.stage{flex:1;padding:30px 32px 20px;display:flex;flex-direction:column}
+.stage{flex:1;padding:30px 32px 20px;display:flex;flex-direction:column;overflow-y:auto}
 .screen{display:none;flex:1;flex-direction:column;animation:in .45s cubic-bezier(.2,.7,.3,1)}
 .screen.on{display:flex}
 @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -254,7 +254,7 @@ background:linear-gradient(180deg,#F4EDE3,#E6DACA);color:#0C1626;display:flex;al
 .sheet h2{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.2}
 .sheet h2 em{font-style:italic;color:var(--tan2)}
 .sheet .s{font-size:13.5px;color:var(--muted);margin-top:10px;line-height:1.55}
-.paths{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.paths{display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px}
 .path{border:1px solid var(--line);border-radius:11px;padding:20px;background:rgba(255,255,255,.03);display:flex;flex-direction:column}
 .path.primary{border-color:rgba(200,146,92,.45);background:rgba(200,146,92,.07)}
 .path .rank{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:3px 7px;align-self:flex-start}
@@ -277,15 +277,14 @@ background:linear-gradient(180deg,#F4EDE3,#E6DACA);color:#0C1626;display:flex;al
 .link:hover{color:var(--muted);text-decoration:underline}
 @media(max-width:960px){.mapgrid{grid-template-columns:1fr}.arrow{display:none}.mcol{margin-bottom:12px}
 .pickwrap,.donegrid,.mods,.paths,.scope,.scorecard{grid-template-columns:1fr}.doors{flex-direction:column}
-#onboarding-root h1{font-size:30px}.map,.later{padding:20px}.app{margin:16px;border-radius:12px}.stage{padding:22px 20px}
+#onboarding-root h1{font-size:30px}.map,.later{padding:20px}.stage{padding:22px 20px}
 header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.bgrid{grid-template-columns:repeat(2,1fr)}}
 ` }} />
 
       <div className="app">
         <header>
           <div className="logo">
-            <div className="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#C8925C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-            <div className="wd">Quantcase</div>
+            <Image src="/logos/logo-text-white.png" alt="Quantcase" width={169} height={39} className="h-7 w-auto" priority />
           </div>
           <a href="#" className="help">NEED HELP?</a>
         </header>
@@ -482,14 +481,6 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                       <div key={b} className="bk" onClick={() => { setIsImportOpen(false); setMode("import"); }}>{b}</div>
                     ))}
                   </div>
-                </div>
-                <div className="path">
-                  <span className="rank">WORKS FOR ANY BROKER</span>
-                  <h3>Forward your CAS statement</h3>
-                  <div className="tm">~1 MINUTE · HOLDINGS ONLY</div>
-                  <p>Your monthly CDSL/NSDL statement lists everything you own across every broker. Forward the email — no account access at all.</p>
-                  <div className="mailbox"><div className="ad">holdings@quantcase.in</div><div className="cp">COPY ADDRESS</div></div>
-                  <p style={{ fontSize: "11.5px", color: "var(--dim)", marginTop: "11px" }}>No buy dates in a CAS, so the journal starts from today rather than backfilling.</p>
                 </div>
               </div>
               <div className="scope">

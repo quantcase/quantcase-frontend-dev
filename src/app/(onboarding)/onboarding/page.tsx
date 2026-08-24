@@ -39,7 +39,7 @@ export default function OnboardingV3() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { connect: connectSmallcase, step: connectStep } = useSmallcaseConnect({
+  const { connect: connectSmallcase, step: connectStep, error: connectError } = useSmallcaseConnect({
     onConnected: () => {
       setIsImportOpen(false);
       setMode("import");
@@ -630,6 +630,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                       </div>
                     ))}
                   </div>
+                  {connectError && <div style={{ color: "var(--neg)", marginTop: "12px", fontSize: "12px" }}>{connectError}</div>}
                 </div>
               </div>
               <div className="scope">

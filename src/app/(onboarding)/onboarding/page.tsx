@@ -3,6 +3,8 @@
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Check } from "lucide-react";
+import { WizardThesisFields, type ThesisFieldsState } from "@/components/journal/wizard-thesis-fields";
 
 const STOCKS = [
   {t:'ZOMATO',n:'Zomato Ltd',w:'High growth potential',s:81,m:80,o:85,d:78},
@@ -24,6 +26,13 @@ export default function OnboardingV3() {
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [q, setQ] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
+
+  const [thesisDraft, setThesisDraft] = useState<ThesisFieldsState>({
+    dim: "M",
+    subFactors: [],
+    thesis: "",
+    conviction: 0
+  });
 
   const col = (s: number) => (s >= 70 ? "var(--pos)" : s >= 60 ? "var(--tan2)" : "var(--neg)");
 

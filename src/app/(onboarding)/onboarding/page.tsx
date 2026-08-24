@@ -4,6 +4,9 @@ import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Check } from "lucide-react";
+import { useSmallcaseConnect } from "@/hooks/useSmallcaseConnect";
+import { apiAuthPost } from "@/lib/api";
+import { BACKEND_URL } from "@/lib/constants";
 import { OnboardingThesisFields, type ThesisFieldsState } from "./onboarding-thesis-fields";
 
 const STOCKS = [
@@ -34,6 +37,15 @@ export default function OnboardingV3() {
     thesis: "",
     conviction: 0
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { connect: connectSmallcase, step: connectStep } = useSmallcaseConnect({
+    onConnected: () => {
+      setIsImportOpen(false);
+      setMode("import");
+      setStep(2);
+    }
+  });
 
   const col = (s: number) => (s >= 70 ? "var(--pos)" : s >= 60 ? "var(--tan2)" : "var(--neg)");
 
@@ -60,13 +72,13 @@ export default function OnboardingV3() {
     return Math.round(picks.reduce((s, p) => s + p.s, 0) / picks.length);
   }, [mode, picks]);
 
-  const nextDisabled = mode === "import" ? false : sel.size < 3;
+  const nextDisabled = mode === "import" ? false : sel.size < 3 || isSubmitting;
   const nextLabel =
     step === 1
       ? (mode === "import" ? "Score my " + PORT.length + " holdings " : (sel.size < 3 ? "Pick " + (3 - sel.size) + " more to continue " : "Score my 3 stocks "))
       : step === 2
       ? "This makes sense — continue "
-      : "Open my dashboard ";
+      : isSubmitting ? "Saving..." : "Open my dashboard ";
 
   const topPick = mode === "import" ? [...PORT].sort((a,b)=>b.s-a.s)[0] : [...picks].sort((a,b)=>b.s-a.s)[0];
 
@@ -74,8 +86,32 @@ export default function OnboardingV3() {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      localStorage.setItem("qc_onboarding_completed", "true");
-      router.push("/investor/dashboard");
+      setIsSubmitting(true);
+      const payload = {
+        mode,
+        pickedTickers: mode === "pick" ? Array.from(sel) : [],
+        thesis: {
+          ticker: topPick?.t,
+          dimension: thesisDraft.dim,
+          sub_factors: thesisDraft.subFactors,
+          thesis_text: thesisDraft.thesis,
+          conviction: thesisDraft.conviction
+        }
+      };
+
+      apiAuthPost(
+        `${BACKEND_URL}/api/onboarding/complete`,
+        {
+          onSuccess: () => {
+            router.push("/investor/dashboard");
+          },
+          onError: (err) => {
+            console.error("Failed to complete onboarding:", err);
+            setIsSubmitting(false);
+          }
+        },
+        payload
+      );
     }
   };
 
@@ -589,7 +625,9 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                   <p>Read-only scope. Brings holdings <em>and</em> the trade history we need to build your journal retroactively.</p>
                   <div className="bgrid">
                     {["ZERODHA","GROWW","UPSTOX","ANGEL ONE","ICICI","HDFC SKY","KOTAK","5PAISA"].map((b) => (
-                      <div key={b} className="bk" onClick={() => { setIsImportOpen(false); setMode("import"); }}>{b}</div>
+                      <div key={b} className="bk" onClick={() => connectSmallcase()}>
+                        {connectStep === "creating" || connectStep === "confirming" ? "..." : b}
+                      </div>
                     ))}
                   </div>
                 </div>

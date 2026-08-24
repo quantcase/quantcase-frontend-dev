@@ -97,7 +97,7 @@ export default function OnboardingV3() {
 }
 
 
-#onboarding-root{background:#060D18;height:100vh;overflow:hidden;display:flex;flex-direction:column;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+#onboarding-root{background:#060D18;min-height:100vh;overflow-y:auto;display:flex;flex-direction:column;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
 
 
 .outcome{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;margin-top:16px;}
@@ -146,7 +146,7 @@ export default function OnboardingV3() {
 
 /* ---------- app ---------- */
 .app {
-  flex: 1;
+
   width: 100%;
   max-width: 1240px;
   margin: 16px auto;
@@ -167,7 +167,7 @@ export default function OnboardingV3() {
 .track{flex:1;height:2px;background:rgba(255,255,255,.09);border-radius:2px;overflow:hidden}
 .fill{height:100%;background:linear-gradient(90deg,var(--tan),var(--tan2));width:33.3%;transition:width .5s cubic-bezier(.4,0,.2,1)}
 .pct{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);white-space:nowrap}
-.stage{flex:1;padding:30px 32px 20px;display:flex;flex-direction:column;overflow-y:auto}
+.stage{padding:30px 32px 20px;display:flex;flex-direction:column;}
 .screen{display:none;flex:1;flex-direction:column;animation:in .45s cubic-bezier(.2,.7,.3,1)}
 .screen.on{display:flex}
 @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -489,17 +489,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                     <h4>WHY THIS MATTERS</h4>
                     <p>A score tells you <b>what changed</b>. Your note tells you <b>whether it changes anything for you</b>. We put the two side by side every time the number moves — the only way to find out if your reasoning was any good.</p>
                   </div>
-                  {mode === "import" ? (
-                    <div className="ask">
-                      <div className="tag">LAST ONE · SEPARATE PERMISSION</div>
-                      <h3>Trade from here too?</h3>
-                      <p>Right now we can only read. Acting on a signal without switching apps is a different permission — we'll ask the first time you tap Buy, not before.</p>
-                      <div className="act">
-                        <button className="mini transition-all" onClick={() => setTradingEnabled(!tradingEnabled)} style={{ padding: "6px 10px", background: tradingEnabled ? "rgba(74,222,128,0.1)" : "rgba(255,255,255,0.05)", border: `1px solid ${tradingEnabled ? "var(--pos)" : "var(--line)"}`, borderRadius: "6px", fontSize: "10px", fontFamily: "var(--mono)", color: tradingEnabled ? "var(--pos)" : "var(--tan)" }}>{tradingEnabled ? "✓ TRADING ENABLED" : "ENABLE TRADING"}</button>
-                        {!tradingEnabled && <button className="laterbtn" style={{ fontSize: "11px", color: "var(--dim)", background: "none", border: "none" }}>Ask me later</button>}
-                      </div>
-                    </div>
-                  ) : (
+                  {mode === "pick" && (
                     <div className="ask">
                       <div className="tag">THE BIGGER HALF · READ-ONLY</div>
                       <h3>Do the ones you own</h3>
@@ -508,36 +498,11 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                         <button className="mini" style={{ padding: "6px 10px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--line)", borderRadius: "6px", fontSize: "10px", fontFamily: "var(--mono)", color: "var(--tan)" }} onClick={() => setIsImportOpen(true)}>IMPORT MY HOLDINGS</button>
                         <button className="laterbtn" style={{ fontSize: "11px", color: "var(--dim)", background: "none", border: "none" }}>Maybe later</button>
                       </div>
+                      <div style={{ marginTop: "16px", fontSize: "10px", fontFamily: "var(--mono)", color: "var(--dim)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                        We cannot place or cancel orders
+                      </div>
                     </div>
                   )}
-
-                  <div className="paper" style={{ marginTop: 0 }}>
-                    <div className="thesisWrap" style={{ marginTop: 0 }}>
-                  <div className="thesisHead">
-                    <span className="t">Your thesis</span>
-                    <span className="keep">KEEP WRITING · <b>{mode === "import" ? "14 TO GO" : "2 TO GO"}</b></span>
-                  </div>
-                  <div className="trow" style={{ flexDirection: "column", padding: "0 22px 18px", overflow: "visible" }}>
-                    {(mode === "import" ? ["HDFCBANK", "INFY", "RELIANCE", "ICICIBANK", "TITAN"] : Array.from(sel)).map((t) => (
-                      <div key={t} style={{ background: "#FFF", border: "1px solid #D6D2CB", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                          <b style={{ fontSize: "13px", color: "var(--jink)" }}>{t}</b>
-                          <span style={{ fontSize: "9px", fontFamily: "var(--mono)", color: "var(--jink3)" }}>NOT WRITTEN</span>
-                        </div>
-                        <div style={{ fontSize: "11px", color: "var(--jink3)", lineHeight: 1.5, marginBottom: "16px", flex: 1 }}>
-                          {mode === "import"
-                            ? "40 sh · 12 Mar 26 · score 84 → 78\nThe facts are here. The reason is up to you." 
-                            : "Score 81\nThe facts are here. The reason is up to you."}
-                        </div>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "10px", color: "var(--jink3)", fontFamily: "var(--mono)" }}>
-                          <span>■ Holdings</span>
-                          <span style={{ color: "var(--vio)", fontWeight: 600 }}>WRITE →</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </section>

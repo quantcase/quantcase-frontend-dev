@@ -138,8 +138,8 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
       icon: Shield,
       iconBg: "var(--qc-section)",
       iconColor: "var(--qc-ink-2)",
-      headline: "Upgrade to continue",
-      subtext: "Choose a plan to unlock the full QuantCase research platform.",
+      headline: "Your first week is on us",
+      subtext: "You will not be charged right now, only after the trial ends. Cancel anytime.",
       urgency: false,
     };
   })();
@@ -529,6 +529,9 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
 
           <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
             Secured by Razorpay &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No hidden fees
+          </p>
+          <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 4, fontStyle: "italic" }}>
+            *These are beta prices
           </p>
         </div>
       </div>

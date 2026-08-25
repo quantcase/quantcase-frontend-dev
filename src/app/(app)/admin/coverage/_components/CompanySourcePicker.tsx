@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import Link from "next/link";
 import { Layers } from "lucide-react";
 import { TagMultiPicker } from "@/components/molecules/tag-multi-picker";
@@ -14,6 +15,7 @@ const SOURCE_OPTIONS: { id: TickerSource; label: string }[] = [
   { id: "manual", label: "Manual tickers" },
   { id: "group", label: "Saved group" },
   { id: "all", label: "All companies" },
+  { id: "csv", label: "CSV upload" },
 ];
 
 interface Props {
@@ -30,6 +32,10 @@ interface Props {
   loading?: boolean;
   /** Set when this lens has no backend default ticker list (e.g. L2) — changes the "Default list" copy. */
   noDefault?: boolean;
+  /** Added for CSV upload feature */
+  csvData?: import('./types').CsvTickerLens[];
+  onCsvDataChange?: (data: import('./types').CsvTickerLens[]) => void;
+  availableSkills?: { slug: string; name: string }[];
 }
 
 /**
@@ -49,7 +55,76 @@ export function CompanySourcePicker({
   groupCounts,
   loading,
   noDefault,
+  csvData,
+  onCsvDataChange,
+  availableSkills = [],
 }: Props) {
+  const [csvError, setCsvError] = useState<string | null>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setCsvError(null);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (!text) return;
+
+      const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+      if (lines.length < 2) {
+        setCsvError("CSV file must contain at least a header and one row.");
+        return;
+      }
+
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      const tickerIdx = headers.findIndex(h => h.includes('ticker') || h.includes('symbol') || h.includes('company'));
+      const lensIdx = headers.findIndex(h => h.includes('lens') || h.includes('skill') || h.includes('slug'));
+
+      if (tickerIdx === -1 || lensIdx === -1) {
+        setCsvError("Could not find 'ticker' and 'lens' columns in the CSV.");
+        return;
+      }
+
+      const parsedData: import('./types').CsvTickerLens[] = [];
+      let unknownLensCount = 0;
+
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim());
+        if (cols.length <= Math.max(tickerIdx, lensIdx)) continue;
+        
+        const ticker = cols[tickerIdx];
+        const rawLens = cols[lensIdx];
+        if (!ticker || !rawLens) continue;
+
+        // Try to map human-readable name or slug to backend slug
+        const matchedSkill = availableSkills.find(s => 
+          s.slug.toLowerCase() === rawLens.toLowerCase() || 
+          s.name.toLowerCase() === rawLens.toLowerCase()
+        );
+
+        if (matchedSkill) {
+          parsedData.push({ ticker, lensSlug: matchedSkill.slug });
+        } else {
+          unknownLensCount++;
+          // Fallback to exactly what was in the CSV, backend might 404 it or we show warning
+          parsedData.push({ ticker, lensSlug: rawLens });
+        }
+      }
+
+      if (parsedData.length === 0) {
+        setCsvError("No valid rows found in the CSV.");
+      } else if (onCsvDataChange) {
+        onCsvDataChange(parsedData);
+        if (unknownLensCount > 0) {
+          setCsvError(`Parsed ${parsedData.length} rows, but ${unknownLensCount} lenses could not be matched to available skills.`);
+        }
+      }
+    };
+    reader.onerror = () => setCsvError("Failed to read the file.");
+    reader.readAsText(file);
+  };
+
   return (
     <div className="rounded-[10px] border border-hair bg-card p-4">
       <div className="flex items-center justify-between mb-1.5">
@@ -125,6 +200,30 @@ export function CompanySourcePicker({
             This will scan every company in the database (~2,000). Consider Start From to resume a
             partial run.
           </p>
+        )}
+
+        {source === "csv" && (
+          <div className="space-y-2">
+            <input 
+              type="file" 
+              accept=".csv" 
+              onChange={handleFileUpload} 
+              className={`${INPUT_CLS} w-full max-w-sm`}
+            />
+            {csvData && csvData.length > 0 && !csvError && (
+              <p className="text-[12px] text-up font-medium">
+                Successfully loaded {csvData.length} valid rows.
+              </p>
+            )}
+            {csvError && (
+              <p className="text-[12px] text-warn bg-warn-soft border border-warn rounded-md px-3 py-2">
+                {csvError}
+              </p>
+            )}
+            <p className="text-[11px] text-ink-3">
+              CSV must have a header row with at least "ticker" and "lens" (or similar) columns.
+            </p>
+          </div>
         )}
       </div>
     </div>

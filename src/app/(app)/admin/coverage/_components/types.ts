@@ -1,7 +1,12 @@
 // ── L1 multi-dispatch — shapes per "Pipeline Dispatch — L1 Multi — Admin Guide" ──
 
 // Shared "which companies?" source picker — common to L1/L2/L3, each tab keeps its own selection
-export type TickerSource = "default" | "manual" | "group" | "all";
+export type TickerSource = "default" | "manual" | "group" | "all" | "csv";
+
+export interface CsvTickerLens {
+  ticker: string;
+  lensSlug: string;
+}
 
 export interface L1DispatchOptions {
   tickers?: string[];

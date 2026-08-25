@@ -19,6 +19,7 @@ import {
   L2RunTriggerResponse,
   L2Run,
   L2RunsResponse,
+  CsvTickerLens,
 } from "./types";
 
 type L2SortSource = "transcript" | "ppt" | "annual_report";
@@ -289,6 +290,7 @@ export function L2MultiDispatchTab() {
   const [tickers, setTickers] = useState<string[]>([]);
   const [groupSlug, setGroupSlug] = useState("");
   const [groupCounts, setGroupCounts] = useState<Record<string, number | "loading" | "error">>({});
+  const [csvData, setCsvData] = useState<CsvTickerLens[]>([]);
 
   // Form state
   // Incremental (unchecked) is disabled for now — Historic mode is forced on and the checkbox is locked.
@@ -385,22 +387,40 @@ export function L2MultiDispatchTab() {
     return b;
   }, [source, groupSlug, tickers]);
 
+  const csvSkillToTickers = useMemo(() => {
+    if (source !== "csv") return {};
+    const map: Record<string, string[]> = {};
+    for (const row of csvData) {
+      if (!map[row.lensSlug]) map[row.lensSlug] = [];
+      map[row.lensSlug].push(row.ticker);
+    }
+    for (const key of Object.keys(map)) {
+      map[key] = Array.from(new Set(map[key]));
+    }
+    return map;
+  }, [source, csvData]);
+
+  const effectiveSkillSlugs = source === "csv" ? Object.keys(csvSkillToTickers) : skillSlugs;
+
   // "preview mode" (previewKey): exactly what Preview queried — ticker scope + the first selected
   // skill only, since /preview accepts one slug and ignores Historic/Force entirely. Kept only to
   // flag a stale Preview page (see pagination below) — it no longer gates Run.
-  const previewSlug = skillSlugs[0];
-  const previewKey = JSON.stringify({ ...tickerBody, previewSlug });
-  const canPreview = sourceUsable && skillSlugs.length > 0 && !previewLoading;
-  const canRun = sourceUsable && skillSlugs.length > 0 && !previewLoading && !triggering && !isRunLive;
+  const previewSlug = effectiveSkillSlugs[0];
+  const previewTickers = source === "csv" && previewSlug ? csvSkillToTickers[previewSlug] : tickerBody.tickers;
+  const previewReqBody = { ...tickerBody, slug: previewSlug, ...(previewTickers ? { tickers: previewTickers } : {}) };
+
+  const previewKey = JSON.stringify(previewReqBody);
+  const canPreview = sourceUsable && effectiveSkillSlugs.length > 0 && !previewLoading && (source !== "csv" || (previewTickers?.length ?? 0) > 0);
+  const canRun = sourceUsable && effectiveSkillSlugs.length > 0 && !previewLoading && !triggering && !isRunLive && (source !== "csv" || effectiveSkillSlugs.length > 0);
 
   function doPreview(targetPage = 1) {
     if (!previewSlug) return;
-    if (skillSlugs.length > 1 && !multiSkillNoticeShown.current) {
+    if (effectiveSkillSlugs.length > 1 && !multiSkillNoticeShown.current) {
       multiSkillNoticeShown.current = true;
       setMultiSkillNotice(true);
     }
     const key = previewKey;
-    const reqBody = { ...tickerBody, slug: previewSlug, ...(targetPage > 1 ? { page: targetPage } : {}) };
+    const reqBody = { ...previewReqBody, ...(targetPage > 1 ? { page: targetPage } : {}) };
     rawPost<L2PreviewResponse>(`${BASE}/preview`, {
       onStart: () => { setPreviewLoading(true); setPreviewError(null); },
       onSuccess: (res) => { setPreview(res); setPreviewedKey(key); setPage(targetPage); },
@@ -415,23 +435,26 @@ export function L2MultiDispatchTab() {
       onStart: () => { setCsvLoading(true); setCsvError(null); },
       onError: setCsvError,
       onComplete: () => setCsvLoading(false),
-    }, { ...tickerBody, slug: previewSlug }, `l2-preview-${previewSlug}.csv`);
+    }, previewReqBody, `l2-preview-${previewSlug}.csv`);
   }
 
   // Fires one /run POST per selected skill concurrently (not one at a time) — all requests go out
   // in this same tick, and we wait for every one to settle before surfacing the result.
   function handleRunClick() {
     if (!confirmArmed) { setConfirmArmed(true); return; }
-    if (skillSlugs.length === 0) return;
+    if (effectiveSkillSlugs.length === 0) return;
     setTriggering(true);
     setRunError(null);
     const runIds: string[] = [];
-    let remaining = skillSlugs.length;
+    let remaining = effectiveSkillSlugs.length;
     let firstError: string | null = null;
     const runBody: Omit<L2DispatchOptions, "slug"> = { ...tickerBody };
     if (historic) runBody.historic = true;
     if (force) runBody.force = true;
-    skillSlugs.forEach((slug) => {
+    effectiveSkillSlugs.forEach((slug) => {
+      const perSkillTickers = source === "csv" ? csvSkillToTickers[slug] : runBody.tickers;
+      const perSkillBody = { ...runBody, slug, ...(perSkillTickers ? { tickers: perSkillTickers } : {}) };
+      
       rawPost<L2RunTriggerResponse>(`${BASE}/run`, {
         onSuccess: (res) => { runIds.push(res.run_id); },
         onError: (err) => { firstError = firstError ?? `${slug}: ${err}`; },
@@ -445,7 +468,7 @@ export function L2MultiDispatchTab() {
             loadRuns();
           }
         },
-      }, { ...runBody, slug });
+      }, perSkillBody);
     });
   }
 
@@ -485,6 +508,9 @@ export function L2MultiDispatchTab() {
         groupCounts={groupCounts}
         loading={optionsLoading}
         noDefault
+        csvData={csvData}
+        onCsvDataChange={setCsvData}
+        availableSkills={skills}
       />
 
       {/* Config tag for the group selected above — full width, always editable even if already tagged */}
@@ -503,12 +529,23 @@ export function L2MultiDispatchTab() {
 
       {/* Options form */}
       <div className="rounded-[10px] border border-hair bg-card p-4 space-y-4">
-        <div>
-          <label className={LABEL_CLS}>
-            Skills {optionsLoading && <span className="normal-case tracking-normal font-normal">— loading…</span>}
-          </label>
-          <SkillMultiSelect skills={skills} selected={skillSlugs} onChange={setSkillSlugs} loading={optionsLoading} />
-        </div>
+        {source !== "csv" && (
+          <div>
+            <label className={LABEL_CLS}>
+              Skills {optionsLoading && <span className="normal-case tracking-normal font-normal">— loading…</span>}
+            </label>
+            <SkillMultiSelect skills={skills} selected={skillSlugs} onChange={setSkillSlugs} loading={optionsLoading} />
+          </div>
+        )}
+        
+        {source === "csv" && effectiveSkillSlugs.length > 0 && (
+          <div>
+            <label className={LABEL_CLS}>Skills found in CSV</label>
+            <div className="text-[12px] text-ink-3 p-2 bg-secondary rounded-md border border-hair">
+              {effectiveSkillSlugs.map(slug => skills.find(s => s.slug === slug)?.name ?? slug).join(", ")}
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-6 pt-1 border-t border-hair">
           <CheckboxField
@@ -571,7 +608,7 @@ export function L2MultiDispatchTab() {
 
         <button
           onClick={doExportCsv}
-          disabled={!sourceUsable || skillSlugs.length === 0 || csvLoading}
+          disabled={!sourceUsable || effectiveSkillSlugs.length === 0 || csvLoading}
           title="CSV reports total signal coverage of any type per period — it does not filter to this skill's whitelist the way the JSON preview above does, so the numbers won't match exactly."
           className="flex items-center gap-1.5 rounded-md border border-hair px-4 py-2 text-sm font-medium text-ink hover:border-ink transition-colors disabled:opacity-40"
         >
@@ -598,7 +635,7 @@ export function L2MultiDispatchTab() {
 
         <span className="text-[11px] text-ink-3">
           {confirmArmed
-            ? `This queues real jobs for ${skillSlugs.length} skill${skillSlugs.length === 1 ? "" : "s"} concurrently and can't be cancelled once started.`
+            ? `This queues real jobs for ${effectiveSkillSlugs.length} skill${effectiveSkillSlugs.length === 1 ? "" : "s"} concurrently and can't be cancelled once started.`
             : "Preview is optional — Run dispatches with the current options whether or not you've previewed them."}
         </span>
       </div>

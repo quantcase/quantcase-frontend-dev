@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
 import { GoogleSignInButton } from "@/components/molecules/google-signin-button";
 import type { GoogleAuthResponse, RegisterPayload, RegisterResponse } from "@/types/auth";
+import { usesInvestorFlow, type AccountType } from "@/components/providers/UserContext";
 
 function FormField({
   id,
@@ -121,14 +122,37 @@ export function RegisterForm() {
   const [googleError, setGoogleError] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  function handleGoogleSuccess(data: GoogleAuthResponse) {
+  async function handleGoogleSuccess(data: GoogleAuthResponse) {
     setGoogleError("");
     setGoogleLoading(true);
     try {
       localStorage.setItem("qc_at", data.access_token);
       localStorage.setItem("qc_rt", data.refresh_token);
-      localStorage.setItem("qc_onboarding_completed", "false");
       if (data.user?.accountType) localStorage.setItem("qc_account_type", data.user.accountType);
+
+      const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${data.access_token}` },
+      });
+
+      if (meRes.ok) {
+        const me = await meRes.json();
+        const onboardingDone = me?.onboarding_completed ?? me?.profile?.onboarding_completed ?? false;
+        localStorage.setItem("qc_onboarding_completed", String(onboardingDone));
+        
+        const resolvedType = me?.accountType ?? me?.account_type ?? data.user?.accountType;
+        if (resolvedType) localStorage.setItem("qc_account_type", resolvedType);
+
+        if (!onboardingDone) {
+          router.push("/onboarding");
+        } else {
+          router.push(usesInvestorFlow((resolvedType ?? null) as AccountType) ? "/investor/dashboard" : "/dashboard");
+        }
+      } else {
+        localStorage.setItem("qc_onboarding_completed", "false");
+        router.push("/onboarding");
+      }
+    } catch {
+      localStorage.setItem("qc_onboarding_completed", "false");
       router.push("/onboarding");
     } finally {
       setGoogleLoading(false);

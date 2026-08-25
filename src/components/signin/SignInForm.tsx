@@ -85,7 +85,7 @@ export function SignInForm() {
       const resolvedType: string | undefined = me?.accountType ?? me?.account_type ?? acctType;
       if (resolvedType) localStorage.setItem("qc_account_type", resolvedType);
 
-      const onboardingDone: boolean = me?.onboarding_completed ?? true;
+      const onboardingDone: boolean = me?.onboarding_completed ?? me?.profile?.onboarding_completed ?? true;
       localStorage.setItem("qc_onboarding_completed", String(onboardingDone));
 
       if (!onboardingDone) {

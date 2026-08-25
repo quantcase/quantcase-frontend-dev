@@ -90,7 +90,7 @@ export interface RegisterPayload {
   mobile?: string;
   password: string;
   display_name?: string;
-  invite_token: string;
+  invite_token?: string;
 }
 
 /** POST /api/auth/register — success body (raw, not wrapped in .data) */

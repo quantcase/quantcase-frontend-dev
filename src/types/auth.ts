@@ -1,6 +1,6 @@
 export interface Subscription {
-  status: "trialing" | "active" | "past_due" | "canceled" | "expired";
-  plan_name: string;
+  status: "trialing" | "active" | "past_due" | "canceled" | "expired" | null;
+  plan_name?: string;
   days_remaining: number;
   is_access_blocked: boolean;
 }

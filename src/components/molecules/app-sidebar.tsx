@@ -153,25 +153,33 @@ export function AppSidebar() {
         </TooltipProvider>
 
         {subscription?.status === "trialing" && (subscription.days_remaining ?? 0) > 0 && (
-          <button
-            onClick={openPaywall}
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              color: "var(--qc-golden-ink)",
-              background: "var(--qc-warn-soft)",
-              border: "1px solid var(--qc-warn-soft)",
-              borderRadius: 4,
-              padding: "3px 6px",
-              textAlign: "center",
-              marginBottom: 4,
-              lineHeight: 1.4,
-              whiteSpace: "nowrap",
-              cursor: "pointer",
-            }}
-          >
-            {subscription.days_remaining}d trial
-          </button>
+          <TooltipProvider delayDuration={300}>
+            <TooltipRoot>
+              <TooltipTrigger asChild>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: "var(--qc-golden-ink)",
+                    background: "var(--qc-warn-soft)",
+                    border: "1px solid var(--qc-warn-soft)",
+                    borderRadius: 4,
+                    padding: "3px 6px",
+                    textAlign: "center",
+                    marginBottom: 4,
+                    lineHeight: 1.4,
+                    whiteSpace: "nowrap",
+                    cursor: "default",
+                  }}
+                >
+                  {subscription.days_remaining}d trial
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                Your plan is set up. Billing begins after the trial.
+              </TooltipContent>
+            </TooltipRoot>
+          </TooltipProvider>
         )}
 
         <div className="mb-1">

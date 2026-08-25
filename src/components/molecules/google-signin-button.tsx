@@ -83,7 +83,7 @@ export function GoogleSignInButton({ onSuccess, onError, disabled }: GoogleSignI
       <Script
         src="https://accounts.google.com/gsi/client"
         strategy="afterInteractive"
-        onLoad={() => setScriptLoaded(true)}
+        onReady={() => setScriptLoaded(true)}
       />
       <div
         ref={buttonRef}

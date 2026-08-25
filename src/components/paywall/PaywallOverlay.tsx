@@ -52,11 +52,14 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
     getBillingConfig().then(setConfig).catch(() => {});
   }, [open]);
 
-  const visiblePrices = products.flatMap((product) =>
-    product.prices
-      .filter((pr) => pr.plan_type === billingInterval)
-      .map((pr) => ({ product, price: pr }))
+  const allPrices = products.flatMap((product) =>
+    product.prices.map((pr) => ({ product, price: pr }))
   );
+  // Find one annual and one monthly plan to display simultaneously
+  const visiblePrices = [
+    allPrices.find((p) => p.price.plan_type === "annual"),
+    allPrices.find((p) => p.price.plan_type === "monthly"),
+  ].filter(Boolean) as { product: BillingProduct; price: any }[];
 
   function formatAmount(amount: number, currency: string) {
     if (currency.toLowerCase() === "inr") {
@@ -175,26 +178,9 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
           maxHeight: "calc(100vh - 48px)",
           overflowY: "auto",
         }}
+        <div style={{ height: 4, background: "linear-gradient(90deg, var(--qc-ink) 0%, var(--qc-ink-2) 100%)" }} />
       >
         {/* Top accent bar */}
-        <div style={{ height: 4, background: "linear-gradient(90deg, var(--qc-ink) 0%, var(--qc-ink-2) 100%)" }} />
-
-        {/* Test-mode banner — backend-driven; no real money is charged */}
-        {config?.mode === "test" && (
-          <div
-            style={{
-              background: "var(--qc-ink)",
-              color: "var(--qc-on-dark)",
-              fontSize: 11,
-              fontWeight: 600,
-              textAlign: "center",
-              padding: "6px 16px",
-              letterSpacing: "0.02em",
-            }}
-          >
-            ⚠️ Test Mode — no real money is charged.
-          </div>
-        )}
 
         {/* Header */}
         <div style={{ padding: "28px 32px 0 32px", position: "relative" }}>
@@ -270,13 +256,13 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
 
           {statusConfig.headline === "What an analyst costs, without the analyst." && (
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24, marginTop: 12 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", textDecoration: "line-through", color: "var(--qc-ink-3)", fontSize: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--qc-ink-3)", fontSize: 14 }}>
                 <span>Junior analyst</span>
-                <span>₹60,000/mo</span>
+                <span style={{ textDecoration: "line-through" }}>₹60,000/mo</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", textDecoration: "line-through", color: "var(--qc-ink-3)", fontSize: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--qc-ink-3)", fontSize: 14 }}>
                 <span>Bloomberg seat</span>
-                <span>₹2,00,000/mo</span>
+                <span style={{ textDecoration: "line-through" }}>₹2,00,000/mo</span>
               </div>
             </div>
           )}
@@ -321,71 +307,6 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
 
         {/* Pricing section */}
         <div style={{ padding: "0 32px 28px 32px" }}>
-          {/* Section label */}
-          <div
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              color: "var(--qc-ink-3)",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              marginBottom: 12,
-            }}
-          >
-            Choose a plan
-          </div>
-
-          {/* Billing interval toggle */}
-          <div
-            style={{
-              display: "inline-flex",
-              border: "1px solid var(--qc-hair)",
-              borderRadius: 999,
-              padding: 3,
-              marginBottom: 16,
-              background: "var(--qc-section)",
-            }}
-          >
-            {(["monthly", "annual"] as const).map((opt) => (
-              <button
-                key={opt}
-                onClick={() => setBillingInterval(opt)}
-                style={{
-                  padding: "5px 16px",
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: 500,
-                  border: "none",
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                  background: billingInterval === opt ? "var(--qc-ink)" : "transparent",
-                  color: billingInterval === opt ? "var(--qc-on-dark)" : "var(--qc-ink-3)",
-                  textTransform: "capitalize",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                {opt}
-                {opt === "annual" && (
-                  <span
-                    style={{
-                      fontSize: 9,
-                      background: billingInterval === "annual" ? "rgba(255,255,255,0.2)" : "var(--qc-up-soft)",
-                      color: billingInterval === "annual" ? "var(--qc-on-dark)" : "var(--qc-up)",
-                      borderRadius: 999,
-                      padding: "1px 6px",
-                      fontWeight: 700,
-                      letterSpacing: "0.02em",
-                    }}
-                  >
-                    SAVE 20%
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-
           {/* Plan cards */}
           {fetchingProducts ? (
             <div style={{ padding: "32px 0", textAlign: "center" }}>
@@ -432,25 +353,6 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                       position: "relative",
                     }}
                   >
-                    {isPopular && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: -10,
-                          left: 14,
-                          fontSize: 9,
-                          fontWeight: 700,
-                          background: "var(--qc-ink)",
-                          color: "var(--qc-on-dark)",
-                          borderRadius: 999,
-                          padding: "2px 8px",
-                          letterSpacing: "0.06em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Most popular
-                      </span>
-                    )}
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       {/* Radio dot */}
                       <div
@@ -465,19 +367,24 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                         }}
                       />
                       <div>
-                        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2 }}>
-                          {product.name}
+                        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2, display: "flex", alignItems: "center", gap: 8 }}>
+                          {price.plan_type === "annual" ? "Yearly" : "Monthly"}
+                          {price.plan_type === "annual" && (
+                            <span style={{ fontSize: 10, background: "var(--qc-up-soft)", color: "var(--qc-up)", borderRadius: 999, padding: "2px 8px", fontWeight: 700 }}>
+                              SAVE 20%
+                            </span>
+                          )}
                         </div>
                         <div style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>
-                          {product.description}
+                          {price.plan_type === "annual" ? `${formatAmount(price.amount, price.currency)} billed once · covers 4 earnings seasons` : "Cancel any time"}
                         </div>
                       </div>
                     </div>
                     <div style={{ textAlign: "right", flexShrink: 0 }}>
                       <div style={{ fontSize: 18, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "-0.02em" }}>
-                        {formatAmount(price.amount, price.currency)}
+                        {price.plan_type === "annual" ? formatAmount(price.amount / 12, price.currency) : formatAmount(price.amount, price.currency)}
                       </div>
-                      <div style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>/{price.plan_type}</div>
+                      <div style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>/mo</div>
                     </div>
                   </button>
                 );

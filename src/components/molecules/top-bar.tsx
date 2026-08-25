@@ -271,14 +271,6 @@ function TopBarInner() {
           )}
         </div>
 
-        {/* Mobile factor items (inline in the scrolling bar) */}
-        <div className="md:hidden flex items-center gap-0.5">
-          {FACTOR_ITEMS.map((item) => (
-            <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
-              {item.label}
-            </PillTab>
-          ))}
-        </div>
       </div>
     );
   } else if (isWealthOS) {
@@ -326,6 +318,7 @@ function TopBarInner() {
   }
 
   return (
+    <>
     <motion.header
       className="fixed left-0 md:left-[72px] right-0 top-0 z-30 flex h-[60px] items-center px-4 md:px-6"
       animate={scrolled ? "scrolled" : "top"}
@@ -359,6 +352,23 @@ function TopBarInner() {
         )}
       </div>
     </motion.header>
+
+      {/* Mobile-only Factor Sub-nav (Row 2) */}
+      {hasAssetSelected && (
+        <div 
+          className="md:hidden fixed left-0 right-0 top-[60px] z-20 flex h-[44px] items-center overflow-x-auto scrollbar-none px-4"
+          style={{ background: "var(--qc-bg)", borderBottom: "1px solid var(--qc-hair)" }}
+        >
+          <div className="flex items-center gap-1">
+            {FACTOR_ITEMS.map((item) => (
+              <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
+                {item.label}
+              </PillTab>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

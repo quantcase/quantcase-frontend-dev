@@ -21,10 +21,15 @@ export function MainContentWrapper({ children }: { children: React.ReactNode }) 
     return <>{children}</>;
   }
 
+  const hasAssetSelected = pathname.startsWith("/screener/") && !HIDE_TOPBAR_PATHS.includes(pathname);
+
   return (
     <div
-      className={cn("md:ml-[72px] min-h-screen pb-[60px] md:pb-0")}
-      style={{ background: "var(--qc-bg)", paddingTop: !hideTopBar ? 60 : undefined }}
+      className={cn(
+        "md:ml-[72px] min-h-screen pb-[60px] md:pb-0",
+        !hideTopBar && (hasAssetSelected ? "pt-[104px] md:pt-[60px]" : "pt-[60px]")
+      )}
+      style={{ background: "var(--qc-bg)" }}
     >
       {children}
     </div>

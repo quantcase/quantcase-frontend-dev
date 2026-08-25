@@ -92,7 +92,7 @@ function FinancialsContent() {
   const [shareholdingView, setShareholdingView] = useState<"table" | "chart">("table");
 
   const { data, loading, error } = useFinancials(symbol);
-  const { data: chartsData } = useFinancialsCharts(symbol);
+  const { data: chartsData, loading: chartsLoading } = useFinancialsCharts(symbol);
   const { data: peersData, loading: peersLoading } = useScreenerPeers(symbol);
   const { data: shareholdingData, loading: shareholdingLoading } = useShareholding(symbol);
   const { data: screenerData } = useScreenerData(symbol);
@@ -129,7 +129,7 @@ function FinancialsContent() {
     );
   }
 
-  if (loading || !data) {
+  if (loading || !data || chartsLoading) {
     return (
       <>
         <ScreenerPageShell navItems={FUNDAMENTALS_NAV} companyInfo={companyInfo}>
@@ -178,7 +178,7 @@ function FinancialsContent() {
                       { label: "10 Years:", value: metrics.salesGrowth["10y"] },
                       { label: "5 Years:", value: metrics.salesGrowth["5y"] },
                       { label: "3 Years:", value: metrics.salesGrowth["3y"] },
-                      { label: "TTM:", value: metrics.salesGrowth.ttm },
+                      // { label: "TTM:", value: metrics.salesGrowth.ttm }, // TODO: Uncomment when backend provides TTM
                     ]}
                   />
                   <GrowthStatCard
@@ -188,7 +188,7 @@ function FinancialsContent() {
                       { label: "10 Years:", value: metrics.profitGrowth["10y"] },
                       { label: "5 Years:", value: metrics.profitGrowth["5y"] },
                       { label: "3 Years:", value: metrics.profitGrowth["3y"] },
-                      { label: "TTM:", value: metrics.profitGrowth.ttm },
+                      // { label: "TTM:", value: metrics.profitGrowth.ttm }, // TODO: Uncomment when backend provides TTM
                     ]}
                   />
                   <GrowthStatCard

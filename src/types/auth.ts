@@ -57,16 +57,14 @@ export interface BillingConfig {
 
 /** POST /api/billing/subscribe → { price_id, coupon_code? } */
 export interface SubscribeResponse {
-  razorpay_order_id: string;
+  razorpay_subscription_id: string;
   razorpay_key_id: string;
   mode: "test" | "live";
-  amount: number;
-  currency: string;
   subscription_id: string;
   prefill: { name: string; email: string; contact: string };
 }
 
-/** POST /api/billing/verify → { razorpay_order_id, razorpay_payment_id, razorpay_signature } */
+/** POST /api/billing/verify → { razorpay_subscription_id, razorpay_payment_id, razorpay_signature } */
 export interface VerifyResponse {
   status: string;
   subscription_id: string;

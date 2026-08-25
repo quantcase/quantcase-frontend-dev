@@ -185,7 +185,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
           position: "fixed",
           left: "50%",
           transform: "translateX(-50%)",
-          zIndex: 50,
+          zIndex: 35,
           display: "flex",
           alignItems: "center",
           gap: 4,

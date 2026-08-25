@@ -259,12 +259,14 @@ function TopBarInner() {
 
           {showFactorItems && (
             <>
-              <span className="px-1 select-none text-sm" style={{ color: "var(--qc-hair)" }}>·</span>
-              {FACTOR_ITEMS.map((item) => (
-                <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
-                  {item.label}
-                </PillTab>
-              ))}
+              <span className="px-1 select-none text-sm hidden md:inline" style={{ color: "var(--qc-hair)" }}>·</span>
+              <div className="hidden md:flex items-center gap-0.5">
+                {FACTOR_ITEMS.map((item) => (
+                  <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
+                    {item.label}
+                  </PillTab>
+                ))}
+              </div>
             </>
           )}
         </div>
@@ -342,11 +344,20 @@ function TopBarInner() {
           {leftZone}
         </div>
         {rightZone && (
-          <div className="ml-auto shrink-0 pl-3 w-[200px] sm:w-[300px]">
+          <div className="hidden md:block ml-auto shrink-0 pl-3 w-[200px] sm:w-[300px]">
             {rightZone}
           </div>
         )}
       </div>
+      {(isFactorActive || factorOpen) && hasAssetSelected && (
+        <div className="md:hidden absolute top-[60px] left-4 flex items-center gap-0.5 rounded-full p-1 shadow-sm" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}>
+          {FACTOR_ITEMS.map((item) => (
+            <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
+              {item.label}
+            </PillTab>
+          ))}
+        </div>
+      )}
     </motion.header>
   );
 }

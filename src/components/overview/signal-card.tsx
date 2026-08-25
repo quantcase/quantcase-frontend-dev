@@ -188,7 +188,7 @@ export function SignalCard({
 
       {interactive && tip && (
         <div
-          className="signal-card-tooltip"
+          className="signal-card-tooltip hidden md:block"
           style={{
             position: "absolute",
             [tooltipAlign === "right" ? "right" : "left"]: 0,

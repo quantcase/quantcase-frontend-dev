@@ -464,15 +464,17 @@ export function IMScoreCard({ management, opportunity, deal, overviewData }: IMS
           </span>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {rankedPatterns.map((p) => (
-            <PatternCard
-              key={p.pillar}
-              pattern={p}
-              href={PILLAR_META[p.pillar].href}
-              symbol={symbol}
-            />
-          ))}
+        <div className="overflow-x-auto scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 480 }}>
+            {rankedPatterns.map((p) => (
+              <PatternCard
+                key={p.pillar}
+                pattern={p}
+                href={PILLAR_META[p.pillar].href}
+                symbol={symbol}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

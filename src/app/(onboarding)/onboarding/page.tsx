@@ -143,7 +143,7 @@ export default function OnboardingV3() {
     <div id="onboarding-root">
       <style dangerouslySetInnerHTML={{ __html: `
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap");
-:root{--navy:#0C1626;--navy2:#101E33;--navy3:#16283F;--ink:#F2F5F9;--muted:#8FA0B4;--dim:#5C6E84;
+:root{--navy:#0E0412;--navy2:var(--qc-ink);--navy3:#341247;--ink:#F2F5F9;--muted:#8FA0B4;--dim:#5C6E84;
 --tan:#C8925C;--tan2:#E0A96D;--pos:#4ADE80;--neg:#F87171;--line:rgba(255,255,255,.10);
 --serif:'Playfair Display',Georgia,serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--sans:'Inter',sans-serif}
 
@@ -153,7 +153,7 @@ export default function OnboardingV3() {
 }
 
 
-#onboarding-root{background:#060D18;min-height:100vh;overflow-y:auto;display:flex;flex-direction:column;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+#onboarding-root{background: radial-gradient(900px 520px at 82% -8%, rgba(200,146,92,.10), transparent 62%), linear-gradient(170deg, var(--navy3), var(--navy2) 45%, var(--navy));min-height:100vh;overflow-y:auto;display:flex;flex-direction:column;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
 
 
 .outcome{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;margin-top:16px;}
@@ -238,7 +238,7 @@ export default function OnboardingV3() {
   display: flex;
   flex-direction: column;
   position: relative;
-  background: radial-gradient(900px 520px at 82% -8%, rgba(200,146,92,.10), transparent 62%), linear-gradient(170deg, var(--navy3), var(--navy2) 45%, var(--navy));
+  background: var(--navy);
   box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
 }
 #onboarding-root header{display:flex;justify-content:space-between;align-items:center;padding:20px 32px}
@@ -366,21 +366,21 @@ export default function OnboardingV3() {
 .jent .then b{font-size:24px}
 
 /* ---------- footer ---------- */
-.bar{border-top:1px solid var(--line);padding:17px 32px;display:flex;justify-content:space-between;align-items:center;background:rgba(6,13,24,.5)}
+.bar{border-top:1px solid var(--line);padding:17px 32px;display:flex;justify-content:space-between;align-items:center;background:rgba(14,4,18,.5)}
 .back{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--dim);background:none;border:none;cursor:pointer;padding:8px 0}
 .back:hover{color:var(--muted)}
 .cta{display:flex;align-items:center;gap:14px}
 .skip{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--dim);background:none;border:none;cursor:pointer}
 .skip:hover{color:var(--muted);text-decoration:underline}
 .btn{font-family:var(--sans);font-size:15px;font-weight:600;padding:13px 26px;border-radius:9px;border:none;cursor:pointer;
-background:linear-gradient(180deg,#F4EDE3,#E6DACA);color:#0C1626;display:flex;align-items:center;gap:9px;transition:.18s}
+background:linear-gradient(180deg,#F4EDE3,#E6DACA);color:var(--qc-ink);display:flex;align-items:center;gap:9px;transition:.18s}
 .btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,146,92,.22)}
 .btn:disabled{opacity:.3;cursor:not-allowed}
 
 /* ---------- import sheet ---------- */
-.ov{position:absolute;inset:0;background:rgba(4,9,17,.8);backdrop-filter:blur(3px);z-index:50;display:none;align-items:center;justify-content:center;padding:24px}
+.ov{position:absolute;inset:0;background:rgba(10,3,14,.8);backdrop-filter:blur(3px);z-index:50;display:none;align-items:center;justify-content:center;padding:24px}
 .ov.on{display:flex}
-.sheet{width:100%;max-width:740px;background:#0E1B2C;border:1px solid var(--line);border-radius:15px;padding:28px;animation:pop .3s cubic-bezier(.2,.8,.3,1);max-height:100%;overflow-y:auto}
+.sheet{width:100%;max-width:740px;background:var(--navy2);border:1px solid var(--line);border-radius:15px;padding:28px;animation:pop .3s cubic-bezier(.2,.8,.3,1);max-height:100%;overflow-y:auto}
 @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
 .sh-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--tan);margin-bottom:11px}
 .sheet h2{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.2}
@@ -485,7 +485,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                       <div key={x.t} className={"row " + (mode === "import" ? "ro" : sel.has(x.t) ? "sel" : "")} onClick={() => mode === "pick" && toggle(x.t)}>
                         <div className="id"><div className="tk">{x.t}</div><div className="nm">{x.n}</div></div>
                         <div className="why">{x.w}</div><div className="sc" style={{ color: col(x.s) }}>{x.s}</div>
-                        {mode === "pick" && <div className="tick"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0C1626" strokeWidth="3.5"><path d="M4 12l5 5L20 6" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}
+                        {mode === "pick" && <div className="tick"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#210B2C" strokeWidth="3.5"><path d="M4 12l5 5L20 6" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}
                       </div>
                     ))}
                     {mode === "pick" && filtered.length === 0 && <div className="empty" style={{ padding: 30 }}>No match. Try a ticker like INFY.</div>}

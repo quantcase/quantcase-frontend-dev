@@ -2,6 +2,11 @@
 
 import { User, Bell, Shield, Building2, Palette, Key } from "lucide-react";
 import { SectionPanel } from "@/components/molecules/section-panel";
+import { Link as LinkIcon } from "lucide-react";
+import { useSmallcaseStatus } from "@/hooks/useSmallcaseStatus";
+import { useSmallcaseConnect } from "@/hooks/useSmallcaseConnect";
+import { apiAuthPost } from "@/lib/api";
+import { BACKEND_URL } from "@/lib/constants";
 
 interface SettingRow {
   label: string;
@@ -114,6 +119,74 @@ function SettingRowItem({ row, wide }: { row: SettingRow; wide?: boolean }) {
   );
 }
 
+function BrokerIntegrationSection() {
+  const { status, loading, refetch } = useSmallcaseStatus();
+  const { connect, step, error } = useSmallcaseConnect({
+    onConnected: () => {
+      refetch();
+    }
+  });
+
+  const handleDisconnect = () => {
+    apiAuthPost(
+      `${BACKEND_URL}/api/smallcase/disconnect`,
+      {
+        onSuccess: () => refetch(),
+        onError: (err) => alert("Failed to disconnect: " + err)
+      },
+      {}
+    );
+  };
+
+  return (
+    <SectionPanel
+      title={
+        <span className="flex items-center gap-2">
+          <span className="inline-flex items-center justify-center rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] p-1">
+            <LinkIcon className="size-4 text-ink-3" />
+          </span>
+          Broker Integration
+        </span>
+      }
+      subtitle="Connect your brokerage account to import holdings securely"
+    >
+      <div className="py-4">
+        {loading ? (
+          <div className="text-sm text-ink-3">Loading status...</div>
+        ) : status?.isConnected ? (
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-medium text-ink">Connected to {status.broker || "Broker"}</div>
+              <div className="text-xs text-ink-3 mt-0.5">Your holdings are synced.</div>
+            </div>
+            <button 
+              onClick={handleDisconnect}
+              className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-md border border-red-200 hover:bg-red-100 transition-colors"
+            >
+              Disconnect
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-medium text-ink">Not Connected</div>
+              <div className="text-xs text-ink-3 mt-0.5">Connect via smallcase to enable holdings tracking.</div>
+              {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
+            </div>
+            <button 
+              onClick={() => connect()}
+              disabled={step === "creating" || step === "confirming"}
+              className="px-3 py-1.5 text-xs font-medium text-ink bg-secondary rounded-md border border-hair hover:bg-[rgba(18,18,18,0.05)] transition-colors disabled:opacity-50"
+            >
+              {step === "creating" || step === "confirming" ? "Connecting..." : "Connect Broker"}
+            </button>
+          </div>
+        )}
+      </div>
+    </SectionPanel>
+  );
+}
+
 export default function SettingsPage() {
   return (
     <div className="p-6 space-y-4">
@@ -124,6 +197,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
+        <div className="xl:col-span-2"><BrokerIntegrationSection /></div>
         {SECTIONS.map((section) => {
           const Icon = section.icon;
           return (

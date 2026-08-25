@@ -7,8 +7,6 @@ import { ChevronRight } from "lucide-react";
 import type { InsightData } from "@/types/analysis";
 import type { OverviewAnalysis, OverviewPillarPattern } from "@/types/overview";
 import { SectionShell } from "./primitives";
-import { StatusBadge } from "@/components/ds";
-import { lensSentiment } from "@/components/insight/insight-lenses";
 
 interface IMScoreCardProps {
   management: InsightData | null;
@@ -24,44 +22,6 @@ const PILLAR_META = {
 } as const;
 
 type PillarKey = keyof typeof PILLAR_META;
-
-// ── trend → semantics ────────────────────────────────────────────────────────
-// The pattern `trend` drives the mini-chart line color and the trend badge.
-// rising = the thesis is improving (positive), falling = deteriorating (negative),
-// steady = holding (neutral). Everything else falls back to neutral.
-function trendSemantics(trend: string): {
-  line: string;
-  badge: { bg: string; text: string; label: string };
-} {
-  const t = (trend ?? "").toLowerCase();
-  if (t.includes("ris") || t.includes("improv") || t.includes("up") || t.includes("accel")) {
-    return { line: "var(--qc-up)", badge: { bg: "var(--qc-up-soft)", text: "var(--qc-up)", label: "Rising" } };
-  }
-  if (t.includes("fall") || t.includes("declin") || t.includes("down") || t.includes("soft") || t.includes("weak")) {
-    return { line: "var(--qc-down)", badge: { bg: "var(--qc-down-soft)", text: "var(--qc-down)", label: "Softening" } };
-  }
-  return { line: "var(--qc-warn)", badge: { bg: "var(--qc-warn-soft)", text: "var(--qc-warn)", label: "Steady" } };
-}
-
-// rating word → semantic tone for the lens-grid rating pills.
-function ratingTone(rating: string): "up" | "down" | "neutral" {
-  const r = (rating ?? "").toLowerCase();
-  if (
-    r.includes("strong") || r.includes("excellent") || r.includes("disciplin") ||
-    r.includes("achiev") || r.includes("clean") || r.includes("good") || r.includes("high")
-  ) return "up";
-  if (
-    r.includes("weak") || r.includes("poor") || r.includes("soft") || r.includes("selective") ||
-    r.includes("pressur") || r.includes("low") || r.includes("risk") || r.includes("capped")
-  ) return "down";
-  return "neutral";
-}
-
-function toneColor(tone: "up" | "down" | "neutral") {
-  if (tone === "up") return { text: "var(--qc-up)", bg: "var(--qc-up-soft)" };
-  if (tone === "down") return { text: "var(--qc-down)", bg: "var(--qc-down-soft)" };
-  return { text: "var(--qc-ink-2)", bg: "var(--qc-chip, #F2F1EC)" };
-}
 
 // Turn *emphasis* markers from the L4 title into accented spans.
 function EmphasisTitle({ text }: { text: string }) {
@@ -81,103 +41,24 @@ function EmphasisTitle({ text }: { text: string }) {
   );
 }
 
-// ── MiniLineChart ─────────────────────────────────────────────────────────────
-// Compact line chart from a `spark` series (values in any range), with a terminal
-// dot and FY24 → FY26 baseline labels — the Asian-Paints pattern glyph.
-function MiniLineChart({ values, color }: { values: number[]; color: string }) {
-  const w = 132;
-  const h = 56;
-  const padY = 8;
-  if (!values.length) {
-    return <div style={{ width: w, height: h + 20 }} />;
-  }
-  const max = Math.max(...values);
-  const min = Math.min(...values);
-  const range = max - min || 1;
-  const n = values.length;
-  const pts = values.map((v, i) => {
-    const x = n === 1 ? w / 2 : (i / (n - 1)) * w;
-    const y = padY + (1 - (v - min) / range) * (h - padY * 2);
-    return [x, y] as const;
-  });
-  const d = pts.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
-  const last = pts[pts.length - 1];
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6, width: w, flexShrink: 0 }}>
-      <svg width={w} height={h} style={{ display: "block", overflow: "visible" }} aria-hidden>
-        <polyline
-          points={d}
-          fill="none"
-          stroke={color}
-          strokeWidth={1.75}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx={last[0]} cy={last[1]} r={3.5} fill={color} />
-      </svg>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          fontFamily: "var(--qc-font-mono)",
-          fontSize: "var(--qc-fz-9)",
-          letterSpacing: ".06em",
-          color: "var(--qc-ink-3)",
-        }}
-      >
-        <span>FY24</span>
-        <span>FY26</span>
-      </div>
-    </div>
-  );
-}
-
-// ── Routing chip ("Opportunity · Pricing power") ──────────────────────────────
-function RouteChip({ pillar, lens }: { pillar: PillarKey; lens: string }) {
-  // Deal routes read golden; management/opportunity read soft-green — matches the Asian Paints legend.
-  const bg = pillar === "deal" ? "var(--qc-warn-soft)" : "var(--qc-up-soft)";
-  const text = pillar === "deal" ? "var(--qc-golden-ink)" : "var(--qc-up)";
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "3px 9px",
-        borderRadius: 6,
-        background: bg,
-        color: text,
-        fontFamily: "var(--qc-font-sans)",
-        fontSize: "var(--qc-fz-11)",
-        fontWeight: "var(--qc-w-medium)",
-        letterSpacing: ".01em",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {PILLAR_META[pillar].label} · {lens}
-    </span>
-  );
-}
-
 // ── Pattern card ──────────────────────────────────────────────────────────────
 function PatternCard({
   pattern,
   href,
   symbol,
+  index,
 }: {
   pattern: OverviewPillarPattern;
   href: string;
   symbol: string;
+  index: number;
 }) {
   const [hovered, setHovered] = useState(false);
-  const sem = trendSemantics(pattern.trend);
   const dest = `${href}?symbol=${encodeURIComponent(symbol)}`;
-
-  // "Routes to" — the two strongest lenses of this pillar, as routing chips.
-  const routes = [...pattern.lenses]
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 2)
-    .map((l) => l.lens);
+  const meta = PILLAR_META[pattern.pillar];
+  
+  const bullets = pattern.snapshot.split(';').map(s => s.replace(/\*\*/g, '').trim()).filter(Boolean);
+  const numStr = (index + 1).toString().padStart(2, "0");
 
   return (
     <Link
@@ -185,157 +66,129 @@ function PatternCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        display: "block",
+        display: "flex",
         textDecoration: "none",
         background: "var(--qc-card)",
         border: `1px solid ${hovered ? "var(--qc-ink-2)" : "var(--qc-hair)"}`,
         borderRadius: 14,
-        padding: "18px 20px",
         position: "relative",
         transition: "border-color 0.15s ease, box-shadow 0.15s ease",
         boxShadow: hovered ? "0 2px 14px rgba(0,0,0,0.06)" : "none",
+        overflow: "hidden",
       }}
     >
-      {/* chevron affordance, top-right */}
-      <ChevronRight
-        size={15}
-        strokeWidth={2}
+      {/* Number Column */}
+      <div
         style={{
-          position: "absolute",
-          top: 18,
-          right: 18,
+          width: 64,
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--qc-font-mono)",
+          fontSize: "var(--qc-fz-12)",
           color: "var(--qc-ink-3)",
-          opacity: hovered ? 1 : 0.5,
-          transform: hovered ? "translateX(2px)" : "none",
-          transition: "opacity 0.15s ease, transform 0.15s ease",
         }}
-      />
+      >
+        {numStr}
+      </div>
 
-      <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-        {/* left rail: color dot + mini chart */}
-        <div style={{ display: "flex", gap: 12, alignItems: "flex-start", paddingTop: 2 }}>
-          <span
+      {/* Content Column */}
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column",
+          padding: "24px 24px 24px 0",
+        }}
+      >
+        <div style={{ display: "flex", flex: 1 }}>
+          {/* Colored Line */}
+          <div
             style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: sem.line,
-              marginTop: 22,
+              width: 4,
+              backgroundColor: meta.color,
               flexShrink: 0,
+              marginRight: 24,
             }}
           />
-          <MiniLineChart values={pattern.spark} color={sem.line} />
-        </div>
 
-        {/* right: title, badges, snapshot, routes */}
-        <div style={{ flex: 1, minWidth: 0, paddingRight: 18 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-            <span
-              style={{
-                fontFamily: "var(--qc-font-sans)",
-                fontSize: "var(--qc-fz-16)",
-                fontWeight: "var(--qc-w-semi)",
-                color: "var(--qc-ink)",
-                letterSpacing: "-0.01em",
-                lineHeight: 1.25,
-              }}
-            >
-              {pattern.name}
-            </span>
-            {routes.map((lens) => (
-              <RouteChip key={lens} pillar={pattern.pillar} lens={lens} />
-            ))}
+          {/* Text Content */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+             {/* Eyebrow */}
+             <div
+               style={{
+                 fontFamily: "var(--qc-font-mono)",
+                 fontSize: "var(--qc-fz-10)",
+                 letterSpacing: ".14em",
+                 textTransform: "uppercase",
+                 color: meta.color,
+                 fontWeight: "var(--qc-w-semi)",
+                 marginBottom: 8,
+               }}
+             >
+               {meta.label}
+             </div>
+             
+             {/* Title */}
+             <div
+               style={{
+                 fontFamily: "var(--qc-font-sans)",
+                 fontSize: "var(--qc-fz-18)",
+                 fontWeight: "var(--qc-w-semi)",
+                 color: "var(--qc-ink)",
+                 letterSpacing: "-0.01em",
+                 lineHeight: 1.25,
+                 marginBottom: 16,
+               }}
+             >
+               {pattern.name}
+             </div>
+             
+             {/* Divider */}
+             <div style={{ height: 1, background: "var(--qc-hair)", marginBottom: 16 }} />
+
+             {/* Bullets */}
+             <ul
+               style={{
+                 margin: 0,
+                 paddingLeft: 20,
+                 fontFamily: "var(--qc-font-sans)",
+                 fontSize: "var(--qc-fz-14)",
+                 color: "var(--qc-ink-2)",
+                 lineHeight: 1.6,
+                 display: "flex",
+                 flexDirection: "column",
+                 gap: 8,
+               }}
+             >
+               {bullets.map((bullet, i) => (
+                 <li key={i}>{bullet}</li>
+               ))}
+             </ul>
           </div>
-
-          <p
-            style={{
-              margin: 0,
-              fontFamily: "var(--qc-font-sans)",
-              fontSize: "var(--qc-fz-13)",
-              color: "var(--qc-ink-2)",
-              lineHeight: 1.6,
-            }}
-          >
-            {pattern.snapshot}
-          </p>
         </div>
+      </div>
+
+      {/* Chevron affordance */}
+      <div style={{ display: "flex", alignItems: "center", paddingRight: 20 }}>
+        <ChevronRight
+          size={15}
+          strokeWidth={2}
+          style={{
+            color: "var(--qc-ink-3)",
+            opacity: hovered ? 1 : 0.5,
+            transform: hovered ? "translateX(2px)" : "none",
+            transition: "opacity 0.15s ease, transform 0.15s ease",
+          }}
+        />
       </div>
     </Link>
   );
 }
 
-// ── Twelve-lenses grid ────────────────────────────────────────────────────────
-function LensGridColumn({ pattern, symbol, l3Data }: { pattern: OverviewPillarPattern; symbol: string; l3Data: InsightData | null }) {
-  const meta = PILLAR_META[pattern.pillar];
-  const dest = `${meta.href}?symbol=${encodeURIComponent(symbol)}`;
 
-  return (
-    <div style={{ minWidth: 0 }}>
-      <Link
-        href={dest}
-        style={{
-          display: "inline-block",
-          textDecoration: "none",
-          fontFamily: "var(--qc-font-mono)",
-          fontSize: "var(--qc-fz-11)",
-          fontWeight: "var(--qc-w-semi)",
-          letterSpacing: ".14em",
-          textTransform: "uppercase",
-          color: meta.color,
-          marginBottom: 12,
-        }}
-      >
-        {meta.label}
-      </Link>
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        {pattern.lenses.map((lens, i) => {
-          const l3Lens = l3Data?.lenses.find((l) => l.slug === lens.lens || l.name === lens.lens);
-          const statusStr = l3Lens?.status || "—";
-          const pct = l3Lens && l3Lens.max_score > 0 ? (l3Lens.score / l3Lens.max_score) * 100 : 0;
-          const sentiment = lensSentiment(l3Lens?.status, pct);
-          
-          return (
-            <Link
-              key={lens.lens}
-              href={`${meta.href}?symbol=${encodeURIComponent(symbol)}&lens=${encodeURIComponent(lens.lens)}`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 10,
-                padding: "10px 4px",
-                borderTop: i === 0 ? "none" : "1px solid var(--qc-hair)",
-                textDecoration: "none",
-                borderRadius: 4,
-              }}
-              className="hover:bg-[var(--qc-surface-hover)] transition-colors"
-            >
-              <span
-                style={{
-                  fontFamily: "var(--qc-font-sans)",
-                  fontSize: "var(--qc-fz-13)",
-                  color: "var(--qc-ink)",
-                  minWidth: 0,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {lens.lens}
-              </span>
-              <StatusBadge
-                label={statusStr === "—" ? statusStr : statusStr.toUpperCase()}
-                sentiment={sentiment}
-                hideGlyph
-                className="shrink-0 self-start"
-              />
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 // ── Empty fallback (no L4 pattern data) ───────────────────────────────────────
 function NarrativeFallback({
@@ -412,7 +265,7 @@ export function IMScoreCard({ management, opportunity, deal, overviewData }: IMS
             marginBottom: 10,
           }}
         >
-          QuantCase · Pattern Overview
+          QC Intuition : Pattern Recognition
         </div>
         {title && (
           <h2
@@ -466,61 +319,17 @@ export function IMScoreCard({ management, opportunity, deal, overviewData }: IMS
 
         <div className="overflow-x-auto scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0">
           <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 480 }}>
-            {rankedPatterns.map((p) => (
+            {rankedPatterns.map((p, index) => (
               <PatternCard
                 key={p.pillar}
                 pattern={p}
                 href={PILLAR_META[p.pillar].href}
                 symbol={symbol}
+                index={index}
               />
             ))}
           </div>
         </div>
-      </div>
-
-      {/* ── Go deeper · twelve lenses ── */}
-      <div style={{ marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--qc-hair)" }}>
-        <div
-          style={{
-            fontFamily: "var(--qc-font-mono)",
-            fontSize: "var(--qc-fz-11)",
-            letterSpacing: ".14em",
-            textTransform: "uppercase",
-            color: "var(--qc-ink-3)",
-            marginBottom: 18,
-          }}
-        >
-          Go deeper · twelve lenses
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3" style={{ gap: 28 }}>
-          {(["management", "opportunity", "deal"] as PillarKey[]).map((key) => {
-            const p = patterns.find((x) => x.pillar === key);
-            if (!p) return <div key={key} />;
-            
-            let l3Data = null;
-            if (key === "management") l3Data = management;
-            else if (key === "opportunity") l3Data = opportunity;
-            else if (key === "deal") l3Data = deal;
-
-            return <LensGridColumn key={key} pattern={p} symbol={symbol} l3Data={l3Data} />;
-          })}
-        </div>
-
-        <p
-          style={{
-            margin: "22px 0 0",
-            fontFamily: "var(--qc-font-sans)",
-            fontSize: "var(--qc-fz-12)",
-            color: "var(--qc-ink-3)",
-            lineHeight: 1.6,
-          }}
-        >
-          Patterns are detected across earnings calls, annual reports and decks, then routed by which lens
-          sub-factors the underlying signals touch. A pattern moving two or more lenses is flagged{" "}
-          <strong style={{ color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-semi)" }}>overarching</strong> and
-          surfaced above; single-lens patterns live inside their lens. Every card links to the pillar detail.
-        </p>
       </div>
     </SectionShell>
   );

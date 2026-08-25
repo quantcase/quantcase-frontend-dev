@@ -223,8 +223,8 @@ function TopBarInner() {
           </PillTab>
         ))}
 
-        {/* QuantCase pill (lime gradient when inactive, solid when active) */}
-        <div ref={factorRef} className="flex items-center">
+        {/* QuantCase grouping (Desktop only) */}
+        <div ref={factorRef} className="hidden md:flex items-center">
           <button
             onClick={() => !isFactorActive && setFactorOpen((v) => !v)}
             className={cn("flex", !isFactorActive ? "cursor-pointer" : "cursor-default")}
@@ -259,8 +259,8 @@ function TopBarInner() {
 
           {showFactorItems && (
             <>
-              <span className="px-1 select-none text-sm hidden md:inline" style={{ color: "var(--qc-hair)" }}>·</span>
-              <div className="hidden md:flex items-center gap-0.5">
+              <span className="px-1 select-none text-sm" style={{ color: "var(--qc-hair)" }}>·</span>
+              <div className="flex items-center gap-0.5">
                 {FACTOR_ITEMS.map((item) => (
                   <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
                     {item.label}
@@ -269,6 +269,15 @@ function TopBarInner() {
               </div>
             </>
           )}
+        </div>
+
+        {/* Mobile factor items (inline in the scrolling bar) */}
+        <div className="md:hidden flex items-center gap-0.5">
+          {FACTOR_ITEMS.map((item) => (
+            <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
+              {item.label}
+            </PillTab>
+          ))}
         </div>
       </div>
     );
@@ -349,15 +358,6 @@ function TopBarInner() {
           </div>
         )}
       </div>
-      {(isFactorActive || factorOpen) && hasAssetSelected && (
-        <div className="md:hidden absolute top-[60px] left-4 flex items-center gap-0.5 rounded-full p-1 shadow-sm" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}>
-          {FACTOR_ITEMS.map((item) => (
-            <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
-              {item.label}
-            </PillTab>
-          ))}
-        </div>
-      )}
     </motion.header>
   );
 }

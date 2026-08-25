@@ -68,17 +68,22 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
         const data: MeResponse = await res.json();
 
+        let isCompleted = data.onboarding_completed ?? data.profile?.onboarding_completed ?? false;
+
         // Never downgrade a locally-confirmed completed state with a potentially
         // stale backend response (race between PATCH completion and this GET).
         const localFlag = localStorage.getItem("qc_onboarding_completed");
         if (localFlag === "true") {
+          isCompleted = true;
+          data.onboarding_completed = true;
+        } else if (isCompleted) {
           data.onboarding_completed = true;
         }
 
         setFromMe(data);
 
         // Onboarding redirect — only if both local cache and network agree
-        if (!data.onboarding_completed && pathname !== ONBOARDING_PATH) {
+        if (!isCompleted && pathname !== ONBOARDING_PATH) {
           router.replace(ONBOARDING_PATH);
           return;
         }

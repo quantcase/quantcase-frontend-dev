@@ -22,8 +22,12 @@ export interface MeResponse {
   display_picture?: string | null;
   accountType?: "manager" | "investor" | "admin" | null;
   account_type?: "manager" | "investor" | "admin" | null;
-  onboarding_completed: boolean;
-  onboarding_step: number;
+  onboarding_completed?: boolean;
+  onboarding_step?: number;
+  profile?: {
+    onboarding_completed: boolean;
+    onboarding_step: string | number;
+  } | null;
   subscription: Subscription | null;
   smallcase?: SmallcaseConnection | null;
 }

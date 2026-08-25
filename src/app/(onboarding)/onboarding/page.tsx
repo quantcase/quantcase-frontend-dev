@@ -102,6 +102,7 @@ export default function OnboardingV3() {
       `${BACKEND_URL}/api/onboarding/complete`,
       {
         onSuccess: () => {
+          localStorage.setItem("qc_onboarding_completed", "true");
           onSuccessCallback();
         },
         onError: (err) => {

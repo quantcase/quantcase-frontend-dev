@@ -119,9 +119,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (userId) localStorage.setItem("qc_user_id", userId);
     else localStorage.removeItem("qc_user_id");
 
-    setOnboardingCompleted(data.onboarding_completed);
-    localStorage.setItem("qc_onboarding_completed", String(data.onboarding_completed));
-    setOnboardingStep(data.onboarding_step ?? 0);
+    const isCompleted = data.onboarding_completed ?? data.profile?.onboarding_completed ?? false;
+    setOnboardingCompleted(isCompleted);
+    localStorage.setItem("qc_onboarding_completed", String(isCompleted));
+    
+    const step = data.onboarding_step ?? (data.profile?.onboarding_step ? Number(data.profile.onboarding_step) : 0);
+    setOnboardingStep(step);
     setSubscription(data.subscription ?? null);
 
     const name = data.display_name ?? null;

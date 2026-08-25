@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
 import { GoogleSignInButton } from "@/components/molecules/google-signin-button";
-import type { GoogleAuthResponse, InviteValidation, RegisterPayload, RegisterResponse } from "@/types/auth";
+import type { GoogleAuthResponse, RegisterPayload, RegisterResponse } from "@/types/auth";
 
 function FormField({
   id,
@@ -110,20 +110,9 @@ function GoogleSignInSection({
   );
 }
 
-type InviteState =
-  | { status: "loading" }
-  | { status: "missing" }
-  | { status: "invalid"; message: string }
-  | { status: "used" }
-  | { status: "expired" }
-  | { status: "valid"; email: string };
-
 export function RegisterForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const inviteToken = searchParams.get("invite_token") ?? "";
 
-  const [invite, setInvite] = useState<InviteState>({ status: "loading" });
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -146,42 +135,6 @@ export function RegisterForm() {
     }
   }
 
-  useEffect(() => {
-    if (!inviteToken) {
-      setInvite({ status: "missing" });
-      return;
-    }
-
-    let cancelled = false;
-
-    fetch(`${BACKEND_URL}/api/invites/validate?token=${encodeURIComponent(inviteToken)}`)
-      .then(async (res) => {
-        const data = await res.json();
-        if (cancelled) return;
-
-        if (res.ok && data.success) {
-          const valid = data as InviteValidation;
-          setEmail(valid.email);
-          setInvite({ status: "valid", email: valid.email });
-          return;
-        }
-
-        if (res.status === 410) {
-          setInvite(data.error === "Invite has already been used" ? { status: "used" } : { status: "expired" });
-        } else if (res.status === 404) {
-          setInvite({ status: "invalid", message: "This invite link isn't valid." });
-        } else {
-          setInvite({ status: "invalid", message: data.error || "This invite link isn't valid." });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setInvite({ status: "invalid", message: "Unable to reach server. Please try again." });
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [inviteToken]);
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -196,7 +149,6 @@ export function RegisterForm() {
       email,
       password,
       display_name: name || undefined,
-      invite_token: inviteToken,
     };
 
     try {
@@ -209,13 +161,7 @@ export function RegisterForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        if (res.status === 403) {
-          setError("This invite was issued to a different email address.");
-        } else if (res.status === 410) {
-          setError(data.error || "This invite has already been used or has expired.");
-        } else {
-          setError(data.error || data.detail || data.message || "Registration failed. Please try again.");
-        }
+        setError(data.error || data.detail || data.message || "Registration failed. Please try again.");
         return;
       }
 
@@ -233,64 +179,7 @@ export function RegisterForm() {
     }
   }
 
-  if (invite.status === "loading") {
-    return (
-      <CenteredState>
-        <div className="flex items-center gap-2 text-[#888888]" style={{ fontSize: 14 }}>
-          <Loader2 className="size-4 animate-spin" />
-          Validating your invite…
-        </div>
-      </CenteredState>
-    );
-  }
 
-  if (invite.status !== "valid") {
-    const copy: Record<string, { title: string; body: string }> = {
-      missing: {
-        title: "Invite link required",
-        body: "QuantCase is currently invite-only. You'll need a valid invite link to create an account.",
-      },
-      invalid: {
-        title: "This invite link isn't valid.",
-        body: "Double-check the link you were sent, or request a new invite.",
-      },
-      used: {
-        title: "Already used",
-        body: "This invite has already been used to register. Sign in instead.",
-      },
-      expired: {
-        title: "Invite expired",
-        body: "This invite link has expired. Please request a new one.",
-      },
-    };
-    const { title, body } = copy[invite.status] ?? copy.invalid;
-
-    return (
-      <CenteredState>
-        <h1 style={{ fontSize: 28, fontWeight: 500, color: "#0F172B", marginBottom: 6, letterSpacing: "-0.02em" }}>
-          {title}
-        </h1>
-        <p style={{ fontSize: 14, color: "#888888", marginBottom: 24, lineHeight: 1.5 }}>{body}</p>
-        <Link
-          href="/signin"
-          className="inline-block rounded-lg transition-all"
-          style={{
-            background: "#0F172B",
-            color: "#fff",
-            fontSize: 14,
-            fontWeight: 500,
-            padding: "12px 24px",
-            letterSpacing: "0.01em",
-            textDecoration: "none",
-          }}
-        >
-          Go to sign in
-        </Link>
-
-        <GoogleSignInSection loading={googleLoading} onSuccess={handleGoogleSuccess} onError={setGoogleError} error={googleError} />
-      </CenteredState>
-    );
-  }
 
   return (
     <CenteredState>
@@ -298,7 +187,7 @@ export function RegisterForm() {
         Create your account
       </h1>
       <p style={{ fontSize: 14, color: "#888888", marginBottom: 36, lineHeight: 1.5 }}>
-        You&apos;ve been invited to the QuantCase beta.
+        Create an account to get started.
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -319,7 +208,6 @@ export function RegisterForm() {
           onChange={setEmail}
           placeholder="you@firm.com"
           autoComplete="email"
-          disabled
         />
         <FormField
           id="password"

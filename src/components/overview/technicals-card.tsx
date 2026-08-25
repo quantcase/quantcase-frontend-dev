@@ -358,11 +358,11 @@ function PriceLevelsBar({
       </div>
 
       {/* SVG chart */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="overflow-x-auto scrollbar-none" style={{ flex: 1, width: "100%" }}>
         <svg
           width="100%"
           viewBox={`0 0 ${W} ${TOTAL_H}`}
-          style={{ display: "block", margin: "0 auto" }}
+          style={{ display: "block", margin: "0 auto", minWidth: 800 }}
           preserveAspectRatio="xMidYMid meet"
         >
           <defs>
@@ -789,7 +789,7 @@ function buildTechnicalsCard({ data, overviewSummary }: Props) {
         )}
 
         {/* 4-column state cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10, minWidth: 0 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ gap: 10, minWidth: 0 }}>
           {stateCards.map((card) => (
             <StateCard key={card.label} {...card} />
           ))}

@@ -32,15 +32,15 @@ export function ValuationHeroSection({
       }}
     >
       {/* PE figure + benchmark bar */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          gap: 24,
-          alignItems: "center",
-          paddingBottom: 16,
-        }}
-      >
+      <div className="overflow-x-auto scrollbar-none" style={{ paddingBottom: 16 }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(250px, 1fr) minmax(240px, auto)",
+            gap: 24,
+            alignItems: "center",
+          }}
+        >
         <div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 2 }}>
             <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>Current P/E ratio</p>
@@ -106,6 +106,7 @@ export function ValuationHeroSection({
             <span>Rich</span>
           </div>
         </div>
+      </div>
       </div>
 
       {footer && (

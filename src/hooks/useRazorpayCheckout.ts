@@ -83,9 +83,9 @@ export function useRazorpayCheckout({ onSuccess }: UseRazorpayCheckoutOptions = 
       }
 
       // Validate the backend response shape BEFORE handing it to the SDK — a missing
-      // order id or key is the most common cause of a 400 from api.razorpay.com.
+      // subscription id or key is the most common cause of a 400 from api.razorpay.com.
       const missing: string[] = [];
-      if (!order.razorpay_order_id) missing.push("razorpay_order_id");
+      if (!order.razorpay_subscription_id) missing.push("razorpay_subscription_id");
       if (!order.razorpay_key_id) missing.push("razorpay_key_id");
       if (missing.length) {
         logErr("backend /subscribe is missing required fields", { missing, order });
@@ -95,15 +95,14 @@ export function useRazorpayCheckout({ onSuccess }: UseRazorpayCheckoutOptions = 
         return;
       }
 
-      // Razorpay treats order_id and subscription_id as MUTUALLY EXCLUSIVE. This is an
-      // order (one-time) flow — passing both causes a 400 from api.razorpay.com and an
-      // empty "payment.failed". Send ONLY order_id; the order already fixes the amount.
+      // Razorpay treats order_id and subscription_id as MUTUALLY EXCLUSIVE. This is a
+      // subscription flow — passing both causes a 400 from api.razorpay.com.
+      // Send ONLY subscription_id.
       const options = {
         key: order.razorpay_key_id, // always from backend — never hardcoded
-        currency: order.currency ?? "INR",
         name: "QuantCase",
         description: "QuantCase Pro subscription",
-        order_id: order.razorpay_order_id,
+        subscription_id: order.razorpay_subscription_id,
         prefill: order.prefill,
         // Hex kept intentionally: passed to Razorpay's external SDK, which cannot resolve CSS var() tokens.
         theme: { color: "#0F172B" },
@@ -111,7 +110,7 @@ export function useRazorpayCheckout({ onSuccess }: UseRazorpayCheckoutOptions = 
         // On success Razorpay calls this — verify server-side before unlocking.
         handler: async (res: {
           razorpay_payment_id: string;
-          razorpay_order_id?: string;
+          razorpay_subscription_id?: string;
           razorpay_signature: string;
         }) => {
           log("checkout handler fired (payment captured client-side)", res);
@@ -119,14 +118,14 @@ export function useRazorpayCheckout({ onSuccess }: UseRazorpayCheckoutOptions = 
           setStep("verifying");
           try {
             const result = await verifyPayment({
-              razorpay_order_id: res.razorpay_order_id ?? order.razorpay_order_id,
+              razorpay_subscription_id: res.razorpay_subscription_id ?? order.razorpay_subscription_id,
               razorpay_payment_id: res.razorpay_payment_id,
               razorpay_signature: res.razorpay_signature,
             });
             log("/verify response", result);
             if (!mountedRef.current) return;
-            if (result.status === "active") {
-              log("subscription active — firing onSuccess");
+            if (result.status === "active" || result.status === "trialing") {
+              log("subscription active/trialing — firing onSuccess");
               setStep("done");
               onSuccess?.(result);
             } else {

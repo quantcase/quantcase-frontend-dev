@@ -92,7 +92,7 @@ export async function createSubscribeOrder(
  * Never treat the checkout handler as "paid" without this.
  */
 export async function verifyPayment(payload: {
-  razorpay_order_id: string;
+  razorpay_subscription_id: string;
   razorpay_payment_id: string;
   razorpay_signature: string;
 }): Promise<VerifyResponse> {

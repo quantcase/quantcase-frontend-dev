@@ -178,9 +178,9 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
           maxHeight: "calc(100vh - 48px)",
           overflowY: "auto",
         }}
-        <div style={{ height: 4, background: "linear-gradient(90deg, var(--qc-ink) 0%, var(--qc-ink-2) 100%)" }} />
       >
         {/* Top accent bar */}
+        <div style={{ height: 4, background: "linear-gradient(90deg, var(--qc-ink) 0%, var(--qc-ink-2) 100%)" }} />
 
         {/* Header */}
         <div style={{ padding: "28px 32px 0 32px", position: "relative" }}>

@@ -27,6 +27,8 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
   const [billingInterval, setBillingInterval] = useState<"monthly" | "annual">("monthly");
   const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
   const [fetchingProducts, setFetchingProducts] = useState(true);
+  const [hasGst, setHasGst] = useState(false);
+  const [gstin, setGstin] = useState("");
 
   // Shared subscribe → open Razorpay → verify → unlock flow (see useRazorpayCheckout).
   // On a verified { status: "active" } we reload so AuthGuard re-fetches /auth/me and
@@ -66,7 +68,7 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
   function handleSubscribe() {
     if (!selectedPriceId) return;
     reset();
-    startCheckout(selectedPriceId);
+    startCheckout(selectedPriceId, undefined, hasGst ? gstin : undefined);
   }
 
   // --- Derive messaging from subscription status ---
@@ -131,15 +133,15 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
       };
     }
     return {
-      badge: "Subscription required",
+      badge: "quantcase.",
       badgeColor: "var(--qc-ink-2)",
       badgeBg: "var(--qc-section)",
       badgeBorder: "var(--qc-hair)",
       icon: Shield,
       iconBg: "var(--qc-section)",
       iconColor: "var(--qc-ink-2)",
-      headline: "Your first week is on us",
-      subtext: "You will not be charged right now, only after the trial ends. Cancel anytime.",
+      headline: "What an analyst costs, without the analyst.",
+      subtext: "",
       urgency: false,
     };
   })();
@@ -262,9 +264,22 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
           >
             {statusConfig.headline}
           </h2>
-          <p style={{ fontSize: 14, color: "var(--qc-ink-3)", lineHeight: 1.6, marginBottom: 20 }}>
+          <p style={{ fontSize: 14, color: "var(--qc-ink-3)", lineHeight: 1.6, marginBottom: statusConfig.headline === "What an analyst costs, without the analyst." ? 0 : 20 }}>
             {statusConfig.subtext}
           </p>
+
+          {statusConfig.headline === "What an analyst costs, without the analyst." && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24, marginTop: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", textDecoration: "line-through", color: "var(--qc-ink-3)", fontSize: 14 }}>
+                <span>Junior analyst</span>
+                <span>₹60,000/mo</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", textDecoration: "line-through", color: "var(--qc-ink-3)", fontSize: 14 }}>
+                <span>Bloomberg seat</span>
+                <span>₹2,00,000/mo</span>
+              </div>
+            </div>
+          )}
 
           {/* Feature highlights (only in soft/trial mode) */}
           {!hardBlock && (
@@ -484,6 +499,31 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
             </div>
           )}
 
+          {/* GSTIN Checkbox */}
+          <div style={{ marginTop: 24, marginBottom: 16, paddingTop: 16, borderTop: "1px solid var(--qc-hair)" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginBottom: hasGst ? 12 : 0 }}>
+              <input type="checkbox" checked={hasGst} onChange={e => setHasGst(e.target.checked)} style={{ width: 14, height: 14 }} />
+              <span style={{ fontSize: 13, color: "var(--qc-ink-3)", userSelect: "none" }}>I have a GSTIN (for business billing)</span>
+            </label>
+            {hasGst && (
+              <input
+                type="text"
+                placeholder="Enter GST Number"
+                value={gstin}
+                onChange={e => setGstin(e.target.value)}
+                style={{
+                  width: "100%",
+                  border: "1px solid var(--qc-hair)",
+                  borderRadius: 6,
+                  padding: "10px 12px",
+                  fontSize: 13,
+                  outline: "none",
+                  background: "var(--qc-card)"
+                }}
+              />
+            )}
+          </div>
+
           {/* CTA */}
           <button
             onClick={handleSubscribe}
@@ -523,16 +563,24 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                 Processing…
               </>
             ) : (
-              "Subscribe now →"
+              (statusConfig.headline === "What an analyst costs, without the analyst." ? "Start free week" : "Subscribe now →")
             )}
           </button>
 
-          <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
-            Secured by Razorpay &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No hidden fees
-          </p>
-          <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 4, fontStyle: "italic" }}>
-            *These are beta prices
-          </p>
+          {statusConfig.headline === "What an analyst costs, without the analyst." ? (
+            <p style={{ fontSize: 12, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
+              No charge for 7 days · Cancel anytime
+            </p>
+          ) : (
+            <>
+              <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
+                Secured by Razorpay &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No hidden fees
+              </p>
+              <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 4, fontStyle: "italic" }}>
+                *These are beta prices
+              </p>
+            </>
+          )}
         </div>
       </div>
 

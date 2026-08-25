@@ -78,11 +78,16 @@ export async function getProducts(): Promise<BillingProduct[]> {
 export async function createSubscribeOrder(
   priceId: string,
   couponCode?: string,
+  gstin?: string,
 ): Promise<SubscribeResponse> {
   const res = await authFetch(`${BILLING}/subscribe`, {
     method: "POST",
     headers: authHeaders(),
-    body: JSON.stringify({ price_id: priceId, ...(couponCode ? { coupon_code: couponCode } : {}) }),
+    body: JSON.stringify({ 
+      price_id: priceId, 
+      ...(couponCode ? { coupon_code: couponCode } : {}),
+      ...(gstin ? { gstin } : {})
+    }),
   });
   return unwrap<SubscribeResponse>(res, "Failed to create order");
 }

@@ -60,14 +60,14 @@ export function useRazorpayCheckout({ onSuccess }: UseRazorpayCheckoutOptions = 
   }, []);
 
   const startCheckout = useCallback(
-    async (priceId: string, couponCode?: string) => {
+    async (priceId: string, couponCode?: string, gstin?: string) => {
       setError(null);
       setStep("creating");
-      log("startCheckout →", { priceId, couponCode: couponCode ?? null });
+      log("startCheckout →", { priceId, couponCode: couponCode ?? null, gstin });
 
       let order;
       try {
-        order = await createSubscribeOrder(priceId, couponCode);
+        order = await createSubscribeOrder(priceId, couponCode, gstin);
         log("/subscribe response", order);
       } catch (e) {
         logErr("/subscribe threw", e);

@@ -63,9 +63,9 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
 
   function formatAmount(amount: number, currency: string) {
     if (currency.toLowerCase() === "inr") {
-      return `₹${(amount / 100).toLocaleString("en-IN")}`;
+      return `₹${Math.round(amount / 100).toLocaleString("en-IN")}`;
     }
-    return `$${(amount / 100).toFixed(2)}`;
+    return `$${Math.round(amount / 100).toFixed(0)}`;
   }
 
   function handleSubscribe() {

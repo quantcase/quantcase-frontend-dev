@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Check } from "lucide-react";
 import { useSmallcaseConnect } from "@/hooks/useSmallcaseConnect";
+import { useSmallcaseHoldings } from "@/hooks/useSmallcaseHoldings";
 import { apiAuthPost } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { OnboardingThesisFields, type ThesisFieldsState } from "./onboarding-thesis-fields";
@@ -26,6 +27,7 @@ export default function OnboardingV3() {
   const router = useRouter();
   const [mode, setMode] = useState("pick");
   const [step, setStep] = useState(1);
+  const { data: holdingsData } = useSmallcaseHoldings();
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [q, setQ] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -137,6 +139,20 @@ export default function OnboardingV3() {
 
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
+  };
+
+  const userHolding = holdingsData?.holdings.find(h => h.ticker === topPick?.t);
+  
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "recently";
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "recently";
+    return d.toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: '2-digit' }).replace(',', '');
+  };
+
+  const formatPrice = (price?: number | null) => {
+    if (price == null) return "₹0";
+    return `₹${price.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   return (
@@ -546,7 +562,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
               </h1>
               <p className="lede">
                 {mode === "import" 
-                  ? "You bought HDFCBANK on 12 Mar 26 at ₹1,610 — we rebuilt that much from your trade history. We've drafted the reason too; correct it or accept it."
+                  ? `You bought ${topPick?.t || "HDFCBANK"} on ${userHolding ? formatDate(userHolding.created_at || userHolding.updated_at) : "12 Mar 26"} at ${userHolding ? formatPrice(userHolding.avg_price) : "₹1,610"} — we rebuilt that much from your trade history. We've drafted the reason too; correct it or accept it.`
                   : "We've pre-filled a thesis for your top pick from its strongest factor. Change a word or leave it — either way it gets checked against reality later."}
               </p>
               
@@ -576,13 +592,13 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                           <p style={{ marginTop: '8px', fontSize: '13px', color: 'var(--ink-3)', textAlign: 'center', maxWidth: '80%' }}>Your thesis has been securely stored. You can view it in your dashboard.</p>
                         </div>
                       )}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "4px" }}>
-                      <div style={{ fontSize: "24px", fontFamily: "var(--serif)" }}>{topPick?.t || "TICKER"}</div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--jink)" }}>{mode === "import" ? "₹1,742.30" : "₹182.40"}</div>
-                        <div style={{ fontSize: "9.5px", fontFamily: "var(--mono)", color: "var(--pos)", letterSpacing: ".05em" }}>↑8.2% <span style={{ color: "var(--jink3)" }}>· MOD {topPick?.s || 0}</span></div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "4px" }}>
+                        <div style={{ fontSize: "24px", fontFamily: "var(--serif)" }}>{topPick?.t || "TICKER"}</div>
+                        <div style={{ textAlign: "right" }}>
+                          <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--jink)" }}>{mode === "import" ? (userHolding ? formatPrice(userHolding.current_price || userHolding.avg_price) : "₹1,742.30") : "₹182.40"}</div>
+                          <div style={{ fontSize: "9.5px", fontFamily: "var(--mono)", color: "var(--pos)", letterSpacing: ".05em" }}>↑8.2% <span style={{ color: "var(--jink3)" }}>· MOD {topPick?.s || 0}</span></div>
+                        </div>
                       </div>
-                    </div>
                     <div style={{ fontSize: "12px", color: "var(--jink2)", marginBottom: "16px" }}>{topPick?.n || ""}</div>
                     <div style={{ display: "flex", gap: "16px", fontSize: "10px", fontFamily: "var(--mono)", letterSpacing: ".1em", marginBottom: "20px" }}>
                       <span style={{ color: "var(--jink)" }}>MANAGEMENT <b style={{ color: "var(--jink)" }}>{topPick?.m || 0}</b></span>
@@ -591,7 +607,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                     </div>
                     <div style={{ background: "#F6F5F3", borderRadius: "6px", padding: "8px 12px", fontSize: "11px", color: "var(--jink2)", marginBottom: "24px" }}>
                       {mode === "import" 
-                        ? <>📌 Bought <b>40 sh</b> on <b>12 Mar 26</b> at <b>₹1,610</b> — score was <b>84</b> then, <b>{topPick?.s || 0}</b> now.</>
+                        ? <>📌 Bought <b>{userHolding ? `${userHolding.quantity} sh` : "40 sh"}</b> on <b>{userHolding ? formatDate(userHolding.created_at || userHolding.updated_at) : "12 Mar 26"}</b> at <b>{userHolding ? formatPrice(userHolding.avg_price) : "₹1,610"}</b> — score was <b>84</b> then, <b>{topPick?.s || 0}</b> now.</>
                         : <>👁 You're <b>watching</b> this, not holding it. The watch thesis converts to a position entry if you buy.</>}
                     </div>
                     

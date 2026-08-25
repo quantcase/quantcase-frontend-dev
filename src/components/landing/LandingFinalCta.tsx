@@ -45,7 +45,7 @@ export default function LandingFinalCta() {
         </motion.h2>
 
         <p className="mx-auto mt-8 max-w-xl text-base" style={{ ...sans, color: "#3A4B61" }}>
-          Any Indian or US stock, analysed in seconds — scored across MOD, benchmarked against peers, with a clear recommendation.
+          Indian stock, analysed in seconds — scored across MOD, benchmarked against peers, with a clear recommendation.
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-6">

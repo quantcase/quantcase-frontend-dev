@@ -143,8 +143,8 @@ export default function OnboardingV3() {
     <div id="onboarding-root">
       <style dangerouslySetInnerHTML={{ __html: `
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap");
-:root{--navy:#0E0412;--navy2:var(--qc-ink);--navy3:#341247;--ink:#F2F5F9;--muted:#8FA0B4;--dim:#5C6E84;
---tan:#C8925C;--tan2:#E0A96D;--pos:#4ADE80;--neg:#F87171;--line:rgba(255,255,255,.10);
+:root{--navy:#F5F0E6;--navy2:#EFE8D8;--navy3:#E7DEC5;--ink:var(--qc-ink);--muted:var(--qc-ink-2);--dim:var(--qc-ink-3);
+--tan:#B98A3E;--tan2:#A87C35;--pos:#1F7A4A;--neg:#B23A2F;--line:rgba(14,26,43,.08);
 --serif:'Playfair Display',Georgia,serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--sans:'Inter',sans-serif}
 
 #onboarding-root h1, #onboarding-root h2, #onboarding-root h3, #onboarding-root h4, #onboarding-root h5, #onboarding-root h6, #onboarding-root p {
@@ -153,11 +153,11 @@ export default function OnboardingV3() {
 }
 
 
-#onboarding-root{background: radial-gradient(900px 520px at 82% -8%, rgba(200,146,92,.10), transparent 62%), linear-gradient(170deg, var(--navy3), var(--navy2) 45%, var(--navy));min-height:100vh;overflow-y:auto;display:flex;flex-direction:column;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+#onboarding-root{background:var(--cream, #F5F0E6);min-height:100vh;overflow-y:auto;display:flex;flex-direction:column;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
 
 
 .outcome{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;margin-top:16px;}
-.ochip{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:8px;padding:9px 13px;font-size:12.5px;color:var(--muted)}
+.ochip{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:rgba(14,26,43,.03);border-radius:8px;padding:9px 13px;font-size:12.5px;color:var(--muted)}
 .ochip b{font-family:var(--serif);font-size:16px;color:var(--ink);line-height:1}
 .ochip .ok{color:var(--pos);font-size:13px}
 .s3grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:30px;margin-top:18px;align-items:start}
@@ -202,7 +202,7 @@ export default function OnboardingV3() {
 .why h4{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--tan);margin-bottom:11px}
 .why p{font-size:12.5px;color:var(--muted);line-height:1.6}
 .why p b{color:var(--ink)}
-.ask{border:1px solid var(--line);border-radius:11px;padding:18px;background:rgba(255,255,255,.028)}
+.ask{border:1px solid var(--line);border-radius:11px;padding:18px;background:rgba(14,26,43,.028)}
 .ask .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--dim)}
 .ask h3{font-size:15px;font-weight:600;margin-top:8px}
 .ask p{font-size:12px;color:var(--muted);line-height:1.5;margin-top:7px}
@@ -216,7 +216,7 @@ export default function OnboardingV3() {
 .mapgrid{display:grid;grid-template-columns:1.25fr 34px .95fr 34px 1.5fr;gap:0;align-items:center}
 .mcol{display:flex;flex-direction:column;gap:9px}
 .mstep{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--dim);margin-bottom:3px}
-.mbox{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:rgba(255,255,255,.03);font-size:13px;line-height:1.35}
+.mbox{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:rgba(14,26,43,.03);font-size:13px;line-height:1.35}
 .mbox.a{border-color:rgba(200,146,92,.45);background:rgba(200,146,92,.09)}
 .mbox.b{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.07)}
 .mbox b{display:block;font-size:13.5px;margin-bottom:3px}
@@ -227,26 +227,13 @@ export default function OnboardingV3() {
 .laterbox b{color:var(--tan2);font-family:var(--mono);font-size:10px;letter-spacing:.15em;margin-right:8px}
 
 /* ---------- app ---------- */
-.app {
-
-  width: 100%;
-  max-width: 1240px;
-  margin: 16px auto;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  background: var(--navy);
-  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
-}
+.app { width: 100%; max-width: 1240px; margin: 16px auto; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; position: relative; background: var(--qc-card, #FFFFFF); box-shadow: 0 10px 40px -10px rgba(14,26,43,0.1); }
 #onboarding-root header{display:flex;justify-content:space-between;align-items:center;padding:20px 32px}
 .logo{display:flex;align-items:center;gap:11px}
 .help{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--dim);text-decoration:none;padding:7px 12px;border-radius:6px}
-.help:hover{color:var(--muted);background:rgba(255,255,255,.04)}
+.help:hover{color:var(--muted);background:rgba(14,26,43,.04)}
 .prog{padding:0 32px 4px;display:flex;align-items:center;gap:14px}
-.track{flex:1;height:2px;background:rgba(255,255,255,.09);border-radius:2px;overflow:hidden}
+.track{flex:1;height:2px;background:rgba(14,26,43,.09);border-radius:2px;overflow:hidden}
 .fill{height:100%;background:linear-gradient(90deg,var(--tan),var(--tan2));width:33.3%;transition:width .5s cubic-bezier(.4,0,.2,1)}
 .pct{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);white-space:nowrap}
 .stage{padding:30px 32px 20px;display:flex;flex-direction:column;}
@@ -255,40 +242,40 @@ export default function OnboardingV3() {
 @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--tan);margin-bottom:13px}
 #onboarding-root h1{color:var(--ink);font-family:var(--serif);font-size:44px;font-weight:600;line-height:1.12;max-width:780px}
-#onboarding-root h1 em{font-style:italic;color:var(--tan2)}
+#onboarding-root h1 em{font-style:italic;color:var(--tan)}
 .lede{font-size:15.5px;color:var(--muted);margin-top:11px;max-width:620px;line-height:1.55}
 
 /* ===== step 1 doors ===== */
 .doors{display:flex;gap:9px;margin-top:22px;margin-bottom:18px}
-.door{flex:1;border:1px solid var(--line);border-radius:10px;padding:15px 18px;background:rgba(255,255,255,.028);cursor:pointer;transition:.18s;display:flex;align-items:center;gap:14px}
-.door:hover{border-color:rgba(200,146,92,.45);background:rgba(255,255,255,.05)}
+.door{flex:1;border:1px solid var(--line);border-radius:10px;padding:15px 18px;background:rgba(14,26,43,.028);cursor:pointer;transition:.18s;display:flex;align-items:center;gap:14px}
+.door:hover{border-color:rgba(200,146,92,.45);background:rgba(14,26,43,.05)}
 .door.on{border-color:var(--tan);background:rgba(200,146,92,.11)}
-.door .ic{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.06);display:grid;place-items:center;flex-shrink:0}
+.door .ic{width:34px;height:34px;border-radius:8px;background:rgba(14,26,43,.06);display:grid;place-items:center;flex-shrink:0}
 .door.on .ic{background:rgba(200,146,92,.22)}
 .door .tx b{display:block;font-size:14.5px;font-weight:600}
 .door .tx span{font-size:12px;color:var(--muted);display:block;margin-top:2px}
 .door .badge{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.11em;color:var(--pos);border:1px solid rgba(74,222,128,.35);border-radius:4px;padding:3px 7px;white-space:nowrap}
 
 .pickwrap{display:grid;grid-template-columns:1.15fr .85fr;gap:32px;flex:1;align-items:start}
-.search{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:9px;padding:12px 15px;margin-bottom:13px}
+.search{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:rgba(14,26,43,.04);border-radius:9px;padding:12px 15px;margin-bottom:13px}
 .search input{flex:1;background:none;border:none;outline:none;color:var(--ink);font-size:15px;font-family:var(--sans)}
 .search input::placeholder{color:var(--dim)}
 .rowlbl{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);margin-bottom:10px}
 .rowlbl b{color:var(--tan)}
 .list{display:flex;flex-direction:column;gap:7px;max-height:300px;overflow-y:auto;padding-right:4px}
-.row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);background:rgba(255,255,255,.028);border-radius:9px;padding:12px 16px;cursor:pointer;transition:.18s}
-.row:hover{background:rgba(255,255,255,.06);border-color:rgba(200,146,92,.4)}
+.row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);background:rgba(14,26,43,.028);border-radius:9px;padding:12px 16px;cursor:pointer;transition:.18s}
+.row:hover{background:rgba(14,26,43,.06);border-color:rgba(200,146,92,.4)}
 .row.sel{border-color:var(--tan);background:rgba(200,146,92,.10)}
-.row.ro{cursor:default}.row.ro:hover{background:rgba(255,255,255,.028);border-color:var(--line)}
+.row.ro{cursor:default}.row.ro:hover{background:rgba(14,26,43,.028);border-color:var(--line)}
 .row .id{flex:1;min-width:0}
 .row .tk{font-family:var(--mono);font-size:12px;letter-spacing:.1em;font-weight:600}
 .row .nm{font-size:12.5px;color:var(--dim);margin-top:2px}
 .row .why{font-size:12px;color:var(--muted);text-align:right;max-width:145px;line-height:1.35}
 .row .sc{font-family:var(--serif);font-size:25px;width:42px;text-align:right;font-variant-numeric:tabular-nums}
-.tick{width:21px;height:21px;border-radius:50%;border:1.5px solid rgba(255,255,255,.22);flex-shrink:0;display:grid;place-items:center;transition:.18s}
+.tick{width:21px;height:21px;border-radius:50%;border:1.5px solid rgba(14,26,43,.22);flex-shrink:0;display:grid;place-items:center;transition:.18s}
 .row.sel .tick{background:var(--tan);border-color:var(--tan)}
 .tick svg{opacity:0}.row.sel .tick svg{opacity:1}
-.live{border:1px solid var(--line);border-radius:11px;padding:22px;background:rgba(255,255,255,.028)}
+.live{border:1px solid var(--line);border-radius:11px;padding:22px;background:rgba(14,26,43,.028)}
 .live h4{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--dim);margin-bottom:16px}
 .dialwrap{display:grid;place-items:center;position:relative;height:150px}
 .dialwrap svg{transform:rotate(-90deg)}
@@ -303,28 +290,28 @@ export default function OnboardingV3() {
 
 /* ===== step 2 ===== */
 .mods{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
-.mod{border:1px solid var(--line);border-radius:11px;padding:22px;background:rgba(255,255,255,.028);border-top:2px solid var(--tan)}
+.mod{border:1px solid var(--line);border-radius:11px;padding:22px;background:rgba(14,26,43,.028);border-top:2px solid var(--tan)}
 .mod .letter{font-family:var(--serif);font-size:36px;color:var(--tan);line-height:1;display:flex;align-items:baseline;gap:9px}
 .mod .letter u{font-family:var(--sans);font-size:20px;font-weight:700;color:var(--ink);text-decoration:none}
 .mod .nm{font-size:17px;font-weight:600;margin-top:11px}
 .mod .q{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted);margin-top:5px}
 .mod .ev{font-size:13px;color:var(--muted);line-height:1.5;margin-top:13px;padding-top:13px;border-top:1px solid var(--line)}
 .mod .ev b{color:var(--ink)}
-.meter{height:3px;background:rgba(255,255,255,.09);border-radius:3px;margin-top:13px;overflow:hidden}
+.meter{height:3px;background:rgba(14,26,43,.09);border-radius:3px;margin-top:13px;overflow:hidden}
 .meter i{display:block;height:100%;background:var(--tan);border-radius:3px}
-.provenance{display:flex;align-items:center;gap:16px;margin-top:20px;padding:16px 20px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.02)}
+.provenance{display:flex;align-items:center;gap:16px;margin-top:20px;padding:16px 20px;border:1px solid var(--line);border-radius:10px;background:rgba(14,26,43,.02)}
 .provenance .n{font-family:var(--serif);font-size:32px;color:var(--tan2);line-height:1}
 .provenance .t{font-size:13.5px;color:var(--muted);line-height:1.5}
 .provenance .t b{color:var(--ink)}
 
 /* ===== step 3 ===== */
 .summary{display:flex;gap:9px;margin-top:20px;flex-wrap:wrap}
-.scard{border:1px solid var(--line);border-radius:9px;padding:13px 17px;background:rgba(255,255,255,.03);display:flex;align-items:center;gap:13px}
+.scard{border:1px solid var(--line);border-radius:9px;padding:13px 17px;background:rgba(14,26,43,.03);display:flex;align-items:center;gap:13px}
 .scard .tk{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
 .scard .sc{font-family:var(--serif);font-size:26px}
 .scard .dl{font-family:var(--mono);font-size:10px}
 .donegrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
-.opt{border:1px solid var(--line);border-radius:11px;padding:22px;background:rgba(255,255,255,.028);display:flex;flex-direction:column}
+.opt{border:1px solid var(--line);border-radius:11px;padding:22px;background:rgba(14,26,43,.028);display:flex;flex-direction:column}
 .opt.hero{border-color:rgba(200,146,92,.45);background:linear-gradient(150deg,rgba(200,146,92,.13),rgba(200,146,92,.02))}
 .opt .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim)}
 .opt.hero .tag{color:var(--tan)}
@@ -338,7 +325,7 @@ export default function OnboardingV3() {
 .trust{font-family:var(--mono);font-size:10px;letter-spacing:.13em;color:var(--dim);margin-top:11px}
 
 /* portfolio payoff */
-.scorecard{display:grid;grid-template-columns:190px 1fr;gap:24px;margin-top:20px;border:1px solid var(--line);border-radius:12px;padding:22px;background:rgba(255,255,255,.028)}
+.scorecard{display:grid;grid-template-columns:190px 1fr;gap:24px;margin-top:20px;border:1px solid var(--line);border-radius:12px;padding:22px;background:rgba(14,26,43,.028)}
 .dialbox{display:grid;place-items:center;position:relative}
 .dialbox svg{transform:rotate(-90deg)}
 .dnum{position:absolute;text-align:center}
@@ -347,7 +334,7 @@ export default function OnboardingV3() {
 .bench{display:flex;flex-direction:column;gap:13px}
 .brow{display:flex;align-items:center;gap:14px;font-size:13px}
 .brow .k{width:145px;color:var(--muted)}
-.brow .bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+.brow .bar{flex:1;height:6px;background:rgba(14,26,43,.08);border-radius:4px;overflow:hidden}
 .brow .bar i{display:block;height:100%;border-radius:4px}
 .brow .v{font-family:var(--mono);font-size:12px;width:24px;text-align:right}
 .flags{border-top:1px solid var(--line);margin-top:16px;padding-top:14px;font-size:13px;color:var(--muted);line-height:1.6}
@@ -355,7 +342,7 @@ export default function OnboardingV3() {
 .jhead{display:flex;justify-content:space-between;align-items:baseline;margin-top:22px;margin-bottom:11px}
 .jhead .t{font-family:var(--mono);font-size:10.5px;letter-spacing:.17em;color:var(--dim)}
 .jhead .n{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--tan2)}
-.jent{border:1px solid var(--line);border-radius:10px;padding:15px 18px;background:rgba(255,255,255,.028);margin-bottom:8px;display:flex;gap:18px;align-items:flex-start}
+.jent{border:1px solid var(--line);border-radius:10px;padding:15px 18px;background:rgba(14,26,43,.028);margin-bottom:8px;display:flex;gap:18px;align-items:flex-start}
 .jent .dt{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim);width:74px;flex-shrink:0;padding-top:3px}
 .jent .bd{flex:1}
 .jent .ttl{font-size:14.5px;font-weight:600}
@@ -366,28 +353,28 @@ export default function OnboardingV3() {
 .jent .then b{font-size:24px}
 
 /* ---------- footer ---------- */
-.bar{border-top:1px solid var(--line);padding:17px 32px;display:flex;justify-content:space-between;align-items:center;background:rgba(14,4,18,.5)}
+.bar{border-top:1px solid var(--line);padding:17px 32px;display:flex;justify-content:space-between;align-items:center;background:rgba(245,240,230,.8)}
 .back{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--dim);background:none;border:none;cursor:pointer;padding:8px 0}
 .back:hover{color:var(--muted)}
 .cta{display:flex;align-items:center;gap:14px}
 .skip{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--dim);background:none;border:none;cursor:pointer}
 .skip:hover{color:var(--muted);text-decoration:underline}
 .btn{font-family:var(--sans);font-size:15px;font-weight:600;padding:13px 26px;border-radius:9px;border:none;cursor:pointer;
-background:linear-gradient(180deg,#F4EDE3,#E6DACA);color:var(--qc-ink);display:flex;align-items:center;gap:9px;transition:.18s}
+background:var(--qc-ink);color:#F5F0E6;display:flex;align-items:center;gap:9px;transition:.18s}
 .btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,146,92,.22)}
 .btn:disabled{opacity:.3;cursor:not-allowed}
 
 /* ---------- import sheet ---------- */
-.ov{position:absolute;inset:0;background:rgba(10,3,14,.8);backdrop-filter:blur(3px);z-index:50;display:none;align-items:center;justify-content:center;padding:24px}
+.ov{position:absolute;inset:0;background:rgba(14,26,43,.4);backdrop-filter:blur(3px);z-index:50;display:none;align-items:center;justify-content:center;padding:24px}
 .ov.on{display:flex}
-.sheet{width:100%;max-width:740px;background:var(--navy2);border:1px solid var(--line);border-radius:15px;padding:28px;animation:pop .3s cubic-bezier(.2,.8,.3,1);max-height:100%;overflow-y:auto}
+.sheet{width:100%;max-width:740px;background:var(--qc-card, #FFF);border:1px solid var(--line);border-radius:15px;padding:28px;animation:pop .3s cubic-bezier(.2,.8,.3,1);max-height:100%;overflow-y:auto}
 @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
 .sh-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--tan);margin-bottom:11px}
 .sheet h2{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.2}
 .sheet h2 em{font-style:italic;color:var(--tan2)}
 .sheet .s{font-size:13.5px;color:var(--muted);margin-top:10px;line-height:1.55}
 .paths{display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px}
-.path{border:1px solid var(--line);border-radius:11px;padding:20px;background:rgba(255,255,255,.03);display:flex;flex-direction:column}
+.path{border:1px solid var(--line);border-radius:11px;padding:20px;background:rgba(14,26,43,.03);display:flex;flex-direction:column}
 .path.primary{border-color:rgba(200,146,92,.45);background:rgba(200,146,92,.07)}
 .path .rank{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:3px 7px;align-self:flex-start}
 .path.primary .rank{color:var(--tan2);border-color:rgba(200,146,92,.45)}
@@ -395,9 +382,9 @@ background:linear-gradient(180deg,#F4EDE3,#E6DACA);color:var(--qc-ink);display:f
 .path .tm{font-family:var(--mono);font-size:10px;color:var(--tan2);letter-spacing:.1em;margin-top:5px}
 .path p{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:9px}
 .bgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
-.bk{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:6px;padding:10px 4px;text-align:center;font-family:var(--mono);font-size:8.5px;color:var(--muted);cursor:pointer;transition:.16s}
+.bk{border:1px solid var(--line);background:rgba(14,26,43,.04);border-radius:6px;padding:10px 4px;text-align:center;font-family:var(--mono);font-size:8.5px;color:var(--muted);cursor:pointer;transition:.16s}
 .bk:hover{border-color:var(--tan);background:rgba(200,146,92,.14);color:var(--tan2)}
-.mailbox{margin-top:14px;border:1px dashed var(--line);border-radius:8px;padding:13px;text-align:center;background:rgba(255,255,255,.03)}
+.mailbox{margin-top:14px;border:1px dashed var(--line);border-radius:8px;padding:13px;text-align:center;background:rgba(14,26,43,.03)}
 .mailbox .ad{font-family:var(--mono);font-size:12.5px;color:var(--tan2)}
 .mailbox .cp{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--dim);margin-top:6px;cursor:pointer}
 .scope{border-top:1px solid var(--line);margin-top:20px;padding-top:17px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -439,7 +426,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
       <div className="app">
         <header>
           <div className="logo">
-            <Image src="/logos/logo-text-white.png" alt="Quantcase" width={169} height={39} className="h-7 w-auto" priority />
+            <Image src="/logos/logo-text-dark.png" alt="Quantcase" width={169} height={39} className="h-7 w-auto" priority />
           </div>
           <a href="#" className="help">NEED HELP?</a>
         </header>
@@ -496,7 +483,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                   <h4>{mode === "import" ? "YOUR PORTFOLIO SCORE" : "YOUR WATCHLIST SCORE"}</h4>
                   <div className="dialwrap">
                     <svg width="150" height="150">
-                      <circle cx="75" cy="75" r="62" stroke="rgba(255,255,255,.05)" strokeWidth="8" fill="none"/>
+                      <circle cx="75" cy="75" r="62" stroke="rgba(14,26,43,.05)" strokeWidth="8" fill="none"/>
                       <circle cx="75" cy="75" r="62" stroke={avgScore !== null ? col(avgScore) : "#5C6E84"} strokeWidth="8" fill="none" strokeLinecap="round" strokeDasharray="389.6" strokeDashoffset={avgScore !== null ? 389.6 * (1 - avgScore / 100) : 389.6}/>
                     </svg>
                     <div className="dialnum">
@@ -616,7 +603,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                       <h3>Do the ones you own</h3>
                       <p>Import your holdings and every card arrives with the buy date, the score then and the score now already filled — you only write the reason.</p>
                       <div className="act">
-                        <button className="mini" style={{ padding: "6px 10px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--line)", borderRadius: "6px", fontSize: "10px", fontFamily: "var(--mono)", color: "var(--tan)" }} onClick={() => setIsImportOpen(true)}>IMPORT MY HOLDINGS</button>
+                        <button className="mini" style={{ padding: "6px 10px", background: "rgba(14,26,43,0.05)", border: "1px solid var(--line)", borderRadius: "6px", fontSize: "10px", fontFamily: "var(--mono)", color: "var(--tan)" }} onClick={() => setIsImportOpen(true)}>IMPORT MY HOLDINGS</button>
                         <button className="laterbtn" style={{ fontSize: "11px", color: "var(--dim)", background: "none", border: "none" }}>Maybe later</button>
                       </div>
                       <div style={{ marginTop: "16px", fontSize: "10px", fontFamily: "var(--mono)", color: "var(--dim)", letterSpacing: "0.1em", textTransform: "uppercase" }}>

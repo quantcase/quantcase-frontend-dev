@@ -242,13 +242,13 @@ export function KpiGrid({
   }[] = [
     ...(showValuationRow ? [
       {
-        label: "PEG (Growth-adj.)", value: pegRatio != null ? `${pegRatio.toFixed(1)}x` : "—",
+        label: "PEG", value: pegRatio != null ? `${pegRatio.toFixed(1)}x` : "—",
         yoy: { text: "—", cls: "na" as const }, muted: pegRatio == null,
         metricKey: "pegRatio" as ChartMetricKey, sparkKey: "eps" as SparkKey,
         customSparkValues: sparkWithFallback("eps", "eps"),
       },
       {
-        label: "EV/EBITDA (Enterprise)", value: evToEbitda != null ? `${evToEbitda.toFixed(1)}x` : "—",
+        label: "Enterprise Value", value: evToEbitda != null ? `${evToEbitda.toFixed(1)}x` : "—",
         yoy: { text: "—", cls: "na" as const }, muted: evToEbitda == null,
         metricKey: "evToEbitda" as ChartMetricKey, sparkKey: "ebitda" as SparkKey,
       },
@@ -259,7 +259,7 @@ export function KpiGrid({
         customSparkValues: sparkWithFallback("totalEquity", "pb"),
       },
       {
-        label: "Dividend Yield (Trailing 12M)",
+        label: "Dividend Payout Ratio",
         value: dividendYield != null && dividendYield > 0 ? `${dividendYield.toFixed(2)}%` : "—",
         yoy: { text: "—", cls: "na" as const },
         muted: dividendYield == null || dividendYield <= 0,
@@ -269,37 +269,37 @@ export function KpiGrid({
       },
     ] : []),
     {
-      label: "Revenue", value: formatINR(revenue), yoy: yoyText(revenueGrowth),
+      label: "PAT", value: formatINR(revenue), yoy: yoyText(revenueGrowth),
       muted: false, metricKey: "revenue", sparkKey: "revenue",
       customSparkValues: sparkWithFallback("revenue", "revenue"),
     },
     {
-      label: ebitdaLabel, value: ebitda != null ? formatINR(ebitda) : "—", yoy: yoyText(ebitdaGrowth),
+      label: "ROCE", value: ebitda != null ? formatINR(ebitda) : "—", yoy: yoyText(ebitdaGrowth),
       muted: ebitda == null, metricKey: "ebitda", sparkKey: "ebitda",
     },
     {
-      label: "Net Profit", value: netProfit != null ? formatINR(netProfit) : "—", yoy: yoyText(netProfitGrowth),
+      label: "ROA", value: netProfit != null ? formatINR(netProfit) : "—", yoy: yoyText(netProfitGrowth),
       muted: netProfit == null, metricKey: "netIncome", sparkKey: "netIncome",
       customSparkValues: sparkWithFallback("netIncome", "netProfit"),
     },
     {
-      label: "CFO", value: resolvedCfo != null ? formatINR(resolvedCfo) : "—", yoy: yoyText(cfoGrowth),
+      label: "CFO to PAT Conversion", value: resolvedCfo != null ? formatINR(resolvedCfo) : "—", yoy: yoyText(cfoGrowth),
       muted: resolvedCfo == null, metricKey: "cfo", sparkKey: "cfo",
     },
     {
-      label: "FCF", value: freeCashflow != null ? formatINR(freeCashflow) : "—", yoy: yoyText(fcfGrowth),
+      label: "CASH", value: freeCashflow != null ? formatINR(freeCashflow) : "—", yoy: yoyText(fcfGrowth),
       muted: freeCashflow == null, metricKey: null, sparkKey: null,
     },
     {
-      label: "Reserves", value: reserves != null ? formatINR(reserves) : "—", yoy: yoyText(reservesGrowth),
+      label: "RESERVES", value: reserves != null ? formatINR(reserves) : "—", yoy: yoyText(reservesGrowth),
       muted: reserves == null, metricKey: "totalEquity", sparkKey: "totalEquity",
     },
     {
-      label: "Debt", value: totalDebt != null ? formatINR(totalDebt) : "—", yoy: yoyText(debtGrowth, true),
+      label: "DEBT", value: totalDebt != null ? formatINR(totalDebt) : "—", yoy: yoyText(debtGrowth, true),
       muted: totalDebt == null, metricKey: "totalDebt", sparkKey: "totalDebt",
     },
     ...(showInterestCoverage ? [{
-      label: "Interest Coverage",
+      label: "Retained Profits as % of PAT",
       value: interestCoverage != null ? `${interestCoverage.toFixed(1)}x` : "—",
       yoy: yoyText(interestCoverageGrowth),
       muted: interestCoverage == null,

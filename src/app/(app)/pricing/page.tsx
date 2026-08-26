@@ -25,7 +25,7 @@ export default function PricingPage() {
   const { subscription } = useUser();
   const [products, setProducts] = useState<BillingProduct[]>([]);
   const [config, setConfig] = useState<BillingConfig | null>(null);
-  const [billingInterval, setBillingInterval] = useState<"monthly" | "annual">("monthly");
+  const [billingInterval, setBillingInterval] = useState<"monthly" | "quaterly" | "annual">("monthly");
   const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
   const [fetchingProducts, setFetchingProducts] = useState(true);
 
@@ -50,7 +50,7 @@ export default function PricingPage() {
 
   const visiblePrices = products.flatMap((product) =>
     product.prices
-      .filter((pr) => pr.plan_type === billingInterval)
+      .filter((pr) => pr.plan_type === billingInterval || (billingInterval === "quaterly" && pr.plan_type === "quarterly"))
       .map((pr) => ({ product, price: pr })),
   );
 
@@ -92,11 +92,11 @@ export default function PricingPage() {
               Choose a plan
             </div>
 
-            {/* Monthly / annual toggle */}
+            {/* Monthly / quarterly / annual toggle */}
             <div
               className="inline-flex rounded-full p-[3px] bg-white border border-[#E2E2E2]"
             >
-              {(["monthly", "annual"] as const).map((opt) => (
+              {(["monthly", "quaterly", "annual"] as const).map((opt) => (
                 <button
                   key={opt}
                   onClick={() => setBillingInterval(opt)}
@@ -106,7 +106,7 @@ export default function PricingPage() {
                     color: billingInterval === opt ? "#fff" : "#888888",
                   }}
                 >
-                  {opt}
+                  {opt === "quaterly" ? "quarterly" : opt}
                   {opt === "annual" && (
                     <span
                       className="text-[9px] font-bold rounded-full px-1.5 py-[1px] tracking-[0.02em]"
@@ -167,9 +167,9 @@ export default function PricingPage() {
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-lg font-semibold text-[#0F172B] tracking-[-0.02em]">
-                          {formatAmount(price.amount, price.currency)}
+                          {formatAmount(Math.round(price.amount / (price.interval_months || 1)), price.currency)}
                         </div>
-                        <div className="text-[11px] text-[#888888]">/{price.plan_type}</div>
+                        <div className="text-[11px] text-[#888888]">/month</div>
                       </div>
                     </button>
                   );
@@ -215,6 +215,9 @@ export default function PricingPage() {
 
             <p className="text-[11px] text-center mt-3 leading-relaxed" style={{ color: "rgba(18,18,18,0.35)" }}>
               Secured by Razorpay &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No hidden fees
+            </p>
+            <p className="text-[11px] text-center mt-1 leading-relaxed text-[#888888]">
+              *Prices shown are exclusive of 18% GST.
             </p>
           </div>
         </div>

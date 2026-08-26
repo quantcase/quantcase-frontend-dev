@@ -284,34 +284,6 @@ export function DecisionIntelligencePanel({
   type Alert = { source: string; text: string; sentiment: "positive" | "negative" | "neutral" };
   const alerts: Alert[] = [];
 
-  // MOD-level alerts
-  if (dScore !== null && dScore < 50) {
-    alerts.push({
-      source: "QuantCase",
-      text: dVerdict ? `Deal ${dVerdict.toLowerCase()} — entry attractiveness limited.` : "Deal score below threshold.",
-      sentiment: "negative",
-    });
-  }
-  if (oScore !== null && oScore < 60) {
-    alerts.push({
-      source: "QuantCase",
-      text: oVerdict ? `Opportunity ${oVerdict.toLowerCase()} — growth revival depends on macro recovery.` : "Opportunity score is moderate.",
-      sentiment: "neutral",
-    });
-  }
-  if (mScore !== null && mScore >= 70) {
-    alerts.push({
-      source: "QuantCase",
-      text: mVerdict ? `Management ${mVerdict.toLowerCase()} — guidance track record is solid.` : "Management quality is strong.",
-      sentiment: "positive",
-    });
-  }
-
-  // Fundamental alert
-  if (fin?.eps_cagr_3y != null && fin.eps_cagr_3y < 0) {
-    alerts.push({ source: "Fundamental", text: "Revenue decelerating — below sector average, re-rating risk.", sentiment: "negative" });
-  }
-
   // Technical alerts from rule engine
   reAlerts.forEach((a) => {
     const s = a.toLowerCase();

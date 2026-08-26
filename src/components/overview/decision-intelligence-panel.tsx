@@ -334,6 +334,8 @@ export function DecisionIntelligencePanel({
 
   const displayAlerts = alerts.slice(0, 5);
 
+  const displayScore = overviewData?.score || (mScore !== null && oScore !== null && dScore !== null ? Math.round((mScore + oScore + dScore) / 3) : null);
+
   return (
     <DecisionIntelligenceShell>
       {/* Overall Rating card — prominent */}
@@ -342,53 +344,54 @@ export function DecisionIntelligencePanel({
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div>
             <DecisionEyebrow className="mb-[5px]">Overall Rating</DecisionEyebrow>
-            <span
-              style={{
-                fontFamily: "var(--qc-font-sans)",
-                fontSize: "var(--qc-fz-22)",
-                fontWeight: "var(--qc-w-bold)",
-                color: ratingColor,
-                letterSpacing: "-0.02em",
-                lineHeight: 1,
-              }}
-            >
-              {effectiveRating ?? "—"}
-            </span>
-          </div>
-          {mScore !== null && oScore !== null && dScore !== null && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                padding: "6px 12px",
-                background: scoreBg(Math.round((mScore + oScore + dScore) / 3)),
-                borderRadius: 999,
-                border: `1px solid ${scoreColor(Math.round((mScore + oScore + dScore) / 3))}30`,
-              }}
-            >
+            {displayScore !== null ? (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "6px 12px",
+                  background: scoreBg(displayScore),
+                  borderRadius: 999,
+                  border: `1px solid ${scoreColor(displayScore)}30`,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "var(--qc-font-mono)",
+                    fontSize: "var(--qc-fz-16)",
+                    fontWeight: "var(--qc-w-bold)",
+                    color: scoreColor(displayScore),
+                  }}
+                >
+                  {displayScore}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--qc-font-mono)",
+                    fontSize: "var(--qc-fz-9)",
+                    color: "var(--qc-ink-2)",
+                    letterSpacing: ".1em",
+                  }}
+                >
+                  / 100
+                </span>
+              </div>
+            ) : (
               <span
                 style={{
-                  fontFamily: "var(--qc-font-mono)",
-                  fontSize: "var(--qc-fz-16)",
+                  fontFamily: "var(--qc-font-sans)",
+                  fontSize: "var(--qc-fz-22)",
                   fontWeight: "var(--qc-w-bold)",
-                  color: scoreColor(Math.round((mScore + oScore + dScore) / 3)),
+                  color: ratingColor,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1,
                 }}
               >
-                {Math.round((mScore + oScore + dScore) / 3)}
+                —
               </span>
-              <span
-                style={{
-                  fontFamily: "var(--qc-font-mono)",
-                  fontSize: "var(--qc-fz-9)",
-                  color: "var(--qc-ink-2)",
-                  letterSpacing: ".1em",
-                }}
-              >
-                / 100
-              </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Fundamental interest sub-row — shown when action_bias overrides MOD rating */}

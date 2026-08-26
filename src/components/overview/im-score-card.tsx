@@ -41,17 +41,63 @@ function EmphasisTitle({ text }: { text: string }) {
   );
 }
 
+// ── Score Donut ─────────────────────────────────────────────────────────────
+function ScoreDonut({ score, color }: { score: number; color: string }) {
+  const radius = 18;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (score / 100) * circumference;
+  
+  return (
+    <div style={{ position: "relative", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <svg width={44} height={44} style={{ transform: "rotate(-90deg)" }}>
+        <circle
+          cx={22}
+          cy={22}
+          r={radius}
+          fill="none"
+          stroke="var(--qc-hair)"
+          strokeWidth={3}
+        />
+        <circle
+          cx={22}
+          cy={22}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={3}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+        />
+      </svg>
+      <span
+        style={{
+          position: "absolute",
+          fontFamily: "var(--qc-font-mono)",
+          fontSize: "var(--qc-fz-11)",
+          fontWeight: "var(--qc-w-semi)",
+          color: "var(--qc-ink)",
+        }}
+      >
+        {Math.round(score)}
+      </span>
+    </div>
+  );
+}
+
 // ── Pattern card ──────────────────────────────────────────────────────────────
 function PatternCard({
   pattern,
   href,
   symbol,
   index,
+  score,
 }: {
   pattern: OverviewPillarPattern;
   href: string;
   symbol: string;
   index: number;
+  score?: number;
 }) {
   const [hovered, setHovered] = useState(false);
   const dest = `${href}?symbol=${encodeURIComponent(symbol)}`;
@@ -65,8 +111,8 @@ function PatternCard({
       href={dest}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      className="flex flex-row"
       style={{
-        display: "flex",
         textDecoration: "none",
         background: "var(--qc-card)",
         border: `1px solid ${hovered ? "var(--qc-ink-2)" : "var(--qc-hair)"}`,
@@ -79,12 +125,8 @@ function PatternCard({
     >
       {/* Number Column */}
       <div
+        className="w-12 sm:w-16 shrink-0 flex items-center justify-center"
         style={{
-          width: 64,
-          flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           fontFamily: "var(--qc-font-mono)",
           fontSize: "var(--qc-fz-12)",
           color: "var(--qc-ink-3)",
@@ -94,23 +136,14 @@ function PatternCard({
       </div>
 
       {/* Content Column */}
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          display: "flex",
-          flexDirection: "column",
-          padding: "24px 24px 24px 0",
-        }}
-      >
+      <div className="flex-1 min-w-0 flex flex-col py-4 pr-3 sm:py-6 sm:pr-0">
         <div style={{ display: "flex", flex: 1 }}>
           {/* Colored Line */}
           <div
+            className="shrink-0 mr-4 sm:mr-6"
             style={{
               width: 4,
               backgroundColor: meta.color,
-              flexShrink: 0,
-              marginRight: 24,
             }}
           />
 
@@ -171,8 +204,15 @@ function PatternCard({
         </div>
       </div>
 
+      {/* Score Donut */}
+      {score !== undefined && (
+        <div className="flex items-center px-2 sm:px-4 shrink-0">
+          <ScoreDonut score={score} color={meta.color} />
+        </div>
+      )}
+
       {/* Chevron affordance */}
-      <div style={{ display: "flex", alignItems: "center", paddingRight: 20 }}>
+      <div className="flex items-center pr-4 sm:pr-6 shrink-0">
         <ChevronRight
           size={15}
           strokeWidth={2}
@@ -317,17 +357,25 @@ export function IMScoreCard({ management, opportunity, deal, overviewData }: IMS
           </span>
         </div>
 
-        <div className="overflow-x-auto scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0">
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 480 }}>
-            {rankedPatterns.map((p, index) => (
-              <PatternCard
-                key={p.pillar}
-                pattern={p}
-                href={PILLAR_META[p.pillar].href}
-                symbol={symbol}
-                index={index}
-              />
-            ))}
+        <div className="pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {rankedPatterns.map((p, index) => {
+              let score: number | undefined;
+              if (p.pillar === "management") score = management?.score;
+              else if (p.pillar === "opportunity") score = opportunity?.score;
+              else if (p.pillar === "deal") score = deal?.score;
+              
+              return (
+                <PatternCard
+                  key={p.pillar}
+                  pattern={p}
+                  href={PILLAR_META[p.pillar].href}
+                  symbol={symbol}
+                  index={index}
+                  score={score}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

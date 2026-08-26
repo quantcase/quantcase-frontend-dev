@@ -338,63 +338,78 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
-              {visiblePrices.map(({ product, price }, idx) => {
-                const isSelected = selectedPriceId === price.id;
-                const isPopular = idx === 0;
-                return (
-                  <button
-                    key={price.id}
-                    onClick={() => setSelectedPriceId(price.id)}
-                    style={{
-                      textAlign: "left",
-                      padding: "16px 18px",
-                      borderRadius: 10,
-                      border: isSelected ? "2px solid var(--qc-ink)" : "1.5px solid var(--qc-hair)",
-                      background: isSelected ? "var(--qc-section)" : "var(--qc-card)",
-                      cursor: "pointer",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      transition: "all 0.12s",
-                      position: "relative",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      {/* Radio dot */}
-                      <div
-                        style={{
-                          width: 16,
-                          height: 16,
-                          borderRadius: "50%",
-                          border: isSelected ? "5px solid var(--qc-ink)" : "1.5px solid var(--qc-hair)",
-                          background: "var(--qc-card)",
-                          flexShrink: 0,
-                          transition: "all 0.12s",
-                        }}
-                      />
-                      <div>
-                        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2, display: "flex", alignItems: "center", gap: 8 }}>
-                          {(price.plan_type === "half-yearly" || price.plan_type === "annual") ? "Half Yearly" : price.plan_type === "monthly" ? "Monthly" : "Quarterly"}
-                          {(price.plan_type === "half-yearly" || price.plan_type === "annual") && (
-                            <span style={{ fontSize: 10, background: "var(--qc-up-soft)", color: "var(--qc-up)", borderRadius: 999, padding: "2px 8px", fontWeight: 700 }}>
-                              SAVE 20%
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>
-                          {(price.plan_type === "half-yearly" || price.plan_type === "annual") ? `${formatAmount(price.amount, price.currency)} billed every 6 months` : price.plan_type === "monthly" ? "Cancel any time" : `${formatAmount(price.amount, price.currency)} billed every 3 months`}
+              {(() => {
+                const monthlyPerMonth = visiblePrices.find(p =>
+                  p.price.plan_type === "monthly"
+                )?.price?.amount ?? null;
+
+                return visiblePrices.map(({ product, price }, idx) => {
+                  const isSelected = selectedPriceId === price.id;
+                  const isPopular = idx === 0;
+                  const isHalfYearly = price.plan_type === "half-yearly" || price.plan_type === "annual";
+                  const isQuarterly = price.plan_type === "quarterly" || price.plan_type === "quaterly";
+
+                  let savePct: number | null = null;
+                  if (monthlyPerMonth && (isHalfYearly || isQuarterly)) {
+                    const planPerMonth = price.amount / (price.interval_months || 1);
+                    savePct = Math.round((1 - planPerMonth / monthlyPerMonth) * 100);
+                  }
+
+                  return (
+                    <button
+                      key={price.id}
+                      onClick={() => setSelectedPriceId(price.id)}
+                      style={{
+                        textAlign: "left",
+                        padding: "16px 18px",
+                        borderRadius: 10,
+                        border: isSelected ? "2px solid var(--qc-ink)" : "1.5px solid var(--qc-hair)",
+                        background: isSelected ? "var(--qc-section)" : "var(--qc-card)",
+                        cursor: "pointer",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        transition: "all 0.12s",
+                        position: "relative",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        {/* Radio dot */}
+                        <div
+                          style={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: "50%",
+                            border: isSelected ? "5px solid var(--qc-ink)" : "1.5px solid var(--qc-hair)",
+                            background: "var(--qc-card)",
+                            flexShrink: 0,
+                            transition: "all 0.12s",
+                          }}
+                        />
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2, display: "flex", alignItems: "center", gap: 8 }}>
+                            {isHalfYearly ? "Semi Annual" : price.plan_type === "monthly" ? "Monthly" : "Quarterly"}
+                            {savePct !== null && savePct > 0 && (
+                              <span style={{ fontSize: 10, background: "var(--qc-up-soft)", color: "var(--qc-up)", borderRadius: 999, padding: "2px 8px", fontWeight: 700 }}>
+                                SAVE {savePct}%
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>
+                            {isHalfYearly ? `${formatAmount(price.amount, price.currency)} billed every 6 months` : price.plan_type === "monthly" ? "Cancel any time" : `${formatAmount(price.amount, price.currency)} billed every 3 months`}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <div style={{ fontSize: 18, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "-0.02em" }}>
-                        {formatAmount(Math.round(price.amount / (price.interval_months || 1)), price.currency)}
+                      <div style={{ textAlign: "right", flexShrink: 0 }}>
+                        <div style={{ fontSize: 18, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "-0.02em" }}>
+                          {formatAmount(Math.round(price.amount / (price.interval_months || 1)), price.currency)}
+                        </div>
+                        <div style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>/mo</div>
                       </div>
-                      <div style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>/mo</div>
-                    </div>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                });
+              })()}
             </div>
           )}
 

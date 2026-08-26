@@ -556,7 +556,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                     {(mode === "import" ? portStocks : filtered).map((x) => (
                       <div key={x.t} className={"row " + (mode === "import" ? "ro" : sel.has(x.t) ? "sel" : "")} onClick={() => mode === "pick" && toggle(x.t)}>
                         <div className="id"><div className="tk">{x.t}</div><div className="nm">{x.n}</div></div>
-                        <div className="why">{x.w}</div><div className="sc" style={{ color: col(x.s) }}>{x.s}</div>
+                        {x.w && x.w !== 'Analysis pending' && <div className="why">{x.w}</div>}<div className="sc" style={{ color: col(x.s) }}>{x.s}</div>
                         {mode === "pick" && <div className="tick"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0C1626" strokeWidth="3.5"><path d="M4 12l5 5L20 6" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}
                       </div>
                     ))}

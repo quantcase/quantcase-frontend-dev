@@ -52,7 +52,8 @@ export default function OnboardingV3() {
             };
           });
           setPortStocks(mapped);
-        }
+        },
+        onError: () => {}
       });
     }
   }, [holdingsData]);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { X, CheckCircle2, Zap, Shield, BarChart2, Clock } from "lucide-react";
 import type { BillingConfig, BillingProduct } from "@/types/auth";
 import { getBillingConfig, getProducts } from "@/lib/billing";
@@ -55,9 +56,10 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
   const allPrices = products.flatMap((product) =>
     product.prices.map((pr) => ({ product, price: pr }))
   );
-  // Find one annual and one monthly plan to display simultaneously
+  // Find one annual, one quarterly, and one monthly plan to display simultaneously
   const visiblePrices = [
     allPrices.find((p) => p.price.plan_type === "annual"),
+    allPrices.find((p) => p.price.plan_type === "quarterly" || p.price.plan_type === "quaterly"),
     allPrices.find((p) => p.price.plan_type === "monthly"),
   ].filter(Boolean) as { product: BillingProduct; price: any }[];
 
@@ -209,33 +211,37 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
 
           {/* Status badge */}
           <div style={{ marginBottom: 16 }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                fontSize: 11,
-                fontWeight: 600,
-                color: statusConfig.badgeColor,
-                background: statusConfig.badgeBg,
-                border: `1px solid ${statusConfig.badgeBorder}`,
-                borderRadius: 999,
-                padding: "3px 10px",
-                letterSpacing: "0.02em",
-                textTransform: "uppercase",
-              }}
-            >
+            {statusConfig.badge === "quantcase." ? (
+              <Image src="/logos/logo-text-dark.png" alt="Quantcase" width={140} height={32} style={{ height: "26px", width: "auto" }} />
+            ) : (
               <span
                 style={{
-                  width: 5,
-                  height: 5,
-                  borderRadius: "50%",
-                  background: statusConfig.badgeColor,
-                  display: "inline-block",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: statusConfig.badgeColor,
+                  background: statusConfig.badgeBg,
+                  border: `1px solid ${statusConfig.badgeBorder}`,
+                  borderRadius: 999,
+                  padding: "3px 10px",
+                  letterSpacing: "0.02em",
+                  textTransform: "uppercase",
                 }}
-              />
-              {statusConfig.badge}
-            </span>
+              >
+                <span
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: "50%",
+                    background: statusConfig.badgeColor,
+                    display: "inline-block",
+                  }}
+                />
+                {statusConfig.badge}
+              </span>
+            )}
           </div>
 
           <h2
@@ -368,7 +374,7 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                       />
                       <div>
                         <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2, display: "flex", alignItems: "center", gap: 8 }}>
-                          {price.plan_type === "annual" ? "Yearly" : "Monthly"}
+                          {price.plan_type === "annual" ? "Yearly" : price.plan_type === "monthly" ? "Monthly" : "Quarterly"}
                           {price.plan_type === "annual" && (
                             <span style={{ fontSize: 10, background: "var(--qc-up-soft)", color: "var(--qc-up)", borderRadius: 999, padding: "2px 8px", fontWeight: 700 }}>
                               SAVE 20%
@@ -376,13 +382,13 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                           )}
                         </div>
                         <div style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>
-                          {price.plan_type === "annual" ? `${formatAmount(price.amount, price.currency)} billed once · covers 4 earnings seasons` : "Cancel any time"}
+                          {price.plan_type === "annual" ? `${formatAmount(price.amount, price.currency)} billed once · covers 4 earnings seasons` : price.plan_type === "monthly" ? "Cancel any time" : `${formatAmount(price.amount, price.currency)} billed every 3 months`}
                         </div>
                       </div>
                     </div>
                     <div style={{ textAlign: "right", flexShrink: 0 }}>
                       <div style={{ fontSize: 18, fontWeight: 600, color: "var(--qc-ink)", letterSpacing: "-0.02em" }}>
-                        {price.plan_type === "annual" ? formatAmount(price.amount / 12, price.currency) : formatAmount(price.amount, price.currency)}
+                        {formatAmount(Math.round(price.amount / (price.interval_months || 1)), price.currency)}
                       </div>
                       <div style={{ fontSize: 11, color: "var(--qc-ink-3)" }}>/mo</div>
                     </div>
@@ -484,7 +490,7 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                 Secured by Razorpay &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No hidden fees
               </p>
               <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 4, fontStyle: "italic" }}>
-                *These are beta prices
+                *Prices shown are exclusive of 18% GST.
               </p>
             </>
           )}

@@ -231,13 +231,13 @@ function FinancialsContent() {
           <TabularCard
             title="Profit & Loss"
             subtitle="All values in INR Crores"
-            tabs={pnlView === "table" ? ["Quarterly", "Annual"] : undefined}
+            tabs={["Quarterly", "Annual"]}
             defaultTab="Annual"
             headerAction={<ViewToggle view={pnlView} onChange={setPnlView} />}
           >
             {(activeTab) =>
               pnlView === "chart" ? (
-                <PnLChart table={quarterly} />
+                <PnLChart table={activeTab === "Quarterly" ? quarterly : annual} />
               ) : (
                 <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
               )

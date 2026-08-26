@@ -36,27 +36,21 @@ export default function OnboardingV3() {
 
   
   useEffect(() => {
-    const tickers = INITIAL_STOCKS.map(s => s.t);
-    apiAuthGet(`${BACKEND_URL}/api/post-html-analysis/bulk-scores?tickers=${tickers.join(',')}`, {
+    apiAuthGet(`${BACKEND_URL}/api/post-html-analysis/bulk-scores`, {
       onSuccess: (res: any) => {
         const scoresData = res.data || {};
-        const updatedStocks = INITIAL_STOCKS.map(stock => {
-          const sc = scoresData[stock.t];
-          if (sc) {
-            return {
-              ...stock,
-              w: sc.w || stock.w,
-              s: sc.s || stock.s,
-              m: sc.m || stock.m,
-              o: sc.o || stock.o,
-              d: sc.d || stock.d,
-              m_txt: sc.m_txt || '',
-              o_txt: sc.o_txt || '',
-              d_txt: sc.d_txt || ''
-            };
-          }
-          return stock;
-        });
+        const updatedStocks = Object.entries(scoresData).map(([ticker, sc]: [string, any]) => ({
+          t: ticker,
+          n: sc.n || ticker,
+          w: sc.w || 'Analysis pending',
+          s: sc.s || 0,
+          m: sc.m || 0,
+          o: sc.o || 0,
+          d: sc.d || 0,
+          m_txt: sc.m_txt || '',
+          o_txt: sc.o_txt || '',
+          d_txt: sc.d_txt || ''
+        })).sort((a, b) => b.s - a.s);
         setStocksList(updatedStocks);
         
 
@@ -121,8 +115,8 @@ export default function OnboardingV3() {
   };
 
   const filtered = useMemo(() => {
-    return stocksList.filter((x) => x.t.toLowerCase().includes(q.toLowerCase()) || x.n.toLowerCase().includes(q.toLowerCase()));
-  }, [q]);
+    return stocksList.filter((x) => x.t.toLowerCase().includes(q.toLowerCase()) || x.n.toLowerCase().includes(q.toLowerCase())).slice(0, 50);
+  }, [q, stocksList]);
 
   const picks = useMemo(() => [...sel].map((t) => stocksList.find((x) => x.t === t)).filter((x): x is typeof INITIAL_STOCKS[0] => x !== undefined), [sel, stocksList]);
 

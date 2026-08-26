@@ -204,9 +204,9 @@ function InvestorDashboardContent() {
         {/* ════════════════════════════════════════════════════════════
             ROW 3 — Discover Screens (full width)
         ═══════════════════════════════════════════════════════════════ */}
-        <section className="mb-3.5">
+        {/* <section className="mb-3.5">
           <DiscoverScreens screens={discoverScreens} />
-        </section>
+        </section> */}
       </main>
 
       <MODBreakdownDrawer

@@ -10,16 +10,16 @@ import { apiAuthPost, apiAuthGet } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { OnboardingThesisFields, type ThesisFieldsState } from "./onboarding-thesis-fields";
 
-const STOCKS = [
-  {t:'ZOMATO',n:'Zomato Ltd',w:'High growth potential',s:81,m:80,o:85,d:78},
-  {t:'BLUESTONE',n:'Bluestone',w:'Strong consumer brand',s:75,m:72,o:79,d:75},
-  {t:'PAYTM',n:'One97 Comm',w:'Regulatory overhang',s:52,m:30,o:70,d:60},
-  {t:'HDFCBANK',n:'HDFC Bank',w:'Sector rotation target',s:78,m:75,o:82,d:77},
-  {t:'RELIANCE',n:'Reliance Ind',w:'Capital intensity peak',s:72,m:70,o:80,d:65},
-  {t:'YESBANK',n:'Yes Bank Ltd',w:'Asset quality concern',s:41,m:40,o:45,d:38},
-  {t:'VODAIDEA',n:'Vodafone Idea',w:'Debt burden severe',s:44,m:42,o:50,d:40},
-  {t:'TCS',n:'Tata Consultancy',w:'Margin resilience',s:84,m:86,o:80,d:85},
-  {t:'INFY',n:'Infosys Ltd',w:'Growth guidance cut',s:68,m:70,o:65,d:69}
+const INITIAL_STOCKS = [
+  {t:'ZOMATO',n:'Zomato Ltd',w:'High growth potential',s:81,m:80,o:85,d:78,m_txt:'',o_txt:'',d_txt:''},
+  {t:'BLUESTONE',n:'Bluestone',w:'Strong consumer brand',s:75,m:72,o:79,d:75,m_txt:'',o_txt:'',d_txt:''},
+  {t:'PAYTM',n:'One97 Comm',w:'Regulatory overhang',s:52,m:30,o:70,d:60,m_txt:'',o_txt:'',d_txt:''},
+  {t:'HDFCBANK',n:'HDFC Bank',w:'Sector rotation target',s:78,m:75,o:82,d:77,m_txt:'',o_txt:'',d_txt:''},
+  {t:'RELIANCE',n:'Reliance Ind',w:'Capital intensity peak',s:72,m:70,o:80,d:65,m_txt:'',o_txt:'',d_txt:''},
+  {t:'YESBANK',n:'Yes Bank Ltd',w:'Asset quality concern',s:41,m:40,o:45,d:38,m_txt:'',o_txt:'',d_txt:''},
+  {t:'VODAIDEA',n:'Vodafone Idea',w:'Debt burden severe',s:44,m:42,o:50,d:40,m_txt:'',o_txt:'',d_txt:''},
+  {t:'TCS',n:'Tata Consultancy',w:'Margin resilience',s:84,m:86,o:80,d:85,m_txt:'',o_txt:'',d_txt:''},
+  {t:'INFY',n:'Infosys Ltd',w:'Growth guidance cut',s:68,m:70,o:65,d:69,m_txt:'',o_txt:'',d_txt:''}
 ];
 
 export default function OnboardingV3() {
@@ -31,7 +31,39 @@ export default function OnboardingV3() {
   const [q, setQ] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [tradingEnabled, setTradingEnabled] = useState(false);
-  const [portStocks, setPortStocks] = useState<typeof STOCKS>(STOCKS.slice(1,7));
+  const [portStocks, setPortStocks] = useState<typeof INITIAL_STOCKS>(INITIAL_STOCKS.slice(1,7));
+  const [stocksList, setStocksList] = useState<typeof INITIAL_STOCKS>(INITIAL_STOCKS);
+
+  
+  useEffect(() => {
+    const tickers = INITIAL_STOCKS.map(s => s.t);
+    apiAuthGet(`${BACKEND_URL}/api/post-html-analysis/bulk-scores?tickers=${tickers.join(',')}`, {
+      onSuccess: (res: any) => {
+        const scoresData = res.data || {};
+        const updatedStocks = INITIAL_STOCKS.map(stock => {
+          const sc = scoresData[stock.t];
+          if (sc) {
+            return {
+              ...stock,
+              w: sc.w || stock.w,
+              s: sc.s || stock.s,
+              m: sc.m || stock.m,
+              o: sc.o || stock.o,
+              d: sc.d || stock.d,
+              m_txt: sc.m_txt || '',
+              o_txt: sc.o_txt || '',
+              d_txt: sc.d_txt || ''
+            };
+          }
+          return stock;
+        });
+        setStocksList(updatedStocks);
+        
+
+      },
+      onError: () => {}
+    });
+  }, []);
 
   useEffect(() => {
     if (holdingsData?.holdings && holdingsData.holdings.length > 0) {
@@ -49,6 +81,9 @@ export default function OnboardingV3() {
               m: sc.m || 0,
               o: sc.o || 0,
               d: sc.d || 0,
+              m_txt: sc.m_txt || '',
+              o_txt: sc.o_txt || '',
+              d_txt: sc.d_txt || '',
             };
           });
           setPortStocks(mapped);
@@ -86,10 +121,10 @@ export default function OnboardingV3() {
   };
 
   const filtered = useMemo(() => {
-    return STOCKS.filter((x) => x.t.toLowerCase().includes(q.toLowerCase()) || x.n.toLowerCase().includes(q.toLowerCase()));
+    return stocksList.filter((x) => x.t.toLowerCase().includes(q.toLowerCase()) || x.n.toLowerCase().includes(q.toLowerCase()));
   }, [q]);
 
-  const picks = useMemo(() => [...sel].map((t) => STOCKS.find((x) => x.t === t)).filter((x): x is typeof STOCKS[0] => x !== undefined), [sel]);
+  const picks = useMemo(() => [...sel].map((t) => stocksList.find((x) => x.t === t)).filter((x): x is typeof INITIAL_STOCKS[0] => x !== undefined), [sel, stocksList]);
 
   const avgScore = useMemo(() => {
     if (mode === "import") {
@@ -573,11 +608,10 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
               <h1>Your top name scores <em><span>{topPick.s}</span></em>. Here's the <em>why</em>.</h1>
               <p className="lede">Three questions, asked the same way for every company, every quarter — so the score moves only when the business does.</p>
               <div className="mods">
-                <div className="mod"><div className="letter">M <u>{topPick.m}</u></div><div className="nm">Management</div><div className="q">"Do they do what they say?"</div><div className="meter"><i style={{ width: topPick.m + "%" }}></i></div><div className="ev">Met <b>11 of 12</b> stated commitments across the last four calls.</div></div>
-                <div className="mod"><div className="letter">O <u>{topPick.o}</u></div><div className="nm">Opportunity</div><div className="q">"Is this a good place to be?"</div><div className="meter"><i style={{ width: topPick.o + "%" }}></i></div><div className="ev">Sector credit growth <b>running ahead of nominal GDP</b> for six quarters.</div></div>
-                <div className="mod"><div className="letter">D <u>{topPick.d}</u></div><div className="nm">Deal</div><div className="q">"Is the price right?"</div><div className="meter"><i style={{ width: topPick.d + "%" }}></i></div><div className="ev">Trading <b>12% above</b> its own five-year median multiple.</div></div>
+                <div className="mod"><div className="letter">M <u>{topPick.m}</u></div><div className="nm">Management</div><div className="q">"Do they do what they say?"</div><div className="meter"><i style={{ width: topPick.m + "%" }}></i></div><div className="ev">{topPick.m_txt || "Analysis pending"}</div></div>
+                <div className="mod"><div className="letter">O <u>{topPick.o}</u></div><div className="nm">Opportunity</div><div className="q">"Is this a good place to be?"</div><div className="meter"><i style={{ width: topPick.o + "%" }}></i></div><div className="ev">{topPick.o_txt || "Analysis pending"}</div></div>
+                <div className="mod"><div className="letter">D <u>{topPick.d}</u></div><div className="nm">Deal</div><div className="q">"Is the price right?"</div><div className="meter"><i style={{ width: topPick.d + "%" }}></i></div><div className="ev">{topPick.d_txt || "Analysis pending"}</div></div>
               </div>
-              <div className="provenance"><div className="n">327</div><div className="t"><b>documents read per company</b> — annual reports, investor presentations, exchange filings, concall transcripts, peer comparisons. Every line links back to the page it came from.</div></div>
             </section>
           )}
 

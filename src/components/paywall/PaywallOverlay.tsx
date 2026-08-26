@@ -485,15 +485,13 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
               No charge for 7 days · Cancel anytime
             </p>
           ) : (
-            <>
-              <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
-                Secured by Razorpay &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No hidden fees
-              </p>
-              <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 4, fontStyle: "italic" }}>
-                *Prices shown are exclusive of 18% GST.
-              </p>
-            </>
+            <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
+              Secured by Razorpay &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No hidden fees
+            </p>
           )}
+          <p style={{ fontSize: 11, color: "var(--qc-ink-3)", textAlign: "center", marginTop: 4, fontStyle: "italic" }}>
+            *Prices shown are exclusive of 18% GST.
+          </p>
         </div>
       </div>
 

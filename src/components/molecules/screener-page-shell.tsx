@@ -54,21 +54,33 @@ function ShellInner({ navItems, headerRight, children, companyInfo }: ScreenerPa
   return (
     <div className="min-h-screen qc-dock-clearance" style={{ background: "var(--qc-bg)" }}>
       {/* Company Header — design-sample style */}
-      <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4" style={{ padding: "10px 16px 10px" }}>
-        <h1
-          className="text-2xl sm:text-[length:var(--qc-fz-30)]"
-          style={{ margin: 0, fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.015em", color: "var(--qc-ink)", lineHeight: 1.2 }}
-        >
-          {companyName}
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4" style={{ padding: "10px 16px 10px" }}>
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <h1
+            className="text-2xl sm:text-[length:var(--qc-fz-30)]"
+            style={{ margin: 0, fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.015em", color: "var(--qc-ink)", lineHeight: 1.2 }}
+          >
+            {companyName}
+          </h1>
+          {/* Mobile-only NSE chip next to title */}
+          {symbol && (
+            <div className="sm:hidden mt-0.5">
+              <Chip>
+                <span style={{ color: "var(--qc-ink-2)" }}>{exchange}:</span>&nbsp;{symbol}
+              </Chip>
+            </div>
+          )}
+        </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
           {symbol && (
-            <Chip>
-              <span style={{ color: "var(--qc-ink-2)" }}>{exchange}:</span>&nbsp;{symbol}
-            </Chip>
+            <div className="hidden sm:block">
+              <Chip>
+                <span style={{ color: "var(--qc-ink-2)" }}>{exchange}:</span>&nbsp;{symbol}
+              </Chip>
+            </div>
           )}
-          {sector && <Chip>{sector}</Chip>}
-          {industry && industry !== sector && <Chip>{industry}</Chip>}
+          {sector && <div className="hidden sm:block"><Chip>{sector}</Chip></div>}
+          {industry && industry !== sector && <div className="hidden sm:block"><Chip>{industry}</Chip></div>}
           {headerRight}
         </div>
       </div>

@@ -205,6 +205,44 @@ export function joinAllTickers(
     });
   }
 
+  // Include holdings that are not in the journal tree so they appear in the queue
+  if (holdings?.holdings) {
+    const byMod = indexBy(mod?.breakdown, (r) => r.symbol);
+    const byStock = indexBy(stocks, (s) => s.ticker);
+    
+    for (const h of holdings.holdings) {
+      const k = key(h.ticker);
+      if (!merged.has(k)) {
+        const modRow = byMod.get(k) ?? null;
+        const stock = byStock.get(k) ?? null;
+        
+        merged.set(k, {
+          ticker: h.ticker,
+          name: modRow?.name ?? h.name ?? stock?.name ?? null,
+          sector: stock?.industry ?? null,
+          addedAt: h.created_at ?? "1970-01-01T00:00:00.000Z",
+          entryCount: 0,
+          market: { 
+            ltp: null, 
+            change: null, 
+            changePercent: null, 
+            qcScore: null, 
+            conviction: null, 
+            thesisTags: [] 
+          },
+          latestEntry: null,
+          latestThesisHealth: null,
+          entries: [],
+          pending: true,
+          holding: h,
+          mod: modRow,
+          metrics: metrics.get(k) ?? null,
+          journals: [],
+        });
+      }
+    }
+  }
+
   return [...merged.values()];
 }
 

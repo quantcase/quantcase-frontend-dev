@@ -56,9 +56,9 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
   const allPrices = products.flatMap((product) =>
     product.prices.map((pr) => ({ product, price: pr }))
   );
-  // Find one annual, one quarterly, and one monthly plan to display simultaneously
+  // Find one half-yearly (or annual mapped to half-yearly), one quarterly, and one monthly plan to display simultaneously
   const visiblePrices = [
-    allPrices.find((p) => p.price.plan_type === "annual"),
+    allPrices.find((p) => p.price.plan_type === "half-yearly" || p.price.plan_type === "annual"),
     allPrices.find((p) => p.price.plan_type === "quarterly" || p.price.plan_type === "quaterly"),
     allPrices.find((p) => p.price.plan_type === "monthly"),
   ].filter(Boolean) as { product: BillingProduct; price: any }[];
@@ -374,15 +374,15 @@ export function PaywallDialog({ open, onClose, hardBlock }: PaywallDialogProps) 
                       />
                       <div>
                         <div style={{ fontSize: 14, fontWeight: 500, color: "var(--qc-ink)", marginBottom: 2, display: "flex", alignItems: "center", gap: 8 }}>
-                          {price.plan_type === "annual" ? "Yearly" : price.plan_type === "monthly" ? "Monthly" : "Quarterly"}
-                          {price.plan_type === "annual" && (
+                          {(price.plan_type === "half-yearly" || price.plan_type === "annual") ? "Half Yearly" : price.plan_type === "monthly" ? "Monthly" : "Quarterly"}
+                          {(price.plan_type === "half-yearly" || price.plan_type === "annual") && (
                             <span style={{ fontSize: 10, background: "var(--qc-up-soft)", color: "var(--qc-up)", borderRadius: 999, padding: "2px 8px", fontWeight: 700 }}>
                               SAVE 20%
                             </span>
                           )}
                         </div>
                         <div style={{ fontSize: 12, color: "var(--qc-ink-3)" }}>
-                          {price.plan_type === "annual" ? `${formatAmount(price.amount, price.currency)} billed once · covers 4 earnings seasons` : price.plan_type === "monthly" ? "Cancel any time" : `${formatAmount(price.amount, price.currency)} billed every 3 months`}
+                          {(price.plan_type === "half-yearly" || price.plan_type === "annual") ? `${formatAmount(price.amount, price.currency)} billed every 6 months` : price.plan_type === "monthly" ? "Cancel any time" : `${formatAmount(price.amount, price.currency)} billed every 3 months`}
                         </div>
                       </div>
                     </div>

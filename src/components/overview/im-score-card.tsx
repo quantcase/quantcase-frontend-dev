@@ -104,7 +104,7 @@ function PatternCard({
   const meta = PILLAR_META[pattern.pillar];
   
   let bullets = pattern.snapshot
-    .split(/(?:\.\s+|;|\*\*|\n|•)+/)
+    .split(/(?:\.\s+|;|\n|•)+/)
     .map(s => s.trim())
     .filter(Boolean)
     .slice(0, 3)

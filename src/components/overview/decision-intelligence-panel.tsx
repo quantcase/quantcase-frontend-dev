@@ -314,7 +314,7 @@ export function DecisionIntelligencePanel({
       <DecisionSection style={{ borderColor: `${ratingColor}40` }}>
         {/* Top row: label + composite score */}
         <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-          <DecisionEyebrow className="mb-[5px]">Overall Rating</DecisionEyebrow>
+          <DecisionEyebrow className="mb-[5px]">QC Score</DecisionEyebrow>
           {displayScore !== null ? (
             <div
               style={{
@@ -368,63 +368,6 @@ export function DecisionIntelligencePanel({
             </span>
           )}
         </div>
-
-        {/* Fundamental interest sub-row — shown when action_bias overrides MOD rating */}
-        {overviewData?.action_bias && rating && overviewData.action_bias.toLowerCase() !== rating.toLowerCase() && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "7px 10px",
-              background: `${scoreColor(Math.round(((mScore ?? 0) + (oScore ?? 0) + (dScore ?? 0)) / Math.max(1, [mScore, oScore, dScore].filter(s => s !== null).length)))}12`,
-              borderRadius: 8,
-              border: `1px solid ${scoreColor(Math.round(((mScore ?? 0) + (oScore ?? 0) + (dScore ?? 0)) / Math.max(1, [mScore, oScore, dScore].filter(s => s !== null).length)))}25`,
-            }}
-          >
-            <span style={{ fontFamily: "var(--qc-font-sans)", fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", lineHeight: 1.4 }}>
-              Quality strong; timing unfavorable now
-            </span>
-          </div>
-        )}
-
-        {/* Investor style tags inside the card */}
-        {di && (di.tag || di.idealFor) && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-            {di.tag && (
-              <span
-                style={{
-                  fontFamily: "var(--qc-font-sans)",
-                  fontSize: "var(--qc-fz-11)",
-                  fontWeight: "var(--qc-w-medium)",
-                  padding: "3px 9px",
-                  borderRadius: 999,
-                  background: "var(--qc-chip)",
-                  color: "var(--qc-ink)",
-                  border: "1px solid var(--qc-hair)",
-                }}
-              >
-                {di.tag}
-              </span>
-            )}
-            {di.idealFor && (
-              <span
-                style={{
-                  fontFamily: "var(--qc-font-sans)",
-                  fontSize: "var(--qc-fz-11)",
-                  fontWeight: "var(--qc-w-medium)",
-                  padding: "3px 9px",
-                  borderRadius: 999,
-                  background: "var(--qc-chip)",
-                  color: "var(--qc-ink-2)",
-                  border: "1px solid var(--qc-hair)",
-                }}
-              >
-                {di.idealFor}
-              </span>
-            )}
-          </div>
-        )}
       </DecisionSection>
 
       {/* QuantCase Framework + Fundamentals + Technicals — shared white card */}

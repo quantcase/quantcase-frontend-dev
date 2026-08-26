@@ -151,6 +151,9 @@ interface QuarterlyTrendPoint {
   totalDebt: number | null;
   totalEquity: number | null;
   interestCoverage: number | null;
+  pegRatio?: number | null;
+  evToEbitda?: number | null;
+  pbRatio?: number | null;
 }
 
 type SparkKey = keyof Omit<QuarterlyTrendPoint, "period">;
@@ -244,25 +247,25 @@ export function KpiGrid({
       {
         label: "PEG", value: pegRatio != null ? `${pegRatio.toFixed(1)}x` : "—",
         yoy: { text: "—", cls: "na" as const }, muted: pegRatio == null,
-        metricKey: "pegRatio" as ChartMetricKey, sparkKey: "eps" as SparkKey,
-        customSparkValues: sparkWithFallback("eps", "eps"),
+        metricKey: "pegRatio" as ChartMetricKey, sparkKey: "pegRatio" as SparkKey,
+        customSparkValues: sparkWithFallback("pegRatio", "eps"),
       },
       {
-        label: "Enterprise Value", value: evToEbitda != null ? `${evToEbitda.toFixed(1)}x` : "—",
+        label: "Enterprise Value", value: evToEbitda != null ? formatINR(evToEbitda) : "—",
         yoy: { text: "—", cls: "na" as const }, muted: evToEbitda == null,
-        metricKey: "evToEbitda" as ChartMetricKey, sparkKey: "ebitda" as SparkKey,
+        metricKey: "evToEbitda" as ChartMetricKey, sparkKey: "evToEbitda" as SparkKey,
       },
       {
         label: "P/B (Book value)", value: pbRatio != null ? `${pbRatio.toFixed(1)}x` : "—",
         yoy: { text: "—", cls: "na" as const }, muted: pbRatio == null,
-        metricKey: "pbRatio" as ChartMetricKey, sparkKey: "totalEquity" as SparkKey,
-        customSparkValues: sparkWithFallback("totalEquity", "pb"),
+        metricKey: "pbRatio" as ChartMetricKey, sparkKey: "pbRatio" as SparkKey,
+        customSparkValues: sparkWithFallback("pbRatio", "pb"),
       },
       {
         label: "Dividend Payout Ratio",
-        value: dividendYield != null && dividendYield > 0 ? `${dividendYield.toFixed(2)}%` : "—",
+        value: dividendYield != null ? `${dividendYield.toFixed(2)}%` : "—",
         yoy: { text: "—", cls: "na" as const },
-        muted: dividendYield == null || dividendYield <= 0,
+        muted: dividendYield == null,
         metricKey: "dividendYield" as ChartMetricKey,
         sparkKey: null,
         customSparkValues: divYieldSparkValues(dividendYieldTrend),
@@ -274,16 +277,16 @@ export function KpiGrid({
       customSparkValues: sparkWithFallback("revenue", "revenue"),
     },
     {
-      label: "ROCE", value: ebitda != null ? formatINR(ebitda) : "—", yoy: yoyText(ebitdaGrowth),
+      label: "ROCE", value: ebitda != null ? `${ebitda.toFixed(2)}%` : "—", yoy: yoyText(ebitdaGrowth),
       muted: ebitda == null, metricKey: "ebitda", sparkKey: "ebitda",
     },
     {
-      label: "ROA", value: netProfit != null ? formatINR(netProfit) : "—", yoy: yoyText(netProfitGrowth),
+      label: "ROA", value: netProfit != null ? `${netProfit.toFixed(2)}%` : "—", yoy: yoyText(netProfitGrowth),
       muted: netProfit == null, metricKey: "netIncome", sparkKey: "netIncome",
       customSparkValues: sparkWithFallback("netIncome", "netProfit"),
     },
     {
-      label: "CFO to PAT Conversion", value: resolvedCfo != null ? formatINR(resolvedCfo) : "—", yoy: yoyText(cfoGrowth),
+      label: "CFO to PAT Conversion", value: resolvedCfo != null ? `${resolvedCfo.toFixed(2)}%` : "—", yoy: yoyText(cfoGrowth),
       muted: resolvedCfo == null, metricKey: "cfo", sparkKey: "cfo",
     },
     {
@@ -300,7 +303,7 @@ export function KpiGrid({
     },
     ...(showInterestCoverage ? [{
       label: "Retained Profits as % of PAT",
-      value: interestCoverage != null ? `${interestCoverage.toFixed(1)}x` : "—",
+      value: interestCoverage != null ? `${interestCoverage.toFixed(2)}%` : "—",
       yoy: yoyText(interestCoverageGrowth),
       muted: interestCoverage == null,
       metricKey: "interestCoverage" as ChartMetricKey,

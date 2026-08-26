@@ -18,6 +18,9 @@ interface QuarterlyTrendPoint {
   totalDebt: number | null;
   totalEquity: number | null;
   interestCoverage: number | null;
+  pegRatio?: number | null;
+  evToEbitda?: number | null;
+  pbRatio?: number | null;
 }
 
 export type ChartMetricKey =
@@ -84,13 +87,11 @@ interface Props {
 }
 
 const VALUATION_RATIO_TO_TREND_KEY: Partial<Record<ChartMetricKey, keyof Omit<QuarterlyTrendPoint, "period" | "ebitdaLabel" | "cfoLabel">>> = {
-  pegRatio: "eps",
-  evToEbitda: "ebitda",
-  pbRatio: "totalEquity",
+  // Empty now since we are graphing them directly, but keeping it in case of fallbacks
 };
 
 // When a ratio metric charts an underlying INR series, use INR formatting for the chart
-const RATIO_USES_INR_SERIES = new Set<ChartMetricKey>(["evToEbitda", "pbRatio"]);
+const RATIO_USES_INR_SERIES = new Set<ChartMetricKey>(["evToEbitda"]);
 
 // Keys that can be sourced from fundamentalsTrend when quarterlyTrend has no data
 const FUNDAMENTALS_TREND_KEY: Partial<Record<ChartMetricKey, keyof Omit<FundamentalsTrendPoint, "period">>> = {
@@ -103,7 +104,8 @@ const FUNDAMENTALS_TREND_KEY: Partial<Record<ChartMetricKey, keyof Omit<Fundamen
 };
 
 export function ValuationChartSidebar({ trend, dividendYieldTrend, fundamentalsTrend, selectedMetric, selectedLabel, formatValue }: Props) {
-  // Ratio metrics (pbRatio, evToEbitda) chart the underlying INR series — override formatter
+  // Ratio metrics (evToEbitda) chart the underlying INR series — override formatter
+  // Note: ROCE and ROA are percentages, we want them to use formatValue which is handled in parent
   const chartFormat = selectedMetric && RATIO_USES_INR_SERIES.has(selectedMetric)
     ? formatINR
     : formatValue;
@@ -122,8 +124,8 @@ export function ValuationChartSidebar({ trend, dividendYieldTrend, fundamentalsT
             .map((d) => {
               const value = selectedMetric === "cfo"
                 ? (d.cfo ?? d.cfoProxy)
-                : d[trendKey!];
-              return { period: shortPeriod(d.period), value };
+                : (d[selectedMetric as keyof QuarterlyTrendPoint] ?? (trendKey ? d[trendKey] : null));
+              return { period: shortPeriod(d.period), value: typeof value === "number" ? value : null };
             })
             .filter((d): d is { period: string; value: number } => d.value != null);
 

@@ -19,25 +19,25 @@ interface Props {
 }
 
 const METRIC_LABELS: Record<ChartMetricKey, string> = {
-  revenue: "Revenue",
-  ebitda: "EBITDA",
-  netIncome: "Net Profit",
+  revenue: "PAT",
+  ebitda: "ROCE",
+  netIncome: "ROA",
   eps: "EPS",
-  cfo: "CFO",
+  cfo: "CFO to PAT Conversion",
   totalDebt: "Debt",
-  totalEquity: "Equity",
-  interestCoverage: "Interest Coverage",
-  dividendYield: "Dividend Yield",
+  totalEquity: "Reserves",
+  interestCoverage: "Retained Profits as % of PAT",
+  dividendYield: "Dividend Payout Ratio",
   pegRatio: "PEG",
-  evToEbitda: "EV/EBITDA",
-  pbRatio: "P/B",
+  evToEbitda: "Enterprise Value",
+  pbRatio: "P/B (Book value)",
   pe: "P/E",
 };
 
 function formatForMetric(key: ChartMetricKey, v: number): string {
-  if (key === "eps" || key === "pegRatio") return `₹${v.toFixed(2)}`;
-  if (key === "interestCoverage" || key === "evToEbitda" || key === "pbRatio" || key === "pe") return `${v.toFixed(1)}x`;
-  if (key === "dividendYield") return `${v.toFixed(2)}%`;
+  if (key === "eps") return `₹${v.toFixed(2)}`;
+  if (key === "pegRatio" || key === "pbRatio" || key === "pe") return `${v.toFixed(1)}x`;
+  if (key === "dividendYield" || key === "ebitda" || key === "netIncome" || key === "cfo" || key === "interestCoverage") return `${v.toFixed(2)}%`;
   return formatINR(v);
 }
 

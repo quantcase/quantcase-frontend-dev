@@ -6,7 +6,12 @@ import type { FinancialRow, FinancialTable } from "@/types/financials";
 // No highlight field from the API anymore — these are the rows that used to carry it.
 const HIGHLIGHTED_LABELS = new Set(
   [
+    "Net Sales",
+    "Net Profit Margin (NPM)%",
+    "Total assets",
+    "Capital & Liabilities",
     "Income from financial services",
+    "Net cash flow from operating activities",
     "Operating Profit",
     "Operating Profit (%)",
     "Profit Before Tax (PBT)",

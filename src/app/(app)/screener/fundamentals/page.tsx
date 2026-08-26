@@ -103,7 +103,8 @@ function FinancialsContent() {
   // Show P/E only on the "PE Ratio" chart — drop the Earnings Yield bar series.
   const chartGroups = useMemo(
     () =>
-      chartsData?.chartGroups.map((g) =>
+      chartsData?.chartGroups
+        .filter((g) => g.group !== "Sales & Margin" && g.group !== "EV/EBITDA" && g.group !== "Market Cap / Sales").map((g) =>
         g.group === "PE Ratio"
           ? { ...g, barSeries: g.barSeries.filter((s) => s.dataKey !== "EARNINGS_YIELD_DAILY") }
           : g

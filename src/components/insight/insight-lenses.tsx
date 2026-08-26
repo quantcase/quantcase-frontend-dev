@@ -122,7 +122,7 @@ function LensScenarios({ slug, ticker }: { slug: string; ticker: string }) {
   return (
     <div className="mt-auto pt-4">
       <div className="text-[10px] text-[var(--qc-ink-2)] font-medium mb-2 uppercase tracking-wider">
-        {isEf ? "3 year CAGR" : "3Y Forecast"}
+        {isEf ? "3 year CAGR" : "3Y P/E Forecast"}
       </div>
       <div className="grid grid-cols-3 gap-2">
         <Box title="BEAR" colorClass="text-[var(--qc-down)]" main={bear.main} sub={bear.sub} borderCol="var(--qc-down)" />

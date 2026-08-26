@@ -244,23 +244,23 @@ export function KpiGrid({
     customSparkValues?: number[];
   }[] = [
     ...(showValuationRow ? [
-      {
-        label: "PEG", value: pegRatio != null ? `${pegRatio.toFixed(1)}x` : "—",
-        yoy: { text: "—", cls: "na" as const }, muted: pegRatio == null,
-        metricKey: "pegRatio" as ChartMetricKey, sparkKey: "pegRatio" as SparkKey,
-        customSparkValues: sparkWithFallback("pegRatio", "eps"),
-      },
+      // {
+      //   label: "PEG", value: pegRatio != null ? `${pegRatio.toFixed(1)}x` : "—",
+      //   yoy: { text: "—", cls: "na" as const }, muted: pegRatio == null,
+      //   metricKey: "pegRatio" as ChartMetricKey, sparkKey: "pegRatio" as SparkKey,
+      //   customSparkValues: sparkWithFallback("pegRatio", "eps"),
+      // },
       {
         label: "Enterprise Value", value: evToEbitda != null ? formatINR(evToEbitda) : "—",
         yoy: { text: "—", cls: "na" as const }, muted: evToEbitda == null,
         metricKey: "evToEbitda" as ChartMetricKey, sparkKey: "evToEbitda" as SparkKey,
       },
-      {
-        label: "P/B (Book value)", value: pbRatio != null ? `${pbRatio.toFixed(1)}x` : "—",
-        yoy: { text: "—", cls: "na" as const }, muted: pbRatio == null,
-        metricKey: "pbRatio" as ChartMetricKey, sparkKey: "pbRatio" as SparkKey,
-        customSparkValues: sparkWithFallback("pbRatio", "pb"),
-      },
+      // {
+      //   label: "P/B (Book value)", value: pbRatio != null ? `${pbRatio.toFixed(1)}x` : "—",
+      //   yoy: { text: "—", cls: "na" as const }, muted: pbRatio == null,
+      //   metricKey: "pbRatio" as ChartMetricKey, sparkKey: "pbRatio" as SparkKey,
+      //   customSparkValues: sparkWithFallback("pbRatio", "pb"),
+      // },
       {
         label: "Dividend Payout Ratio",
         value: dividendYield != null ? `${dividendYield.toFixed(2)}%` : "—",
@@ -285,10 +285,10 @@ export function KpiGrid({
       muted: netProfit == null, metricKey: "netIncome", sparkKey: "netIncome",
       customSparkValues: sparkWithFallback("netIncome", "netProfit"),
     },
-    {
-      label: "CFO to PAT Conversion", value: resolvedCfo != null ? `${resolvedCfo.toFixed(2)}%` : "—", yoy: yoyText(cfoGrowth),
-      muted: resolvedCfo == null, metricKey: "cfo", sparkKey: "cfo",
-    },
+    // {
+    //   label: "CFO to PAT Conversion", value: resolvedCfo != null ? `${resolvedCfo.toFixed(2)}%` : "—", yoy: yoyText(cfoGrowth),
+    //   muted: resolvedCfo == null, metricKey: "cfo", sparkKey: "cfo",
+    // },
     {
       label: "Cash", value: freeCashflow != null ? formatINR(freeCashflow) : "—", yoy: yoyText(fcfGrowth),
       muted: freeCashflow == null, metricKey: null, sparkKey: null,

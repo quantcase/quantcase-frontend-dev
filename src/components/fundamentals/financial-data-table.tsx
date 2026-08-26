@@ -44,6 +44,7 @@ interface FlatRow {
 function flattenRows(rows: FinancialRow[], expanded: Set<string>, depth = 0): FlatRow[] {
   const out: FlatRow[] = [];
   for (const row of rows) {
+    if (row.label.trim().toLowerCase() === "sectoral nnpa") continue;
     const hasChildren = !!row.children && row.children.length > 0;
     out.push({ row, depth, hasChildren });
     if (hasChildren && expanded.has(row.key)) {

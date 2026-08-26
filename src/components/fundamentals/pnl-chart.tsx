@@ -17,15 +17,15 @@ import type { FinancialTable } from "@/types/financials";
 import { QC, SEQUENTIAL } from "@/lib/chart-tokens";
 
 const ROW_KEYS = {
-  revenue:         "revenue",
-  expenses:        "expenses",
-  interest:        "interest",
-  operatingProfit: "operatingProfit",
-  netProfit:       "netProfit",
+  revenue:         ["REV_OP", "SALES_BFSI", "T_INC_CON_OPR_BFSI"],
+  expenses:        ["TOTAL_OPEX", "BFSI_OPEX"],
+  interest:        ["FIN_COST"],
+  operatingProfit: ["OP_PROFIT", "FINANCING_PROFIT"],
+  netProfit:       ["PAT", "NET_PNL_AFTR_SHAREPNL_ASST_BFSI"],
 } as const;
 
-function getRow(table: FinancialTable, key: string): (number | null)[] {
-  return table.rows.find((r) => r.key === key)?.values ?? table.periods.map(() => null);
+function getRow(table: FinancialTable, keys: readonly string[]): (number | null)[] {
+  return table.rows.find((r) => keys.includes(r.key))?.values ?? table.periods.map(() => null);
 }
 
 function fmtCr(val: number | null | undefined): string {

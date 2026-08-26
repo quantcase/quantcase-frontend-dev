@@ -341,57 +341,60 @@ export function DecisionIntelligencePanel({
       {/* Overall Rating card — prominent */}
       <DecisionSection style={{ borderColor: `${ratingColor}40` }}>
         {/* Top row: label + composite score */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-          <div>
-            <DecisionEyebrow className="mb-[5px]">Overall Rating</DecisionEyebrow>
-            {displayScore !== null ? (
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                  padding: "6px 12px",
-                  background: scoreBg(displayScore),
-                  borderRadius: 999,
-                  border: `1px solid ${scoreColor(displayScore)}30`,
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "var(--qc-font-mono)",
-                    fontSize: "var(--qc-fz-16)",
-                    fontWeight: "var(--qc-w-bold)",
-                    color: scoreColor(displayScore),
-                  }}
-                >
-                  {displayScore}
-                </span>
-                <span
-                  style={{
-                    fontFamily: "var(--qc-font-mono)",
-                    fontSize: "var(--qc-fz-9)",
-                    color: "var(--qc-ink-2)",
-                    letterSpacing: ".1em",
-                  }}
-                >
-                  / 100
-                </span>
-              </div>
-            ) : (
+        <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+          <DecisionEyebrow className="mb-[5px]">Overall Rating</DecisionEyebrow>
+          {displayScore !== null ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                gap: 4,
+                padding: "6px 12px",
+                background: scoreBg(displayScore),
+                borderRadius: 999,
+                border: `1px solid ${scoreColor(displayScore)}30`,
+              }}
+            >
               <span
                 style={{
-                  fontFamily: "var(--qc-font-sans)",
-                  fontSize: "var(--qc-fz-22)",
+                  fontFamily: "var(--qc-font-mono)",
+                  fontSize: "var(--qc-fz-16)",
                   fontWeight: "var(--qc-w-bold)",
-                  color: ratingColor,
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1,
+                  color: scoreColor(displayScore),
                 }}
               >
-                —
+                {displayScore}
               </span>
-            )}
-          </div>
+              <span
+                style={{
+                  fontFamily: "var(--qc-font-mono)",
+                  fontSize: "var(--qc-fz-9)",
+                  color: "var(--qc-ink-2)",
+                  letterSpacing: ".1em",
+                }}
+              >
+                / 100
+              </span>
+            </div>
+          ) : (
+            <span
+              style={{
+                fontFamily: "var(--qc-font-sans)",
+                fontSize: "var(--qc-fz-22)",
+                fontWeight: "var(--qc-w-bold)",
+                color: ratingColor,
+                letterSpacing: "-0.02em",
+                lineHeight: 1,
+                display: "block",
+                textAlign: "center",
+                width: "100%",
+              }}
+            >
+              —
+            </span>
+          )}
         </div>
 
         {/* Fundamental interest sub-row — shown when action_bias overrides MOD rating */}

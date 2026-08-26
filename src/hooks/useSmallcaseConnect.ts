@@ -92,33 +92,50 @@ export function useSmallcaseConnect({ onConnected }: UseSmallcaseConnectOptions 
       }
     );
   }, [fail, onConnected]);
-  confirmRef.current = confirm;
+  const [premadeTxn, setPremadeTxn] = useState<{ transactionId: string; smallcaseAuthToken: string } | null>(null);
 
-  const connect = useCallback(() => {
-    setError(null);
-    setStep("creating");
-
-    apiAuthPost<{ success: boolean; data: SmallcaseConnectTransaction }>(
+  const prepare = useCallback((intent: string = "HOLDINGS_IMPORT") => {
+    apiAuthPost<{ success: boolean; data: { transactionId: string; smallcaseAuthToken: string } }>(
       `${BACKEND_URL}/api/smallcase/connect`,
       {
-        onSuccess: async (res) => {
-          const { transactionId, smallcaseAuthToken } = res.data;
-          setStep("awaiting_sdk");
-          try {
-            await triggerTransaction(transactionId, smallcaseAuthToken);
-          } catch (sdkErr) {
-            fail(sdkErr instanceof Error ? sdkErr.message : "Broker connection failed.");
-            return;
-          }
-          if (!mountedRef.current) return;
-          setStep("confirming");
-          confirm(transactionId);
-        },
-        onError: (err) => fail(err),
+        onSuccess: (res) => setPremadeTxn(res.data),
+        onError: (err) => console.error("Failed to prepare smallcase transaction:", err),
       },
-      {}
+      { intent }
     );
-  }, [confirm, fail]);
+  }, []);
+
+  useEffect(() => {
+    prepare();
+  }, [prepare]);
+
+  confirmRef.current = confirm;
+
+  const connect = useCallback((intent: string = "HOLDINGS_IMPORT") => {
+    if (!premadeTxn) {
+      fail("Gateway is still initializing. Please wait a second and try again.");
+      return;
+    }
+
+    setError(null);
+    setStep("awaiting_sdk");
+
+    const { transactionId, smallcaseAuthToken } = premadeTxn;
+    const promise = triggerTransaction(transactionId, smallcaseAuthToken);
+    
+    // Prepare a fresh transaction in the background in case they cancel and need to retry
+    prepare(intent);
+
+    promise
+      .then(() => {
+        if (!mountedRef.current) return;
+        setStep("confirming");
+        confirm(transactionId);
+      })
+      .catch((sdkErr) => {
+        fail(sdkErr instanceof Error ? sdkErr.message : "Broker connection failed.");
+      });
+  }, [premadeTxn, confirm, fail, prepare]);
 
   const reset = useCallback(() => {
     clearConfirmTimer();

@@ -103,7 +103,7 @@ function LensScenarios({ slug, ticker }: { slug: string; ticker: string }) {
       return { main: s?.cagr ?? "-", sub: null };
     } else {
       const s = data.probability_fan?.segments?.find((s: any) => s.class === c);
-      return { main: s?.prob ?? "-", sub: s?.['p/e'] ?? null };
+      return { main: s?.['p/e'] ?? "-", sub: null };
     }
   };
 
@@ -120,10 +120,15 @@ function LensScenarios({ slug, ticker }: { slug: string; ticker: string }) {
   );
 
   return (
-    <div className="mt-4 grid grid-cols-3 gap-2">
-      <Box title="BEAR" colorClass="text-[var(--qc-down)]" main={bear.main} sub={bear.sub} borderCol="var(--qc-down)" />
-      <Box title="BASE" colorClass="text-[var(--qc-blue)]" main={base.main} sub={base.sub} borderCol="var(--qc-blue)" />
-      <Box title="BULL" colorClass="text-[var(--qc-up)]" main={bull.main} sub={bull.sub} borderCol="var(--qc-up)" />
+    <div className="mt-auto pt-4">
+      <div className="text-[10px] text-[var(--qc-ink-2)] font-medium mb-2 uppercase tracking-wider">
+        {isEf ? "3 year CAGR" : "PE probability"}
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <Box title="BEAR" colorClass="text-[var(--qc-down)]" main={bear.main} sub={bear.sub} borderCol="var(--qc-down)" />
+        <Box title="BASE" colorClass="text-[var(--qc-blue)]" main={base.main} sub={base.sub} borderCol="var(--qc-blue)" />
+        <Box title="BULL" colorClass="text-[var(--qc-up)]" main={bull.main} sub={bull.sub} borderCol="var(--qc-up)" />
+      </div>
     </div>
   );
 }

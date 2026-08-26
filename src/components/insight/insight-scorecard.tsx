@@ -565,7 +565,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
                 fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-medium)", lineHeight: 1.35, margin: "0 0 12px",
                 color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)", letterSpacing: "-0.01em",
               }}>
-                {insight.subtitle && renderMd(insight.subtitle)}
+                {insight.subtitle && renderMd(insight.subtitle.charAt(0).toUpperCase() + insight.subtitle.slice(1).toLowerCase())}
               </h3>
 
               {insight.thesis_points.length > 0 && (

@@ -42,7 +42,7 @@ export function InsightSignalMap({ signals, heading, subtitle }: InsightSignalMa
       contentClassName="min-w-0"
     >
       <div
-        className="grid grid-cols-1 sm:grid-cols-2"
+        className="grid grid-cols-2"
         style={{ gap: 10, height: "100%", gridAutoRows: fillHeight ? "1fr" : "auto" }}
       >
         {signals.map((s, i) => (

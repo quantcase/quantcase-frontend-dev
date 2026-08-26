@@ -355,7 +355,7 @@ export default function OnboardingV3() {
 .row .id{flex:1;min-width:0}
 .row .tk{font-family:var(--mono);font-size:12px;letter-spacing:.1em;font-weight:600}
 .row .nm{font-size:12.5px;color:var(--dim);margin-top:2px}
-.row .why{font-size:12px;color:var(--muted);text-align:right;max-width:145px;line-height:1.35}
+.row .why{font-size:11.5px;color:var(--muted);text-align:right;max-width:160px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .row .sc{font-family:var(--serif);font-size:25px;width:42px;text-align:right;font-variant-numeric:tabular-nums}
 .tick{width:21px;height:21px;border-radius:50%;border:1.5px solid rgba(255,255,255,.22);flex-shrink:0;display:grid;place-items:center;transition:.18s}
 .row.sel .tick{background:var(--tan);border-color:var(--tan)}

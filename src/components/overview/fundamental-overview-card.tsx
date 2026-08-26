@@ -173,13 +173,13 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
         />
       </div>
 
-      <ReturnsLeveragePanel
+      {/* <ReturnsLeveragePanel
         roce={roceVal}
         roe={roeVal}
         debtToEquity={deVal}
         roce3yAvg={ratios.roce3yAvg}
         roe3yAvg={ratios.roe3yAvg}
-      />
+      /> */}
 
       <ShareholdingPanel segments={shareholdingSegments} />
     </SectionShell>

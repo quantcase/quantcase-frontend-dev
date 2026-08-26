@@ -360,9 +360,30 @@ function TopBarInner() {
           style={{ background: "var(--qc-bg)", borderBottom: "1px solid var(--qc-hair)" }}
         >
           <div className="flex items-center gap-1">
+            <span
+              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium overflow-hidden whitespace-nowrap mr-1"
+              style={{
+                background: "var(--qc-section)",
+                border: "1px solid var(--qc-hair)",
+                color: "var(--qc-ink)",
+              }}
+            >
+              <motion.span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-full"
+                style={{
+                  background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.65) 48%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.65) 52%, transparent 60%)",
+                  backgroundSize: "220% 100%",
+                }}
+                animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
+                transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
+              />
+              <Sparkles size={12} style={{ position: "relative", zIndex: 1 }} />
+              <span style={{ position: "relative", zIndex: 1 }}>QC</span>
+            </span>
             {FACTOR_ITEMS.map((item) => (
               <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
-                {item.label}
+                {item.label.replace(" Factor", "")}
               </PillTab>
             ))}
           </div>

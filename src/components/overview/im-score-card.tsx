@@ -103,7 +103,13 @@ function PatternCard({
   const dest = `${href}?symbol=${encodeURIComponent(symbol)}`;
   const meta = PILLAR_META[pattern.pillar];
   
-  const bullets = pattern.snapshot.split(/[;•\n]+/).map(s => s.replace(/\*\*/g, '').trim()).filter(Boolean);
+  let bullets = pattern.snapshot
+    .split(/(?:\.\s+|;|\*\*|\n|•)+/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .slice(0, 3)
+    .map(s => s.replace(/[*;]/g, '').trim())
+    .filter(Boolean);
   const numStr = (index + 1).toString().padStart(2, "0");
 
   return (

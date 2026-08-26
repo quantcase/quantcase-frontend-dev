@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Check } from "lucide-react";
 import { useSmallcaseConnect } from "@/hooks/useSmallcaseConnect";
 import { useSmallcaseHoldings } from "@/hooks/useSmallcaseHoldings";
-import { apiAuthPost } from "@/lib/api";
+import { apiAuthPost, apiAuthGet } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
 import { OnboardingThesisFields, type ThesisFieldsState } from "./onboarding-thesis-fields";
 
@@ -21,7 +21,6 @@ const STOCKS = [
   {t:'TCS',n:'Tata Consultancy',w:'Margin resilience',s:84,m:86,o:80,d:85},
   {t:'INFY',n:'Infosys Ltd',w:'Growth guidance cut',s:68,m:70,o:65,d:69}
 ];
-const PORT = STOCKS.slice(1,7);
 
 export default function OnboardingV3() {
   const router = useRouter();
@@ -32,6 +31,31 @@ export default function OnboardingV3() {
   const [q, setQ] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [tradingEnabled, setTradingEnabled] = useState(false);
+  const [portStocks, setPortStocks] = useState<typeof STOCKS>(STOCKS.slice(1,7));
+
+  useEffect(() => {
+    if (holdingsData?.holdings && holdingsData.holdings.length > 0) {
+      const tickers = Array.from(new Set(holdingsData.holdings.map(h => h.ticker)));
+      apiAuthGet(`${BACKEND_URL}/api/post-html-analysis/bulk-scores?tickers=${tickers.join(',')}`, {
+        onSuccess: (res: any) => {
+          const scoresData = res.data || {};
+          const mapped = holdingsData.holdings.map(h => {
+            const sc = scoresData[h.ticker] || {};
+            return {
+              t: h.ticker,
+              n: h.name || h.ticker,
+              w: sc.w || 'Analysis pending',
+              s: sc.s || 0,
+              m: sc.m || 0,
+              o: sc.o || 0,
+              d: sc.d || 0,
+            };
+          });
+          setPortStocks(mapped);
+        }
+      });
+    }
+  }, [holdingsData]);
 
   const [thesisDraft, setThesisDraft] = useState<ThesisFieldsState>({
     dim: "M",
@@ -68,21 +92,23 @@ export default function OnboardingV3() {
 
   const avgScore = useMemo(() => {
     if (mode === "import") {
-      return Math.round(PORT.reduce((s, p) => s + p.s, 0) / PORT.length);
+      const validStocks = portStocks.filter(p => p.s > 0);
+      if (validStocks.length === 0) return null;
+      return Math.round(validStocks.reduce((s, p) => s + p.s, 0) / validStocks.length);
     }
     if (!picks.length) return null;
     return Math.round(picks.reduce((s, p) => s + p.s, 0) / picks.length);
-  }, [mode, picks]);
+  }, [mode, picks, portStocks]);
 
   const nextDisabled = mode === "import" ? false : sel.size < 3 || isSubmitting;
   const nextLabel =
     step === 1
-      ? (mode === "import" ? "Score my " + PORT.length + " holdings " : (sel.size < 3 ? "Pick " + (3 - sel.size) + " more to continue " : "Score my 3 stocks "))
+      ? (mode === "import" ? "Score my " + portStocks.length + " holdings " : (sel.size < 3 ? "Pick " + (3 - sel.size) + " more to continue " : "Score my 3 stocks "))
       : step === 2
       ? "This makes sense — continue "
       : isSubmitting ? "Saving..." : "Open my dashboard ";
 
-  const topPick = mode === "import" ? [...PORT].sort((a,b)=>b.s-a.s)[0] : [...picks].sort((a,b)=>b.s-a.s)[0];
+  const topPick = mode === "import" ? [...portStocks].sort((a,b)=>b.s-a.s)[0] : [...picks].sort((a,b)=>b.s-a.s)[0];
 
   const [isSaved, setIsSaved] = useState(false);
 
@@ -497,7 +523,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                     {mode === "pick" && <b id="cntLbl">({sel.size}/3)</b>}
                   </div>
                   <div className="list">
-                    {(mode === "import" ? PORT : filtered).map((x) => (
+                    {(mode === "import" ? portStocks : filtered).map((x) => (
                       <div key={x.t} className={"row " + (mode === "import" ? "ro" : sel.has(x.t) ? "sel" : "")} onClick={() => mode === "pick" && toggle(x.t)}>
                         <div className="id"><div className="tk">{x.t}</div><div className="nm">{x.n}</div></div>
                         <div className="why">{x.w}</div><div className="sc" style={{ color: col(x.s) }}>{x.s}</div>
@@ -568,7 +594,7 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
               
               {mode === "import" ? (
                 <div className="outcome">
-                  <div className="ochip"><span className="ok">✓</span><b>{PORT.length}</b> holdings scored</div>
+                  <div className="ochip"><span className="ok">✓</span><b>{portStocks.length}</b> holdings scored</div>
                   <div className="ochip"><span className="ok">✓</span>Buy dates &amp; score history <b>recovered</b></div>
                   <div className="ochip"><span className="ok">✓</span>Read-only · <b>no</b> trading access</div>
                 </div>

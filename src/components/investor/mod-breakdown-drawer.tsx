@@ -127,7 +127,7 @@ function PortfolioSummary({ stocks }: { stocks: StockMOD[] }) {
         fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)",
         margin: "0 0 12px",
       }}>
-        Portfolio Average
+        {stocks.length > 0 && stocks[0].pct > 0 ? "Portfolio Average" : "Market Average"}
       </p>
       <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
         {scores.map(({ label, score }) => (
@@ -191,7 +191,7 @@ function StockRow({ stock, index }: { stock: StockMOD; index: number }) {
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: index * 0.03 }}
+      transition={{ duration: 0.2, delay: Math.min(index * 0.03, 1.5) }}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 48px 48px 48px 70px",
@@ -249,7 +249,7 @@ function StockRow({ stock, index }: { stock: StockMOD; index: number }) {
           padding: "2px 7px", fontWeight: "var(--qc-w-medium)",
           whiteSpace: "nowrap",
         }}>
-          {stock.pct}%
+          {stock.pct > 0 ? `${stock.pct}%` : "—"}
         </span>
       </div>
     </motion.div>
@@ -331,7 +331,7 @@ export function MODBreakdownDrawer({ open, stocks, onClose }: MODBreakdownDrawer
                   letterSpacing: "var(--qc-track-eyebrow-l)", textTransform: "uppercase",
                   fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)", marginBottom: 4,
                 }}>
-                  YOUR PORTFOLIO
+                  {displayStocks[0].pct > 0 ? "YOUR PORTFOLIO" : "MARKET COVERAGE"}
                 </div>
                 <h2 style={{
                   fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-regular)",
@@ -374,7 +374,7 @@ export function MODBreakdownDrawer({ open, stocks, onClose }: MODBreakdownDrawer
                 fontFamily: "var(--qc-font-sans)", color: "var(--qc-ink-3)",
                 margin: "0 0 8px",
               }}>
-                {displayStocks.length} Holdings · sorted by portfolio weight
+                {displayStocks.length} {displayStocks[0].pct > 0 ? "Holdings · sorted by portfolio weight" : "Companies · sorted by MOD score"}
               </p>
 
               <TableHeader />

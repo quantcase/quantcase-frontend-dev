@@ -342,7 +342,7 @@ function TopBarInner() {
       transition={{ duration: 0.25, ease: "easeInOut" }}
     >
       <div className="flex h-full items-center min-w-0 w-full">
-        <div className="flex h-full items-center overflow-x-auto scrollbar-none min-w-0">
+        <div className="flex h-full items-center overflow-x-auto scrollbar-none min-w-0 w-full md:w-auto md:flex-1 justify-center md:justify-start">
           {leftZone}
         </div>
         {rightZone && (
@@ -359,7 +359,7 @@ function TopBarInner() {
           className="md:hidden fixed left-0 right-0 top-[60px] z-20 flex h-[44px] items-center overflow-x-auto scrollbar-none px-4"
           style={{ background: "var(--qc-bg)", borderBottom: "1px solid var(--qc-hair)" }}
         >
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 mx-auto">
             <span
               className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium overflow-hidden whitespace-nowrap mr-1"
               style={{

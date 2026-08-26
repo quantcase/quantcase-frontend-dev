@@ -287,15 +287,15 @@ export function KpiGrid({
       muted: resolvedCfo == null, metricKey: "cfo", sparkKey: "cfo",
     },
     {
-      label: "CASH", value: freeCashflow != null ? formatINR(freeCashflow) : "—", yoy: yoyText(fcfGrowth),
+      label: "Cash", value: freeCashflow != null ? formatINR(freeCashflow) : "—", yoy: yoyText(fcfGrowth),
       muted: freeCashflow == null, metricKey: null, sparkKey: null,
     },
     {
-      label: "RESERVES", value: reserves != null ? formatINR(reserves) : "—", yoy: yoyText(reservesGrowth),
+      label: "Reserves", value: reserves != null ? formatINR(reserves) : "—", yoy: yoyText(reservesGrowth),
       muted: reserves == null, metricKey: "totalEquity", sparkKey: "totalEquity",
     },
     {
-      label: "DEBT", value: totalDebt != null ? formatINR(totalDebt) : "—", yoy: yoyText(debtGrowth, true),
+      label: "Debt", value: totalDebt != null ? formatINR(totalDebt) : "—", yoy: yoyText(debtGrowth, true),
       muted: totalDebt == null, metricKey: "totalDebt", sparkKey: "totalDebt",
     },
     ...(showInterestCoverage ? [{

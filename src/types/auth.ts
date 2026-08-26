@@ -34,7 +34,7 @@ export interface MeResponse {
 
 export interface BillingPrice {
   id: string;
-  plan_type: "monthly" | "quaterly" | "quarterly" | "annual" | "trial";
+  plan_type: "monthly" | "quaterly" | "quarterly" | "half-yearly" | "annual" | "trial";
   amount: number;
   currency: string;
   interval_months: number;

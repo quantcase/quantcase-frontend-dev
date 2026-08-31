@@ -35,12 +35,12 @@ export function useSubscription() {
     apiAuthGet(
       `${BACKEND_URL}/api/billing/subscription`,
       {
-        onSuccess: (res) => {
+        onSuccess: (res: any) => {
           setData(res.data);
           setError(null);
           setLoading(false);
         },
-        onError: (err) => {
+        onError: (err: any) => {
           setError(err.message || "Failed to fetch subscription");
           setLoading(false);
         },

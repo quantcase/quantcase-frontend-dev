@@ -192,12 +192,12 @@ export function KeyRatioTiles({ data }: Props) {
             sublabel={epsCagrLabel}
             sublabelColor={epsCagrDisplay !== "—" ? (epsCagrIsPositive ? "up" : "down") : "muted"}
           />,
-          <StatCell
-            key="div"
-            label="Dividend Rate"
-            value={divRate}
-            sublabel="Annual"
-          />,
+          // <StatCell
+          //   key="div"
+          //   label="Dividend Rate"
+          //   value={divRate}
+          //   sublabel="Annual"
+          // />,
         ].map((cell, i) => (
           <div
             key={i}

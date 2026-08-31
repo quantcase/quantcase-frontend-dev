@@ -10,6 +10,7 @@ import type { StocksApiResponse } from "@/types/screener";
 import { MfScreenerSection } from "./_components/mf-screener-section";
 import { StockBasketsSection } from "./_components/stock-baskets-section";
 import { SectionDivider } from "./_components/section-divider";
+import { ModScoresStrip } from "./_components/mod-scores-strip";
 
 const ASSET_TABS = ["Indian Stocks", "Mutual Funds", "US Stocks", "PE / Pre-IPO"] as const;
 type AssetTab = (typeof ASSET_TABS)[number];
@@ -105,6 +106,13 @@ export default function ScreenerHomePage() {
           </div>
         )}
       </div>
+
+      {/* ── MOD Scores Strip ── */}
+      {activeTab === "Indian Stocks" && (
+        <div className="px-4 sm:px-6 pb-4 max-w-[1400px] mx-auto">
+          <ModScoresStrip />
+        </div>
+      )}
 
       {/* ── MF Screener ── */}
       {activeTab === "Mutual Funds" && <MfScreenerSection />}

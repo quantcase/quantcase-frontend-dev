@@ -7,6 +7,7 @@ import { SentimentPill } from "@/components/overview/primitives";
 
 interface ValuationHeroSectionProps {
   pe: number | null;
+  peLabel?: string | null;
   industryPE: number | null;
   verdictLabel: string;
   benchmarkPct: number;
@@ -15,7 +16,7 @@ interface ValuationHeroSectionProps {
 }
 
 export function ValuationHeroSection({
-  pe, industryPE, verdictLabel, benchmarkPct, narrative, footer,
+  pe, peLabel, industryPE, verdictLabel, benchmarkPct, narrative, footer,
 }: ValuationHeroSectionProps) {
   const sentiment =
     verdictLabel === "Undervalued" ? "up" : verdictLabel === "Overvalued" ? "down" : "neutral";
@@ -43,7 +44,9 @@ export function ValuationHeroSection({
         >
         <div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 2 }}>
-            <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>Current P/E ratio</p>
+            <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>
+              Current P/E ratio {peLabel ? `(${peLabel})` : ""}
+            </p>
             <SentimentPill label={verdictLabel} sentiment={sentiment} />
           </div>
           <div
@@ -53,7 +56,7 @@ export function ValuationHeroSection({
               display: "flex", alignItems: "baseline", gap: 5,
             }}
           >
-            {pe != null ? pe.toFixed(1) : "—"}
+            {pe != null ? pe.toFixed(pe % 1 === 0 ? 0 : (pe * 10) % 1 === 0 ? 1 : 2) : "—"}
             <span style={{ fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-medium)", letterSpacing: "-0.02em", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-mono)" }}>x</span>
           </div>
           <div style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", marginTop: 6, lineHeight: 1.45, fontFamily: "var(--qc-font-sans)" }}>

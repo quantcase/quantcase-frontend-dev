@@ -54,6 +54,7 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
   const { data: shareholdingData } = useShareholding(symbol);
 
   const pe = val.peRatio;
+  const peLabel = val.peLabel;
   const industryPE = val.industryPE;
 
   const verdictLabel =
@@ -72,8 +73,8 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
 
   const roceVal = ratios.roce;
   const roeVal = ratios.roe;
-  const deVal = eff.debtToEquity;
   const roceIsGood = roceVal != null && roceVal > 15;
+  const deVal = eff.debtToEquity;
   const deIsGood = deVal != null && deVal < 1;
 
   const derivedNarrative = (() => {
@@ -126,6 +127,7 @@ export function FundamentalOverviewCard({ data, symbol, overviewData }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px]" style={{ gap: 14, marginBottom: 14 }}>
         <ValuationHeroSection
           pe={pe}
+          peLabel={peLabel}
           industryPE={industryPE}
           verdictLabel={verdictLabel}
           benchmarkPct={benchmarkPct}

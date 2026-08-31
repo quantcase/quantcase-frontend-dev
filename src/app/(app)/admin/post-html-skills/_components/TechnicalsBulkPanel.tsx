@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  AlertCircle, X, Play, Loader2, CheckCircle2, XCircle, ChevronDown, RotateCcw,
+  AlertCircle, X, Play, Loader2, CheckCircle2, XCircle, ChevronDown, RotateCcw, Upload
 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/constants";
 import { apiAuthPost, rawFetch, authFetch } from "@/lib/api";
@@ -43,6 +43,9 @@ export function TechnicalsBulkPanel({ initialTicker }: Props) {
   const [tickers, setTickers] = useState<string[]>(initialTicker ? [initialTicker] : []);
   const [force, setForce] = useState(false);
   const [armed, setArmed] = useState(false);
+
+  const [csvUnmatched, setCsvUnmatched] = useState<string[] | null>(null);
+  const csvInputRef = useRef<HTMLInputElement>(null);
 
   const [enqueuing, setEnqueuing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -133,6 +136,35 @@ export function TechnicalsBulkPanel({ initialTicker }: Props) {
     });
   }
 
+  function handleCsvFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const HEADER_WORDS = new Set(["TICKER", "SYMBOL", "STOCK", "COMPANY", "NAME"]);
+      const tokens = String(reader.result ?? "")
+        .split(/[\r\n,]+/)
+        .map((t) => t.trim().replace(/^"|"$/g, "").toUpperCase())
+        .filter((t) => t.length > 0 && !HEADER_WORDS.has(t));
+      const candidates = Array.from(new Set(tokens));
+
+      const known = new Set(companies.map((c) => c.toUpperCase()));
+      const matched = candidates.filter((t) => known.has(t));
+      const unmatched = candidates.filter((t) => !known.has(t));
+
+      setCsvUnmatched(unmatched.length > 0 ? unmatched : null);
+      if (matched.length > 0) {
+        setTickers((prev) => Array.from(new Set([...prev, ...matched])));
+        setArmed(false);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function handleCsvInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) handleCsvFile(file);
+    e.target.value = "";
+  }
+
   function toggleExpand(ticker: string) {
     const next = !expanded[ticker];
     setExpanded((prev) => ({ ...prev, [ticker]: next }));
@@ -154,7 +186,23 @@ export function TechnicalsBulkPanel({ initialTicker }: Props) {
         </div>
 
         <div>
-          <label className={LABEL_CLS}>Tickers <span className="normal-case tracking-normal font-normal text-ink-3">— type to add, Enter to confirm</span></label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-ink-3">Tickers <span className="normal-case tracking-normal font-normal text-ink-3">— type to add, Enter to confirm</span></label>
+            <button
+              type="button"
+              onClick={() => csvInputRef.current?.click()}
+              className="flex items-center gap-1 text-[11px] font-medium text-ink hover:underline"
+            >
+              <Upload className="size-3" /> Upload CSV
+            </button>
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={handleCsvInputChange}
+            />
+          </div>
           <TagMultiPicker
             options={companies}
             selected={tickers}
@@ -162,6 +210,16 @@ export function TechnicalsBulkPanel({ initialTicker }: Props) {
             disabled={enqueuing}
             placeholder="Add tickers (e.g. HDFCBANK)…"
           />
+          {csvUnmatched && csvUnmatched.length > 0 && (
+            <div className="mt-2 flex items-start gap-2 rounded-md border border-hair bg-down-soft px-3 py-2 text-[12px] text-down">
+              <AlertCircle className="size-3.5 shrink-0 mt-px" />
+              <span>
+                {csvUnmatched.length} ticker{csvUnmatched.length === 1 ? "" : "s"} from the CSV didn&apos;t
+                match a known company and {csvUnmatched.length === 1 ? "wasn't" : "weren't"} added:{" "}
+                {csvUnmatched.join(", ")}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-end gap-4 flex-wrap">

@@ -120,6 +120,21 @@ function useScrolled(threshold = 4) {
   }, [threshold]);
   return scrolled;
 }
+function useScrollDirection() {
+  const [direction, setDirection] = useState<"up" | "down">("up");
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    const update = () => {
+      const scrollY = window.scrollY;
+      if (Math.abs(scrollY - lastScrollY) < 5) return;
+      setDirection(scrollY > lastScrollY ? "down" : "up");
+      lastScrollY = scrollY > 0 ? scrollY : 0;
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+  return direction;
+}
 
 function TopBarInner() {
   const pathname = usePathname();
@@ -128,6 +143,7 @@ function TopBarInner() {
   const symbol = searchParams.get("symbol");
   const rmId = searchParams.get("rm_id");
   const scrolled = useScrolled();
+  const scrollDirection = useScrollDirection();
 
   const { data: overviewData } = useOverviewFetch(symbol || "");
 
@@ -356,7 +372,10 @@ function TopBarInner() {
 
       {/* Mobile-only Terminal Sub-nav (Row 2) */}
       {hasAssetSelected && (
-        <div 
+        <motion.div 
+          initial={false}
+          animate={{ y: scrolled && scrollDirection === "down" ? "-100%" : 0 }}
+          transition={{ duration: 0.25, ease: "easeInOut" }}
           className="md:hidden fixed left-0 right-0 top-[60px] z-20 flex h-[44px] items-center overflow-x-auto scrollbar-none px-4"
           style={{ background: "var(--qc-bg)", borderBottom: "1px solid var(--qc-hair)" }}
         >
@@ -367,7 +386,7 @@ function TopBarInner() {
               </PillTab>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
     </>
   );

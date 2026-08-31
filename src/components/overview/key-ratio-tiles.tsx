@@ -146,9 +146,9 @@ export function KeyRatioTiles({ data }: Props) {
   const epsCagrIsPositive = epsCagrDisplay !== "—" && !epsCagrDisplay.startsWith("-");
   const epsCagrLabel = fin.eps_cagr_3y_label ?? null;
 
-  // Dividend Yield — backend sends value already in % (e.g. 0.98 means 0.98%)
-  const divYieldRaw = ps.dividendYield;
-  const divYield = divYieldRaw != null && divYieldRaw > 0 ? `${divYieldRaw.toFixed(2)}%` : "—";
+  // Dividend Rate
+  const divRateRaw = ps.dividendRate;
+  const divRate = divRateRaw != null && divRateRaw > 0 ? formatPrice(divRateRaw, 2) : "—";
 
   return (
     <div className="px-4">
@@ -194,8 +194,8 @@ export function KeyRatioTiles({ data }: Props) {
           />,
           <StatCell
             key="div"
-            label="Dividend Yield"
-            value={divYield}
+            label="Dividend Rate"
+            value={divRate}
             sublabel="Annual"
           />,
         ].map((cell, i) => (

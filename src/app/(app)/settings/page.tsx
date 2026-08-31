@@ -28,61 +28,61 @@ interface SettingSection {
 }
 
 const SECTIONS: SettingSection[] = [
-  {
-    id: "profile",
-    title: "Profile",
-    subtitle: "Your personal account details",
-    icon: User,
-    rows: [
-      { label: "Full Name", description: "Your display name across the platform", value: "Alex Morgan", placeholder: "Enter full name" },
-      { label: "Email", description: "Primary contact and login email", value: "alex.morgan@firm.com", placeholder: "Enter email" },
-      { label: "Role", description: "Your designation within the organisation", value: "Relationship Manager", placeholder: "Enter role" },
-    ],
-  },
-  {
-    id: "organisation",
-    title: "Organisation",
-    subtitle: "Firm-level configuration",
-    icon: Building2,
-    rows: [
-      { label: "Firm Name", description: "Legal entity name shown on reports", value: "QuantCase FinTech", placeholder: "Enter firm name" },
-      { label: "Region", description: "Primary market jurisdiction", value: "India — NSE / BSE", placeholder: "Enter region" },
-      { label: "Currency", description: "Default display currency", value: "INR", placeholder: "Enter currency" },
-    ],
-  },
-  {
-    id: "notifications",
-    title: "Notifications",
-    subtitle: "Control how and when you receive alerts",
-    icon: Bell,
-    rows: [
-      { label: "Email Alerts", description: "Receive analysis completion notifications via email" },
-      { label: "In-app Alerts", description: "Show badge counts and toasts within the platform" },
-      { label: "Priority Client Digest", description: "Daily morning summary of high-priority client actions" },
-    ],
-  },
-  {
-    id: "security",
-    title: "Security",
-    subtitle: "Authentication and access control",
-    icon: Shield,
-    rows: [
-      { label: "Password", description: "Change your account password", placeholder: "••••••••" },
-      { label: "Two-factor Authentication", description: "Add an extra layer of login security" },
-      { label: "Active Sessions", description: "View and revoke devices signed in to your account" },
-    ],
-  },
-  {
-    id: "api",
-    title: "API Access",
-    subtitle: "Manage keys for programmatic access",
-    icon: Key,
-    wide: true,
-    rows: [
-      { label: "API Key", description: "Use this key to authenticate requests to the QuantCase API", placeholder: "sk-••••••••••••••••" },
-      { label: "Webhook URL", description: "Receive real-time event payloads at this endpoint", placeholder: "https://your-server.com/webhook" },
-    ],
-  },
+  // {
+  //   id: "profile",
+  //   title: "Profile",
+  //   subtitle: "Your personal account details",
+  //   icon: User,
+  //   rows: [
+  //     { label: "Full Name", description: "Your display name across the platform", value: "Alex Morgan", placeholder: "Enter full name" },
+  //     { label: "Email", description: "Primary contact and login email", value: "alex.morgan@firm.com", placeholder: "Enter email" },
+  //     { label: "Role", description: "Your designation within the organisation", value: "Relationship Manager", placeholder: "Enter role" },
+  //   ],
+  // },
+  // {
+  //   id: "organisation",
+  //   title: "Organisation",
+  //   subtitle: "Firm-level configuration",
+  //   icon: Building2,
+  //   rows: [
+  //     { label: "Firm Name", description: "Legal entity name shown on reports", value: "QuantCase FinTech", placeholder: "Enter firm name" },
+  //     { label: "Region", description: "Primary market jurisdiction", value: "India — NSE / BSE", placeholder: "Enter region" },
+  //     { label: "Currency", description: "Default display currency", value: "INR", placeholder: "Enter currency" },
+  //   ],
+  // },
+  // {
+  //   id: "notifications",
+  //   title: "Notifications",
+  //   subtitle: "Control how and when you receive alerts",
+  //   icon: Bell,
+  //   rows: [
+  //     { label: "Email Alerts", description: "Receive analysis completion notifications via email" },
+  //     { label: "In-app Alerts", description: "Show badge counts and toasts within the platform" },
+  //     { label: "Priority Client Digest", description: "Daily morning summary of high-priority client actions" },
+  //   ],
+  // },
+  // {
+  //   id: "security",
+  //   title: "Security",
+  //   subtitle: "Authentication and access control",
+  //   icon: Shield,
+  //   rows: [
+  //     { label: "Password", description: "Change your account password", placeholder: "••••••••" },
+  //     { label: "Two-factor Authentication", description: "Add an extra layer of login security" },
+  //     { label: "Active Sessions", description: "View and revoke devices signed in to your account" },
+  //   ],
+  // },
+  // {
+  //   id: "api",
+  //   title: "API Access",
+  //   subtitle: "Manage keys for programmatic access",
+  //   icon: Key,
+  //   wide: true,
+  //   rows: [
+  //     { label: "API Key", description: "Use this key to authenticate requests to the QuantCase API", placeholder: "sk-••••••••••••••••" },
+  //     { label: "Webhook URL", description: "Receive real-time event payloads at this endpoint", placeholder: "https://your-server.com/webhook" },
+  //   ],
+  // },
   {
     id: "appearance",
     title: "Appearance",

@@ -45,6 +45,7 @@ export const TECHNICALS_MODEL_OPTIONS = [
   "anthropic/claude-haiku-4.5",
   "anthropic/claude-sonnet-4.5",
   "anthropic/claude-sonnet-4-6",
+  "deepseek/deepseek-v4-flash-latest:floor",
 ];
 
 export const TECHNICALS_DEFAULT_MAX_TOKENS = 20000;

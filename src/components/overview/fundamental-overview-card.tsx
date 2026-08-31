@@ -32,6 +32,7 @@ const METRIC_LABELS: Record<ChartMetricKey, string> = {
   evToEbitda: "Enterprise Value",
   pbRatio: "P/B (Book value)",
   pe: "P/E",
+  freeCashflow: "Cash",
 };
 
 function formatForMetric(key: ChartMetricKey, v: number): string {

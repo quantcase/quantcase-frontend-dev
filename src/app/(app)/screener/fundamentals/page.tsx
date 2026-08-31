@@ -87,14 +87,17 @@ const FUNDAMENTALS_NAV = [
 function FinancialsContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
-  const [reportType, setReportType] = useState<"C" | "S">("C");
+  const [pnlReportType, setPnlReportType] = useState<"C" | "S">("C");
+  const [balanceSheetReportType, setBalanceSheetReportType] = useState<"C" | "S">("C");
+  const [cashFlowReportType, setCashFlowReportType] = useState<"C" | "S">("C");
+  
   const [pnlView, setPnlView] = useState<"table" | "chart">("table");
   const [balanceSheetView, setBalanceSheetView] = useState<"table" | "chart">("table");
   const [cashFlowView, setCashFlowView] = useState<"table" | "chart">("table");
   const [shareholdingView, setShareholdingView] = useState<"table" | "chart">("table");
 
-  const { data, loading, error } = useFinancials(symbol, reportType);
-  const { data: chartsData } = useFinancialsCharts(symbol, reportType);
+  const { data, loading, error } = useFinancials(symbol);
+  const { data: chartsData } = useFinancialsCharts(symbol);
   const { data: peersData, loading: peersLoading } = useScreenerPeers(symbol);
   const { data: shareholdingData, loading: shareholdingLoading } = useShareholding(symbol);
   const { data: screenerData } = useScreenerData(symbol);
@@ -152,16 +155,6 @@ function FinancialsContent() {
     <>
     <ScreenerPageShell navItems={FUNDAMENTALS_NAV} companyInfo={companyInfo}>
       <div className="px-4 pt-6 pb-8 space-y-6">
-
-        {/* Global Report Toggle */}
-        <div className="flex justify-end items-center -mb-2">
-           <TabToggle
-             options={["Consolidated", "Standalone"]}
-             value={reportType === "C" ? "Consolidated" : "Standalone"}
-             onChange={(val) => setReportType(val === "Consolidated" ? "C" : "S")}
-             variant="outline"
-           />
-        </div>
 
         {/* Full-width charts */}
         {chartGroups && (
@@ -246,13 +239,23 @@ function FinancialsContent() {
             subtitle="All values in INR Crores"
             tabs={["Quarterly", "Annual"]}
             defaultTab="Annual"
-            headerAction={<ViewToggle view={pnlView} onChange={setPnlView} />}
+            headerAction={
+              <div className="flex items-center gap-3">
+                <TabToggle
+                  options={["Consolidated", "Standalone"]}
+                  value={pnlReportType === "C" ? "Consolidated" : "Standalone"}
+                  onChange={(val) => setPnlReportType(val === "Consolidated" ? "C" : "S")}
+                  variant="outline"
+                />
+                <ViewToggle view={pnlView} onChange={setPnlView} />
+              </div>
+            }
           >
             {(activeTab) =>
               pnlView === "chart" ? (
-                <PnLChart table={activeTab === "Quarterly" ? quarterly : annual} />
+                <PnLChart table={activeTab === "Quarterly" ? quarterly[pnlReportType] : annual[pnlReportType]} />
               ) : (
-                <FinancialDataTable table={activeTab === "Quarterly" ? quarterly : annual} />
+                <FinancialDataTable table={activeTab === "Quarterly" ? quarterly[pnlReportType] : annual[pnlReportType]} />
               )
             }
           </TabularCard>
@@ -263,12 +266,22 @@ function FinancialsContent() {
           <TabularCard
             title="Balance Sheet"
             subtitle="All values in INR Crores"
-            headerAction={<ViewToggle view={balanceSheetView} onChange={setBalanceSheetView} />}
+            headerAction={
+              <div className="flex items-center gap-3">
+                <TabToggle
+                  options={["Consolidated", "Standalone"]}
+                  value={balanceSheetReportType === "C" ? "Consolidated" : "Standalone"}
+                  onChange={(val) => setBalanceSheetReportType(val === "Consolidated" ? "C" : "S")}
+                  variant="outline"
+                />
+                <ViewToggle view={balanceSheetView} onChange={setBalanceSheetView} />
+              </div>
+            }
           >
             {balanceSheetView === "chart" ? (
-              <BalanceSheetTreemap table={balanceSheet.annual} />
+              <BalanceSheetTreemap table={balanceSheet.annual[balanceSheetReportType]} />
             ) : (
-              <FinancialDataTable table={balanceSheet.annual} />
+              <FinancialDataTable table={balanceSheet.annual[balanceSheetReportType]} />
             )}
           </TabularCard>
         </div>
@@ -278,12 +291,22 @@ function FinancialsContent() {
           <TabularCard
             title="Cash Flow"
             subtitle="All values in INR Crores"
-            headerAction={<ViewToggle view={cashFlowView} onChange={setCashFlowView} />}
+            headerAction={
+              <div className="flex items-center gap-3">
+                <TabToggle
+                  options={["Consolidated", "Standalone"]}
+                  value={cashFlowReportType === "C" ? "Consolidated" : "Standalone"}
+                  onChange={(val) => setCashFlowReportType(val === "Consolidated" ? "C" : "S")}
+                  variant="outline"
+                />
+                <ViewToggle view={cashFlowView} onChange={setCashFlowView} />
+              </div>
+            }
           >
             {cashFlowView === "chart" ? (
-              <CashFlowWaterfall table={cashFlow} />
+              <CashFlowWaterfall table={cashFlow[cashFlowReportType]} />
             ) : (
-              <FinancialDataTable table={cashFlow} cashFlowMode />
+              <FinancialDataTable table={cashFlow[cashFlowReportType]} cashFlowMode />
             )}
           </TabularCard>
         </div>

@@ -13,9 +13,14 @@ export interface FinancialTable {
   rows: FinancialRow[];
 }
 
+export interface FinancialTableDual {
+  C: FinancialTable;
+  S: FinancialTable;
+}
+
 interface BalanceSheetData {
-  annual: FinancialTable;
-  quarterly?: FinancialTable;
+  annual: FinancialTableDual;
+  quarterly?: FinancialTableDual;
 }
 
 interface GrowthMetric {
@@ -60,11 +65,11 @@ interface FinancialsTTM {
 }
 
 interface FinancialsStandardized {
-  quarterly: FinancialTable;
-  annual: FinancialTable;
+  quarterly: FinancialTableDual;
+  annual: FinancialTableDual;
   balanceSheet: BalanceSheetData;
-  cashFlow: FinancialTable;
-  cashFlowQuarterly?: FinancialTable;
+  cashFlow: FinancialTableDual;
+  cashFlowQuarterly?: FinancialTableDual;
   ttm: FinancialsTTM;
   metrics: FinancialsMetrics;
   valuation: FinancialsValuation;

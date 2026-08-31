@@ -1,12 +1,14 @@
 "use client";
 
-import { User, Bell, Shield, Building2, Palette, Key } from "lucide-react";
+import { User, Bell, Shield, Building2, Palette, Key, CreditCard } from "lucide-react";
 import { SectionPanel } from "@/components/molecules/section-panel";
 import { Link as LinkIcon } from "lucide-react";
 import { useSmallcaseStatus } from "@/hooks/useSmallcaseStatus";
 import { useSmallcaseConnect } from "@/hooks/useSmallcaseConnect";
+import { useSubscription } from "@/hooks/useSubscription";
 import { apiAuthPost } from "@/lib/api";
 import { BACKEND_URL } from "@/lib/constants";
+import { useState } from "react";
 
 interface SettingRow {
   label: string;
@@ -187,6 +189,85 @@ function BrokerIntegrationSection() {
   );
 }
 
+function SubscriptionSection() {
+  const { data: sub, loading, refetch } = useSubscription();
+  const [cancelling, setCancelling] = useState(false);
+
+  const handleCancel = () => {
+    if (!window.confirm("Are you sure you want to cancel your subscription? You will retain access until the end of the current billing cycle.")) return;
+    
+    setCancelling(true);
+    apiAuthPost(
+      `${BACKEND_URL}/api/billing/subscription/cancel`,
+      {
+        onSuccess: () => {
+          alert("Subscription cancelled successfully.");
+          refetch();
+          setCancelling(false);
+        },
+        onError: (err: any) => {
+          alert("Failed to cancel subscription: " + (err.message || err));
+          setCancelling(false);
+        }
+      },
+      {}
+    );
+  };
+
+  if (loading) {
+    return (
+      <SectionPanel
+        title={<span className="flex items-center gap-2"><span className="inline-flex items-center justify-center rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] p-1"><CreditCard className="size-4 text-ink-3" /></span> Subscription</span>}
+        subtitle="Manage your billing and active plan"
+      >
+        <div className="py-4 text-sm text-ink-3">Loading subscription details...</div>
+      </SectionPanel>
+    );
+  }
+
+  return (
+    <SectionPanel
+      title={
+        <span className="flex items-center gap-2">
+          <span className="inline-flex items-center justify-center rounded-[6px] border border-[rgba(18,18,18,0.10)] bg-[rgba(18,18,18,0.03)] p-1">
+            <CreditCard className="size-4 text-ink-3" />
+          </span>
+          Subscription
+        </span>
+      }
+      subtitle="Manage your billing and active plan"
+    >
+      <div className="py-4">
+        {sub && sub.status && sub.status !== 'expired' && sub.status !== 'cancelled' ? (
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-medium text-ink capitalize">{sub.plan_type} Plan ({sub.status})</div>
+              <div className="text-xs text-ink-3 mt-0.5">
+                {sub.cancelled_at 
+                  ? `Cancels at the end of the cycle (${sub.days_remaining} days remaining).`
+                  : `${sub.days_remaining} days remaining in current billing cycle.`}
+              </div>
+            </div>
+            {!sub.cancelled_at && (
+              <button 
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-md border border-red-200 hover:bg-red-100 transition-colors disabled:opacity-50"
+              >
+                {cancelling ? "Cancelling..." : "Cancel Subscription"}
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="text-sm text-ink-3">
+            No active subscription found. Please subscribe to access premium features.
+          </div>
+        )}
+      </div>
+    </SectionPanel>
+  );
+}
+
 export default function SettingsPage() {
   return (
     <div className="p-6 space-y-4">
@@ -198,6 +279,7 @@ export default function SettingsPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
         <div className="xl:col-span-2"><BrokerIntegrationSection /></div>
+        <div className="xl:col-span-2"><SubscriptionSection /></div>
         {SECTIONS.map((section) => {
           const Icon = section.icon;
           return (

@@ -10,7 +10,7 @@ import { StockSearch } from "@/components/molecules/stock-search";
 import { useOverviewFetch } from "@/hooks/useOverviewAnalysis";
 
 /** Terminal tabs that carry a stock search in the top-bar's right rail. */
-const HEADER_SEARCH_PATHS = ["/screener/fundamentals", "/screener/technicals"];
+const HEADER_SEARCH_PATHS = ["/screener/fundamentals", "/screener/technicals", "/screener/management", "/screener/opportunity", "/screener/deal", "/screener/overview"];
 
 const INDUSTRY_TABS = [
   { id: "dashboard",         label: "Dashboard" },
@@ -56,7 +56,7 @@ function PillTab({
 
   const content = (
     <span
-      className={cn("flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] transition-colors whitespace-nowrap", className)}
+      className={cn("flex items-center gap-1.5 px-4 py-2 rounded-full text-sm transition-colors whitespace-nowrap", className)}
       style={{ ...base, ...style }}
     >
       {icon}
@@ -199,6 +199,13 @@ function TopBarInner() {
 
   let leftZone: React.ReactNode = null;
 
+  // Normal tabs for asset view
+  const terminalTabs = [
+    { label: "View",         href: "/screener/overview" },
+    { label: "Fundamentals", href: "/screener/fundamentals" },
+    { label: "Technicals",   href: "/screener/technicals" },
+  ];
+
   if (isIndustryTerminal) {
     leftZone = (
       <div
@@ -219,22 +226,15 @@ function TopBarInner() {
   } else if (isHome || (isTerminal && !hasAssetSelected)) {
     leftZone = <SearchZone />;
   } else if (hasAssetSelected) {
-    const terminalTabs = [
-      { label: "View",         href: "/screener/overview" },
-      { label: "Fundamentals", href: "/screener/fundamentals" },
-      { label: "Technicals",   href: "/screener/technicals" },
-    ];
-
     leftZone = (
-      /* pill-tabs container — card bg, border, rounded-full pill, small gap */
-      <div
-        className="flex items-center gap-1 rounded-full p-1"
-        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
-      >
-        {/* M.O.D. grouping (Always shown) */}
-        <div className="flex items-center">
+      <div className="flex items-center gap-2">
+        {/* M.O.D. grouping in a ring */}
+        <div
+          className="flex items-center gap-0.5 rounded-full p-1"
+          style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
+        >
           <span
-            className="flex items-center gap-1.5 px-3 text-[13px] font-medium whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 text-sm font-medium whitespace-nowrap"
             style={{ color: "var(--qc-ink-2)", letterSpacing: "0.05em" }}
           >
             M·O·D
@@ -260,9 +260,8 @@ function TopBarInner() {
           </div>
         </div>
 
-        <span className="px-1 select-none text-sm" style={{ color: "var(--qc-hair)" }}>|</span>
-
-        <div className="flex items-center gap-0.5">
+        {/* Normal tabs outside the ring (Hidden on mobile, shown in Row 2 instead) */}
+        <div className="hidden md:flex items-center gap-1 ml-1">
           {terminalTabs.map((tab) => (
             <PillTab key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href}>
               {tab.label}
@@ -351,37 +350,16 @@ function TopBarInner() {
       </div>
     </motion.header>
 
-      {/* Mobile-only Factor Sub-nav (Row 2) */}
+      {/* Mobile-only Terminal Sub-nav (Row 2) */}
       {hasAssetSelected && (
         <div 
           className="md:hidden fixed left-0 right-0 top-[60px] z-20 flex h-[44px] items-center overflow-x-auto scrollbar-none px-4"
           style={{ background: "var(--qc-bg)", borderBottom: "1px solid var(--qc-hair)" }}
         >
           <div className="flex items-center gap-1 mx-auto">
-            <span
-              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium overflow-hidden whitespace-nowrap mr-1"
-              style={{
-                background: "var(--qc-section)",
-                border: "1px solid var(--qc-hair)",
-                color: "var(--qc-ink)",
-              }}
-            >
-              <motion.span
-                aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-full"
-                style={{
-                  background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.65) 48%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.65) 52%, transparent 60%)",
-                  backgroundSize: "220% 100%",
-                }}
-                animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
-                transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
-              />
-              <Sparkles size={12} style={{ position: "relative", zIndex: 1 }} />
-              <span style={{ position: "relative", zIndex: 1 }}>QC</span>
-            </span>
-            {FACTOR_ITEMS.map((item) => (
+            {terminalTabs.map((item) => (
               <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
-                {item.label.replace(" Factor", "")}
+                {item.label}
               </PillTab>
             ))}
           </div>

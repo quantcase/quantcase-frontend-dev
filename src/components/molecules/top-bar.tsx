@@ -56,7 +56,7 @@ function PillTab({
 
   const content = (
     <span
-      className={cn("flex items-center gap-1.5 px-4 py-2 rounded-full text-sm transition-colors whitespace-nowrap", className)}
+      className={cn("flex items-center gap-1 md:gap-1.5 px-2.5 md:px-4 py-1.5 md:py-2 rounded-full text-[13px] md:text-sm transition-colors whitespace-nowrap", className)}
       style={{ ...base, ...style }}
     >
       {icon}
@@ -227,26 +227,30 @@ function TopBarInner() {
     leftZone = <SearchZone />;
   } else if (hasAssetSelected) {
     leftZone = (
-      <div className="flex items-center gap-2">
-        {/* M.O.D. grouping in a ring */}
+      /* Outer capsule containing EVERYTHING (M.O.D + Normal tabs) */
+      <div
+        className="flex items-center gap-1 md:gap-2 rounded-full p-1 w-full md:w-auto"
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
+      >
+        {/* M.O.D. grouping inner ring */}
         <div
-          className="flex items-center gap-0.5 rounded-full p-1"
-          style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
+          className="flex items-center gap-0.5 rounded-full p-0.5 w-full md:w-auto overflow-x-auto scrollbar-none"
+          style={{ border: "1px solid var(--qc-hair)" }}
         >
           <span
-            className="flex items-center gap-1.5 px-3 text-sm font-medium whitespace-nowrap"
+            className="flex items-center gap-1 px-2 md:px-3 text-[13px] md:text-sm font-medium whitespace-nowrap shrink-0"
             style={{ color: "var(--qc-ink-2)", letterSpacing: "0.05em" }}
           >
             M·O·D
           </span>
 
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-0.5 shrink-0 justify-between flex-1 md:flex-none">
             {FACTOR_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               const score = getScore(item.label);
               return (
                 <PillTab key={item.href} href={withSymbol(item.href)} active={isActive}>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1 md:gap-1.5">
                     <span>{item.label}</span>
                     {score !== null && (
                       <span style={{ color: getScoreColor(score), fontWeight: isActive ? 600 : 500 }}>
@@ -260,8 +264,8 @@ function TopBarInner() {
           </div>
         </div>
 
-        {/* Normal tabs outside the ring (Hidden on mobile, shown in Row 2 instead) */}
-        <div className="hidden md:flex items-center gap-1 ml-1">
+        {/* Normal tabs outside the inner ring (Hidden on mobile, shown in Row 2 instead) */}
+        <div className="hidden md:flex items-center gap-0.5 shrink-0 pr-1">
           {terminalTabs.map((tab) => (
             <PillTab key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href}>
               {tab.label}
@@ -317,7 +321,7 @@ function TopBarInner() {
   return (
     <>
     <motion.header
-      className="fixed left-0 md:left-[72px] right-0 top-0 z-30 flex h-[60px] items-center px-4 md:px-6"
+      className="fixed left-0 md:left-[72px] right-0 top-0 z-30 flex h-[60px] items-center px-2 md:px-6"
       animate={scrolled ? "scrolled" : "top"}
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       variants={({

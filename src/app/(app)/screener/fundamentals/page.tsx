@@ -18,6 +18,7 @@ import { ShareholdingTable } from "@/components/fundamentals/shareholding-table"
 import { BalanceSheetTreemap } from "@/components/fundamentals/balance-sheet-treemap";
 import { CashFlowWaterfall } from "@/components/fundamentals/cash-flow-waterfall";
 import { ShareholdingCharts } from "@/components/fundamentals/shareholding-charts";
+import { TabToggle } from "@/components/molecules/tab-toggle";
 import { ViewToggle } from "@/components/fundamentals/view-toggle";
 import { PnLChart } from "@/components/fundamentals/pnl-chart";
 import { SectionPanel } from "@/components/molecules/section-panel";
@@ -86,13 +87,14 @@ const FUNDAMENTALS_NAV = [
 function FinancialsContent() {
   const searchParams = useSearchParams();
   const symbol = searchParams.get("symbol") || "";
+  const [reportType, setReportType] = useState<"C" | "S">("C");
   const [pnlView, setPnlView] = useState<"table" | "chart">("table");
   const [balanceSheetView, setBalanceSheetView] = useState<"table" | "chart">("table");
   const [cashFlowView, setCashFlowView] = useState<"table" | "chart">("table");
   const [shareholdingView, setShareholdingView] = useState<"table" | "chart">("table");
 
-  const { data, loading, error } = useFinancials(symbol);
-  const { data: chartsData } = useFinancialsCharts(symbol);
+  const { data, loading, error } = useFinancials(symbol, reportType);
+  const { data: chartsData } = useFinancialsCharts(symbol, reportType);
   const { data: peersData, loading: peersLoading } = useScreenerPeers(symbol);
   const { data: shareholdingData, loading: shareholdingLoading } = useShareholding(symbol);
   const { data: screenerData } = useScreenerData(symbol);
@@ -150,6 +152,16 @@ function FinancialsContent() {
     <>
     <ScreenerPageShell navItems={FUNDAMENTALS_NAV} companyInfo={companyInfo}>
       <div className="px-4 pt-6 pb-8 space-y-6">
+
+        {/* Global Report Toggle */}
+        <div className="flex justify-end items-center -mb-2">
+           <TabToggle
+             options={["Consolidated", "Standalone"]}
+             value={reportType === "C" ? "Consolidated" : "Standalone"}
+             onChange={(val) => setReportType(val === "Consolidated" ? "C" : "S")}
+             variant="outline"
+           />
+        </div>
 
         {/* Full-width charts */}
         {chartGroups && (

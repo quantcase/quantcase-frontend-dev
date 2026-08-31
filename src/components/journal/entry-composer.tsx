@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { TabToggle } from "@/components/molecules/tab-toggle";
 import { TagMultiPicker } from "@/components/molecules/tag-multi-picker";
@@ -10,6 +10,8 @@ import { DEFAULT_THESIS_PROMPTS } from "@/lib/journal-ideas";
 import { CONV_LABELS, SF_HINTS, dimColor, dimBg } from "@/lib/journal-format";
 import { SUB_FACTORS, DIMENSION_LABEL } from "@/types/journal";
 import type { Dimension, JournalEntry, ThesisHealth } from "@/types/journal";
+
+import { useQuantcaseRead } from "@/app/(app)/diary/_hooks/useQuantcaseRead";
 
 // ── Step number bubble ────────────────────────────────────────────────────────
 
@@ -55,6 +57,20 @@ export function EntryComposer({ journalId, ticker, editEntry, onSaved, onCancel 
   const [conviction, setConviction] = useState<number>(editEntry?.type === "thesis" ? editEntry.conviction : 1);
 
   const [error, setError] = useState<string | null>(null);
+
+  const activeDim = dim || "M";
+  const { snapshot } = useQuantcaseRead(ticker || null, activeDim);
+
+  const dynamicPrompts = useMemo(() => {
+    if (!snapshot) return [];
+    return snapshot
+      .split(";")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => (s.endsWith(".") ? s : `${s}.`));
+  }, [snapshot]);
+
+  const prompts = dynamicPrompts.length > 0 ? dynamicPrompts : DEFAULT_THESIS_PROMPTS;
 
   const canSaveNote = noteText.trim().length > 0;
   const canSaveThesis = dim !== null && thesis.trim().length > 10 && conviction > 0;
@@ -177,7 +193,7 @@ export function EntryComposer({ journalId, ticker, editEntry, onSaved, onCancel 
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <span className="text-[11px] text-ink-2">Prompts:</span>
-                {DEFAULT_THESIS_PROMPTS.map((p) => (
+                {prompts.map((p) => (
                   <button
                     key={p}
                     type="button"
@@ -186,7 +202,7 @@ export function EntryComposer({ journalId, ticker, editEntry, onSaved, onCancel 
                     className="rounded-md border px-2 py-0.5 text-[11px]"
                     style={{ color: "var(--qc-brand-accent)", background: "var(--qc-brand-accent-soft)", borderColor: "var(--qc-brand-accent-edge)" }}
                   >
-                    {p.length > 42 ? `${p.slice(0, 41).trimEnd()}…` : p}
+                    {p.length > 55 ? `${p.slice(0, 54).trimEnd()}…` : p}
                   </button>
                 ))}
               </div>

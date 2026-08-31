@@ -51,7 +51,20 @@ export function ComposerCard({ t, journalId, onSaved }: ComposerCardProps) {
   const [conviction, setConviction] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
-  const { read } = useQuantcaseRead(t.ticker, dim);
+  const { read, snapshot } = useQuantcaseRead(t.ticker, dim);
+
+  // Parse the snapshot into bullet points for the quick-fill pills
+  const dynamicPrompts = useMemo(() => {
+    if (!snapshot) return [];
+    return snapshot
+      .split(';')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => (s.endsWith('.') ? s : `${s}.`));
+  }, [snapshot]);
+
+  // Fallback to default prompts if the L4 analysis doesn't have a snapshot
+  const prompts = dynamicPrompts.length > 0 ? dynamicPrompts : DEFAULT_THESIS_PROMPTS;
 
   // Same gate as the existing composer: a dimension, real prose, a conviction.
   const canSave = thesis.trim().length > 10 && conviction > 0;
@@ -158,7 +171,7 @@ export function ComposerCard({ t, journalId, onSaved }: ComposerCardProps) {
         </div>
 
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {DEFAULT_THESIS_PROMPTS.map((p) => (
+          {prompts.map((p) => (
             <button
               key={p}
               type="button"
@@ -166,7 +179,7 @@ export function ComposerCard({ t, journalId, onSaved }: ComposerCardProps) {
               title={p}
               className="rounded-md border border-[var(--qc-brand-accent-edge)] bg-brand-accent-soft px-2.5 py-1 text-[11px] text-brand-accent transition-opacity hover:opacity-80"
             >
-              {p.length > 42 ? `${p.slice(0, 41).trimEnd()}…` : p}
+              {p.length > 55 ? `${p.slice(0, 54).trimEnd()}…` : p}
             </button>
           ))}
         </div>

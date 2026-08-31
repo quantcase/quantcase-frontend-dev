@@ -666,7 +666,8 @@ header,.prog,.bar{padding-left:20px;padding-right:20px}.row .why{display:none}.b
                         : <>👁 You're <b>watching</b> this, not holding it. The watch thesis converts to a position entry if you buy.</>}
                     </div>
                     
-                    <OnboardingThesisFields 
+                    <OnboardingThesisFields
+                      ticker={topPick?.t}
                       value={thesisDraft} 
                       onChange={setThesisDraft} 
                       dimScores={{ M: topPick?.m || 0, O: topPick?.o || 0, D: topPick?.d || 0 }} 

@@ -1,11 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
 import { TabToggle } from "@/components/molecules/tab-toggle";
 import { CheckboxField } from "@/components/molecules/checkbox-field";
 import { DEFAULT_THESIS_PROMPTS } from "@/lib/journal-ideas";
 import { SUB_FACTORS, DIMENSION_LABEL } from "@/types/journal";
 import type { Dimension } from "@/types/journal";
 import { ConvictionSlider } from "@/app/(app)/diary/_components/conviction-slider";
+import { useQuantcaseRead } from "@/app/(app)/diary/_hooks/useQuantcaseRead";
 
 export interface ThesisFieldsState {
   dim: Dimension | null;
@@ -15,6 +17,7 @@ export interface ThesisFieldsState {
 }
 
 interface OnboardingThesisFieldsProps {
+  ticker?: string;
   value: ThesisFieldsState;
   onChange: (next: ThesisFieldsState) => void;
   dimScores?: Partial<Record<Dimension, number | null>>;
@@ -28,9 +31,22 @@ const LABEL_TO_DIM: Record<string, Dimension> = {
   [DIMENSION_LABEL.D]: "D",
 };
 
-export function OnboardingThesisFields({ value, onChange, dimScores, onSave }: OnboardingThesisFieldsProps) {
+export function OnboardingThesisFields({ ticker, value, onChange, dimScores, onSave }: OnboardingThesisFieldsProps) {
   const { dim, subFactors, thesis, conviction } = value;
   const activeDim = dim || "M";
+
+  const { snapshot } = useQuantcaseRead(ticker || null, activeDim);
+
+  const dynamicPrompts = useMemo(() => {
+    if (!snapshot) return [];
+    return snapshot
+      .split(";")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => (s.endsWith(".") ? s : `${s}.`));
+  }, [snapshot]);
+
+  const prompts = dynamicPrompts.length > 0 ? dynamicPrompts : DEFAULT_THESIS_PROMPTS;
 
   const setDim = (d: Dimension) => onChange({ ...value, dim: d, subFactors: [] });
   const setSubFactors = (next: string[]) => onChange({ ...value, subFactors: next });
@@ -86,7 +102,7 @@ export function OnboardingThesisFields({ value, onChange, dimScores, onSave }: O
         </div>
 
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {DEFAULT_THESIS_PROMPTS.map((p) => (
+          {prompts.map((p) => (
             <button
               key={p}
               type="button"
@@ -99,7 +115,7 @@ export function OnboardingThesisFields({ value, onChange, dimScores, onSave }: O
                 borderColor: "var(--qc-brand-accent-edge)",
               }}
             >
-              {p.length > 42 ? p.slice(0, 41).trimEnd() + "…" : p}
+              {p.length > 55 ? p.slice(0, 54).trimEnd() + "…" : p}
             </button>
           ))}
         </div>

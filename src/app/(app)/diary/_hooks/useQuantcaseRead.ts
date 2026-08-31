@@ -30,6 +30,7 @@ const PILLAR: Record<Dimension, "management" | "opportunity" | "deal"> = {
 
 interface QuantcaseRead {
   read: string | null;
+  snapshot: string | null;
   score: number | null;
   trend: string | null;
   loading: boolean;
@@ -45,8 +46,6 @@ export function useQuantcaseRead(ticker: string | null, dim: Dimension): Quantca
     const hit = cache.get(ticker);
     if (hit) { setData(hit); setLoading(false); return; }
 
-    // Guards a fast next/prev: a resolved response for an abandoned card must
-    // not overwrite the current one.
     let cancelled = false;
     setLoading(true);
     setData(null);
@@ -55,25 +54,23 @@ export function useQuantcaseRead(ticker: string | null, dim: Dimension): Quantca
       `${BACKEND_URL}/api/post-html-analysis?ticker=${encodeURIComponent(ticker)}&layer_id=l4`,
       {
         onSuccess: (res) => {
-          // adaptL4Results returns null when the payload carries no summary
-          // result — a ticker with no analysis yet. Cache only real reads.
           const adapted = adaptL4Results(res.data?.results ?? []);
           if (adapted) cache.set(ticker, adapted);
           if (!cancelled) setData(adapted);
         },
-        // A missing read must never block writing — fail quiet, the box hides.
         onError: () => { if (!cancelled) setData(null); },
         onComplete: () => { if (!cancelled) setLoading(false); },
       },
     );
 
     return () => { cancelled = true; };
-  }, [ticker]); // not `dim` — one fetch serves all three pillars
+  }, [ticker]);
 
   const pattern = data?.pillar_patterns.find((p) => p.pillar === PILLAR[dim]) ?? null;
 
   return {
     read: pattern?.interpretation ?? pattern?.snapshot ?? null,
+    snapshot: pattern?.snapshot ?? null,
     score: pattern?.score ?? null,
     trend: pattern?.trend ?? null,
     loading,

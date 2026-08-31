@@ -164,6 +164,7 @@ export interface ScreenerData {
   };
   valuation: {
     peRatio: number;
+    peLabel?: string | null;
     peValuationLabel: string | null;
     forwardPE: number;
     pbRatio: number;

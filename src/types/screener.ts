@@ -80,6 +80,7 @@ interface QuarterlyTrend {
   totalDebt: number | null;
   totalEquity: number | null;
   interestCoverage: number | null;
+  freeCashflow?: number | null;
 }
 
 export interface FundamentalsTrendPoint {

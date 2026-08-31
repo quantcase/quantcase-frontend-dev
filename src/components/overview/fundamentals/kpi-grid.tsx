@@ -154,6 +154,7 @@ interface QuarterlyTrendPoint {
   pegRatio?: number | null;
   evToEbitda?: number | null;
   pbRatio?: number | null;
+  freeCashflow?: number | null;
 }
 
 type SparkKey = keyof Omit<QuarterlyTrendPoint, "period">;
@@ -291,7 +292,7 @@ export function KpiGrid({
     // },
     {
       label: "Cash", value: freeCashflow != null ? formatINR(freeCashflow) : "—", yoy: yoyText(fcfGrowth),
-      muted: freeCashflow == null, metricKey: null, sparkKey: null,
+      muted: freeCashflow == null, metricKey: "freeCashflow" as ChartMetricKey, sparkKey: "freeCashflow" as SparkKey,
     },
     {
       label: "Reserves", value: reserves != null ? formatINR(reserves) : "—", yoy: yoyText(reservesGrowth),

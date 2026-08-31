@@ -21,6 +21,7 @@ interface QuarterlyTrendPoint {
   pegRatio?: number | null;
   evToEbitda?: number | null;
   pbRatio?: number | null;
+  freeCashflow?: number | null;
 }
 
 export type ChartMetricKey =
@@ -36,7 +37,8 @@ export type ChartMetricKey =
   | "pegRatio"
   | "evToEbitda"
   | "pbRatio"
-  | "pe";
+  | "pe"
+  | "freeCashflow";
 
 function shortPeriod(p: string) {
   const qMatch = p.match(/(\d{4})[- _]?Q(\d)/i);

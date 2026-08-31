@@ -535,8 +535,8 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
             display: "flex", flexDirection: "column",
           }}
         >
-          {/* Top: radar + context text */}
-          <div className="flex flex-col sm:flex-row" style={{ flex: 1, padding: "28px 16px 0" }}>
+          {/* Top: radar centered */}
+          <div style={{ flex: 1, padding: "28px 16px 28px", display: "flex", justifyContent: "center", alignItems: "center" }}>
 
             {/* Radar — horizontal padding absorbs left/right axis label overflow */}
             <div style={{ flexShrink: 0, width: 300, height: 260, position: "relative", overflow: "visible", padding: "0 28px" }}>
@@ -553,38 +553,6 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
                   }
                 }}
               />
-            </div>
-
-            {/* Right of radar: thesis section */}
-            <div style={{ flex: 1, padding: "4px 24px 16px 12px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <MonoLabel size={9} tracking="0.16em" color="var(--qc-ink-3)" style={{ marginBottom: 8 }}>
-                THESIS
-              </MonoLabel>
-
-              <h3 style={{
-                fontSize: "var(--qc-fz-14)", fontWeight: "var(--qc-w-medium)", lineHeight: 1.35, margin: "0 0 12px",
-                color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)", letterSpacing: "-0.01em",
-              }}>
-                {insight.subtitle && renderMd(insight.subtitle.charAt(0).toUpperCase() + insight.subtitle.slice(1).toLowerCase())}
-              </h3>
-
-              {insight.thesis_points.length > 0 && (
-                <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
-                  {insight.thesis_points.map((point, i) => (
-                    <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 9 }}>
-                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--qc-ink-3)", flexShrink: 0, marginTop: 6 }} />
-                      <span style={{
-                        fontSize: "var(--qc-fz-12)",
-                        color: "var(--qc-ink-2)",
-                        lineHeight: 1.5,
-                        fontFamily: "var(--qc-font-sans)",
-                      }}>
-                        {renderMd(point)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
           </div>
 

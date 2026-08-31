@@ -111,28 +111,13 @@ function InsightScorecardSkeleton() {
           </div>
         </div>
 
-        {/* Radar card — white bg, radar circle on left + text/legend on right, lens tiles below */}
+        {/* Radar card — white bg, radar centered, lens tiles below */}
         <div style={{ borderRadius: 14, background: "var(--qc-card)", border: "1px solid var(--qc-hair)", display: "flex", flexDirection: "column" }}>
-          {/* Top section: radar + context */}
-          <div className="flex flex-col sm:flex-row items-center" style={{ flex: 1, padding: "8px 0 0" }}>
+          {/* Top section: radar centered */}
+          <div style={{ flex: 1, padding: "28px 16px 28px", display: "flex", justifyContent: "center", alignItems: "center" }}>
             {/* Radar diamond skeleton */}
-            <div style={{ flexShrink: 0, padding: "16px 0 16px 16px" }}>
+            <div style={{ flexShrink: 0 }}>
               <RadarDiamondSkeleton size={220} />
-            </div>
-            {/* Right: band pill + subtitle + legend */}
-            <div style={{ flex: 1, padding: "20px 20px 20px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
-              <Shimmer style={{ height: 20, width: 100 }} rounded={4} />
-              <Shimmer style={{ height: 16, width: "85%" }} rounded={5} />
-              <Shimmer style={{ height: 16, width: "65%" }} rounded={5} />
-              <Shimmer style={{ height: 11, width: "55%" }} rounded={4} />
-              <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 6 }}>
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <Shimmer style={{ width: 8, height: 8, flexShrink: 0 }} rounded={2} />
-                    <Shimmer style={{ height: 10, width: 90 }} rounded={4} />
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
           {/* Lens score tiles row */}

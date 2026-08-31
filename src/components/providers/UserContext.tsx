@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import type { Subscription, MeResponse, SmallcaseConnection } from "@/types/auth";
+import { BACKEND_URL } from "@/lib/constants";
 
 export type AccountType = "manager" | "investor" | "admin" | null;
 
@@ -155,7 +156,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const token = localStorage.getItem("qc_at");
       if (!token) return;
       
-      const res = await fetch("/api/auth/me/view-ticker", {
+      const res = await fetch(`${BACKEND_URL}/api/auth/me/view-ticker`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

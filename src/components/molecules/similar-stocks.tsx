@@ -27,12 +27,6 @@ function fmtNum(val: number | null, decimals = 2): string {
   return val.toLocaleString("en-IN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
-function fmtVar(val: number | null): { text: string; color: string } {
-  if (val === null) return { text: "—", color: "var(--qc-ink-3)" };
-  const sign = val > 0 ? "+" : "";
-  const color = val > 0 ? "var(--qc-up)" : val < 0 ? "var(--qc-down)" : "var(--qc-ink-3)";
-  return { text: `${sign}${val.toFixed(2)}%`, color };
-}
 
 function verdictColor(verdict: string): string {
   const v = verdict?.toUpperCase();
@@ -43,7 +37,7 @@ function verdictColor(verdict: string): string {
 }
 
 const COL_HEADER: React.CSSProperties = {
-  fontSize: "var(--qc-fz-9)",
+  fontSize: "var(--qc-fz-10)",
   fontWeight: "var(--qc-w-semi)",
   fontFamily: "var(--qc-font-mono)",
   textTransform: "uppercase",
@@ -56,7 +50,7 @@ const COL_HEADER: React.CSSProperties = {
 };
 
 const COL_CELL: React.CSSProperties = {
-  fontSize: "var(--qc-fz-11)",
+  fontSize: "var(--qc-fz-12)",
   color: "var(--qc-ink-2)",
   padding: "8px 10px",
   textAlign: "right",
@@ -66,7 +60,7 @@ const COL_CELL: React.CSSProperties = {
 };
 
 function ScoreChip({ score, verdict }: { score: number | null; verdict: string | null }) {
-  if (score === null || verdict === null) return <span style={{ fontSize: "var(--qc-fz-11)", color: "#888" }}>—</span>;
+  if (score === null || verdict === null) return <span style={{ fontSize: "var(--qc-fz-12)", color: "#888" }}>—</span>;
   const ref = useRef<HTMLSpanElement>(null);
   const [show, setShow] = useState(false);
   const [alignRight, setAlignRight] = useState(false);
@@ -88,7 +82,7 @@ function ScoreChip({ score, verdict }: { score: number | null; verdict: string |
       onMouseLeave={() => setShow(false)}
     >
       <span style={{ width: 5, height: 5, borderRadius: "50%", background: color, flexShrink: 0 }} />
-      <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-bold)", color, fontFamily: "var(--qc-font-mono)" }}>
+      <span style={{ fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-bold)", color, fontFamily: "var(--qc-font-mono)" }}>
         {score}
       </span>
 
@@ -108,7 +102,7 @@ function ScoreChip({ score, verdict }: { score: number | null; verdict: string |
             pointerEvents: "none",
           }}
         >
-          <span style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-bold)", fontFamily: "var(--qc-font-mono)", letterSpacing: "0.08em", textTransform: "uppercase", color }}>
+          <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-bold)", fontFamily: "var(--qc-font-mono)", letterSpacing: "0.08em", textTransform: "uppercase", color }}>
             {verdict}
           </span>
         </span>
@@ -130,8 +124,6 @@ function PeerTableRow({
   onClick: () => void;
   activeFactor: ActiveFactor;
 }) {
-  const profitVar = fmtVar(peer.qtrProfitVar);
-  const salesVar = fmtVar(peer.qtrSalesVar);
   const cellStyle: React.CSSProperties = {
     ...COL_CELL,
     borderBottom: isLast ? "none" : "1px solid var(--qc-hair)",
@@ -152,22 +144,22 @@ function PeerTableRow({
       onClick={onClick}
     >
       <td style={{ ...textCellStyle, paddingLeft: 14, background: "inherit" }}>
-        <span style={{ fontWeight: peer.isSubject ? "var(--qc-w-bold)" : "var(--qc-w-medium)", color: "var(--qc-ink)", fontSize: "var(--qc-fz-11)", fontFamily: "var(--qc-font-mono)" }}>
+        <span style={{ fontWeight: peer.isSubject ? "var(--qc-w-bold)" : "var(--qc-w-medium)", color: "var(--qc-ink)", fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)" }}>
           {peer.symbol}
         </span>
         <br />
-        <span style={{ fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-3)", fontWeight: "var(--qc-w-regular)", fontFamily: "var(--qc-font-sans)" }}>{peer.name}</span>
+        <span style={{ fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-3)", fontWeight: "var(--qc-w-regular)", fontFamily: "var(--qc-font-sans)" }}>{peer.name}</span>
       </td>
       <td style={{ ...cellStyle, color: "var(--qc-ink)", fontWeight: peer.isSubject ? 600 : 400 }}>
         {peer.cmp !== null ? `₹${peer.cmp.toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "—"}
       </td>
       <td style={cellStyle}>{fmtCap(peer.marketCapCr)}</td>
-      <td style={cellStyle}>{fmtNum(peer.pe, 1)}</td>
-      <td style={cellStyle}>{peer.divYld !== null ? `${peer.divYld.toFixed(2)}%` : "—"}</td>
+      <td style={cellStyle}>
+        {fmtNum(peer.pe, 1)}
+        {peer.peType === 'consolidated' && <span style={{ fontSize: '0.85em', color: 'var(--qc-ink-3)', marginLeft: 4 }}>(C)</span>}
+        {peer.peType === 'standalone' && <span style={{ fontSize: '0.85em', color: 'var(--qc-ink-3)', marginLeft: 4 }}>(S)</span>}
+      </td>
       <td style={cellStyle}>{peer.salesQtrCr !== null ? `₹${fmtNum(peer.salesQtrCr, 0)} Cr` : "—"}</td>
-      <td style={{ ...cellStyle, color: salesVar.color }}>{salesVar.text}</td>
-      <td style={cellStyle}>{peer.npQtrCr !== null ? `₹${fmtNum(peer.npQtrCr, 0)} Cr` : "—"}</td>
-      <td style={{ ...cellStyle, color: profitVar.color }}>{profitVar.text}</td>
       <td style={{ ...cellStyle, textAlign: "center", ...activeCell("management") }}>
         <ScoreChip score={peer.management?.score ?? null} verdict={peer.management?.verdict ?? null} />
       </td>
@@ -257,11 +249,7 @@ export function SimilarStocks({ symbol }: SimilarStocksProps) {
                 <th style={COL_HEADER}>CMP</th>
                 <th style={COL_HEADER}>Mkt Cap</th>
                 <th style={COL_HEADER}>P/E</th>
-                <th style={COL_HEADER}>Div Yld</th>
                 <th style={COL_HEADER}>Qtr Sales</th>
-                <th style={COL_HEADER}>Sales Var</th>
-                <th style={COL_HEADER}>Qtr Profit</th>
-                <th style={COL_HEADER}>Profit Var</th>
                 <th style={{ ...COL_HEADER, textAlign: "center", ...(activeFactor === "management" ? { background: ACTIVE_COL_BG, color: "var(--qc-ink-2)" } : {}) }}>Mgmt</th>
                 <th style={{ ...COL_HEADER, textAlign: "center", ...(activeFactor === "opportunity" ? { background: ACTIVE_COL_BG, color: "var(--qc-ink-2)" } : {}) }}>Opp</th>
                 <th style={{ ...COL_HEADER, textAlign: "center", paddingRight: 14, ...(activeFactor === "deal" ? { background: ACTIVE_COL_BG, color: "var(--qc-ink-2)" } : {}) }}>Deal</th>

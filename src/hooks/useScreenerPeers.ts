@@ -13,6 +13,7 @@ export interface PeerRow {
   isSubject: boolean;
   cmp: number | null;
   pe: number | null;
+  peType?: 'consolidated' | 'standalone' | 'default' | 'calculated' | null;
   marketCapCr: number | null;
   divYld: number | null;
   npQtrCr: number | null;

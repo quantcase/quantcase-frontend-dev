@@ -27,6 +27,7 @@ export interface MeResponse {
   profile?: {
     onboarding_completed: boolean;
     onboarding_step: string | number;
+    free_tickers_viewed?: string[];
   } | null;
   subscription: Subscription | null;
   smallcase?: SmallcaseConnection | null;

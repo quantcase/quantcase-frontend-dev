@@ -35,6 +35,8 @@ interface UserContextValue {
   paywallOpen: boolean;
   openPaywall: () => void;
   closePaywall: () => void;
+  freeTickersViewed: string[];
+  recordTickerView: (symbol: string) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextValue>({
@@ -53,6 +55,8 @@ const UserContext = createContext<UserContextValue>({
   paywallOpen: false,
   openPaywall: () => {},
   closePaywall: () => {},
+  freeTickersViewed: [],
+  recordTickerView: async () => {},
 });
 
 export function UserProvider({ children }: { children: ReactNode }) {
@@ -107,6 +111,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     else localStorage.removeItem("qc_account_type");
   }, []);
 
+  const [freeTickersViewed, setFreeTickersViewed] = useState<string[]>([]);
+
   const setFromMe = useCallback((data: MeResponse) => {
     const acctType = data.accountType ?? data.account_type ?? null;
     if (acctType) {
@@ -127,6 +133,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setOnboardingStep(step);
     setSubscription(data.subscription ?? null);
 
+    if (data.profile?.free_tickers_viewed) {
+      setFreeTickersViewed(data.profile.free_tickers_viewed);
+    }
+
     const name = data.display_name ?? null;
     setDisplayName(name);
     if (name) localStorage.setItem("qc_display_name", name);
@@ -138,6 +148,28 @@ export function UserProvider({ children }: { children: ReactNode }) {
     else localStorage.removeItem("qc_email");
 
     setSmallcase(data.smallcase ?? null);
+  }, []);
+
+  const recordTickerView = useCallback(async (symbol: string) => {
+    try {
+      const token = localStorage.getItem("qc_at");
+      if (!token) return;
+      
+      const res = await fetch("/api/auth/me/view-ticker", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ticker: symbol }),
+      });
+      const json = await res.json();
+      if (json.success && json.data?.free_tickers_viewed) {
+        setFreeTickersViewed(json.data.free_tickers_viewed);
+      }
+    } catch (e) {
+      console.error("Failed to record ticker view", e);
+    }
   }, []);
 
   return (
@@ -157,6 +189,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       paywallOpen,
       openPaywall,
       closePaywall,
+      freeTickersViewed,
+      recordTickerView,
     }}>
       {children}
     </UserContext.Provider>

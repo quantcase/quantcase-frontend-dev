@@ -61,6 +61,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           localStorage.removeItem("qc_rt");
           localStorage.removeItem("qc_account_type");
           localStorage.removeItem("qc_onboarding_completed");
+          localStorage.removeItem("qc_paywall_triggered");
           router.push(`/signin?next=${encodeURIComponent(pathname)}`);
           return;
         }

@@ -20,7 +20,7 @@ function authHeaders(extra?: Record<string, string>): Record<string, string> {
 }
 
 // Auth keys cleared on 401 — kept in sync with AuthGuard's cleanup.
-const AUTH_KEYS = ["qc_at", "qc_rt", "qc_account_type", "qc_onboarding_completed"];
+const AUTH_KEYS = ["qc_at", "qc_rt", "qc_account_type", "qc_onboarding_completed", "qc_paywall_triggered"];
 
 function clearAuthAndRedirect(): void {
   if (typeof window === "undefined") return;

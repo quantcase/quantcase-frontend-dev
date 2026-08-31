@@ -146,9 +146,10 @@ export function KeyRatioTiles({ data }: Props) {
   const epsCagrIsPositive = epsCagrDisplay !== "—" && !epsCagrDisplay.startsWith("-");
   const epsCagrLabel = fin.eps_cagr_3y_label ?? null;
 
-  // Dividend Rate
-  const divRateRaw = ps.dividendRate;
-  const divRate = divRateRaw != null && divRateRaw > 0 ? formatPrice(divRateRaw, 2) : "—";
+  // PE Ratio
+  const peRaw = data.valuation.peRatio;
+  const peDisplay = peRaw != null ? `${peRaw.toFixed(2)}x` : "—";
+  const peLabel = data.valuation.peLabel || "Consolidated";
 
   return (
     <div className="px-4">
@@ -192,12 +193,12 @@ export function KeyRatioTiles({ data }: Props) {
             sublabel={epsCagrLabel}
             sublabelColor={epsCagrDisplay !== "—" ? (epsCagrIsPositive ? "up" : "down") : "muted"}
           />,
-          // <StatCell
-          //   key="div"
-          //   label="Dividend Rate"
-          //   value={divRate}
-          //   sublabel="Annual"
-          // />,
+          <StatCell
+            key="pe"
+            label="P/E Ratio"
+            value={peDisplay}
+            sublabel={peLabel}
+          />,
         ].map((cell, i) => (
           <div
             key={i}

@@ -213,7 +213,11 @@ export function InsightLenses({ lenses, heading, subtitle, onLensClick, ticker }
           const statusLabel = (lens.status || (pct >= 70 ? "STRONG" : pct >= 40 ? "MODERATE" : "NEUTRAL")).toUpperCase();
           const isClickable = !!onLensClick;
           const Icon = LENS_ICON_CONFIG[lens.slug];
-          const isEarnings = lens.slug === 'earnings-forecast' || lens.slug === 'earnings-quality' || lens.slug === 'earnings_forecast' || lens.slug === 'earnings_quality';
+          const isEarnings = [
+            'earnings-forecast', 'earnings_forecast',
+            'earning-quality', 'earnings-quality', 'earnings_quality',
+            'pe-rerating-potential'
+          ].includes(lens.slug);
 
           return (
             <motion.div

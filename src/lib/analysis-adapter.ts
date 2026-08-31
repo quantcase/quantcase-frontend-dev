@@ -26,12 +26,22 @@ export const LENS_DISPLAY_NAME: Record<string, string> = {
   "earnings_quality": "Earnings Quality",
 };
 
+const LENS_SLUG_CANONICAL: Record<string, string> = {
+  "pe-rerating-potential": "earning-quality",
+  "earnings-quality":      "earning-quality",
+  "earnings_quality":      "earning-quality",
+};
+
 function normalizeLenses(lenses: InsightLens[]): InsightLens[] {
-  return lenses.map((l) => ({
-    ...l,
-    max_score: LENS_SCALE,
-    name: LENS_DISPLAY_NAME[l.slug] ?? l.name,
-  }));
+  return lenses.map((l) => {
+    const canonicalSlug = LENS_SLUG_CANONICAL[l.slug] ?? l.slug;
+    return {
+      ...l,
+      slug: canonicalSlug,
+      max_score: LENS_SCALE,
+      name: LENS_DISPLAY_NAME[canonicalSlug] ?? l.name,
+    };
+  });
 }
 
 function deriveKeySignals(signalMap: L3Result["result"]["signal_map"]): InsightKeySignal[] {

@@ -179,9 +179,9 @@ function OverviewContent() {
           {technicalsData && <PriceLevelsSection data={technicalsData} overviewSummary={overviewData?.technical_summary ?? null} />}
 
           {/* Fundamentals */}
-          <div id="section-fundamentals">
+          {/* <div id="section-fundamentals">
             {data && <FundamentalOverviewCard data={data} symbol={symbol} overviewData={overviewData} />}
-          </div>
+          </div> */}
 
         </div>
       </div>

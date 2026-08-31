@@ -7,6 +7,7 @@ import { Suspense, useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { StockSearch } from "@/components/molecules/stock-search";
+import { useOverviewFetch } from "@/hooks/useOverviewAnalysis";
 
 /** Terminal tabs that carry a stock search in the top-bar's right rail. */
 const HEADER_SEARCH_PATHS = ["/screener/fundamentals", "/screener/technicals"];
@@ -26,9 +27,9 @@ const quickSymbols = ["HDFC", "TCS", "INFY", "ICICI"];
 const QUANTCASE_FACTOR_PATHS = ["/screener/management", "/screener/opportunity", "/screener/deal"];
 
 const FACTOR_ITEMS = [
-  { label: "Management Factor", href: "/screener/management" },
-  { label: "Opportunity Factor", href: "/screener/opportunity" },
-  { label: "Deal Factor",        href: "/screener/deal" },
+  { label: "Management", href: "/screener/management" },
+  { label: "Opportunity", href: "/screener/opportunity" },
+  { label: "Deal",        href: "/screener/deal" },
 ];
 
 /* Pill-style tab button matching design-sample */
@@ -128,6 +129,21 @@ function TopBarInner() {
   const rmId = searchParams.get("rm_id");
   const scrolled = useScrolled();
 
+  const { data: overviewData } = useOverviewFetch(symbol || "");
+
+  const getScore = (type: string) => {
+    if (!overviewData) return null;
+    const dim = overviewData.dimensions.find((d) => d.type === type.toLowerCase());
+    return dim ? Math.round(dim.score) : null;
+  };
+  
+  const getScoreColor = (score: number | null) => {
+    if (score === null) return "var(--qc-ink-3)";
+    if (score >= 75) return "var(--qc-up)";
+    if (score >= 60) return "var(--qc-warn)";
+    return "var(--qc-down)";
+  };
+
   const isHome = pathname === "/dashboard";
   const isScreenerHomePage = pathname === "/screener/home";
   const isBasketPage = pathname === "/screener/basket";
@@ -204,73 +220,55 @@ function TopBarInner() {
     leftZone = <SearchZone />;
   } else if (hasAssetSelected) {
     const terminalTabs = [
-      { label: "Overview",     href: "/screener/overview",                icon: <Eye size={13} strokeWidth={1.8} /> },
-      { label: "Technicals",   href: "/screener/technicals",              icon: <CandlestickChart size={13} strokeWidth={1.8} /> },
-      { label: "Fundamentals", href: "/screener/fundamentals",            icon: <BookOpen size={13} strokeWidth={1.8} /> },
+      { label: "View",         href: "/screener/overview" },
+      { label: "Fundamentals", href: "/screener/fundamentals" },
+      { label: "Technicals",   href: "/screener/technicals" },
     ];
-
-    const showFactorItems = isFactorActive || factorOpen;
 
     leftZone = (
       /* pill-tabs container — card bg, border, rounded-full pill, small gap */
       <div
-        className="flex items-center gap-0.5 rounded-full p-1"
+        className="flex items-center gap-1 rounded-full p-1"
         style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
       >
-        {terminalTabs.map((tab) => (
-          <PillTab key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href} icon={tab.icon}>
-            {tab.label}
-          </PillTab>
-        ))}
-
-        {/* QuantCase grouping (Desktop only) */}
-        <div ref={factorRef} className="hidden md:flex items-center">
-          <button
-            onClick={() => !isFactorActive && setFactorOpen((v) => !v)}
-            className={cn("flex", !isFactorActive ? "cursor-pointer" : "cursor-default")}
+        {/* M.O.D. grouping (Always shown) */}
+        <div className="flex items-center">
+          <span
+            className="flex items-center gap-1.5 px-3 text-[13px] font-medium whitespace-nowrap"
+            style={{ color: "var(--qc-ink-2)", letterSpacing: "0.05em" }}
           >
-            <span
-              className="relative flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium overflow-hidden transition-colors whitespace-nowrap"
-              style={{
-                background: "var(--qc-section)",
-                border: "1px solid var(--qc-hair)",
-                color: "var(--qc-ink)",
-              }}
-            >
-              <motion.span
-                aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-full"
-                style={{
-                  background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.65) 48%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.65) 52%, transparent 60%)",
-                  backgroundSize: "220% 100%",
-                }}
-                animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
-                transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
-              />
-              <Sparkles size={12} />
-              <span style={{ position: "relative", zIndex: 1 }}>QuantCase</span>
-              <ChevronRight
-                size={12}
-                className={cn("transition-transform duration-200", showFactorItems ? "rotate-90" : "rotate-0")}
-                style={{ position: "relative", zIndex: 1, color: "var(--qc-ink-2)" }}
-              />
-            </span>
-          </button>
+            M·O·D
+          </span>
 
-          {showFactorItems && (
-            <>
-              <span className="px-1 select-none text-sm" style={{ color: "var(--qc-hair)" }}>·</span>
-              <div className="flex items-center gap-0.5">
-                {FACTOR_ITEMS.map((item) => (
-                  <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
-                    {item.label}
-                  </PillTab>
-                ))}
-              </div>
-            </>
-          )}
+          <div className="flex items-center gap-0.5">
+            {FACTOR_ITEMS.map((item) => {
+              const isActive = pathname === item.href;
+              const score = getScore(item.label);
+              return (
+                <PillTab key={item.href} href={withSymbol(item.href)} active={isActive}>
+                  <div className="flex items-center gap-1.5">
+                    <span>{item.label}</span>
+                    {score !== null && (
+                      <span style={{ color: getScoreColor(score), fontWeight: isActive ? 600 : 500 }}>
+                        {score}
+                      </span>
+                    )}
+                  </div>
+                </PillTab>
+              );
+            })}
+          </div>
         </div>
 
+        <span className="px-1 select-none text-sm" style={{ color: "var(--qc-hair)" }}>|</span>
+
+        <div className="flex items-center gap-0.5">
+          {terminalTabs.map((tab) => (
+            <PillTab key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href}>
+              {tab.label}
+            </PillTab>
+          ))}
+        </div>
       </div>
     );
   } else if (isWealthOS) {

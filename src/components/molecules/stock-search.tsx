@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { useStocks } from "@/hooks/useStocks";
 import { cn } from "@/lib/utils";
@@ -43,9 +43,13 @@ export function StockSearch() {
         .slice(0, MAX_SUGGESTIONS)
     : [];
 
+  const pathname = usePathname();
+
   const goTo = (symbol: string) => {
     if (!symbol) return;
-    router.push(`/screener/overview?symbol=${encodeURIComponent(symbol)}`);
+    const MOD_PATHS = ["/screener/management", "/screener/opportunity", "/screener/deal"];
+    const targetPath = MOD_PATHS.includes(pathname) ? pathname : "/screener/management";
+    router.push(`${targetPath}?symbol=${encodeURIComponent(symbol)}`);
     setOpen(false);
   };
 

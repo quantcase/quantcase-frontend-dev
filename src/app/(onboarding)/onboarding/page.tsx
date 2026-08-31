@@ -184,10 +184,10 @@ export default function OnboardingV3() {
       setStep(step + 1);
     } else {
       if (isSaved) {
-        router.push(`/screener/overview?symbol=${topPick?.t}`);
+        router.push(`/screener/management?symbol=${topPick?.t}`);
       } else {
         saveAndComplete(() => {
-          router.push(`/screener/overview?symbol=${topPick?.t}`);
+          router.push(`/screener/management?symbol=${topPick?.t}`);
         });
       }
     }

@@ -86,7 +86,7 @@ export function ResearchHero() {
 
   const goTo = (symbol: string) => {
     if (!symbol) return;
-    router.push(`/screener/overview?symbol=${encodeURIComponent(symbol)}`);
+    router.push(`/screener/management?symbol=${encodeURIComponent(symbol)}`);
     setOpen(false);
   };
 

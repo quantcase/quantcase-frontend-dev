@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { BookmarkPlus, PenLine, Check, Loader2, Search, X } from "lucide-react";
 import { useJournalTree } from "@/hooks/useJournalTree";
 import { useJournalMutations } from "@/hooks/useJournalMutations";
@@ -31,6 +31,7 @@ interface AssetActionBarProps {
  */
 export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   // Resolve the Tracking journal (defaults are created lazily on first GET).
   // One read carries the journals, their tickers and every entry, so tracking
@@ -139,7 +140,9 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
     if (!symbol) return;
     setSearchOpen(false);
     setSearchQuery("");
-    router.push(`/screener/overview?symbol=${encodeURIComponent(symbol)}`);
+    const MOD_PATHS = ["/screener/management", "/screener/opportunity", "/screener/deal"];
+    const targetPath = MOD_PATHS.includes(pathname) ? pathname : "/screener/management";
+    router.push(`${targetPath}?symbol=${encodeURIComponent(symbol)}`);
   }
 
   function handleSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {

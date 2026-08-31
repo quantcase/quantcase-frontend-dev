@@ -98,7 +98,7 @@ export default function ScreenerHomePage() {
               placeholder="Search by company name or ticker…"
               value={searchQuery}
               onChange={setSearchQuery}
-              onSubmit={(symbol) => { if (symbol) router.push(`/screener/overview?symbol=${encodeURIComponent(symbol)}`); }}
+              onSubmit={(symbol) => { if (symbol) router.push(`/screener/management?symbol=${encodeURIComponent(symbol)}`); }}
               options={stockOptions}
               maxSuggestions={8}
             />

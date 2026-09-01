@@ -494,7 +494,7 @@ function HtmlSkillsPage() {
 
                   {/* Historic / Incremental — prominent, defaults to Historic (original behavior).
                       Incremental needs a base to build on, so it's unavailable until a first output exists. */}
-                  {ticker && tier !== "Tier 0" && tier !== "Tier 0.5" && (
+                  {ticker && tier !== "Tier 0" && (
                     <TabToggle
                       variant="outline"
                       options={previewControls?.hasBase === false ? ["Historic"] : ["Historic", "Incremental"]}
@@ -503,7 +503,7 @@ function HtmlSkillsPage() {
                       className="shrink-0"
                     />
                   )}
-                  {ticker && tier !== "Tier 0" && tier !== "Tier 0.5" && (
+                  {ticker && tier !== "Tier 0" && (
                     <TabToggle
                       variant="outline"
                       options={["Detailed", "Compressed"]}
@@ -512,12 +512,12 @@ function HtmlSkillsPage() {
                       className="shrink-0"
                     />
                   )}
-                  {ticker && skillMode === "Detailed" && previewControls?.hasBase === false && tier !== "Tier 0" && tier !== "Tier 0.5" && (
+                  {ticker && skillMode === "Detailed" && previewControls?.hasBase === false && tier !== "Tier 0" && (
                     <span className="text-[11px] text-warn shrink-0">No base yet — run Historic first</span>
                   )}
 
                   {/* Pick the fiscal year/quarter that resolves to callId — Historic and Incremental each keep their own selection */}
-                  {ticker && (tier === "Tier 0" || tier === "Tier 0.5") ? (
+                  {ticker && (tier === "Tier 0" ) ? (
                     <span className="text-[12px] font-medium text-down shrink-0">This company is not eligible for HTML Skill execution.</span>
                   ) : ticker && (
                     <div className="relative shrink-0">
@@ -547,7 +547,7 @@ function HtmlSkillsPage() {
                   {/* Export full prompt */}
                   <button
                     onClick={handleExportPrompt}
-                    disabled={exportingPrompt || !callId || tier === "Tier 0" || tier === "Tier 0.5"}
+                    disabled={exportingPrompt || !callId || tier === "Tier 0" }
                     title="Export full prompt as .md"
                     className="flex items-center justify-center size-7 rounded border border-[var(--qc-border-default)] text-ink-3 hover:text-[var(--qc-ink)] hover:border-[var(--qc-ink)] transition-colors disabled:opacity-40 shrink-0"
                   >
@@ -557,7 +557,7 @@ function HtmlSkillsPage() {
                   {/* Regenerate HTML */}
                   <button
                     onClick={() => previewControls?.regenerate()}
-                    disabled={previewControls?.running || !callId || tier === "Tier 0" || tier === "Tier 0.5" || !previewControls?.result?.output?.extracted_json}
+                    disabled={previewControls?.running || !callId || tier === "Tier 0" || !previewControls?.result?.output?.extracted_json}
                     className="flex items-center gap-1.5 rounded-md border border-[var(--qc-border-default)] px-3 py-1.5 text-[12px] font-medium text-[var(--qc-ink)] hover:bg-[var(--qc-surface-hover)] transition-colors disabled:opacity-40 shrink-0"
                   >
                     {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
@@ -567,7 +567,7 @@ function HtmlSkillsPage() {
                   {/* Run */}
                   <button
                     onClick={() => previewControls?.run(true)}
-                    disabled={previewControls?.running || !callId || tier === "Tier 0" || tier === "Tier 0.5"}
+                    disabled={previewControls?.running || !callId || tier === "Tier 0" }
                     className="flex items-center gap-1.5 rounded-md bg-ink px-3 py-1.5 text-[12px] font-medium text-[var(--qc-on-dark)] hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
                   >
                     {previewControls?.running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}

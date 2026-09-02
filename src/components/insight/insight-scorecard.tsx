@@ -258,42 +258,64 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
         const isHovered = hoveredIndex === i;
         const Icon = LENS_ICON_CONFIG[d.slug];
         
-        const boxWidth = 160;
-        const boxHeight = 90;
+        let boxWidth = 140;
+        let boxHeight = 80;
+        const iconR = 16;
         
         let x = lp.x;
         let y = lp.y;
         let flexDirection: any = "row";
-        let justifyContent = "center";
-        let textAlign: any = "center";
+        let justifyContent = "flex-start";
+        let textAlign: any = "left";
+        let finalBoxWidth = boxWidth;
+        let finalBoxHeight = 40;
         
         if (Math.abs(lp.x - cx) < 8) {
-           x -= boxWidth / 2; // Center horizontally
            if (lp.y < cy) {
-             // Top label
-             y -= boxHeight; // Box sits completely above the point
-             flexDirection = "column-reverse"; // Text top, Icon bottom (closest to point)
-             justifyContent = "flex-start"; // Pack to bottom
+             // Top
+             flexDirection = "row"; 
+             x = lp.x - iconR;
+             y = lp.y - iconR;
+             textAlign = "left";
            } else {
-             // Bottom label
-             y += 0; // Box sits completely below the point
-             flexDirection = "column"; // Icon top (closest to point), Text bottom
-             justifyContent = "flex-start"; // Pack to top
+             // Bottom
+             flexDirection = "row-reverse"; 
+             x = lp.x + iconR - finalBoxWidth;
+             y = lp.y - iconR;
+             textAlign = "right";
            }
-        } else if (lp.x < cx) {
-           // Left label
-           x -= boxWidth; // Box sits completely to the left
-           y -= boxHeight / 2; // Center vertically
-           flexDirection = "row-reverse"; // Text left, Icon right (closest to point)
-           justifyContent = "flex-start"; // Pack to right
-           textAlign = "right";
+        } else if (Math.abs(lp.y - cy) < 8) {
+           finalBoxWidth = 110; 
+           finalBoxHeight = 80;
+           if (lp.x > cx) {
+             // Right
+             flexDirection = "column";
+             x = lp.x - finalBoxWidth / 2;
+             y = lp.y - iconR;
+             textAlign = "center";
+           } else {
+             // Left
+             flexDirection = "column-reverse";
+             x = lp.x - finalBoxWidth / 2;
+             y = lp.y + iconR - finalBoxHeight;
+             textAlign = "center";
+           }
         } else {
-           // Right label
-           x += 0; // Box sits completely to the right
-           y -= boxHeight / 2; // Center vertically
-           flexDirection = "row"; // Icon left (closest to point), Text right
-           justifyContent = "flex-start"; // Pack to left
-           textAlign = "left";
+           if (lp.x > cx && lp.y < cy) {
+             flexDirection = "row";
+             x = lp.x - iconR; y = lp.y - iconR; textAlign = "left";
+           } else if (lp.x > cx && lp.y > cy) {
+             finalBoxWidth = 110; finalBoxHeight = 80;
+             flexDirection = "column";
+             x = lp.x - finalBoxWidth / 2; y = lp.y - iconR; textAlign = "center";
+           } else if (lp.x < cx && lp.y > cy) {
+             flexDirection = "row-reverse";
+             x = lp.x + iconR - finalBoxWidth; y = lp.y - iconR; textAlign = "right";
+           } else {
+             finalBoxWidth = 110; finalBoxHeight = 80;
+             flexDirection = "column-reverse";
+             x = lp.x - finalBoxWidth / 2; y = lp.y + iconR - finalBoxHeight; textAlign = "center";
+           }
         }
 
         return (
@@ -301,8 +323,8 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
             key={i}
             x={x}
             y={y}
-            width={boxWidth}
-            height={boxHeight}
+            width={finalBoxWidth}
+            height={finalBoxHeight}
             style={{ overflow: "visible" }}
           >
              <div 

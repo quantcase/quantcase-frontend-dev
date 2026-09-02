@@ -109,7 +109,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
   const SIZE = 320;
   const cx = SIZE / 2;
   const cy = SIZE / 2;
-  const maxR = SIZE * 0.34;
+  const maxR = SIZE * 0.30;
   const n = data.length;
   // 4 rings: 25%, 50%, 75%, 100% — marks the threshold zones visually
   const rings = [0.25, 0.5, 0.75, 1];
@@ -130,7 +130,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
   const axisPoints = buildPolygonPoints(cx, cy, maxR, n);
 
   // Label positions — tight to the outer ring edge
-  const labelOffset = maxR + 14;
+  const labelOffset = maxR + 12;
   const labelPoints = buildPolygonPoints(cx, cy, labelOffset, n);
 
   const dataPath = pointsToPath(dataPoints);
@@ -633,7 +633,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
           <div style={{ flex: 1, padding: "28px 16px 28px", display: "flex", justifyContent: "center", alignItems: "center" }}>
 
             {/* Radar — horizontal padding absorbs left/right axis label overflow */}
-            <div style={{ flexShrink: 0, width: 360, height: 320, position: "relative", overflow: "visible", padding: "0 28px" }}>
+            <div style={{ flexShrink: 0, width: "100%", maxWidth: 360, aspectRatio: "360 / 320", position: "relative", overflow: "visible", margin: "0 auto" }}>
               <VertexTooltip lens={hoveredLens} visible={hoveredVertex !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
               <SVGRadar
                 data={radarData}

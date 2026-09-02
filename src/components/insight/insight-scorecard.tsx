@@ -6,7 +6,6 @@ import type { InsightData, InsightLens } from "@/types/analysis";
 import { DarkGradientCard, MonoLabel } from "@/components/ds";
 import { renderMd } from "@/lib/render-md";
 import { QC } from "@/lib/chart-tokens";
-import { LENS_ICON_CONFIG } from "./insight-lenses";
 
 // ─── Color helpers ─────────────────────────────────────────────────────────────
 
@@ -75,8 +74,6 @@ function getTotalScore(lenses: InsightLens[]) {
 interface RadarPoint {
   subject: string;
   pct: number; // 0–100, computed as (score/max)*100
-  name: string;
-  slug: string;
 }
 
 function polarToCartesian(cx: number, cy: number, r: number, angleRad: number) {
@@ -106,10 +103,10 @@ interface SVGRadarProps {
 }
 
 function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex }: SVGRadarProps) {
-  const SIZE = 320;
+  const SIZE = 260;
   const cx = SIZE / 2;
   const cy = SIZE / 2;
-  const maxR = SIZE * 0.30;
+  const maxR = SIZE * 0.34;
   const n = data.length;
   // 4 rings: 25%, 50%, 75%, 100% — marks the threshold zones visually
   const rings = [0.25, 0.5, 0.75, 1];
@@ -130,7 +127,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
   const axisPoints = buildPolygonPoints(cx, cy, maxR, n);
 
   // Label positions — tight to the outer ring edge
-  const labelOffset = maxR + 12;
+  const labelOffset = maxR + 14;
   const labelPoints = buildPolygonPoints(cx, cy, labelOffset, n);
 
   const dataPath = pointsToPath(dataPoints);
@@ -254,121 +251,36 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
       {/* ── Axis labels ── */}
       {data.map((d, i) => {
         const lp = labelPoints[i];
+        const words = d.subject.split(" ");
         const { hex: axColor } = axisStatusColor(d.pct);
         const isHovered = hoveredIndex === i;
-        const Icon = LENS_ICON_CONFIG[d.slug];
-        
-        let boxWidth = 140;
-        let boxHeight = 80;
-        const iconR = 16;
-        
-        let x = lp.x;
-        let y = lp.y;
-        let flexDirection: any = "row";
-        let justifyContent = "flex-start";
-        let textAlign: any = "left";
-        let finalBoxWidth = boxWidth;
-        let finalBoxHeight = 40;
-        
-        if (Math.abs(lp.x - cx) < 8) {
-           if (lp.y < cy) {
-             // Top
-             flexDirection = "row"; 
-             x = lp.x - iconR;
-             y = lp.y - iconR;
-             textAlign = "left";
-           } else {
-             // Bottom
-             flexDirection = "row-reverse"; 
-             x = lp.x + iconR - finalBoxWidth;
-             y = lp.y - iconR;
-             textAlign = "right";
-           }
-        } else if (Math.abs(lp.y - cy) < 8) {
-           finalBoxWidth = 110; 
-           finalBoxHeight = 80;
-           if (lp.x > cx) {
-             // Right
-             flexDirection = "column";
-             x = lp.x - finalBoxWidth / 2;
-             y = lp.y - iconR;
-             textAlign = "center";
-           } else {
-             // Left
-             flexDirection = "column-reverse";
-             x = lp.x - finalBoxWidth / 2;
-             y = lp.y + iconR - finalBoxHeight;
-             textAlign = "center";
-           }
-        } else {
-           if (lp.x > cx && lp.y < cy) {
-             flexDirection = "row";
-             x = lp.x - iconR; y = lp.y - iconR; textAlign = "left";
-           } else if (lp.x > cx && lp.y > cy) {
-             finalBoxWidth = 110; finalBoxHeight = 80;
-             flexDirection = "column";
-             x = lp.x - finalBoxWidth / 2; y = lp.y - iconR; textAlign = "center";
-           } else if (lp.x < cx && lp.y > cy) {
-             flexDirection = "row-reverse";
-             x = lp.x + iconR - finalBoxWidth; y = lp.y - iconR; textAlign = "right";
-           } else {
-             finalBoxWidth = 110; finalBoxHeight = 80;
-             flexDirection = "column-reverse";
-             x = lp.x - finalBoxWidth / 2; y = lp.y + iconR - finalBoxHeight; textAlign = "center";
-           }
-        }
-
+        const textAnchor =
+          Math.abs(lp.x - cx) < 8 ? "middle"
+          : lp.x < cx ? "end"
+          : "start";
         return (
-          <foreignObject
+          <g
             key={i}
-            x={x}
-            y={y}
-            width={finalBoxWidth}
-            height={finalBoxHeight}
-            style={{ overflow: "visible" }}
+            style={{ cursor: "pointer" }}
+            onMouseEnter={() => onHoverVertex(i, lp.x / SIZE, lp.y / SIZE)}
+            onMouseLeave={() => onHoverVertex(null)}
           >
-             <div 
-               style={{ 
-                 display: "flex", 
-                 alignItems: "center", 
-                 justifyContent: justifyContent,
-                 flexDirection: flexDirection,
-                 height: "100%",
-                 width: "100%",
-                 cursor: "pointer",
-                 gap: 8,
-               }}
-               onMouseEnter={() => onHoverVertex(i, lp.x / SIZE, lp.y / SIZE)}
-               onMouseLeave={() => onHoverVertex(null)}
-             >
-                {Icon && (
-                  <div style={{
-                    flexShrink: 0,
-                    width: 32, height: 32, borderRadius: 8,
-                    background: "rgba(18,18,18,0.04)", 
-                    border: "1px solid rgba(18,18,18,0.08)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: isHovered ? axColor : "var(--qc-ink-2)",
-                    transition: "color 0.15s"
-                  }}>
-                    <Icon size={14} strokeWidth={1.5} />
-                  </div>
-                )}
-                <span style={{ 
-                  fontSize: "var(--qc-fz-14)", 
-                  fontWeight: "var(--qc-w-semi)", 
-                  color: isHovered ? axColor : "var(--qc-ink)", 
-                  fontFamily: "var(--qc-font-sans)",
-                  lineHeight: 1.2,
-                  textAlign: textAlign,
-                  whiteSpace: "pre-wrap",
-                  maxWidth: flexDirection.includes("column") ? "100%" : "90px",
-                  transition: "color 0.15s"
-                }}>
-                  {d.name.replace(" ", "\n")}
-                </span>
-             </div>
-          </foreignObject>
+            {words.map((word, wi) => (
+              <text
+                key={wi}
+                x={lp.x}
+                y={lp.y + wi * 11 - ((words.length - 1) * 11) / 2}
+                textAnchor={textAnchor}
+                fontSize={8}
+                fontWeight={isHovered ? 700 : 500}
+                letterSpacing="0.06em"
+                fill={isHovered ? axColor : QC.ink3}
+                style={{ transition: "fill 0.15s" }}
+              >
+                {word}
+              </text>
+            ))}
+          </g>
         );
       })}
 
@@ -511,33 +423,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
   const [hoveredVertex, setHoveredVertex] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ pctX: 0.5, pctY: 0 });
 
-  // Define preferred order for lenses to align radar points (Top, Right, Bottom, Left)
-  const PREFERRED_LENS_ORDER = [
-    "disclosure-honesty",    // Top
-    "promoter-activity",     // Right
-    "capital-allocation",    // Bottom
-    "guidance-credibility",  // Left
-    // Additional lenses for Opp / Deal pages to ensure stable ordering
-    "industry-analysis",
-    "competition",
-    "financial-strength",
-    "customer-distribution",
-    "eps-engine",
-    "earnings-forecast",
-    "pe-rerating-potential",
-    "earning-quality",
-    "earnings-quality",
-    "target-price-matrix",
-  ];
-
-  const rawLenses = lenses ?? insight.lenses;
-  const scorecardLenses = [...rawLenses].sort((a, b) => {
-    let ia = PREFERRED_LENS_ORDER.indexOf(a.slug);
-    let ib = PREFERRED_LENS_ORDER.indexOf(b.slug);
-    if (ia === -1) ia = 999;
-    if (ib === -1) ib = 999;
-    return ia - ib;
-  });
+  const scorecardLenses = lenses ?? insight.lenses;
 
   const bandColor = verdictBandColor(insight.verdict_band ?? insight.verdict);
   const bandBg = verdictBandBg(insight.verdict_band ?? insight.verdict);
@@ -549,8 +435,6 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
   const radarData: RadarPoint[] = scorecardLenses.map((l) => ({
     subject: l.name.toUpperCase(),
     pct: l.max_score > 0 ? Math.round((l.score / l.max_score) * 100) : 0,
-    name: l.name,
-    slug: l.slug,
   }));
 
   const hoveredLens = hoveredVertex !== null ? scorecardLenses[hoveredVertex] ?? null : null;
@@ -655,7 +539,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
           <div style={{ flex: 1, padding: "28px 16px 28px", display: "flex", justifyContent: "center", alignItems: "center" }}>
 
             {/* Radar — horizontal padding absorbs left/right axis label overflow */}
-            <div style={{ flexShrink: 0, width: "100%", maxWidth: 360, aspectRatio: "360 / 320", position: "relative", overflow: "visible", margin: "0 auto" }}>
+            <div style={{ flexShrink: 0, width: 300, height: 260, position: "relative", overflow: "visible", padding: "0 28px" }}>
               <VertexTooltip lens={hoveredLens} visible={hoveredVertex !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
               <SVGRadar
                 data={radarData}

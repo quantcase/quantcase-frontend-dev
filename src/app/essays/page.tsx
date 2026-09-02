@@ -155,42 +155,60 @@ export default function EssaysPage() {
         </div>
       </section>
 
-      {/* Coming soon section */}
+      {/* Essays Section */}
       <section className="relative pb-40 md:pb-60" style={{ background: "#F5F0E6" }}>
         <div className="mx-auto max-w-[1280px] px-8 md:px-12">
 
-          {/* Coming soon banner */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-14 flex items-center justify-center"
-          >
-            <div
-              className="inline-flex items-center gap-3 rounded-full px-6 py-3"
-              style={{
-                border: "1px solid rgba(185,138,62,0.25)",
-                background: "rgba(185,138,62,0.06)",
-              }}
-            >
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-50" style={{ background: "#B98A3E" }} />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: "#B98A3E" }} />
-              </span>
-              <span className="text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.26em", color: "#B98A3E" }}>
-                First essays dropping soon
-              </span>
-            </div>
-          </motion.div>
-
-          {/* Placeholder cards — blurred / locked */}
+          {/* Cards Grid */}
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {placeholderCards.map((card, i) => (
+            {/* Real Card: Introducing QuantCase */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Link
+                href="/essays/introducing-quantcase"
+                className="group relative block h-full overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-lg"
+                style={{
+                  border: "1px solid rgba(14,26,43,0.15)",
+                  background: "rgba(255,255,255,0.4)",
+                  textDecoration: "none",
+                }}
+              >
+                <div className="p-7">
+                  <span
+                    className="inline-block rounded-sm px-2.5 py-1 text-[9px] uppercase mb-5"
+                    style={{ ...mono, letterSpacing: "0.18em", background: "rgba(185,138,62,0.1)", color: "#B98A3E" }}
+                  >
+                    Vision
+                  </span>
+                  <h3
+                    className="mb-3 leading-snug transition-colors group-hover:text-[#B98A3E]"
+                    style={{ ...serif, color: "#0E1A2B", fontSize: "1.25rem", fontWeight: 400, margin: 0, marginBottom: "0.75rem" }}
+                  >
+                    What is QuantCase
+                  </h3>
+                  <p className="text-sm leading-relaxed" style={{ ...sans, color: "#3A4B61" }}>
+                    The problem with fundamental analysis, our MOD framework, and extracting signal from the noise. Includes real case studies on HDFC Bank and Reliance.
+                  </p>
+                  <div className="mt-6 flex items-center justify-between">
+                    <span className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.18em", color: "rgba(14,26,43,0.35)" }}>
+                      4 min read
+                    </span>
+                    <span className="transition-transform group-hover:translate-x-1" style={{ ...mono, color: "#B98A3E", fontSize: "0.85rem" }}>→</span>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+
+            {/* Placeholder Cards — blurred / locked */}
+            {placeholderCards.slice(1).map((card, i) => (
               <motion.div
                 key={card.title}
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.55 + i * 0.10, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.8, delay: 0.65 + i * 0.10, ease: [0.16, 1, 0.3, 1] }}
                 className="relative overflow-hidden rounded-2xl"
                 style={{
                   border: "1px solid rgba(14,26,43,0.08)",
@@ -263,3 +281,4 @@ export default function EssaysPage() {
     </div>
   );
 }
+

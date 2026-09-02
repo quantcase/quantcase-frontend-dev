@@ -122,8 +122,8 @@ export default function IntroducingQuantcasePage() {
 
           <motion.div custom={2} initial="hidden" animate="show" variants={fadeUp} className="mt-8 flex items-center gap-4 text-base" style={{ ...mono, color: "rgba(14,26,43,0.5)" }}>
             <span>2026</span>
-            <span className="h-1 w-1 rounded-full bg-current opacity-50" />
-            <span>Confidential</span>
+            {/* <span className="h-1 w-1 rounded-full bg-current opacity-50" /> */}
+            {/* <span>Confidential</span> */}
             <span className="h-1 w-1 rounded-full bg-current opacity-50" />
             <span>4 min read</span>
           </motion.div>

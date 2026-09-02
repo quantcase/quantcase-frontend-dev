@@ -6,6 +6,7 @@ import type { InsightData, InsightLens } from "@/types/analysis";
 import { DarkGradientCard, MonoLabel } from "@/components/ds";
 import { renderMd } from "@/lib/render-md";
 import { QC } from "@/lib/chart-tokens";
+import { LENS_ICON_CONFIG } from "./insight-lenses";
 
 // ─── Color helpers ─────────────────────────────────────────────────────────────
 
@@ -74,6 +75,8 @@ function getTotalScore(lenses: InsightLens[]) {
 interface RadarPoint {
   subject: string;
   pct: number; // 0–100, computed as (score/max)*100
+  name: string;
+  slug: string;
 }
 
 function polarToCartesian(cx: number, cy: number, r: number, angleRad: number) {
@@ -251,36 +254,82 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
       {/* ── Axis labels ── */}
       {data.map((d, i) => {
         const lp = labelPoints[i];
-        const words = d.subject.split(" ");
         const { hex: axColor } = axisStatusColor(d.pct);
         const isHovered = hoveredIndex === i;
-        const textAnchor =
-          Math.abs(lp.x - cx) < 8 ? "middle"
-          : lp.x < cx ? "end"
-          : "start";
+        const Icon = LENS_ICON_CONFIG[d.slug];
+        
+        const boxWidth = 220;
+        const boxHeight = 40;
+        
+        let x = lp.x;
+        let y = lp.y;
+        let justify = "center";
+        
+        if (Math.abs(lp.x - cx) < 8) {
+           x -= boxWidth / 2;
+           y -= boxHeight / 2;
+           if (lp.y < cy) {
+             y -= 15; // Top label
+           } else {
+             y += 15; // Bottom label
+           }
+        } else if (lp.x < cx) {
+           x -= boxWidth;
+           y -= boxHeight / 2;
+           justify = "flex-end";
+        } else {
+           y -= boxHeight / 2;
+           justify = "flex-start";
+        }
+
         return (
-          <g
+          <foreignObject
             key={i}
-            style={{ cursor: "pointer" }}
-            onMouseEnter={() => onHoverVertex(i, lp.x / SIZE, lp.y / SIZE)}
-            onMouseLeave={() => onHoverVertex(null)}
+            x={x}
+            y={y}
+            width={boxWidth}
+            height={boxHeight}
+            style={{ overflow: "visible" }}
           >
-            {words.map((word, wi) => (
-              <text
-                key={wi}
-                x={lp.x}
-                y={lp.y + wi * 11 - ((words.length - 1) * 11) / 2}
-                textAnchor={textAnchor}
-                fontSize={8}
-                fontWeight={isHovered ? 700 : 500}
-                letterSpacing="0.06em"
-                fill={isHovered ? axColor : QC.ink3}
-                style={{ transition: "fill 0.15s" }}
-              >
-                {word}
-              </text>
-            ))}
-          </g>
+             <div 
+               style={{ 
+                 display: "flex", 
+                 alignItems: "center", 
+                 justifyContent: justify,
+                 height: "100%",
+                 width: "100%",
+                 cursor: "pointer",
+                 gap: 8,
+               }}
+               onMouseEnter={() => onHoverVertex(i, lp.x / SIZE, lp.y / SIZE)}
+               onMouseLeave={() => onHoverVertex(null)}
+             >
+                {Icon && (
+                  <div style={{
+                    flexShrink: 0,
+                    width: 32, height: 32, borderRadius: 8,
+                    background: "rgba(18,18,18,0.04)", 
+                    border: "1px solid rgba(18,18,18,0.08)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: isHovered ? axColor : "var(--qc-ink-2)",
+                    transition: "color 0.15s"
+                  }}>
+                    <Icon size={14} strokeWidth={1.5} />
+                  </div>
+                )}
+                <span style={{ 
+                  fontSize: "var(--qc-fz-13)", 
+                  fontWeight: "var(--qc-w-semi)", 
+                  color: isHovered ? axColor : "var(--qc-ink)", 
+                  fontFamily: "var(--qc-font-sans)",
+                  lineHeight: 1.2,
+                  textAlign: justify === "flex-end" ? "right" : justify === "center" ? "center" : "left",
+                  transition: "color 0.15s"
+                }}>
+                  {d.name}
+                </span>
+             </div>
+          </foreignObject>
         );
       })}
 
@@ -435,6 +484,8 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
   const radarData: RadarPoint[] = scorecardLenses.map((l) => ({
     subject: l.name.toUpperCase(),
     pct: l.max_score > 0 ? Math.round((l.score / l.max_score) * 100) : 0,
+    name: l.name,
+    slug: l.slug,
   }));
 
   const hoveredLens = hoveredVertex !== null ? scorecardLenses[hoveredVertex] ?? null : null;

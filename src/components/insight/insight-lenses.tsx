@@ -15,7 +15,7 @@ import { SectionPanel } from "@/components/molecules/section-panel";
 import { BACKEND_URL } from "@/lib/constants";
 import { authFetch } from "@/lib/api";
 
-const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
+export const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
   "guidance-credibility": Target,
   "disclosure-honesty": Eye,
   "capital-allocation": TrendingUp,

@@ -1,10 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
+import LandingNavbar from "@/components/landing/LandingNavbar";
 import LandingFooter from "@/components/landing/LandingFooter";
 
 const serif: React.CSSProperties = { fontFamily: "var(--font-instrument-serif, 'Instrument Serif', serif)" };
@@ -41,60 +40,10 @@ const placeholderCards = [
   },
 ];
 
-function Navbar({ scrolled }: { scrolled: boolean }) {
-  return (
-    <header
-      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
-        scrolled ? "border-b backdrop-blur-xl" : "bg-transparent"
-      }`}
-      style={scrolled ? { background: "rgba(245,240,230,0.70)", borderColor: "rgba(14,26,43,0.08)" } : {}}
-    >
-      <div className="mx-auto flex max-w-[1280px] items-center justify-between px-8 py-4 md:px-12">
-        <Link
-          href="/"
-          className="flex items-center gap-2.5"
-          style={{ textDecoration: "none" }}
-        >
-          <Image
-            src="/logos/logo-text-dark.png"
-            alt="Quantcase"
-            width={169}
-            height={39}
-            className="h-[30px] w-auto"
-            priority
-          />
-        </Link>
-
-        <nav className="hidden items-center gap-10 md:flex">
-          <Link href="/#framework" className="nav-link text-sm" style={{ ...sans, color: "rgba(14,26,43,0.80)", textDecoration: "none" }}>
-            Framework
-          </Link>
-          <Link href="/essays" className="nav-link text-sm" style={{ ...sans, color: "#0E1A2B", textDecoration: "none", fontWeight: 500 }}>
-            Essays
-          </Link>
-        </nav>
-
-        <Link href="/register" className="lp-cta-btn group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium">
-          Get started
-          <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
-        </Link>
-      </div>
-    </header>
-  );
-}
-
 export default function EssaysPage() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
     <div style={{ background: "#F5F0E6", minHeight: "100vh" }}>
-      <Navbar scrolled={scrolled} />
+      <LandingNavbar ctaText="Get started" />
 
       {/* Hero */}
       <section className="relative pt-40 pb-28 md:pt-52 md:pb-36 overflow-hidden">
@@ -120,10 +69,10 @@ export default function EssaysPage() {
           }}
         />
 
-        <div className="relative mx-auto max-w-[1280px] px-8 md:px-12">
+        <div className="relative mx-auto max-w-[1280px] px-6 sm:px-8 md:px-12">
           <motion.div custom={0} initial="hidden" animate="show" variants={fadeUp} className="mb-8 flex items-center gap-4">
             <span className="h-px w-12" style={{ background: "rgba(185,138,62,0.7)" }} />
-            <span className="text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.28em", color: "#B98A3E" }}>
+            <span className="text-[14px] uppercase font-medium" style={{ ...mono, letterSpacing: "0.28em", color: "#B98A3E" }}>
               Essays &amp; case studies
             </span>
           </motion.div>
@@ -147,8 +96,8 @@ export default function EssaysPage() {
 
           <motion.p
             custom={2} initial="hidden" animate="show" variants={fadeUp}
-            className="mt-8 max-w-xl text-base md:text-lg"
-            style={{ ...sans, color: "#3A4B61", lineHeight: 1.55 }}
+            className="mt-8 max-w-xl text-[18px] md:text-[20px]"
+            style={{ ...sans, color: "#3A4B61", lineHeight: 1.6 }}
           >
             Deep dives into management quality, earnings call patterns, and the signals that separate conviction from noise.
           </motion.p>
@@ -157,10 +106,10 @@ export default function EssaysPage() {
 
       {/* Essays Section */}
       <section className="relative pb-40 md:pb-60" style={{ background: "#F5F0E6" }}>
-        <div className="mx-auto max-w-[1280px] px-8 md:px-12">
+        <div className="mx-auto max-w-[1280px] px-6 sm:px-8 md:px-12">
 
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {/* Real Card: Introducing QuantCase */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -176,27 +125,27 @@ export default function EssaysPage() {
                   textDecoration: "none",
                 }}
               >
-                <div className="p-7">
+                <div className="p-8">
                   <span
-                    className="inline-block rounded-sm px-2.5 py-1 text-[9px] uppercase mb-5"
-                    style={{ ...mono, letterSpacing: "0.18em", background: "rgba(185,138,62,0.1)", color: "#B98A3E" }}
+                    className="inline-block rounded-sm px-3 py-1 text-[12px] uppercase font-medium mb-5"
+                    style={{ ...mono, letterSpacing: "0.18em", background: "rgba(185,138,62,0.12)", color: "#B98A3E" }}
                   >
                     Vision
                   </span>
                   <h3
                     className="mb-3 leading-snug transition-colors group-hover:text-[#B98A3E]"
-                    style={{ ...serif, color: "#0E1A2B", fontSize: "1.25rem", fontWeight: 400, margin: 0, marginBottom: "0.75rem" }}
+                    style={{ ...serif, color: "#0E1A2B", fontSize: "1.65rem", fontWeight: 400, margin: 0, marginBottom: "0.75rem" }}
                   >
                     What is QuantCase
                   </h3>
-                  <p className="text-sm leading-relaxed" style={{ ...sans, color: "#3A4B61" }}>
+                  <p className="text-[18px] leading-relaxed" style={{ ...sans, color: "#3A4B61" }}>
                     The problem with fundamental analysis, our MOD framework, and extracting signal from the noise. Includes real case studies on HDFC Bank and Reliance.
                   </p>
-                  <div className="mt-6 flex items-center justify-between">
-                    <span className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.18em", color: "rgba(14,26,43,0.35)" }}>
+                  <div className="mt-8 flex items-center justify-between">
+                    <span className="text-[13px] uppercase font-medium" style={{ ...mono, letterSpacing: "0.18em", color: "rgba(14,26,43,0.45)" }}>
                       4 min read
                     </span>
-                    <span className="transition-transform group-hover:translate-x-1" style={{ ...mono, color: "#B98A3E", fontSize: "0.85rem" }}>→</span>
+                    <span className="transition-transform group-hover:translate-x-1" style={{ ...mono, color: "#B98A3E", fontSize: "1.1rem" }}>→</span>
                   </div>
                 </div>
               </Link>
@@ -221,35 +170,35 @@ export default function EssaysPage() {
                   style={{ background: "rgba(245,240,230,0.55)" }}
                 >
                   <span
-                    className="rounded-full px-4 py-1.5 text-[10px] uppercase"
-                    style={{ ...mono, letterSpacing: "0.22em", border: "1px solid rgba(14,26,43,0.10)", color: "rgba(14,26,43,0.45)" }}
+                    className="rounded-full px-4 py-1.5 text-[12px] uppercase font-medium"
+                    style={{ ...mono, letterSpacing: "0.22em", border: "1px solid rgba(14,26,43,0.12)", color: "rgba(14,26,43,0.55)" }}
                   >
                     Coming soon
                   </span>
                 </div>
 
                 {/* Card content (visible beneath blur) */}
-                <div className="p-7">
+                <div className="p-8">
                   <span
-                    className="inline-block rounded-sm px-2.5 py-1 text-[9px] uppercase mb-5"
+                    className="inline-block rounded-sm px-3 py-1 text-[12px] uppercase font-medium mb-5"
                     style={{ ...mono, letterSpacing: "0.18em", background: "rgba(14,26,43,0.06)", color: "rgba(14,26,43,0.45)" }}
                   >
                     {card.tag}
                   </span>
                   <h3
                     className="mb-3 leading-snug"
-                    style={{ ...serif, color: "#0E1A2B", fontSize: "1.25rem", fontWeight: 400, margin: 0, marginBottom: "0.75rem" }}
+                    style={{ ...serif, color: "#0E1A2B", fontSize: "1.65rem", fontWeight: 400, margin: 0, marginBottom: "0.75rem" }}
                   >
                     {card.title}
                   </h3>
-                  <p className="text-sm leading-relaxed" style={{ ...sans, color: "#3A4B61" }}>
+                  <p className="text-[18px] leading-relaxed" style={{ ...sans, color: "#3A4B61" }}>
                     {card.desc}
                   </p>
-                  <div className="mt-6 flex items-center justify-between">
-                    <span className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.18em", color: "rgba(14,26,43,0.35)" }}>
+                  <div className="mt-8 flex items-center justify-between">
+                    <span className="text-[13px] uppercase font-medium" style={{ ...mono, letterSpacing: "0.18em", color: "rgba(14,26,43,0.35)" }}>
                       {card.readTime} read
                     </span>
-                    <span style={{ ...mono, color: "rgba(14,26,43,0.30)", fontSize: "0.85rem" }}>→</span>
+                    <span style={{ ...mono, color: "rgba(14,26,43,0.30)", fontSize: "1.1rem" }}>→</span>
                   </div>
                 </div>
               </motion.div>
@@ -263,7 +212,7 @@ export default function EssaysPage() {
             transition={{ duration: 0.9, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="mt-20 text-center"
           >
-            <p className="mb-6 text-sm" style={{ ...sans, color: "#3A4B61" }}>
+            <p className="mb-6 text-[18px] md:text-[20px]" style={{ ...sans, color: "#3A4B61" }}>
               We write about what we find. Occasionally. No filler.
             </p>
             <Link

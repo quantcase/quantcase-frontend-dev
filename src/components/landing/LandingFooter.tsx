@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const mono: React.CSSProperties = { fontFamily: "'Geist Mono', 'JetBrains Mono', ui-monospace, monospace" };
 const sans: React.CSSProperties = { fontFamily: "'Geist', system-ui, sans-serif" };
@@ -40,11 +41,18 @@ export default function LandingFooter() {
           <div>
             <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Company</div>
             <ul className="mt-4 space-y-3 text-sm" style={{ padding: 0 }}>
-              {["About", "Research", "Careers", "Contact"].map((l) => (
-                <li key={l} style={{ listStyleType: "none", marginLeft: 0 }}>
-                  <a href="#" className="lp-footer-link">{l}</a>
-                </li>
-              ))}
+              <li style={{ listStyleType: "none", marginLeft: 0 }}>
+                <Link href="/essays/introducing-quantcase" className="lp-footer-link">About</Link>
+              </li>
+              <li style={{ listStyleType: "none", marginLeft: 0 }}>
+                <Link href="/essays" className="lp-footer-link">Research</Link>
+              </li>
+              {/* <li style={{ listStyleType: "none", marginLeft: 0 }}>
+                <a href="#" className="lp-footer-link">Careers</a>
+              </li> */}
+              {/* <li style={{ listStyleType: "none", marginLeft: 0 }}>
+                <a href="#" className="lp-footer-link">Contact</a>
+              </li> */}
             </ul>
           </div>
         </div>
@@ -66,11 +74,18 @@ export default function LandingFooter() {
           <div className="md:col-span-4">
             <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.22em", color: "rgba(14,26,43,0.50)" }}>Company</div>
             <ul className="mt-5 space-y-3 text-sm" style={{ padding: 0 }}>
-              {["About", "Research", "Careers", "Contact"].map((l) => (
-                <li key={l} style={{ listStyleType: "none", marginLeft: 0 }}>
-                  <a href="#" className="lp-footer-link">{l}</a>
-                </li>
-              ))}
+              <li style={{ listStyleType: "none", marginLeft: 0 }}>
+                <Link href="/essays/introducing-quantcase" className="lp-footer-link">About</Link>
+              </li>
+              <li style={{ listStyleType: "none", marginLeft: 0 }}>
+                <Link href="/essays" className="lp-footer-link">Research</Link>
+              </li>
+              {/* <li style={{ listStyleType: "none", marginLeft: 0 }}>
+                <a href="#" className="lp-footer-link">Careers</a>
+              </li> */}
+              {/* <li style={{ listStyleType: "none", marginLeft: 0 }}>
+                <a href="#" className="lp-footer-link">Contact</a>
+              </li> */}
             </ul>
           </div>
         </div>

@@ -106,7 +106,7 @@ interface SVGRadarProps {
 }
 
 function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex }: SVGRadarProps) {
-  const SIZE = 260;
+  const SIZE = 320;
   const cx = SIZE / 2;
   const cy = SIZE / 2;
   const maxR = SIZE * 0.34;
@@ -258,28 +258,42 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
         const isHovered = hoveredIndex === i;
         const Icon = LENS_ICON_CONFIG[d.slug];
         
-        const boxWidth = 220;
-        const boxHeight = 40;
+        const boxWidth = 160;
+        const boxHeight = 90;
         
         let x = lp.x;
         let y = lp.y;
-        let justify = "center";
+        let flexDirection: any = "row";
+        let justifyContent = "center";
+        let textAlign: any = "center";
         
         if (Math.abs(lp.x - cx) < 8) {
-           x -= boxWidth / 2;
-           y -= boxHeight / 2;
+           x -= boxWidth / 2; // Center horizontally
            if (lp.y < cy) {
-             y -= 15; // Top label
+             // Top label
+             y -= boxHeight; // Box sits completely above the point
+             flexDirection = "column-reverse"; // Text top, Icon bottom (closest to point)
+             justifyContent = "flex-start"; // Pack to bottom
            } else {
-             y += 15; // Bottom label
+             // Bottom label
+             y += 0; // Box sits completely below the point
+             flexDirection = "column"; // Icon top (closest to point), Text bottom
+             justifyContent = "flex-start"; // Pack to top
            }
         } else if (lp.x < cx) {
-           x -= boxWidth;
-           y -= boxHeight / 2;
-           justify = "flex-end";
+           // Left label
+           x -= boxWidth; // Box sits completely to the left
+           y -= boxHeight / 2; // Center vertically
+           flexDirection = "row-reverse"; // Text left, Icon right (closest to point)
+           justifyContent = "flex-start"; // Pack to right
+           textAlign = "right";
         } else {
-           y -= boxHeight / 2;
-           justify = "flex-start";
+           // Right label
+           x += 0; // Box sits completely to the right
+           y -= boxHeight / 2; // Center vertically
+           flexDirection = "row"; // Icon left (closest to point), Text right
+           justifyContent = "flex-start"; // Pack to left
+           textAlign = "left";
         }
 
         return (
@@ -295,7 +309,8 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
                style={{ 
                  display: "flex", 
                  alignItems: "center", 
-                 justifyContent: justify,
+                 justifyContent: justifyContent,
+                 flexDirection: flexDirection,
                  height: "100%",
                  width: "100%",
                  cursor: "pointer",
@@ -318,15 +333,17 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
                   </div>
                 )}
                 <span style={{ 
-                  fontSize: "var(--qc-fz-13)", 
+                  fontSize: "var(--qc-fz-14)", 
                   fontWeight: "var(--qc-w-semi)", 
                   color: isHovered ? axColor : "var(--qc-ink)", 
                   fontFamily: "var(--qc-font-sans)",
                   lineHeight: 1.2,
-                  textAlign: justify === "flex-end" ? "right" : justify === "center" ? "center" : "left",
+                  textAlign: textAlign,
+                  whiteSpace: "pre-wrap",
+                  maxWidth: flexDirection.includes("column") ? "100%" : "90px",
                   transition: "color 0.15s"
                 }}>
-                  {d.name}
+                  {d.name.replace(" ", "\n")}
                 </span>
              </div>
           </foreignObject>
@@ -472,7 +489,33 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
   const [hoveredVertex, setHoveredVertex] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ pctX: 0.5, pctY: 0 });
 
-  const scorecardLenses = lenses ?? insight.lenses;
+  // Define preferred order for lenses to align radar points (Top, Right, Bottom, Left)
+  const PREFERRED_LENS_ORDER = [
+    "disclosure-honesty",    // Top
+    "promoter-activity",     // Right
+    "capital-allocation",    // Bottom
+    "guidance-credibility",  // Left
+    // Additional lenses for Opp / Deal pages to ensure stable ordering
+    "industry-analysis",
+    "competition",
+    "financial-strength",
+    "customer-distribution",
+    "eps-engine",
+    "earnings-forecast",
+    "pe-rerating-potential",
+    "earning-quality",
+    "earnings-quality",
+    "target-price-matrix",
+  ];
+
+  const rawLenses = lenses ?? insight.lenses;
+  const scorecardLenses = [...rawLenses].sort((a, b) => {
+    let ia = PREFERRED_LENS_ORDER.indexOf(a.slug);
+    let ib = PREFERRED_LENS_ORDER.indexOf(b.slug);
+    if (ia === -1) ia = 999;
+    if (ib === -1) ib = 999;
+    return ia - ib;
+  });
 
   const bandColor = verdictBandColor(insight.verdict_band ?? insight.verdict);
   const bandBg = verdictBandBg(insight.verdict_band ?? insight.verdict);
@@ -590,7 +633,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
           <div style={{ flex: 1, padding: "28px 16px 28px", display: "flex", justifyContent: "center", alignItems: "center" }}>
 
             {/* Radar — horizontal padding absorbs left/right axis label overflow */}
-            <div style={{ flexShrink: 0, width: 300, height: 260, position: "relative", overflow: "visible", padding: "0 28px" }}>
+            <div style={{ flexShrink: 0, width: 360, height: 320, position: "relative", overflow: "visible", padding: "0 28px" }}>
               <VertexTooltip lens={hoveredLens} visible={hoveredVertex !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
               <SVGRadar
                 data={radarData}

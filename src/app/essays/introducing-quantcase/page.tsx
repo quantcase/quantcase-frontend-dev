@@ -117,7 +117,7 @@ export default function IntroducingQuantcasePage() {
               margin: 0,
             }}
           >
-            What is QuantCase
+            What is QuantCase ?
           </motion.h1>
 
           <motion.div custom={2} initial="hidden" animate="show" variants={fadeUp} className="mt-8 flex items-center gap-4 text-base" style={{ ...mono, color: "rgba(14,26,43,0.5)" }}>

@@ -100,7 +100,7 @@ export default function IntroducingQuantcasePage() {
 
         <div className="relative mx-auto max-w-[800px] px-8 md:px-12 text-center flex flex-col items-center">
           <motion.div custom={0} initial="hidden" animate="show" variants={fadeUp} className="mb-6 flex items-center gap-4">
-            <span className="text-[11px] uppercase" style={{ ...mono, letterSpacing: "0.28em", color: "#B98A3E" }}>
+            <span className="text-[13px] uppercase" style={{ ...mono, letterSpacing: "0.28em", color: "#B98A3E" }}>
               Vision
             </span>
           </motion.div>
@@ -110,7 +110,7 @@ export default function IntroducingQuantcasePage() {
             style={{
               ...serif,
               color: "#0E1A2B",
-              fontSize: "clamp(2.5rem, 6vw, 4.5rem)",
+              fontSize: "clamp(3rem, 7.2vw, 5.4rem)",
               lineHeight: 1.05,
               letterSpacing: "-0.02em",
               fontWeight: 400,
@@ -120,7 +120,7 @@ export default function IntroducingQuantcasePage() {
             What is QuantCase
           </motion.h1>
 
-          <motion.div custom={2} initial="hidden" animate="show" variants={fadeUp} className="mt-8 flex items-center gap-4 text-sm" style={{ ...mono, color: "rgba(14,26,43,0.5)" }}>
+          <motion.div custom={2} initial="hidden" animate="show" variants={fadeUp} className="mt-8 flex items-center gap-4 text-base" style={{ ...mono, color: "rgba(14,26,43,0.5)" }}>
             <span>2026</span>
             <span className="h-1 w-1 rounded-full bg-current opacity-50" />
             <span>Confidential</span>
@@ -137,10 +137,10 @@ export default function IntroducingQuantcasePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="prose prose-lg prose-slate max-w-none"
-            style={{ ...sans, color: "#3A4B61", lineHeight: 1.7 }}
+            className="prose prose-xl prose-slate max-w-none text-[1.125rem]"
+            style={{ ...sans, color: "#3A4B61", lineHeight: 1.7, fontSize: "1.35rem" }}
           >
-            <h2 style={{ ...serif, color: "#0E1A2B", fontSize: "2rem", marginTop: 0, marginBottom: "1.5rem" }}>The Problem and the Design</h2>
+            <h2 style={{ ...serif, color: "#0E1A2B", fontSize: "2.4rem", marginTop: 0, marginBottom: "1.5rem" }}>The Problem and the Design</h2>
             
             <p className="mb-6">
               Most Fundamental analysis is tedious. You have to go into the company's data. You have to look at their annual reports, their quarterly earnings transcripts, their presentations released periodically. For any one company, this would usually amount to anywhere between 500 and 1,000 pages a year. Any investor individually would hold between 20 and 30 stocks in their portfolio. That's between 10,000 and 30,000 pages of reading materials.
@@ -157,21 +157,21 @@ export default function IntroducingQuantcasePage() {
                 <span className="font-bold text-[#B98A3E]">1.</span>
                 <div>
                   <strong className="text-[#0E1A2B] block mb-1">How good is the company’s management?</strong>
-                  <span className="text-sm opacity-80">Do they disclose bad news in time? How is their guidance credibility? Is the promoter acting in good faith? Is the management good at allocating their resources?</span>
+                  <span className="text-base opacity-80">Do they disclose bad news in time? How is their guidance credibility? Is the promoter acting in good faith? Is the management good at allocating their resources?</span>
                 </div>
               </li>
               <li className="flex gap-4">
                 <span className="font-bold text-[#B98A3E]">2.</span>
                 <div>
                   <strong className="text-[#0E1A2B] block mb-1">Is it an attractive opportunity?</strong>
-                  <span className="text-sm opacity-80">Is the industry growing? How's the competitive intensity? How's the financial strength of the business? Has the company built durable distribution?</span>
+                  <span className="text-base opacity-80">Is the industry growing? How's the competitive intensity? How's the financial strength of the business? Has the company built durable distribution?</span>
                 </div>
               </li>
               <li className="flex gap-4">
                 <span className="font-bold text-[#B98A3E]">3.</span>
                 <div>
                   <strong className="text-[#0E1A2B] block mb-1">Is it a good deal?</strong>
-                  <span className="text-sm opacity-80">Is the quality of their revenue improving or deteriorating? Are their earnings expected to grow or stay stagnant?</span>
+                  <span className="text-base opacity-80">Is the quality of their revenue improving or deteriorating? Are their earnings expected to grow or stay stagnant?</span>
                 </div>
               </li>
             </ul>
@@ -192,7 +192,7 @@ export default function IntroducingQuantcasePage() {
               </p>
             </div>
 
-            <h3 style={{ ...serif, color: "#0E1A2B", fontSize: "1.75rem", marginTop: 0, marginBottom: "1rem" }}>HDFC Bank</h3>
+            <h3 style={{ ...serif, color: "#0E1A2B", fontSize: "2.1rem", marginTop: 0, marginBottom: "1rem" }}>HDFC Bank</h3>
             <p className="mb-4">
               <strong>The story everyone knows:</strong> the merger brought a giant loan book and not enough deposits, the CD ratio spiked to 111.5%, and the bank has been walking it down since. A before/after read says fixed — 95% by June 2025.
             </p>
@@ -216,7 +216,7 @@ export default function IntroducingQuantcasePage() {
               />
             </div>
 
-            <h3 style={{ ...serif, color: "#0E1A2B", fontSize: "1.75rem", marginTop: 0, marginBottom: "1rem" }}>Reliance</h3>
+            <h3 style={{ ...serif, color: "#0E1A2B", fontSize: "2.1rem", marginTop: 0, marginBottom: "1rem" }}>Reliance</h3>
             <p className="mb-4">
               <strong>Everyone parses Reliance's quarterly calls. Wrong document.</strong> Reliance commits once a year, at the AGM - the calls just report against what was already set there. So we read the AGMs, and watch each bet harden.
             </p>
@@ -249,10 +249,10 @@ export default function IntroducingQuantcasePage() {
             </div>
 
             <div className="mt-16 text-center">
-              <p className="text-xl mb-2" style={{ ...serif, color: "#0E1A2B" }}>
+              <p className="text-2xl mb-2" style={{ ...serif, color: "#0E1A2B" }}>
                 Pattern recognition is the nuance between analysis and interpretation. Its what sets us apart.
               </p>
-              <p className="text-sm font-bold uppercase tracking-widest text-[#B98A3E]">
+              <p className="text-base font-bold uppercase tracking-widest text-[#B98A3E]">
                 We call it QuantCase Intuition.
               </p>
             </div>

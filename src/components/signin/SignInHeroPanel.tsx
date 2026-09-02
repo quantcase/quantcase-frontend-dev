@@ -8,8 +8,8 @@ import { SignInPreviewCard } from "./SignInPreviewCard";
 
 const SLIDE_LABELS = [
   { text: "Indian Stocks.", color: "#a5b4fc" },
-  { text: "Mutual Funds.", color: "#6ee7b7" },
-  { text: "US Stocks.",    color: "#fb923c" },
+  // { text: "Mutual Funds.", color: "#6ee7b7" },
+  // { text: "US Stocks.",    color: "#fb923c" },
   { text: "Private Markets.", color: "#fde68a" },
 ];
 const INTERVAL_MS = 4500;
@@ -102,7 +102,7 @@ export function SignInHeroPanel() {
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         {/* Logo + Wordmark + Headline stacked */}
-        <Link href="/" className="flex flex-col items-start gap-3">
+        {/* <Link href="/" className="flex flex-col items-start gap-3"> */}
           <Image
             src="/logos/logo-text-white.png"
             alt="QuantCase"
@@ -137,7 +137,7 @@ export function SignInHeroPanel() {
               </AnimatePresence>
             </h1>
           </div>
-        </Link>
+        {/* </Link> */}
       </motion.div>
 
       {/* Preview card */}

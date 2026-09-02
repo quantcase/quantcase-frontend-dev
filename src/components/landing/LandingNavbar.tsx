@@ -168,29 +168,8 @@ export default function LandingNavbar({
                   <span>Essays</span>
                   <span className="text-xs text-[rgba(14,26,43,0.45)]">Case Studies</span>
                 </Link>
-
-                <Link
-                  href="/essays/introducing-quantcase"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between rounded-xl px-4 py-3.5 text-base font-medium text-[#0E1A2B] transition-colors hover:bg-[rgba(14,26,43,0.05)] hover:text-[#B98A3E]"
-                  style={{ textDecoration: "none", fontFamily: "'Geist', system-ui, sans-serif" }}
-                >
-                  <span>What is QuantCase</span>
-                  <span className="text-xs text-[rgba(14,26,43,0.45)]">Vision</span>
-                </Link>
               </nav>
-
-              <div className="pt-2 border-t border-[rgba(14,26,43,0.08)]">
-                <Link
-                  href={ctaHref}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="lp-cta-btn flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-center text-sm font-medium"
-                  style={{ textDecoration: "none" }}
-                >
-                  <span>{ctaText}</span>
-                  <span>→</span>
-                </Link>
-              </div>
+              
             </div>
           </motion.div>
         )}

@@ -14,6 +14,8 @@ export interface TaskItem {
 
 interface TodaysTasksProps {
   tasks: TaskItem[];
+  style?: React.CSSProperties;
+  className?: string;
 }
 
 const BADGE_STYLE: Record<TaskStatus, React.CSSProperties> = {
@@ -50,7 +52,7 @@ const ADD_ACTION = (
   </button>
 );
 
-export function TodaysTasks({ tasks: initialTasks }: TodaysTasksProps) {
+export function TodaysTasks({ tasks: initialTasks, style, className = "" }: TodaysTasksProps) {
   const [tasks, setTasks] = useState<TaskItem[]>(initialTasks);
 
   function toggleTask(id: string) {
@@ -65,17 +67,19 @@ export function TodaysTasks({ tasks: initialTasks }: TodaysTasksProps) {
 
   return (
     <aside
+      className={className}
       style={{
         background: "var(--qc-card)",
         border: "1px solid var(--qc-hair)",
-        borderRadius: 18,
-        padding: "14px 16px",
+        borderRadius: 10,
+        padding: "16px 18px",
         display: "flex",
         flexDirection: "column",
         gap: 14,
         position: "relative",
         overflow: "hidden",
-        marginTop: 14,
+        marginTop: 0,
+        ...style,
       }}
     >
       {/* Lime gradient overlay (bottom 60%) */}

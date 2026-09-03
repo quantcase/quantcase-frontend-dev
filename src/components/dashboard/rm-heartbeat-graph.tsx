@@ -4,8 +4,6 @@ import React, { useRef, useEffect, useState, useMemo, useCallback } from "react"
 import Link from "next/link";
 import {
   Activity,
-  Maximize2,
-  Minimize2,
   ZoomIn,
   ZoomOut,
   RotateCcw,
@@ -596,7 +594,6 @@ export function RMHeartbeatGraph() {
   const [activeFilter, setActiveFilter] = useState<HoldingCategory | "all" | "alerts">("all");
   const [colorMode, setColorMode] = useState<"category" | "severity">("category");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Transform / Camera
   const transformRef = useRef({ x: 0, y: 0, k: 1 });
@@ -1115,13 +1112,11 @@ export function RMHeartbeatGraph() {
   return (
     <div
       ref={containerRef}
-      className={`rounded-[10px] flex flex-col transition-all overflow-hidden relative w-full min-w-0 ${
-        isFullscreen ? "fixed inset-0 z-50 rounded-none h-screen w-screen" : ""
-      }`}
+      className="rounded-[10px] flex flex-col transition-all overflow-hidden relative w-full min-w-0"
       style={{
         border: "1px solid rgba(255, 255, 255, 0.12)",
         background: NAVY_BG,
-        minHeight: isFullscreen ? "100vh" : 520
+        minHeight: 520
       }}
     >
       {/* ── Top Header Section: Number of Clients (Top-Left) & AUM Metric (Top-Right) ── */}
@@ -1291,15 +1286,6 @@ export function RMHeartbeatGraph() {
               <RotateCcw className="size-3.5" />
             </button>
           </div>
-
-          {/* Fullscreen Toggle */}
-          <button
-            onClick={() => setIsFullscreen((f) => !f)}
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            className="p-1.5 rounded-md text-white/80 bg-white/[0.08] border border-white/[0.14] hover:bg-white/[0.15] transition-colors cursor-pointer"
-          >
-            {isFullscreen ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
-          </button>
         </div>
       </div>
 

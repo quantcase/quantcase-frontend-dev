@@ -1,11 +1,10 @@
 import { TodaysBriefing } from "@/components/dashboard/todays-briefing";
 import { ClientsAttentionScroll } from "@/components/dashboard/clients-attention-scroll";
 import { RMHeartbeatGraph } from "@/components/dashboard/rm-heartbeat-graph";
+import { WhatChangedToday } from "@/components/dashboard/what-changed-today";
 import { NextMeetingPrep } from "@/components/dashboard/next-meeting-prep";
 import { WhoToCallToday } from "@/components/dashboard/who-to-call-today";
-import { BookAtAGlance } from "@/components/dashboard/book-at-a-glance";
 import { TodaysTasks } from "@/components/dashboard/todays-tasks";
-import { WhatChangedToday } from "@/components/dashboard/what-changed-today";
 import { SmartSegmentsPills } from "@/components/dashboard/smart-segments-pills";
 import { OpportunitiesPanel } from "@/components/dashboard/opportunities-panel";
 import type { TaskItem } from "@/components/dashboard/todays-tasks";
@@ -112,7 +111,7 @@ export default function DashboardPage() {
         </header>
 
         {/* ════════════════════════════════════════════════════════════
-            TOP ROW — Today's Brief (Compact) + Horizontally Scrollable Clients Needing Attention
+            1. TOP ROW — Today's Brief (Compact) + Horizontally Scrollable Clients Needing Attention
         ═══════════════════════════════════════════════════════════════ */}
         <section className="grid grid-cols-1 lg:grid-cols-[330px_minmax(0,1fr)] gap-3.5 mb-5 items-stretch w-full min-w-0">
           <div className="w-full min-w-0 flex flex-col">
@@ -124,48 +123,47 @@ export default function DashboardPage() {
         </section>
 
         {/* ════════════════════════════════════════════════════════════
-            RM HEARTBEAT GRAPH (RM at Center, Clients & Holdings Branching Out)
+            2. RM HEARTBEAT GRAPH (RM at Center, Clients & Holdings Branching Out)
         ═══════════════════════════════════════════════════════════════ */}
         <section className="mb-6 w-full min-w-0">
           <RMHeartbeatGraph />
         </section>
 
         {/* ════════════════════════════════════════════════════════════
-            NEXT MEETING STRIP
-        ═══════════════════════════════════════════════════════════════ */}
-        <div className="mb-6 w-full min-w-0">
-          <NextMeetingPrep />
-        </div>
-
-        {/* ════════════════════════════════════════════════════════════
-            TWO-COLUMN — Who to call (left) + Book glance + Tasks (right)
-        ═══════════════════════════════════════════════════════════════ */}
-        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 mb-6 w-full min-w-0">
-          <div className="w-full min-w-0">
-            <WhoToCallToday />
-          </div>
-          <aside className="w-full min-w-0 flex flex-col gap-3.5">
-            <BookAtAGlance />
-            <TodaysTasks tasks={TODAYS_TASKS} />
-          </aside>
-        </section>
-
-        {/* ════════════════════════════════════════════════════════════
-            WHAT CHANGED TODAY
+            3. WHAT CHANGED TODAY (Directly below the graph)
         ═══════════════════════════════════════════════════════════════ */}
         <div className="w-full min-w-0 mb-6">
           <WhatChangedToday />
         </div>
 
         {/* ════════════════════════════════════════════════════════════
-            SMART SEGMENTS
+            4. NEXT MEETING STRIP
+        ═══════════════════════════════════════════════════════════════ */}
+        <div className="mb-6 w-full min-w-0">
+          <NextMeetingPrep />
+        </div>
+
+        {/* ════════════════════════════════════════════════════════════
+            5. TWO-COLUMN — Who to call (left) + Today's Tasks (right)
+        ═══════════════════════════════════════════════════════════════ */}
+        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] gap-6 mb-6 w-full min-w-0 items-start">
+          <div className="w-full min-w-0">
+            <WhoToCallToday />
+          </div>
+          <div className="w-full min-w-0">
+            <TodaysTasks tasks={TODAYS_TASKS} />
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════
+            6. SMART SEGMENTS
         ═══════════════════════════════════════════════════════════════ */}
         <div className="w-full min-w-0 mb-6">
           <SmartSegmentsPills />
         </div>
 
         {/* ════════════════════════════════════════════════════════════
-            OPPORTUNITIES WORTH A CONVERSATION
+            7. OPPORTUNITIES WORTH A CONVERSATION
         ═══════════════════════════════════════════════════════════════ */}
         <div className="w-full min-w-0">
           <OpportunitiesPanel />

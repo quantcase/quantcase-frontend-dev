@@ -3,15 +3,20 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { BACKEND_URL } from "@/lib/constants";
-import { useUser, usesInvestorFlow, hasAdminPrivileges, type AccountType } from "@/components/providers/UserContext";
+import { useUser, usesInvestorFlow, hasAdminPrivileges, hasManagerPrivileges, type AccountType } from "@/components/providers/UserContext";
 import type { MeResponse } from "@/types/auth";
 
 const PUBLIC_PATHS = ["/signin", "/", "/register"];
 const ONBOARDING_PATH = "/onboarding";
-const ADMIN_PATH_PREFIXES = ["/admin", "/wealthos", "/model-builder", "/model-analytics"];
+const SUPER_ADMIN_PATH_PREFIXES = ["/admin"];
+const MANAGER_PATH_PREFIXES = ["/wealthos", "/model-builder", "/model-analytics"];
 
-function isAdminPath(pathname: string) {
-  return ADMIN_PATH_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+function isSuperAdminPath(pathname: string) {
+  return SUPER_ADMIN_PATH_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+function isManagerPath(pathname: string) {
+  return MANAGER_PATH_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
 function homePathFor(accountType: AccountType) {
@@ -39,15 +44,22 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Synchronous guard: redirect investor-flow accounts from manager dashboard immediately
     const cachedType = localStorage.getItem("qc_account_type") as AccountType;
-    if (usesInvestorFlow(cachedType) && pathname === "/dashboard") {
+
+    // Synchronous guard: redirect investor accounts from manager dashboard immediately
+    if (cachedType === "investor" && pathname === "/dashboard") {
       router.replace("/investor/dashboard");
       return;
     }
 
-    // Synchronous guard: block admin-only routes for accounts without admin privileges
-    if (isAdminPath(pathname) && cachedType && !hasAdminPrivileges(cachedType)) {
+    // Synchronous guard: block super-admin-only routes (/admin/*) for non-admins (investors & managers)
+    if (isSuperAdminPath(pathname) && cachedType && !hasAdminPrivileges(cachedType)) {
+      router.replace(homePathFor(cachedType));
+      return;
+    }
+
+    // Synchronous guard: block manager routes (/wealthos/*, /model-builder/*) for investors
+    if (isManagerPath(pathname) && cachedType && !hasManagerPrivileges(cachedType)) {
       router.replace(homePathFor(cachedType));
       return;
     }
@@ -91,14 +103,20 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
         const acctType: AccountType = data.accountType ?? data.account_type ?? null;
 
-        // Authoritative guard: block admin-only routes for accounts without admin privileges
-        if (isAdminPath(pathname) && !hasAdminPrivileges(acctType)) {
+        // Authoritative guard: block super-admin-only routes (/admin/*) for non-admins (investors & managers)
+        if (isSuperAdminPath(pathname) && !hasAdminPrivileges(acctType)) {
           router.replace(homePathFor(acctType));
           return;
         }
 
-        // Investor-flow account on manager dashboard
-        if (usesInvestorFlow(acctType) && pathname === "/dashboard") {
+        // Authoritative guard: block manager routes for non-managers (investors)
+        if (isManagerPath(pathname) && !hasManagerPrivileges(acctType)) {
+          router.replace(homePathFor(acctType));
+          return;
+        }
+
+        // Investor account on manager dashboard
+        if (acctType === "investor" && pathname === "/dashboard") {
           router.replace("/investor/dashboard");
         }
       })

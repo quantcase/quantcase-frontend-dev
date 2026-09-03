@@ -14,8 +14,13 @@ export function usesInvestorFlow(accountType: AccountType): boolean {
   return accountType === "investor" || accountType === "admin";
 }
 
-/** Whether an account has privileged (admin-only) nav items and routes. */
+/** Whether an account has privileged super-admin nav items and routes. */
 export function hasAdminPrivileges(accountType: AccountType): boolean {
+  return accountType === "admin";
+}
+
+/** Whether an account has manager/wealth privileges (WealthOS, Model Builder, Manager Dashboard). */
+export function hasManagerPrivileges(accountType: AccountType): boolean {
   return accountType === "manager" || accountType === "admin";
 }
 

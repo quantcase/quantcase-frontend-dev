@@ -10,31 +10,32 @@ export function TodaysBriefing() {
   return (
     <DarkGradientCard
       style={{
-        padding: "22px 26px 20px",
+        padding: "18px 20px 16px",
         color: "#fff",
-        minHeight: 320,
+        minHeight: 220,
         display: "flex",
         flexDirection: "column",
+        height: "100%",
       }}
     >
 
       <MonoLabel
-        size={10}
-        tracking="0.18em"
+        size={9.5}
+        tracking="0.16em"
         color="rgba(255,255,255,0.5)"
-        style={{ marginBottom: 28, position: "relative" }}
+        style={{ marginBottom: 14, position: "relative" }}
       >
         TODAY&apos;S BRIEF · 09:42 IST
       </MonoLabel>
 
       <h2
         style={{
-          fontSize: 22,
+          fontSize: 18,
           fontWeight: 400,
-          lineHeight: 1.4,
+          lineHeight: 1.35,
           letterSpacing: "-0.01em",
           margin: 0,
-          maxWidth: "92%",
+          maxWidth: "96%",
           position: "relative",
           fontFamily: "var(--qc-font-sans)",
           color: "var(--qc-on-dark)",
@@ -47,9 +48,9 @@ export function TodaysBriefing() {
       <div
         style={{
           display: "flex",
-          gap: 8,
+          gap: 6,
           marginTop: "auto",
-          paddingTop: 28,
+          paddingTop: 16,
           flexWrap: "wrap",
           position: "relative",
         }}

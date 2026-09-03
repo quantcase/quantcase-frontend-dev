@@ -1,6 +1,6 @@
-import { RMPortfolioSignalGraph } from "@/components/dashboard/rm-portfolio-signal-graph";
-import type { RMNode } from "@/components/dashboard/rm-portfolio-signal-graph";
 import { TodaysBriefing } from "@/components/dashboard/todays-briefing";
+import { ClientsAttentionScroll } from "@/components/dashboard/clients-attention-scroll";
+import { ObsidianHoldingsGraph } from "@/components/dashboard/obsidian-holdings-graph";
 import { NextMeetingPrep } from "@/components/dashboard/next-meeting-prep";
 import { WhoToCallToday } from "@/components/dashboard/who-to-call-today";
 import { BookAtAGlance } from "@/components/dashboard/book-at-a-glance";
@@ -9,152 +9,6 @@ import { WhatChangedToday } from "@/components/dashboard/what-changed-today";
 import { SmartSegmentsPills } from "@/components/dashboard/smart-segments-pills";
 import { OpportunitiesPanel } from "@/components/dashboard/opportunities-panel";
 import type { TaskItem } from "@/components/dashboard/todays-tasks";
-
-// ── RM Signal Graph data ──────────────────────────────────────────────────────
-
-const RM_GRAPH_DATA: RMNode[] = [
-  {
-    id: "rm-palash",
-    name: "Palash Jain",
-    initials: "PJ",
-    severity: "critical",
-    clients: [
-      {
-        id: "cli-rahul",
-        name: "Rahul Mehta",
-        aum: "₹3.2 Cr",
-        severity: "critical",
-        assetClasses: [
-          {
-            id: "ac-eq-rm",
-            label: "Equity",
-            severity: "critical",
-            subclasses: [
-              { id: "sub-midcap", label: "Mid-cap",   severity: "critical", signal: "Drift +6%"  },
-              { id: "sub-lrgcap", label: "Large-cap", severity: "clean",    signal: "On track"   },
-            ],
-          },
-          {
-            id: "ac-mf-rm",
-            label: "Mutual Funds",
-            severity: "moderate",
-            subclasses: [
-              { id: "sub-hybrid", label: "Hybrid", severity: "moderate", signal: "Rebalance due" },
-            ],
-          },
-        ],
-      },
-      {
-        id: "cli-varun",
-        name: "Varun Kapoor",
-        aum: "₹7.1 Cr",
-        severity: "critical",
-        assetClasses: [
-          {
-            id: "ac-eq-vk",
-            label: "Equity",
-            severity: "critical",
-            subclasses: [
-              { id: "sub-midcap-vk", label: "Mid-cap",   severity: "critical", signal: "Overweight +9%"  },
-              { id: "sub-smcap-vk",  label: "Small-cap", severity: "warning",  signal: "Threshold near" },
-            ],
-          },
-          {
-            id: "ac-bonds-vk",
-            label: "Bonds",
-            severity: "clean",
-            subclasses: [
-              { id: "sub-gsec", label: "G-Sec", severity: "clean", signal: "Normal" },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "rm-sonal",
-    name: "Sonal Batra",
-    initials: "SB",
-    severity: "warning",
-    clients: [
-      {
-        id: "cli-anita",
-        name: "Anita Shah",
-        aum: "₹5.8 Cr",
-        severity: "warning",
-        assetClasses: [
-          {
-            id: "ac-eq-as",
-            label: "Equity",
-            severity: "warning",
-            subclasses: [
-              { id: "sub-ev",    label: "EV / Green", severity: "warning",  signal: "Report pending" },
-              { id: "sub-it-as", label: "IT",         severity: "moderate", signal: "Watch"          },
-            ],
-          },
-          {
-            id: "ac-realty-as",
-            label: "Realty",
-            severity: "clean",
-            subclasses: [
-              { id: "sub-realty", label: "REITs", severity: "clean", signal: "Stable" },
-            ],
-          },
-        ],
-      },
-      {
-        id: "cli-suresh",
-        name: "Suresh Nair",
-        aum: "₹2.4 Cr",
-        severity: "clean",
-        assetClasses: [
-          {
-            id: "ac-mf-sn",
-            label: "Mutual Funds",
-            severity: "clean",
-            subclasses: [
-              { id: "sub-debt-sn",   label: "Debt",   severity: "clean", signal: "Stable" },
-              { id: "sub-equity-sn", label: "Equity", severity: "clean", signal: "Stable" },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "rm-arjun",
-    name: "Arjun Rao",
-    initials: "AR",
-    severity: "moderate",
-    clients: [
-      {
-        id: "cli-priya",
-        name: "Priya Venkat",
-        aum: "₹4.6 Cr",
-        severity: "moderate",
-        assetClasses: [
-          {
-            id: "ac-eq-pv",
-            label: "Equity",
-            severity: "moderate",
-            subclasses: [
-              { id: "sub-infra",  label: "Infra",  severity: "moderate", signal: "Pending review" },
-              { id: "sub-pharma", label: "Pharma", severity: "clean",    signal: "On track"       },
-            ],
-          },
-          {
-            id: "ac-intl-pv",
-            label: "Intl Funds",
-            severity: "warning",
-            subclasses: [
-              { id: "sub-us", label: "US Equity", severity: "warning", signal: "FX exposure" },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
 
 const TODAYS_TASKS: TaskItem[] = [
   { id: "1", label: "Send Rahul updated portfolio PDF", status: "pending", meta: "BY 10:00"        },
@@ -190,7 +44,7 @@ export default function DashboardPage() {
     <div style={{ background: "var(--qc-bg)", minHeight: "100vh" }}>
       <main
         style={{
-          padding: "28px 36px 60px",
+          padding: "24px 32px 60px",
           maxWidth: 1440,
           fontFamily: "var(--qc-font-sans)",
           color: "var(--qc-ink)",
@@ -202,13 +56,13 @@ export default function DashboardPage() {
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "space-between",
-            marginBottom: 22,
+            marginBottom: 20,
           }}
         >
           <div>
             <h1
               style={{
-                fontSize: 30,
+                fontSize: 28,
                 fontWeight: 500,
                 letterSpacing: "-0.02em",
                 margin: 0,
@@ -221,7 +75,7 @@ export default function DashboardPage() {
             </h1>
             <div
               style={{
-                marginTop: 6,
+                marginTop: 5,
                 fontFamily: "var(--qc-font-mono)",
                 fontSize: 11,
                 color: "var(--qc-ink-3)",
@@ -241,7 +95,7 @@ export default function DashboardPage() {
               color: "#fff",
               border: "1px solid var(--qc-ink)",
               borderRadius: 10,
-              padding: "9px 14px",
+              padding: "8px 14px",
               fontSize: 12.5,
               fontWeight: 500,
               fontFamily: "var(--qc-font-sans)",
@@ -256,24 +110,32 @@ export default function DashboardPage() {
         </header>
 
         {/* ════════════════════════════════════════════════════════════
-            TOP ROW — Today's Brief + RM Heartbeat
+            TOP ROW — Today's Brief (Compact) + Horizontally Scrollable Clients Needing Attention
         ═══════════════════════════════════════════════════════════════ */}
         <section
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr 3fr",
+            gridTemplateColumns: "330px 1fr",
             gap: 14,
-            marginBottom: 14,
+            marginBottom: 20,
+            alignItems: "stretch",
           }}
         >
           <TodaysBriefing />
-          <RMPortfolioSignalGraph rms={RM_GRAPH_DATA} className="h-full" />
+          <ClientsAttentionScroll />
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════
+            OBSIDIAN HOLDINGS NETWORK GRAPH (RM at Center, Clients & Holdings Branching Out)
+        ═══════════════════════════════════════════════════════════════ */}
+        <section style={{ marginBottom: 24 }}>
+          <ObsidianHoldingsGraph />
         </section>
 
         {/* ════════════════════════════════════════════════════════════
             NEXT MEETING STRIP
         ═══════════════════════════════════════════════════════════════ */}
-        <div style={{ marginBottom: 28 }}>
+        <div style={{ marginBottom: 24 }}>
           <NextMeetingPrep />
         </div>
 
@@ -284,8 +146,8 @@ export default function DashboardPage() {
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 360px",
-            gap: 28,
-            marginBottom: 28,
+            gap: 24,
+            marginBottom: 24,
           }}
         >
           <WhoToCallToday />

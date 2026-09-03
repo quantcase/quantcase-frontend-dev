@@ -58,26 +58,21 @@ Defined in [`UserContext.tsx`](../src/components/providers/UserContext.tsx):
 type AccountType = "manager" | "investor" | "admin" | null;
 ```
 
-Two helpers derive behavior from the account type — use these rather than comparing strings inline:
+Three helpers derive behavior from the account type — use these rather than comparing strings inline:
 
 | Helper | True for | Meaning |
 |--------|----------|---------|
 | `usesInvestorFlow(t)` | `investor`, `admin` | Uses the investor UX (investor dashboard + sidebar). Home = `/investor/dashboard`. |
-| `hasAdminPrivileges(t)` | `manager`, `admin` | Sees privileged nav items and admin routes. Manager home = `/dashboard`. |
+| `hasAdminPrivileges(t)` | `admin` | Super-admin: sees super-admin nav items and can access `/admin/*` routes. |
+| `hasManagerPrivileges(t)` | `manager`, `admin` | Relationship manager & admin: can access `/dashboard`, `/wealthos/*`, `/model-builder/*`. |
 
-`admin` intentionally mirrors the **investor** flow for its home/landing while retaining privileged
+`admin` intentionally mirrors the **investor** flow for its home/landing while retaining super-admin
 access everywhere else.
 
-## Admin-gated routes
+## Gated routes
 
-These path prefixes require `hasAdminPrivileges`:
-
-```
-/admin   /wealthos   /model-builder   /model-analytics
-```
-
-Accounts without privileges are redirected to their home (`homePathFor` → investor or manager
-dashboard).
+- `/admin/*` — requires `hasAdminPrivileges` (`admin` only). Non-admins are redirected to their home dashboard.
+- `/wealthos/*`, `/model-builder/*`, `/model-analytics/*` — requires `hasManagerPrivileges` (`manager`, `admin`). Investors are redirected to `/investor/dashboard`.
 
 ## localStorage keys
 

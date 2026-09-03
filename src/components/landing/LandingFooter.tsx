@@ -47,6 +47,9 @@ export default function LandingFooter() {
               <li style={{ listStyleType: "none", marginLeft: 0 }}>
                 <Link href="/essays" className="lp-footer-link">Research</Link>
               </li>
+              <li style={{ listStyleType: "none", marginLeft: 0 }}>
+                <Link href="/disclaimer" className="lp-footer-link">Disclaimer</Link>
+              </li>
               {/* <li style={{ listStyleType: "none", marginLeft: 0 }}>
                 <a href="#" className="lp-footer-link">Careers</a>
               </li> */}
@@ -79,6 +82,9 @@ export default function LandingFooter() {
               </li>
               <li style={{ listStyleType: "none", marginLeft: 0 }}>
                 <Link href="/essays" className="lp-footer-link">Research</Link>
+              </li>
+              <li style={{ listStyleType: "none", marginLeft: 0 }}>
+                <Link href="/disclaimer" className="lp-footer-link">Disclaimer</Link>
               </li>
               {/* <li style={{ listStyleType: "none", marginLeft: 0 }}>
                 <a href="#" className="lp-footer-link">Careers</a>

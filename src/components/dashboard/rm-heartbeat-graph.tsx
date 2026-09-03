@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import {
-  Network,
+  Activity,
   Maximize2,
   Minimize2,
   ZoomIn,
@@ -11,14 +11,9 @@ import {
   RotateCcw,
   Search,
   Sliders,
-  Filter,
-  Eye,
-  Info,
-  ExternalLink,
-  ChevronRight,
   TrendingUp,
-  AlertCircle,
-  Sparkles
+  ArrowUpRight,
+  ChevronRight
 } from "lucide-react";
 import { MonoLabel } from "@/components/ds";
 
@@ -71,7 +66,9 @@ export interface GraphLink {
   distance: number;
 }
 
-// ── Color Schemes ─────────────────────────────────────────────────────────────
+// ── Color Schemes (Harmonized for Solid Navy Background #210B2C) ──────────────
+
+const NAVY_BG = "#210B2C";
 
 const CATEGORY_COLORS: Record<HoldingCategory, { main: string; glow: string; label: string; text: string }> = {
   rm: {
@@ -81,48 +78,48 @@ const CATEGORY_COLORS: Record<HoldingCategory, { main: string; glow: string; lab
     text: "#FEF3C7"
   },
   equity: {
-    main: "#3B82F6",
-    glow: "rgba(59, 130, 246, 0.4)",
+    main: "#38BDF8",
+    glow: "rgba(56, 189, 248, 0.4)",
     label: "Equity",
-    text: "#DBEAFE"
+    text: "#E0F2FE"
   },
   debt: {
-    main: "#10B981",
-    glow: "rgba(16, 185, 129, 0.4)",
+    main: "#34D399",
+    glow: "rgba(52, 211, 153, 0.4)",
     label: "Debt & Fixed Income",
     text: "#D1FAE5"
   },
   mutual_fund: {
-    main: "#A855F7",
-    glow: "rgba(168, 85, 247, 0.4)",
+    main: "#C084FC",
+    glow: "rgba(192, 132, 252, 0.4)",
     label: "Mutual Funds",
     text: "#F3E8FF"
   },
   reit: {
-    main: "#F97316",
-    glow: "rgba(249, 115, 22, 0.4)",
+    main: "#FBBF24",
+    glow: "rgba(251, 191, 36, 0.4)",
     label: "Real Estate & REITs",
-    text: "#FFEDD5"
+    text: "#FEF3C7"
   },
   intl: {
-    main: "#06B6D4",
-    glow: "rgba(6, 182, 212, 0.4)",
+    main: "#2DD4BF",
+    glow: "rgba(45, 212, 191, 0.4)",
     label: "International Funds",
-    text: "#CFFAFE"
+    text: "#CCFBF1"
   },
   alts: {
-    main: "#EC4899",
-    glow: "rgba(236, 72, 153, 0.4)",
+    main: "#FB7185",
+    glow: "rgba(251, 113, 133, 0.4)",
     label: "Private Equity & Alts",
-    text: "#FCE7F3"
+    text: "#FFE4E6"
   }
 };
 
 const SEVERITY_COLORS: Record<HealthSeverity, { main: string; glow: string; label: string }> = {
-  critical: { main: "#EF4444", glow: "rgba(239, 68, 68, 0.5)", label: "Critical Drift" },
-  warning:  { main: "#F59E0B", glow: "rgba(245, 158, 11, 0.4)", label: "Warning" },
-  moderate: { main: "#3B82F6", glow: "rgba(59, 130, 246, 0.35)", label: "Watch" },
-  clean:    { main: "#10B981", glow: "rgba(16, 185, 129, 0.35)", label: "On Track" }
+  critical: { main: "#F87171", glow: "rgba(248, 113, 113, 0.55)", label: "Critical Drift" },
+  warning:  { main: "#FBBF24", glow: "rgba(251, 191, 36, 0.45)", label: "Warning" },
+  moderate: { main: "#60A5FA", glow: "rgba(96, 165, 250, 0.4)", label: "Watch" },
+  clean:    { main: "#34D399", glow: "rgba(52, 211, 153, 0.4)", label: "On Track" }
 };
 
 // ── Graph Data Definition ─────────────────────────────────────────────────────
@@ -135,7 +132,7 @@ function createInitialGraphData(): { nodes: GraphNode[]; links: GraphLink[] } {
   nodes.push({
     id: "rm-center",
     label: "Palash Jain",
-    sublabel: "Lead RM · ₹43.6 Cr Book",
+    sublabel: "Lead RM · ₹796 Cr Book",
     category: "rm",
     kind: "rm",
     severity: "moderate",
@@ -470,11 +467,11 @@ function createInitialGraphData(): { nodes: GraphNode[]; links: GraphLink[] } {
 
   CLIENTS_TREE.forEach((client, clientIndex) => {
     const angle = clientIndex * clientAngleStep - Math.PI / 2;
-    const clientDist = 175;
+    const clientDist = 170;
     const cx = Math.cos(angle) * clientDist;
     const cy = Math.sin(angle) * clientDist;
 
-    // Add Client Node
+    // Client Node
     nodes.push({
       id: client.id,
       label: client.name,
@@ -485,8 +482,8 @@ function createInitialGraphData(): { nodes: GraphNode[]; links: GraphLink[] } {
       aum: client.aum,
       signal: client.signal,
       radius: 17,
-      x: cx + (Math.random() - 0.5) * 20,
-      y: cy + (Math.random() - 0.5) * 20,
+      x: cx + (Math.random() - 0.5) * 15,
+      y: cy + (Math.random() - 0.5) * 15,
       vx: 0,
       vy: 0,
       parentId: "rm-center",
@@ -506,12 +503,12 @@ function createInitialGraphData(): { nodes: GraphNode[]; links: GraphLink[] } {
       distance: clientDist
     });
 
-    // Asset Classes for this client
+    // Asset Classes
     const acCount = client.assetClasses.length;
     client.assetClasses.forEach((ac, acIdx) => {
-      const acSpread = 0.7; // angle arc spread
+      const acSpread = 0.7;
       const acAngle = angle + (acIdx - (acCount - 1) / 2) * (acSpread / Math.max(1, acCount - 1));
-      const acDist = 80;
+      const acDist = 78;
       const acx = cx + Math.cos(acAngle) * acDist;
       const acy = cy + Math.sin(acAngle) * acDist;
 
@@ -524,8 +521,8 @@ function createInitialGraphData(): { nodes: GraphNode[]; links: GraphLink[] } {
         severity: ac.severity,
         weight: ac.weight,
         radius: 11,
-        x: acx + (Math.random() - 0.5) * 15,
-        y: acy + (Math.random() - 0.5) * 15,
+        x: acx + (Math.random() - 0.5) * 12,
+        y: acy + (Math.random() - 0.5) * 12,
         vx: 0,
         vy: 0,
         parentId: client.id,
@@ -545,12 +542,12 @@ function createInitialGraphData(): { nodes: GraphNode[]; links: GraphLink[] } {
         distance: acDist
       });
 
-      // Specific Holdings for this Asset Class
+      // Specific Holdings
       const hCount = ac.holdings.length;
       ac.holdings.forEach((h, hIdx) => {
         const hSpread = 0.9;
         const hAngle = acAngle + (hIdx - (hCount - 1) / 2) * (hSpread / Math.max(1, hCount - 1));
-        const hDist = 52;
+        const hDist = 50;
         const hx = acx + Math.cos(hAngle) * hDist;
         const hy = acy + Math.sin(hAngle) * hDist;
 
@@ -563,9 +560,9 @@ function createInitialGraphData(): { nodes: GraphNode[]; links: GraphLink[] } {
           severity: h.severity,
           weight: h.weight,
           signal: h.signal,
-          radius: 7,
-          x: hx + (Math.random() - 0.5) * 10,
-          y: hy + (Math.random() - 0.5) * 10,
+          radius: 6.5,
+          x: hx + (Math.random() - 0.5) * 8,
+          y: hy + (Math.random() - 0.5) * 8,
           vx: 0,
           vy: 0,
           parentId: ac.id,
@@ -590,9 +587,9 @@ function createInitialGraphData(): { nodes: GraphNode[]; links: GraphLink[] } {
   return { nodes, links };
 }
 
-// ── Obsidian Holdings Graph Component ─────────────────────────────────────────
+// ── RM Heartbeat Graph Component ──────────────────────────────────────────────
 
-export function ObsidianHoldingsGraph() {
+export function RMHeartbeatGraph() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -617,7 +614,7 @@ export function ObsidianHoldingsGraph() {
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0 });
 
-  // Filtered nodes lookup
+  // Connected nodes lookup for hover highlight
   const connectedNodeIds = useMemo(() => {
     if (!hoveredNode && !selectedNode) return null;
     const target = (hoveredNode || selectedNode)!;
@@ -666,7 +663,7 @@ export function ObsidianHoldingsGraph() {
     return set;
   }, [searchQuery]);
 
-  // Center the view on init / resize
+  // Center graph in canvas
   const centerGraph = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -679,7 +676,7 @@ export function ObsidianHoldingsGraph() {
     setZoomLevel(0.95);
   }, []);
 
-  // Zoom helpers
+  // Zoom handler
   const handleZoom = useCallback((factor: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -728,7 +725,7 @@ export function ObsidianHoldingsGraph() {
         const dist = Math.sqrt(distSq);
 
         const minDist = a.radius + b.radius + 12;
-        let force = (REPULSION / (distSq + 200));
+        let force = REPULSION / (distSq + 200);
         if (dist < minDist) {
           force += (minDist - dist) * 0.08;
         }
@@ -764,7 +761,7 @@ export function ObsidianHoldingsGraph() {
       b.vy -= fy;
     });
 
-    // Position updates with drag locks
+    // Position updates
     nodes.forEach((n) => {
       if (n.fx != null && n.fy != null) {
         n.x = n.fx;
@@ -815,36 +812,25 @@ export function ObsidianHoldingsGraph() {
       ctx.save();
       ctx.clearRect(0, 0, width, height);
 
-      // Deep Obsidian background gradient
-      const bgGrad = ctx.createRadialGradient(
-        width / 2,
-        height / 2,
-        40,
-        width / 2,
-        height / 2,
-        Math.max(width, height) * 0.75
-      );
-      bgGrad.addColorStop(0, "#111827");
-      bgGrad.addColorStop(0.45, "#0B0F19");
-      bgGrad.addColorStop(1, "#070A10");
-      ctx.fillStyle = bgGrad;
+      // Flat solid navy background matching Today's Brief box
+      ctx.fillStyle = NAVY_BG;
       ctx.fillRect(0, 0, width, height);
 
-      // Subtle coordinate star-dots grid
-      ctx.fillStyle = "rgba(255, 255, 255, 0.035)";
-      const gridSize = 40;
+      // Subtle micro-dots grid for coordinate depth
+      ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+      const gridSize = 36;
       const offsetX = transformRef.current.x % (gridSize * transformRef.current.k);
       const offsetY = transformRef.current.y % (gridSize * transformRef.current.k);
       const step = gridSize * transformRef.current.k;
       for (let x = offsetX; x < width; x += step) {
         for (let y = offsetY; y < height; y += step) {
           ctx.beginPath();
-          ctx.arc(x, y, 0.8, 0, Math.PI * 2);
+          ctx.arc(x, y, 0.75, 0, Math.PI * 2);
           ctx.fill();
         }
       }
 
-      // Apply camera transformation matrix
+      // Apply camera transform
       ctx.translate(transformRef.current.x, transformRef.current.y);
       ctx.scale(transformRef.current.k, transformRef.current.k);
 
@@ -852,30 +838,33 @@ export function ObsidianHoldingsGraph() {
       const nodeMap = new Map<string, GraphNode>();
       nodes.forEach((n) => nodeMap.set(n.id, n));
 
-      // ── Draw Links (Edges) ──────────────────────────────────────────────────
+      // ── Draw Links ──────────────────────────────────────────────────────────
       links.forEach((link) => {
         const source = nodeMap.get(link.source);
         const target = nodeMap.get(link.target);
         if (!source || !target) return;
 
-        // Filtering check
         const isFilterActive =
           activeFilter === "all" ||
-          (activeFilter === "alerts" && (source.severity === "critical" || target.severity === "critical" || source.severity === "warning" || target.severity === "warning")) ||
+          (activeFilter === "alerts" &&
+            (source.severity === "critical" ||
+              target.severity === "critical" ||
+              source.severity === "warning" ||
+              target.severity === "warning")) ||
           source.category === activeFilter ||
           target.category === activeFilter;
 
         const isHighlighted =
-          connectedNodeIds ? (connectedNodeIds.has(source.id) && connectedNodeIds.has(target.id)) : false;
-        const isDimmed =
-          connectedNodeIds ? !isHighlighted : !isFilterActive;
+          connectedNodeIds ? connectedNodeIds.has(source.id) && connectedNodeIds.has(target.id) : false;
+        const isDimmed = connectedNodeIds ? !isHighlighted : !isFilterActive;
 
         const isSearchHighlighted = searchMatchedIds
           ? searchMatchedIds.has(source.id) && searchMatchedIds.has(target.id)
           : false;
 
-        const colorCfg = colorMode === "category" ? CATEGORY_COLORS[link.category] : SEVERITY_COLORS[link.severity];
-        const baseColor = colorCfg?.main || "#6366F1";
+        const colorCfg =
+          colorMode === "category" ? CATEGORY_COLORS[link.category] : SEVERITY_COLORS[link.severity];
+        const baseColor = colorCfg?.main || "#38BDF8";
 
         ctx.beginPath();
         ctx.moveTo(source.x, source.y);
@@ -883,19 +872,19 @@ export function ObsidianHoldingsGraph() {
 
         if (isHighlighted || isSearchHighlighted) {
           ctx.strokeStyle = baseColor;
-          ctx.lineWidth = 1.8;
+          ctx.lineWidth = 2.0;
           ctx.globalAlpha = 0.95;
           ctx.shadowColor = baseColor;
-          ctx.shadowBlur = 8;
+          ctx.shadowBlur = 10;
         } else if (isDimmed) {
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
           ctx.lineWidth = 0.6;
-          ctx.globalAlpha = 0.08;
+          ctx.globalAlpha = 0.07;
           ctx.shadowBlur = 0;
         } else {
           ctx.strokeStyle = baseColor;
-          ctx.lineWidth = source.kind === "rm" ? 1.4 : source.kind === "client" ? 1.0 : 0.7;
-          ctx.globalAlpha = source.kind === "rm" ? 0.35 : source.kind === "client" ? 0.25 : 0.18;
+          ctx.lineWidth = source.kind === "rm" ? 1.5 : source.kind === "client" ? 1.1 : 0.8;
+          ctx.globalAlpha = source.kind === "rm" ? 0.38 : source.kind === "client" ? 0.28 : 0.20;
           ctx.shadowBlur = 0;
         }
 
@@ -918,28 +907,26 @@ export function ObsidianHoldingsGraph() {
         const isDimmed = connectedNodeIds ? !isConnected : !isFilterActive;
 
         const colorCfg =
-          colorMode === "category"
-            ? CATEGORY_COLORS[node.category]
-            : SEVERITY_COLORS[node.severity];
-        const mainColor = colorCfg?.main || "#3B82F6";
-        const glowColor = colorCfg?.glow || "rgba(59,130,246,0.3)";
+          colorMode === "category" ? CATEGORY_COLORS[node.category] : SEVERITY_COLORS[node.severity];
+        const mainColor = colorCfg?.main || "#38BDF8";
+        const glowColor = colorCfg?.glow || "rgba(56, 189, 248, 0.35)";
 
-        const alpha = isDimmed && !isSearchMatched ? 0.15 : 1;
+        const alpha = isDimmed && !isSearchMatched ? 0.12 : 1;
         ctx.globalAlpha = alpha;
 
-        // Outer pulsing aura for Critical/Warning or Hovered Nodes
+        // Outer pulsing aura
         if ((node.severity === "critical" || isHovered || isSelected || isSearchMatched) && !isDimmed) {
           const pulse = Math.sin(pulseAngle + node.x * 0.05) * 4;
           const auraRadius = node.radius + 6 + (node.severity === "critical" ? pulse : 2);
           ctx.beginPath();
           ctx.arc(node.x, node.y, auraRadius, 0, Math.PI * 2);
-          ctx.fillStyle = node.severity === "critical" ? "rgba(239, 68, 68, 0.22)" : glowColor;
+          ctx.fillStyle = node.severity === "critical" ? "rgba(248, 113, 113, 0.25)" : glowColor;
           ctx.fill();
 
           if (node.severity === "critical") {
             ctx.beginPath();
             ctx.arc(node.x, node.y, auraRadius + 2, 0, Math.PI * 2);
-            ctx.strokeStyle = "rgba(239, 68, 68, 0.6)";
+            ctx.strokeStyle = "rgba(248, 113, 113, 0.7)";
             ctx.lineWidth = 1;
             ctx.setLineDash([3, 3]);
             ctx.stroke();
@@ -954,7 +941,7 @@ export function ObsidianHoldingsGraph() {
 
         if (isHovered || isSelected || isSearchMatched) {
           ctx.shadowColor = mainColor;
-          ctx.shadowBlur = 16;
+          ctx.shadowBlur = 18;
         }
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -967,13 +954,13 @@ export function ObsidianHoldingsGraph() {
             ? "#FFFFFF"
             : isHovered || isSelected
             ? "#FFFFFF"
-            : "rgba(255, 255, 255, 0.35)";
-        ctx.lineWidth = node.kind === "rm" ? 2.2 : 1.2;
+            : "rgba(255, 255, 255, 0.45)";
+        ctx.lineWidth = node.kind === "rm" ? 2.4 : 1.2;
         ctx.stroke();
 
-        // Node Inner Label or Center Glyph
+        // Node Center Glyph
         if (node.kind === "rm") {
-          ctx.fillStyle = "#0F172A";
+          ctx.fillStyle = "#210B2C";
           ctx.font = "bold 11px IBM Plex Sans, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
@@ -987,7 +974,7 @@ export function ObsidianHoldingsGraph() {
           ctx.fillText(initials, node.x, node.y);
         }
 
-        // Outer Text Labels (Clients & Asset Classes always, Holdings when zoom > 0.8 or hovered)
+        // Labels
         const shouldShowLabel =
           node.kind === "rm" ||
           node.kind === "client" ||
@@ -1000,14 +987,14 @@ export function ObsidianHoldingsGraph() {
         if (shouldShowLabel && !isDimmed) {
           const fontSize = node.kind === "rm" ? 11 : node.kind === "client" ? 10 : 8.5;
           ctx.font = `${node.kind === "rm" || node.kind === "client" ? "600" : "500"} ${fontSize}px IBM Plex Sans, sans-serif`;
-          ctx.fillStyle = isHovered || isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.85)";
+          ctx.fillStyle = isHovered || isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.9)";
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
-          ctx.fillText(node.label, node.x, node.y + node.radius + 3);
+          ctx.fillText(node.label, node.x, node.y + node.radius + 3.5);
 
           if (node.sublabel && (node.kind === "client" || isHovered || isSelected)) {
-            ctx.font = "400 8px IBM Plex Mono, monospace";
-            ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+            ctx.font = "400 8.5px IBM Plex Mono, monospace";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
             ctx.fillText(node.sublabel, node.x, node.y + node.radius + fontSize + 4);
           }
         }
@@ -1027,7 +1014,7 @@ export function ObsidianHoldingsGraph() {
     };
   }, [activeFilter, colorMode, connectedNodeIds, searchMatchedIds, hoveredNode, selectedNode, centerGraph, runPhysicsStep]);
 
-  // Pointer & Drag Handlers
+  // Pointer Handlers
   const screenToWorld = useCallback((sx: number, sy: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -1082,7 +1069,6 @@ export function ObsidianHoldingsGraph() {
       transformRef.current.x = e.clientX - panStartRef.current.x;
       transformRef.current.y = e.clientY - panStartRef.current.y;
     } else {
-      // Hover detection
       const node = findNodeAt(e.clientX, e.clientY);
       setHoveredNode(node);
     }
@@ -1094,7 +1080,6 @@ export function ObsidianHoldingsGraph() {
       draggedNodeRef.current.fy = null;
       isDraggingRef.current = false;
 
-      // Click threshold
       const dist = Math.hypot(
         e.clientX - dragStartPosRef.current.x,
         e.clientY - dragStartPosRef.current.y
@@ -1130,43 +1115,107 @@ export function ObsidianHoldingsGraph() {
   return (
     <div
       ref={containerRef}
-      className={`rounded-[10px] flex flex-col transition-all overflow-hidden relative ${
-        isFullscreen ? "fixed inset-0 z-50 rounded-none h-screen w-screen" : "w-full"
+      className={`rounded-[10px] flex flex-col transition-all overflow-hidden relative w-full min-w-0 ${
+        isFullscreen ? "fixed inset-0 z-50 rounded-none h-screen w-screen" : ""
       }`}
       style={{
-        border: "1px solid var(--qc-hair)",
-        background: "#080C14",
-        minHeight: isFullscreen ? "100vh" : 540
+        border: "1px solid rgba(255, 255, 255, 0.12)",
+        background: NAVY_BG,
+        minHeight: isFullscreen ? "100vh" : 520
       }}
     >
-      {/* ── Toolbar Header ─────────────────────────────────────────────────── */}
+      {/* ── Top Header Section: Number of Clients (Top-Left) & AUM Metric (Top-Right) ── */}
       <div
-        className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 border-b shrink-0 z-10"
+        className="px-5 pt-4 pb-3 flex flex-wrap items-center justify-between gap-4 border-b shrink-0 z-10"
         style={{
-          borderColor: "rgba(255, 255, 255, 0.08)",
-          background: "rgba(11, 15, 25, 0.92)",
-          backdropFilter: "blur(12px)"
+          borderColor: "rgba(255, 255, 255, 0.1)",
+          background: NAVY_BG
         }}
       >
-        {/* Title + Stats */}
-        <div className="flex items-center gap-2.5">
-          <div className="size-6 rounded-md flex items-center justify-center" style={{ background: "rgba(99, 102, 241, 0.2)", border: "1px solid rgba(99, 102, 241, 0.3)" }}>
-            <Network className="size-3.5 text-indigo-400" />
+        {/* Top-Left: Number of Clients & RM Heartbeat Branding */}
+        <div className="flex items-center gap-3">
+          <div
+            className="size-8 rounded-lg flex items-center justify-center"
+            style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.16)" }}
+          >
+            <Activity className="size-4 text-[var(--qc-lime)]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[13px] font-semibold text-white tracking-tight">
-                Obsidian Holdings Network
+              <span
+                className="text-[15px] font-semibold text-white tracking-tight uppercase"
+                style={{ fontFamily: "var(--qc-font-sans)" }}
+              >
+                RM HEARTBEAT
               </span>
-              <span className="text-[9px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded bg-indigo-950/80 text-indigo-300 border border-indigo-800/60">
-                Constellation View
+              <span
+                className="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-semibold"
+                style={{
+                  background: "rgba(255, 245, 202, 0.15)",
+                  color: "var(--qc-lime)",
+                  border: "1px solid rgba(255, 245, 202, 0.3)"
+                }}
+              >
+                Active Book
               </span>
+            </div>
+            <div
+              className="text-[11.5px] text-white/70 flex items-center gap-2 mt-0.5"
+              style={{ fontFamily: "var(--qc-font-mono)" }}
+            >
+              <span className="font-semibold text-white">18 CLIENTS</span>
+              <span>·</span>
+              <span>52 HOLDINGS</span>
+              <span>·</span>
+              <span className="text-amber-300">3 FLAGGED</span>
             </div>
           </div>
         </div>
 
+        {/* Top-Right: Big AUM Value + Increase/Decrease Indicator */}
+        <div className="flex items-center gap-4 text-right">
+          <div>
+            <div className="flex items-baseline justify-end gap-2">
+              <span
+                className="text-[28px] font-semibold text-white tracking-tight leading-none"
+                style={{ fontFamily: "var(--qc-font-sans)" }}
+              >
+                ₹796 Cr
+              </span>
+              <span
+                className="text-[11px] font-mono text-white/60 uppercase tracking-wider"
+              >
+                Total AUM
+              </span>
+            </div>
+            <div className="flex items-center justify-end gap-1.5 mt-1">
+              <span
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10.5px] font-medium font-mono"
+                style={{
+                  background: "rgba(52, 211, 153, 0.16)",
+                  color: "#34D399",
+                  border: "1px solid rgba(52, 211, 153, 0.3)"
+                }}
+              >
+                <ArrowUpRight className="size-3" />
+                <span>+₹14 Cr · +3.2%</span>
+              </span>
+              <span className="text-[10px] font-mono text-white/50">vs 7d ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Toolbar: Filter Categories, Search, Zoom & Display Controls ──────── */}
+      <div
+        className="px-4 py-2 flex flex-wrap items-center justify-between gap-2.5 border-b shrink-0 z-10 text-[11.5px]"
+        style={{
+          borderColor: "rgba(255, 255, 255, 0.08)",
+          background: "rgba(33, 11, 44, 0.95)"
+        }}
+      >
         {/* Filter Categories */}
-        <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-lg border border-white/[0.08] overflow-x-auto max-w-full">
+        <div className="flex items-center gap-1 bg-white/[0.06] p-1 rounded-lg border border-white/[0.1] overflow-x-auto max-w-full">
           {(
             [
               { key: "all", label: "All" },
@@ -1182,10 +1231,10 @@ export function ObsidianHoldingsGraph() {
               <button
                 key={key}
                 onClick={() => setActiveFilter(key)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-2.5 py-0.5 rounded-md text-[11px] font-medium transition-all cursor-pointer whitespace-nowrap ${
                   active
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "text-gray-400 hover:text-white hover:bg-white/[0.06]"
+                    ? "bg-white text-[var(--qc-ink)] font-semibold shadow-sm"
+                    : "text-white/70 hover:text-white hover:bg-white/[0.08]"
                 }`}
               >
                 {label}
@@ -1198,13 +1247,13 @@ export function ObsidianHoldingsGraph() {
         <div className="flex items-center gap-2">
           {/* Quick Search */}
           <div className="relative flex items-center">
-            <Search className="size-3.5 absolute left-2 text-gray-400 pointer-events-none" />
+            <Search className="size-3.5 absolute left-2 text-white/40 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search ticker or client..."
-              className="pl-7 pr-2.5 py-1 rounded-md text-[11.5px] bg-white/[0.05] border border-white/[0.1] text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 w-36 transition-all focus:w-48"
+              className="pl-7 pr-2.5 py-1 rounded-md text-[11px] bg-white/[0.08] border border-white/[0.14] text-white placeholder-white/40 focus:outline-none focus:border-white/40 w-36 transition-all focus:w-44"
             />
           </div>
 
@@ -1212,32 +1261,32 @@ export function ObsidianHoldingsGraph() {
           <button
             onClick={() => setColorMode((m) => (m === "category" ? "severity" : "category"))}
             title={`Color Mode: ${colorMode === "category" ? "By Asset Class" : "By Alert Status"}`}
-            className="px-2 py-1 rounded-md text-[11px] font-medium text-gray-300 bg-white/[0.05] border border-white/[0.1] hover:bg-white/[0.09] transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="px-2 py-1 rounded-md text-[11px] font-medium text-white/80 bg-white/[0.08] border border-white/[0.14] hover:bg-white/[0.14] transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Sliders className="size-3" />
             <span className="hidden sm:inline">{colorMode === "category" ? "Asset Types" : "Alert Health"}</span>
           </button>
 
           {/* Zoom Buttons */}
-          <div className="flex items-center rounded-md border border-white/[0.1] bg-white/[0.05] overflow-hidden">
+          <div className="flex items-center rounded-md border border-white/[0.14] bg-white/[0.08] overflow-hidden">
             <button
               onClick={() => handleZoom(1.18)}
               title="Zoom In"
-              className="p-1.5 text-gray-300 hover:bg-white/[0.1] transition-colors cursor-pointer"
+              className="p-1.5 text-white/80 hover:bg-white/[0.15] transition-colors cursor-pointer"
             >
               <ZoomIn className="size-3.5" />
             </button>
             <button
               onClick={() => handleZoom(0.82)}
               title="Zoom Out"
-              className="p-1.5 text-gray-300 hover:bg-white/[0.1] transition-colors cursor-pointer border-l border-white/[0.08]"
+              className="p-1.5 text-white/80 hover:bg-white/[0.15] transition-colors cursor-pointer border-l border-white/[0.1]"
             >
               <ZoomOut className="size-3.5" />
             </button>
             <button
               onClick={centerGraph}
               title="Reset View"
-              className="p-1.5 text-gray-300 hover:bg-white/[0.1] transition-colors cursor-pointer border-l border-white/[0.08]"
+              className="p-1.5 text-white/80 hover:bg-white/[0.15] transition-colors cursor-pointer border-l border-white/[0.1]"
             >
               <RotateCcw className="size-3.5" />
             </button>
@@ -1247,7 +1296,7 @@ export function ObsidianHoldingsGraph() {
           <button
             onClick={() => setIsFullscreen((f) => !f)}
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            className="p-1.5 rounded-md text-gray-300 bg-white/[0.05] border border-white/[0.1] hover:bg-white/[0.09] transition-colors cursor-pointer"
+            className="p-1.5 rounded-md text-white/80 bg-white/[0.08] border border-white/[0.14] hover:bg-white/[0.15] transition-colors cursor-pointer"
           >
             {isFullscreen ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
           </button>
@@ -1255,7 +1304,7 @@ export function ObsidianHoldingsGraph() {
       </div>
 
       {/* ── Interactive Canvas ─────────────────────────────────────────────── */}
-      <div className="relative flex-1 min-h-[460px] cursor-grab active:cursor-grabbing overflow-hidden">
+      <div className="relative flex-1 min-h-[440px] cursor-grab active:cursor-grabbing overflow-hidden w-full">
         <canvas
           ref={canvasRef}
           onPointerDown={handlePointerDown}
@@ -1268,10 +1317,10 @@ export function ObsidianHoldingsGraph() {
         {/* ── Floating Node Inspector Card (Hover or Click) ────────────────── */}
         {activeInspection && (
           <div
-            className="absolute top-4 left-4 z-20 w-72 rounded-[10px] p-3.5 shadow-2xl transition-all pointer-events-auto border"
+            className="absolute top-3 left-3 z-20 w-72 rounded-[10px] p-3.5 shadow-2xl transition-all pointer-events-auto border"
             style={{
-              background: "rgba(15, 23, 42, 0.95)",
-              borderColor: "rgba(255, 255, 255, 0.12)",
+              background: "rgba(24, 10, 36, 0.96)",
+              borderColor: "rgba(255, 255, 255, 0.18)",
               backdropFilter: "blur(16px)"
             }}
           >
@@ -1291,7 +1340,7 @@ export function ObsidianHoldingsGraph() {
                     {activeInspection.label}
                   </span>
                 </div>
-                <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider block mt-0.5">
+                <span className="text-[10px] font-mono text-white/60 uppercase tracking-wider block mt-0.5">
                   {activeInspection.kind.replace("_", " ")} · {CATEGORY_COLORS[activeInspection.category]?.label}
                 </span>
               </div>
@@ -1309,22 +1358,22 @@ export function ObsidianHoldingsGraph() {
             </div>
 
             {/* Quick Metrics Breakdown */}
-            <div className="grid grid-cols-2 gap-2 py-2 border-t border-b border-white/[0.08] my-2 text-[11px]">
+            <div className="grid grid-cols-2 gap-2 py-2 border-t border-b border-white/[0.1] my-2 text-[11px]">
               {activeInspection.aum && (
                 <div>
-                  <span className="text-gray-400 block text-[9.5px]">Client AUM</span>
+                  <span className="text-white/60 block text-[9.5px]">Client AUM</span>
                   <span className="text-white font-mono font-medium">{activeInspection.aum}</span>
                 </div>
               )}
               {activeInspection.weight && (
                 <div>
-                  <span className="text-gray-400 block text-[9.5px]">Portfolio Weight</span>
+                  <span className="text-white/60 block text-[9.5px]">Portfolio Weight</span>
                   <span className="text-white font-mono font-medium">{activeInspection.weight}</span>
                 </div>
               )}
               {activeInspection.signal && (
                 <div className="col-span-2">
-                  <span className="text-gray-400 block text-[9.5px]">Signal Alert</span>
+                  <span className="text-white/60 block text-[9.5px]">Signal Alert</span>
                   <span
                     className="font-medium"
                     style={{
@@ -1345,10 +1394,10 @@ export function ObsidianHoldingsGraph() {
             {/* Contextual Action CTA */}
             {activeInspection.kind === "client" && (
               <div className="pt-1 flex items-center justify-between">
-                <span className="text-[10px] text-gray-400">Click to explore cluster</span>
+                <span className="text-[10px] text-white/60">Explore client holdings</span>
                 <Link
-                  href={`/brief/${activeInspection.id.replace("cli-", "") === "priya" ? "priya-venkat" : "priya-venkat"}`}
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+                  href="/brief/priya-venkat"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--qc-lime)] hover:underline transition-colors"
                 >
                   <span>View Brief</span>
                   <ChevronRight className="size-3" />
@@ -1360,15 +1409,15 @@ export function ObsidianHoldingsGraph() {
 
         {/* ── Visual Legend (Bottom Left) ──────────────────────────────────── */}
         <div
-          className="absolute bottom-3 left-3 z-10 px-3 py-2 rounded-lg border flex flex-wrap items-center gap-3 text-[10px] text-gray-300"
+          className="absolute bottom-3 left-3 z-10 px-3 py-1.5 rounded-lg border flex flex-wrap items-center gap-3 text-[10px] text-white/80"
           style={{
-            background: "rgba(11, 15, 25, 0.85)",
-            borderColor: "rgba(255, 255, 255, 0.08)",
+            background: "rgba(24, 10, 36, 0.9)",
+            borderColor: "rgba(255, 255, 255, 0.12)",
             backdropFilter: "blur(8px)"
           }}
         >
-          <div className="flex items-center gap-1.5 font-medium text-gray-400 uppercase tracking-wider text-[9px]">
-            <span>Legend:</span>
+          <div className="flex items-center gap-1.5 font-semibold text-white/60 uppercase tracking-wider text-[9px]">
+            <span>Assets:</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="size-2 rounded-full" style={{ background: CATEGORY_COLORS.equity.main }} />
@@ -1394,15 +1443,15 @@ export function ObsidianHoldingsGraph() {
             <span className="size-2 rounded-full" style={{ background: CATEGORY_COLORS.alts.main }} />
             <span>Alts</span>
           </div>
-          <div className="flex items-center gap-1 pl-1 border-l border-white/[0.1]">
-            <span className="size-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-red-400">Critical Drift</span>
+          <div className="flex items-center gap-1 pl-1.5 border-l border-white/[0.14]">
+            <span className="size-2 rounded-full bg-red-400 animate-pulse" />
+            <span className="text-red-300 font-medium">Critical Drift</span>
           </div>
         </div>
 
         {/* Zoom badge (Bottom Right) */}
         <div
-          className="absolute bottom-3 right-3 z-10 px-2 py-1 rounded text-[10px] font-mono text-gray-400 bg-white/[0.04] border border-white/[0.08]"
+          className="absolute bottom-3 right-3 z-10 px-2 py-1 rounded text-[10px] font-mono text-white/60 bg-white/[0.06] border border-white/[0.1]"
         >
           Zoom: {(zoomLevel * 100).toFixed(0)}%
         </div>

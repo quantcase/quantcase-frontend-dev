@@ -1,6 +1,6 @@
 import { TodaysBriefing } from "@/components/dashboard/todays-briefing";
 import { ClientsAttentionScroll } from "@/components/dashboard/clients-attention-scroll";
-import { ObsidianHoldingsGraph } from "@/components/dashboard/obsidian-holdings-graph";
+import { RMHeartbeatGraph } from "@/components/dashboard/rm-heartbeat-graph";
 import { NextMeetingPrep } from "@/components/dashboard/next-meeting-prep";
 import { WhoToCallToday } from "@/components/dashboard/who-to-call-today";
 import { BookAtAGlance } from "@/components/dashboard/book-at-a-glance";
@@ -41,7 +41,7 @@ export default function DashboardPage() {
   const todayMeta = getTodayMeta();
 
   return (
-    <div style={{ background: "var(--qc-bg)", minHeight: "100vh" }}>
+    <div style={{ background: "var(--qc-bg)", minHeight: "100vh" }} className="w-full min-w-0">
       <main
         style={{
           padding: "24px 32px 60px",
@@ -49,6 +49,7 @@ export default function DashboardPage() {
           fontFamily: "var(--qc-font-sans)",
           color: "var(--qc-ink)",
         }}
+        className="w-full min-w-0 mx-auto"
       >
         {/* ── Page header ───────────────────────────────────────────────── */}
         <header
@@ -58,6 +59,7 @@ export default function DashboardPage() {
             justifyContent: "space-between",
             marginBottom: 20,
           }}
+          className="w-full min-w-0"
         >
           <div>
             <h1
@@ -112,46 +114,37 @@ export default function DashboardPage() {
         {/* ════════════════════════════════════════════════════════════
             TOP ROW — Today's Brief (Compact) + Horizontally Scrollable Clients Needing Attention
         ═══════════════════════════════════════════════════════════════ */}
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "330px 1fr",
-            gap: 14,
-            marginBottom: 20,
-            alignItems: "stretch",
-          }}
-        >
-          <TodaysBriefing />
-          <ClientsAttentionScroll />
+        <section className="grid grid-cols-1 lg:grid-cols-[330px_minmax(0,1fr)] gap-3.5 mb-5 items-stretch w-full min-w-0">
+          <div className="w-full min-w-0 flex flex-col">
+            <TodaysBriefing />
+          </div>
+          <div className="w-full min-w-0 flex flex-col">
+            <ClientsAttentionScroll />
+          </div>
         </section>
 
         {/* ════════════════════════════════════════════════════════════
-            OBSIDIAN HOLDINGS NETWORK GRAPH (RM at Center, Clients & Holdings Branching Out)
+            RM HEARTBEAT GRAPH (RM at Center, Clients & Holdings Branching Out)
         ═══════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 24 }}>
-          <ObsidianHoldingsGraph />
+        <section className="mb-6 w-full min-w-0">
+          <RMHeartbeatGraph />
         </section>
 
         {/* ════════════════════════════════════════════════════════════
             NEXT MEETING STRIP
         ═══════════════════════════════════════════════════════════════ */}
-        <div style={{ marginBottom: 24 }}>
+        <div className="mb-6 w-full min-w-0">
           <NextMeetingPrep />
         </div>
 
         {/* ════════════════════════════════════════════════════════════
             TWO-COLUMN — Who to call (left) + Book glance + Tasks (right)
         ═══════════════════════════════════════════════════════════════ */}
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 360px",
-            gap: 24,
-            marginBottom: 24,
-          }}
-        >
-          <WhoToCallToday />
-          <aside>
+        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 mb-6 w-full min-w-0">
+          <div className="w-full min-w-0">
+            <WhoToCallToday />
+          </div>
+          <aside className="w-full min-w-0 flex flex-col gap-3.5">
             <BookAtAGlance />
             <TodaysTasks tasks={TODAYS_TASKS} />
           </aside>
@@ -160,17 +153,23 @@ export default function DashboardPage() {
         {/* ════════════════════════════════════════════════════════════
             WHAT CHANGED TODAY
         ═══════════════════════════════════════════════════════════════ */}
-        <WhatChangedToday />
+        <div className="w-full min-w-0 mb-6">
+          <WhatChangedToday />
+        </div>
 
         {/* ════════════════════════════════════════════════════════════
             SMART SEGMENTS
         ═══════════════════════════════════════════════════════════════ */}
-        <SmartSegmentsPills />
+        <div className="w-full min-w-0 mb-6">
+          <SmartSegmentsPills />
+        </div>
 
         {/* ════════════════════════════════════════════════════════════
             OPPORTUNITIES WORTH A CONVERSATION
         ═══════════════════════════════════════════════════════════════ */}
-        <OpportunitiesPanel />
+        <div className="w-full min-w-0">
+          <OpportunitiesPanel />
+        </div>
 
       </main>
     </div>

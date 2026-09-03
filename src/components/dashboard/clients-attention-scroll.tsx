@@ -130,16 +130,16 @@ export function ClientsAttentionScroll() {
 
   return (
     <div
-      className="rounded-[10px] p-2 flex flex-col h-full"
+      className="rounded-[10px] p-2 flex flex-col h-full w-full min-w-0 max-w-full overflow-hidden"
       style={{
         border: "1px solid var(--qc-hair)",
         background: "var(--qc-section)",
       }}
     >
       {/* Header bar */}
-      <div className="px-2 pt-1 pb-2 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="size-3.5" style={{ color: "var(--qc-warn)" }} />
+      <div className="px-2 pt-1 pb-2 flex items-center justify-between shrink-0 w-full min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <AlertTriangle className="size-3.5 shrink-0" style={{ color: "var(--qc-warn)" }} />
           <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">
             CLIENTS NEEDING ATTENTION
           </MonoLabel>
@@ -147,7 +147,7 @@ export function ClientsAttentionScroll() {
         </div>
 
         {/* Scroll Controls */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => scroll("left")}
             aria-label="Scroll Left"
@@ -180,7 +180,7 @@ export function ClientsAttentionScroll() {
       {/* Horizontal Scroll Area */}
       <div
         ref={scrollRef}
-        className="flex gap-2.5 overflow-x-auto pb-1 pt-0.5 px-0.5 scroll-smooth flex-1"
+        className="flex gap-2.5 overflow-x-auto pb-1 pt-0.5 px-0.5 scroll-smooth flex-1 w-full min-w-0"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",

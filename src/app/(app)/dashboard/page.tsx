@@ -146,11 +146,11 @@ export default function DashboardPage() {
         {/* ════════════════════════════════════════════════════════════
             5. TWO-COLUMN — Who to call (left) + Today's Tasks (right)
         ═══════════════════════════════════════════════════════════════ */}
-        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] gap-6 mb-6 w-full min-w-0 items-start">
-          <div className="w-full min-w-0">
+        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] gap-6 mb-6 w-full min-w-0 items-stretch">
+          <div className="w-full min-w-0 flex flex-col h-full">
             <WhoToCallToday />
           </div>
-          <div className="w-full min-w-0">
+          <div className="w-full min-w-0 flex flex-col h-full">
             <TodaysTasks tasks={TODAYS_TASKS} />
           </div>
         </section>

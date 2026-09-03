@@ -53,14 +53,14 @@ const CLIENTS = [
 export function WhoToCallToday() {
   return (
     <div
-      className="rounded-[10px] p-2"
-      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)", alignSelf: "start" }}
+      className="rounded-[10px] p-2 flex flex-col h-full w-full min-w-0"
+      style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
     >
-      {/* Header — matches RM Heartbeat header style */}
-      <div className="px-2 pt-1 pb-3 flex items-center justify-between">
+      {/* Header */}
+      <div className="px-2 pt-1 pb-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <PhoneCall className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
-          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Who to call today</MonoLabel>
+          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">WHO TO CALL TODAY</MonoLabel>
           <LimeCountPip count={3} />
         </div>
         <span
@@ -77,38 +77,39 @@ export function WhoToCallToday() {
         </span>
       </div>
 
-      {/* Content — white inner card matching RM Heartbeat's graph canvas wrapper */}
-      <div className="rounded-[10px] overflow-hidden" style={{ background: "var(--qc-card)" }}>
+      {/* Content — white inner card matching dashboard aesthetic */}
+      <div className="rounded-[10px] overflow-hidden flex-1 flex flex-col justify-between" style={{ background: "var(--qc-card)" }}>
         {CLIENTS.map((c, i) => (
           <div
             key={c.id}
             style={{
               display: "grid",
-              gridTemplateColumns: "36px minmax(0,1fr) 120px 100px",
-              gap: 18,
+              gridTemplateColumns: "36px minmax(0,1fr) 110px 96px",
+              gap: 16,
               alignItems: "center",
               padding: "16px 18px",
               borderTop: i === 0 ? "none" : "1px solid var(--qc-hair-2)",
               position: "relative",
             }}
+            className="flex-1"
           >
             <ColorRail color={c.railColor} opacity={c.railOpacity} />
             <Avatar initials={c.initials} size={36} />
 
             {/* Body */}
             <div style={{ minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-                <span style={{ fontSize: 14, fontWeight: 500, whiteSpace: "nowrap", color: "var(--qc-ink)" }}>{c.name}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 3 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 500, whiteSpace: "nowrap", color: "var(--qc-ink)" }}>{c.name}</span>
                 <Badge variant={c.badgeVariant}>{c.badge}</Badge>
               </div>
-              <div style={{ fontSize: 12.5, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>{c.why}</div>
-              <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: 10, color: "var(--qc-ink-3)", marginTop: 6 }}>{c.lastTouch}</div>
+              <div style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.45 }}>{c.why}</div>
+              <div style={{ fontFamily: "var(--qc-font-mono)", fontSize: 10, color: "var(--qc-ink-3)", marginTop: 4 }}>{c.lastTouch}</div>
             </div>
 
             {/* Numbers */}
-            <div style={{ textAlign: "right", fontFamily: "var(--qc-font-mono)", fontSize: 13, lineHeight: 1.4 }}>
-              <div style={{ color: "var(--qc-ink)", fontSize: 13.5 }}>{c.aum}</div>
-              <div style={{ fontSize: 11, color: c.retNeg ? "var(--qc-down)" : "var(--qc-up)" }}>{c.ret}</div>
+            <div style={{ textAlign: "right", fontFamily: "var(--qc-font-mono)", fontSize: 13, lineHeight: 1.35 }}>
+              <div style={{ color: "var(--qc-ink)", fontSize: 13 }}>{c.aum}</div>
+              <div style={{ fontSize: 10.5, color: c.retNeg ? "var(--qc-down)" : "var(--qc-up)" }}>{c.ret}</div>
             </div>
 
             <ActionButton noWrap>{c.cta}</ActionButton>

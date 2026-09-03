@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { MonoLabel } from "@/components/ds";
+import React, { useState } from "react";
+import { MonoLabel, LimeCountPip } from "@/components/ds";
+import { CheckSquare, Plus, Check } from "lucide-react";
 
 type TaskStatus = "pending" | "done" | "overdue";
 
@@ -24,146 +25,162 @@ const BADGE_STYLE: Record<TaskStatus, React.CSSProperties> = {
   done:    { background: "var(--qc-up-soft)",   color: "var(--qc-up)",   border: "1px solid var(--qc-up-soft)" },
 };
 
-const TITLE_ICON = (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ color: "var(--qc-ink-2)" }}>
-    <rect x="3" y="5" width="3.5" height="3.5" rx="0.5"/><rect x="3" y="15" width="3.5" height="3.5" rx="0.5"/>
-    <path d="M9 6.5h11 M9 16.5h11"/>
-  </svg>
-);
-
-const ADD_ACTION = (
-  <button
-    style={{
-      width: 22,
-      height: 22,
-      borderRadius: 6,
-      background: "var(--qc-lime)",
-      color: "var(--qc-ink)",
-      border: "1px solid var(--qc-lime-edge)",
-      cursor: "pointer",
-      display: "grid",
-      placeItems: "center",
-    }}
-    aria-label="Add task"
-  >
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M12 5v14 M5 12h14"/>
-    </svg>
-  </button>
-);
-
 export function TodaysTasks({ tasks: initialTasks, style, className = "" }: TodaysTasksProps) {
   const [tasks, setTasks] = useState<TaskItem[]>(initialTasks);
+  const [newDraft, setNewDraft] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
 
   function toggleTask(id: string) {
     setTasks((prev) =>
       prev.map((t) => {
         if (t.id !== id) return t;
-        if (t.status === "done") return { ...t, status: t.meta?.startsWith("Overdue") ? "overdue" as TaskStatus : "pending" as TaskStatus };
-        return { ...t, status: "done" as TaskStatus, meta: "DONE · " + new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) };
+        if (t.status === "done") {
+          return {
+            ...t,
+            status: t.meta?.startsWith("OVERDUE") ? "overdue" : "pending",
+          };
+        }
+        return {
+          ...t,
+          status: "done",
+          meta: "DONE · " + new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }),
+        };
       })
     );
   }
 
+  function handleAddTask(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newDraft.trim()) return;
+    const newTask: TaskItem = {
+      id: String(Date.now()),
+      label: newDraft.trim(),
+      status: "pending",
+      meta: "NEW",
+    };
+    setTasks((prev) => [newTask, ...prev]);
+    setNewDraft("");
+    setIsAdding(false);
+  }
+
+  const pendingCount = tasks.filter((t) => t.status !== "done").length;
+
   return (
-    <aside
-      className={className}
+    <div
+      className={`rounded-[10px] p-2 flex flex-col h-full w-full min-w-0 ${className}`}
       style={{
-        background: "var(--qc-card)",
         border: "1px solid var(--qc-hair)",
-        borderRadius: 10,
-        padding: "16px 18px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 14,
-        position: "relative",
-        overflow: "hidden",
-        marginTop: 0,
+        background: "var(--qc-section)",
         ...style,
       }}
     >
-      {/* Lime gradient overlay (bottom 60%) */}
-      <div
-        style={{
-          position: "absolute",
-          inset: "auto 0 0 0",
-          height: "60%",
-          background: "linear-gradient(180deg, transparent 0%, var(--qc-lime) 100%)",
-          zIndex: 0,
-          pointerEvents: "none",
-        }}
-      />
-
-      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <MonoLabel style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {TITLE_ICON}
-            Today&apos;s tasks
+      {/* Header — identical layout & height to WhoToCallToday */}
+      <div className="px-2 pt-1 pb-3 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2">
+          <CheckSquare className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+          <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">
+            TODAY&apos;S TASKS
           </MonoLabel>
-          {ADD_ACTION}
+          <LimeCountPip count={pendingCount} />
         </div>
 
-        {/* Task list */}
-        <ul style={{ listStyle: "none", margin: 0, padding: 0, paddingTop: 8, gap: 0 }}>
-          {tasks.map((task, i) => {
+        <button
+          onClick={() => setIsAdding((v) => !v)}
+          className="size-6 rounded-md flex items-center justify-center transition-colors cursor-pointer hover:opacity-90"
+          style={{
+            background: "var(--qc-lime)",
+            color: "var(--qc-ink)",
+            border: "1px solid var(--qc-lime-edge)",
+          }}
+          title="Add task"
+          aria-label="Add task"
+        >
+          <Plus className="size-3.5" />
+        </button>
+      </div>
+
+      {/* Content — white inner card perfectly matched with WhoToCallToday */}
+      <div
+        className="rounded-[10px] overflow-hidden flex-1 flex flex-col justify-between"
+        style={{ background: "var(--qc-card)" }}
+      >
+        <div className="divide-y divide-[var(--qc-hair-2)] flex-1 flex flex-col">
+          {/* Inline quick add field if active */}
+          {isAdding && (
+            <form onSubmit={handleAddTask} className="p-2.5 bg-[var(--qc-surface)] border-b border-[var(--qc-hair)] flex gap-2">
+              <input
+                type="text"
+                autoFocus
+                placeholder="What needs to be done today?"
+                value={newDraft}
+                onChange={(e) => setNewDraft(e.target.value)}
+                className="flex-1 text-xs px-2 py-1 rounded border border-[var(--qc-hair)] bg-white text-[var(--qc-ink)] focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="px-2.5 py-1 text-[11px] font-medium rounded bg-[var(--qc-ink)] text-white"
+              >
+                Add
+              </button>
+            </form>
+          )}
+
+          {tasks.map((task) => {
             const isDone = task.status === "done";
             return (
-              <li
+              <div
                 key={task.id}
                 onClick={() => toggleTask(task.id)}
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  alignItems: "start",
-                  paddingTop: i === 0 ? 0 : 8,
-                  paddingBottom: 8,
-                  borderTop: i === 0 ? "none" : "1px dashed var(--qc-hair-2)",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  marginLeft: 0,
-                }}
+                className="group flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-[rgba(0,0,0,0.015)] transition-colors flex-1"
               >
+                {/* Custom Checkbox */}
                 <div
+                  className="size-4 rounded flex items-center justify-center shrink-0 transition-all"
                   style={{
-                    width: 16,
-                    height: 16,
-                    borderRadius: 4,
-                    border: isDone ? "1px solid var(--qc-up)" : "1px solid var(--qc-hair)",
-                    background: isDone ? "var(--qc-up)" : "#fff",
-                    display: "grid",
-                    placeItems: "center",
-                    color: "#fff",
-                    flexShrink: 0,
-                    marginTop: 1,
+                    border: isDone ? "1px solid var(--qc-up)" : "1px solid var(--qc-hair-strong)",
+                    background: isDone ? "var(--qc-up)" : "#FFFFFF",
+                    color: "#FFFFFF",
                   }}
                 >
-                  {isDone && (
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12l5 5L20 7"/>
-                    </svg>
-                  )}
+                  {isDone && <Check className="size-3 stroke-[3]" />}
                 </div>
 
-                <span style={{ flex: 1, color: isDone ? "var(--qc-ink-3)" : "var(--qc-ink)", textDecoration: isDone ? "line-through" : "none" }}>
+                {/* Task Label */}
+                <span
+                  className="flex-1 text-[12.5px] leading-snug transition-all"
+                  style={{
+                    color: isDone ? "var(--qc-ink-3)" : "var(--qc-ink)",
+                    textDecoration: isDone ? "line-through" : "none",
+                  }}
+                >
                   {task.label}
                 </span>
 
+                {/* Status Meta Badge */}
                 {task.meta && (
-                  <MonoLabel
-                    size={9.5}
-                    tracking="0.12em"
-                    color={task.status === "overdue" ? "var(--qc-down)" : isDone ? "var(--qc-up)" : "var(--qc-ink-3)"}
-                    style={{ padding: "3px 7px", borderRadius: 4, alignSelf: "start", marginTop: 1, ...BADGE_STYLE[task.status] }}
+                  <span
+                    className="text-[9.5px] font-mono tracking-wider uppercase px-2 py-0.5 rounded shrink-0 font-medium"
+                    style={BADGE_STYLE[task.status]}
                   >
                     {task.meta}
-                  </MonoLabel>
+                  </span>
                 )}
-              </li>
+              </div>
             );
           })}
-        </ul>
+        </div>
+
+        {/* Bottom footer status */}
+        <div
+          className="px-4 py-2 border-t border-[var(--qc-hair-2)] flex items-center justify-between text-[10.5px] font-mono shrink-0"
+          style={{ background: "var(--qc-surface)", color: "var(--qc-ink-3)" }}
+        >
+          <span>
+            {tasks.filter((t) => t.status === "done").length} OF {tasks.length} COMPLETED
+          </span>
+          <span className="text-[var(--qc-ink-2)]">Auto-syncs with CRM</span>
+        </div>
       </div>
-    </aside>
+    </div>
   );
 }

@@ -6,12 +6,13 @@ import type { InsightData, InsightLens } from "@/types/analysis";
 import { DarkGradientCard, MonoLabel } from "@/components/ds";
 import { renderMd } from "@/lib/render-md";
 import { QC } from "@/lib/chart-tokens";
+import { LENS_ICON_CONFIG } from "./insight-lenses";
 
 // ─── Color helpers ─────────────────────────────────────────────────────────────
 
-// Thresholds: ≥80% Strong (green), 50–79% Moderate (amber), <50% Weak (red)
+// Thresholds: ≥75% Strong (green, matches top nav), 50–74% Moderate (amber), <50% Weak (red)
 function scoreToTier(pct: number): "strong" | "moderate" | "weak" {
-  if (pct >= 80) return "strong";
+  if (pct >= 75) return "strong";
   if (pct >= 50) return "moderate";
   return "weak";
 }
@@ -62,8 +63,7 @@ function scoreLabel(type: string): string {
   return "M-SCORE";
 }
 
-
-function getTotalScore(lenses: InsightLens[]) {
+export function getTotalScore(lenses: InsightLens[]) {
   const totalScore = lenses.reduce((sum, l) => sum + l.score, 0);
   const totalMax = lenses.reduce((sum, l) => sum + l.max_score, 0);
   return totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
@@ -74,6 +74,91 @@ function getTotalScore(lenses: InsightLens[]) {
 interface RadarPoint {
   subject: string;
   pct: number; // 0–100, computed as (score/max)*100
+  lens: InsightLens;
+  position: "top" | "right" | "bottom" | "left";
+}
+
+// Canonical radar positions for each factor page so the radar diamond vertices
+// and labels always follow the specified arrangement:
+// e.g. Management: Guidance Credibility (left), Disclosure Honesty (top),
+// Promoter Activity (right), Capital Allocation (bottom).
+export const FACTOR_RADAR_POSITIONS: Record<
+  string,
+  { top: string; right: string; bottom: string; left: string }
+> = {
+  management: {
+    top: "disclosure-honesty",
+    right: "promoter-activity",
+    bottom: "capital-allocation",
+    left: "guidance-credibility",
+  },
+  opportunity: {
+    top: "competition",
+    right: "customer-distribution",
+    bottom: "financial-strength",
+    left: "industry-analysis",
+  },
+  deal: {
+    top: "pe-rerating-potential",
+    right: "target-price-matrix",
+    bottom: "earning-quality",
+    left: "eps-engine",
+  },
+};
+
+export function getOrderedRadarData(type: string, lenses: InsightLens[]): RadarPoint[] {
+  const normSlug = (s: string) => s.toLowerCase().replace(/_/g, "-");
+  const cfg = FACTOR_RADAR_POSITIONS[type.toLowerCase()];
+
+  if (cfg && lenses.length === 4) {
+    const findLens = (slug: string) =>
+      lenses.find((l) => normSlug(l.slug) === normSlug(slug));
+    const topLens = findLens(cfg.top) ?? lenses[1];
+    const rightLens = findLens(cfg.right) ?? lenses[3];
+    const bottomLens = findLens(cfg.bottom) ?? lenses[2];
+    const leftLens = findLens(cfg.left) ?? lenses[0];
+
+    const toPoint = (lens: InsightLens, position: "top" | "right" | "bottom" | "left"): RadarPoint => ({
+      subject: lens.name.toUpperCase(),
+      pct: lens.max_score > 0 ? Math.round((lens.score / lens.max_score) * 100) : 0,
+      lens,
+      position,
+    });
+
+    return [
+      toPoint(topLens, "top"),
+      toPoint(rightLens, "right"),
+      toPoint(bottomLens, "bottom"),
+      toPoint(leftLens, "left"),
+    ];
+  }
+
+  // Fallback for 4 lenses:
+  // In the 2x2 grid of lens assessment section:
+  // [0] is top-left, [1] is top-right, [2] is bottom-left, [3] is bottom-right.
+  // Left: [0], Top: [1], Right: [3], Bottom: [2].
+  if (lenses.length === 4) {
+    const toPoint = (lens: InsightLens, position: "top" | "right" | "bottom" | "left"): RadarPoint => ({
+      subject: lens.name.toUpperCase(),
+      pct: lens.max_score > 0 ? Math.round((lens.score / lens.max_score) * 100) : 0,
+      lens,
+      position,
+    });
+    return [
+      toPoint(lenses[1], "top"),
+      toPoint(lenses[3], "right"),
+      toPoint(lenses[2], "bottom"),
+      toPoint(lenses[0], "left"),
+    ];
+  }
+
+  const positions: ("top" | "right" | "bottom" | "left")[] = ["top", "right", "bottom", "left"];
+  return lenses.map((lens, i) => ({
+    subject: lens.name.toUpperCase(),
+    pct: lens.max_score > 0 ? Math.round((lens.score / lens.max_score) * 100) : 0,
+    lens,
+    position: positions[i % 4],
+  }));
 }
 
 function polarToCartesian(cx: number, cy: number, r: number, angleRad: number) {
@@ -98,15 +183,17 @@ interface SVGRadarProps {
   data: RadarPoint[];
   overallScore: number;
   insightType: string;
-  hoveredIndex: number | null;
-  onHoverVertex: (i: number | null, pctX?: number, pctY?: number) => void;
+  hoveredSlug: string | null;
+  onHoverVertex: (slug: string | null, pctX?: number, pctY?: number) => void;
+  onLensClick?: (slug: string) => void;
 }
 
-function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex }: SVGRadarProps) {
-  const SIZE = 260;
-  const cx = SIZE / 2;
-  const cy = SIZE / 2;
-  const maxR = SIZE * 0.34;
+function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex, onLensClick }: SVGRadarProps) {
+  const WIDTH = 480;
+  const HEIGHT = 320;
+  const cx = WIDTH / 2;
+  const cy = HEIGHT / 2;
+  const maxR = 105;
   const n = data.length;
   // 4 rings: 25%, 50%, 75%, 100% — marks the threshold zones visually
   const rings = [0.25, 0.5, 0.75, 1];
@@ -116,6 +203,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
   const gradIds = data.map((_, i) => `radar-seg-grad-${i}`);
 
   // Vertex positions scaled by each axis's own pct
+  // Index 0: Top (angle 0), Index 1: Right (angle PI/2), Index 2: Bottom (angle PI), Index 3: Left (angle 3*PI/2)
   const dataPoints = data.map((d, i) => {
     const angle = (2 * Math.PI * i) / n;
     // clamp so a 0% score still has a tiny visible point at center
@@ -126,220 +214,406 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
   // Full-radius axis endpoints
   const axisPoints = buildPolygonPoints(cx, cy, maxR, n);
 
-  // Label positions — tight to the outer ring edge
-  const labelOffset = maxR + 14;
-  const labelPoints = buildPolygonPoints(cx, cy, labelOffset, n);
-
   const dataPath = pointsToPath(dataPoints);
 
-  // Overall fill color: average pct drives the gradient center color
-  const avgPct = data.length > 0 ? data.reduce((s, d) => s + d.pct, 0) / data.length : 0;
-  const fillTier = TIER_COLORS[scoreToTier(avgPct)];
-
+  // Overall fill color: tier of the overall score
+  const fillTier = TIER_COLORS[scoreToTier(overallScore)];
   const label = scoreLabel(insightType);
 
+  // 4-axis reference points and icons
+  const topPoint = data[0];
+  const rightPoint = data[1];
+  const bottomPoint = data[2];
+  const leftPoint = data[3];
+
+  const topPt = dataPoints[0];
+  const rightPt = dataPoints[1];
+  const bottomPt = dataPoints[2];
+  const leftPt = dataPoints[3];
+
+  const isTopHovered = hoveredSlug === topPoint?.lens.slug;
+  const isRightHovered = hoveredSlug === rightPoint?.lens.slug;
+  const isBottomHovered = hoveredSlug === bottomPoint?.lens.slug;
+  const isLeftHovered = hoveredSlug === leftPoint?.lens.slug;
+
+  const TopIcon = topPoint ? LENS_ICON_CONFIG[topPoint.lens.slug] : null;
+  const RightIcon = rightPoint ? LENS_ICON_CONFIG[rightPoint.lens.slug] : null;
+  const BottomIcon = bottomPoint ? LENS_ICON_CONFIG[bottomPoint.lens.slug] : null;
+  const LeftIcon = leftPoint ? LENS_ICON_CONFIG[leftPoint.lens.slug] : null;
+
+  const topTier = topPoint ? axisStatusColor(topPoint.pct) : TIER_COLORS.moderate;
+  const rightTier = rightPoint ? axisStatusColor(rightPoint.pct) : TIER_COLORS.moderate;
+  const bottomTier = bottomPoint ? axisStatusColor(bottomPoint.pct) : TIER_COLORS.moderate;
+  const leftTier = leftPoint ? axisStatusColor(leftPoint.pct) : TIER_COLORS.moderate;
+
+  const leftWords = leftPoint ? leftPoint.lens.name.toUpperCase().split(" ") : [];
+  const rightWords = rightPoint ? rightPoint.lens.name.toUpperCase().split(" ") : [];
+
   return (
-    <svg width="100%" height="100%" viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ overflow: "visible" }}>
-      <defs>
-        {/* Per-segment gradients from center (transparent) → vertex color */}
-        {data.map((d, i) => {
-          const { hex } = axisStatusColor(d.pct);
-          const apt = axisPoints[i];
-          // linear gradient along the axis spoke direction
-          const pctX = ((apt.x - cx) / SIZE + 0.5);
-          const pctY = ((apt.y - cy) / SIZE + 0.5);
+    <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <svg width="100%" height="100%" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} style={{ overflow: "visible" }}>
+        <defs>
+          {/* Per-segment gradients from center (transparent) → vertex color */}
+          {data.map((d, i) => {
+            const { hex } = axisStatusColor(d.pct);
+            const apt = axisPoints[i];
+            const pctX = (apt.x - cx) / WIDTH + 0.5;
+            const pctY = (apt.y - cy) / HEIGHT + 0.5;
+            return (
+              <linearGradient
+                key={i}
+                id={gradIds[i]}
+                x1="50%"
+                y1="50%"
+                x2={`${(pctX * 100).toFixed(1)}%`}
+                y2={`${(pctY * 100).toFixed(1)}%`}
+                gradientUnits="objectBoundingBox"
+              >
+                <stop offset="0%" stopColor={hex} stopOpacity={0} />
+                <stop offset="100%" stopColor={hex} stopOpacity={0.55} />
+              </linearGradient>
+            );
+          })}
+
+          {/* Radial fill from center — uses overall tier color */}
+          <radialGradient id="radar-area-fill" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={fillTier.hex} stopOpacity={0.35} />
+            <stop offset="100%" stopColor={fillTier.hex} stopOpacity={0.06} />
+          </radialGradient>
+
+          {/* Subtle glow on stroke */}
+          <filter id={glowId} x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* ── Background rings ── */}
+        {rings.map((ratio, ri) => {
+          const ringPts = buildPolygonPoints(cx, cy, maxR * ratio, n);
+          // dashed ring at 75% to visually reinforce the ~75% strong zone
+          const isThreshold = ri === 2;
           return (
-            <linearGradient
-              key={i}
-              id={gradIds[i]}
-              x1="50%" y1="50%"
-              x2={`${(pctX * 100).toFixed(1)}%`}
-              y2={`${(pctY * 100).toFixed(1)}%`}
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0%" stopColor={hex} stopOpacity={0} />
-              <stop offset="100%" stopColor={hex} stopOpacity={0.55} />
-            </linearGradient>
+            <polygon
+              key={ri}
+              points={ringPts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}
+              fill="none"
+              stroke={isThreshold ? QC.ink3 : QC.hair}
+              strokeWidth={isThreshold ? 1.2 : 0.9}
+              strokeOpacity={1}
+              strokeDasharray={isThreshold ? "3 3" : undefined}
+            />
           );
         })}
 
-        {/* Radial fill from center — uses average tier color */}
-        <radialGradient id="radar-area-fill" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stopColor={fillTier.hex} stopOpacity={0.35} />
-          <stop offset="100%" stopColor={fillTier.hex} stopOpacity={0.06} />
-        </radialGradient>
-
-        {/* Subtle glow on stroke */}
-        <filter id={glowId} x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="2" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-
-      {/* ── Background rings ── */}
-      {rings.map((ratio, ri) => {
-        const ringPts = buildPolygonPoints(cx, cy, maxR * ratio, n);
-        // dashed ring at 75% to visually reinforce the ~80% strong zone
-        const isThreshold = ri === 2;
-        return (
-          <polygon
-            key={ri}
-            points={ringPts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}
-            fill="none"
-            stroke={isThreshold ? QC.ink3 : QC.hair}
-            strokeWidth={isThreshold ? 1.2 : 0.9}
+        {/* ── Axis spokes ── */}
+        {axisPoints.map((pt, i) => (
+          <line
+            key={i}
+            x1={cx}
+            y1={cy}
+            x2={pt.x.toFixed(2)}
+            y2={pt.y.toFixed(2)}
+            stroke={QC.hair}
+            strokeWidth={0.9}
             strokeOpacity={1}
-            strokeDasharray={isThreshold ? "3 3" : undefined}
           />
-        );
-      })}
+        ))}
 
-      {/* ── Axis spokes ── */}
-      {axisPoints.map((pt, i) => (
-        <line
-          key={i}
-          x1={cx} y1={cy}
-          x2={pt.x.toFixed(2)} y2={pt.y.toFixed(2)}
-          stroke={QC.hair}
-          strokeWidth={0.9}
-          strokeOpacity={1}
+        {/* ── Data area fill (radial gradient, overall tier) ── */}
+        <motion.path
+          d={dataPath}
+          fill="url(#radar-area-fill)"
+          initial={{ opacity: 0, scale: 0.2 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+          style={{ transformOrigin: `${cx}px ${cy}px` }}
         />
-      ))}
 
-      {/* ── Data area fill (radial gradient, overall tier) ── */}
-      <motion.path
-        d={dataPath}
-        fill="url(#radar-area-fill)"
-        initial={{ opacity: 0, scale: 0.2 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}
-        style={{ transformOrigin: `${cx}px ${cy}px` }}
-      />
+        {/* ── Per-segment coloured stroke edges ── */}
+        {dataPoints.map((pt, i) => {
+          const nextPt = dataPoints[(i + 1) % n];
+          const { hex: fromColor } = axisStatusColor(data[i].pct);
+          const { hex: toColor } = axisStatusColor(data[(i + 1) % n].pct);
+          const segGradId = `seg-stroke-${i}`;
+          return (
+            <g key={i}>
+              <defs>
+                <linearGradient
+                  id={segGradId}
+                  x1={`${((pt.x / WIDTH) * 100).toFixed(1)}%`}
+                  y1={`${((pt.y / HEIGHT) * 100).toFixed(1)}%`}
+                  x2={`${((nextPt.x / WIDTH) * 100).toFixed(1)}%`}
+                  y2={`${((nextPt.y / HEIGHT) * 100).toFixed(1)}%`}
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop offset="0%" stopColor={fromColor} />
+                  <stop offset="100%" stopColor={toColor} />
+                </linearGradient>
+              </defs>
+              <motion.line
+                x1={pt.x}
+                y1={pt.y}
+                x2={nextPt.x}
+                y2={nextPt.y}
+                stroke={`url(#${segGradId})`}
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                filter={`url(#${glowId})`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 + i * 0.06 }}
+              />
+            </g>
+          );
+        })}
 
-      {/* ── Per-segment coloured stroke edges (one line per edge, coloured by the "from" vertex) ── */}
-      {dataPoints.map((pt, i) => {
-        const nextPt = dataPoints[(i + 1) % n];
-        const { hex: fromColor } = axisStatusColor(data[i].pct);
-        const { hex: toColor } = axisStatusColor(data[(i + 1) % n].pct);
-        const segGradId = `seg-stroke-${i}`;
-        return (
-          <g key={i}>
-            <defs>
-              <linearGradient id={segGradId} x1={`${((pt.x / SIZE) * 100).toFixed(1)}%`} y1={`${((pt.y / SIZE) * 100).toFixed(1)}%`} x2={`${((nextPt.x / SIZE) * 100).toFixed(1)}%`} y2={`${((nextPt.y / SIZE) * 100).toFixed(1)}%`} gradientUnits="userSpaceOnUse">
-                <stop offset="0%"   stopColor={fromColor} />
-                <stop offset="100%" stopColor={toColor} />
-              </linearGradient>
-            </defs>
-            <motion.line
-              x1={pt.x} y1={pt.y}
-              x2={nextPt.x} y2={nextPt.y}
-              stroke={`url(#${segGradId})`}
-              strokeWidth={2}
-              strokeLinecap="round"
-              filter={`url(#${glowId})`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 + i * 0.06 }}
+        {/* ── Vertex dots — each colored by its own tier ── */}
+        {dataPoints.map((pt, i) => {
+          const { hex: dotColor } = axisStatusColor(data[i].pct);
+          const isHovered = hoveredSlug === data[i].lens.slug;
+          return (
+            <motion.circle
+              key={i}
+              cx={pt.x}
+              cy={pt.y}
+              r={isHovered ? 6.5 : 5}
+              fill={dotColor}
+              stroke="white"
+              strokeWidth={1.5}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.5 + i * 0.07, duration: 0.3, ease: "backOut" }}
+              onMouseEnter={() => onHoverVertex(data[i].lens.slug, pt.x / WIDTH, pt.y / HEIGHT)}
+              onMouseLeave={() => onHoverVertex(null)}
+              onClick={() => onLensClick?.(data[i].lens.slug)}
+              style={{
+                cursor: "pointer",
+                filter: isHovered ? `drop-shadow(0 0 6px ${dotColor})` : undefined,
+                transition: "r 0.15s",
+              }}
             />
-          </g>
-        );
-      })}
+          );
+        })}
 
-      {/* ── Axis labels ── */}
-      {data.map((d, i) => {
-        const lp = labelPoints[i];
-        const words = d.subject.split(" ");
-        const { hex: axColor } = axisStatusColor(d.pct);
-        const isHovered = hoveredIndex === i;
-        const textAnchor =
-          Math.abs(lp.x - cx) < 8 ? "middle"
-          : lp.x < cx ? "end"
-          : "start";
-        return (
-          <g
-            key={i}
-            style={{ cursor: "pointer" }}
-            onMouseEnter={() => onHoverVertex(i, lp.x / SIZE, lp.y / SIZE)}
-            onMouseLeave={() => onHoverVertex(null)}
+        {/* ── Center score + label ── */}
+        <motion.g
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.65, duration: 0.4, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+          style={{ transformOrigin: `${cx}px ${cy}px` }}
+        >
+          <text
+            x={cx}
+            y={cy + 8}
+            textAnchor="middle"
+            fontSize={28}
+            fontWeight={700}
+            fill={fillTier.hex}
+            letterSpacing="-0.03em"
           >
-            {words.map((word, wi) => (
-              <text
-                key={wi}
-                x={lp.x}
-                y={lp.y + wi * 11 - ((words.length - 1) * 11) / 2}
-                textAnchor={textAnchor}
-                fontSize={8}
-                fontWeight={isHovered ? 700 : 500}
-                letterSpacing="0.06em"
-                fill={isHovered ? axColor : QC.ink3}
-                style={{ transition: "fill 0.15s" }}
+            {overallScore}
+          </text>
+          <text
+            x={cx}
+            y={cy + 24}
+            textAnchor="middle"
+            fontSize={9.5}
+            fontWeight={700}
+            letterSpacing="0.14em"
+            fill={QC.ink2}
+          >
+            {label}
+          </text>
+        </motion.g>
+      </svg>
+
+      {/* ── Lens labels with icons (dedicated 4-axis positioning) ── */}
+      {n === 4 && (
+        <>
+          {/* Top Label */}
+          {topPoint && (
+            <div
+              className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              style={{
+                position: "absolute",
+                top: 8,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 10,
+              }}
+              onMouseEnter={() => onHoverVertex(topPoint.lens.slug, topPt.x / WIDTH, topPt.y / HEIGHT)}
+              onMouseLeave={() => onHoverVertex(null)}
+              onClick={() => onLensClick?.(topPoint.lens.slug)}
+            >
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150"
+                style={{
+                  background: isTopHovered ? `${topTier.hex}18` : "rgba(18,18,18,0.04)",
+                  border: `1.5px solid ${isTopHovered ? topTier.hex : "rgba(18,18,18,0.10)"}`,
+                  color: isTopHovered ? topTier.hex : "var(--qc-ink)",
+                  boxShadow: isTopHovered ? `0 0 10px ${topTier.hex}33` : undefined,
+                }}
               >
-                {word}
-              </text>
-            ))}
-          </g>
-        );
-      })}
+                {TopIcon && <TopIcon size={14} strokeWidth={1.8} />}
+              </div>
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: isTopHovered ? 700 : 600,
+                  letterSpacing: "0.06em",
+                  color: isTopHovered ? topTier.hex : "var(--qc-ink)",
+                  whiteSpace: "nowrap",
+                  fontFamily: "var(--qc-font-sans)",
+                  transition: "color 0.15s",
+                }}
+              >
+                {topPoint.lens.name.toUpperCase()}
+              </span>
+            </div>
+          )}
 
-      {/* ── Vertex dots — each colored by its own tier ── */}
-      {dataPoints.map((pt, i) => {
-        const { hex: dotColor } = axisStatusColor(data[i].pct);
-        const isHovered = hoveredIndex === i;
-        return (
-          <motion.circle
-            key={i}
-            cx={pt.x}
-            cy={pt.y}
-            r={isHovered ? 6 : 4.5}
-            fill={dotColor}
-            stroke="white"
-            strokeWidth={1.5}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.5 + i * 0.07, duration: 0.3, ease: "backOut" }}
-            onMouseEnter={() => onHoverVertex(i, pt.x / SIZE, pt.y / SIZE)}
-            onMouseLeave={() => onHoverVertex(null)}
-            style={{
-              cursor: "pointer",
-              filter: isHovered ? `drop-shadow(0 0 5px ${dotColor})` : undefined,
-              transition: "r 0.15s",
-            }}
-          />
-        );
-      })}
+          {/* Right Label */}
+          {rightPoint && (
+            <div
+              className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              style={{
+                position: "absolute",
+                right: 12,
+                top: "50%",
+                transform: "translateY(-50%)",
+                zIndex: 10,
+              }}
+              onMouseEnter={() => onHoverVertex(rightPoint.lens.slug, rightPt.x / WIDTH, rightPt.y / HEIGHT)}
+              onMouseLeave={() => onHoverVertex(null)}
+              onClick={() => onLensClick?.(rightPoint.lens.slug)}
+            >
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150"
+                style={{
+                  background: isRightHovered ? `${rightTier.hex}18` : "rgba(18,18,18,0.04)",
+                  border: `1.5px solid ${isRightHovered ? rightTier.hex : "rgba(18,18,18,0.10)"}`,
+                  color: isRightHovered ? rightTier.hex : "var(--qc-ink)",
+                  boxShadow: isRightHovered ? `0 0 10px ${rightTier.hex}33` : undefined,
+                }}
+              >
+                {RightIcon && <RightIcon size={14} strokeWidth={1.8} />}
+              </div>
+              <div className="flex flex-col items-start text-left">
+                {rightWords.map((word, wi) => (
+                  <span
+                    key={wi}
+                    style={{
+                      fontSize: "10.5px",
+                      fontWeight: isRightHovered ? 700 : 600,
+                      letterSpacing: "0.06em",
+                      color: isRightHovered ? rightTier.hex : "var(--qc-ink)",
+                      lineHeight: 1.18,
+                      fontFamily: "var(--qc-font-sans)",
+                      transition: "color 0.15s",
+                    }}
+                  >
+                    {word}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* ── Center score + label ── */}
-      <motion.g
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.65, duration: 0.4, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}
-        style={{ transformOrigin: `${cx}px ${cy}px` }}
-      >
-        <text
-          x={cx} y={cy + 7}
-          textAnchor="middle"
-          fontSize={22}
-          fontWeight={700}
-          fill={fillTier.hex}
-          letterSpacing="-0.03em"
-        >
-          {overallScore}
-        </text>
-        <text
-          x={cx} y={cy + 20}
-          textAnchor="middle"
-          fontSize={8.5}
-          fontWeight={700}
-          letterSpacing="0.14em"
-          fill={QC.ink2}
-        >
-          {label}
-        </text>
-      </motion.g>
-    </svg>
+          {/* Bottom Label */}
+          {bottomPoint && (
+            <div
+              className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              style={{
+                position: "absolute",
+                bottom: 8,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 10,
+              }}
+              onMouseEnter={() => onHoverVertex(bottomPoint.lens.slug, bottomPt.x / WIDTH, bottomPt.y / HEIGHT)}
+              onMouseLeave={() => onHoverVertex(null)}
+              onClick={() => onLensClick?.(bottomPoint.lens.slug)}
+            >
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150"
+                style={{
+                  background: isBottomHovered ? `${bottomTier.hex}18` : "rgba(18,18,18,0.04)",
+                  border: `1.5px solid ${isBottomHovered ? bottomTier.hex : "rgba(18,18,18,0.10)"}`,
+                  color: isBottomHovered ? bottomTier.hex : "var(--qc-ink)",
+                  boxShadow: isBottomHovered ? `0 0 10px ${bottomTier.hex}33` : undefined,
+                }}
+              >
+                {BottomIcon && <BottomIcon size={14} strokeWidth={1.8} />}
+              </div>
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: isBottomHovered ? 700 : 600,
+                  letterSpacing: "0.06em",
+                  color: isBottomHovered ? bottomTier.hex : "var(--qc-ink)",
+                  whiteSpace: "nowrap",
+                  fontFamily: "var(--qc-font-sans)",
+                  transition: "color 0.15s",
+                }}
+              >
+                {bottomPoint.lens.name.toUpperCase()}
+              </span>
+            </div>
+          )}
+
+          {/* Left Label */}
+          {leftPoint && (
+            <div
+              className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              style={{
+                position: "absolute",
+                left: 12,
+                top: "50%",
+                transform: "translateY(-50%)",
+                zIndex: 10,
+              }}
+              onMouseEnter={() => onHoverVertex(leftPoint.lens.slug, leftPt.x / WIDTH, leftPt.y / HEIGHT)}
+              onMouseLeave={() => onHoverVertex(null)}
+              onClick={() => onLensClick?.(leftPoint.lens.slug)}
+            >
+              <div className="flex flex-col items-end text-right">
+                {leftWords.map((word, wi) => (
+                  <span
+                    key={wi}
+                    style={{
+                      fontSize: "10.5px",
+                      fontWeight: isLeftHovered ? 700 : 600,
+                      letterSpacing: "0.06em",
+                      color: isLeftHovered ? leftTier.hex : "var(--qc-ink)",
+                      lineHeight: 1.18,
+                      fontFamily: "var(--qc-font-sans)",
+                      transition: "color 0.15s",
+                    }}
+                  >
+                    {word}
+                  </span>
+                ))}
+              </div>
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150"
+                style={{
+                  background: isLeftHovered ? `${leftTier.hex}18` : "rgba(18,18,18,0.04)",
+                  border: `1.5px solid ${isLeftHovered ? leftTier.hex : "rgba(18,18,18,0.10)"}`,
+                  color: isLeftHovered ? leftTier.hex : "var(--qc-ink)",
+                  boxShadow: isLeftHovered ? `0 0 10px ${leftTier.hex}33` : undefined,
+                }}
+              >
+                {LeftIcon && <LeftIcon size={14} strokeWidth={1.8} />}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }
 
@@ -347,30 +621,32 @@ function SVGRadar({ data, overallScore, insightType, hoveredIndex, onHoverVertex
 
 function VertexTooltip({ lens, visible, pctX, pctY }: { lens: InsightLens | null; visible: boolean; pctX: number; pctY: number }) {
   // Convert 0–1 SVG fractions to CSS % within the radar container.
-  // Nudge tooltip above the vertex by 28px; clamp x so it doesn't overflow.
   const leftPct = pctX * 100;
   const topPct  = pctY * 100;
+  // If vertex is in the top 26% of container, display tooltip below to avoid clipping
+  const isNearTop = topPct < 26;
 
   return (
     <AnimatePresence>
       {visible && lens && (
         <motion.div
-          initial={{ opacity: 0, y: 6, scale: 0.95 }}
+          initial={{ opacity: 0, y: isNearTop ? -6 : 6, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 4, scale: 0.96 }}
+          exit={{ opacity: 0, y: isNearTop ? -4 : 4, scale: 0.96 }}
           transition={{ duration: 0.18 }}
           style={{
             position: "absolute",
             left: `${leftPct}%`,
             top: `${topPct}%`,
-            transform: "translate(-50%, calc(-100% - 10px))",
-            zIndex: 20,
+            transform: isNearTop ? "translate(-50%, 14px)" : "translate(-50%, calc(-100% - 10px))",
+            zIndex: 30,
             background: QC.ink,
             border: "1px solid rgba(255,255,255,0.10)",
             borderRadius: 8,
             padding: "8px 14px",
             whiteSpace: "nowrap",
             pointerEvents: "none",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
           }}
         >
           <p style={{ fontSize: "var(--qc-fz-10)", fontWeight: "var(--qc-w-semi)", letterSpacing: "var(--qc-track-eyebrow)", color: "rgba(255,255,255,0.45)", textTransform: "uppercase", marginBottom: 3, fontFamily: "var(--qc-font-sans)" }}>
@@ -417,10 +693,11 @@ interface InsightScorecardProps {
   // insight's own lenses; the Deal page passes native + the cloned Industry
   // Analysis lens so the radar/tiles include it (frontend-only clone).
   lenses?: InsightLens[];
+  scoreOverride?: number;
 }
 
-export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }: InsightScorecardProps) {
-  const [hoveredVertex, setHoveredVertex] = useState<number | null>(null);
+export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, scoreOverride }: InsightScorecardProps) {
+  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ pctX: 0.5, pctY: 0 });
 
   const scorecardLenses = lenses ?? insight.lenses;
@@ -428,16 +705,31 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
   const bandColor = verdictBandColor(insight.verdict_band ?? insight.verdict);
   const bandBg = verdictBandBg(insight.verdict_band ?? insight.verdict);
   const bandLabel = (insight.verdict_band || insight.verdict || "").toUpperCase();
-  // Overall score comes straight from the backend (0–100). Fall back to a
-  // lens average only if the top-level score is missing.
-  const overallScore = insight.score > 0 ? Math.round(insight.score) : getTotalScore(scorecardLenses);
 
-  const radarData: RadarPoint[] = scorecardLenses.map((l) => ({
-    subject: l.name.toUpperCase(),
-    pct: l.max_score > 0 ? Math.round((l.score / l.max_score) * 100) : 0,
-  }));
+  // Overall score: prefer scoreOverride (from top nav MOD section),
+  // then lens rollup average (which matches how top nav computes it),
+  // and fall back to insight.score only if no lenses are present.
+  const overallScore =
+    scoreOverride != null
+      ? scoreOverride
+      : scorecardLenses.length > 0
+      ? getTotalScore(scorecardLenses)
+      : (insight.score > 0 ? Math.round(insight.score) : 0);
 
-  const hoveredLens = hoveredVertex !== null ? scorecardLenses[hoveredVertex] ?? null : null;
+  const radarData: RadarPoint[] = getOrderedRadarData(insight.type, scorecardLenses);
+
+  const hoveredLens = hoveredSlug !== null ? scorecardLenses.find((l) => l.slug === hoveredSlug) ?? null : null;
+
+  // Map lens slug to its vertex position for tooltip placement when hovering bottom tiles
+  const vertexMap: Record<string, { pctX: number; pctY: number }> = {};
+  radarData.forEach((d, i) => {
+    const angle = (2 * Math.PI * i) / radarData.length;
+    const r = Math.max((d.pct / 100) * 105, 2);
+    const pt = polarToCartesian(240, 160, r, angle);
+    vertexMap[d.lens.slug] = { pctX: pt.x / 480, pctY: pt.y / 320 };
+    vertexMap[d.lens.slug.replace(/_/g, "-")] = { pctX: pt.x / 480, pctY: pt.y / 320 };
+    vertexMap[d.lens.slug.replace(/-/g, "_")] = { pctX: pt.x / 480, pctY: pt.y / 320 };
+  });
 
   // Foot of the dark verdict panel: the three semantic pill groups from the L3
   // verdict — strengths (positive), concerns, and watch-fors — each dotted by
@@ -535,23 +827,24 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
             display: "flex", flexDirection: "column",
           }}
         >
-          {/* Top: radar centered */}
-          <div style={{ flex: 1, padding: "28px 16px 28px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          {/* Top: radar centered — expanded sizing to occupy much more space */}
+          <div style={{ flex: 1, padding: "16px 12px 12px", display: "flex", justifyContent: "center", alignItems: "center", minHeight: 340 }}>
 
-            {/* Radar — horizontal padding absorbs left/right axis label overflow */}
-            <div style={{ flexShrink: 0, width: 300, height: 260, position: "relative", overflow: "visible", padding: "0 28px" }}>
-              <VertexTooltip lens={hoveredLens} visible={hoveredVertex !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
+            {/* Radar — wide container occupying the card space */}
+            <div style={{ flexShrink: 0, width: "100%", maxWidth: 520, height: 330, position: "relative", overflow: "visible" }}>
+              <VertexTooltip lens={hoveredLens} visible={hoveredSlug !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
               <SVGRadar
                 data={radarData}
                 overallScore={overallScore}
                 insightType={insight.type}
-                hoveredIndex={hoveredVertex}
-                onHoverVertex={(i, pctX, pctY) => {
-                  setHoveredVertex(i);
-                  if (i !== null && pctX !== undefined && pctY !== undefined) {
+                hoveredSlug={hoveredSlug}
+                onHoverVertex={(slug, pctX, pctY) => {
+                  setHoveredSlug(slug);
+                  if (slug !== null && pctX !== undefined && pctY !== undefined) {
                     setTooltipPos({ pctX, pctY });
                   }
                 }}
+                onLensClick={onLensClick}
               />
             </div>
           </div>
@@ -578,14 +871,18 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses }:
               const statusLabel = lensStatusLabel(pct, lens.status);
               const isLast = i === scorecardLenses.length - 1;
               const isClickable = !!onLensClick;
-              const isHovered = hoveredVertex === i;
+              const isHovered = hoveredSlug === lens.slug;
 
               return (
                 <motion.div
                   key={lens.slug}
                   onClick={() => onLensClick?.(lens.slug)}
-                  onMouseEnter={() => setHoveredVertex(i)}
-                  onMouseLeave={() => setHoveredVertex(null)}
+                  onMouseEnter={() => {
+                    setHoveredSlug(lens.slug);
+                    const vertexPos = vertexMap[lens.slug] || vertexMap[lens.slug.replace(/_/g, "-")] || vertexMap[lens.slug.replace(/-/g, "_")];
+                    if (vertexPos) setTooltipPos(vertexPos);
+                  }}
+                  onMouseLeave={() => setHoveredSlug(null)}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1, backgroundColor: isHovered ? "var(--qc-section)" : "var(--qc-card)" }}
                   transition={{ opacity: { delay: 0.5 + i * 0.08, duration: 0.3 }, backgroundColor: { duration: 0.15 } }}

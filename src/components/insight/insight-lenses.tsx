@@ -15,22 +15,36 @@ import { SectionPanel } from "@/components/molecules/section-panel";
 import { BACKEND_URL } from "@/lib/constants";
 import { authFetch } from "@/lib/api";
 
-const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
+export const LENS_ICON_CONFIG: Record<string, LucideIcon> = {
   "guidance-credibility": Target,
+  "guidance_credibility": Target,
   "disclosure-honesty": Eye,
+  "disclosure_honesty": Eye,
   "capital-allocation": TrendingUp,
+  "capital_allocation": TrendingUp,
   "promoter-activity": BarChart2,
+  "promoter_activity": BarChart2,
   "industry-analysis": Factory,
+  "industry_analysis": Factory,
+  "industry": Factory,
   "competition": Swords,
   "financial-strength": Shield,
+  "financial_strength": Shield,
   "customer-distribution": Users,
+  "customer_distribution": Users,
   "eps-engine": Zap,
+  "eps_engine": Zap,
   "earnings-forecast": Zap,
+  "earnings_forecast": Zap,
   "pe-rerating-potential": RefreshCw,
+  "pe_rerating_potential": RefreshCw,
   "earning-quality": Award,
+  "earning_quality": Award,
   "earnings-quality": Award,
   "earnings_quality": Award,
   "target-price-matrix": DollarSign,
+  "target_price_matrix": DollarSign,
+  "target-price": DollarSign,
 };
 
 interface InsightLensesProps {

@@ -4,12 +4,13 @@ import React, { Suspense, useState, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { useLenses } from "@/hooks/useLenses";
+import { useOverviewFetch } from "@/hooks/useOverviewAnalysis";
 import { useScreenerData } from "@/hooks/useScreenerData";
 import type { ScreenerData } from "@/types/screener";
 
 import { ScreenerPageShell } from "@/components/molecules/screener-page-shell";
 import { AssetActionBar } from "@/components/molecules/asset-action-bar";
-import { InsightScorecard } from "@/components/insight/insight-scorecard";
+import { InsightScorecard, getTotalScore } from "@/components/insight/insight-scorecard";
 import { InsightLenses } from "@/components/insight/insight-lenses";
 import { InsightSignalMap } from "@/components/insight/insight-signal-map";
 import { InsightEmptyState } from "@/components/insight/insight-empty-state";
@@ -32,10 +33,12 @@ function Shimmer({ style, rounded = 8 }: { style?: React.CSSProperties; rounded?
   return <div className="skeleton-shimmer" style={{ borderRadius: rounded, ...style }} />;
 }
 
-function RadarDiamondSkeleton({ size = 220 }: { size?: number }) {
-  const cx = size / 2;
-  const cy = size / 2;
-  const maxR = size * 0.34;
+function RadarDiamondSkeleton() {
+  const width = 480;
+  const height = 320;
+  const cx = width / 2;
+  const cy = height / 2;
+  const maxR = 105;
   const rings = [0.25, 0.5, 0.75, 1];
   const n = 4;
   const axes = Array.from({ length: n }, (_, i) => {
@@ -57,22 +60,24 @@ function RadarDiamondSkeleton({ size = 220 }: { size?: number }) {
   }).join(" ");
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: "visible", flexShrink: 0 }}>
-      {/* Background rings */}
-      {rings.map((r, i) => (
-        <polygon key={i} points={ringPoints(r)} fill="none" stroke={QC.hair} strokeWidth={i === 2 ? 1.2 : 0.9} strokeDasharray={i === 2 ? "3 3" : undefined} />
-      ))}
-      {/* Axis spokes */}
-      {axes.map((pt, i) => (
-        <line key={i} x1={cx} y1={cy} x2={pt.x} y2={pt.y} stroke={QC.hair} strokeWidth={0.9} />
-      ))}
-      {/* Shimmer data polygon — animated via CSS class */}
-      <polygon points={dataPoints} className="skeleton-shimmer" style={{ fill: QC.section }} strokeWidth={0} />
-      {/* Polygon stroke outline */}
-      <polygon points={dataPoints} fill="none" stroke={QC.hair} strokeWidth={1.5} strokeLinejoin="round" />
-      {/* Center score placeholder */}
-      <rect x={cx - 14} y={cy - 8} width={28} height={14} rx={3} fill={QC.section} />
-    </svg>
+    <div style={{ width: "100%", maxWidth: 520, height: 330, display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} style={{ overflow: "visible", flexShrink: 0 }}>
+        {/* Background rings */}
+        {rings.map((r, i) => (
+          <polygon key={i} points={ringPoints(r)} fill="none" stroke={QC.hair} strokeWidth={i === 2 ? 1.2 : 0.9} strokeDasharray={i === 2 ? "3 3" : undefined} />
+        ))}
+        {/* Axis spokes */}
+        {axes.map((pt, i) => (
+          <line key={i} x1={cx} y1={cy} x2={pt.x} y2={pt.y} stroke={QC.hair} strokeWidth={0.9} />
+        ))}
+        {/* Shimmer data polygon — animated via CSS class */}
+        <polygon points={dataPoints} className="skeleton-shimmer" style={{ fill: QC.section }} strokeWidth={0} />
+        {/* Polygon stroke outline */}
+        <polygon points={dataPoints} fill="none" stroke={QC.hair} strokeWidth={1.5} strokeLinejoin="round" />
+        {/* Center score placeholder */}
+        <rect x={cx - 16} y={cy - 10} width={32} height={20} rx={4} fill={QC.section} />
+      </svg>
+    </div>
   );
 }
 
@@ -114,11 +119,8 @@ function InsightScorecardSkeleton() {
         {/* Radar card — white bg, radar centered, lens tiles below */}
         <div style={{ borderRadius: 14, background: "var(--qc-card)", border: "1px solid var(--qc-hair)", display: "flex", flexDirection: "column" }}>
           {/* Top section: radar centered */}
-          <div style={{ flex: 1, padding: "28px 16px 28px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-            {/* Radar diamond skeleton */}
-            <div style={{ flexShrink: 0 }}>
-              <RadarDiamondSkeleton size={220} />
-            </div>
+          <div style={{ flex: 1, padding: "16px 12px 12px", display: "flex", justifyContent: "center", alignItems: "center", minHeight: 340 }}>
+            <RadarDiamondSkeleton />
           </div>
           {/* Lens score tiles row */}
           <div className="grid grid-cols-2 sm:grid-cols-4" style={{ borderTop: "1px solid var(--qc-hair)" }}>
@@ -363,13 +365,24 @@ function InsightDashboard({
         ?? null
     : null;
 
+  const { data: overviewData } = useOverviewFetch(ticker);
+  const overviewDim = overviewData?.dimensions.find((d) => d.type === type.toLowerCase());
+  const navScore = overviewDim != null ? Math.round(overviewDim.score) : null;
+  const consistentScore = navScore ?? (scorecardLenses.length > 0 ? getTotalScore(scorecardLenses) : Math.round(insight.score));
+
   const lensHeading = `${TYPE_LABELS[type]} Lenses`;
 
   return (
     <>
       <div className="px-3 sm:px-6 pt-3 space-y-3">
         <div id="section-score">
-          <InsightScorecard insight={insight} verdictLabel={TYPE_VERDICT_LABELS[type]} onLensClick={handleLensClick} lenses={scorecardLenses} />
+          <InsightScorecard
+            insight={insight}
+            verdictLabel={TYPE_VERDICT_LABELS[type]}
+            onLensClick={handleLensClick}
+            lenses={scorecardLenses}
+            scoreOverride={consistentScore}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.2fr]" style={{ gap: 12, alignItems: "stretch" }}>
@@ -383,7 +396,7 @@ function InsightDashboard({
           {insight.signal_map.length > 0 && (
             <div id="section-signal-map" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <InsightSignalMap signals={type === 'deal' ? insight.signal_map.slice(0, 6) : insight.signal_map} />
-              <FactorConvictionScore score={insight.score} verdict={insight.verdict} />
+              <FactorConvictionScore score={consistentScore} verdict={insight.verdict} />
             </div>
           )}
         </div>

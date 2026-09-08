@@ -64,6 +64,16 @@ interface FinancialsTTM {
   eps: number | null;
 }
 
+interface FinancialsMetricsDual {
+  C: FinancialsMetrics;
+  S: FinancialsMetrics;
+}
+
+interface FinancialsValuationDual {
+  C: FinancialsValuation;
+  S: FinancialsValuation;
+}
+
 interface FinancialsStandardized {
   quarterly: FinancialTableDual;
   annual: FinancialTableDual;
@@ -71,8 +81,8 @@ interface FinancialsStandardized {
   cashFlow: FinancialTableDual;
   cashFlowQuarterly?: FinancialTableDual;
   ttm: FinancialsTTM;
-  metrics: FinancialsMetrics;
-  valuation: FinancialsValuation;
+  metrics: FinancialsMetricsDual;
+  valuation: FinancialsValuationDual;
 }
 
 interface FundamentalsSignals {

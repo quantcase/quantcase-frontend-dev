@@ -90,6 +90,7 @@ function FinancialsContent() {
   const [pnlReportType, setPnlReportType] = useState<"C" | "S">("C");
   const [balanceSheetReportType, setBalanceSheetReportType] = useState<"C" | "S">("C");
   const [cashFlowReportType, setCashFlowReportType] = useState<"C" | "S">("C");
+  const [metricsReportType, setMetricsReportType] = useState<"C" | "S">("C");
   
   const [pnlView, setPnlView] = useState<"table" | "chart">("table");
   const [balanceSheetView, setBalanceSheetView] = useState<"table" | "chart">("table");
@@ -176,45 +177,57 @@ function FinancialsContent() {
 
             {/* Growth & Returns */}
             <div id="section-growth-returns" className="flex-1">
-              <SectionPanel className="h-full" title="Growth & Returns" subtitle="Compounded growth rates and return metrics">
+              <SectionPanel
+                className="h-full"
+                title="Growth & Returns"
+                subtitle="Compounded growth rates and return metrics"
+                headerAction={
+                  <TabToggle
+                    options={["Consolidated", "Standalone"]}
+                    value={metricsReportType === "C" ? "Consolidated" : "Standalone"}
+                    onChange={(val) => setMetricsReportType(val === "Consolidated" ? "C" : "S")}
+                    variant="outline"
+                  />
+                }
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                   <GrowthStatCard
                     title="Compounded Sales Growth"
                     rows={[
-                      { label: "10 Years:", value: metrics.salesGrowth["10y"] },
-                      { label: "5 Years:", value: metrics.salesGrowth["5y"] },
-                      { label: "3 Years:", value: metrics.salesGrowth["3y"] },
-                      { label: "TTM:", value: metrics.salesGrowth.ttm },
+                      { label: "10 Years:", value: metrics[metricsReportType].salesGrowth["10y"] },
+                      { label: "5 Years:", value: metrics[metricsReportType].salesGrowth["5y"] },
+                      { label: "3 Years:", value: metrics[metricsReportType].salesGrowth["3y"] },
+                      { label: "TTM:", value: metrics[metricsReportType].salesGrowth.ttm },
                     ]}
                   />
                   <GrowthStatCard
                     title="Compounded Profit Growth"
                     divider
                     rows={[
-                      { label: "10 Years:", value: metrics.profitGrowth["10y"] },
-                      { label: "5 Years:", value: metrics.profitGrowth["5y"] },
-                      { label: "3 Years:", value: metrics.profitGrowth["3y"] },
-                      { label: "TTM:", value: metrics.profitGrowth.ttm },
+                      { label: "10 Years:", value: metrics[metricsReportType].profitGrowth["10y"] },
+                      { label: "5 Years:", value: metrics[metricsReportType].profitGrowth["5y"] },
+                      { label: "3 Years:", value: metrics[metricsReportType].profitGrowth["3y"] },
+                      { label: "TTM:", value: metrics[metricsReportType].profitGrowth.ttm },
                     ]}
                   />
                   <GrowthStatCard
                     title="Stock Price CAGR"
                     divider
                     rows={[
-                      { label: "10 Years:", value: metrics.stockPriceCagr["10y"] },
-                      { label: "5 Years:", value: metrics.stockPriceCagr["5y"] },
-                      { label: "3 Years:", value: metrics.stockPriceCagr["3y"] },
-                      { label: "1 Year:", value: metrics.stockPriceCagr["1y"] },
+                      { label: "10 Years:", value: metrics[metricsReportType].stockPriceCagr["10y"] },
+                      { label: "5 Years:", value: metrics[metricsReportType].stockPriceCagr["5y"] },
+                      { label: "3 Years:", value: metrics[metricsReportType].stockPriceCagr["3y"] },
+                      { label: "1 Year:", value: metrics[metricsReportType].stockPriceCagr["1y"] },
                     ]}
                   />
                   <GrowthStatCard
                     title="Return on Equity"
                     divider
                     rows={[
-                      { label: "10 Years:", value: metrics.roe["10y"] },
-                      { label: "5 Years:", value: metrics.roe["5y"] },
-                      { label: "3 Years:", value: metrics.roe["3y"] },
-                      { label: "Last Year:", value: metrics.roe.last },
+                      { label: "10 Years:", value: metrics[metricsReportType].roe["10y"] },
+                      { label: "5 Years:", value: metrics[metricsReportType].roe["5y"] },
+                      { label: "3 Years:", value: metrics[metricsReportType].roe["3y"] },
+                      { label: "Last Year:", value: metrics[metricsReportType].roe.last },
                     ]}
                   />
                 </div>

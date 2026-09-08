@@ -128,9 +128,22 @@ export interface DecisionIntelligenceIndicator {
 }
 
 export interface ActionableInsight {
+  horizon?: "swing" | "positional" | "investor";
   watch_for: string | null;
   new_position: string | null;
   existing_position: string | null;
+  idealEntry?: number | null;
+  stopLoss?: number | null;
+  target?: number | null;
+}
+
+export interface PriceAnchors {
+  support: number | null;
+  resistance: number | null;
+  sma20: number | null;
+  sma50: number | null;
+  sma100: number | null;
+  sma200: number | null;
 }
 
 export interface IdealForScores {
@@ -141,6 +154,7 @@ export interface IdealForScores {
 
 export interface DecisionIntelligence {
   tag: string;
+  bottomLine?: string | null;
   lens: string;
   idealFor: string;
   playbook: string;
@@ -149,6 +163,8 @@ export interface DecisionIntelligence {
   actionableInsight: ActionableInsight | null;
   actionableInsight_investor: ActionableInsight | null;
   actionableInsight_positional: ActionableInsight | null;
+  actionableInsights?: ActionableInsight[];
+  priceAnchors?: PriceAnchors | null;
   convictionLevel: string;
   convictionScore: number;
   priorityWatchout: string | null;
@@ -158,6 +174,9 @@ export interface DecisionIntelligence {
   directionFlag: string | null;
   breakoutQuality: string | null;
   idealForScores: IdealForScores | null;
+  swingScore?: number | null;
+  positionalScore?: number | null;
+  investorScore?: number | null;
   indicators: DecisionIntelligenceIndicator[];
   whatCanChange: string[];
   currentRegime: {

@@ -45,7 +45,7 @@ function StockTypeChip({ classification }: { classification: StockClassification
   return (
     <span
       title={classification_note || undefined}
-      className="inline-flex items-center gap-1 rounded-[4px] border px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.08em]"
+      className="inline-flex items-center gap-1 rounded-[4px] border px-2.5 py-1 font-mono text-[12px] uppercase tracking-[0.08em]"
       // Neutral chrome — stock type is a category, not a good/bad signal.
       style={{ borderColor: "var(--qc-hair)", color: "var(--qc-ink-2)", background: "var(--qc-card)" }}
     >
@@ -83,21 +83,21 @@ export function TechnicalsRuleEngine({
       style={{ borderRadius: 10, border: "1px solid var(--qc-hair)", background: "var(--qc-section)", padding: 8 }}
     >
       {/* Header — stacks vertically on mobile */}
-      <div className="flex flex-col gap-2 px-2 pt-1 pb-3">
+      <div className="flex flex-col gap-2.5 px-2 pt-1 pb-3">
         {/* Title row with perspective toggle */}
         <div className="flex items-center justify-between gap-2">
-          <span style={{ fontSize: "var(--qc-fz-16)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", letterSpacing: "0.01em", fontFamily: "var(--qc-font-sans)" }}>
+          <span style={{ fontSize: "var(--qc-fz-18)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)", letterSpacing: "0.01em", fontFamily: "var(--qc-font-sans)" }}>
             Rule Engine
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             {stockClassification && <StockTypeChip classification={stockClassification} />}
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1">
             {(["GROWTH", "VALUE"] as const).map((p, i) => (
               <span key={p} className="contents">
-                {i > 0 && <span className="text-[11px] select-none" style={{ color: "var(--qc-hair)" }}>·</span>}
+                {i > 0 && <span className="text-[12px] select-none" style={{ color: "var(--qc-hair)" }}>·</span>}
                 <button
                   onClick={() => setActivePerspective(p)}
-                  className="px-1.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-colors"
+                  className="px-2 py-0.5 font-mono text-[12px] font-semibold uppercase tracking-[0.10em] transition-colors"
                   style={{ color: activePerspective === p ? "var(--qc-ink)" : "var(--qc-ink-2)" }}
                 >
                   {p}
@@ -110,7 +110,7 @@ export function TechnicalsRuleEngine({
         {/* Mixed is the majority case today, so a one-line hint rather than
             stacking both watchouts on every card. */}
         {isMixed && (
-          <span style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-sans)" }}>
+          <span style={{ fontSize: "13px", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-sans)" }}>
             Mixed profile — compare both lenses.
           </span>
         )}
@@ -124,7 +124,7 @@ export function TechnicalsRuleEngine({
               <button
                 key={tab}
                 onClick={() => onEngineChange(tab)}
-                className="px-3.5 py-1.5 rounded-[6px] font-mono text-[11.5px] font-medium uppercase tracking-[0.12em] transition-all whitespace-nowrap"
+                className="px-4 py-2 rounded-[6px] font-mono text-[12.5px] font-semibold uppercase tracking-[0.10em] transition-all whitespace-nowrap"
                 style={activeEngine === tab
                   ? { background: "var(--qc-ink)", color: "var(--qc-card)" }
                   : { color: "var(--qc-ink-2)" }
@@ -143,11 +143,11 @@ export function TechnicalsRuleEngine({
           borderRadius: 10,
           border: "1px solid var(--qc-hair-2)",
           background: "var(--qc-card)",
-          padding: 16,
+          padding: 18,
         }}
       >
         {tabSummary && (
-          <p style={{ margin: "0 0 12px", fontSize: "var(--qc-fz-135)", color: "var(--qc-ink-2)", lineHeight: 1.6, fontFamily: "var(--qc-font-sans)" }}>
+          <p style={{ margin: "0 0 14px", fontSize: "15px", color: "var(--qc-ink-2)", lineHeight: 1.65, fontFamily: "var(--qc-font-sans)" }}>
             {tabSummary}
           </p>
         )}
@@ -160,7 +160,7 @@ export function TechnicalsRuleEngine({
           smaDistancePct={smaDistancePct}
           wyckoffGrowthWarning={stockClassification?.wyckoff_growth_warning ?? null}
         />
-        <p className="mt-3 px-1 text-[11px] text-right" style={{ color: "var(--qc-ink-2)" }}>
+        <p className="mt-3 px-1 text-[12px] text-right" style={{ color: "var(--qc-ink-2)" }}>
           * All analysis and indicators are calculated using daily timeframe data.
         </p>
       </div>

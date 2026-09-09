@@ -101,7 +101,7 @@ function TechnicalsContent() {
     data, derived, loading, error,
     insightStatus, insightProgress, isUpdating, isRefreshing, refreshError, refresh,
   } = useTechnicals(symbol);
-  const { prices, indicators, loading: pricesLoading, error: pricesError } = usePrices(symbol);
+  const { prices, indicators, loading: pricesLoading, error: pricesError } = usePrices(symbol, { years: 2 });
 
   const [dismissedRefreshError, setDismissedRefreshError] = useState(false);
   const lastRefreshAtRef = useRef(0);

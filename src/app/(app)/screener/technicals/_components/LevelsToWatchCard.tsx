@@ -31,8 +31,8 @@ export function LevelsToWatchCard({ levels, cmp }: Props) {
   if (rows.length === 0) return null;
 
   return (
-    <div style={{ height: "100%", background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 14, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
-      <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+    <div style={{ height: "100%", background: "var(--qc-card)", border: "1px solid var(--qc-hair)", borderRadius: 14, padding: "14px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+      <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-105)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: "var(--qc-w-semi)" }}>
         Levels To Watch
       </span>
 
@@ -47,18 +47,18 @@ export function LevelsToWatchCard({ levels, cmp }: Props) {
               style={{ borderBottom: i < rows.length - 1 ? "1px solid var(--qc-hair)" : "none" }}
             >
               <div className="flex items-center gap-2 min-w-0">
-                <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em", flexShrink: 0 }}>
+                <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-105)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em", flexShrink: 0 }}>
                   {heading}
                 </span>
-                <span className="truncate" style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)", lineHeight: 1.4 }}>
+                <span className="truncate" style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)", lineHeight: 1.4 }}>
                   {level.label}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-12)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>
+                <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-125)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink)" }}>
                   {fmtPrice(level.price)}
                 </span>
-                <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-10)", color: above ? "var(--qc-up)" : "var(--qc-down)" }}>
+                <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-105)", color: above ? "var(--qc-up)" : "var(--qc-down)" }}>
                   ({above ? "+" : ""}{distPct.toFixed(1)}%)
                 </span>
               </div>
@@ -68,7 +68,7 @@ export function LevelsToWatchCard({ levels, cmp }: Props) {
       </div>
 
       {levels.horizonNote && (
-        <p style={{ margin: 0, fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)", lineHeight: 1.5, fontFamily: "var(--qc-font-sans)" }}>
+        <p style={{ margin: 0, fontSize: "var(--qc-fz-115)", color: "var(--qc-ink-2)", lineHeight: 1.5, fontFamily: "var(--qc-font-sans)" }}>
           {levels.horizonNote}
         </p>
       )}

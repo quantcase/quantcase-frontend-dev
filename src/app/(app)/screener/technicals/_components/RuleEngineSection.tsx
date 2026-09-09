@@ -61,11 +61,11 @@ function deriveTrendDirectionBadge(db: DirectionalBiasIndicator): string {
 function MetricPill({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-[4px] border px-2 py-0.5"
+      className="inline-flex items-center gap-1.5 rounded-[4px] border px-2 py-0.5"
       style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}
     >
-      <span style={{ fontSize: "var(--qc-fz-10)", color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-medium)", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "var(--qc-font-mono)" }}>{label}</span>
-      <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: valueColor ?? "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>{value}</span>
+      <span style={{ fontSize: "var(--qc-fz-105)", color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-medium)", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "var(--qc-font-mono)" }}>{label}</span>
+      <span style={{ fontSize: "var(--qc-fz-125)", fontWeight: "var(--qc-w-semi)", color: valueColor ?? "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>{value}</span>
     </span>
   );
 }
@@ -93,23 +93,23 @@ function EngineCard({
 
   return (
     <div
-      className="rounded-[10px] border px-4 py-3 space-y-3"
+      className="rounded-[10px] border px-4 py-3.5 space-y-3"
       style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
     >
       {/* HEADER */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-baseline gap-2">
           <span
-            className="font-mono text-[10px] uppercase tracking-[0.14em]"
+            className="font-mono text-[11.5px] uppercase tracking-[0.12em] font-semibold"
             style={{ color: "var(--qc-ink)" }}
           >{title}</span>
           {subtitle && (
-            <span style={{ fontSize: "var(--qc-fz-11)", color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-regular)", fontFamily: "var(--qc-font-sans)" }}>{subtitle}</span>
+            <span style={{ fontSize: "var(--qc-fz-125)", color: "var(--qc-ink-2)", fontWeight: "var(--qc-w-regular)", fontFamily: "var(--qc-font-sans)" }}>{subtitle}</span>
           )}
         </div>
         {badgeLabel && (
           <span
-            className="shrink-0 inline-flex items-center rounded-[4px] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.10em] font-semibold"
+            className="shrink-0 inline-flex items-center rounded-[4px] px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.08em] font-semibold"
             style={{ background: variant.bgColor, color: variant.textColor }}
           >
             {badgeLabel}
@@ -122,36 +122,36 @@ function EngineCard({
 
       {/* INTERPRETATION */}
       {(output || emptyOutput) && (
-        <div className="space-y-1">
-          <div className="flex items-center gap-1">
-            <TrendingUp className="h-3 w-3" style={{ color: "var(--qc-ink-2)" }} />
-            <span style={{ fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "var(--qc-font-mono)" }}>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className="h-3.5 w-3.5" style={{ color: "var(--qc-ink-2)" }} />
+            <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "var(--qc-font-mono)" }}>
               Interpretation
             </span>
           </div>
           {output ? (
-            <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)", lineHeight: 1.6, fontFamily: "var(--qc-font-sans)" }}>
+            <p style={{ fontSize: "var(--qc-fz-135)", color: "var(--qc-ink)", lineHeight: 1.65, fontFamily: "var(--qc-font-sans)" }}>
               {output.split("\n").map((line, i, arr) => (
                 <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
               ))}
             </p>
           ) : (
-            <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-sans)" }}>{emptyOutput}</p>
+            <p style={{ fontSize: "var(--qc-fz-13)", color: "var(--qc-ink-2)", fontFamily: "var(--qc-font-sans)" }}>{emptyOutput}</p>
           )}
         </div>
       )}
 
       {/* WATCHOUTS */}
       {watchout && (
-        <div className="space-y-1">
-          <div className="flex items-center gap-1">
-            <AlertCircle className="h-3 w-3" style={{ color: "var(--qc-warn)" }} />
-            <span style={{ fontSize: "var(--qc-fz-9)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "var(--qc-font-mono)" }}>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <AlertCircle className="h-3.5 w-3.5" style={{ color: "var(--qc-warn)" }} />
+            <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "var(--qc-font-mono)" }}>
               Watchouts
             </span>
           </div>
           <div className="rounded-[6px] px-3 py-2" style={{ background: "var(--qc-warn-soft)" }}>
-            <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-warn)", lineHeight: 1.6, fontFamily: "var(--qc-font-sans)" }}>{watchout}</p>
+            <p style={{ fontSize: "var(--qc-fz-135)", color: "var(--qc-warn)", lineHeight: 1.65, fontFamily: "var(--qc-font-sans)" }}>{watchout}</p>
           </div>
         </div>
       )}
@@ -179,7 +179,7 @@ function StructureEnginePanel({ engine, perspective, indicators, avgVolume20d, w
       {wyckoffGrowthWarning && (
         <div className="flex items-start gap-2 rounded-[8px] px-3 py-2" style={{ background: "var(--qc-warn-soft)" }}>
           <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: "var(--qc-warn)" }} />
-          <p style={{ fontSize: "var(--qc-fz-12)", color: "var(--qc-warn)", lineHeight: 1.55, fontFamily: "var(--qc-font-sans)" }}>
+          <p style={{ fontSize: "var(--qc-fz-135)", color: "var(--qc-warn)", lineHeight: 1.6, fontFamily: "var(--qc-font-sans)" }}>
             {wyckoffGrowthWarning}
           </p>
         </div>

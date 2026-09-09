@@ -193,7 +193,7 @@ function TechnicalsContent() {
         </div>
 
         {/* Row 2: Rule Engine (left) + Decision Intelligence (right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-[14px] items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_520px] xl:grid-cols-[1fr_560px] 2xl:grid-cols-[1fr_580px] gap-[14px] items-start">
           <div className="min-w-0 flex flex-col gap-[14px]">
             {!loading && data?.ruleEngine && (
               <div id="section-rule-engine">

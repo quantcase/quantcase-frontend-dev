@@ -10,6 +10,7 @@ import type {
   TechnicalsScores,
 } from "@/types/technicals";
 import { SCORE_MODULES } from "@/lib/technicals-scores";
+import { useUser } from "@/components/providers/UserContext";
 import { RawDataDialog } from "./RawDataDialog";
 
 // ─── Constants & Mappings from decision_intelligence_v4 ─────────────────────────
@@ -202,6 +203,7 @@ export function DecisionIntelligenceBanner({
   onRefresh,
   refreshDisabled,
 }: BannerProps) {
+  const { isAdmin } = useUser();
   const [activeHorizon, setActiveHorizon] = useState<HorizonKey>(() => getInitialHorizon(di));
   const [showRaw, setShowRaw] = useState(false);
   const [showScoresPopover, setShowScoresPopover] = useState(false);
@@ -292,26 +294,30 @@ export function DecisionIntelligenceBanner({
             </span>
           )}
 
-          {onRefresh && (
-            <button
-              type="button"
-              onClick={onRefresh}
-              disabled={refreshDisabled}
-              title="Refresh Technical Analysis"
-              className="p-1 rounded text-[#9aa0a6] hover:text-[#1a1c1e] transition-colors disabled:opacity-40"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshDisabled ? "animate-spin" : ""}`} />
-            </button>
-          )}
+          {isAdmin && (
+            <>
+              {onRefresh && (
+                <button
+                  type="button"
+                  onClick={onRefresh}
+                  disabled={refreshDisabled}
+                  title="Refresh Technical Analysis"
+                  className="p-1 rounded text-[#9aa0a6] hover:text-[#1a1c1e] transition-colors disabled:opacity-40"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${refreshDisabled ? "animate-spin" : ""}`} />
+                </button>
+              )}
 
-          <button
-            type="button"
-            onClick={() => setShowRaw(true)}
-            title="View Raw Decision Intelligence Payload"
-            className="p-1 rounded text-[#9aa0a6] hover:text-[#1a1c1e] transition-colors"
-          >
-            <Braces className="w-3.5 h-3.5" />
-          </button>
+              <button
+                type="button"
+                onClick={() => setShowRaw(true)}
+                title="View Raw Decision Intelligence Payload"
+                className="p-1 rounded text-[#9aa0a6] hover:text-[#1a1c1e] transition-colors"
+              >
+                <Braces className="w-3.5 h-3.5" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -577,7 +583,7 @@ export function DecisionIntelligenceBanner({
       </div>
 
       {/* Raw Payload Modal for diagnostics */}
-      {showRaw && (
+      {isAdmin && showRaw && (
         <RawDataDialog
           title="Decision Intelligence Payload"
           data={di}

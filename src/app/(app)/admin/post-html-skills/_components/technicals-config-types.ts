@@ -42,6 +42,7 @@ export interface SkillUpdateBody {
 
 // Known models for the dropdown; the loaded skill's model is added if absent.
 export const TECHNICALS_MODEL_OPTIONS = [
+  "google/gemini-2.5-flash",
   "anthropic/claude-haiku-4.5",
   "anthropic/claude-sonnet-4.5",
   "anthropic/claude-sonnet-4-6",

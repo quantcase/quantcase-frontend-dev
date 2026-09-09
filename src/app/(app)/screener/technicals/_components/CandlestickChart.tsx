@@ -211,6 +211,35 @@ export function CandlestickChart({
   const rsiMarkersRef = useRef<ISeriesMarkersPluginApi<Time> | null>(null);
 
   const [legendItems, setLegendItems] = useState<LegendItem[]>([]);
+  const [activeRange, setActiveRange] = useState<"6M" | "1Y" | "2Y">("2Y");
+  const activeRangeRef = useRef<"6M" | "1Y" | "2Y">("2Y");
+  const sortedPricesRef = useRef<PriceBar[]>([]);
+
+  const applyRange = useCallback((range: "6M" | "1Y" | "2Y", totalBars: number) => {
+    const chart = chartRef.current;
+    if (!chart || totalBars === 0) return;
+    if (range === "2Y") {
+      chart.timeScale().fitContent();
+    } else if (range === "1Y") {
+      const barCount = Math.min(totalBars, 252);
+      chart.timeScale().setVisibleLogicalRange({
+        from: totalBars - barCount,
+        to: totalBars + 5,
+      });
+    } else if (range === "6M") {
+      const barCount = Math.min(totalBars, 126);
+      chart.timeScale().setVisibleLogicalRange({
+        from: totalBars - barCount,
+        to: totalBars + 5,
+      });
+    }
+  }, []);
+
+  const handleRangeChange = useCallback((range: "6M" | "1Y" | "2Y") => {
+    activeRangeRef.current = range;
+    setActiveRange(range);
+    applyRange(range, sortedPricesRef.current.length);
+  }, [applyRange]);
 
   const ohlcBarRef = useRef<HTMLDivElement>(null);
   const latestCandleRef = useRef<any>(null);
@@ -362,8 +391,9 @@ export function CandlestickChart({
         }))
     );
 
-    chartRef.current?.timeScale().fitContent();
-  }, [prices]);
+    sortedPricesRef.current = sorted;
+    applyRange(activeRangeRef.current, sorted.length);
+  }, [prices, applyRange]);
 
   // Support / Resistance horizontal lines
   useEffect(() => {
@@ -719,37 +749,63 @@ export function CandlestickChart({
 
       <div ref={containerRef} className="w-full overflow-hidden" />
 
-      {/* Legend */}
-      {legendItems.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-1 pt-2 pb-1">
-          {legendItems.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => toggleLegendItem(item.key)}
-              className="flex items-center gap-1.5 group"
-              style={{ opacity: item.visible ? 1 : 0.35 }}
-            >
-              {item.isOsc ? (
-                <span
-                  className="inline-block w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ background: item.color }}
-                />
-              ) : (
-                <span
-                  className="inline-block h-[2px] w-4 flex-shrink-0 rounded-full"
-                  style={{ background: item.color }}
-                />
-              )}
-              <span
-                className="font-mono text-[10px] uppercase tracking-[0.12em] transition-colors"
-                style={{ color: item.visible ? item.color : "var(--qc-ink-2)" }}
+      {/* Legend and Time Range Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-1 pt-2 pb-1">
+        {legendItems.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            {legendItems.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => toggleLegendItem(item.key)}
+                className="flex items-center gap-1.5 group cursor-pointer select-none"
+                style={{ opacity: item.visible ? 1 : 0.35 }}
               >
-                {item.title}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+                {item.isOsc ? (
+                  <span
+                    className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ background: item.color }}
+                  />
+                ) : (
+                  <span
+                    className="inline-block h-[2px] w-4 flex-shrink-0 rounded-full"
+                    style={{ background: item.color }}
+                  />
+                )}
+                <span
+                  className="font-mono text-[10px] uppercase tracking-[0.12em] transition-colors"
+                  style={{ color: item.visible ? item.color : "var(--qc-ink-2)" }}
+                >
+                  {item.title}
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : <div />}
+
+        {/* Time range selector */}
+        {prices.length > 0 && (
+          <div
+            className="inline-flex items-center rounded-[6px] border p-0.5 gap-0.5 ml-auto select-none"
+            style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}
+          >
+            {(["6M", "1Y", "2Y"] as const).map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => handleRangeChange(r)}
+                className="px-2 py-0.5 rounded-[4px] font-mono text-[10px] uppercase tracking-[0.08em] transition-all cursor-pointer"
+                style={activeRange === r
+                  ? { background: "var(--qc-ink)", color: "var(--qc-card)", fontWeight: 600 }
+                  : { color: "var(--qc-ink-2)" }
+                }
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
     </div>
   );

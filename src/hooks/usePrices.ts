@@ -46,15 +46,31 @@ interface PricesResponse {
   indicators?: PriceIndicators;
 }
 
-export function usePrices(symbol: string) {
+export interface UsePricesOptions {
+  years?: number;
+  from?: string;
+  to?: string;
+}
+
+export function usePrices(symbol: string, options?: UsePricesOptions) {
   const [prices, setPrices] = useState<PriceBar[]>([]);
   const [indicators, setIndicators] = useState<PriceIndicators | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const years = options?.years;
+  const from = options?.from;
+  const to = options?.to;
+
   useEffect(() => {
     if (!symbol?.trim()) return;
-    rawFetch<PricesResponse>(`${BACKEND_URL}/api/screener/${symbol}/prices`, {
+    const params = new URLSearchParams();
+    if (years != null) params.set("years", String(years));
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+
+    rawFetch<PricesResponse>(`${BACKEND_URL}/api/screener/${symbol}/prices${qs}`, {
       onStart: () => { setLoading(true); setError(null); setPrices([]); setIndicators(null); },
       onSuccess: (res) => {
         setPrices(res.prices);
@@ -63,7 +79,7 @@ export function usePrices(symbol: string) {
       },
       onError: (err) => { setError(err); setLoading(false); },
     });
-  }, [symbol]);
+  }, [symbol, years, from, to]);
 
   return { prices, indicators, loading, error };
 }

@@ -16,10 +16,10 @@ import { useUser, usesInvestorFlow } from "@/components/providers/UserContext";
 import { UserMenu } from "@/components/molecules/user-menu";
 
 const managerNavItems = [
-  { label: "Home",     href: "/dashboard",          icon: Home,       isActive: (p: string) => p === "/dashboard" },
-  { label: "WealthOS", href: "/wealthos/dashboard", icon: Briefcase,  isActive: (p: string) => p.startsWith("/wealthos") },
-  { label: "Models",   href: "/model-builder",      icon: TrendingUp, isActive: (p: string) => p === "/model-builder" || p.startsWith("/model-builder/") || p === "/model-analytics" },
-  { label: "Settings", href: "/settings",           icon: Settings,   isActive: (p: string) => p.startsWith("/settings") },
+  { label: "Home",          href: "/dashboard",              icon: Home,     isActive: (p: string) => p === "/dashboard" },
+  { label: "Opportunities", href: "/wealthos/opportunities",  icon: Sparkles, isActive: (p: string) => p.startsWith("/wealthos") },
+  { label: "Models",        href: "/model-builder",          icon: TrendingUp, isActive: (p: string) => p === "/model-builder" || p.startsWith("/model-builder/") || p === "/model-analytics" },
+  { label: "Settings",      href: "/settings",               icon: Settings, isActive: (p: string) => p.startsWith("/settings") },
 ];
 
 const investorNavItems = [

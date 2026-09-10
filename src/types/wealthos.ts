@@ -410,9 +410,13 @@ export interface ClientAnalytics {
 
 export interface GraphNode {
   id: string;
-  type: "cio" | "rm" | "client" | "holding";
+  type: "super_admin" | "cio" | "rm" | "client" | "holding";
+  role?: string;
+  stage?: number;
+  parent_id?: string;
   label: string;
   initials?: string;
+  title?: string;
   aum_cr?: number;
   current_value_cr?: number;
   weight_pct?: number;
@@ -421,9 +425,10 @@ export interface GraphNode {
   lifecycle_status?: ClientStatus;
   churn_probability?: number;
   team?: string;
+  holding_count?: number;
   alert_count?: number;
   has_alert?: boolean;
-  raw_id: string;
+  raw_id?: string;
 }
 
 export interface GraphEdge {
@@ -448,7 +453,11 @@ export interface GraphAlert {
 
 export interface HeartbeatGraphData {
   meta: {
-    type: "rm_heartbeat" | "cio_heartbeat";
+    type: "rm_heartbeat" | "cio_heartbeat" | "admin_heartbeat" | string;
+    role?: "super_admin" | "cio" | "rm" | "admin" | string;
+    stageCount?: number;
+    center_id?: string;
+    center_label?: string;
     rm_id?: string;
     rm_name?: string;
     org_id?: string;
@@ -458,6 +467,7 @@ export interface HeartbeatGraphData {
     total_clients: number;
     total_alerts: number;
     generated_at: string;
+    filters?: Record<string, unknown>;
   };
   nodes: GraphNode[];
   edges: GraphEdge[];

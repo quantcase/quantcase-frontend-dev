@@ -71,3 +71,47 @@ export function useCioHeartbeat(filters: { asset_class?: string; alert_only?: bo
 
   return { data, loading, error, refetch: fetchHeartbeat };
 }
+
+/**
+ * Unified, Role-Aware Heartbeat Hook:
+ * Auto-detects logged in user (RM, CIO, or Super Admin) and returns
+ * the network graph with whoever is logged in at the center.
+ */
+export function useHeartbeat(filters: { rm_id?: string; asset_class?: string; alert_only?: boolean } = {}) {
+  const [data, setData] = useState<HeartbeatGraphData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { rm_id, asset_class, alert_only } = filters;
+
+  const fetchHeartbeat = useCallback(() => {
+    const params = new URLSearchParams();
+    if (rm_id) params.set("rm_id", rm_id);
+    if (asset_class) params.set("asset_class", asset_class);
+    if (alert_only) params.set("alert_only", "true");
+
+    const query = params.toString() ? `?${params.toString()}` : "";
+
+    apiCall<HeartbeatGraphData>(`${BACKEND_URL}/api/wealthos/heartbeat${query}`, {
+      onStart: () => {
+        setLoading(true);
+        setError(null);
+      },
+      onSuccess: (res: any) => {
+        setData(res.data || res);
+        setLoading(false);
+      },
+      onError: (err) => {
+        setError(err);
+        setLoading(false);
+      },
+    });
+  }, [rm_id, asset_class, alert_only]);
+
+  useEffect(() => {
+    fetchHeartbeat();
+  }, [fetchHeartbeat]);
+
+  return { data, loading, error, refetch: fetchHeartbeat };
+}
+

@@ -1,3 +1,5 @@
+"use client";
+
 import { TodaysBriefing } from "@/components/dashboard/todays-briefing";
 import { ClientsAttentionScroll } from "@/components/dashboard/clients-attention-scroll";
 import { RMHeartbeatGraph } from "@/components/dashboard/rm-heartbeat-graph";
@@ -8,6 +10,9 @@ import { TodaysTasks } from "@/components/dashboard/todays-tasks";
 import { SmartSegmentsPills } from "@/components/dashboard/smart-segments-pills";
 import { OpportunitiesPanel } from "@/components/dashboard/opportunities-panel";
 import type { TaskItem } from "@/components/dashboard/todays-tasks";
+import { useUser } from "@/components/providers/UserContext";
+import { useWealthDashboardSummary } from "@/hooks/useWealthDashboardSummary";
+import { useHeartbeat } from "@/hooks/useWealthHeartbeat";
 
 const TODAYS_TASKS: TaskItem[] = [
   { id: "1", label: "Send Rahul updated portfolio PDF", status: "pending", meta: "BY 10:00"        },
@@ -38,6 +43,13 @@ function getTodayMeta(): string {
 export default function DashboardPage() {
   const greeting = getGreeting();
   const todayMeta = getTodayMeta();
+  const { displayName } = useUser();
+  const { data: summaryData } = useWealthDashboardSummary();
+  const { data: heartbeatData, loading: loadingHeartbeat } = useHeartbeat();
+
+  const userFirstName = displayName ? displayName.split(" ")[0] : (heartbeatData?.meta?.center_label?.split(" ")[0] || "Palash");
+  const clientCount = heartbeatData?.meta?.total_clients ?? summaryData?.total_clients ?? 18;
+  const aumCr = heartbeatData?.meta?.total_aum_cr ?? summaryData?.total_aum_cr ?? 796;
 
   return (
     <div style={{ background: "var(--qc-bg)", minHeight: "100vh" }} className="w-full min-w-0">
@@ -72,7 +84,7 @@ export default function DashboardPage() {
                 fontFamily: "var(--qc-font-sans)",
               }}
             >
-              {greeting}, <span style={{ fontWeight: 500 }}>Palash</span>
+              {greeting}, <span style={{ fontWeight: 500 }}>{userFirstName}</span>
             </h1>
             <div
               style={{
@@ -85,9 +97,9 @@ export default function DashboardPage() {
             >
               {todayMeta}
               <span style={{ padding: "0 8px", color: "var(--qc-ink-3)" }}>·</span>
-              18 CLIENTS
+              {clientCount} CLIENTS
               <span style={{ padding: "0 8px", color: "var(--qc-ink-3)" }}>·</span>
-              ₹796 CR BOOK
+              ₹{aumCr} CR BOOK
             </div>
           </div>
           <button
@@ -126,7 +138,7 @@ export default function DashboardPage() {
             2. RM HEARTBEAT GRAPH (RM at Center, Clients & Holdings Branching Out)
         ═══════════════════════════════════════════════════════════════ */}
         <section className="mb-6 w-full min-w-0">
-          <RMHeartbeatGraph />
+          <RMHeartbeatGraph data={heartbeatData} loading={loadingHeartbeat} />
         </section>
 
         {/* ════════════════════════════════════════════════════════════

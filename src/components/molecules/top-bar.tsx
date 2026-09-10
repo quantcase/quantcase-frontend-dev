@@ -292,11 +292,11 @@ function TopBarInner() {
     );
   } else if (isWealthOS) {
     const wealthTabs = [
-      { label: "Dashboard", href: "/wealthos/dashboard", icon: <LayoutDashboard size={13} strokeWidth={1.8} /> },
-      { label: "Clients",   href: "/wealthos/clients",   icon: <Users size={13} strokeWidth={1.8} /> },
-      { label: "RMs",       href: "/wealthos/rms",       icon: <Users size={13} strokeWidth={1.8} /> },
-      { label: "Models",    href: "/wealthos/models",    icon: <PieChart size={13} strokeWidth={1.8} /> },
-      { label: "Analytics", href: "/wealthos/analytics", icon: <LineChart size={13} strokeWidth={1.8} /> },
+      { label: "Opportunities", href: "/wealthos/opportunities", icon: <Sparkles size={13} strokeWidth={1.8} /> },
+      { label: "Clients",       href: "/wealthos/clients",       icon: <Users size={13} strokeWidth={1.8} /> },
+      { label: "RMs",           href: "/wealthos/rms",           icon: <Users size={13} strokeWidth={1.8} /> },
+      { label: "Models",        href: "/wealthos/models",        icon: <PieChart size={13} strokeWidth={1.8} /> },
+      { label: "Analytics",     href: "/wealthos/analytics",     icon: <LineChart size={13} strokeWidth={1.8} /> },
     ];
     leftZone = (
       <div

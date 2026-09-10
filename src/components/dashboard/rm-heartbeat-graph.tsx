@@ -19,13 +19,15 @@ import type { HeartbeatGraphData } from "@/types/wealthos";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type HoldingCategory =
+  | "super_admin"
+  | "cio"
+  | "rm"
   | "equity"
   | "debt"
   | "mutual_fund"
   | "reit"
   | "intl"
-  | "alts"
-  | "rm";
+  | "alts";
 
 export type HealthSeverity = "critical" | "warning" | "moderate" | "clean";
 
@@ -34,7 +36,9 @@ export interface GraphNode {
   label: string;
   sublabel?: string;
   category: HoldingCategory;
-  kind: "rm" | "client" | "asset_class" | "holding";
+  kind: "super_admin" | "cio" | "rm" | "client" | "asset_class" | "holding";
+  stage?: number;
+  role?: string;
   severity: HealthSeverity;
   aum?: string;
   weight?: string;
@@ -48,12 +52,17 @@ export interface GraphNode {
   fy?: number | null;
   parentId?: string;
   clientId?: string;
+  rawId?: string;
+  alertCount?: number;
+  holdingCount?: number;
   details?: {
     allocation?: string;
     riskScore?: number;
     driftPct?: string;
     rebalanceDue?: boolean;
     holdingCount?: number;
+    team?: string;
+    title?: string;
   };
 }
 
@@ -70,6 +79,18 @@ export interface GraphLink {
 const NAVY_BG = "#210B2C";
 
 const CATEGORY_COLORS: Record<HoldingCategory, { main: string; glow: string; label: string; text: string }> = {
+  super_admin: {
+    main: "#E11D48",
+    glow: "rgba(225, 29, 72, 0.5)",
+    label: "Super Admin / Owner",
+    text: "#FFE4E6",
+  },
+  cio: {
+    main: "#8B5CF6",
+    glow: "rgba(139, 92, 246, 0.5)",
+    label: "Chief Investment Officer",
+    text: "#EDE9FE",
+  },
   rm: {
     main: "#F59E0B",
     glow: "rgba(245, 158, 11, 0.45)",
@@ -123,10 +144,22 @@ const SEVERITY_COLORS: Record<HealthSeverity, { main: string; glow: string; labe
 
 // ── Graph Data Definition ─────────────────────────────────────────────────────
 
+function mapAssetClass(assetClass?: string): HoldingCategory {
+  if (!assetClass) return "equity";
+  const ac = assetClass.toLowerCase();
+  if (ac.includes("debt") || ac.includes("liquid") || ac.includes("bond")) return "debt";
+  if (ac.includes("mutual") || ac.includes("mf")) return "mutual_fund";
+  if (ac.includes("reit") || ac.includes("real_estate")) return "reit";
+  if (ac.includes("intl") || ac.includes("global")) return "intl";
+  if (ac.includes("alt") || ac.includes("pms") || ac.includes("aif") || ac.includes("private")) return "alts";
+  return "equity";
+}
+
 function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nodes: GraphNode[]; links: GraphLink[] } {
   if (externalData && externalData.nodes && externalData.nodes.length > 0) {
     const dynNodes: GraphNode[] = [];
     const dynLinks: GraphLink[] = [];
+    const addedLinks = new Set<string>();
 
     const alertsByHolding = new Map<string, any[]>();
     for (const a of externalData.alerts || []) {
@@ -135,121 +168,436 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
       alertsByHolding.set(a.holding_id, list);
     }
 
-    const centerRaw = externalData.nodes.find(n => n.type === "rm" || n.type === "cio") || externalData.nodes[0];
-    const clientRaws = externalData.nodes.filter(n => n.type === "client");
-    const holdingRaws = externalData.nodes.filter(n => n.type === "holding");
+    // 1. Identify Center Node (Stage 0)
+    const centerRaw =
+      externalData.nodes.find((n) => n.stage === 0) ||
+      externalData.nodes.find((n) => n.id === externalData.meta?.center_id) ||
+      externalData.nodes.find((n) => n.type === "super_admin" || n.type === "cio" || n.type === "rm") ||
+      externalData.nodes[0];
+
+    const centerKind: "super_admin" | "cio" | "rm" =
+      centerRaw.type === "super_admin"
+        ? "super_admin"
+        : centerRaw.type === "cio"
+        ? "cio"
+        : "rm";
+
+    const centerCategory: HoldingCategory = centerKind;
+    const isExecutive = centerKind === "super_admin";
+    const isCio = centerKind === "cio";
 
     dynNodes.push({
       id: centerRaw.id,
       label: centerRaw.label,
-      sublabel: `${externalData.meta?.type === "cio_heartbeat" ? "CIO Firm Macro" : "Lead RM"} · ₹${centerRaw.aum_cr || externalData.meta?.total_aum_cr || 0} Cr`,
-      category: "rm",
-      kind: "rm",
+      sublabel: `${
+        isExecutive
+          ? "Firm Owner"
+          : isCio
+          ? "Chief Investment Officer"
+          : centerRaw.title || "Relationship Manager"
+      } · ₹${centerRaw.aum_cr || externalData.meta?.total_aum_cr || 0} Cr`,
+      category: centerCategory,
+      kind: centerKind,
+      stage: 0,
+      role: centerRaw.role,
       severity: (centerRaw.alert_count || 0) > 0 ? "critical" : "clean",
-      radius: 26,
+      radius: isExecutive ? 30 : 28,
       x: 0,
       y: 0,
       vx: 0,
       vy: 0,
+      rawId: centerRaw.raw_id,
       details: {
         allocation: "100%",
-        holdingCount: holdingRaws.length,
+        holdingCount: externalData.nodes.filter((n) => n.type === "holding").length,
+        team: centerRaw.team,
+        title: centerRaw.title,
       },
     });
 
-    const clientCount = clientRaws.length;
-    clientRaws.forEach((c, idx) => {
-      const angle = (idx / Math.max(1, clientCount)) * Math.PI * 2 - Math.PI / 2;
-      const clientDist = 190 + (idx % 2 === 0 ? 0 : 35);
-      const cx = Math.cos(angle) * clientDist;
-      const cy = Math.sin(angle) * clientDist;
-
-      let severity: HealthSeverity = "clean";
-      if ((c.alert_count || 0) > 0) severity = "critical";
-      else if ((c.churn_probability || 0) > 0.4) severity = "warning";
-
-      dynNodes.push({
-        id: c.id,
-        label: c.label,
-        sublabel: `₹${c.aum_cr || 0} Cr · ${c.segment || "HNI"}`,
-        category: "rm",
-        kind: "client",
-        severity,
-        aum: `₹${c.aum_cr || 0} Cr`,
-        radius: 15,
-        x: cx + (Math.random() - 0.5) * 10,
-        y: cy + (Math.random() - 0.5) * 10,
-        vx: 0,
-        vy: 0,
-        clientId: c.raw_id,
-        details: {
-          riskScore: 6,
-          allocation: `${c.segment}`,
-        },
-      });
-
-      dynLinks.push({
-        source: centerRaw.id,
-        target: c.id,
-        category: "rm",
-        severity,
-        distance: clientDist,
-      });
-
-      const connectedHoldingIds = new Set(
-        (externalData.edges || [])
-          .filter(e => e.source === c.id)
-          .map(e => e.target)
-      );
-
-      const clientHoldings = holdingRaws.filter(h => connectedHoldingIds.has(h.id));
-      const hCount = clientHoldings.length;
-
-      clientHoldings.forEach((h, hIdx) => {
-        const hSpread = 0.9;
-        const hAngle = angle + (hIdx - (hCount - 1) / 2) * (hSpread / Math.max(1, hCount - 1));
-        const hDist = 58;
-        const hx = cx + Math.cos(hAngle) * hDist;
-        const hy = cy + Math.sin(hAngle) * hDist;
-
-        const holdingAlerts = alertsByHolding.get(h.id) || [];
-        const hasAlert = holdingAlerts.length > 0 || h.has_alert;
-        const hSeverity: HealthSeverity = hasAlert ? "critical" : "clean";
-
-        let cat: HoldingCategory = "equity";
-        if (h.asset_class === "debt") cat = "debt";
-        else if (h.asset_class === "mutual_fund") cat = "mutual_fund";
-        else if (h.asset_class === "reit") cat = "reit";
-        else if (h.asset_class === "aif" || h.asset_class === "pms") cat = "alts";
-
-        dynNodes.push({
-          id: h.id,
-          label: h.label,
-          sublabel: h.weight_pct ? `${h.weight_pct}%` : undefined,
+    const addLink = (
+      src: string,
+      tgt: string,
+      cat: HoldingCategory,
+      sev: HealthSeverity,
+      dist: number
+    ) => {
+      const key = `${src}->${tgt}`;
+      if (!addedLinks.has(key)) {
+        addedLinks.add(key);
+        dynLinks.push({
+          source: src,
+          target: tgt,
           category: cat,
-          kind: "holding",
-          severity: hSeverity,
-          weight: h.weight_pct ? `${h.weight_pct}%` : undefined,
-          radius: 7,
-          x: hx + (Math.random() - 0.5) * 8,
-          y: hy + (Math.random() - 0.5) * 8,
+          severity: sev,
+          distance: dist,
+        });
+      }
+    };
+
+    // 2. Identify remaining tiers
+    const cioNodes = externalData.nodes.filter((n) => n.type === "cio" && n.id !== centerRaw.id);
+    const rmNodes = externalData.nodes.filter((n) => n.type === "rm" && n.id !== centerRaw.id);
+    const clientNodes = externalData.nodes.filter((n) => n.type === "client");
+    const holdingNodes = externalData.nodes.filter((n) => n.type === "holding");
+
+    // Connected holdings map
+    const holdingByParent = new Map<string, typeof holdingNodes>();
+    holdingNodes.forEach((h) => {
+      const pid = h.parent_id || (externalData.edges || []).find((e) => e.target === h.id)?.source || "";
+      if (pid) {
+        const list = holdingByParent.get(pid) || [];
+        list.push(h);
+        holdingByParent.set(pid, list);
+      }
+    });
+
+    if (isExecutive) {
+      // ── Stage 1: CIO Desk(s) ──
+      cioNodes.forEach((cio, idx) => {
+        const angle = (idx / Math.max(1, cioNodes.length)) * Math.PI * 2 - Math.PI / 2;
+        const dist = 120;
+        const cx = Math.cos(angle) * dist;
+        const cy = Math.sin(angle) * dist;
+        dynNodes.push({
+          id: cio.id,
+          label: cio.label,
+          sublabel: `CIO Desk · ₹${cio.aum_cr || externalData.meta?.total_aum_cr || 0} Cr`,
+          category: "cio",
+          kind: "cio",
+          stage: 1,
+          parentId: centerRaw.id,
+          rawId: cio.raw_id,
+          severity: (cio.alert_count || 0) > 0 ? "critical" : "clean",
+          radius: 24,
+          x: cx,
+          y: cy,
           vx: 0,
           vy: 0,
-          parentId: c.id,
-          clientId: c.raw_id,
-          details: {
-            allocation: h.weight_pct ? `${h.weight_pct}%` : undefined,
-          },
+          details: { team: cio.team, title: cio.title },
         });
+        addLink(centerRaw.id, cio.id, "cio", (cio.alert_count || 0) > 0 ? "critical" : "clean", 120);
+      });
 
-        dynLinks.push({
-          source: c.id,
-          target: h.id,
-          category: cat,
-          severity: hSeverity,
-          distance: hDist,
+      // ── Stage 2: RMs ──
+      const rmCount = rmNodes.length;
+      rmNodes.forEach((rm, rmIdx) => {
+        const angle = (rmIdx / Math.max(1, rmCount)) * Math.PI * 2 - Math.PI / 2;
+        const dist = 220;
+        const rx = Math.cos(angle) * dist;
+        const ry = Math.sin(angle) * dist;
+        const parentId = rm.parent_id || cioNodes[0]?.id || centerRaw.id;
+
+        dynNodes.push({
+          id: rm.id,
+          label: rm.label,
+          sublabel: `RM · ₹${rm.aum_cr || 0} Cr`,
+          category: "rm",
+          kind: "rm",
+          stage: 2,
+          parentId,
+          rawId: rm.raw_id,
+          severity: (rm.alert_count || 0) > 0 ? "critical" : "clean",
+          radius: 20,
+          x: rx,
+          y: ry,
+          vx: 0,
+          vy: 0,
+          details: { team: rm.team, title: rm.title },
+        });
+        addLink(parentId, rm.id, "rm", (rm.alert_count || 0) > 0 ? "critical" : "clean", 120);
+
+        // ── Stage 3: Clients under this RM ──
+        const rmClients = clientNodes.filter(
+          (c) => c.parent_id === rm.id || (c as any).rm_id === rm.raw_id
+        );
+        const cCount = rmClients.length;
+        const sectorSpan = (Math.PI * 2 / Math.max(1, rmCount)) * 0.72;
+
+        rmClients.forEach((c, cIdx) => {
+          const cOffset = cCount > 1 ? (cIdx - (cCount - 1) / 2) * (sectorSpan / Math.max(1, cCount - 1)) : 0;
+          const cAngle = angle + cOffset;
+          const cDist = 120;
+          const cx = rx + Math.cos(cAngle) * cDist;
+          const cy = ry + Math.sin(cAngle) * cDist;
+
+          let severity: HealthSeverity = "clean";
+          if ((c.alert_count || 0) > 0) severity = "critical";
+          else if ((c.churn_probability || 0) > 0.4) severity = "warning";
+
+          dynNodes.push({
+            id: c.id,
+            label: c.label,
+            sublabel: `₹${c.aum_cr || 0} Cr · ${c.segment || "HNI"}`,
+            category: "rm",
+            kind: "client",
+            stage: 3,
+            parentId: rm.id,
+            clientId: c.raw_id,
+            rawId: c.raw_id,
+            severity,
+            aum: `₹${c.aum_cr || 0} Cr`,
+            radius: 14,
+            x: cx,
+            y: cy,
+            vx: 0,
+            vy: 0,
+            details: {
+              allocation: `${c.segment || "HNI"}`,
+              holdingCount: c.holding_count,
+            },
+          });
+          addLink(rm.id, c.id, "rm", severity, 120);
+
+          // ── Stage 4: Holdings under Client ──
+          const cHolds = holdingByParent.get(c.id) || [];
+          const hCount = cHolds.length;
+          const cRadAngle = Math.atan2(cy, cx);
+          const hSpread = Math.min(Math.PI * 0.8, 0.25 * hCount);
+
+          cHolds.forEach((h, hIdx) => {
+            const hOffset = hCount > 1 ? (hIdx - (hCount - 1) / 2) * (hSpread / Math.max(1, hCount - 1)) : 0;
+            const hAngle = cRadAngle + hOffset;
+            const hDist = 48;
+            const hx = cx + Math.cos(hAngle) * hDist;
+            const hy = cy + Math.sin(hAngle) * hDist;
+
+            const holdingAlerts = alertsByHolding.get(h.id) || [];
+            const hasAlert = holdingAlerts.length > 0 || h.has_alert;
+            const hSeverity: HealthSeverity = hasAlert ? "critical" : "clean";
+            const cat = mapAssetClass(h.asset_class);
+
+            dynNodes.push({
+              id: h.id,
+              label: h.label,
+              sublabel: h.weight_pct ? `${h.weight_pct}%` : undefined,
+              category: cat,
+              kind: "holding",
+              stage: 4,
+              parentId: c.id,
+              clientId: c.raw_id,
+              rawId: h.raw_id,
+              severity: hSeverity,
+              weight: h.weight_pct ? `${h.weight_pct}%` : undefined,
+              radius: 6,
+              x: hx,
+              y: hy,
+              vx: 0,
+              vy: 0,
+              details: {
+                allocation: h.weight_pct ? `${h.weight_pct}%` : undefined,
+              },
+            });
+            addLink(c.id, h.id, cat, hSeverity, 48);
+          });
         });
       });
+    } else if (isCio) {
+      // ── Stage 1: RMs around CIO ──
+      const rmCount = rmNodes.length;
+      rmNodes.forEach((rm, rmIdx) => {
+        const angle = (rmIdx / Math.max(1, rmCount)) * Math.PI * 2 - Math.PI / 2;
+        const dist = 155;
+        const rx = Math.cos(angle) * dist;
+        const ry = Math.sin(angle) * dist;
+
+        dynNodes.push({
+          id: rm.id,
+          label: rm.label,
+          sublabel: `RM · ₹${rm.aum_cr || 0} Cr`,
+          category: "rm",
+          kind: "rm",
+          stage: 1,
+          parentId: centerRaw.id,
+          rawId: rm.raw_id,
+          severity: (rm.alert_count || 0) > 0 ? "critical" : "clean",
+          radius: 22,
+          x: rx,
+          y: ry,
+          vx: 0,
+          vy: 0,
+          details: { team: rm.team, title: rm.title },
+        });
+        addLink(centerRaw.id, rm.id, "rm", (rm.alert_count || 0) > 0 ? "critical" : "clean", 155);
+
+        // ── Stage 2: Clients under this RM ──
+        const rmClients = clientNodes.filter(
+          (c) => c.parent_id === rm.id || (c as any).rm_id === rm.raw_id
+        );
+        const cCount = rmClients.length;
+        const sectorSpan = (Math.PI * 2 / Math.max(1, rmCount)) * 0.76;
+
+        rmClients.forEach((c, cIdx) => {
+          const cOffset = cCount > 1 ? (cIdx - (cCount - 1) / 2) * (sectorSpan / Math.max(1, cCount - 1)) : 0;
+          const cAngle = angle + cOffset;
+          const cDist = 135;
+          const cx = rx + Math.cos(cAngle) * cDist;
+          const cy = ry + Math.sin(cAngle) * cDist;
+
+          let severity: HealthSeverity = "clean";
+          if ((c.alert_count || 0) > 0) severity = "critical";
+          else if ((c.churn_probability || 0) > 0.4) severity = "warning";
+
+          dynNodes.push({
+            id: c.id,
+            label: c.label,
+            sublabel: `₹${c.aum_cr || 0} Cr · ${c.segment || "HNI"}`,
+            category: "rm",
+            kind: "client",
+            stage: 2,
+            parentId: rm.id,
+            clientId: c.raw_id,
+            rawId: c.raw_id,
+            severity,
+            aum: `₹${c.aum_cr || 0} Cr`,
+            radius: 15,
+            x: cx,
+            y: cy,
+            vx: 0,
+            vy: 0,
+            details: {
+              allocation: `${c.segment || "HNI"}`,
+              holdingCount: c.holding_count,
+            },
+          });
+          addLink(rm.id, c.id, "rm", severity, 135);
+
+          // ── Stage 3: Holdings under Client ──
+          const cHolds = holdingByParent.get(c.id) || [];
+          const hCount = cHolds.length;
+          const cRadAngle = Math.atan2(cy, cx);
+          const hSpread = Math.min(Math.PI * 0.82, 0.26 * hCount);
+
+          cHolds.forEach((h, hIdx) => {
+            const hOffset = hCount > 1 ? (hIdx - (hCount - 1) / 2) * (hSpread / Math.max(1, hCount - 1)) : 0;
+            const hAngle = cRadAngle + hOffset;
+            const hDist = 52;
+            const hx = cx + Math.cos(hAngle) * hDist;
+            const hy = cy + Math.sin(hAngle) * hDist;
+
+            const holdingAlerts = alertsByHolding.get(h.id) || [];
+            const hasAlert = holdingAlerts.length > 0 || h.has_alert;
+            const hSeverity: HealthSeverity = hasAlert ? "critical" : "clean";
+            const cat = mapAssetClass(h.asset_class);
+
+            dynNodes.push({
+              id: h.id,
+              label: h.label,
+              sublabel: h.weight_pct ? `${h.weight_pct}%` : undefined,
+              category: cat,
+              kind: "holding",
+              stage: 3,
+              parentId: c.id,
+              clientId: c.raw_id,
+              rawId: h.raw_id,
+              severity: hSeverity,
+              weight: h.weight_pct ? `${h.weight_pct}%` : undefined,
+              radius: 6.5,
+              x: hx,
+              y: hy,
+              vx: 0,
+              vy: 0,
+              details: {
+                allocation: h.weight_pct ? `${h.weight_pct}%` : undefined,
+              },
+            });
+            addLink(c.id, h.id, cat, hSeverity, 52);
+          });
+        });
+      });
+    } else {
+      // ── Case C: RM Mode (3-Stage: RM Center -> Clients -> Holdings) ──
+      const clientCount = clientNodes.length;
+      clientNodes.forEach((c, idx) => {
+        const angle = (idx / Math.max(1, clientCount)) * Math.PI * 2 - Math.PI / 2;
+        const clientDist = 185 + (idx % 2 === 0 ? 0 : 35);
+        const cx = Math.cos(angle) * clientDist;
+        const cy = Math.sin(angle) * clientDist;
+
+        let severity: HealthSeverity = "clean";
+        if ((c.alert_count || 0) > 0) severity = "critical";
+        else if ((c.churn_probability || 0) > 0.4) severity = "warning";
+
+        dynNodes.push({
+          id: c.id,
+          label: c.label,
+          sublabel: `₹${c.aum_cr || 0} Cr · ${c.segment || "HNI"}`,
+          category: "rm",
+          kind: "client",
+          stage: 1,
+          parentId: centerRaw.id,
+          clientId: c.raw_id,
+          rawId: c.raw_id,
+          severity,
+          aum: `₹${c.aum_cr || 0} Cr`,
+          radius: 16,
+          x: cx + (Math.random() - 0.5) * 8,
+          y: cy + (Math.random() - 0.5) * 8,
+          vx: 0,
+          vy: 0,
+          details: {
+            allocation: `${c.segment || "HNI"}`,
+            holdingCount: c.holding_count,
+          },
+        });
+        addLink(centerRaw.id, c.id, "rm", severity, clientDist);
+
+        const cHolds = holdingByParent.get(c.id) || [];
+        const hCount = cHolds.length;
+        const cRadAngle = Math.atan2(cy, cx);
+        const hSpread = Math.min(Math.PI * 0.85, 0.28 * hCount);
+
+        cHolds.forEach((h, hIdx) => {
+          const hOffset = hCount > 1 ? (hIdx - (hCount - 1) / 2) * (hSpread / Math.max(1, hCount - 1)) : 0;
+          const hAngle = cRadAngle + hOffset;
+          const hDist = 58;
+          const hx = cx + Math.cos(hAngle) * hDist;
+          const hy = cy + Math.sin(hAngle) * hDist;
+
+          const holdingAlerts = alertsByHolding.get(h.id) || [];
+          const hasAlert = holdingAlerts.length > 0 || h.has_alert;
+          const hSeverity: HealthSeverity = hasAlert ? "critical" : "clean";
+          const cat = mapAssetClass(h.asset_class);
+
+          dynNodes.push({
+            id: h.id,
+            label: h.label,
+            sublabel: h.weight_pct ? `${h.weight_pct}%` : undefined,
+            category: cat,
+            kind: "holding",
+            stage: 2,
+            parentId: c.id,
+            clientId: c.raw_id,
+            rawId: h.raw_id,
+            severity: hSeverity,
+            weight: h.weight_pct ? `${h.weight_pct}%` : undefined,
+            radius: 7,
+            x: hx + (Math.random() - 0.5) * 6,
+            y: hy + (Math.random() - 0.5) * 6,
+            vx: 0,
+            vy: 0,
+            details: {
+              allocation: h.weight_pct ? `${h.weight_pct}%` : undefined,
+            },
+          });
+          addLink(c.id, h.id, cat, hSeverity, hDist);
+        });
+      });
+    }
+
+    // Also include any extra edges from externalData.edges that might not have been added
+    (externalData.edges || []).forEach((edge) => {
+      const srcNode = dynNodes.find((n) => n.id === edge.source);
+      const tgtNode = dynNodes.find((n) => n.id === edge.target);
+      if (srcNode && tgtNode) {
+        addLink(
+          edge.source,
+          edge.target,
+          tgtNode.category || "equity",
+          tgtNode.severity || "clean",
+          tgtNode.kind === "holding" ? 52 : 130
+        );
+      }
     });
 
     return { nodes: dynNodes, links: dynLinks };
@@ -729,6 +1077,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
   const [activeFilter, setActiveFilter] = useState<HoldingCategory | "all" | "alerts">("all");
   const [colorMode, setColorMode] = useState<"category" | "severity">("category");
   const [searchQuery, setSearchQuery] = useState("");
+  const [holdingsVisibility, setHoldingsVisibility] = useState<"auto" | "always" | "hidden">("auto");
 
   // Transform / Camera
   const transformRef = useRef({ x: 0, y: 0, k: 1 });
@@ -747,10 +1096,58 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       graphDataRef.current = createInitialGraphData(data);
     }
   }, [data]);
+
   const draggedNodeRef = useRef<GraphNode | null>(null);
   const dragStartPosRef = useRef({ x: 0, y: 0 });
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0 });
+
+  const role = data?.meta?.role;
+  const isSuperAdmin = role === "super_admin" || role === "admin";
+  const isCio = role === "cio";
+  const isFirmView = isSuperAdmin || isCio || (data?.meta?.stageCount ?? 3) > 3;
+
+  // Search match set
+  const searchMatchedIds = useMemo(() => {
+    if (!searchQuery.trim()) return null;
+    const q = searchQuery.toLowerCase().trim();
+    const set = new Set<string>();
+    graphDataRef.current.nodes.forEach((n) => {
+      if (
+        n.label.toLowerCase().includes(q) ||
+        (n.sublabel && n.sublabel.toLowerCase().includes(q)) ||
+        (n.signal && n.signal.toLowerCase().includes(q))
+      ) {
+        set.add(n.id);
+        if (n.parentId) set.add(n.parentId);
+        if (n.clientId) set.add(n.clientId);
+      }
+    });
+    return set;
+  }, [searchQuery]);
+
+  // Holding Level of Detail (LOD) visibility predicate
+  const isHoldingVisible = useCallback(
+    (node: GraphNode): boolean => {
+      if (node.kind !== "holding") return true;
+      if (!isFirmView) return true; // RM 3-stage always displays holdings
+
+      if (holdingsVisibility === "always") return true;
+      if (holdingsVisibility === "hidden") return false;
+
+      // "auto" mode:
+      // 1. Zoomed in
+      if (transformRef.current.k >= 0.85) return true;
+      // 2. Client is hovered or selected
+      if (hoveredNode && (hoveredNode.id === node.parentId || hoveredNode.id === node.id)) return true;
+      if (selectedNode && (selectedNode.id === node.parentId || selectedNode.id === node.id)) return true;
+      // 3. Search matches this holding
+      if (searchMatchedIds && searchMatchedIds.has(node.id)) return true;
+
+      return false;
+    },
+    [isFirmView, holdingsVisibility, hoveredNode, selectedNode, searchMatchedIds]
+  );
 
   // Connected nodes lookup for hover highlight
   const connectedNodeIds = useMemo(() => {
@@ -772,34 +1169,17 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
     const addDescendants = (parentId: string) => {
       allNodes.forEach((n) => {
         if (n.parentId === parentId) {
-          ids.add(n.id);
-          addDescendants(n.id);
+          if (n.kind !== "holding" || isHoldingVisible(n)) {
+            ids.add(n.id);
+            addDescendants(n.id);
+          }
         }
       });
     };
     addDescendants(target.id);
 
     return ids;
-  }, [hoveredNode, selectedNode]);
-
-  // Search match set
-  const searchMatchedIds = useMemo(() => {
-    if (!searchQuery.trim()) return null;
-    const q = searchQuery.toLowerCase().trim();
-    const set = new Set<string>();
-    graphDataRef.current.nodes.forEach((n) => {
-      if (
-        n.label.toLowerCase().includes(q) ||
-        (n.sublabel && n.sublabel.toLowerCase().includes(q)) ||
-        (n.signal && n.signal.toLowerCase().includes(q))
-      ) {
-        set.add(n.id);
-        if (n.parentId) set.add(n.parentId);
-        if (n.clientId) set.add(n.clientId);
-      }
-    });
-    return set;
-  }, [searchQuery]);
+  }, [hoveredNode, selectedNode, isHoldingVisible]);
 
   // Center graph in canvas
   const centerGraph = useCallback(() => {
@@ -830,6 +1210,23 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
     setZoomLevel(newK);
   }, []);
 
+  // Smooth zoom to specific node
+  const zoomToNode = useCallback((node: GraphNode) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const targetK = 1.65;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    transformRef.current = {
+      x: cx - node.x * targetK,
+      y: cy - node.y * targetK,
+      k: targetK,
+    };
+    setZoomLevel(targetK);
+    setSelectedNode(node);
+  }, []);
+
   // Physics Simulation Step
   const runPhysicsStep = useCallback(() => {
     const { nodes, links } = graphDataRef.current;
@@ -840,11 +1237,12 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
     const CENTER_GRAVITY = 0.0018;
     const REPULSION = 1400;
 
-    // Center Gravity
+    // Center Gravity for logged in user's anchor node
     nodes.forEach((n) => {
-      if (n.kind === "rm") {
-        n.vx -= n.x * 0.02;
-        n.vy -= n.y * 0.02;
+      const isCenter = n.stage === 0 || n.kind === "super_admin" || n.kind === "cio" || (n.kind === "rm" && !n.parentId);
+      if (isCenter) {
+        n.vx -= n.x * 0.05;
+        n.vy -= n.y * 0.05;
       } else {
         n.vx -= n.x * CENTER_GRAVITY;
         n.vy -= n.y * CENTER_GRAVITY;
@@ -855,8 +1253,10 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
     const len = nodes.length;
     for (let i = 0; i < len; i++) {
       const a = nodes[i];
+      if (a.kind === "holding" && !isHoldingVisible(a)) continue;
       for (let j = i + 1; j < len; j++) {
         const b = nodes[j];
+        if (b.kind === "holding" && !isHoldingVisible(b)) continue;
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const distSq = dx * dx + dy * dy || 1;
@@ -883,6 +1283,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       const a = nodeMap.get(link.source);
       const b = nodeMap.get(link.target);
       if (!a || !b) return;
+      if (b.kind === "holding" && !isHoldingVisible(b)) return;
 
       const dx = b.x - a.x;
       const dy = b.y - a.y;
@@ -913,7 +1314,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         n.y += n.vy;
       }
     });
-  }, []);
+  }, [isHoldingVisible]);
 
   // Main Canvas Render Loop
   useEffect(() => {
@@ -981,6 +1382,8 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         const source = nodeMap.get(link.source);
         const target = nodeMap.get(link.target);
         if (!source || !target) return;
+        if (target.kind === "holding" && !isHoldingVisible(target)) return;
+        if (source.kind === "holding" && !isHoldingVisible(source)) return;
 
         const isFilterActive =
           activeFilter === "all" ||
@@ -1021,8 +1424,9 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           ctx.shadowBlur = 0;
         } else {
           ctx.strokeStyle = baseColor;
-          ctx.lineWidth = source.kind === "rm" ? 1.5 : source.kind === "client" ? 1.1 : 0.8;
-          ctx.globalAlpha = source.kind === "rm" ? 0.38 : source.kind === "client" ? 0.28 : 0.20;
+          const isSourceCenter = source.kind === "super_admin" || source.kind === "cio" || (source.kind === "rm" && !source.parentId);
+          ctx.lineWidth = isSourceCenter ? 1.6 : source.kind === "rm" ? 1.3 : source.kind === "client" ? 1.1 : 0.8;
+          ctx.globalAlpha = isSourceCenter ? 0.40 : source.kind === "rm" ? 0.32 : source.kind === "client" ? 0.28 : 0.20;
           ctx.shadowBlur = 0;
         }
 
@@ -1033,6 +1437,8 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
 
       // ── Draw Nodes ──────────────────────────────────────────────────────────
       nodes.forEach((node) => {
+        if (node.kind === "holding" && !isHoldingVisible(node)) return;
+
         const isFilterActive =
           activeFilter === "all" ||
           (activeFilter === "alerts" && (node.severity === "critical" || node.severity === "warning")) ||
@@ -1085,28 +1491,41 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         ctx.shadowBlur = 0;
 
         // Node Border / Ring
+        const isCenterNode = node.kind === "super_admin" || node.kind === "cio" || (node.kind === "rm" && !node.parentId);
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
         ctx.strokeStyle =
-          node.kind === "rm"
+          isCenterNode
             ? "#FFFFFF"
             : isHovered || isSelected
             ? "#FFFFFF"
             : "rgba(255, 255, 255, 0.45)";
-        ctx.lineWidth = node.kind === "rm" ? 2.4 : 1.2;
+        ctx.lineWidth = node.kind === "super_admin" ? 2.8 : node.kind === "cio" ? 2.4 : node.kind === "rm" ? 2.0 : 1.2;
         ctx.stroke();
 
         // Node Center Glyph
-        if (node.kind === "rm") {
+        if (node.kind === "super_admin") {
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "bold 9.5px IBM Plex Sans, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("HQ", node.x, node.y);
+        } else if (node.kind === "cio") {
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "bold 9.5px IBM Plex Sans, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("CIO", node.x, node.y);
+        } else if (node.kind === "rm") {
           ctx.fillStyle = "#210B2C";
-          ctx.font = "bold 11px IBM Plex Sans, sans-serif";
+          ctx.font = "bold 10px IBM Plex Sans, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillText("RM", node.x, node.y);
         } else if (node.kind === "client") {
-          const initials = node.label.split(" ").map((w) => w[0]).join("").slice(0, 2);
+          const initials = (node.label || "CL").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
           ctx.fillStyle = "#FFFFFF";
-          ctx.font = "bold 9.5px IBM Plex Sans, sans-serif";
+          ctx.font = "bold 9px IBM Plex Sans, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillText(initials, node.x, node.y);
@@ -1114,6 +1533,8 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
 
         // Labels
         const shouldShowLabel =
+          node.kind === "super_admin" ||
+          node.kind === "cio" ||
           node.kind === "rm" ||
           node.kind === "client" ||
           node.kind === "asset_class" ||
@@ -1123,14 +1544,14 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           isSearchMatched;
 
         if (shouldShowLabel && !isDimmed) {
-          const fontSize = node.kind === "rm" ? 11 : node.kind === "client" ? 10 : 8.5;
-          ctx.font = `${node.kind === "rm" || node.kind === "client" ? "600" : "500"} ${fontSize}px IBM Plex Sans, sans-serif`;
+          const fontSize = node.kind === "super_admin" || node.kind === "cio" || node.kind === "rm" ? 11 : node.kind === "client" ? 10 : 8.5;
+          ctx.font = `${node.kind === "super_admin" || node.kind === "cio" || node.kind === "rm" || node.kind === "client" ? "600" : "500"} ${fontSize}px IBM Plex Sans, sans-serif`;
           ctx.fillStyle = isHovered || isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.9)";
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
           ctx.fillText(node.label, node.x, node.y + node.radius + 3.5);
 
-          if (node.sublabel && (node.kind === "client" || isHovered || isSelected)) {
+          if (node.sublabel && (node.kind === "super_admin" || node.kind === "cio" || node.kind === "rm" || node.kind === "client" || isHovered || isSelected)) {
             ctx.font = "400 8.5px IBM Plex Mono, monospace";
             ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
             ctx.fillText(node.sublabel, node.x, node.y + node.radius + fontSize + 4);
@@ -1150,7 +1571,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
     };
-  }, [activeFilter, colorMode, connectedNodeIds, searchMatchedIds, hoveredNode, selectedNode, centerGraph, runPhysicsStep]);
+  }, [activeFilter, colorMode, connectedNodeIds, searchMatchedIds, hoveredNode, selectedNode, centerGraph, runPhysicsStep, isHoldingVisible]);
 
   // Pointer Handlers
   const screenToWorld = useCallback((sx: number, sy: number) => {
@@ -1168,6 +1589,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       const { nodes } = graphDataRef.current;
       for (let i = nodes.length - 1; i >= 0; i--) {
         const n = nodes[i];
+        if (n.kind === "holding" && !isHoldingVisible(n)) continue;
         const dx = n.x - x;
         const dy = n.y - y;
         const hitRadius = Math.max(n.radius, 14);
@@ -1177,7 +1599,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       }
       return null;
     },
-    [screenToWorld]
+    [screenToWorld, isHoldingVisible]
   );
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -1260,7 +1682,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         minHeight: 520
       }}
     >
-      {/* ── Top Header Section: Number of Clients (Top-Left) & AUM Metric (Top-Right) ── */}
+      {/* ── Top Header Section: Perspectives (RM / CIO / Super Admin), Counts & AUM ── */}
       <div
         className="px-5 pt-4 pb-3 flex flex-wrap items-center justify-between gap-4 border-b shrink-0 z-10"
         style={{
@@ -1268,7 +1690,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           background: NAVY_BG
         }}
       >
-        {/* Top-Left: Number of Clients & RM Heartbeat Branding */}
+        {/* Top-Left: Dynamic Heartbeat Role Branding & Node Counts */}
         <div className="flex items-center gap-3">
           <div
             className="size-8 rounded-lg flex items-center justify-center"
@@ -1282,7 +1704,11 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
                 className="text-[15px] font-semibold text-white tracking-tight uppercase"
                 style={{ fontFamily: "var(--qc-font-sans)" }}
               >
-                RM HEARTBEAT
+                {isSuperAdmin
+                  ? "EXECUTIVE HEARTBEAT"
+                  : isCio
+                  ? "CIO FIRM HEARTBEAT"
+                  : "RM HEARTBEAT"}
               </span>
               <span
                 className="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-semibold"
@@ -1292,18 +1718,46 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
                   border: "1px solid rgba(255, 245, 202, 0.3)"
                 }}
               >
-                Active Book
+                {isSuperAdmin
+                  ? "Firm Radar"
+                  : isCio
+                  ? "Macro Radar"
+                  : "Active Book"}
               </span>
             </div>
             <div
               className="text-[11.5px] text-white/70 flex items-center gap-2 mt-0.5"
               style={{ fontFamily: "var(--qc-font-mono)" }}
             >
-              <span className="font-semibold text-white">18 CLIENTS</span>
-              <span>·</span>
-              <span>52 HOLDINGS</span>
-              <span>·</span>
-              <span className="text-amber-300">3 FLAGGED</span>
+              {isFirmView ? (
+                <>
+                  <span className="font-semibold text-white">
+                    {data?.meta?.total_rms ?? 2} RMS
+                  </span>
+                  <span>·</span>
+                  <span className="font-semibold text-white">
+                    {data?.meta?.total_clients ?? 18} CLIENTS
+                  </span>
+                  <span>·</span>
+                  <span className={(data?.meta?.total_alerts ?? 0) > 0 ? "text-amber-300" : "text-emerald-300"}>
+                    {data?.meta?.total_alerts ?? 0} FLAGGED
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="font-semibold text-white">
+                    {data?.meta?.total_clients ?? 18} CLIENTS
+                  </span>
+                  <span>·</span>
+                  <span>
+                    {graphDataRef.current.nodes.filter((n) => n.kind === "holding").length || 52} HOLDINGS
+                  </span>
+                  <span>·</span>
+                  <span className={(data?.meta?.total_alerts ?? 3) > 0 ? "text-amber-300" : "text-emerald-300"}>
+                    {data?.meta?.total_alerts ?? 3} FLAGGED
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1316,12 +1770,12 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
                 className="text-[28px] font-semibold text-white tracking-tight leading-none"
                 style={{ fontFamily: "var(--qc-font-sans)" }}
               >
-                ₹796 Cr
+                ₹{data?.meta?.total_aum_cr ?? 796} Cr
               </span>
               <span
                 className="text-[11px] font-mono text-white/60 uppercase tracking-wider"
               >
-                Total AUM
+                {isSuperAdmin ? "Firm AUM" : isCio ? "CIO Book AUM" : "Total RM AUM"}
               </span>
             </div>
             <div className="flex items-center justify-end gap-1.5 mt-1">
@@ -1379,7 +1833,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           })}
         </div>
 
-        {/* Right Tools (Search, Color Mode, Zoom, Fullscreen) */}
+        {/* Right Tools (Search, Holdings LOD, Color Mode, Zoom, Reset) */}
         <div className="flex items-center gap-2">
           {/* Quick Search */}
           <div className="relative flex items-center">
@@ -1388,10 +1842,37 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search ticker or client..."
+              placeholder="Search ticker, RM, client..."
               className="pl-7 pr-2.5 py-1 rounded-md text-[11px] bg-white/[0.08] border border-white/[0.14] text-white placeholder-white/40 focus:outline-none focus:border-white/40 w-36 transition-all focus:w-44"
             />
           </div>
+
+          {/* Holdings LOD Toggle for CIO / Admin Firm Views */}
+          {isFirmView && (
+            <button
+              onClick={() =>
+                setHoldingsVisibility((v) => (v === "auto" ? "always" : v === "always" ? "hidden" : "auto"))
+              }
+              title="Toggle holdings display: Auto (reveals on zoom/click), Always, or Hidden"
+              className="px-2 py-1 rounded-md text-[11px] font-medium text-white/80 bg-white/[0.08] border border-white/[0.14] hover:bg-white/[0.14] transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <span
+                className={`size-1.5 rounded-full ${
+                  holdingsVisibility === "always"
+                    ? "bg-emerald-400"
+                    : holdingsVisibility === "auto"
+                    ? "bg-[var(--qc-lime)]"
+                    : "bg-white/40"
+                }`}
+              />
+              <span className="hidden sm:inline">
+                Holdings:{" "}
+                <strong className="text-white">
+                  {holdingsVisibility === "auto" ? "Auto (Zoom)" : holdingsVisibility === "always" ? "Visible" : "Hidden"}
+                </strong>
+              </span>
+            </button>
+          )}
 
           {/* Color Mode Toggle */}
           <button
@@ -1468,7 +1949,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
                   </span>
                 </div>
                 <span className="text-[10px] font-mono text-white/60 uppercase tracking-wider block mt-0.5">
-                  {activeInspection.kind.replace("_", " ")} · {CATEGORY_COLORS[activeInspection.category]?.label}
+                  {activeInspection.kind.replace("_", " ")} · {CATEGORY_COLORS[activeInspection.category]?.label || activeInspection.kind}
                 </span>
               </div>
 
@@ -1488,7 +1969,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
             <div className="grid grid-cols-2 gap-2 py-2 border-t border-b border-white/[0.1] my-2 text-[11px]">
               {activeInspection.aum && (
                 <div>
-                  <span className="text-white/60 block text-[9.5px]">Client AUM</span>
+                  <span className="text-white/60 block text-[9.5px]">AUM</span>
                   <span className="text-white font-mono font-medium">{activeInspection.aum}</span>
                 </div>
               )}
@@ -1496,6 +1977,12 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
                 <div>
                   <span className="text-white/60 block text-[9.5px]">Portfolio Weight</span>
                   <span className="text-white font-mono font-medium">{activeInspection.weight}</span>
+                </div>
+              )}
+              {activeInspection.details?.team && (
+                <div className="col-span-2">
+                  <span className="text-white/60 block text-[9.5px]">Division / Desk</span>
+                  <span className="text-white font-medium">{activeInspection.details.team}</span>
                 </div>
               )}
               {activeInspection.signal && (
@@ -1520,13 +2007,43 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
 
             {/* Contextual Action CTA */}
             {activeInspection.kind === "client" && (
-              <div className="pt-1 flex items-center justify-between">
-                <span className="text-[10px] text-white/60">Explore client holdings</span>
+              <div className="pt-2 flex flex-col gap-2 border-t border-white/[0.1] mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-white/60">
+                    {activeInspection.details?.holdingCount
+                      ? `${activeInspection.details.holdingCount} holdings in book`
+                      : "Inspect holdings"}
+                  </span>
+                  <button
+                    onClick={() => zoomToNode(activeInspection)}
+                    className="inline-flex items-center gap-1 text-[10.5px] font-mono font-medium text-[var(--qc-lime)] hover:underline cursor-pointer"
+                    title="Zoom camera directly into this client's holdings"
+                  >
+                    <ZoomIn className="size-3" />
+                    <span>Zoom to Holdings</span>
+                  </button>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-white/[0.06]">
+                  <span className="text-[10px] text-white/60">CRM 360° Profile</span>
+                  <Link
+                    href={`/wealthos/clients/${activeInspection.clientId || activeInspection.rawId || activeInspection.id.replace("client-", "")}`}
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-white hover:text-[var(--qc-lime)] transition-colors"
+                  >
+                    <span>View Client</span>
+                    <ChevronRight className="size-3" />
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {activeInspection.kind === "rm" && activeInspection.id !== "rm-center" && (
+              <div className="pt-2 flex items-center justify-between border-t border-white/[0.1] mt-2">
+                <span className="text-[10px] text-white/60">RM Desk & Book</span>
                 <Link
-                  href="/brief/priya-venkat"
+                  href={`/wealthos/rms/${activeInspection.rawId || activeInspection.id.replace("rm-", "")}`}
                   className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--qc-lime)] hover:underline transition-colors"
                 >
-                  <span>View Brief</span>
+                  <span>View RM Desk</span>
                   <ChevronRight className="size-3" />
                 </Link>
               </div>
@@ -1544,8 +2061,26 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           }}
         >
           <div className="flex items-center gap-1.5 font-semibold text-white/60 uppercase tracking-wider text-[9px]">
-            <span>Assets:</span>
+            <span>Nodes:</span>
           </div>
+          {isFirmView && (
+            <>
+              {isSuperAdmin && (
+                <div className="flex items-center gap-1">
+                  <span className="size-2 rounded-full" style={{ background: CATEGORY_COLORS.super_admin.main }} />
+                  <span>Admin</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1">
+                <span className="size-2 rounded-full" style={{ background: CATEGORY_COLORS.cio.main }} />
+                <span>CIO</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="size-2 rounded-full" style={{ background: CATEGORY_COLORS.rm.main }} />
+                <span>RMs</span>
+              </div>
+            </>
+          )}
           <div className="flex items-center gap-1">
             <span className="size-2 rounded-full" style={{ background: CATEGORY_COLORS.equity.main }} />
             <span>Equity</span>
@@ -1562,17 +2097,9 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
             <span className="size-2 rounded-full" style={{ background: CATEGORY_COLORS.reit.main }} />
             <span>REITs</span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="size-2 rounded-full" style={{ background: CATEGORY_COLORS.intl.main }} />
-            <span>Intl</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="size-2 rounded-full" style={{ background: CATEGORY_COLORS.alts.main }} />
-            <span>Alts</span>
-          </div>
           <div className="flex items-center gap-1 pl-1.5 border-l border-white/[0.14]">
             <span className="size-2 rounded-full bg-red-400 animate-pulse" />
-            <span className="text-red-300 font-medium">Critical Drift</span>
+            <span className="text-red-300 font-medium">Alert</span>
           </div>
         </div>
 

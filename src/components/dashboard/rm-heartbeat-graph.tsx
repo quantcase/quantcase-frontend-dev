@@ -14,6 +14,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { MonoLabel } from "@/components/ds";
+import type { HeartbeatGraphData } from "@/types/wealthos";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -122,7 +123,138 @@ const SEVERITY_COLORS: Record<HealthSeverity, { main: string; glow: string; labe
 
 // ── Graph Data Definition ─────────────────────────────────────────────────────
 
-function createInitialGraphData(): { nodes: GraphNode[]; links: GraphLink[] } {
+function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nodes: GraphNode[]; links: GraphLink[] } {
+  if (externalData && externalData.nodes && externalData.nodes.length > 0) {
+    const dynNodes: GraphNode[] = [];
+    const dynLinks: GraphLink[] = [];
+
+    const alertsByHolding = new Map<string, any[]>();
+    for (const a of externalData.alerts || []) {
+      const list = alertsByHolding.get(a.holding_id) || [];
+      list.push(a);
+      alertsByHolding.set(a.holding_id, list);
+    }
+
+    const centerRaw = externalData.nodes.find(n => n.type === "rm" || n.type === "cio") || externalData.nodes[0];
+    const clientRaws = externalData.nodes.filter(n => n.type === "client");
+    const holdingRaws = externalData.nodes.filter(n => n.type === "holding");
+
+    dynNodes.push({
+      id: centerRaw.id,
+      label: centerRaw.label,
+      sublabel: `${externalData.meta?.type === "cio_heartbeat" ? "CIO Firm Macro" : "Lead RM"} · ₹${centerRaw.aum_cr || externalData.meta?.total_aum_cr || 0} Cr`,
+      category: "rm",
+      kind: "rm",
+      severity: (centerRaw.alert_count || 0) > 0 ? "critical" : "clean",
+      radius: 26,
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      details: {
+        allocation: "100%",
+        holdingCount: holdingRaws.length,
+      },
+    });
+
+    const clientCount = clientRaws.length;
+    clientRaws.forEach((c, idx) => {
+      const angle = (idx / Math.max(1, clientCount)) * Math.PI * 2 - Math.PI / 2;
+      const clientDist = 190 + (idx % 2 === 0 ? 0 : 35);
+      const cx = Math.cos(angle) * clientDist;
+      const cy = Math.sin(angle) * clientDist;
+
+      let severity: HealthSeverity = "clean";
+      if ((c.alert_count || 0) > 0) severity = "critical";
+      else if ((c.churn_probability || 0) > 0.4) severity = "warning";
+
+      dynNodes.push({
+        id: c.id,
+        label: c.label,
+        sublabel: `₹${c.aum_cr || 0} Cr · ${c.segment || "HNI"}`,
+        category: "rm",
+        kind: "client",
+        severity,
+        aum: `₹${c.aum_cr || 0} Cr`,
+        radius: 15,
+        x: cx + (Math.random() - 0.5) * 10,
+        y: cy + (Math.random() - 0.5) * 10,
+        vx: 0,
+        vy: 0,
+        clientId: c.raw_id,
+        details: {
+          riskScore: 6,
+          allocation: `${c.segment}`,
+        },
+      });
+
+      dynLinks.push({
+        source: centerRaw.id,
+        target: c.id,
+        category: "rm",
+        severity,
+        distance: clientDist,
+      });
+
+      const connectedHoldingIds = new Set(
+        (externalData.edges || [])
+          .filter(e => e.source === c.id)
+          .map(e => e.target)
+      );
+
+      const clientHoldings = holdingRaws.filter(h => connectedHoldingIds.has(h.id));
+      const hCount = clientHoldings.length;
+
+      clientHoldings.forEach((h, hIdx) => {
+        const hSpread = 0.9;
+        const hAngle = angle + (hIdx - (hCount - 1) / 2) * (hSpread / Math.max(1, hCount - 1));
+        const hDist = 58;
+        const hx = cx + Math.cos(hAngle) * hDist;
+        const hy = cy + Math.sin(hAngle) * hDist;
+
+        const holdingAlerts = alertsByHolding.get(h.id) || [];
+        const hasAlert = holdingAlerts.length > 0 || h.has_alert;
+        const hSeverity: HealthSeverity = hasAlert ? "critical" : "clean";
+
+        let cat: HoldingCategory = "equity";
+        if (h.asset_class === "debt") cat = "debt";
+        else if (h.asset_class === "mutual_fund") cat = "mutual_fund";
+        else if (h.asset_class === "reit") cat = "reit";
+        else if (h.asset_class === "aif" || h.asset_class === "pms") cat = "alts";
+
+        dynNodes.push({
+          id: h.id,
+          label: h.label,
+          sublabel: h.weight_pct ? `${h.weight_pct}%` : undefined,
+          category: cat,
+          kind: "holding",
+          severity: hSeverity,
+          weight: h.weight_pct ? `${h.weight_pct}%` : undefined,
+          radius: 7,
+          x: hx + (Math.random() - 0.5) * 8,
+          y: hy + (Math.random() - 0.5) * 8,
+          vx: 0,
+          vy: 0,
+          parentId: c.id,
+          clientId: c.raw_id,
+          details: {
+            allocation: h.weight_pct ? `${h.weight_pct}%` : undefined,
+          },
+        });
+
+        dynLinks.push({
+          source: c.id,
+          target: h.id,
+          category: cat,
+          severity: hSeverity,
+          distance: hDist,
+        });
+      });
+    });
+
+    return { nodes: dynNodes, links: dynLinks };
+  }
+
   const nodes: GraphNode[] = [];
   const links: GraphLink[] = [];
 
@@ -585,9 +717,12 @@ function createInitialGraphData(): { nodes: GraphNode[]; links: GraphLink[] } {
   return { nodes, links };
 }
 
-// ── RM Heartbeat Graph Component ──────────────────────────────────────────────
+interface RMHeartbeatGraphProps {
+  data?: HeartbeatGraphData | null;
+  loading?: boolean;
+}
 
-export function RMHeartbeatGraph() {
+export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -604,8 +739,14 @@ export function RMHeartbeatGraph() {
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
 
   // Physics data
-  const graphDataRef = useRef(createInitialGraphData());
+  const graphDataRef = useRef(createInitialGraphData(data));
   const isDraggingRef = useRef(false);
+
+  useEffect(() => {
+    if (data && data.nodes && data.nodes.length > 0) {
+      graphDataRef.current = createInitialGraphData(data);
+    }
+  }, [data]);
   const draggedNodeRef = useRef<GraphNode | null>(null);
   const dragStartPosRef = useRef({ x: 0, y: 0 });
   const isPanningRef = useRef(false);

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useWealthClients } from "@/hooks/useWealthClients";
 import { useWealthRMList } from "@/hooks/useWealthRM";
 import { SegmentBadge } from "@/components/wealthos/segment-badge";
+import { ClientImportModal } from "@/components/wealthos/client-import-modal";
+import { ExportButton } from "@/components/wealthos/export-button";
 import {
   Search,
   ChevronLeft,
@@ -20,6 +22,7 @@ import {
   MessageSquare,
   Calendar,
   ChevronDown,
+  Upload,
 } from "lucide-react";
 import type { Segment, WealthClient } from "@/types/wealthos";
 
@@ -130,7 +133,30 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
       </div>
 
       {/* Stats */}
-      <div className="flex items-center gap-6 shrink-0">
+      <div className="flex items-center gap-5 shrink-0">
+        <div className="text-right">
+          <p style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>
+            AUM
+          </p>
+          <p
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: "var(--qc-ink)",
+              fontFamily: "var(--font-ibm-plex-mono, monospace)",
+            }}
+          >
+            ₹{client.aum_cr ?? client.portfolio?.total_value_cr ?? client.portfolio?.total_value ?? 0} Cr
+          </p>
+        </div>
+        <div className="text-right hidden sm:block">
+          <p style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>
+            Assigned RM
+          </p>
+          <p style={{ fontSize: 12, fontWeight: 500, color: "var(--qc-ink)" }}>
+            {client.rm?.display_name || client.rm?.name || "Unassigned"}
+          </p>
+        </div>
         <div className="text-right">
           <p style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 1 }}>
             Churn
@@ -393,10 +419,11 @@ function ClientsContent() {
   const [segment, setSegment] = useState("");
   const [rmFilter, setRmFilter] = useState("");
   const [page, setPage] = useState(1);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: rms } = useWealthRMList();
-  const { data: clientsData, loading, error } = useWealthClients({
+  const { data: clientsData, loading, error, refetch } = useWealthClients({
     page,
     size: 20,
     segment: segment as Segment | undefined,
@@ -415,7 +442,7 @@ function ClientsContent() {
     };
   }, [search]);
 
-  const totalPages = clientsData ? Math.ceil(clientsData.total / 20) : 0;
+  const totalPages = clientsData?.total ? Math.ceil(clientsData.total / 20) : 0;
   const clients = clientsData?.items ?? [];
   const offset = (page - 1) * 20;
 
@@ -424,7 +451,7 @@ function ClientsContent() {
 
       {/* Header */}
       <div style={{ borderBottom: "1px solid var(--qc-hair)", background: "var(--qc-bg)", padding: "18px 24px 16px" }}>
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--qc-ink-2)", marginBottom: 3, fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
               WealthOS · Client Registry
@@ -438,25 +465,54 @@ function ClientsContent() {
               )}
             </h1>
           </div>
-          <button
-            onClick={() => router.push("/wealthos/clients/new")}
-            className="flex items-center gap-1.5 hover:opacity-85 transition-opacity"
-            style={{
-              borderRadius: 7,
-              border: "none",
-              background: "var(--qc-ink)",
-              color: "var(--qc-on-dark)",
-              fontSize: 12,
-              fontWeight: 600,
-              padding: "7px 14px",
-              cursor: "pointer",
-            }}
-          >
-            <Plus className="size-3.5" />
-            New Client
-          </button>
+
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setImportModalOpen(true)}
+              className="flex items-center gap-1.5 hover:bg-[rgba(0,0,0,0.05)] transition-colors"
+              style={{
+                borderRadius: 7,
+                border: "1px solid var(--qc-hair)",
+                background: "var(--qc-card)",
+                color: "var(--qc-ink)",
+                fontSize: 12,
+                fontWeight: 500,
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              <Upload className="size-3.5" />
+              Import CSV
+            </button>
+
+            <ExportButton entityType="clients" label="Export CSV" />
+
+            <button
+              onClick={() => router.push("/wealthos/clients/new")}
+              className="flex items-center gap-1.5 hover:opacity-85 transition-opacity"
+              style={{
+                borderRadius: 7,
+                border: "none",
+                background: "var(--qc-ink)",
+                color: "var(--qc-on-dark)",
+                fontSize: 12,
+                fontWeight: 600,
+                padding: "7px 14px",
+                cursor: "pointer",
+              }}
+            >
+              <Plus className="size-3.5" />
+              New Client
+            </button>
+          </div>
         </div>
       </div>
+
+      <ClientImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onSuccess={() => refetch()}
+      />
 
       {/* Body: two-column */}
       <div className="px-6 pt-5">

@@ -5,9 +5,19 @@ interface ModelCardProps {
   model: WealthModel;
   className?: string;
   action?: React.ReactNode;
+  isAssigned?: boolean;
+  onAssign?: (modelId: string) => void;
+  onRemove?: (modelId: string) => void;
 }
 
-export function ModelCard({ model, className, action }: ModelCardProps) {
+export function ModelCard({
+  model,
+  className,
+  action,
+  isAssigned,
+  onAssign,
+  onRemove,
+}: ModelCardProps) {
   return (
     <div
       className={cn("rounded-[14px]", className)}
@@ -43,6 +53,29 @@ export function ModelCard({ model, className, action }: ModelCardProps) {
         </p>
       )}
       {action && <div className="mt-2">{action}</div>}
+      {!action && (onAssign || onRemove) && (
+        <div className="mt-2 flex justify-end">
+          {isAssigned ? (
+            <button
+              type="button"
+              onClick={() => onRemove?.(model.id)}
+              className="text-xs px-2.5 py-1 rounded hover:opacity-80 transition-opacity cursor-pointer font-medium"
+              style={{ background: "rgba(220, 38, 38, 0.1)", color: "var(--qc-down)" }}
+            >
+              Remove
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onAssign?.(model.id)}
+              className="text-xs px-2.5 py-1 rounded hover:opacity-80 transition-opacity cursor-pointer font-medium"
+              style={{ background: "var(--qc-ink)", color: "var(--qc-on-dark)" }}
+            >
+              Assign
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

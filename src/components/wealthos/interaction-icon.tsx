@@ -11,11 +11,12 @@ const iconMap: Record<InteractionType, React.ElementType> = {
   call: Phone,
   email: Mail,
   whatsapp: MessageSquare,
+  whatsapp_note: MessageSquare,
   meeting: Users,
   sms: MessageCircle,
 };
 
 export function InteractionIcon({ type, className }: InteractionIconProps) {
-  const Icon = iconMap[type];
+  const Icon = iconMap[type] || MessageSquare;
   return <Icon className={cn("size-4", className)} style={{ color: "var(--qc-ink-2)" }} />;
 }

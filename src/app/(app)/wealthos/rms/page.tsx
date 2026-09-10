@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
+import Link from "next/link";
 import { useWealthRMList, useWealthRM } from "@/hooks/useWealthRM";
 import { useWealthRMAnalytics } from "@/hooks/useWealthAnalytics";
 import { CreateRMForm } from "@/components/wealthos/create-rm-form";
@@ -34,6 +35,8 @@ function RMRow({
   const scoreColor =
     score >= 85 ? "var(--qc-up)" : score >= 70 ? "var(--qc-warn)" : "var(--qc-down)";
   const clientCount = rm._count?.clients ?? 0;
+  const displayName = rm.display_name || rm.name || "RM";
+  const aum = rm.total_aum_cr ?? 0;
 
   return (
     <div
@@ -77,7 +80,7 @@ function RMRow({
           letterSpacing: "0.02em",
         }}
       >
-        {rm.name
+        {displayName
           .split(" ")
           .map((w) => w[0])
           .slice(0, 2)
@@ -91,7 +94,7 @@ function RMRow({
           className="truncate"
           style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}
         >
-          {rm.name}
+          {displayName}
         </div>
         {rm.team && (
           <div
@@ -101,6 +104,23 @@ function RMRow({
             {rm.team}
           </div>
         )}
+      </div>
+
+      {/* AUM */}
+      <div className="flex flex-col items-end shrink-0" style={{ minWidth: 64 }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
+            color: "var(--qc-ink)",
+          }}
+        >
+          {aum > 0 ? `₹${aum.toFixed(1)}Cr` : "—"}
+        </span>
+        <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase" }}>
+          AUM
+        </span>
       </div>
 
       {/* Clients */}
@@ -159,11 +179,13 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
       : "var(--qc-up)";
 
   return (
-    <div
-      className="group flex items-center gap-3 transition-all duration-150 cursor-pointer"
+    <Link
+      href={`/wealthos/clients/${client.id}`}
+      className="group flex items-center gap-3 transition-all duration-150 cursor-pointer block hover:bg-[var(--qc-section)]"
       style={{
         padding: "8px 16px",
         borderBottom: "1px solid var(--qc-hair)",
+        textDecoration: "none",
       }}
     >
       <span
@@ -206,8 +228,24 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
           <SegmentBadge segment={client.segment} />
         </div>
         <div style={{ fontSize: 10, color: "var(--qc-ink-2)", marginTop: 1 }}>
-          {client.risk_profile}
+          {client.risk_profile} {client.city ? `· ${client.city}` : ""}
         </div>
+      </div>
+
+      <div className="flex flex-col items-end shrink-0" style={{ minWidth: 50 }}>
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
+            color: "var(--qc-ink)",
+          }}
+        >
+          {client.aum_cr ? `₹${client.aum_cr.toFixed(1)}Cr` : "—"}
+        </span>
+        <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase" }}>
+          aum
+        </span>
       </div>
 
       <div className="flex flex-col items-end shrink-0" style={{ minWidth: 44 }}>
@@ -246,7 +284,7 @@ function ClientRow({ client, rank }: { client: WealthClient; rank: number }) {
         className="size-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
         style={{ color: "var(--qc-ink-2)" }}
       />
-    </div>
+    </Link>
   );
 }
 
@@ -310,6 +348,7 @@ function RightPanel({
   analyticsLoading: boolean;
 }) {
   const totalClients = rms.reduce((s, rm) => s + (rm._count?.clients ?? 0), 0);
+  const totalFirmAum = rms.reduce((s, rm) => s + (rm.total_aum_cr ?? 0), 0);
   const avgScore =
     rms.length > 0
       ? rms.reduce((s, rm) => s + (rm.performance_score ?? 0), 0) / rms.length
@@ -358,7 +397,17 @@ function RightPanel({
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <div
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
+            style={{ background: "rgba(255,255,255,0.15)" }}
+          >
+            <BarChart2 className="size-2.5" style={{ color: "rgba(255,255,255,0.8)" }} />
+            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.95)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
+              ₹{totalFirmAum.toFixed(0)}Cr
+            </span>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>AUM</span>
+          </div>
           <div
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
             style={{ background: "rgba(255,255,255,0.15)" }}
@@ -367,7 +416,7 @@ function RightPanel({
             <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.95)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
               {totalClients}
             </span>
-            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>total clients</span>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>clients</span>
           </div>
           <div
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
@@ -377,7 +426,7 @@ function RightPanel({
             <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.95)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
               {avgScore.toFixed(1)}
             </span>
-            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>avg score</span>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>score</span>
           </div>
         </div>
       </div>
@@ -416,7 +465,7 @@ function RightPanel({
                 color: "rgba(255,255,255,0.95)",
               }}
             >
-              {topRM.name
+              {(topRM.display_name || topRM.name || "RM")
                 .split(" ")
                 .map((w) => w[0])
                 .slice(0, 2)
@@ -425,7 +474,7 @@ function RightPanel({
             </div>
             <div>
               <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>
-                {topRM.name}
+                {topRM.display_name || topRM.name}
               </p>
               {topRM.team && (
                 <p style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>{topRM.team}</p>
@@ -439,6 +488,7 @@ function RightPanel({
               color="var(--qc-up)"
             />
             <StatPill label="Clients" value={String(topRM._count?.clients ?? 0)} />
+            <StatPill label="AUM" value={topRM.total_aum_cr ? `₹${topRM.total_aum_cr.toFixed(0)}Cr` : "—"} />
           </div>
         </div>
       )}
@@ -462,7 +512,7 @@ function RightPanel({
               marginBottom: 10,
             }}
           >
-            {selectedRM.name} · Analytics
+            {selectedRM.display_name || selectedRM.name} · Analytics
           </p>
           {analyticsLoading || !analytics ? (
             <div className="space-y-2">
@@ -475,45 +525,54 @@ function RightPanel({
               ))}
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <StatPill
-                  label="Avg Churn"
-                  value={`${(analytics.avg_churn_probability * 100).toFixed(0)}%`}
-                  color={
-                    analytics.avg_churn_probability > 0.5
-                      ? "var(--qc-down)"
-                      : analytics.avg_churn_probability > 0.3
-                      ? "var(--qc-warn)"
-                      : "var(--qc-up)"
-                  }
-                />
-                <StatPill
-                  label="Avg Eng"
-                  value={analytics.avg_engagement_score.toFixed(1)}
-                  color="var(--qc-ink)"
-                />
-              </div>
-              <div className="flex gap-2">
-                <StatPill
-                  label="Interactions"
-                  value={String(analytics.interactions_last_30d)}
-                />
-                <StatPill
-                  label="Adoption"
-                  value={`${(analytics.suggestion_adoption_rate * 100).toFixed(0)}%`}
-                  color={
-                    analytics.suggestion_adoption_rate > 0.6
-                      ? "var(--qc-up)"
-                      : "var(--qc-warn)"
-                  }
-                />
-              </div>
-              <StatPill
-                label="Avg Portfolio Risk Score"
-                value={analytics.avg_portfolio_risk_score.toFixed(1)}
-              />
-            </div>
+            (() => {
+              const churn = analytics.avg_churn_probability ?? analytics.clients?.avg_churn_probability ?? 0;
+              const eng = analytics.avg_engagement_score ?? analytics.clients?.avg_engagement_score ?? 0;
+              const adoption = analytics.suggestion_adoption_rate ?? analytics.suggestions_last_30d?.adoption_rate ?? 0;
+              const risk = analytics.avg_portfolio_risk_score ?? analytics.portfolio?.avg_risk_score ?? 0;
+
+              return (
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <StatPill
+                      label="Avg Churn"
+                      value={`${(churn * 100).toFixed(0)}%`}
+                      color={
+                        churn > 0.5
+                          ? "var(--qc-down)"
+                          : churn > 0.3
+                          ? "var(--qc-warn)"
+                          : "var(--qc-up)"
+                      }
+                    />
+                    <StatPill
+                      label="Avg Eng"
+                      value={eng.toFixed(1)}
+                      color="var(--qc-ink)"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <StatPill
+                      label="Interactions"
+                      value={String(analytics.interactions_last_30d ?? 0)}
+                    />
+                    <StatPill
+                      label="Adoption"
+                      value={`${(adoption * 100).toFixed(0)}%`}
+                      color={
+                        adoption > 0.6
+                          ? "var(--qc-up)"
+                          : "var(--qc-warn)"
+                      }
+                    />
+                  </div>
+                  <StatPill
+                    label="Avg Portfolio Risk Score"
+                    value={risk.toFixed(1)}
+                  />
+                </div>
+              );
+            })()
           )}
         </div>
       )}
@@ -698,6 +757,18 @@ function RMPageContent() {
                   color: "var(--qc-ink-2)",
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
+                  minWidth: 64,
+                  textAlign: "right",
+                }}
+              >
+                AUM
+              </span>
+              <span
+                style={{
+                  fontSize: 9,
+                  color: "var(--qc-ink-2)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
                   minWidth: 40,
                   textAlign: "right",
                 }}
@@ -788,7 +859,7 @@ function RMPageContent() {
                       Assigned Clients
                     </p>
                     <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)" }}>
-                      {selectedRM?.name ?? "Loading…"}
+                      {(selectedRM?.display_name || selectedRM?.name) ?? "Loading…"}
                     </p>
                   </div>
                   {selectedRM?.clients && (
@@ -827,6 +898,18 @@ function RMPageContent() {
                     }}
                   >
                     Client
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      color: "var(--qc-ink-2)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      minWidth: 50,
+                      textAlign: "right",
+                    }}
+                  >
+                    AUM
                   </span>
                   <span
                     style={{

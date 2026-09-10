@@ -10,7 +10,7 @@ function getAuthToken(): string | null {
   return localStorage.getItem("qc_at");
 }
 
-function authHeaders(extra?: Record<string, string>): Record<string, string> {
+export function authHeaders(extra?: Record<string, string>): Record<string, string> {
   const token = getAuthToken();
   return {
     "Content-Type": "application/json",

@@ -68,7 +68,7 @@ function RMSelectorRow({
   selectedRmId,
   onSelect,
 }: {
-  rms: { id: string; name: string; team?: string; performance_score?: number }[];
+  rms: { id: string; display_name?: string; name?: string; team?: string; performance_score?: number }[];
   selectedRmId: string;
   onSelect: (id: string) => void;
 }) {
@@ -78,6 +78,7 @@ function RMSelectorRow({
         const isSelected = rm.id === selectedRmId;
         const score = rm.performance_score ?? 0;
         const scoreColor = score >= 85 ? "var(--qc-up)" : score >= 70 ? "var(--qc-warn)" : "var(--qc-down)";
+        const label = rm.display_name || rm.name || "RM";
         return (
           <button
             key={rm.id}
@@ -109,9 +110,9 @@ function RMSelectorRow({
                 flexShrink: 0,
               }}
             >
-              {rm.name.slice(0, 2).toUpperCase()}
+              {label.slice(0, 2).toUpperCase()}
             </span>
-            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>{rm.name}</span>
+            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--qc-ink)" }}>{label}</span>
             {rm.performance_score !== undefined && (
               <span
                 style={{
@@ -274,11 +275,12 @@ function RMAnalyticsPanel({ rmId, rmName }: { rmId: string; rmName: string }) {
 
 function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
   const safeData = data ?? [];
-  const chartData = safeData.map((d) => ({
+  const chartData = safeData.map((d: any) => ({
     segment: d.segment,
-    engagement: parseFloat(d.avg_engagement.toFixed(1)),
-    churn: parseFloat((d.avg_churn * 100).toFixed(1)),
-    count: d.count,
+    engagement: parseFloat(((d.avg_engagement_score ?? d.avg_engagement ?? 0)).toFixed(1)),
+    churn: parseFloat((((d.avg_churn_probability ?? d.avg_churn ?? 0)) * 100).toFixed(1)),
+    count: d.client_count ?? d.count ?? 0,
+    aum: d.total_aum_cr ?? 0,
   }));
 
   return (
@@ -336,7 +338,7 @@ function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
 
       {/* Segment summary row */}
       <div className="flex gap-3 mt-4">
-        {safeData.map((seg) => (
+        {safeData.map((seg: any) => (
           <div
             key={seg.segment}
             style={{
@@ -349,9 +351,11 @@ function SegmentChart({ data }: { data: SegmentAnalytic[] | undefined }) {
           >
             <p style={{ fontSize: 10, color: "var(--qc-ink-2)", marginBottom: 3 }}>{seg.segment}</p>
             <p style={{ fontSize: 15, fontWeight: 700, color: "var(--qc-ink)", fontFamily: "var(--font-ibm-plex-mono, monospace)", letterSpacing: "-0.02em" }}>
-              {seg.count}
+              {seg.client_count ?? seg.count ?? 0}
             </p>
-            <p style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>clients</p>
+            <p style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>
+              {seg.total_aum_cr ? `₹${seg.total_aum_cr.toFixed(0)}Cr` : "clients"}
+            </p>
           </div>
         ))}
       </div>
@@ -699,7 +703,8 @@ function AnalyticsContent() {
   );
 
   // Unique client count across segments
-  const totalClients = (clientAnalytics?.by_segment ?? []).reduce((s, seg) => s + seg.count, 0);
+  const segmentsList = clientAnalytics?.segments ?? clientAnalytics?.by_segment ?? [];
+  const totalClients = segmentsList.reduce((s: number, seg: any) => s + (seg.client_count ?? seg.count ?? 0), 0);
 
   // Client dots for risk profile matrix
   const clientDots: ClientDot[] = (clientsPage?.items ?? []).map((c) => ({
@@ -767,7 +772,7 @@ function AnalyticsContent() {
                 <div className="h-52 rounded-xl animate-pulse" style={{ background: "var(--qc-section)" }} />
               </div>
             ) : clientAnalytics ? (
-              <SegmentChart data={clientAnalytics.by_segment} />
+              <SegmentChart data={segmentsList} />
             ) : null}
           </div>
 
@@ -816,7 +821,7 @@ function AnalyticsContent() {
 
             {selectedRmId && selectedRM ? (
               <div className="mt-4">
-                <RMAnalyticsPanel rmId={selectedRmId} rmName={selectedRM.name} />
+                <RMAnalyticsPanel rmId={selectedRmId} rmName={selectedRM.display_name || selectedRM.name || "RM"} />
               </div>
             ) : (
               <div

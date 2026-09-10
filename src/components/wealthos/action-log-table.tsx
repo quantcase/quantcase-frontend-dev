@@ -11,9 +11,20 @@ import type { WealthAction } from "@/types/wealthos";
 
 interface ActionLogTableProps {
   actions: WealthAction[];
+  loading?: boolean;
 }
 
-export function ActionLogTable({ actions }: ActionLogTableProps) {
+export function ActionLogTable({ actions, loading }: ActionLogTableProps) {
+  if (loading) {
+    return (
+      <div className="space-y-2 py-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-10 rounded animate-pulse" style={{ background: "var(--qc-section)" }} />
+        ))}
+      </div>
+    );
+  }
+
   if (!actions?.length) {
     return (
       <p className="py-6 text-center" style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>

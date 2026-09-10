@@ -4,6 +4,7 @@ import type { WealthInteraction } from "@/types/wealthos";
 
 interface InteractionTimelineProps {
   interactions: WealthInteraction[];
+  loading?: boolean;
 }
 
 const sentimentStyles: Record<string, React.CSSProperties> = {
@@ -24,7 +25,17 @@ const sentimentStyles: Record<string, React.CSSProperties> = {
   },
 };
 
-export function InteractionTimeline({ interactions }: InteractionTimelineProps) {
+export function InteractionTimeline({ interactions, loading }: InteractionTimelineProps) {
+  if (loading) {
+    return (
+      <div className="space-y-3 py-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-14 rounded-lg animate-pulse" style={{ background: "var(--qc-section)" }} />
+        ))}
+      </div>
+    );
+  }
+
   if (!interactions?.length) {
     return (
       <p className="py-6 text-center" style={{ fontSize: 13, color: "var(--qc-ink-2)" }}>

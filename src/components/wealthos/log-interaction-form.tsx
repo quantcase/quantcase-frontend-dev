@@ -8,7 +8,8 @@ import type { InteractionType } from "@/types/wealthos";
 
 interface LogInteractionFormProps {
   clientId: string;
-  onSuccess: () => void;
+  onSuccess?: () => void;
+  onLogged?: () => void;
 }
 
 const INTERACTION_TYPES: InteractionType[] = ["call", "email", "whatsapp", "meeting", "sms"];
@@ -35,7 +36,7 @@ const labelStyle: React.CSSProperties = {
   fontFamily: "var(--font-ibm-plex-mono, monospace)",
 };
 
-export function LogInteractionForm({ clientId, onSuccess }: LogInteractionFormProps) {
+export function LogInteractionForm({ clientId, onSuccess, onLogged }: LogInteractionFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<InteractionType>("call");
   const [summary, setSummary] = useState("");
@@ -59,7 +60,7 @@ export function LogInteractionForm({ clientId, onSuccess }: LogInteractionFormPr
           setSummary("");
           setSentiment("");
           setRmId("");
-          onSuccess();
+          (onSuccess || onLogged)?.();
         },
         onError: (err) => { setError(err); setLoading(false); },
       },

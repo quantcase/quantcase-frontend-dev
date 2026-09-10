@@ -2,91 +2,244 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useModels } from "@/hooks/useModels";
-import { PortfolioBuilderStepper } from "@/components/model-builder/portfolio-builder-stepper";
-import { formatCapital } from "@/components/model-builder/portfolio-builder-stepper";
-import { formatDate } from "@/lib/utils";
+import { useWealthModels } from "@/hooks/useWealthModels";
+import { apiAuthPost, apiAuthPut } from "@/lib/api";
+import { BACKEND_URL } from "@/lib/constants";
+import { Button } from "@/components/ui/button";
 import {
   Plus,
   X,
-  ArrowUpRight,
   Layers,
   TrendingUp,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
   Shield,
   Zap,
 } from "lucide-react";
-import type { StoredModel, RiskProfileType } from "@/types/portfolio";
+import type { WealthModel, ModelType } from "@/types/wealthos";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
-const RISK_LABELS: Record<RiskProfileType, string> = {
-  conservative: "Conservative",
-  balanced: "Balanced",
-  aggressive: "Aggressive",
-  "goal-based": "Goal-based",
-};
-
-const RISK_COLOR: Record<RiskProfileType, string> = {
-  conservative: "var(--qc-up)",
-  balanced: "var(--qc-warn)",
-  aggressive: "var(--qc-down)",
-  "goal-based": "var(--qc-warn)",
-};
-
-const ASSET_COLORS = [
-  "color-mix(in srgb, var(--qc-brand-accent) 85%, var(--qc-ink))",
-  "color-mix(in srgb, var(--qc-brand-accent) 90%, black)",
-  "var(--qc-brand-accent)",
-  "color-mix(in srgb, var(--qc-brand-accent) 70%, white)",
-  "color-mix(in srgb, var(--qc-brand-accent) 45%, white)",
+const MODEL_TYPES: { label: string; value: ModelType }[] = [
+  { label: "Equity", value: "equity" },
+  { label: "Debt", value: "debt" },
+  { label: "Hybrid", value: "hybrid" },
+  { label: "PMS", value: "pms" },
+  { label: "AIF", value: "aif" },
+  { label: "Structured", value: "structured" },
 ];
 
-// ─── Modal ─────────────────────────────────────────────────────────────────────
+const TYPE_COLOR: Record<ModelType, string> = {
+  equity: "var(--qc-up)",
+  debt: "var(--qc-ink)",
+  hybrid: "var(--qc-warn)",
+  structured: "var(--qc-down)",
+  pms: "var(--qc-brand-accent)",
+  aif: "color-mix(in srgb, var(--qc-brand-accent) 70%, white)",
+};
 
-function PortfolioBuilderModal({
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  borderRadius: 6,
+  border: "1px solid var(--qc-hair)",
+  background: "var(--qc-card)",
+  color: "var(--qc-ink)",
+  fontSize: 13,
+  padding: "7px 12px",
+  outline: "none",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 11,
+  fontWeight: 500,
+  color: "var(--qc-ink-2)",
+  marginBottom: 4,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  fontFamily: "var(--font-ibm-plex-mono, monospace)",
+};
+
+// ─── Create Model Modal ────────────────────────────────────────────────────────
+
+function CreateModelModal({
   onClose,
   onSuccess,
 }: {
   onClose: () => void;
-  onSuccess: (id: string) => void;
+  onSuccess: () => void;
 }) {
+  const [name, setName] = useState("");
+  const [modelType, setModelType] = useState<ModelType>("equity");
+  const [version, setVersion] = useState("1.0");
+  const [minInvestmentCr, setMinInvestmentCr] = useState("");
+  const [description, setDescription] = useState("");
+  const [isPublished, setIsPublished] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const body: Record<string, unknown> = {
+      name: name.trim(),
+      model_type: modelType,
+      version: version.trim() || "1.0",
+      is_published: isPublished,
+    };
+    if (description.trim()) body.description = description.trim();
+    if (minInvestmentCr) body.min_investment_cr = parseFloat(minInvestmentCr);
+
+    apiAuthPost<{ success: boolean }>(
+      `${BACKEND_URL}/api/wealthos/models`,
+      {
+        onStart: () => setLoading(true),
+        onSuccess: () => {
+          setLoading(false);
+          onSuccess();
+        },
+        onError: (err) => {
+          setError(err);
+          setLoading(false);
+        },
+      },
+      body
+    );
+  };
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-stretch justify-center"
-      style={{ background: "rgba(0,0,0,0.45)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.5)" }}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        className="relative flex flex-col w-full max-w-4xl mx-auto my-0 sm:my-10 sm:rounded-lg overflow-hidden"
-        style={{ background: "var(--qc-card)", maxHeight: "calc(100dvh - 80px)" }}
+        className="w-full max-w-lg rounded-xl overflow-hidden shadow-2xl"
+        style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
       >
         <div
-          className="shrink-0 flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-card)" }}
+          className="flex items-center justify-between px-6 py-4 border-b"
+          style={{ borderColor: "var(--qc-hair)", background: "var(--qc-section)" }}
         >
           <div>
-            <h2 className="text-xl font-semibold" style={{ color: "var(--qc-ink)" }}>
-              Wealth Builder
+            <h2 className="text-base font-semibold" style={{ color: "var(--qc-ink)" }}>
+              Create Approved Model Portfolio
             </h2>
-            <p className="text-xs mt-0.5" style={{ color: "var(--qc-ink-2)" }}>
-              Model Portfolio Library — configure and save for relationship managers
+            <p className="text-xs" style={{ color: "var(--qc-ink-2)" }}>
+              Define a firm-level model for CIO approval and RM client allocation
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-secondary transition-colors shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:opacity-70 transition-opacity"
             style={{ color: "var(--qc-ink-2)" }}
           >
             <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="flex flex-col flex-1 min-h-0">
-          <PortfolioBuilderStepper onSuccess={onSuccess} onCancel={onClose} />
-        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label style={labelStyle}>Model Name *</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                placeholder="e.g. Quantcase High Alpha Growth"
+                style={inputStyle}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Model Type *</label>
+              <select
+                value={modelType}
+                onChange={(e) => setModelType(e.target.value as ModelType)}
+                required
+                style={inputStyle}
+              >
+                {MODEL_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Version</label>
+              <input
+                type="text"
+                value={version}
+                onChange={(e) => setVersion(e.target.value)}
+                placeholder="e.g. 1.0"
+                style={inputStyle}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label style={labelStyle}>Min Investment (₹ Cr)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={minInvestmentCr}
+                onChange={(e) => setMinInvestmentCr(e.target.value)}
+                placeholder="e.g. 0.5 (₹50 Lakhs) or 5.0"
+                style={inputStyle}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label style={labelStyle}>Investment Thesis / Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                placeholder="Key philosophy, benchmark index, rebalancing cadence..."
+                style={{ ...inputStyle, resize: "vertical" }}
+              />
+            </div>
+
+            <div className="md:col-span-2 flex items-center gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="is_published"
+                checked={isPublished}
+                onChange={(e) => setIsPublished(e.target.checked)}
+                className="rounded cursor-pointer"
+              />
+              <label htmlFor="is_published" className="text-xs cursor-pointer select-none" style={{ color: "var(--qc-ink)" }}>
+                Publish immediately to RM recommendations catalog
+              </label>
+            </div>
+          </div>
+
+          {error && (
+            <div
+              className="p-3 rounded text-xs font-mono"
+              style={{ background: "rgba(220,38,38,0.1)", color: "var(--qc-down)", border: "1px solid var(--qc-down)" }}
+            >
+              {error}
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-3 pt-3 border-t" style={{ borderColor: "var(--qc-hair)" }}>
+            <Button type="button" variant="outline" size="sm" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" size="sm" disabled={loading}>
+              {loading ? "Creating..." : "Save Model"}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -94,28 +247,34 @@ function PortfolioBuilderModal({
 
 // ─── Model Row ─────────────────────────────────────────────────────────────────
 
-function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
-  const assetClasses = model.assetClasses ?? [];
-  const totalPct = assetClasses.reduce((s, a) => s + a.pct, 0);
-  const isBalanced = Math.round(totalPct) === 100;
-  const isOver = totalPct > 100;
-  const allocationColor = isOver
-    ? "var(--qc-down)"
-    : isBalanced
-    ? "var(--qc-up)"
-    : "var(--qc-warn)";
-  const riskColor = RISK_COLOR[model.riskProfile] ?? "var(--qc-ink-2)";
+function ModelRow({
+  model,
+  rank,
+  onPublish,
+}: {
+  model: WealthModel;
+  rank: number;
+  onPublish: (id: string) => void;
+}) {
+  const [publishing, setPublishing] = useState(false);
+  const typeColor = TYPE_COLOR[model.model_type] ?? "var(--qc-ink)";
+  const isPublished = model.is_published ?? false;
+  const mappedClients = model._count?.client_mappings ?? 0;
+
+  const handlePublishClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPublishing(true);
+    onPublish(model.id);
+  };
 
   return (
-    <Link
-      href={`/model-builder/${model.id}`}
-      className="group flex items-center gap-4 transition-all duration-150 no-underline"
+    <div
+      className="group flex items-center gap-4 transition-all duration-150"
       style={{
-        padding: "11px 16px",
+        padding: "12px 16px",
         borderBottom: "1px solid var(--qc-hair)",
         background: "transparent",
-        display: "flex",
-        textDecoration: "none",
       }}
     >
       {/* Rank */}
@@ -132,7 +291,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
         {String(rank).padStart(2, "0")}
       </span>
 
-      {/* Icon */}
+      {/* Icon / Type badge */}
       <div
         className="flex items-center justify-center shrink-0"
         style={{
@@ -143,7 +302,7 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
           border: "1px solid var(--qc-hair)",
         }}
       >
-        <Layers className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+        <Layers className="size-3.5" style={{ color: typeColor }} />
       </div>
 
       {/* Name + description */}
@@ -155,53 +314,48 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
           >
             {model.name}
           </span>
+          <span
+            className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+            style={{
+              background: "var(--qc-section)",
+              color: "var(--qc-ink-2)",
+              border: "1px solid var(--qc-hair)",
+            }}
+          >
+            v{model.version || "1.0"}
+          </span>
         </div>
-        {model.whyThisPortfolio?.[0] && (
+        {model.description && (
           <p
             className="truncate"
             style={{ fontSize: 10, color: "var(--qc-ink-2)", marginTop: 1 }}
           >
-            {model.whyThisPortfolio[0]}
+            {model.description}
           </p>
         )}
       </div>
 
-      {/* Allocation mini-bar */}
-      <div className="shrink-0" style={{ width: 80 }}>
-        {assetClasses.length > 0 ? (
-          <>
-            <div className="flex h-[4px] rounded-full overflow-hidden gap-px mb-1">
-              {assetClasses.map((entry, i) => (
-                <div
-                  key={entry.key}
-                  style={{
-                    width: `${entry.pct}%`,
-                    background: ASSET_COLORS[i % ASSET_COLORS.length],
-                  }}
-                />
-              ))}
-              {totalPct < 100 && (
-                <div style={{ width: `${100 - totalPct}%`, background: "var(--qc-hair)" }} />
-              )}
-            </div>
-            <span
-              style={{
-                fontSize: 9,
-                fontFamily: "var(--font-ibm-plex-mono, monospace)",
-                color: allocationColor,
-                fontWeight: 700,
-              }}
-            >
-              {Math.round(totalPct)}% allocated
-            </span>
-          </>
-        ) : (
-          <span style={{ fontSize: 10, color: "var(--qc-ink-2)" }}>—</span>
-        )}
+      {/* Type badge */}
+      <div className="shrink-0" style={{ minWidth: 70 }}>
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            color: typeColor,
+            background: `color-mix(in srgb, ${typeColor} 12%, transparent)`,
+            padding: "2px 8px",
+            borderRadius: 20,
+            border: `1px solid color-mix(in srgb, ${typeColor} 25%, transparent)`,
+            textTransform: "uppercase",
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
+          }}
+        >
+          {model.model_type}
+        </span>
       </div>
 
-      {/* Capital */}
-      <div className="flex flex-col items-end shrink-0" style={{ minWidth: 60 }}>
+      {/* Min Investment */}
+      <div className="flex flex-col items-end shrink-0" style={{ minWidth: 64 }}>
         <span
           style={{
             fontSize: 12,
@@ -210,43 +364,70 @@ function ModelRow({ model, rank }: { model: StoredModel; rank: number }) {
             color: "var(--qc-ink)",
           }}
         >
-          {formatCapital(model.capital)}
+          {model.min_investment_cr ? `₹${model.min_investment_cr.toFixed(1)}Cr` : "—"}
         </span>
         <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase" }}>
-          capital
+          min inv
         </span>
       </div>
 
-      {/* Risk profile */}
-      <div className="shrink-0" style={{ minWidth: 76 }}>
+      {/* Mapped Clients */}
+      <div className="flex flex-col items-end shrink-0" style={{ minWidth: 50 }}>
         <span
           style={{
-            fontSize: 10,
-            fontWeight: 600,
-            color: riskColor,
-            background: `color-mix(in srgb, ${riskColor} 12%, transparent)`,
-            padding: "2px 8px",
-            borderRadius: 20,
-            border: `1px solid color-mix(in srgb, ${riskColor} 25%, transparent)`,
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: "var(--font-ibm-plex-mono, monospace)",
+            color: "var(--qc-ink)",
           }}
         >
-          {RISK_LABELS[model.riskProfile] ?? model.riskProfile}
+          {mappedClients}
+        </span>
+        <span style={{ fontSize: 9, color: "var(--qc-ink-2)", textTransform: "uppercase" }}>
+          clients
         </span>
       </div>
 
-      {/* Date */}
-      <div className="shrink-0" style={{ minWidth: 60, textAlign: "right" }}>
-        <span style={{ fontSize: 10, color: "var(--qc-ink-2)", fontFamily: "var(--font-ibm-plex-mono, monospace)" }}>
-          {formatDate(model.createdAt)}
-        </span>
+      {/* Status Badge */}
+      <div className="shrink-0 flex items-center justify-center" style={{ minWidth: 90 }}>
+        {isPublished ? (
+          <span
+            className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full"
+            style={{
+              background: "rgba(34, 197, 94, 0.1)",
+              color: "var(--qc-up)",
+              border: "1px solid rgba(34, 197, 94, 0.25)",
+            }}
+          >
+            <CheckCircle2 className="size-3" /> Published
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={handlePublishClick}
+            disabled={publishing}
+            className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full hover:opacity-80 transition-opacity cursor-pointer"
+            style={{
+              background: "rgba(245, 158, 11, 0.1)",
+              color: "var(--qc-warn)",
+              border: "1px solid rgba(245, 158, 11, 0.3)",
+            }}
+          >
+            <Clock className="size-3" /> {publishing ? "Publishing…" : "Publish Draft"}
+          </button>
+        )}
       </div>
 
-      {/* Arrow */}
-      <ArrowUpRight
-        className="size-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+      {/* Action / Link to builder */}
+      <Link
+        href="/model-builder"
+        className="shrink-0 text-xs flex items-center gap-1 hover:underline"
         style={{ color: "var(--qc-ink-2)" }}
-      />
-    </Link>
+        title="Open in Portfolio Builder"
+      >
+        <ExternalLink className="size-3.5" />
+      </Link>
+    </div>
   );
 }
 
@@ -295,30 +476,17 @@ function RightPanel({
   models,
   onAddModel,
 }: {
-  models: StoredModel[];
+  models: WealthModel[];
   onAddModel: () => void;
 }) {
-  const totalCapital = models.reduce((s, m) => s + (m.capital ?? 0), 0);
+  const publishedCount = models.filter((m) => m.is_published).length;
+  const draftCount = models.length - publishedCount;
+  const totalMapped = models.reduce((s, m) => s + (m._count?.client_mappings ?? 0), 0);
 
-  const riskCounts: Record<string, number> = { conservative: 0, balanced: 0, aggressive: 0 };
+  const typeCounts: Record<string, number> = {};
   models.forEach((m) => {
-    const key = m.riskProfile === "goal-based" ? "balanced" : m.riskProfile;
-    if (key in riskCounts) riskCounts[key]++;
+    typeCounts[m.model_type] = (typeCounts[m.model_type] ?? 0) + 1;
   });
-
-  const avgAssetClasses =
-    models.length > 0
-      ? models.reduce((s, m) => s + (m.assetClasses?.length ?? 0), 0) / models.length
-      : 0;
-
-  // Most used asset class
-  const acFreq: Record<string, number> = {};
-  models.forEach((m) =>
-    (m.assetClasses ?? []).forEach((ac) => {
-      acFreq[ac.label] = (acFreq[ac.label] ?? 0) + 1;
-    })
-  );
-  const topAC = Object.entries(acFreq).sort((a, b) => b[1] - a[1])[0];
 
   return (
     <div className="flex flex-col gap-3" style={{ position: "sticky", top: 16 }}>
@@ -336,12 +504,12 @@ function RightPanel({
             fontFamily: "var(--font-ibm-plex-mono, monospace)",
             fontWeight: 700,
             letterSpacing: "0.12em",
-            color: "var(--qc-on-dark)",
+            color: "rgba(255,255,255,0.6)",
             textTransform: "uppercase",
             marginBottom: 8,
           }}
         >
-          Model Library
+          Model Portfolio Hub
         </p>
         <div className="flex items-end gap-3 mb-4">
           <div>
@@ -350,40 +518,57 @@ function RightPanel({
                 fontSize: 40,
                 fontWeight: 800,
                 fontFamily: "var(--font-ibm-plex-mono, monospace)",
-                color: "var(--qc-on-dark)",
+                color: "rgba(255,255,255,0.95)",
                 letterSpacing: "-0.04em",
                 lineHeight: 1,
               }}
             >
               {models.length}
             </p>
-            <p style={{ fontSize: 11, color: "var(--qc-on-dark)", marginTop: 2 }}>
-              Portfolio Models
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>
+              Approved Models
             </p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <div
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
-            style={{ background: "rgba(26,58,0,0.15)" }}
+            style={{ background: "rgba(255,255,255,0.15)" }}
           >
-            <TrendingUp className="size-2.5" style={{ color: "var(--qc-on-dark)" }} />
+            <CheckCircle2 className="size-2.5" style={{ color: "rgba(255,255,255,0.8)" }} />
             <span
               style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: "var(--qc-on-dark)",
+                color: "rgba(255,255,255,0.95)",
                 fontFamily: "var(--font-ibm-plex-mono, monospace)",
               }}
             >
-              {formatCapital(totalCapital)}
+              {publishedCount}
             </span>
-            <span style={{ fontSize: 10, color: "var(--qc-on-dark)" }}>total AUM</span>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>published</span>
+          </div>
+          <div
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
+            style={{ background: "rgba(255,255,255,0.15)" }}
+          >
+            <TrendingUp className="size-2.5" style={{ color: "rgba(255,255,255,0.8)" }} />
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: "rgba(255,255,255,0.95)",
+                fontFamily: "var(--font-ibm-plex-mono, monospace)",
+              }}
+            >
+              {totalMapped}
+            </span>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>client allocations</span>
           </div>
         </div>
       </div>
 
-      {/* Risk breakdown */}
+      {/* Model Types breakdown */}
       <div
         className="rounded-[14px]"
         style={{
@@ -401,30 +586,30 @@ function RightPanel({
             marginBottom: 12,
           }}
         >
-          Risk Profile Mix
+          Model Type Mix
         </p>
-        {(["conservative", "balanced", "aggressive"] as RiskProfileType[]).map((rp) => {
-          const count = riskCounts[rp];
+        {MODEL_TYPES.map((t) => {
+          const count = typeCounts[t.value] ?? 0;
           const pct = models.length > 0 ? (count / models.length) * 100 : 0;
+          const col = TYPE_COLOR[t.value];
           return (
-            <div key={rp} className="mb-3 last:mb-0">
+            <div key={t.value} className="mb-3 last:mb-0">
               <div className="flex items-center justify-between mb-1">
                 <span
                   style={{
                     fontSize: 11,
                     color: "var(--qc-ink)",
                     fontWeight: 500,
-                    textTransform: "capitalize",
                   }}
                 >
-                  {RISK_LABELS[rp]}
+                  {t.label}
                 </span>
                 <span
                   style={{
                     fontSize: 11,
                     fontFamily: "var(--font-ibm-plex-mono, monospace)",
                     fontWeight: 700,
-                    color: RISK_COLOR[rp],
+                    color: col,
                   }}
                 >
                   {count}
@@ -436,7 +621,7 @@ function RightPanel({
               >
                 <div
                   className="h-full rounded-full transition-all"
-                  style={{ width: `${pct}%`, background: RISK_COLOR[rp], opacity: 0.7 }}
+                  style={{ width: `${pct}%`, background: col, opacity: 0.85 }}
                 />
               </div>
             </div>
@@ -462,11 +647,11 @@ function RightPanel({
             marginBottom: 10,
           }}
         >
-          Library Stats
+          Lifecycle Summary
         </p>
         <div className="flex gap-2 mb-2">
-          <StatPill label="Avg Classes" value={avgAssetClasses.toFixed(1)} />
-          <StatPill label="Top Asset" value={topAC?.[0] ?? "—"} />
+          <StatPill label="Active" value={String(publishedCount)} color="var(--qc-up)" />
+          <StatPill label="Drafts" value={String(draftCount)} color="var(--qc-warn)" />
         </div>
       </div>
 
@@ -493,57 +678,94 @@ function RightPanel({
         <div className="grid grid-cols-2 gap-2">
           {[
             { icon: Plus, label: "New Model", action: onAddModel },
-            { icon: Layers, label: "Compare Models", action: undefined },
-            { icon: Shield, label: "Risk Review", action: undefined },
-            { icon: Zap, label: "AI Suggest", action: undefined },
-          ].map(({ icon: Icon, label, action }) => (
-            <button
-              key={label}
-              onClick={action}
-              className="flex flex-col items-center gap-1.5 rounded-[10px] transition-all"
-              style={{
-                padding: "10px 8px",
-                background: "var(--qc-section)",
-                border: "1px solid var(--qc-hair)",
-                cursor: action ? "pointer" : "default",
-                opacity: action ? 1 : 0.5,
-              }}
-            >
-              <Icon className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
-              <span
+            { icon: Layers, label: "Model Builder", href: "/model-builder" },
+            { icon: Shield, label: "Risk Matrix", href: "/wealthos/analytics" },
+            { icon: Zap, label: "Client Roster", href: "/wealthos/clients" },
+          ].map(({ icon: Icon, label, action, href }) =>
+            href ? (
+              <Link
+                key={label}
+                href={href}
+                className="flex flex-col items-center gap-1.5 rounded-[10px] transition-all no-underline"
                 style={{
-                  fontSize: 9,
-                  color: "var(--qc-ink-2)",
-                  textAlign: "center",
-                  lineHeight: 1.3,
+                  padding: "10px 8px",
+                  background: "var(--qc-section)",
+                  border: "1px solid var(--qc-hair)",
                 }}
               >
-                {label}
-              </span>
-            </button>
-          ))}
+                <Icon className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+                <span
+                  style={{
+                    fontSize: 9,
+                    color: "var(--qc-ink-2)",
+                    textAlign: "center",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {label}
+                </span>
+              </Link>
+            ) : (
+              <button
+                key={label}
+                type="button"
+                onClick={action}
+                className="flex flex-col items-center gap-1.5 rounded-[10px] transition-all cursor-pointer"
+                style={{
+                  padding: "10px 8px",
+                  background: "var(--qc-section)",
+                  border: "1px solid var(--qc-hair)",
+                }}
+              >
+                <Icon className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
+                <span
+                  style={{
+                    fontSize: 9,
+                    color: "var(--qc-ink-2)",
+                    textAlign: "center",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {label}
+                </span>
+              </button>
+            )
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Page Content ───────────────────────────────────────────────────────────────
+// ─── Main Content ──────────────────────────────────────────────────────────────
 
 function ModelsContent() {
-  const router = useRouter();
-  const { models, loading, error } = useModels();
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { data: models, loading, error } = useWealthModels(refreshKey);
   const [modalOpen, setModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
 
-  const handleSuccess = (id: string) => {
-    setModalOpen(false);
-    router.push(`/model-builder/${id}`);
+  const handlePublish = (modelId: string) => {
+    apiAuthPut<{ success: boolean }>(
+      `${BACKEND_URL}/api/wealthos/models/${modelId}/publish`,
+      {
+        onSuccess: () => {
+          setRefreshKey((k) => k + 1);
+        },
+        onError: (err) => {
+          alert(`Failed to publish model: ${err}`);
+        },
+      }
+    );
   };
 
-  const RISK_ORDER: Record<string, number> = { aggressive: 0, balanced: 1, conservative: 2 };
-  const sortedModels = models
-    .slice()
-    .sort((a, b) => (RISK_ORDER[a.riskProfile] ?? 9) - (RISK_ORDER[b.riskProfile] ?? 9));
+  const filteredModels = models.filter((m) => {
+    if (statusFilter === "published" && !m.is_published) return false;
+    if (statusFilter === "draft" && m.is_published) return false;
+    if (typeFilter !== "all" && m.model_type !== typeFilter) return false;
+    return true;
+  });
 
   return (
     <>
@@ -562,7 +784,7 @@ function ModelsContent() {
                 marginBottom: 4,
               }}
             >
-              WealthOS · Model Library
+              WealthOS · Firm Catalog
             </p>
             <h1
               style={{
@@ -573,7 +795,7 @@ function ModelsContent() {
                 lineHeight: 1.1,
               }}
             >
-              Investment Models{" "}
+              Approved Model Portfolios{" "}
               {models.length > 0 && (
                 <span
                   style={{
@@ -608,6 +830,50 @@ function ModelsContent() {
           </button>
         </div>
 
+        {/* Filter bar */}
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            {(["all", "published", "draft"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className="text-xs px-3 py-1.5 rounded-full transition-all cursor-pointer font-medium"
+                style={{
+                  background: statusFilter === s ? "var(--qc-ink)" : "var(--qc-card)",
+                  color: statusFilter === s ? "var(--qc-on-dark)" : "var(--qc-ink-2)",
+                  border: statusFilter === s ? "none" : "1px solid var(--qc-hair)",
+                }}
+              >
+                {s === "all" ? "All Models" : s === "published" ? "Published" : "Drafts"}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span style={{ fontSize: 11, color: "var(--qc-ink-2)", textTransform: "uppercase" }}>Type:</span>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              style={{
+                borderRadius: 6,
+                border: "1px solid var(--qc-hair)",
+                background: "var(--qc-card)",
+                color: "var(--qc-ink)",
+                fontSize: 12,
+                padding: "4px 8px",
+                outline: "none",
+              }}
+            >
+              <option value="all">All Types</option>
+              {MODEL_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         {/* Two-column layout */}
         <div className="grid gap-4" style={{ gridTemplateColumns: "1fr 290px", alignItems: "start" }}>
           {/* Left: models list */}
@@ -639,7 +905,7 @@ function ModelsContent() {
                     letterSpacing: "0.08em",
                   }}
                 >
-                  Model Name
+                  Model Portfolio
                 </span>
                 <span
                   style={{
@@ -647,11 +913,10 @@ function ModelsContent() {
                     color: "var(--qc-ink-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
-                    width: 80,
-                    flexShrink: 0,
+                    minWidth: 70,
                   }}
                 >
-                  Allocation
+                  Type
                 </span>
                 <span
                   style={{
@@ -659,11 +924,11 @@ function ModelsContent() {
                     color: "var(--qc-ink-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
-                    minWidth: 60,
+                    minWidth: 64,
                     textAlign: "right",
                   }}
                 >
-                  Capital
+                  Min Inv
                 </span>
                 <span
                   style={{
@@ -671,23 +936,23 @@ function ModelsContent() {
                     color: "var(--qc-ink-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
-                    minWidth: 76,
+                    minWidth: 50,
+                    textAlign: "right",
+                  }}
+                >
+                  Clients
+                </span>
+                <span
+                  style={{
+                    fontSize: 9,
+                    color: "var(--qc-ink-2)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    minWidth: 90,
                     textAlign: "center",
                   }}
                 >
-                  Risk
-                </span>
-                <span
-                  style={{
-                    fontSize: 9,
-                    color: "var(--qc-ink-2)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                    minWidth: 60,
-                    textAlign: "right",
-                  }}
-                >
-                  Created
+                  Status
                 </span>
                 <span style={{ width: 14, flexShrink: 0 }} />
               </div>
@@ -710,7 +975,7 @@ function ModelsContent() {
                 </p>
               )}
 
-              {!loading && models.length === 0 && (
+              {!loading && filteredModels.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16">
                   <div
                     className="flex items-center justify-center mb-4"
@@ -725,10 +990,10 @@ function ModelsContent() {
                     <Layers className="size-5" style={{ color: "var(--qc-ink-2)" }} />
                   </div>
                   <p style={{ fontSize: 13, fontWeight: 600, color: "var(--qc-ink)", marginBottom: 4 }}>
-                    No models yet
+                    No models found
                   </p>
                   <p style={{ fontSize: 11, color: "var(--qc-ink-2)", marginBottom: 16 }}>
-                    Build your first model portfolio to enable AI suggestions.
+                    Create an approved model portfolio for your wealth firm.
                   </p>
                   <button
                     onClick={() => setModalOpen(true)}
@@ -745,13 +1010,18 @@ function ModelsContent() {
                     }}
                   >
                     <Plus className="size-3.5" />
-                    Build first model
+                    Create first model
                   </button>
                 </div>
               )}
 
-              {sortedModels.map((model, i) => (
-                <ModelRow key={model.id} model={model} rank={i + 1} />
+              {filteredModels.map((model, i) => (
+                <ModelRow
+                  key={model.id}
+                  model={model}
+                  rank={i + 1}
+                  onPublish={handlePublish}
+                />
               ))}
             </div>
           </div>
@@ -762,9 +1032,12 @@ function ModelsContent() {
       </div>
 
       {modalOpen && (
-        <PortfolioBuilderModal
+        <CreateModelModal
           onClose={() => setModalOpen(false)}
-          onSuccess={handleSuccess}
+          onSuccess={() => {
+            setModalOpen(false);
+            setRefreshKey((k) => k + 1);
+          }}
         />
       )}
     </>

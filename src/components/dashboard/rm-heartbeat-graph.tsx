@@ -280,13 +280,35 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
       });
 
       // ── Stage 2: RMs ──
+      const rmsByCio = new Map<string, typeof rmNodes>();
+      rmNodes.forEach((rm, idx) => {
+        const pId = rm.parent_id || (cioNodes.length > 0 ? cioNodes[idx % cioNodes.length].id : centerRaw.id);
+        const list = rmsByCio.get(pId) || [];
+        list.push(rm);
+        rmsByCio.set(pId, list);
+      });
+
       const rmCount = rmNodes.length;
       rmNodes.forEach((rm, rmIdx) => {
-        const angle = (rmIdx / Math.max(1, rmCount)) * Math.PI * 2 - Math.PI / 2;
+        const parentId = rm.parent_id || (cioNodes.length > 0 ? cioNodes[rmIdx % cioNodes.length].id : centerRaw.id);
+        const parentCioIdx = cioNodes.findIndex((c) => c.id === parentId);
+
+        let angle: number;
+        if (parentCioIdx !== -1 && cioNodes.length > 0) {
+          const cioAngle = (parentCioIdx / cioNodes.length) * Math.PI * 2 - Math.PI / 2;
+          const siblings = rmsByCio.get(parentId) || [rm];
+          const subIdx = Math.max(0, siblings.findIndex((s) => s.id === rm.id));
+          const subCount = siblings.length;
+          const spread = Math.min(Math.PI * 0.75, 0.55 * Math.max(1, subCount - 1));
+          const offset = subCount > 1 ? (subIdx - (subCount - 1) / 2) * (spread / Math.max(1, subCount - 1)) : 0;
+          angle = cioAngle + offset;
+        } else {
+          angle = (rmIdx / Math.max(1, rmCount)) * Math.PI * 2 - Math.PI / 2;
+        }
+
         const dist = 220;
         const rx = Math.cos(angle) * dist;
         const ry = Math.sin(angle) * dist;
-        const parentId = rm.parent_id || cioNodes[0]?.id || centerRaw.id;
 
         dynNodes.push({
           id: rm.id,

@@ -282,6 +282,7 @@ export function CandlestickChart({
         textColor: C.muted,
         fontFamily: "IBM Plex Mono, monospace",
         fontSize: 11,
+        attributionLogo: false,
       },
       grid: {
         vertLines: { color: C.grid },

@@ -1711,39 +1711,24 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         const ny = node.renderY ?? node.y;
         const depth = node.virtualZ ?? getNodeVirtualDepth(node);
 
-        const zScale = tiltEnabled ? Math.max(0.85, Math.min(1.22, 1.0 + (1.2 - depth) * 0.08 + tiltY * (ny / 450) * 0.08)) : 1.0;
-        const r = node.radius * zScale;
-
-        // 3D Depth Floor Shadow & Elevation Drop Stem (height cue in 3D space)
+        // Ambient holographic depth shadow cast opposite to tilt angle
         if (tiltEnabled && depth > 0 && !isDimmed) {
-          const stemLen = 14 + depth * 14;
-          const floorX = nx - tiltX * depth * 10;
-          const floorY = ny + stemLen - tiltY * depth * 8;
-
-          // Ground shadow ellipse
+          const shadowDist = depth * 5.5;
+          const shadowX = nx - tiltX * shadowDist;
+          const shadowY = ny - tiltY * shadowDist + depth * 1.5;
           ctx.beginPath();
-          ctx.ellipse(floorX, floorY, r * 0.95, r * 0.36, 0, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(0, 0, 0, 0.40)";
-          ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
-          ctx.shadowBlur = 8 * depth;
+          ctx.arc(shadowX, shadowY, node.radius * 0.95, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
+          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+          ctx.shadowBlur = 7 * depth;
           ctx.fill();
           ctx.shadowBlur = 0;
-
-          // Subtle 3D elevation drop stem connecting node to its ground shadow
-          ctx.beginPath();
-          ctx.moveTo(nx, ny + r * 0.6);
-          ctx.lineTo(floorX, floorY);
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.09)";
-          ctx.lineWidth = 0.8;
-          ctx.setLineDash([2, 3]);
-          ctx.stroke();
-          ctx.setLineDash([]);
         }
 
         // Outer pulsing aura
         if ((node.severity === "critical" || isHovered || isSelected || isSearchMatched) && !isDimmed) {
           const pulse = Math.sin(pulseAngle + node.x * 0.05) * 4;
-          const auraRadius = r + 6 + (node.severity === "critical" ? pulse : 2);
+          const auraRadius = node.radius + 6 + (node.severity === "critical" ? pulse : 2);
           ctx.beginPath();
           ctx.arc(nx, ny, auraRadius, 0, Math.PI * 2);
           ctx.fillStyle = node.severity === "critical" ? "rgba(248, 113, 113, 0.25)" : glowColor;
@@ -1760,43 +1745,28 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           }
         }
 
-        // 3D Sphere Body with volumetric light and specular sheen
-        const sphereGrad = ctx.createRadialGradient(
-          nx - r * 0.32, ny - r * 0.32, r * 0.05,
-          nx, ny, r
-        );
-        sphereGrad.addColorStop(0, "rgba(255, 255, 255, 0.78)"); // specular gleam
-        sphereGrad.addColorStop(0.24, mainColor);
-        sphereGrad.addColorStop(0.82, mainColor);
-        sphereGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.52)");     // 3D sphere falloff
-
+        // Main Node Circle (Flat pastel color)
         ctx.beginPath();
-        ctx.arc(nx, ny, r, 0, Math.PI * 2);
-        ctx.fillStyle = sphereGrad;
+        ctx.arc(nx, ny, node.radius, 0, Math.PI * 2);
+        ctx.fillStyle = mainColor;
+
         if (isHovered || isSelected || isSearchMatched) {
           ctx.shadowColor = mainColor;
-          ctx.shadowBlur = 22;
+          ctx.shadowBlur = 18;
         }
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // 3D Glass Specular Rim Arc (top-left edge glint)
-        ctx.beginPath();
-        ctx.arc(nx, ny, Math.max(1, r - 0.6), -Math.PI * 0.75, -Math.PI * 0.15);
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.55)";
-        ctx.lineWidth = 1.1;
-        ctx.stroke();
-
-        // Node Outer Ring
+        // Node Border / Ring
         const isCenterNode = node.kind === "super_admin" || node.kind === "cio" || (node.kind === "rm" && !node.parentId);
         ctx.beginPath();
-        ctx.arc(nx, ny, r, 0, Math.PI * 2);
+        ctx.arc(nx, ny, node.radius, 0, Math.PI * 2);
         ctx.strokeStyle =
           isCenterNode
             ? "#FFFFFF"
             : isHovered || isSelected
             ? "#FFFFFF"
-            : "rgba(255, 255, 255, 0.40)";
+            : "rgba(255, 255, 255, 0.45)";
         ctx.lineWidth = node.kind === "super_admin" ? 2.8 : node.kind === "cio" ? 2.4 : node.kind === "rm" ? 2.0 : 1.2;
         ctx.stroke();
 
@@ -1833,8 +1803,8 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         if (hasChildren) {
           const isExpanded = expandedNodeIds.has(node.id);
           const badgeAngle = -Math.PI / 4; // Top-right corner
-          const bx = nx + Math.cos(badgeAngle) * (r + 3);
-          const by = ny + Math.sin(badgeAngle) * (r + 3);
+          const bx = nx + Math.cos(badgeAngle) * (node.radius + 3);
+          const by = ny + Math.sin(badgeAngle) * (node.radius + 3);
           const badgeR = 6.5;
 
           ctx.beginPath();
@@ -1857,7 +1827,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           // If node has hidden children (unexpanded edge node), draw a dashed orbit ring
           if (!isExpanded) {
             ctx.beginPath();
-            ctx.arc(nx, ny, r + 4.5, 0, Math.PI * 2);
+            ctx.arc(nx, ny, node.radius + 4.5, 0, Math.PI * 2);
             ctx.strokeStyle = "rgba(223, 255, 0, 0.65)";
             ctx.lineWidth = 1.2;
             ctx.setLineDash([2.5, 2.5]);
@@ -1884,12 +1854,12 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           ctx.fillStyle = isHovered || isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.9)";
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
-          ctx.fillText(node.label, nx, ny + r + 3.5);
+          ctx.fillText(node.label, nx, ny + node.radius + 3.5);
 
           if (node.sublabel && (node.kind === "super_admin" || node.kind === "cio" || node.kind === "rm" || node.kind === "client" || isHovered || isSelected)) {
             ctx.font = "400 8.5px IBM Plex Mono, monospace";
             ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-            ctx.fillText(node.sublabel, nx, ny + r + fontSize + 4);
+            ctx.fillText(node.sublabel, nx, ny + node.radius + fontSize + 4);
           }
         }
 

@@ -1519,25 +1519,86 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       ctx.save();
       ctx.clearRect(0, 0, width, height);
 
-      // Flat solid navy background matching Today's Brief box
+      // ── Background: gradient matching DarkGradientCard (Today's Brief) ──
+      // Base fill: deep plum #210B2C
       ctx.fillStyle = NAVY_BG;
       ctx.fillRect(0, 0, width, height);
 
-      // Subtle micro-dots grid for coordinate depth with subtle inverse parallax
-      ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
-      const gridSize = 36;
-      const bgShiftX = -tiltX * 8;
-      const bgShiftY = -tiltY * 6;
-      const offsetX = (transformRef.current.x + bgShiftX) % (gridSize * transformRef.current.k);
-      const offsetY = (transformRef.current.y + bgShiftY) % (gridSize * transformRef.current.k);
-      const step = gridSize * transformRef.current.k;
-      for (let x = offsetX; x < width; x += step) {
-        for (let y = offsetY; y < height; y += step) {
-          ctx.beginPath();
-          ctx.arc(x, y, 0.75, 0, Math.PI * 2);
-          ctx.fill();
-        }
+      // Bottom-right corner radial glow — blue-indigo (matches qc-dark-card-glow-near #172f70)
+      const glowBR = ctx.createRadialGradient(
+        width * (1.0 + tiltX * 0.06), height * (1.0 + tiltY * 0.06), 0,
+        width * (1.0 + tiltX * 0.06), height * (1.0 + tiltY * 0.06), Math.max(width, height) * 0.65
+      );
+      glowBR.addColorStop(0,    "rgba(23, 47, 112, 0.72)");  // #172f70 deep indigo
+      glowBR.addColorStop(0.28, "rgba(25, 18, 101, 0.45)");  // #191265 dark violet
+      glowBR.addColorStop(0.50, "rgba(8, 8, 40, 0.28)");     // #080828 near-black
+      glowBR.addColorStop(1,    "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = glowBR;
+      ctx.fillRect(0, 0, width, height);
+
+      // Top-left corner vignette — near-black (matches qc-dark-card-vignette #000000d9)
+      const vigTL = ctx.createRadialGradient(
+        width * (-0.05 + tiltX * 0.04), height * (-0.05 + tiltY * 0.04), 0,
+        width * (-0.05 + tiltX * 0.04), height * (-0.05 + tiltY * 0.04), Math.max(width, height) * 0.65
+      );
+      vigTL.addColorStop(0,    "rgba(0, 0, 0, 0.62)");
+      vigTL.addColorStop(0.30, "rgba(0, 0, 0, 0.30)");
+      vigTL.addColorStop(0.65, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = vigTL;
+      ctx.fillRect(0, 0, width, height);
+
+      // ── 3D Perspective Grid ───────────────────────────────────────────────────
+      // Vanishing point shifts with tilt to simulate true 3D perspective rotation
+      const vpX = width  * 0.5 + tiltX * width  * 0.22;
+      const vpY = height * 0.5 + tiltY * height * 0.18;
+
+      // How many grid lines on each axis
+      const GRID_COLS = 18;
+      const GRID_ROWS = 14;
+
+      // Camera transform offset modulated so grid tracks with pan
+      const camOffX = transformRef.current.x;
+      const camOffY = transformRef.current.y;
+      // Normalise pan offset into a 0..1 repeat cycle for lines
+      const panFracX = ((camOffX / transformRef.current.k) % (width  / GRID_COLS) + width  / GRID_COLS) / (width  / GRID_COLS);
+      const panFracY = ((camOffY / transformRef.current.k) % (height / GRID_ROWS) + height / GRID_ROWS) / (height / GRID_ROWS);
+
+      ctx.save();
+
+      // Vertical perspective lines — fan out from vanishing point to bottom edge
+      for (let i = 0; i <= GRID_COLS; i++) {
+        // Ground plane x position — offset slightly with pan so it tiles
+        const t = (i + panFracX * 0.35) / GRID_COLS;
+        const groundX = t * width;
+
+        // Near-plane horizon is at vpY; far edge goes full width
+        const lineAlpha = 0.055 + (Math.abs(t - 0.5) < 0.15 ? 0.035 : 0); // slightly brighter near center
+        ctx.beginPath();
+        ctx.moveTo(vpX, vpY);
+        ctx.lineTo(groundX, height);
+        ctx.strokeStyle = `rgba(160, 180, 255, ${lineAlpha})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
       }
+
+      // Horizontal perspective lines — parallel bands that recede into the VP
+      for (let j = 1; j <= GRID_ROWS; j++) {
+        const t = (j + panFracY * 0.35) / GRID_ROWS;
+        // Perspective interpolation: lines converge toward vanishing point
+        const lx = vpX + (0       - vpX) * t;
+        const rx = vpX + (width   - vpX) * t;
+        const y  = vpY + (height  - vpY) * t;
+
+        const lineAlpha = 0.04 + t * 0.045; // lines get brighter / denser toward bottom
+        ctx.beginPath();
+        ctx.moveTo(lx, y);
+        ctx.lineTo(rx, y);
+        ctx.strokeStyle = `rgba(160, 180, 255, ${lineAlpha})`;
+        ctx.lineWidth = 0.7;
+        ctx.stroke();
+      }
+
+      ctx.restore();
 
       // Apply camera transform
       ctx.translate(transformRef.current.x, transformRef.current.y);
@@ -1956,10 +2017,9 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
   return (
     <div
       ref={containerRef}
-      className="rounded-[10px] flex flex-col transition-all overflow-hidden relative w-full min-w-0"
+      className="qc-dark-gradient-card rounded-[10px] flex flex-col transition-all overflow-hidden relative w-full min-w-0"
       style={{
         border: "1px solid rgba(255, 255, 255, 0.12)",
-        background: NAVY_BG,
         minHeight: 520
       }}
     >
@@ -1968,7 +2028,8 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         className="px-5 pt-4 pb-3 flex flex-wrap items-center justify-between gap-4 border-b shrink-0 z-10"
         style={{
           borderColor: "rgba(255, 255, 255, 0.1)",
-          background: NAVY_BG
+          background: "rgba(33, 11, 44, 0.82)",
+          backdropFilter: "blur(8px)",
         }}
       >
         {/* Top-Left: Dynamic Heartbeat Role Branding & Node Counts */}

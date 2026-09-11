@@ -1209,6 +1209,8 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
   const dragStartPosRef = useRef({ x: 0, y: 0 });
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0 });
+  // Stable star field — generated once, reused every frame
+  const starFieldRef = useRef<Array<{ nx: number; ny: number; r: number; depth: number; alpha: number }> | null>(null);
 
   const role = data?.meta?.role;
   const isSuperAdmin = role === "super_admin" || role === "admin";
@@ -1519,86 +1521,163 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       ctx.save();
       ctx.clearRect(0, 0, width, height);
 
-      // ── Background: gradient matching DarkGradientCard (Today's Brief) ──
-      // Base fill: deep plum #210B2C
+      // ── Background: deep plum base (Today's Brief palette) ──────────────────
       ctx.fillStyle = NAVY_BG;
       ctx.fillRect(0, 0, width, height);
 
-      // Bottom-right corner radial glow — blue-indigo (matches qc-dark-card-glow-near #172f70)
-      const glowBR = ctx.createRadialGradient(
-        width * (1.0 + tiltX * 0.06), height * (1.0 + tiltY * 0.06), 0,
-        width * (1.0 + tiltX * 0.06), height * (1.0 + tiltY * 0.06), Math.max(width, height) * 0.65
-      );
-      glowBR.addColorStop(0,    "rgba(23, 47, 112, 0.72)");  // #172f70 deep indigo
-      glowBR.addColorStop(0.28, "rgba(25, 18, 101, 0.45)");  // #191265 dark violet
-      glowBR.addColorStop(0.50, "rgba(8, 8, 40, 0.28)");     // #080828 near-black
-      glowBR.addColorStop(1,    "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = glowBR;
+      // ── Vanishing point — shifts with tilt for true 3D feel ──────────────────
+      const vpX = width  * 0.5 + tiltX * width  * 0.15;
+      const vpY = height * 0.5 + tiltY * height * 0.12;
+
+      // ── Background glow: blue-indigo from VP center outward ──────────────────
+      const coreGlow = ctx.createRadialGradient(vpX, vpY, 0, vpX, vpY, Math.max(width, height) * 0.6);
+      coreGlow.addColorStop(0,    "rgba(35, 22, 120, 0.55)");
+      coreGlow.addColorStop(0.35, "rgba(23, 15,  88, 0.30)");
+      coreGlow.addColorStop(0.70, "rgba( 8,  8,  40, 0.15)");
+      coreGlow.addColorStop(1,    "rgba( 0,  0,   0, 0.00)");
+      ctx.fillStyle = coreGlow;
       ctx.fillRect(0, 0, width, height);
 
-      // Top-left corner vignette — near-black (matches qc-dark-card-vignette #000000d9)
-      const vigTL = ctx.createRadialGradient(
-        width * (-0.05 + tiltX * 0.04), height * (-0.05 + tiltY * 0.04), 0,
-        width * (-0.05 + tiltX * 0.04), height * (-0.05 + tiltY * 0.04), Math.max(width, height) * 0.65
+      // Corner vignettes to frame the space
+      const vigBR = ctx.createRadialGradient(
+        width * (1.05 + tiltX * 0.05), height * (1.05 + tiltY * 0.05), 0,
+        width * (1.05 + tiltX * 0.05), height * (1.05 + tiltY * 0.05), Math.max(width, height) * 0.60
       );
-      vigTL.addColorStop(0,    "rgba(0, 0, 0, 0.62)");
-      vigTL.addColorStop(0.30, "rgba(0, 0, 0, 0.30)");
-      vigTL.addColorStop(0.65, "rgba(0, 0, 0, 0)");
+      vigBR.addColorStop(0,   "rgba(23, 47, 112, 0.65)");
+      vigBR.addColorStop(0.3, "rgba(25, 18, 101, 0.30)");
+      vigBR.addColorStop(0.6, "rgba( 0,  0,   0, 0.00)");
+      ctx.fillStyle = vigBR;
+      ctx.fillRect(0, 0, width, height);
+
+      const vigTL = ctx.createRadialGradient(
+        width * (-0.05 + tiltX * 0.03), height * (-0.05 + tiltY * 0.03), 0,
+        width * (-0.05 + tiltX * 0.03), height * (-0.05 + tiltY * 0.03), Math.max(width, height) * 0.55
+      );
+      vigTL.addColorStop(0,   "rgba(0, 0, 0, 0.60)");
+      vigTL.addColorStop(0.3, "rgba(0, 0, 0, 0.22)");
+      vigTL.addColorStop(0.6, "rgba(0, 0, 0, 0.00)");
       ctx.fillStyle = vigTL;
       ctx.fillRect(0, 0, width, height);
 
-      // ── 3D Perspective Grid ───────────────────────────────────────────────────
-      // Vanishing point shifts with tilt to simulate true 3D perspective rotation
-      const vpX = width  * 0.5 + tiltX * width  * 0.22;
-      const vpY = height * 0.5 + tiltY * height * 0.18;
-
-      // How many grid lines on each axis
-      const GRID_COLS = 18;
-      const GRID_ROWS = 14;
-
-      // Camera transform offset modulated so grid tracks with pan
-      const camOffX = transformRef.current.x;
-      const camOffY = transformRef.current.y;
-      // Normalise pan offset into a 0..1 repeat cycle for lines
-      const panFracX = ((camOffX / transformRef.current.k) % (width  / GRID_COLS) + width  / GRID_COLS) / (width  / GRID_COLS);
-      const panFracY = ((camOffY / transformRef.current.k) % (height / GRID_ROWS) + height / GRID_ROWS) / (height / GRID_ROWS);
+      // ── STAR FIELD: 3 depth layers, generated once ────────────────────────────
+      if (!starFieldRef.current) {
+        const stars: Array<{ nx: number; ny: number; r: number; depth: number; alpha: number }> = [];
+        const rng = (seed: number) => { const x = Math.sin(seed + 1) * 10000; return x - Math.floor(x); };
+        for (let i = 0; i < 140; i++) {
+          stars.push({
+            nx:    rng(i * 3.71),
+            ny:    rng(i * 5.33 + 1),
+            r:     0.4 + rng(i * 2.13) * 1.1,
+            depth: Math.floor(rng(i * 4.07) * 3),    // 0=far  1=mid  2=near
+            alpha: 0.12 + rng(i * 1.91) * 0.42,
+          });
+        }
+        starFieldRef.current = stars;
+      }
+      starFieldRef.current.forEach((s) => {
+        const shift = [3, 8, 16][s.depth];            // near stars parallax more
+        const sx = s.nx * width  + tiltX * shift;
+        const sy = s.ny * height + tiltY * shift;
+        ctx.beginPath();
+        ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 215, 255, ${s.alpha})`;
+        ctx.fill();
+      });
 
       ctx.save();
+      ctx.globalCompositeOperation = "lighter";      // additive blending for grid glow
 
-      // Vertical perspective lines — fan out from vanishing point to bottom edge
-      for (let i = 0; i <= GRID_COLS; i++) {
-        // Ground plane x position — offset slightly with pan so it tiles
-        const t = (i + panFracX * 0.35) / GRID_COLS;
-        const groundX = t * width;
+      // ── LAYER 1: 32 Radial spokes VP → all 4 canvas edges (full 360°) ────────
+      const SPOKE_COUNT = 32;
+      for (let i = 0; i < SPOKE_COUNT; i++) {
+        const angle = (i / SPOKE_COUNT) * Math.PI * 2 - Math.PI / 2;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        // Intersect ray from VP with canvas bounding box
+        let t = Infinity;
+        if (cos >  0.00001) t = Math.min(t, (width  - vpX) / cos);
+        if (cos < -0.00001) t = Math.min(t, (0      - vpX) / cos);
+        if (sin >  0.00001) t = Math.min(t, (height - vpY) / sin);
+        if (sin < -0.00001) t = Math.min(t, (0      - vpY) / sin);
+        const ex = vpX + cos * t;
+        const ey = vpY + sin * t;
 
-        // Near-plane horizon is at vpY; far edge goes full width
-        const lineAlpha = 0.055 + (Math.abs(t - 0.5) < 0.15 ? 0.035 : 0); // slightly brighter near center
+        const grd = ctx.createLinearGradient(vpX, vpY, ex, ey);
+        grd.addColorStop(0,    "rgba(110, 140, 255, 0.24)");
+        grd.addColorStop(0.25, "rgba( 90, 120, 230, 0.09)");
+        grd.addColorStop(1,    "rgba( 60,  80, 200, 0.00)");
         ctx.beginPath();
         ctx.moveTo(vpX, vpY);
-        ctx.lineTo(groundX, height);
-        ctx.strokeStyle = `rgba(160, 180, 255, ${lineAlpha})`;
-        ctx.lineWidth = 0.8;
+        ctx.lineTo(ex, ey);
+        ctx.strokeStyle = grd;
+        ctx.lineWidth = 0.65;
         ctx.stroke();
       }
 
-      // Horizontal perspective lines — parallel bands that recede into the VP
-      for (let j = 1; j <= GRID_ROWS; j++) {
-        const t = (j + panFracY * 0.35) / GRID_ROWS;
-        // Perspective interpolation: lines converge toward vanishing point
-        const lx = vpX + (0       - vpX) * t;
-        const rx = vpX + (width   - vpX) * t;
-        const y  = vpY + (height  - vpY) * t;
+      // ── LAYER 2: 4-directional perspective parallels (full 3D box/room) ───────
+      // These are lines that converge toward the VP from all 4 sides simultaneously,
+      // creating the look of being inside an infinite 3D grid room.
+      const P_COUNT = 14;
+      for (let j = 1; j <= P_COUNT; j++) {
+        const tNorm = j / P_COUNT;
+        // Non-linear distribution: lines bunch near VP (depth compression)
+        const pf    = Math.pow(tNorm, 0.55);
+        const alpha = 0.018 + tNorm * 0.068;
+        const lw    = 0.45 + tNorm * 0.25;
+        const col   = `rgba(130, 170, 255, ${alpha})`;
 
-        const lineAlpha = 0.04 + t * 0.045; // lines get brighter / denser toward bottom
+        // ── Horizontal line: above VP ──
         ctx.beginPath();
-        ctx.moveTo(lx, y);
-        ctx.lineTo(rx, y);
-        ctx.strokeStyle = `rgba(160, 180, 255, ${lineAlpha})`;
-        ctx.lineWidth = 0.7;
+        ctx.moveTo(vpX + (0     - vpX) * pf, vpY + (0       - vpY) * pf);
+        ctx.lineTo(vpX + (width - vpX) * pf, vpY + (0       - vpY) * pf);
+        ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
+
+        // ── Horizontal line: below VP ──
+        ctx.beginPath();
+        ctx.moveTo(vpX + (0     - vpX) * pf, vpY + (height - vpY) * pf);
+        ctx.lineTo(vpX + (width - vpX) * pf, vpY + (height - vpY) * pf);
+        ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
+
+        // ── Vertical line: left of VP ──
+        ctx.beginPath();
+        ctx.moveTo(vpX + (0 - vpX) * pf, vpY + (0      - vpY) * pf);
+        ctx.lineTo(vpX + (0 - vpX) * pf, vpY + (height - vpY) * pf);
+        ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
+
+        // ── Vertical line: right of VP ──
+        ctx.beginPath();
+        ctx.moveTo(vpX + (width - vpX) * pf, vpY + (0      - vpY) * pf);
+        ctx.lineTo(vpX + (width - vpX) * pf, vpY + (height - vpY) * pf);
+        ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
+      }
+
+      // ── LAYER 3: Concentric elliptical depth rings around VP ─────────────────
+      // Simulate looking through orbital shells — rings squish with vertical tilt
+      const RING_COUNT = 10;
+      const squishY = 0.52 + Math.abs(tiltY) * 0.12;
+      for (let r = 1; r <= RING_COUNT; r++) {
+        const norm   = r / RING_COUNT;
+        const radius = Math.max(width, height) * 0.92 * Math.pow(norm, 0.60);
+        const alpha  = (1 - norm) * 0.11 + 0.012;
+        ctx.beginPath();
+        ctx.ellipse(vpX, vpY, radius, radius * squishY, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(110, 155, 255, ${alpha})`;
+        ctx.lineWidth = 0.6;
         ctx.stroke();
       }
 
-      ctx.restore();
+      // ── LAYER 4: Nebula / core glow at VP (additive, so it blooms brightly) ──
+      const nebulaR = Math.min(width, height) * 0.18;
+      const ng = ctx.createRadialGradient(vpX, vpY, 0, vpX, vpY, nebulaR);
+      ng.addColorStop(0,   "rgba(80, 60, 255, 0.18)");
+      ng.addColorStop(0.5, "rgba(50, 40, 200, 0.06)");
+      ng.addColorStop(1,   "rgba( 0,  0,   0, 0.00)");
+      ctx.fillStyle = ng;
+      ctx.beginPath();
+      ctx.arc(vpX, vpY, nebulaR, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore(); // back to normal composite mode
 
       // Apply camera transform
       ctx.translate(transformRef.current.x, transformRef.current.y);

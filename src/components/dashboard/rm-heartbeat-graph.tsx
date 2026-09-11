@@ -11,7 +11,8 @@ import {
   Sliders,
   TrendingUp,
   ArrowUpRight,
-  ChevronRight
+  ChevronRight,
+  Layers
 } from "lucide-react";
 import { MonoLabel } from "@/components/ds";
 import type { HeartbeatGraphData } from "@/types/wealthos";
@@ -50,6 +51,9 @@ export interface GraphNode {
   vy: number;
   fx?: number | null;
   fy?: number | null;
+  renderX?: number;
+  renderY?: number;
+  virtualZ?: number;
   parentId?: string;
   clientId?: string;
   rawId?: string;
@@ -1145,6 +1149,15 @@ function isNodeVisible(node: GraphNode, expandedIds: Set<string>, nodeMap: Map<s
   return true;
 }
 
+function getNodeVirtualDepth(node: GraphNode): number {
+  if (node.stage === 0 || !node.parentId) return 0;
+  if (node.stage === 1) return 0.55;
+  if (node.stage === 2) return 1.1;
+  if (node.stage === 3) return 1.7;
+  if (node.stage === 4) return 2.3;
+  return node.kind === "holding" ? 2.1 : node.kind === "client" ? 1.4 : 0.7;
+}
+
 interface RMHeartbeatGraphProps {
   data?: HeartbeatGraphData | null;
   loading?: boolean;
@@ -1157,6 +1170,16 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
   const [activeFilter, setActiveFilter] = useState<HoldingCategory | "all" | "alerts">("all");
   const [colorMode, setColorMode] = useState<"category" | "severity">("category");
   const [searchQuery, setSearchQuery] = useState("");
+  const [tiltEnabled, setTiltEnabled] = useState(true);
+
+  // Holographic 3D tilt tracking
+  const pointerPosRef = useRef({
+    targetX: 0,
+    targetY: 0,
+    currentX: 0,
+    currentY: 0,
+    isInside: false,
+  });
 
   // Default: Capped at 3 layers for everyone at start
   const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(() => getInitialExpandedNodeIds(data));
@@ -1482,6 +1505,13 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       pulseAngle += 0.04;
       runPhysicsStep();
 
+      // Smooth pointer easing for holographic parallax tilt
+      const ptr = pointerPosRef.current;
+      ptr.currentX += (ptr.targetX - ptr.currentX) * 0.08;
+      ptr.currentY += (ptr.targetY - ptr.currentY) * 0.08;
+      const tiltX = tiltEnabled ? ptr.currentX : 0;
+      const tiltY = tiltEnabled ? ptr.currentY : 0;
+
       const rect = canvas.getBoundingClientRect();
       const width = rect.width;
       const height = rect.height;
@@ -1493,11 +1523,13 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       ctx.fillStyle = NAVY_BG;
       ctx.fillRect(0, 0, width, height);
 
-      // Subtle micro-dots grid for coordinate depth
+      // Subtle micro-dots grid for coordinate depth with subtle inverse parallax
       ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
       const gridSize = 36;
-      const offsetX = transformRef.current.x % (gridSize * transformRef.current.k);
-      const offsetY = transformRef.current.y % (gridSize * transformRef.current.k);
+      const bgShiftX = -tiltX * 8;
+      const bgShiftY = -tiltY * 6;
+      const offsetX = (transformRef.current.x + bgShiftX) % (gridSize * transformRef.current.k);
+      const offsetY = (transformRef.current.y + bgShiftY) % (gridSize * transformRef.current.k);
       const step = gridSize * transformRef.current.k;
       for (let x = offsetX; x < width; x += step) {
         for (let y = offsetY; y < height; y += step) {
@@ -1513,7 +1545,13 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
 
       const { nodes, links } = graphDataRef.current;
       const nodeMap = new Map<string, GraphNode>();
-      nodes.forEach((n) => nodeMap.set(n.id, n));
+      nodes.forEach((n) => {
+        const depth = getNodeVirtualDepth(n);
+        n.virtualZ = depth;
+        n.renderX = n.x + tiltX * depth * 20;
+        n.renderY = n.y + tiltY * depth * 15;
+        nodeMap.set(n.id, n);
+      });
 
       // ── Draw Links ──────────────────────────────────────────────────────────
       links.forEach((link) => {
@@ -1544,9 +1582,14 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           colorMode === "category" ? CATEGORY_COLORS[link.category] : SEVERITY_COLORS[link.severity];
         const baseColor = colorCfg?.main || "#38BDF8";
 
+        const sx = source.renderX ?? source.x;
+        const sy = source.renderY ?? source.y;
+        const tx = target.renderX ?? target.x;
+        const ty = target.renderY ?? target.y;
+
         ctx.beginPath();
-        ctx.moveTo(source.x, source.y);
-        ctx.lineTo(target.x, target.y);
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(tx, ty);
 
         if (isHighlighted || isSearchHighlighted) {
           ctx.strokeStyle = baseColor;
@@ -1595,18 +1638,36 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         const alpha = isDimmed && !isSearchMatched ? 0.12 : 1;
         ctx.globalAlpha = alpha;
 
+        const nx = node.renderX ?? node.x;
+        const ny = node.renderY ?? node.y;
+        const depth = node.virtualZ ?? getNodeVirtualDepth(node);
+
+        // Ambient holographic depth shadow cast opposite to tilt angle
+        if (tiltEnabled && depth > 0 && !isDimmed) {
+          const shadowDist = depth * 5.5;
+          const shadowX = nx - tiltX * shadowDist;
+          const shadowY = ny - tiltY * shadowDist + depth * 1.5;
+          ctx.beginPath();
+          ctx.arc(shadowX, shadowY, node.radius * 0.95, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
+          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+          ctx.shadowBlur = 7 * depth;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+
         // Outer pulsing aura
         if ((node.severity === "critical" || isHovered || isSelected || isSearchMatched) && !isDimmed) {
           const pulse = Math.sin(pulseAngle + node.x * 0.05) * 4;
           const auraRadius = node.radius + 6 + (node.severity === "critical" ? pulse : 2);
           ctx.beginPath();
-          ctx.arc(node.x, node.y, auraRadius, 0, Math.PI * 2);
+          ctx.arc(nx, ny, auraRadius, 0, Math.PI * 2);
           ctx.fillStyle = node.severity === "critical" ? "rgba(248, 113, 113, 0.25)" : glowColor;
           ctx.fill();
 
           if (node.severity === "critical") {
             ctx.beginPath();
-            ctx.arc(node.x, node.y, auraRadius + 2, 0, Math.PI * 2);
+            ctx.arc(nx, ny, auraRadius + 2, 0, Math.PI * 2);
             ctx.strokeStyle = "rgba(248, 113, 113, 0.7)";
             ctx.lineWidth = 1;
             ctx.setLineDash([3, 3]);
@@ -1617,7 +1678,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
 
         // Main Node Circle
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.arc(nx, ny, node.radius, 0, Math.PI * 2);
         ctx.fillStyle = mainColor;
 
         if (isHovered || isSelected || isSearchMatched) {
@@ -1630,7 +1691,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         // Node Border / Ring
         const isCenterNode = node.kind === "super_admin" || node.kind === "cio" || (node.kind === "rm" && !node.parentId);
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.arc(nx, ny, node.radius, 0, Math.PI * 2);
         ctx.strokeStyle =
           isCenterNode
             ? "#FFFFFF"
@@ -1646,26 +1707,26 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           ctx.font = "bold 9.5px IBM Plex Sans, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText("HQ", node.x, node.y);
+          ctx.fillText("HQ", nx, ny);
         } else if (node.kind === "cio") {
           ctx.fillStyle = "#FFFFFF";
           ctx.font = "bold 9.5px IBM Plex Sans, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText("CIO", node.x, node.y);
+          ctx.fillText("CIO", nx, ny);
         } else if (node.kind === "rm") {
           ctx.fillStyle = "#210B2C";
           ctx.font = "bold 10px IBM Plex Sans, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText("RM", node.x, node.y);
+          ctx.fillText("RM", nx, ny);
         } else if (node.kind === "client") {
           const initials = (node.label || "CL").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
           ctx.fillStyle = "#FFFFFF";
           ctx.font = "bold 9px IBM Plex Sans, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText(initials, node.x, node.y);
+          ctx.fillText(initials, nx, ny);
         }
 
         // ── Draw Expand / Collapse Badge for Nodes with Children ──
@@ -1673,8 +1734,8 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         if (hasChildren) {
           const isExpanded = expandedNodeIds.has(node.id);
           const badgeAngle = -Math.PI / 4; // Top-right corner
-          const bx = node.x + Math.cos(badgeAngle) * (node.radius + 3);
-          const by = node.y + Math.sin(badgeAngle) * (node.radius + 3);
+          const bx = nx + Math.cos(badgeAngle) * (node.radius + 3);
+          const by = ny + Math.sin(badgeAngle) * (node.radius + 3);
           const badgeR = 6.5;
 
           ctx.beginPath();
@@ -1697,7 +1758,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           // If node has hidden children (unexpanded edge node), draw a dashed orbit ring
           if (!isExpanded) {
             ctx.beginPath();
-            ctx.arc(node.x, node.y, node.radius + 4.5, 0, Math.PI * 2);
+            ctx.arc(nx, ny, node.radius + 4.5, 0, Math.PI * 2);
             ctx.strokeStyle = "rgba(223, 255, 0, 0.65)";
             ctx.lineWidth = 1.2;
             ctx.setLineDash([2.5, 2.5]);
@@ -1724,12 +1785,12 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           ctx.fillStyle = isHovered || isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.9)";
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
-          ctx.fillText(node.label, node.x, node.y + node.radius + 3.5);
+          ctx.fillText(node.label, nx, ny + node.radius + 3.5);
 
           if (node.sublabel && (node.kind === "super_admin" || node.kind === "cio" || node.kind === "rm" || node.kind === "client" || isHovered || isSelected)) {
             ctx.font = "400 8.5px IBM Plex Mono, monospace";
             ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-            ctx.fillText(node.sublabel, node.x, node.y + node.radius + fontSize + 4);
+            ctx.fillText(node.sublabel, nx, ny + node.radius + fontSize + 4);
           }
         }
 
@@ -1746,7 +1807,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
     };
-  }, [activeFilter, colorMode, connectedNodeIds, searchMatchedIds, hoveredNode, selectedNode, centerGraph, runPhysicsStep, expandedNodeIds]);
+  }, [activeFilter, colorMode, connectedNodeIds, searchMatchedIds, hoveredNode, selectedNode, centerGraph, runPhysicsStep, expandedNodeIds, tiltEnabled]);
 
   // Pointer Handlers
   const screenToWorld = useCallback((sx: number, sy: number) => {
@@ -1768,8 +1829,10 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       for (let i = nodes.length - 1; i >= 0; i--) {
         const n = nodes[i];
         if (!isNodeVisible(n, expandedNodeIds, nodeMap)) continue;
-        const dx = n.x - x;
-        const dy = n.y - y;
+        const nx = n.renderX ?? n.x;
+        const ny = n.renderY ?? n.y;
+        const dx = nx - x;
+        const dy = ny - y;
         const hitRadius = Math.max(n.radius, 14);
         if (dx * dx + dy * dy <= hitRadius * hitRadius) {
           return n;
@@ -1786,8 +1849,11 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       isDraggingRef.current = true;
       draggedNodeRef.current = node;
       const w = screenToWorld(e.clientX, e.clientY);
-      node.fx = w.x;
-      node.fy = w.y;
+      const depth = getNodeVirtualDepth(node);
+      const tiltOffsetX = tiltEnabled ? pointerPosRef.current.currentX * depth * 20 : 0;
+      const tiltOffsetY = tiltEnabled ? pointerPosRef.current.currentY * depth * 15 : 0;
+      node.fx = w.x - tiltOffsetX;
+      node.fy = w.y - tiltOffsetY;
       dragStartPosRef.current = { x: e.clientX, y: e.clientY };
     } else {
       isPanningRef.current = true;
@@ -1799,10 +1865,23 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const normX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+      const normY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      pointerPosRef.current.targetX = Math.max(-1, Math.min(1, normX));
+      pointerPosRef.current.targetY = Math.max(-1, Math.min(1, normY));
+      pointerPosRef.current.isInside = true;
+    }
+
     if (isDraggingRef.current && draggedNodeRef.current) {
       const w = screenToWorld(e.clientX, e.clientY);
-      draggedNodeRef.current.fx = w.x;
-      draggedNodeRef.current.fy = w.y;
+      const depth = getNodeVirtualDepth(draggedNodeRef.current);
+      const tiltOffsetX = tiltEnabled ? pointerPosRef.current.currentX * depth * 20 : 0;
+      const tiltOffsetY = tiltEnabled ? pointerPosRef.current.currentY * depth * 15 : 0;
+      draggedNodeRef.current.fx = w.x - tiltOffsetX;
+      draggedNodeRef.current.fy = w.y - tiltOffsetY;
       simAlphaRef.current = Math.max(simAlphaRef.current, 0.45);
     } else if (isPanningRef.current) {
       transformRef.current.x = e.clientX - panStartRef.current.x;
@@ -1819,6 +1898,13 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         }
       }
     }
+  };
+
+  const handlePointerLeave = () => {
+    pointerPosRef.current.targetX = 0;
+    pointerPosRef.current.targetY = 0;
+    pointerPosRef.current.isInside = false;
+    setHoveredNode(null);
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -2072,6 +2158,20 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
             </button>
           </div>
 
+          {/* 3D Holographic Parallax Depth Toggle */}
+          <button
+            onClick={() => setTiltEnabled((v) => !v)}
+            title={`3D Hologram Depth: ${tiltEnabled ? "Enabled (Interactive gyro tilt)" : "Disabled (Flat 2D)"}`}
+            className={`px-2 py-1 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1.5 cursor-pointer border ${
+              tiltEnabled
+                ? "bg-white/[0.14] text-[var(--qc-lime)] border-[var(--qc-lime)]/40 shadow-sm"
+                : "bg-white/[0.08] text-white/60 border-white/[0.14] hover:bg-white/[0.12] hover:text-white"
+            }`}
+          >
+            <Layers className="size-3" />
+            <span className="hidden sm:inline">3D Depth {tiltEnabled ? "ON" : "OFF"}</span>
+          </button>
+
           {/* Color Mode Toggle */}
           <button
             onClick={() => setColorMode((m) => (m === "category" ? "severity" : "category"))}
@@ -2116,6 +2216,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerLeave}
           onWheel={handleWheel}
           className="w-full h-full block"
         />

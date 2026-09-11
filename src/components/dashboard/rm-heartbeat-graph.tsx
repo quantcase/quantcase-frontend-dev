@@ -256,7 +256,7 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
       // ── Stage 1: CIO Desk(s) ──
       cioNodes.forEach((cio, idx) => {
         const angle = (idx / Math.max(1, cioNodes.length)) * Math.PI * 2 - Math.PI / 2;
-        const dist = 120;
+        const dist = 180;
         const cx = Math.cos(angle) * dist;
         const cy = Math.sin(angle) * dist;
         dynNodes.push({
@@ -276,7 +276,7 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
           vy: 0,
           details: { team: cio.team, title: cio.title },
         });
-        addLink(centerRaw.id, cio.id, "cio", (cio.alert_count || 0) > 0 ? "critical" : "clean", 120);
+        addLink(centerRaw.id, cio.id, "cio", (cio.alert_count || 0) > 0 ? "critical" : "clean", 180);
       });
 
       // ── Stage 2: RMs ──
@@ -299,14 +299,14 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
           const siblings = rmsByCio.get(parentId) || [rm];
           const subIdx = Math.max(0, siblings.findIndex((s) => s.id === rm.id));
           const subCount = siblings.length;
-          const spread = Math.min(Math.PI * 0.75, 0.55 * Math.max(1, subCount - 1));
+          const spread = Math.min(Math.PI * 0.85, 0.65 * Math.max(1, subCount - 1));
           const offset = subCount > 1 ? (subIdx - (subCount - 1) / 2) * (spread / Math.max(1, subCount - 1)) : 0;
           angle = cioAngle + offset;
         } else {
           angle = (rmIdx / Math.max(1, rmCount)) * Math.PI * 2 - Math.PI / 2;
         }
 
-        const dist = 220;
+        const dist = 340;
         const rx = Math.cos(angle) * dist;
         const ry = Math.sin(angle) * dist;
 
@@ -327,19 +327,19 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
           vy: 0,
           details: { team: rm.team, title: rm.title },
         });
-        addLink(parentId, rm.id, "rm", (rm.alert_count || 0) > 0 ? "critical" : "clean", 120);
+        addLink(parentId, rm.id, "rm", (rm.alert_count || 0) > 0 ? "critical" : "clean", 160);
 
         // ── Stage 3: Clients under this RM ──
         const rmClients = clientNodes.filter(
           (c) => c.parent_id === rm.id || (c as any).rm_id === rm.raw_id
         );
         const cCount = rmClients.length;
-        const sectorSpan = (Math.PI * 2 / Math.max(1, rmCount)) * 0.72;
+        const sectorSpan = Math.min(Math.PI * 0.78, (Math.PI * 2 / Math.max(1, rmCount)) * 0.85);
 
         rmClients.forEach((c, cIdx) => {
           const cOffset = cCount > 1 ? (cIdx - (cCount - 1) / 2) * (sectorSpan / Math.max(1, cCount - 1)) : 0;
           const cAngle = angle + cOffset;
-          const cDist = 120;
+          const cDist = 175;
           const cx = rx + Math.cos(cAngle) * cDist;
           const cy = ry + Math.sin(cAngle) * cDist;
 
@@ -369,18 +369,18 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
               holdingCount: c.holding_count,
             },
           });
-          addLink(rm.id, c.id, "rm", severity, 120);
+          addLink(rm.id, c.id, "rm", severity, 175);
 
           // ── Stage 4: Holdings under Client ──
           const cHolds = holdingByParent.get(c.id) || [];
           const hCount = cHolds.length;
           const cRadAngle = Math.atan2(cy, cx);
-          const hSpread = Math.min(Math.PI * 0.8, 0.25 * hCount);
+          const hSpread = Math.min(Math.PI * 0.9, 0.32 * hCount);
 
           cHolds.forEach((h, hIdx) => {
             const hOffset = hCount > 1 ? (hIdx - (hCount - 1) / 2) * (hSpread / Math.max(1, hCount - 1)) : 0;
             const hAngle = cRadAngle + hOffset;
-            const hDist = 48;
+            const hDist = 80;
             const hx = cx + Math.cos(hAngle) * hDist;
             const hy = cy + Math.sin(hAngle) * hDist;
 
@@ -410,7 +410,7 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
                 allocation: h.weight_pct ? `${h.weight_pct}%` : undefined,
               },
             });
-            addLink(c.id, h.id, cat, hSeverity, 48);
+            addLink(c.id, h.id, cat, hSeverity, 80);
           });
         });
       });
@@ -419,7 +419,7 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
       const rmCount = rmNodes.length;
       rmNodes.forEach((rm, rmIdx) => {
         const angle = (rmIdx / Math.max(1, rmCount)) * Math.PI * 2 - Math.PI / 2;
-        const dist = 155;
+        const dist = 225;
         const rx = Math.cos(angle) * dist;
         const ry = Math.sin(angle) * dist;
 
@@ -440,19 +440,19 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
           vy: 0,
           details: { team: rm.team, title: rm.title },
         });
-        addLink(centerRaw.id, rm.id, "rm", (rm.alert_count || 0) > 0 ? "critical" : "clean", 155);
+        addLink(centerRaw.id, rm.id, "rm", (rm.alert_count || 0) > 0 ? "critical" : "clean", 225);
 
         // ── Stage 2: Clients under this RM ──
         const rmClients = clientNodes.filter(
           (c) => c.parent_id === rm.id || (c as any).rm_id === rm.raw_id
         );
         const cCount = rmClients.length;
-        const sectorSpan = (Math.PI * 2 / Math.max(1, rmCount)) * 0.76;
+        const sectorSpan = (Math.PI * 2 / Math.max(1, rmCount)) * 0.78;
 
         rmClients.forEach((c, cIdx) => {
           const cOffset = cCount > 1 ? (cIdx - (cCount - 1) / 2) * (sectorSpan / Math.max(1, cCount - 1)) : 0;
           const cAngle = angle + cOffset;
-          const cDist = 135;
+          const cDist = 180;
           const cx = rx + Math.cos(cAngle) * cDist;
           const cy = ry + Math.sin(cAngle) * cDist;
 
@@ -482,18 +482,18 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
               holdingCount: c.holding_count,
             },
           });
-          addLink(rm.id, c.id, "rm", severity, 135);
+          addLink(rm.id, c.id, "rm", severity, 180);
 
           // ── Stage 3: Holdings under Client ──
           const cHolds = holdingByParent.get(c.id) || [];
           const hCount = cHolds.length;
           const cRadAngle = Math.atan2(cy, cx);
-          const hSpread = Math.min(Math.PI * 0.82, 0.26 * hCount);
+          const hSpread = Math.min(Math.PI * 0.88, 0.30 * hCount);
 
           cHolds.forEach((h, hIdx) => {
             const hOffset = hCount > 1 ? (hIdx - (hCount - 1) / 2) * (hSpread / Math.max(1, hCount - 1)) : 0;
             const hAngle = cRadAngle + hOffset;
-            const hDist = 52;
+            const hDist = 80;
             const hx = cx + Math.cos(hAngle) * hDist;
             const hy = cy + Math.sin(hAngle) * hDist;
 
@@ -523,7 +523,7 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
                 allocation: h.weight_pct ? `${h.weight_pct}%` : undefined,
               },
             });
-            addLink(c.id, h.id, cat, hSeverity, 52);
+            addLink(c.id, h.id, cat, hSeverity, 80);
           });
         });
       });
@@ -532,7 +532,7 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
       const clientCount = clientNodes.length;
       clientNodes.forEach((c, idx) => {
         const angle = (idx / Math.max(1, clientCount)) * Math.PI * 2 - Math.PI / 2;
-        const clientDist = 185 + (idx % 2 === 0 ? 0 : 35);
+        const clientDist = 260 + (idx % 2 === 0 ? 0 : 35);
         const cx = Math.cos(angle) * clientDist;
         const cy = Math.sin(angle) * clientDist;
 
@@ -567,12 +567,12 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
         const cHolds = holdingByParent.get(c.id) || [];
         const hCount = cHolds.length;
         const cRadAngle = Math.atan2(cy, cx);
-        const hSpread = Math.min(Math.PI * 0.85, 0.28 * hCount);
+        const hSpread = Math.min(Math.PI * 0.88, 0.30 * hCount);
 
         cHolds.forEach((h, hIdx) => {
           const hOffset = hCount > 1 ? (hIdx - (hCount - 1) / 2) * (hSpread / Math.max(1, hCount - 1)) : 0;
           const hAngle = cRadAngle + hOffset;
-          const hDist = 58;
+          const hDist = 85 + (hIdx % 2 === 0 ? 0 : 18);
           const hx = cx + Math.cos(hAngle) * hDist;
           const hy = cy + Math.sin(hAngle) * hDist;
 
@@ -967,7 +967,7 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
 
   CLIENTS_TREE.forEach((client, clientIndex) => {
     const angle = clientIndex * clientAngleStep - Math.PI / 2;
-    const clientDist = 170;
+    const clientDist = 240;
     const cx = Math.cos(angle) * clientDist;
     const cy = Math.sin(angle) * clientDist;
 
@@ -982,8 +982,8 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
       aum: client.aum,
       signal: client.signal,
       radius: 17,
-      x: cx + (Math.random() - 0.5) * 15,
-      y: cy + (Math.random() - 0.5) * 15,
+      x: cx + (Math.random() - 0.5) * 8,
+      y: cy + (Math.random() - 0.5) * 8,
       vx: 0,
       vy: 0,
       parentId: "rm-center",
@@ -1006,9 +1006,9 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
     // Asset Classes
     const acCount = client.assetClasses.length;
     client.assetClasses.forEach((ac, acIdx) => {
-      const acSpread = 0.7;
+      const acSpread = 0.75;
       const acAngle = angle + (acIdx - (acCount - 1) / 2) * (acSpread / Math.max(1, acCount - 1));
-      const acDist = 78;
+      const acDist = 95;
       const acx = cx + Math.cos(acAngle) * acDist;
       const acy = cy + Math.sin(acAngle) * acDist;
 
@@ -1021,8 +1021,8 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
         severity: ac.severity,
         weight: ac.weight,
         radius: 11,
-        x: acx + (Math.random() - 0.5) * 12,
-        y: acy + (Math.random() - 0.5) * 12,
+        x: acx + (Math.random() - 0.5) * 6,
+        y: acy + (Math.random() - 0.5) * 6,
         vx: 0,
         vy: 0,
         parentId: client.id,
@@ -1045,9 +1045,9 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
       // Specific Holdings
       const hCount = ac.holdings.length;
       ac.holdings.forEach((h, hIdx) => {
-        const hSpread = 0.9;
+        const hSpread = 0.95;
         const hAngle = acAngle + (hIdx - (hCount - 1) / 2) * (hSpread / Math.max(1, hCount - 1));
-        const hDist = 50;
+        const hDist = 65;
         const hx = acx + Math.cos(hAngle) * hDist;
         const hy = acy + Math.sin(hAngle) * hDist;
 
@@ -1169,14 +1169,16 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
 
-  // Physics data
+  // Physics data & simulation cooling energy
   const graphDataRef = useRef(createInitialGraphData(data));
   const isDraggingRef = useRef(false);
+  const simAlphaRef = useRef(1.0);
 
   useEffect(() => {
     if (data && data.nodes && data.nodes.length > 0) {
       graphDataRef.current = createInitialGraphData(data);
       setExpandedNodeIds(getInitialExpandedNodeIds(data));
+      simAlphaRef.current = 1.0;
     }
   }, [data]);
 
@@ -1208,28 +1210,30 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           });
         };
         removeDescendants(nodeId);
+        simAlphaRef.current = Math.max(simAlphaRef.current, 0.4);
       } else {
         // Expand: add nodeId
         next.add(nodeId);
 
-        // Blossom outward animation for newly visible children
+        // Smooth blossom outward glide for newly visible children
         const parent = nodes.find((n) => n.id === nodeId);
         if (parent) {
           const children = nodes.filter((n) => n.parentId === nodeId);
           const cCount = children.length;
           const parentRad = Math.atan2(parent.y, parent.x) || -Math.PI / 2;
-          const spread = Math.min(Math.PI * 1.1, 0.32 * Math.max(1, cCount));
+          const spread = Math.min(Math.PI * 1.05, 0.36 * Math.max(1, cCount));
 
           children.forEach((c, idx) => {
             const offset = cCount > 1 ? (idx - (cCount - 1) / 2) * (spread / Math.max(1, cCount - 1)) : 0;
             const angle = parentRad + offset;
-            const dist = c.kind === "holding" ? 50 : 120;
+            const dist = c.kind === "holding" ? 80 : (c.kind === "client" ? 175 : 180);
 
-            c.x = parent.x + Math.cos(angle) * (dist * 0.55);
-            c.y = parent.y + Math.sin(angle) * (dist * 0.55);
-            c.vx = Math.cos(angle) * 3.5;
-            c.vy = Math.sin(angle) * 3.5;
+            c.x = parent.x + Math.cos(angle) * (dist * 0.88);
+            c.y = parent.y + Math.sin(angle) * (dist * 0.88);
+            c.vx = Math.cos(angle) * 1.2;
+            c.vy = Math.sin(angle) * 1.2;
           });
+          simAlphaRef.current = 0.85;
         }
       }
       return next;
@@ -1287,18 +1291,19 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
     return ids;
   }, [hoveredNode, selectedNode, expandedNodeIds]);
 
-  // Center graph in canvas
+  // Center graph in canvas with adaptive initial zoom
   const centerGraph = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
+    const initK = isSuperAdmin ? 0.80 : isCio ? 0.86 : 0.90;
     transformRef.current = {
       x: rect.width / 2,
       y: rect.height / 2,
-      k: 0.95
+      k: initK
     };
-    setZoomLevel(0.95);
-  }, []);
+    setZoomLevel(initK);
+  }, [isSuperAdmin, isCio]);
 
   // Zoom handler
   const handleZoom = useCallback((factor: number) => {
@@ -1333,29 +1338,37 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
     setSelectedNode(node);
   }, []);
 
-  // Physics Simulation Step
+  // Physics Simulation Step with Cooling Energy & Smooth Settlement
   const runPhysicsStep = useCallback(() => {
+    if (simAlphaRef.current < 0.002) return;
+
+    const alpha = simAlphaRef.current;
+    simAlphaRef.current *= 0.982; // Gradual cooling decay over ~150 frames
+
     const { nodes, links } = graphDataRef.current;
     const nodeMap = new Map<string, GraphNode>();
     nodes.forEach((n) => nodeMap.set(n.id, n));
 
-    const DAMPING = 0.88;
-    const CENTER_GRAVITY = 0.0018;
-    const REPULSION = 1400;
+    const DAMPING = 0.82;
+    const CENTER_GRAVITY = 0.0012;
+    const REPULSION = 2200;
+    const MAX_SPEED = 3.8;
 
-    // Center Gravity for logged in user's anchor node
+    // Center Gravity for non-root nodes; root node is firmly pinned at center (0,0)
     nodes.forEach((n) => {
-      const isCenter = n.stage === 0 || n.kind === "super_admin" || n.kind === "cio" || (n.kind === "rm" && !n.parentId);
-      if (isCenter) {
-        n.vx -= n.x * 0.05;
-        n.vy -= n.y * 0.05;
+      const isRoot = n.stage === 0 || !n.parentId;
+      if (isRoot) {
+        n.x = 0;
+        n.y = 0;
+        n.vx = 0;
+        n.vy = 0;
       } else {
-        n.vx -= n.x * CENTER_GRAVITY;
-        n.vy -= n.y * CENTER_GRAVITY;
+        n.vx -= n.x * CENTER_GRAVITY * alpha;
+        n.vy -= n.y * CENTER_GRAVITY * alpha;
       }
     });
 
-    // Many-Body Coulomb Repulsion between currently visible nodes only
+    // Softened Many-Body Coulomb Repulsion between visible nodes
     const len = nodes.length;
     for (let i = 0; i < len; i++) {
       const a = nodes[i];
@@ -1368,19 +1381,24 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         const distSq = dx * dx + dy * dy || 1;
         const dist = Math.sqrt(distSq);
 
-        const minDist = a.radius + b.radius + 12;
-        let force = REPULSION / (distSq + 200);
+        const minDist = a.radius + b.radius + 24;
+        let force = (REPULSION * alpha) / (distSq + 800);
         if (dist < minDist) {
-          force += (minDist - dist) * 0.08;
+          force += Math.min(1.2, (minDist - dist) * 0.04 * alpha);
         }
+        force = Math.min(force, 1.8);
 
         const fx = (dx / dist) * force;
         const fy = (dy / dist) * force;
 
-        a.vx -= fx;
-        a.vy -= fy;
-        b.vx += fx;
-        b.vy += fy;
+        if (a.stage !== 0 && a.parentId) {
+          a.vx -= fx;
+          a.vy -= fy;
+        }
+        if (b.stage !== 0 && b.parentId) {
+          b.vx += fx;
+          b.vy += fy;
+        }
       }
     }
 
@@ -1395,27 +1413,41 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       const dy = b.y - a.y;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
       const diff = dist - link.distance;
-      const strength = 0.045;
+      const strength = 0.035 * alpha;
 
       const fx = (dx / dist) * diff * strength;
       const fy = (dy / dist) * diff * strength;
 
-      a.vx += fx;
-      a.vy += fy;
-      b.vx -= fx;
-      b.vy -= fy;
+      if (a.stage !== 0 && a.parentId) {
+        a.vx += fx;
+        a.vy += fy;
+      }
+      if (b.stage !== 0 && b.parentId) {
+        b.vx -= fx;
+        b.vy -= fy;
+      }
     });
 
-    // Position updates
+    // Position updates with friction damping and max speed cap
     nodes.forEach((n) => {
       if (n.fx != null && n.fy != null) {
         n.x = n.fx;
         n.y = n.fy;
         n.vx = 0;
         n.vy = 0;
+      } else if (n.stage === 0 || !n.parentId) {
+        n.x = 0;
+        n.y = 0;
+        n.vx = 0;
+        n.vy = 0;
       } else {
         n.vx *= DAMPING;
         n.vy *= DAMPING;
+        const speed = Math.sqrt(n.vx * n.vx + n.vy * n.vy);
+        if (speed > MAX_SPEED) {
+          n.vx = (n.vx / speed) * MAX_SPEED;
+          n.vy = (n.vy / speed) * MAX_SPEED;
+        }
         n.x += n.vx;
         n.y += n.vy;
       }
@@ -1771,6 +1803,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       const w = screenToWorld(e.clientX, e.clientY);
       draggedNodeRef.current.fx = w.x;
       draggedNodeRef.current.fy = w.y;
+      simAlphaRef.current = Math.max(simAlphaRef.current, 0.45);
     } else if (isPanningRef.current) {
       transformRef.current.x = e.clientX - panStartRef.current.x;
       transformRef.current.y = e.clientY - panStartRef.current.y;
@@ -1794,6 +1827,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       clickedNode.fx = null;
       clickedNode.fy = null;
       isDraggingRef.current = false;
+      simAlphaRef.current = Math.max(simAlphaRef.current, 0.5);
 
       const dist = Math.hypot(
         e.clientX - dragStartPosRef.current.x,
@@ -2011,7 +2045,10 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           {/* Layer Expansion Controls (Default: Capped at 3 layers, expandable on click) */}
           <div className="flex items-center gap-1 bg-white/[0.06] p-0.5 rounded-lg border border-white/[0.1]">
             <button
-              onClick={() => setExpandedNodeIds(getInitialExpandedNodeIds(data))}
+              onClick={() => {
+                setExpandedNodeIds(getInitialExpandedNodeIds(data));
+                simAlphaRef.current = 1.0;
+              }}
               title="Reset graph to default 3 layers"
               className="px-2 py-0.5 rounded-md text-[11px] font-medium text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors cursor-pointer flex items-center gap-1"
             >
@@ -2026,6 +2063,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
                   }
                 });
                 setExpandedNodeIds(allWithChildren);
+                simAlphaRef.current = 1.0;
               }}
               title="Expand all layers and holdings"
               className="px-2 py-0.5 rounded-md text-[11px] font-medium text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors cursor-pointer border-l border-white/[0.1] flex items-center gap-1"

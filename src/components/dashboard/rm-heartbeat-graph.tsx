@@ -1065,6 +1065,64 @@ function createInitialGraphData(externalData?: HeartbeatGraphData | null): { nod
   return { nodes, links };
 }
 
+// ── Layer Hierarchy Helpers ──────────────────────────────────────────────────
+
+function getInitialExpandedNodeIds(graphData?: HeartbeatGraphData | null): Set<string> {
+  const set = new Set<string>();
+  if (!graphData || !graphData.nodes || graphData.nodes.length === 0) {
+    set.add("rm-center");
+    set.add("cli-rahul");
+    set.add("cli-anita");
+    set.add("cli-suresh");
+    set.add("cli-vikram");
+    set.add("cli-kabir");
+    return set;
+  }
+
+  // Find center node (Stage 0)
+  const centerNode =
+    graphData.nodes.find((n) => n.stage === 0) ||
+    graphData.nodes.find((n) => n.id === graphData.meta?.center_id) ||
+    graphData.nodes.find((n) => n.type === "super_admin" || n.type === "cio" || n.type === "rm") ||
+    graphData.nodes[0];
+
+  if (centerNode) {
+    set.add(centerNode.id);
+  }
+
+  // Direct children of center node (Stage 1)
+  const stage1Nodes = graphData.nodes.filter(
+    (n) => n.stage === 1 || (centerNode && n.parent_id === centerNode.id && n.id !== centerNode.id)
+  );
+
+  // Expanding Stage 0 (center) and Stage 1 nodes caps the initial view at EXACTLY 3 layers:
+  // - Stage 0 (Center) is expanded -> Stage 1 nodes are visible
+  // - Stage 1 nodes are expanded -> Stage 2 nodes are visible
+  // - Stage 2 nodes are NOT expanded -> Stage 3 (and beyond) start hidden!
+  // Edge nodes can then be clicked to expand deeper layers on demand.
+  stage1Nodes.forEach((n) => {
+    set.add(n.id);
+  });
+
+  return set;
+}
+
+function isNodeVisible(node: GraphNode, expandedIds: Set<string>, nodeMap: Map<string, GraphNode>): boolean {
+  if (node.stage === 0 || !node.parentId) return true;
+
+  let curr = node;
+  while (curr.parentId) {
+    const parent = nodeMap.get(curr.parentId);
+    if (!parent) return false;
+    if (!expandedIds.has(parent.id)) {
+      return false;
+    }
+    curr = parent;
+    if (curr.stage === 0 || !curr.parentId) break;
+  }
+  return true;
+}
+
 interface RMHeartbeatGraphProps {
   data?: HeartbeatGraphData | null;
   loading?: boolean;
@@ -1077,7 +1135,9 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
   const [activeFilter, setActiveFilter] = useState<HoldingCategory | "all" | "alerts">("all");
   const [colorMode, setColorMode] = useState<"category" | "severity">("category");
   const [searchQuery, setSearchQuery] = useState("");
-  const [holdingsVisibility, setHoldingsVisibility] = useState<"auto" | "always" | "hidden">("auto");
+
+  // Default: Capped at 3 layers for everyone at start
+  const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(() => getInitialExpandedNodeIds(data));
 
   // Transform / Camera
   const transformRef = useRef({ x: 0, y: 0, k: 1 });
@@ -1094,6 +1154,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
   useEffect(() => {
     if (data && data.nodes && data.nodes.length > 0) {
       graphDataRef.current = createInitialGraphData(data);
+      setExpandedNodeIds(getInitialExpandedNodeIds(data));
     }
   }, [data]);
 
@@ -1106,6 +1167,52 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
   const isSuperAdmin = role === "super_admin" || role === "admin";
   const isCio = role === "cio";
   const isFirmView = isSuperAdmin || isCio || (data?.meta?.stageCount ?? 3) > 3;
+
+  // Toggle expansion of an edge node to expand/collapse its child layer
+  const toggleNodeExpansion = useCallback((nodeId: string) => {
+    setExpandedNodeIds((prev) => {
+      const next = new Set(prev);
+      const { nodes } = graphDataRef.current;
+      const isCurrentlyExpanded = next.has(nodeId);
+
+      if (isCurrentlyExpanded) {
+        // Collapse: remove nodeId and all its descendants
+        const removeDescendants = (id: string) => {
+          next.delete(id);
+          nodes.forEach((n) => {
+            if (n.parentId === id) {
+              removeDescendants(n.id);
+            }
+          });
+        };
+        removeDescendants(nodeId);
+      } else {
+        // Expand: add nodeId
+        next.add(nodeId);
+
+        // Blossom outward animation for newly visible children
+        const parent = nodes.find((n) => n.id === nodeId);
+        if (parent) {
+          const children = nodes.filter((n) => n.parentId === nodeId);
+          const cCount = children.length;
+          const parentRad = Math.atan2(parent.y, parent.x) || -Math.PI / 2;
+          const spread = Math.min(Math.PI * 1.1, 0.32 * Math.max(1, cCount));
+
+          children.forEach((c, idx) => {
+            const offset = cCount > 1 ? (idx - (cCount - 1) / 2) * (spread / Math.max(1, cCount - 1)) : 0;
+            const angle = parentRad + offset;
+            const dist = c.kind === "holding" ? 50 : 120;
+
+            c.x = parent.x + Math.cos(angle) * (dist * 0.55);
+            c.y = parent.y + Math.sin(angle) * (dist * 0.55);
+            c.vx = Math.cos(angle) * 3.5;
+            c.vy = Math.sin(angle) * 3.5;
+          });
+        }
+      }
+      return next;
+    });
+  }, []);
 
   // Search match set
   const searchMatchedIds = useMemo(() => {
@@ -1126,60 +1233,37 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
     return set;
   }, [searchQuery]);
 
-  // Holding Level of Detail (LOD) visibility predicate
-  const isHoldingVisible = useCallback(
-    (node: GraphNode): boolean => {
-      if (node.kind !== "holding") return true;
-      if (!isFirmView) return true; // RM 3-stage always displays holdings
-
-      if (holdingsVisibility === "always") return true;
-      if (holdingsVisibility === "hidden") return false;
-
-      // "auto" mode:
-      // 1. Zoomed in
-      if (transformRef.current.k >= 0.85) return true;
-      // 2. Client is hovered or selected
-      if (hoveredNode && (hoveredNode.id === node.parentId || hoveredNode.id === node.id)) return true;
-      if (selectedNode && (selectedNode.id === node.parentId || selectedNode.id === node.id)) return true;
-      // 3. Search matches this holding
-      if (searchMatchedIds && searchMatchedIds.has(node.id)) return true;
-
-      return false;
-    },
-    [isFirmView, holdingsVisibility, hoveredNode, selectedNode, searchMatchedIds]
-  );
-
   // Connected nodes lookup for hover highlight
   const connectedNodeIds = useMemo(() => {
     if (!hoveredNode && !selectedNode) return null;
     const target = (hoveredNode || selectedNode)!;
     const ids = new Set<string>([target.id]);
+    const allNodes = graphDataRef.current.nodes;
+    const nodeMap = new Map<string, GraphNode>();
+    allNodes.forEach((n) => nodeMap.set(n.id, n));
 
     // Add ancestors
     let curr = target;
-    const allNodes = graphDataRef.current.nodes;
     while (curr.parentId) {
       ids.add(curr.parentId);
-      const parent = allNodes.find((n) => n.id === curr.parentId);
+      const parent = nodeMap.get(curr.parentId);
       if (!parent) break;
       curr = parent;
     }
 
-    // Add descendants
+    // Add descendants (only visible ones)
     const addDescendants = (parentId: string) => {
       allNodes.forEach((n) => {
-        if (n.parentId === parentId) {
-          if (n.kind !== "holding" || isHoldingVisible(n)) {
-            ids.add(n.id);
-            addDescendants(n.id);
-          }
+        if (n.parentId === parentId && isNodeVisible(n, expandedNodeIds, nodeMap)) {
+          ids.add(n.id);
+          addDescendants(n.id);
         }
       });
     };
     addDescendants(target.id);
 
     return ids;
-  }, [hoveredNode, selectedNode, isHoldingVisible]);
+  }, [hoveredNode, selectedNode, expandedNodeIds]);
 
   // Center graph in canvas
   const centerGraph = useCallback(() => {
@@ -1249,14 +1333,14 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       }
     });
 
-    // Many-Body Coulomb Repulsion
+    // Many-Body Coulomb Repulsion between currently visible nodes only
     const len = nodes.length;
     for (let i = 0; i < len; i++) {
       const a = nodes[i];
-      if (a.kind === "holding" && !isHoldingVisible(a)) continue;
+      if (!isNodeVisible(a, expandedNodeIds, nodeMap)) continue;
       for (let j = i + 1; j < len; j++) {
         const b = nodes[j];
-        if (b.kind === "holding" && !isHoldingVisible(b)) continue;
+        if (!isNodeVisible(b, expandedNodeIds, nodeMap)) continue;
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const distSq = dx * dx + dy * dy || 1;
@@ -1278,12 +1362,12 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       }
     }
 
-    // Link Spring Attraction
+    // Link Spring Attraction for visible links only
     links.forEach((link) => {
       const a = nodeMap.get(link.source);
       const b = nodeMap.get(link.target);
       if (!a || !b) return;
-      if (b.kind === "holding" && !isHoldingVisible(b)) return;
+      if (!isNodeVisible(a, expandedNodeIds, nodeMap) || !isNodeVisible(b, expandedNodeIds, nodeMap)) return;
 
       const dx = b.x - a.x;
       const dy = b.y - a.y;
@@ -1314,7 +1398,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         n.y += n.vy;
       }
     });
-  }, [isHoldingVisible]);
+  }, [expandedNodeIds]);
 
   // Main Canvas Render Loop
   useEffect(() => {
@@ -1382,8 +1466,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         const source = nodeMap.get(link.source);
         const target = nodeMap.get(link.target);
         if (!source || !target) return;
-        if (target.kind === "holding" && !isHoldingVisible(target)) return;
-        if (source.kind === "holding" && !isHoldingVisible(source)) return;
+        if (!isNodeVisible(source, expandedNodeIds, nodeMap) || !isNodeVisible(target, expandedNodeIds, nodeMap)) return;
 
         const isFilterActive =
           activeFilter === "all" ||
@@ -1437,7 +1520,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
 
       // ── Draw Nodes ──────────────────────────────────────────────────────────
       nodes.forEach((node) => {
-        if (node.kind === "holding" && !isHoldingVisible(node)) return;
+        if (!isNodeVisible(node, expandedNodeIds, nodeMap)) return;
 
         const isFilterActive =
           activeFilter === "all" ||
@@ -1531,6 +1614,44 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           ctx.fillText(initials, node.x, node.y);
         }
 
+        // ── Draw Expand / Collapse Badge for Nodes with Children ──
+        const hasChildren = nodes.some((c) => c.parentId === node.id);
+        if (hasChildren) {
+          const isExpanded = expandedNodeIds.has(node.id);
+          const badgeAngle = -Math.PI / 4; // Top-right corner
+          const bx = node.x + Math.cos(badgeAngle) * (node.radius + 3);
+          const by = node.y + Math.sin(badgeAngle) * (node.radius + 3);
+          const badgeR = 6.5;
+
+          ctx.beginPath();
+          ctx.arc(bx, by, badgeR, 0, Math.PI * 2);
+          ctx.fillStyle = isExpanded ? "rgba(255, 255, 255, 0.25)" : "var(--qc-lime, #DFFF00)";
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(bx, by, badgeR, 0, Math.PI * 2);
+          ctx.strokeStyle = "#210B2C";
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+
+          ctx.fillStyle = isExpanded ? "#FFFFFF" : "#1A0B2E";
+          ctx.font = "bold 9px IBM Plex Sans, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(isExpanded ? "−" : "+", bx, by);
+
+          // If node has hidden children (unexpanded edge node), draw a dashed orbit ring
+          if (!isExpanded) {
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius + 4.5, 0, Math.PI * 2);
+            ctx.strokeStyle = "rgba(223, 255, 0, 0.65)";
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash([2.5, 2.5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+        }
+
         // Labels
         const shouldShowLabel =
           node.kind === "super_admin" ||
@@ -1571,7 +1692,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
     };
-  }, [activeFilter, colorMode, connectedNodeIds, searchMatchedIds, hoveredNode, selectedNode, centerGraph, runPhysicsStep, isHoldingVisible]);
+  }, [activeFilter, colorMode, connectedNodeIds, searchMatchedIds, hoveredNode, selectedNode, centerGraph, runPhysicsStep, expandedNodeIds]);
 
   // Pointer Handlers
   const screenToWorld = useCallback((sx: number, sy: number) => {
@@ -1587,9 +1708,12 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
     (sx: number, sy: number): GraphNode | null => {
       const { x, y } = screenToWorld(sx, sy);
       const { nodes } = graphDataRef.current;
+      const nodeMap = new Map<string, GraphNode>();
+      nodes.forEach((n) => nodeMap.set(n.id, n));
+
       for (let i = nodes.length - 1; i >= 0; i--) {
         const n = nodes[i];
-        if (n.kind === "holding" && !isHoldingVisible(n)) continue;
+        if (!isNodeVisible(n, expandedNodeIds, nodeMap)) continue;
         const dx = n.x - x;
         const dy = n.y - y;
         const hitRadius = Math.max(n.radius, 14);
@@ -1599,7 +1723,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       }
       return null;
     },
-    [screenToWorld, isHoldingVisible]
+    [screenToWorld, expandedNodeIds]
   );
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -1631,21 +1755,36 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
     } else {
       const node = findNodeAt(e.clientX, e.clientY);
       setHoveredNode(node);
+      if (canvasRef.current) {
+        if (node) {
+          const hasChildren = graphDataRef.current.nodes.some((c) => c.parentId === node.id);
+          canvasRef.current.style.cursor = hasChildren ? "pointer" : "grab";
+        } else {
+          canvasRef.current.style.cursor = isPanningRef.current ? "grabbing" : "default";
+        }
+      }
     }
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (isDraggingRef.current && draggedNodeRef.current) {
-      draggedNodeRef.current.fx = null;
-      draggedNodeRef.current.fy = null;
+      const clickedNode = draggedNodeRef.current;
+      clickedNode.fx = null;
+      clickedNode.fy = null;
       isDraggingRef.current = false;
 
       const dist = Math.hypot(
         e.clientX - dragStartPosRef.current.x,
         e.clientY - dragStartPosRef.current.y
       );
-      if (dist < 4) {
-        setSelectedNode((prev) => (prev?.id === draggedNodeRef.current?.id ? null : draggedNodeRef.current));
+      if (dist < 5) {
+        // Toggle expansion if node has children
+        const { nodes } = graphDataRef.current;
+        const hasChildren = nodes.some((n) => n.parentId === clickedNode.id);
+        if (hasChildren) {
+          toggleNodeExpansion(clickedNode.id);
+        }
+        setSelectedNode((prev) => (prev?.id === clickedNode.id ? null : clickedNode));
       }
       draggedNodeRef.current = null;
     }
@@ -1847,32 +1986,31 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
             />
           </div>
 
-          {/* Holdings LOD Toggle for CIO / Admin Firm Views */}
-          {isFirmView && (
+          {/* Layer Expansion Controls (Default: Capped at 3 layers, expandable on click) */}
+          <div className="flex items-center gap-1 bg-white/[0.06] p-0.5 rounded-lg border border-white/[0.1]">
             <button
-              onClick={() =>
-                setHoldingsVisibility((v) => (v === "auto" ? "always" : v === "always" ? "hidden" : "auto"))
-              }
-              title="Toggle holdings display: Auto (reveals on zoom/click), Always, or Hidden"
-              className="px-2 py-1 rounded-md text-[11px] font-medium text-white/80 bg-white/[0.08] border border-white/[0.14] hover:bg-white/[0.14] transition-colors flex items-center gap-1.5 cursor-pointer"
+              onClick={() => setExpandedNodeIds(getInitialExpandedNodeIds(data))}
+              title="Reset graph to default 3 layers"
+              className="px-2 py-0.5 rounded-md text-[11px] font-medium text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors cursor-pointer flex items-center gap-1"
             >
-              <span
-                className={`size-1.5 rounded-full ${
-                  holdingsVisibility === "always"
-                    ? "bg-emerald-400"
-                    : holdingsVisibility === "auto"
-                    ? "bg-[var(--qc-lime)]"
-                    : "bg-white/40"
-                }`}
-              />
-              <span className="hidden sm:inline">
-                Holdings:{" "}
-                <strong className="text-white">
-                  {holdingsVisibility === "auto" ? "Auto (Zoom)" : holdingsVisibility === "always" ? "Visible" : "Hidden"}
-                </strong>
-              </span>
+              <span>3 Layers (Default)</span>
             </button>
-          )}
+            <button
+              onClick={() => {
+                const allWithChildren = new Set<string>();
+                graphDataRef.current.nodes.forEach((n) => {
+                  if (graphDataRef.current.nodes.some((c) => c.parentId === n.id)) {
+                    allWithChildren.add(n.id);
+                  }
+                });
+                setExpandedNodeIds(allWithChildren);
+              }}
+              title="Expand all layers and holdings"
+              className="px-2 py-0.5 rounded-md text-[11px] font-medium text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors cursor-pointer border-l border-white/[0.1] flex items-center gap-1"
+            >
+              <span>Expand All</span>
+            </button>
+          </div>
 
           {/* Color Mode Toggle */}
           <button
@@ -2005,6 +2143,50 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
               )}
             </div>
 
+            {/* Expand / Collapse Action for any node with child layers */}
+            {(() => {
+              const children = graphDataRef.current.nodes.filter((n) => n.parentId === activeInspection.id);
+              if (children.length === 0) return null;
+
+              const isExpanded = expandedNodeIds.has(activeInspection.id);
+              const childType =
+                activeInspection.kind === "super_admin"
+                  ? "CIO Desk"
+                  : activeInspection.kind === "cio"
+                  ? "RMs"
+                  : activeInspection.kind === "rm"
+                  ? "Clients"
+                  : activeInspection.kind === "client"
+                  ? "Holdings"
+                  : "Sub-nodes";
+
+              return (
+                <div className="pt-2 border-t border-white/[0.1] mt-2">
+                  <button
+                    onClick={() => toggleNodeExpansion(activeInspection.id)}
+                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-[11px] font-semibold transition-all cursor-pointer shadow-sm"
+                    style={{
+                      background: isExpanded ? "rgba(255, 255, 255, 0.12)" : "var(--qc-lime, #DFFF00)",
+                      color: isExpanded ? "#FFFFFF" : "#1A0B2E",
+                      border: isExpanded ? "1px solid rgba(255, 255, 255, 0.2)" : "none",
+                    }}
+                  >
+                    {isExpanded ? (
+                      <>
+                        <span>Collapse {childType}</span>
+                        <span className="text-[10px] opacity-75">(-)</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Expand {childType} ({children.length})</span>
+                        <span className="text-[10px] font-bold">(+)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              );
+            })()}
+
             {/* Contextual Action CTA */}
             {activeInspection.kind === "client" && (
               <div className="pt-2 flex flex-col gap-2 border-t border-white/[0.1] mt-2">
@@ -2020,7 +2202,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
                     title="Zoom camera directly into this client's holdings"
                   >
                     <ZoomIn className="size-3" />
-                    <span>Zoom to Holdings</span>
+                    <span>Zoom to Node</span>
                   </button>
                 </div>
                 <div className="flex items-center justify-between pt-1 border-t border-white/[0.06]">
@@ -2100,6 +2282,9 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           <div className="flex items-center gap-1 pl-1.5 border-l border-white/[0.14]">
             <span className="size-2 rounded-full bg-red-400 animate-pulse" />
             <span className="text-red-300 font-medium">Alert</span>
+          </div>
+          <div className="flex items-center gap-1 pl-1.5 border-l border-white/[0.14] text-[9.5px] text-[var(--qc-lime)]">
+            <span>Click (+) to expand</span>
           </div>
         </div>
 

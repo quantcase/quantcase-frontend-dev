@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Avatar, Badge, ActionButton, ColorRail, MonoLabel, LimeCountPip } from "@/components/ds";
 import type { BadgeVariant } from "@/components/ds/Badge";
 import type { ReactNode } from "react";
@@ -99,9 +100,11 @@ export function OpportunitiesPanel() {
             <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Opportunities worth a conversation</MonoLabel>
             <LimeCountPip count={12} />
           </div>
-          <MonoLabel tracking="0.04em" color="var(--qc-ink-3)" style={{ cursor: "pointer" }}>
-            All 12 →
-          </MonoLabel>
+          <Link href="/wealthos/opportunities" className="hover:opacity-75 transition-opacity">
+            <MonoLabel tracking="0.04em" color="var(--qc-ink-3)" style={{ cursor: "pointer" }}>
+              All 12 →
+            </MonoLabel>
+          </Link>
         </div>
 
         {/* Subtitle */}
@@ -175,7 +178,9 @@ export function OpportunitiesPanel() {
                   ~<b style={{ color: "var(--qc-ink)", fontWeight: 500 }}>{opp.valueBold}</b>{" "}
                   {opp.value.replace(opp.valueBold, "").trim()}
                 </MonoLabel>
-                <ActionButton size="sm">Brief →</ActionButton>
+                <Link href={opp.id === "1" ? "/brief/priya-venkat" : "/wealthos/opportunities"}>
+                  <ActionButton size="sm">Brief →</ActionButton>
+                </Link>
               </div>
             </article>
           ))}
@@ -196,7 +201,9 @@ export function OpportunitiesPanel() {
             <b style={{ color: "var(--qc-ink)", fontWeight: 500 }}>9 more</b>{" "}
             opportunities · ₹38.4 Cr total opportunity AUM · 7 coverage gaps · ₹14.2 Cr idle cash across book
           </MonoLabel>
-          <ActionButton noWrap>Open Opportunities →</ActionButton>
+          <Link href="/wealthos/opportunities">
+            <ActionButton noWrap>Open Opportunities →</ActionButton>
+          </Link>
         </div>
       </div>
     </section>

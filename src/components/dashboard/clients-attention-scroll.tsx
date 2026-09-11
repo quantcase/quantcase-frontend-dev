@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Avatar, Badge, ActionButton, ColorRail, LimeCountPip, MonoLabel } from "@/components/ds";
 import type { BadgeVariant } from "@/components/ds/Badge";
+import { useWealthActionModals } from "@/components/wealthos/modals";
 
 export interface AttentionClient {
   id: string;
@@ -120,6 +121,49 @@ const ATTENTION_CLIENTS: AttentionClient[] = [
 
 export function ClientsAttentionScroll() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { openInteractionModal, openReviewModal, openReportModal, openDeployCashModal } = useWealthActionModals();
+
+  const handleCtaClick = (client: AttentionClient) => {
+    if (client.ctaText === "Call Now") {
+      openInteractionModal(
+        {
+          id: client.id,
+          name: client.name,
+          initials: client.initials,
+          aum: client.aum,
+          context: client.reason,
+        },
+        "call"
+      );
+    } else if (client.ctaText === "Rebalance") {
+      openReviewModal(
+        {
+          id: client.id,
+          name: client.name,
+          initials: client.initials,
+          aum: client.aum,
+          drift: client.badge,
+        },
+        "rebalance"
+      );
+    } else if (client.ctaText === "Send Report") {
+      openReportModal(
+        {
+          id: client.id,
+          name: client.name,
+          initials: client.initials,
+        },
+        "thematic_ev"
+      );
+    } else if (client.ctaText === "Deploy Cash") {
+      openDeployCashModal({
+        id: client.id,
+        name: client.name,
+        initials: client.initials,
+        aum: client.aum,
+      });
+    }
+  };
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -206,12 +250,15 @@ export function ClientsAttentionScroll() {
               {/* Top: Avatar, Name, AUM, Badge */}
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2 min-w-0">
+                  <Link
+                    href={`/wealthos/clients/${client.id}`}
+                    className="flex items-center gap-2 min-w-0 hover:opacity-85 transition-opacity"
+                  >
                     <Avatar initials={client.initials} size={28} />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span
-                          className="text-[13px] font-semibold text-[var(--qc-ink)] truncate"
+                          className="text-[13px] font-semibold text-[var(--qc-ink)] truncate hover:underline"
                           style={{ fontFamily: "var(--qc-font-sans)" }}
                         >
                           {client.name}
@@ -224,7 +271,7 @@ export function ClientsAttentionScroll() {
                         {client.aum}
                       </span>
                     </div>
-                  </div>
+                  </Link>
 
                   <Badge variant={client.badgeVariant} style={{ fontSize: 8.5, padding: "1.5px 5px" }}>
                     {client.badge}
@@ -264,6 +311,8 @@ export function ClientsAttentionScroll() {
                   </Link>
                 ) : (
                   <button
+                    type="button"
+                    onClick={() => handleCtaClick(client)}
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
                     style={{
                       background: client.urgency === "critical" ? "var(--qc-down-soft)" : "var(--qc-section)",

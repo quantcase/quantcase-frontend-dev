@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ActionButton, LimeCountPip, MonoLabel } from "@/components/ds";
 import { Clock4 } from "lucide-react";
 
@@ -17,6 +18,7 @@ const ITEMS = [
     title: "Meridian Holdings — portfolio value below threshold",
     desc: <>Triggered drift alert. Held by <b>Rahul Mehta</b> (₹3.2 Cr). Position size 4.2% of book.</>,
     cta: "Review →",
+    href: "/wealthos/clients/rahul-mehta",
   },
   {
     id: "2",
@@ -26,6 +28,7 @@ const ITEMS = [
     title: "Emerging Markets Outlook — new note published",
     desc: <>Relevant to <b>4 clients</b>: Anita Shah, Priya Venkat, Suresh Nair, Kapoor &amp; Sons. Auto-tagged to portfolios.</>,
     cta: "Read →",
+    href: "/ic-report",
   },
   {
     id: "3",
@@ -35,6 +38,7 @@ const ITEMS = [
     title: "Northwind Capital — rebalance executed",
     desc: <>6 holdings rebalanced successfully. Confirmation sent to client. No further action needed.</>,
     cta: "View →",
+    href: "/wealthos/clients/rahul-mehta",
   },
   {
     id: "4",
@@ -44,6 +48,7 @@ const ITEMS = [
     title: "Apex Ventures — redemption request ₹8.2 Cr",
     desc: <>Submitted by client. Pending your approval. Settlement timeline: T+2.</>,
     cta: "Approve →",
+    href: "/wealthos/clients",
   },
   {
     id: "5",
@@ -53,6 +58,7 @@ const ITEMS = [
     title: "Bluechip Growth Fund — Q4 transcript flagged",
     desc: <>Management tone analysis flagged for review. Held by <b>3 clients</b>. Worth reading before next call.</>,
     cta: "Open →",
+    href: "/transcript",
   },
 ];
 
@@ -70,9 +76,11 @@ export function WhatChangedToday() {
             <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">What changed today</MonoLabel>
             <LimeCountPip count={5} />
           </div>
-          <MonoLabel tracking="0.04em" color="var(--qc-ink-3)" style={{ cursor: "pointer" }}>
-            All activity →
-          </MonoLabel>
+          <Link href="/wealthos/clients" className="hover:opacity-75 transition-opacity">
+            <MonoLabel tracking="0.04em" color="var(--qc-ink-3)" style={{ cursor: "pointer" }}>
+              All activity →
+            </MonoLabel>
+          </Link>
         </div>
 
         {/* Content */}
@@ -141,7 +149,9 @@ export function WhatChangedToday() {
                 <div style={{ fontSize: 12.5, color: "var(--qc-ink-2)", lineHeight: 1.5 }}>{item.desc}</div>
               </div>
 
-              <ActionButton noWrap>{item.cta}</ActionButton>
+              <Link href={item.href}>
+                <ActionButton noWrap style={{ cursor: "pointer" }}>{item.cta}</ActionButton>
+              </Link>
             </div>
           ))}
         </div>

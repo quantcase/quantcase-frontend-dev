@@ -13,6 +13,7 @@ import type { TaskItem } from "@/components/dashboard/todays-tasks";
 import { useUser } from "@/components/providers/UserContext";
 import { useWealthDashboardSummary } from "@/hooks/useWealthDashboardSummary";
 import { useHeartbeat } from "@/hooks/useWealthHeartbeat";
+import { useWealthActionModals } from "@/components/wealthos/modals";
 
 const TODAYS_TASKS: TaskItem[] = [
   { id: "1", label: "Send Rahul updated portfolio PDF", status: "pending", meta: "BY 10:00"        },
@@ -46,6 +47,7 @@ export default function DashboardPage() {
   const { displayName } = useUser();
   const { data: summaryData } = useWealthDashboardSummary();
   const { data: heartbeatData, loading: loadingHeartbeat } = useHeartbeat();
+  const { openReviewModal } = useWealthActionModals();
 
   const userFirstName = displayName ? displayName.split(" ")[0] : (heartbeatData?.meta?.center_label?.split(" ")[0] || "Palash");
   const clientCount = heartbeatData?.meta?.total_clients ?? summaryData?.total_clients ?? 18;
@@ -103,6 +105,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <button
+            onClick={() => openReviewModal(null, "quarterly")}
             style={{
               background: "var(--qc-ink)",
               color: "#fff",

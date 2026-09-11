@@ -1,4 +1,7 @@
+"use client";
+
 import { ActionButton, DarkGradientCard, MonoLabel } from "@/components/ds";
+import { useWealthActionModals } from "@/components/wealthos/modals";
 
 const CHIPS = [
   { pip: "var(--qc-down)", label: "Call Rahul" },
@@ -7,6 +10,27 @@ const CHIPS = [
 ];
 
 export function TodaysBriefing() {
+  const { openInteractionModal, openReviewModal, openReportModal } = useWealthActionModals();
+
+  const handleChipClick = (label: string) => {
+    if (label === "Call Rahul") {
+      openInteractionModal(
+        { name: "Rahul Mehta", initials: "RM", aum: "₹3.2 Cr" },
+        "call",
+        "Discuss small-cap volatility and drift +6%"
+      );
+    } else if (label === "EV report → Anita") {
+      openReportModal(
+        { name: "Anita Shah", initials: "AS", aum: "₹5.8 Cr" },
+        "thematic_ev"
+      );
+    } else if (label === "Rebalance Varun") {
+      openReviewModal(
+        { name: "Varun Kapoor", initials: "VK", aum: "₹7.1 Cr", drift: "+9% Overweight" },
+        "rebalance"
+      );
+    }
+  };
   return (
     <DarkGradientCard
       style={{
@@ -59,6 +83,7 @@ export function TodaysBriefing() {
           <ActionButton
             key={label}
             size="sm"
+            onClick={() => handleChipClick(label)}
             style={{
               background: "rgba(255,255,255,0.06)",
               border: "1px solid rgba(255,255,255,0.14)",
@@ -67,6 +92,7 @@ export function TodaysBriefing() {
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
+              cursor: "pointer",
             }}
           >
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: pip, flexShrink: 0, display: "inline-block" }} />

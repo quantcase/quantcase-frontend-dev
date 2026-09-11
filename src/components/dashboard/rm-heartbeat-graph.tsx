@@ -1209,8 +1209,6 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
   const dragStartPosRef = useRef({ x: 0, y: 0 });
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0 });
-  // Stable star field — generated once, reused every frame
-  const starFieldRef = useRef<Array<{ nx: number; ny: number; r: number; depth: number; alpha: number }> | null>(null);
 
   const role = data?.meta?.role;
   const isSuperAdmin = role === "super_admin" || role === "admin";
@@ -1521,163 +1519,37 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       ctx.save();
       ctx.clearRect(0, 0, width, height);
 
-      // ── Background: deep plum base (Today's Brief palette) ──────────────────
-      ctx.fillStyle = NAVY_BG;
+      // ── Background: Smooth gradient matching Today's Brief (.qc-dark-gradient-card) ──
+      // 1. Base linear gradient (165deg: top-left to bottom-right)
+      const baseGrad = ctx.createLinearGradient(0, 0, width * 0.95, height * 1.05);
+      baseGrad.addColorStop(0, "#210B2C");
+      baseGrad.addColorStop(0.42, "#210B2C");
+      baseGrad.addColorStop(1, "#191265");
+      ctx.fillStyle = baseGrad;
       ctx.fillRect(0, 0, width, height);
 
-      // ── Vanishing point — shifts with tilt for true 3D feel ──────────────────
-      const vpX = width  * 0.5 + tiltX * width  * 0.15;
-      const vpY = height * 0.5 + tiltY * height * 0.12;
-
-      // ── Background glow: blue-indigo from VP center outward ──────────────────
-      const coreGlow = ctx.createRadialGradient(vpX, vpY, 0, vpX, vpY, Math.max(width, height) * 0.6);
-      coreGlow.addColorStop(0,    "rgba(35, 22, 120, 0.55)");
-      coreGlow.addColorStop(0.35, "rgba(23, 15,  88, 0.30)");
-      coreGlow.addColorStop(0.70, "rgba( 8,  8,  40, 0.15)");
-      coreGlow.addColorStop(1,    "rgba( 0,  0,   0, 0.00)");
-      ctx.fillStyle = coreGlow;
-      ctx.fillRect(0, 0, width, height);
-
-      // Corner vignettes to frame the space
-      const vigBR = ctx.createRadialGradient(
-        width * (1.05 + tiltX * 0.05), height * (1.05 + tiltY * 0.05), 0,
-        width * (1.05 + tiltX * 0.05), height * (1.05 + tiltY * 0.05), Math.max(width, height) * 0.60
+      // 2. Corner glow: bottom-right indigo/blue radial glow
+      const brGlow = ctx.createRadialGradient(
+        width * (1.0 + tiltX * 0.05), height * (1.0 + tiltY * 0.05), 0,
+        width * (1.0 + tiltX * 0.05), height * (1.0 + tiltY * 0.05), Math.max(width, height) * 0.75
       );
-      vigBR.addColorStop(0,   "rgba(23, 47, 112, 0.65)");
-      vigBR.addColorStop(0.3, "rgba(25, 18, 101, 0.30)");
-      vigBR.addColorStop(0.6, "rgba( 0,  0,   0, 0.00)");
-      ctx.fillStyle = vigBR;
+      brGlow.addColorStop(0, "rgba(23, 47, 112, 0.85)");    // --qc-dark-card-glow-near
+      brGlow.addColorStop(0.25, "rgba(25, 18, 101, 0.65)");  // --qc-dark-card-glow
+      brGlow.addColorStop(0.42, "rgba(8, 8, 40, 0.40)");    // --qc-dark-card-glow-tail
+      brGlow.addColorStop(0.75, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = brGlow;
       ctx.fillRect(0, 0, width, height);
 
-      const vigTL = ctx.createRadialGradient(
+      // 3. Vignette: top-left dark radial shadow
+      const tlVig = ctx.createRadialGradient(
         width * (-0.05 + tiltX * 0.03), height * (-0.05 + tiltY * 0.03), 0,
-        width * (-0.05 + tiltX * 0.03), height * (-0.05 + tiltY * 0.03), Math.max(width, height) * 0.55
+        width * (-0.05 + tiltX * 0.03), height * (-0.05 + tiltY * 0.03), Math.max(width, height) * 0.70
       );
-      vigTL.addColorStop(0,   "rgba(0, 0, 0, 0.60)");
-      vigTL.addColorStop(0.3, "rgba(0, 0, 0, 0.22)");
-      vigTL.addColorStop(0.6, "rgba(0, 0, 0, 0.00)");
-      ctx.fillStyle = vigTL;
+      tlVig.addColorStop(0, "rgba(0, 0, 0, 0.82)");         // --qc-dark-card-vignette
+      tlVig.addColorStop(0.32, "rgba(0, 0, 0, 0.45)");      // --qc-dark-card-vignette-mid
+      tlVig.addColorStop(0.70, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = tlVig;
       ctx.fillRect(0, 0, width, height);
-
-      // ── STAR FIELD: 3 depth layers, generated once ────────────────────────────
-      if (!starFieldRef.current) {
-        const stars: Array<{ nx: number; ny: number; r: number; depth: number; alpha: number }> = [];
-        const rng = (seed: number) => { const x = Math.sin(seed + 1) * 10000; return x - Math.floor(x); };
-        for (let i = 0; i < 140; i++) {
-          stars.push({
-            nx:    rng(i * 3.71),
-            ny:    rng(i * 5.33 + 1),
-            r:     0.4 + rng(i * 2.13) * 1.1,
-            depth: Math.floor(rng(i * 4.07) * 3),    // 0=far  1=mid  2=near
-            alpha: 0.12 + rng(i * 1.91) * 0.42,
-          });
-        }
-        starFieldRef.current = stars;
-      }
-      starFieldRef.current.forEach((s) => {
-        const shift = [3, 8, 16][s.depth];            // near stars parallax more
-        const sx = s.nx * width  + tiltX * shift;
-        const sy = s.ny * height + tiltY * shift;
-        ctx.beginPath();
-        ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(200, 215, 255, ${s.alpha})`;
-        ctx.fill();
-      });
-
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";      // additive blending for grid glow
-
-      // ── LAYER 1: 32 Radial spokes VP → all 4 canvas edges (full 360°) ────────
-      const SPOKE_COUNT = 32;
-      for (let i = 0; i < SPOKE_COUNT; i++) {
-        const angle = (i / SPOKE_COUNT) * Math.PI * 2 - Math.PI / 2;
-        const cos = Math.cos(angle);
-        const sin = Math.sin(angle);
-        // Intersect ray from VP with canvas bounding box
-        let t = Infinity;
-        if (cos >  0.00001) t = Math.min(t, (width  - vpX) / cos);
-        if (cos < -0.00001) t = Math.min(t, (0      - vpX) / cos);
-        if (sin >  0.00001) t = Math.min(t, (height - vpY) / sin);
-        if (sin < -0.00001) t = Math.min(t, (0      - vpY) / sin);
-        const ex = vpX + cos * t;
-        const ey = vpY + sin * t;
-
-        const grd = ctx.createLinearGradient(vpX, vpY, ex, ey);
-        grd.addColorStop(0,    "rgba(110, 140, 255, 0.24)");
-        grd.addColorStop(0.25, "rgba( 90, 120, 230, 0.09)");
-        grd.addColorStop(1,    "rgba( 60,  80, 200, 0.00)");
-        ctx.beginPath();
-        ctx.moveTo(vpX, vpY);
-        ctx.lineTo(ex, ey);
-        ctx.strokeStyle = grd;
-        ctx.lineWidth = 0.65;
-        ctx.stroke();
-      }
-
-      // ── LAYER 2: 4-directional perspective parallels (full 3D box/room) ───────
-      // These are lines that converge toward the VP from all 4 sides simultaneously,
-      // creating the look of being inside an infinite 3D grid room.
-      const P_COUNT = 14;
-      for (let j = 1; j <= P_COUNT; j++) {
-        const tNorm = j / P_COUNT;
-        // Non-linear distribution: lines bunch near VP (depth compression)
-        const pf    = Math.pow(tNorm, 0.55);
-        const alpha = 0.018 + tNorm * 0.068;
-        const lw    = 0.45 + tNorm * 0.25;
-        const col   = `rgba(130, 170, 255, ${alpha})`;
-
-        // ── Horizontal line: above VP ──
-        ctx.beginPath();
-        ctx.moveTo(vpX + (0     - vpX) * pf, vpY + (0       - vpY) * pf);
-        ctx.lineTo(vpX + (width - vpX) * pf, vpY + (0       - vpY) * pf);
-        ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
-
-        // ── Horizontal line: below VP ──
-        ctx.beginPath();
-        ctx.moveTo(vpX + (0     - vpX) * pf, vpY + (height - vpY) * pf);
-        ctx.lineTo(vpX + (width - vpX) * pf, vpY + (height - vpY) * pf);
-        ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
-
-        // ── Vertical line: left of VP ──
-        ctx.beginPath();
-        ctx.moveTo(vpX + (0 - vpX) * pf, vpY + (0      - vpY) * pf);
-        ctx.lineTo(vpX + (0 - vpX) * pf, vpY + (height - vpY) * pf);
-        ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
-
-        // ── Vertical line: right of VP ──
-        ctx.beginPath();
-        ctx.moveTo(vpX + (width - vpX) * pf, vpY + (0      - vpY) * pf);
-        ctx.lineTo(vpX + (width - vpX) * pf, vpY + (height - vpY) * pf);
-        ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
-      }
-
-      // ── LAYER 3: Concentric elliptical depth rings around VP ─────────────────
-      // Simulate looking through orbital shells — rings squish with vertical tilt
-      const RING_COUNT = 10;
-      const squishY = 0.52 + Math.abs(tiltY) * 0.12;
-      for (let r = 1; r <= RING_COUNT; r++) {
-        const norm   = r / RING_COUNT;
-        const radius = Math.max(width, height) * 0.92 * Math.pow(norm, 0.60);
-        const alpha  = (1 - norm) * 0.11 + 0.012;
-        ctx.beginPath();
-        ctx.ellipse(vpX, vpY, radius, radius * squishY, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(110, 155, 255, ${alpha})`;
-        ctx.lineWidth = 0.6;
-        ctx.stroke();
-      }
-
-      // ── LAYER 4: Nebula / core glow at VP (additive, so it blooms brightly) ──
-      const nebulaR = Math.min(width, height) * 0.18;
-      const ng = ctx.createRadialGradient(vpX, vpY, 0, vpX, vpY, nebulaR);
-      ng.addColorStop(0,   "rgba(80, 60, 255, 0.18)");
-      ng.addColorStop(0.5, "rgba(50, 40, 200, 0.06)");
-      ng.addColorStop(1,   "rgba( 0,  0,   0, 0.00)");
-      ctx.fillStyle = ng;
-      ctx.beginPath();
-      ctx.arc(vpX, vpY, nebulaR, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore(); // back to normal composite mode
 
       // Apply camera transform
       ctx.translate(transformRef.current.x, transformRef.current.y);
@@ -1688,10 +1560,67 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
       nodes.forEach((n) => {
         const depth = getNodeVirtualDepth(n);
         n.virtualZ = depth;
-        n.renderX = n.x + tiltX * depth * 20;
-        n.renderY = n.y + tiltY * depth * 15;
+        n.renderX = n.x + tiltX * depth * 22;
+        n.renderY = n.y + tiltY * depth * 16;
         nodeMap.set(n.id, n);
       });
+
+      // ── DYNAMIC NEBULA GLOW: Originates from the element currently being hovered over ──
+      const activeGlowNode = (hoveredNode ? nodeMap.get(hoveredNode.id) : null) ||
+                             (selectedNode ? nodeMap.get(selectedNode.id) : null);
+
+      if (activeGlowNode && isNodeVisible(activeGlowNode, expandedNodeIds, nodeMap)) {
+        const gx = activeGlowNode.renderX ?? activeGlowNode.x;
+        const gy = activeGlowNode.renderY ?? activeGlowNode.y;
+        const colorCfg =
+          colorMode === "category"
+            ? CATEGORY_COLORS[activeGlowNode.category]
+            : SEVERITY_COLORS[activeGlowNode.severity];
+        const glowBase = colorCfg?.main || "#8B5CF6";
+        const isCrit = activeGlowNode.severity === "critical";
+
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+
+        // Broad volumetric atmospheric nebula cloud radiating outwards
+        const nebulaRadius = Math.max(220, activeGlowNode.radius * 9.5);
+        const nebGrad = ctx.createRadialGradient(gx, gy, activeGlowNode.radius * 0.3, gx, gy, nebulaRadius);
+        nebGrad.addColorStop(0, isCrit ? "rgba(239, 68, 68, 0.52)" : `${glowBase}55`);
+        nebGrad.addColorStop(0.24, isCrit ? "rgba(225, 29, 72, 0.32)" : `${glowBase}30`);
+        nebGrad.addColorStop(0.52, "rgba(99, 102, 241, 0.14)"); // soft indigo edge
+        nebGrad.addColorStop(0.80, "rgba(33, 11, 44, 0.05)");
+        nebGrad.addColorStop(1.0, "rgba(0, 0, 0, 0)");
+
+        ctx.fillStyle = nebGrad;
+        ctx.beginPath();
+        ctx.arc(gx, gy, nebulaRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // High-intensity core aura immediately surrounding the node
+        const coreRadius = activeGlowNode.radius * 3.4;
+        const coreGrad = ctx.createRadialGradient(gx, gy, 0, gx, gy, coreRadius);
+        coreGrad.addColorStop(0, "rgba(255, 255, 255, 0.70)");
+        coreGrad.addColorStop(0.35, isCrit ? "rgba(248, 113, 113, 0.50)" : `${glowBase}60`);
+        coreGrad.addColorStop(1.0, "rgba(0, 0, 0, 0)");
+
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.arc(gx, gy, coreRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Expanding resonant holographic pulse ripple around the hovered element
+        const waveProgress = (pulseAngle * 1.6) % (Math.PI * 2);
+        const waveRadius = activeGlowNode.radius + (waveProgress / (Math.PI * 2)) * 80;
+        const waveAlpha = Math.max(0, 0.38 * (1 - waveRadius / (activeGlowNode.radius + 80)));
+        ctx.beginPath();
+        ctx.arc(gx, gy, waveRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = isCrit ? "rgba(248, 113, 113, 0.85)" : glowBase;
+        ctx.globalAlpha = waveAlpha;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        ctx.restore();
+      }
 
       // ── Draw Links ──────────────────────────────────────────────────────────
       links.forEach((link) => {
@@ -1782,24 +1711,39 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         const ny = node.renderY ?? node.y;
         const depth = node.virtualZ ?? getNodeVirtualDepth(node);
 
-        // Ambient holographic depth shadow cast opposite to tilt angle
+        const zScale = tiltEnabled ? Math.max(0.85, Math.min(1.22, 1.0 + (1.2 - depth) * 0.08 + tiltY * (ny / 450) * 0.08)) : 1.0;
+        const r = node.radius * zScale;
+
+        // 3D Depth Floor Shadow & Elevation Drop Stem (height cue in 3D space)
         if (tiltEnabled && depth > 0 && !isDimmed) {
-          const shadowDist = depth * 5.5;
-          const shadowX = nx - tiltX * shadowDist;
-          const shadowY = ny - tiltY * shadowDist + depth * 1.5;
+          const stemLen = 14 + depth * 14;
+          const floorX = nx - tiltX * depth * 10;
+          const floorY = ny + stemLen - tiltY * depth * 8;
+
+          // Ground shadow ellipse
           ctx.beginPath();
-          ctx.arc(shadowX, shadowY, node.radius * 0.95, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
-          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-          ctx.shadowBlur = 7 * depth;
+          ctx.ellipse(floorX, floorY, r * 0.95, r * 0.36, 0, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(0, 0, 0, 0.40)";
+          ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
+          ctx.shadowBlur = 8 * depth;
           ctx.fill();
           ctx.shadowBlur = 0;
+
+          // Subtle 3D elevation drop stem connecting node to its ground shadow
+          ctx.beginPath();
+          ctx.moveTo(nx, ny + r * 0.6);
+          ctx.lineTo(floorX, floorY);
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.09)";
+          ctx.lineWidth = 0.8;
+          ctx.setLineDash([2, 3]);
+          ctx.stroke();
+          ctx.setLineDash([]);
         }
 
         // Outer pulsing aura
         if ((node.severity === "critical" || isHovered || isSelected || isSearchMatched) && !isDimmed) {
           const pulse = Math.sin(pulseAngle + node.x * 0.05) * 4;
-          const auraRadius = node.radius + 6 + (node.severity === "critical" ? pulse : 2);
+          const auraRadius = r + 6 + (node.severity === "critical" ? pulse : 2);
           ctx.beginPath();
           ctx.arc(nx, ny, auraRadius, 0, Math.PI * 2);
           ctx.fillStyle = node.severity === "critical" ? "rgba(248, 113, 113, 0.25)" : glowColor;
@@ -1816,28 +1760,43 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           }
         }
 
-        // Main Node Circle
-        ctx.beginPath();
-        ctx.arc(nx, ny, node.radius, 0, Math.PI * 2);
-        ctx.fillStyle = mainColor;
+        // 3D Sphere Body with volumetric light and specular sheen
+        const sphereGrad = ctx.createRadialGradient(
+          nx - r * 0.32, ny - r * 0.32, r * 0.05,
+          nx, ny, r
+        );
+        sphereGrad.addColorStop(0, "rgba(255, 255, 255, 0.78)"); // specular gleam
+        sphereGrad.addColorStop(0.24, mainColor);
+        sphereGrad.addColorStop(0.82, mainColor);
+        sphereGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.52)");     // 3D sphere falloff
 
+        ctx.beginPath();
+        ctx.arc(nx, ny, r, 0, Math.PI * 2);
+        ctx.fillStyle = sphereGrad;
         if (isHovered || isSelected || isSearchMatched) {
           ctx.shadowColor = mainColor;
-          ctx.shadowBlur = 18;
+          ctx.shadowBlur = 22;
         }
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Node Border / Ring
+        // 3D Glass Specular Rim Arc (top-left edge glint)
+        ctx.beginPath();
+        ctx.arc(nx, ny, Math.max(1, r - 0.6), -Math.PI * 0.75, -Math.PI * 0.15);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.55)";
+        ctx.lineWidth = 1.1;
+        ctx.stroke();
+
+        // Node Outer Ring
         const isCenterNode = node.kind === "super_admin" || node.kind === "cio" || (node.kind === "rm" && !node.parentId);
         ctx.beginPath();
-        ctx.arc(nx, ny, node.radius, 0, Math.PI * 2);
+        ctx.arc(nx, ny, r, 0, Math.PI * 2);
         ctx.strokeStyle =
           isCenterNode
             ? "#FFFFFF"
             : isHovered || isSelected
             ? "#FFFFFF"
-            : "rgba(255, 255, 255, 0.45)";
+            : "rgba(255, 255, 255, 0.40)";
         ctx.lineWidth = node.kind === "super_admin" ? 2.8 : node.kind === "cio" ? 2.4 : node.kind === "rm" ? 2.0 : 1.2;
         ctx.stroke();
 
@@ -1874,8 +1833,8 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
         if (hasChildren) {
           const isExpanded = expandedNodeIds.has(node.id);
           const badgeAngle = -Math.PI / 4; // Top-right corner
-          const bx = nx + Math.cos(badgeAngle) * (node.radius + 3);
-          const by = ny + Math.sin(badgeAngle) * (node.radius + 3);
+          const bx = nx + Math.cos(badgeAngle) * (r + 3);
+          const by = ny + Math.sin(badgeAngle) * (r + 3);
           const badgeR = 6.5;
 
           ctx.beginPath();
@@ -1898,7 +1857,7 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           // If node has hidden children (unexpanded edge node), draw a dashed orbit ring
           if (!isExpanded) {
             ctx.beginPath();
-            ctx.arc(nx, ny, node.radius + 4.5, 0, Math.PI * 2);
+            ctx.arc(nx, ny, r + 4.5, 0, Math.PI * 2);
             ctx.strokeStyle = "rgba(223, 255, 0, 0.65)";
             ctx.lineWidth = 1.2;
             ctx.setLineDash([2.5, 2.5]);
@@ -1925,12 +1884,12 @@ export function RMHeartbeatGraph({ data, loading }: RMHeartbeatGraphProps = {}) 
           ctx.fillStyle = isHovered || isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.9)";
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
-          ctx.fillText(node.label, nx, ny + node.radius + 3.5);
+          ctx.fillText(node.label, nx, ny + r + 3.5);
 
           if (node.sublabel && (node.kind === "super_admin" || node.kind === "cio" || node.kind === "rm" || node.kind === "client" || isHovered || isSelected)) {
             ctx.font = "400 8.5px IBM Plex Mono, monospace";
             ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-            ctx.fillText(node.sublabel, nx, ny + node.radius + fontSize + 4);
+            ctx.fillText(node.sublabel, nx, ny + r + fontSize + 4);
           }
         }
 

@@ -7,6 +7,7 @@ import { useWealthRMList } from "@/hooks/useWealthRM";
 import { SegmentBadge } from "@/components/wealthos/segment-badge";
 import { ClientImportModal } from "@/components/wealthos/client-import-modal";
 import { ExportButton } from "@/components/wealthos/export-button";
+import { useWealthActionModals } from "@/components/wealthos/modals";
 import {
   Search,
   ChevronLeft,
@@ -205,6 +206,7 @@ function RightPanel({
   total: number;
   clients: WealthClient[];
 }) {
+  const { openInteractionModal, openReviewModal } = useWealthActionModals();
   const highRisk = clients.filter((c) => c.churn_probability > 0.6);
   const topRisk = clients.slice().sort((a, b) => b.churn_probability - a.churn_probability)[0];
   const avgChurn = clients.length
@@ -394,6 +396,27 @@ function RightPanel({
           {QUICK_ACTIONS.map(({ icon: Icon, label, desc }) => (
             <button
               key={label}
+              type="button"
+              onClick={() => {
+                const target = topRisk ? {
+                  id: topRisk.id,
+                  rawId: topRisk.id,
+                  name: topRisk.name,
+                  aum: topRisk.aum_cr ? `₹${topRisk.aum_cr} Cr` : undefined,
+                  phone: topRisk.phone || undefined,
+                  email: topRisk.email || undefined,
+                } : null;
+
+                if (label === "Schedule Call") {
+                  openInteractionModal(target, "call");
+                } else if (label === "Send Update") {
+                  openInteractionModal(target, "email");
+                } else if (label === "WhatsApp") {
+                  openInteractionModal(target, "whatsapp");
+                } else if (label === "Set Review") {
+                  openReviewModal(target, "rebalance");
+                }
+              }}
               className="flex flex-col gap-1.5 rounded-[9px] p-3 text-left hover:bg-[rgba(0,0,0,0.03)] transition-colors cursor-pointer"
               style={{ border: "1px solid var(--qc-hair)", background: "var(--qc-section)" }}
             >

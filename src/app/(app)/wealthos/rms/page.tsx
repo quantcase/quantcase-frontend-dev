@@ -6,6 +6,7 @@ import { useWealthRMList, useWealthRM } from "@/hooks/useWealthRM";
 import { useWealthRMAnalytics } from "@/hooks/useWealthAnalytics";
 import { CreateRMForm } from "@/components/wealthos/create-rm-form";
 import { SegmentBadge } from "@/components/wealthos/segment-badge";
+import { useWealthActionModals } from "@/components/wealthos/modals";
 import {
   Users,
   BarChart2,
@@ -347,6 +348,7 @@ function RightPanel({
   analytics: RMAnalytics | null;
   analyticsLoading: boolean;
 }) {
+  const { openInteractionModal, openReviewModal, openReportModal } = useWealthActionModals();
   const totalClients = rms.reduce((s, rm) => s + (rm._count?.clients ?? 0), 0);
   const totalFirmAum = rms.reduce((s, rm) => s + (rm.total_aum_cr ?? 0), 0);
   const avgScore =
@@ -354,6 +356,26 @@ function RightPanel({
       ? rms.reduce((s, rm) => s + (rm.performance_score ?? 0), 0) / rms.length
       : 0;
   const topRM = rms.slice().sort((a, b) => (b.performance_score ?? 0) - (a.performance_score ?? 0))[0];
+
+  const handleAction = (label: string) => {
+    const rmName = selectedRM?.display_name || selectedRM?.name || "RM Team";
+    if (label === "Schedule Call") {
+      openInteractionModal(
+        { name: rmName, phone: selectedRM?.phone || undefined, email: selectedRM?.email || undefined },
+        "call",
+        `Internal operational sync with ${rmName}`
+      );
+    } else if (label === "Send Briefing") {
+      openReportModal({ name: rmName, email: selectedRM?.email || undefined }, "thematic_ev");
+    } else if (label === "Performance Report") {
+      openReportModal({ name: rmName, email: selectedRM?.email || undefined }, "quarterly_performance");
+    } else if (label === "Risk Review") {
+      openReviewModal(
+        { name: rmName, aum: selectedRM?.total_aum_cr ? `₹${selectedRM.total_aum_cr}Cr` : undefined },
+        "risk_mandate"
+      );
+    }
+  };
 
   return (
     <div className="flex flex-col gap-3" style={{ position: "sticky", top: 16 }}>
@@ -606,7 +628,9 @@ function RightPanel({
           ].map(({ icon: Icon, label }) => (
             <button
               key={label}
-              className="flex flex-col items-center gap-1.5 rounded-[10px] transition-all"
+              type="button"
+              onClick={() => handleAction(label)}
+              className="flex flex-col items-center gap-1.5 rounded-[10px] transition-all hover:bg-[var(--qc-card)]"
               style={{
                 padding: "10px 8px",
                 background: "var(--qc-section)",

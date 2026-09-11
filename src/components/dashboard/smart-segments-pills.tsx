@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ActionButton, GoldenCard, MonoLabel } from "@/components/ds";
 import { LayoutGrid } from "lucide-react";
 
@@ -79,6 +80,7 @@ const SEGMENT_CONTENT: Record<string, SegmentContent> = {
       { label: "Risk breach", value: "1 client" },
     ],
     cta: "Review All →",
+    ctaHref: "/wealthos/clients?segment=UHNI",
   },
   "2": {
     icon: <AlertIcon />,
@@ -90,6 +92,7 @@ const SEGMENT_CONTENT: Record<string, SegmentContent> = {
       { label: "Rebalance due", value: "3 today" },
     ],
     cta: "Rebalance →",
+    ctaHref: "/wealthos/clients",
   },
   "3": {
     icon: <TrendUpIcon />,
@@ -101,6 +104,7 @@ const SEGMENT_CONTENT: Record<string, SegmentContent> = {
       { label: "Meetings due", value: "2 this week" },
     ],
     cta: "Open Segment →",
+    ctaHref: "/wealthos/clients?segment=UHNI",
   },
   "4": {
     icon: <LeafIcon />,
@@ -112,6 +116,7 @@ const SEGMENT_CONTENT: Record<string, SegmentContent> = {
       { label: "Last pitched", value: "18 days ago" },
     ],
     cta: "View Opportunities →",
+    ctaHref: "/wealthos/opportunities",
   },
   "5": {
     icon: <ShieldIcon />,
@@ -123,6 +128,7 @@ const SEGMENT_CONTENT: Record<string, SegmentContent> = {
       { label: "Suitable products", value: "4 options" },
     ],
     cta: "Suggest Products →",
+    ctaHref: "/wealthos/clients?segment=HNI",
   },
   "6": {
     icon: <ClockIcon />,
@@ -134,17 +140,19 @@ const SEGMENT_CONTENT: Record<string, SegmentContent> = {
       { label: "Open tasks", value: "0" },
     ],
     cta: "Schedule Re-engagement →",
+    ctaHref: "/wealthos/clients",
   },
   "7": {
     icon: <FileIcon />,
     title: "KYC Expiring Soon",
-    subtitle: "1 client · KYC expires in 8 days · Action required to avoid lock",
+    subtitle: "1 client needs KYC re-verification within 14 days to prevent freeze",
     stats: [
-      { label: "Expires in", value: "8 days" },
-      { label: "AUM at risk", value: "₹4.3Cr" },
-      { label: "Status", value: "Pending docs" },
+      { label: "Days left", value: "11 days" },
+      { label: "Document", value: "CKYC ref" },
+      { label: "Client AUM", value: "₹2.4Cr" },
     ],
-    cta: "Send KYC Reminder →",
+    cta: "Send Reminder →",
+    ctaHref: "/wealthos/clients",
   },
 };
 
@@ -186,9 +194,11 @@ export function SmartSegmentsPills() {
             <LayoutGrid className="size-3.5" style={{ color: "var(--qc-ink-2)" }} />
             <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">Smart segments</MonoLabel>
           </div>
-          <MonoLabel tracking="0.04em" color="var(--qc-ink-3)" style={{ cursor: "pointer" }}>
-            Create segment →
-          </MonoLabel>
+          <Link href="/wealthos/clients" className="hover:opacity-75 transition-opacity">
+            <MonoLabel tracking="0.04em" color="var(--qc-ink-3)" style={{ cursor: "pointer" }}>
+              Create segment →
+            </MonoLabel>
+          </Link>
         </div>
 
         {/* Pills */}
@@ -259,17 +269,20 @@ export function SmartSegmentsPills() {
             </div>
           }
           actions={
-            <ActionButton
-              noWrap
-              style={{
-                background: "rgba(255,255,255,0.5)",
-                border: "1px solid rgba(255,255,255,0.7)",
-                color: "var(--qc-lime-ink)",
-                borderRadius: 999,
-              }}
-            >
-              {seg.cta}
-            </ActionButton>
+            <Link href={seg.ctaHref || "/wealthos/clients"}>
+              <ActionButton
+                noWrap
+                style={{
+                  background: "rgba(255,255,255,0.5)",
+                  border: "1px solid rgba(255,255,255,0.7)",
+                  color: "var(--qc-lime-ink)",
+                  borderRadius: 999,
+                  cursor: "pointer",
+                }}
+              >
+                {seg.cta}
+              </ActionButton>
+            </Link>
           }
           style={{ padding: "14px 18px" }}
         />

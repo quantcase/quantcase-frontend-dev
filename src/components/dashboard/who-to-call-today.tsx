@@ -1,10 +1,15 @@
+"use client";
+
+import Link from "next/link";
 import { Avatar, Badge, ActionButton, ColorRail, LimeCountPip, MonoLabel } from "@/components/ds";
 import type { BadgeVariant } from "@/components/ds/Badge";
 import { PhoneCall } from "lucide-react";
+import { useWealthActionModals } from "@/components/wealthos/modals";
 
 const CLIENTS = [
   {
     id: "1",
+    clientId: "rahul-mehta",
     initials: "RM",
     name: "Rahul Mehta",
     badge: "CRITICAL",
@@ -20,6 +25,7 @@ const CLIENTS = [
   },
   {
     id: "2",
+    clientId: "varun-kapoor",
     initials: "VK",
     name: "Varun Kapoor",
     badge: "HIGH RISK",
@@ -35,6 +41,7 @@ const CLIENTS = [
   },
   {
     id: "3",
+    clientId: "anita-shah",
     initials: "AS",
     name: "Anita Shah",
     badge: "PENDING PROMISE",
@@ -51,6 +58,28 @@ const CLIENTS = [
 ];
 
 export function WhoToCallToday() {
+  const { openInteractionModal, openReviewModal, openReportModal } = useWealthActionModals();
+
+  const handleCta = (c: typeof CLIENTS[0]) => {
+    if (c.cta === "Call Now") {
+      openInteractionModal(
+        { id: c.clientId, name: c.name, initials: c.initials, aum: c.aum },
+        "call",
+        "Discuss small-cap volatility and drift +6%"
+      );
+    } else if (c.cta === "Rebalance") {
+      openReviewModal(
+        { id: c.clientId, name: c.name, initials: c.initials, aum: c.aum, drift: "+9% Mid-cap Overweight" },
+        "rebalance"
+      );
+    } else if (c.cta === "Send Report") {
+      openReportModal(
+        { id: c.clientId, name: c.name, initials: c.initials },
+        "thematic_ev"
+      );
+    }
+  };
+
   return (
     <div
       className="rounded-[10px] p-2 flex flex-col h-full w-full min-w-0"
@@ -63,18 +92,19 @@ export function WhoToCallToday() {
           <MonoLabel size={11} tracking="0.16em" color="var(--qc-ink)">WHO TO CALL TODAY</MonoLabel>
           <LimeCountPip count={3} />
         </div>
-        <span
+        <Link
+          href="/wealthos/clients"
           style={{
             fontFamily: "var(--qc-font-mono)",
             fontSize: 11,
             letterSpacing: "0.04em",
             color: "var(--qc-ink-3)",
-            cursor: "pointer",
             whiteSpace: "nowrap",
           }}
+          className="hover:text-[var(--qc-ink)] transition-colors cursor-pointer"
         >
           ALL CLIENTS →
-        </span>
+        </Link>
       </div>
 
       {/* Content — white inner card matching dashboard aesthetic */}
@@ -94,12 +124,23 @@ export function WhoToCallToday() {
             className="flex-1"
           >
             <ColorRail color={c.railColor} opacity={c.railOpacity} />
-            <Avatar initials={c.initials} size={36} />
+            <Link
+              href={`/wealthos/clients/${c.clientId}`}
+              className="hover:opacity-80 transition-opacity"
+            >
+              <Avatar initials={c.initials} size={36} />
+            </Link>
 
             {/* Body */}
             <div style={{ minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 3 }}>
-                <span style={{ fontSize: 13.5, fontWeight: 500, whiteSpace: "nowrap", color: "var(--qc-ink)" }}>{c.name}</span>
+                <Link
+                  href={`/wealthos/clients/${c.clientId}`}
+                  style={{ fontSize: 13.5, fontWeight: 500, whiteSpace: "nowrap", color: "var(--qc-ink)" }}
+                  className="hover:underline"
+                >
+                  {c.name}
+                </Link>
                 <Badge variant={c.badgeVariant}>{c.badge}</Badge>
               </div>
               <div style={{ fontSize: 12, color: "var(--qc-ink-2)", lineHeight: 1.45 }}>{c.why}</div>
@@ -112,10 +153,13 @@ export function WhoToCallToday() {
               <div style={{ fontSize: 10.5, color: c.retNeg ? "var(--qc-down)" : "var(--qc-up)" }}>{c.ret}</div>
             </div>
 
-            <ActionButton noWrap>{c.cta}</ActionButton>
+            <ActionButton noWrap onClick={() => handleCta(c)}>
+              {c.cta}
+            </ActionButton>
           </div>
         ))}
       </div>
     </div>
   );
 }
+

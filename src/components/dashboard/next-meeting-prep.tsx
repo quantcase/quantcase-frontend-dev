@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Avatar, ActionButton, MonoLabel, GoldenCard } from "@/components/ds";
 
 const AGENDA = [
@@ -21,7 +22,7 @@ const RAIL = (
 );
 
 const ENTITY = (
-  <>
+  <Link href="/wealthos/clients/priya-venkat" className="flex items-center gap-3 hover:opacity-85 transition-opacity">
     <Avatar initials="PV" size={32} />
     <div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8, fontSize: 14, fontWeight: 500, color: "var(--qc-lime-ink)" }}>
@@ -32,7 +33,7 @@ const ENTITY = (
         Client since Mar 2022 · last met 11 Apr
       </div>
     </div>
-  </>
+  </Link>
 );
 
 const CONTENT = (
@@ -47,14 +48,18 @@ const CONTENT = (
 );
 
 const ACTIONS = (
-  <>
-    <ActionButton style={{ borderRadius: 10, textAlign: "center", background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.7)", color: "var(--qc-lime-ink)" }}>
-      Brief me
-    </ActionButton>
-    <ActionButton variant="primary" style={{ borderRadius: 10, textAlign: "center" }}>
-      Open file
-    </ActionButton>
-  </>
+  <div className="flex items-center gap-2">
+    <Link href="/brief/priya-venkat">
+      <ActionButton style={{ borderRadius: 10, textAlign: "center", background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.7)", color: "var(--qc-lime-ink)", cursor: "pointer" }}>
+        Brief me
+      </ActionButton>
+    </Link>
+    <Link href="/wealthos/clients/priya-venkat">
+      <ActionButton variant="primary" style={{ borderRadius: 10, textAlign: "center", cursor: "pointer" }}>
+        Open file
+      </ActionButton>
+    </Link>
+  </div>
 );
 
 export function NextMeetingPrep() {

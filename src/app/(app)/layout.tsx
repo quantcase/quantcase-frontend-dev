@@ -4,6 +4,7 @@ import { TopBar } from "@/components/molecules/top-bar";
 import { MainContentWrapper } from "@/components/molecules/main-content-wrapper";
 import { AuthGuard } from "@/components/providers/AuthGuard";
 import { PaywallProvider } from "@/components/providers/PaywallProvider";
+import { WealthActionModalsProvider } from "@/components/wealthos/modals";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +13,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <AppSidebar />
         <TopBar />
         <PaywallProvider>
-          <MainContentWrapper>{children}</MainContentWrapper>
+          <WealthActionModalsProvider>
+            <MainContentWrapper>{children}</MainContentWrapper>
+          </WealthActionModalsProvider>
         </PaywallProvider>
       </AuthGuard>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />

@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MonoLabel, LimeCountPip } from "@/components/ds";
 import { CheckSquare, Plus, Check } from "lucide-react";
+import { useWealthTasks } from "@/hooks/useWealthTasks";
+import { authFetch, authHeaders } from "@/lib/api";
+import { BACKEND_URL } from "@/lib/constants";
 
 type TaskStatus = "pending" | "done" | "overdue";
 
@@ -29,8 +32,27 @@ export function TodaysTasks({ tasks: initialTasks, style, className = "" }: Toda
   const [tasks, setTasks] = useState<TaskItem[]>(initialTasks);
   const [newDraft, setNewDraft] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const { data: dbTasks, refetch } = useWealthTasks({ size: 10 });
 
-  function toggleTask(id: string) {
+  useEffect(() => {
+    if (dbTasks?.items && dbTasks.items.length > 0) {
+      setTasks(
+        dbTasks.items.map((t) => ({
+          id: t.id,
+          label: t.title,
+          status: (t.status === "done" ? "done" : t.status === "overdue" ? "overdue" : "pending") as TaskStatus,
+          meta: t.due_date
+            ? new Date(t.due_date).toLocaleDateString("en-IN", { month: "short", day: "numeric" }).toUpperCase()
+            : "TODAY",
+        }))
+      );
+    }
+  }, [dbTasks]);
+
+  async function toggleTask(id: string) {
+    const current = tasks.find((t) => t.id === id);
+    const newStatus = current?.status === "done" ? "open" : "done";
+
     setTasks((prev) =>
       prev.map((t) => {
         if (t.id !== id) return t;
@@ -47,20 +69,46 @@ export function TodaysTasks({ tasks: initialTasks, style, className = "" }: Toda
         };
       })
     );
+
+    if (id && /^[0-9a-fA-F-]{36}$/.test(id)) {
+      try {
+        await authFetch(`${BACKEND_URL}/api/v1/wealthos/tasks/${id}`, {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify({ status: newStatus }),
+        });
+      } catch {}
+    }
   }
 
-  function handleAddTask(e: React.FormEvent) {
+  async function handleAddTask(e: React.FormEvent) {
     e.preventDefault();
     if (!newDraft.trim()) return;
+    const title = newDraft.trim();
     const newTask: TaskItem = {
       id: String(Date.now()),
-      label: newDraft.trim(),
+      label: title,
       status: "pending",
       meta: "NEW",
     };
     setTasks((prev) => [newTask, ...prev]);
     setNewDraft("");
     setIsAdding(false);
+
+    try {
+      const res = await authFetch(`${BACKEND_URL}/api/v1/wealthos/tasks`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({
+          title,
+          task_type: "call",
+          due_date: new Date().toISOString(),
+        }),
+      });
+      if (res.ok) {
+        refetch();
+      }
+    } catch {}
   }
 
   const pendingCount = tasks.filter((t) => t.status !== "done").length;

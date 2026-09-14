@@ -423,7 +423,11 @@ function InsightTabContent({ type }: { type: InsightType }) {
   const opportunityInsight = getInsight("opportunity");
   const injectedLenses =
     type === "deal"
-      ? (opportunityInsight?.lenses ?? []).filter((l) => l.slug === INDUSTRY_LENS_SLUG || l.slug === "industry")
+      ? (opportunityInsight?.lenses ?? [])
+          .filter((l) => l.slug === INDUSTRY_LENS_SLUG || l.slug === "industry")
+          // Short corner/tile label on Deal radar ("Industry"), matching the
+          // Earnings Forecast / Earnings Quality naming on the triangle.
+          .map((l) => ({ ...l, name: "Industry" }))
       : [];
 
   const companyInfo = screenerData?.company

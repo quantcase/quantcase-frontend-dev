@@ -78,6 +78,34 @@ interface RadarPoint {
   position: "top" | "right" | "bottom" | "left";
 }
 
+const normSlug = (s: string) => s.toLowerCase().replace(/_/g, "-");
+
+// Slug aliases so radar vertex lookup still works after backend renames / merges
+// (e.g. eps-engine → earnings-forecast, pe-rerating → earning-quality).
+const RADAR_SLUG_ALIASES: Record<string, string[]> = {
+  "earnings-forecast": ["eps-engine", "earnings_forecast"],
+  "eps-engine": ["earnings-forecast", "earnings_forecast"],
+  "earning-quality": ["pe-rerating-potential", "earnings-quality", "earnings_quality"],
+  "pe-rerating-potential": ["earning-quality", "earnings-quality", "earnings_quality"],
+  "industry-analysis": ["industry"],
+  "industry": ["industry-analysis"],
+};
+
+function findRadarLens(lenses: InsightLens[], slug: string): InsightLens | undefined {
+  const target = normSlug(slug);
+  const aliases = new Set([target, ...(RADAR_SLUG_ALIASES[target] ?? []).map(normSlug)]);
+  return lenses.find((l) => aliases.has(normSlug(l.slug)));
+}
+
+function toRadarPoint(lens: InsightLens, position: RadarPoint["position"]): RadarPoint {
+  return {
+    subject: lens.name.toUpperCase(),
+    pct: lens.max_score > 0 ? Math.round((lens.score / lens.max_score) * 100) : 0,
+    lens,
+    position,
+  };
+}
+
 // Canonical radar positions for each factor page so the radar diamond vertices
 // and labels always follow the specified arrangement:
 // e.g. Management: Guidance Credibility (left), Disclosure Honesty (top),
@@ -98,38 +126,54 @@ export const FACTOR_RADAR_POSITIONS: Record<
     bottom: "financial-strength",
     left: "industry-analysis",
   },
+};
+
+// Deal uses a 3-axis triangle (not a 4-axis diamond): Earnings Quality (top),
+// Industry (bottom-right), Earnings Forecast (bottom-left). Industry is often a
+// frontend clone from Opportunity onto the Deal scorecard.
+export const FACTOR_RADAR_TRIANGLES: Record<
+  string,
+  { top: string; right: string; left: string }
+> = {
   deal: {
-    top: "pe-rerating-potential",
-    right: "target-price-matrix",
-    bottom: "earning-quality",
-    left: "eps-engine",
+    top: "earning-quality",
+    right: "industry-analysis",
+    left: "earnings-forecast",
   },
 };
 
 export function getOrderedRadarData(type: string, lenses: InsightLens[]): RadarPoint[] {
-  const normSlug = (s: string) => s.toLowerCase().replace(/_/g, "-");
-  const cfg = FACTOR_RADAR_POSITIONS[type.toLowerCase()];
+  const typeKey = type.toLowerCase();
+  const tri = FACTOR_RADAR_TRIANGLES[typeKey];
+
+  // Prefer an explicit triangle layout when all three vertices resolve — even if
+  // extra lenses are present on the scorecard tiles (e.g. target-price-matrix).
+  if (tri) {
+    const topLens = findRadarLens(lenses, tri.top);
+    const rightLens = findRadarLens(lenses, tri.right);
+    const leftLens = findRadarLens(lenses, tri.left);
+    if (topLens && rightLens && leftLens) {
+      return [
+        toRadarPoint(topLens, "top"),
+        toRadarPoint(rightLens, "right"),
+        toRadarPoint(leftLens, "left"),
+      ];
+    }
+  }
+
+  const cfg = FACTOR_RADAR_POSITIONS[typeKey];
 
   if (cfg && lenses.length === 4) {
-    const findLens = (slug: string) =>
-      lenses.find((l) => normSlug(l.slug) === normSlug(slug));
-    const topLens = findLens(cfg.top) ?? lenses[1];
-    const rightLens = findLens(cfg.right) ?? lenses[3];
-    const bottomLens = findLens(cfg.bottom) ?? lenses[2];
-    const leftLens = findLens(cfg.left) ?? lenses[0];
-
-    const toPoint = (lens: InsightLens, position: "top" | "right" | "bottom" | "left"): RadarPoint => ({
-      subject: lens.name.toUpperCase(),
-      pct: lens.max_score > 0 ? Math.round((lens.score / lens.max_score) * 100) : 0,
-      lens,
-      position,
-    });
+    const topLens = findRadarLens(lenses, cfg.top) ?? lenses[1];
+    const rightLens = findRadarLens(lenses, cfg.right) ?? lenses[3];
+    const bottomLens = findRadarLens(lenses, cfg.bottom) ?? lenses[2];
+    const leftLens = findRadarLens(lenses, cfg.left) ?? lenses[0];
 
     return [
-      toPoint(topLens, "top"),
-      toPoint(rightLens, "right"),
-      toPoint(bottomLens, "bottom"),
-      toPoint(leftLens, "left"),
+      toRadarPoint(topLens, "top"),
+      toRadarPoint(rightLens, "right"),
+      toRadarPoint(bottomLens, "bottom"),
+      toRadarPoint(leftLens, "left"),
     ];
   }
 
@@ -138,17 +182,20 @@ export function getOrderedRadarData(type: string, lenses: InsightLens[]): RadarP
   // [0] is top-left, [1] is top-right, [2] is bottom-left, [3] is bottom-right.
   // Left: [0], Top: [1], Right: [3], Bottom: [2].
   if (lenses.length === 4) {
-    const toPoint = (lens: InsightLens, position: "top" | "right" | "bottom" | "left"): RadarPoint => ({
-      subject: lens.name.toUpperCase(),
-      pct: lens.max_score > 0 ? Math.round((lens.score / lens.max_score) * 100) : 0,
-      lens,
-      position,
-    });
     return [
-      toPoint(lenses[1], "top"),
-      toPoint(lenses[3], "right"),
-      toPoint(lenses[2], "bottom"),
-      toPoint(lenses[0], "left"),
+      toRadarPoint(lenses[1], "top"),
+      toRadarPoint(lenses[3], "right"),
+      toRadarPoint(lenses[2], "bottom"),
+      toRadarPoint(lenses[0], "left"),
+    ];
+  }
+
+  // 3-lens fallback → triangle: top, bottom-right, bottom-left
+  if (lenses.length === 3) {
+    return [
+      toRadarPoint(lenses[0], "top"),
+      toRadarPoint(lenses[1], "right"),
+      toRadarPoint(lenses[2], "left"),
     ];
   }
 
@@ -193,7 +240,8 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
   const HEIGHT = 320;
   const cx = WIDTH / 2;
   const cy = HEIGHT / 2;
-  const maxR = 105;
+  // Larger plot — mobile uses icon-only corner labels, so more of the viewBox can be the radar.
+  const maxR = 118;
   const n = data.length;
   // 4 rings: 25%, 50%, 75%, 100% — marks the threshold zones visually
   const rings = [0.25, 0.5, 0.75, 1];
@@ -220,16 +268,19 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
   const fillTier = TIER_COLORS[scoreToTier(overallScore)];
   const label = scoreLabel(insightType);
 
-  // 4-axis reference points and icons
+  // Vertex reference points and icons.
+  // Diamond (n=4): [top, right, bottom, left]
+  // Triangle (n=3): [top, bottom-right, bottom-left]
+  const isTriangle = n === 3;
   const topPoint = data[0];
   const rightPoint = data[1];
-  const bottomPoint = data[2];
-  const leftPoint = data[3];
+  const bottomPoint = isTriangle ? undefined : data[2];
+  const leftPoint = isTriangle ? data[2] : data[3];
 
   const topPt = dataPoints[0];
   const rightPt = dataPoints[1];
-  const bottomPt = dataPoints[2];
-  const leftPt = dataPoints[3];
+  const bottomPt = isTriangle ? undefined : dataPoints[2];
+  const leftPt = isTriangle ? dataPoints[2] : dataPoints[3];
 
   const isTopHovered = hoveredSlug === topPoint?.lens.slug;
   const isRightHovered = hoveredSlug === rightPoint?.lens.slug;
@@ -248,9 +299,17 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
 
   const leftWords = leftPoint ? leftPoint.lens.name.toUpperCase().split(" ") : [];
   const rightWords = rightPoint ? rightPoint.lens.name.toUpperCase().split(" ") : [];
+  // Triangle side vertices sit lower — pin labels near those corners.
+  const sideLabelTop = isTriangle ? "68%" : "50%";
+  const sideLabelTransform = isTriangle ? "translateY(-30%)" : "translateY(-50%)";
+
+  const iconBoxClass =
+    "w-8 h-8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150";
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+      {/* Nearly full-bleed on mobile — icon-only corner labels free space for a larger plot. */}
+      <div className="w-[86%] sm:w-full h-full mx-auto">
       <svg width="100%" height="100%" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} style={{ overflow: "visible" }}>
         <defs>
           {/* Per-segment gradients from center (transparent) → vertex color */}
@@ -430,17 +489,19 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
           </text>
         </motion.g>
       </svg>
+      </div>
 
-      {/* ── Lens labels with icons (dedicated 4-axis positioning) ── */}
-      {n === 4 && (
+      {/* ── Lens labels: icons only on mobile, icon + text from sm up ── */}
+      {(n === 3 || n === 4) && (
         <>
           {/* Top Label */}
           {topPoint && (
             <div
               className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              title={topPoint.lens.name}
               style={{
                 position: "absolute",
-                top: 8,
+                top: 4,
                 left: "50%",
                 transform: "translateX(-50%)",
                 zIndex: 10,
@@ -450,7 +511,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
               onClick={() => onLensClick?.(topPoint.lens.slug)}
             >
               <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150"
+                className={iconBoxClass}
                 style={{
                   background: isTopHovered ? `${topTier.hex}18` : "rgba(18,18,18,0.04)",
                   border: `1.5px solid ${isTopHovered ? topTier.hex : "rgba(18,18,18,0.10)"}`,
@@ -458,9 +519,10 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
                   boxShadow: isTopHovered ? `0 0 10px ${topTier.hex}33` : undefined,
                 }}
               >
-                {TopIcon && <TopIcon size={14} strokeWidth={1.8} />}
+                {TopIcon && <TopIcon size={15} strokeWidth={1.8} />}
               </div>
               <span
+                className="hidden sm:inline"
                 style={{
                   fontSize: "11px",
                   fontWeight: isTopHovered ? 700 : 600,
@@ -480,11 +542,12 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
           {rightPoint && (
             <div
               className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              title={rightPoint.lens.name}
               style={{
                 position: "absolute",
-                right: 12,
-                top: "50%",
-                transform: "translateY(-50%)",
+                right: 2,
+                top: sideLabelTop,
+                transform: sideLabelTransform,
                 zIndex: 10,
               }}
               onMouseEnter={() => onHoverVertex(rightPoint.lens.slug, rightPt.x / WIDTH, rightPt.y / HEIGHT)}
@@ -492,7 +555,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
               onClick={() => onLensClick?.(rightPoint.lens.slug)}
             >
               <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150"
+                className={iconBoxClass}
                 style={{
                   background: isRightHovered ? `${rightTier.hex}18` : "rgba(18,18,18,0.04)",
                   border: `1.5px solid ${isRightHovered ? rightTier.hex : "rgba(18,18,18,0.10)"}`,
@@ -500,9 +563,9 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
                   boxShadow: isRightHovered ? `0 0 10px ${rightTier.hex}33` : undefined,
                 }}
               >
-                {RightIcon && <RightIcon size={14} strokeWidth={1.8} />}
+                {RightIcon && <RightIcon size={15} strokeWidth={1.8} />}
               </div>
-              <div className="flex flex-col items-start text-left">
+              <div className="hidden sm:flex flex-col items-start text-left">
                 {rightWords.map((word, wi) => (
                   <span
                     key={wi}
@@ -523,13 +586,14 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
             </div>
           )}
 
-          {/* Bottom Label */}
-          {bottomPoint && (
+          {/* Bottom Label — diamond only */}
+          {n === 4 && bottomPoint && bottomPt && (
             <div
               className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              title={bottomPoint.lens.name}
               style={{
                 position: "absolute",
-                bottom: 8,
+                bottom: 4,
                 left: "50%",
                 transform: "translateX(-50%)",
                 zIndex: 10,
@@ -539,7 +603,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
               onClick={() => onLensClick?.(bottomPoint.lens.slug)}
             >
               <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150"
+                className={iconBoxClass}
                 style={{
                   background: isBottomHovered ? `${bottomTier.hex}18` : "rgba(18,18,18,0.04)",
                   border: `1.5px solid ${isBottomHovered ? bottomTier.hex : "rgba(18,18,18,0.10)"}`,
@@ -547,9 +611,10 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
                   boxShadow: isBottomHovered ? `0 0 10px ${bottomTier.hex}33` : undefined,
                 }}
               >
-                {BottomIcon && <BottomIcon size={14} strokeWidth={1.8} />}
+                {BottomIcon && <BottomIcon size={15} strokeWidth={1.8} />}
               </div>
               <span
+                className="hidden sm:inline"
                 style={{
                   fontSize: "11px",
                   fontWeight: isBottomHovered ? 700 : 600,
@@ -566,21 +631,22 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
           )}
 
           {/* Left Label */}
-          {leftPoint && (
+          {leftPoint && leftPt && (
             <div
               className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              title={leftPoint.lens.name}
               style={{
                 position: "absolute",
-                left: 12,
-                top: "50%",
-                transform: "translateY(-50%)",
+                left: 2,
+                top: sideLabelTop,
+                transform: sideLabelTransform,
                 zIndex: 10,
               }}
               onMouseEnter={() => onHoverVertex(leftPoint.lens.slug, leftPt.x / WIDTH, leftPt.y / HEIGHT)}
               onMouseLeave={() => onHoverVertex(null)}
               onClick={() => onLensClick?.(leftPoint.lens.slug)}
             >
-              <div className="flex flex-col items-end text-right">
+              <div className="hidden sm:flex flex-col items-end text-right">
                 {leftWords.map((word, wi) => (
                   <span
                     key={wi}
@@ -599,7 +665,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
                 ))}
               </div>
               <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150"
+                className={iconBoxClass}
                 style={{
                   background: isLeftHovered ? `${leftTier.hex}18` : "rgba(18,18,18,0.04)",
                   border: `1.5px solid ${isLeftHovered ? leftTier.hex : "rgba(18,18,18,0.10)"}`,
@@ -607,7 +673,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
                   boxShadow: isLeftHovered ? `0 0 10px ${leftTier.hex}33` : undefined,
                 }}
               >
-                {LeftIcon && <LeftIcon size={14} strokeWidth={1.8} />}
+                {LeftIcon && <LeftIcon size={15} strokeWidth={1.8} />}
               </div>
             </div>
           )}
@@ -724,7 +790,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
   const vertexMap: Record<string, { pctX: number; pctY: number }> = {};
   radarData.forEach((d, i) => {
     const angle = (2 * Math.PI * i) / radarData.length;
-    const r = Math.max((d.pct / 100) * 105, 2);
+    const r = Math.max((d.pct / 100) * 118, 2);
     const pt = polarToCartesian(240, 160, r, angle);
     vertexMap[d.lens.slug] = { pctX: pt.x / 480, pctY: pt.y / 320 };
     vertexMap[d.lens.slug.replace(/_/g, "-")] = { pctX: pt.x / 480, pctY: pt.y / 320 };
@@ -828,10 +894,10 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
           }}
         >
           {/* Top: radar centered — expanded sizing to occupy much more space */}
-          <div style={{ flex: 1, padding: "16px 12px 12px", display: "flex", justifyContent: "center", alignItems: "center", minHeight: 340 }}>
+          <div className="min-h-[300px] sm:min-h-[340px] px-2 pt-3 pb-2 sm:p-4 sm:pb-3" style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
 
             {/* Radar — wide container occupying the card space */}
-            <div style={{ flexShrink: 0, width: "100%", maxWidth: 520, height: 330, position: "relative", overflow: "visible" }}>
+            <div className="h-[300px] sm:h-[330px]" style={{ flexShrink: 0, width: "100%", maxWidth: 520, position: "relative", overflow: "visible" }}>
               <VertexTooltip lens={hoveredLens} visible={hoveredSlug !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
               <SVGRadar
                 data={radarData}

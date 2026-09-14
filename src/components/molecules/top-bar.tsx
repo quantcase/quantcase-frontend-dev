@@ -41,6 +41,7 @@ function PillTab({
   className,
   style,
   onClick,
+  grow,
 }: {
   href?: string;
   active: boolean;
@@ -49,6 +50,8 @@ function PillTab({
   className?: string;
   style?: React.CSSProperties;
   onClick?: () => void;
+  /** Stretch to fill available width on mobile (MOD factor tabs). */
+  grow?: boolean;
 }) {
   const base: React.CSSProperties = active
     ? { background: "var(--qc-ink)", color: "var(--qc-on-dark)" }
@@ -56,7 +59,11 @@ function PillTab({
 
   const content = (
     <span
-      className={cn("flex items-center gap-1 md:gap-1.5 px-2.5 md:px-4 py-1.5 md:py-2 rounded-full text-[13px] md:text-sm transition-colors whitespace-nowrap", className)}
+      className={cn(
+        "flex items-center gap-1 md:gap-1.5 px-2.5 md:px-4 py-1.5 md:py-2 rounded-full text-[13px] md:text-sm transition-colors whitespace-nowrap",
+        grow && "w-full justify-center",
+        className,
+      )}
       style={{ ...base, ...style }}
     >
       {icon}
@@ -66,14 +73,14 @@ function PillTab({
 
   if (href) {
     return (
-      <Link href={href} className="flex">
+      <Link href={href} className={cn("flex min-w-0", grow && "flex-1 md:flex-none")}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button onClick={onClick} className="flex">
+    <button onClick={onClick} className={cn("flex min-w-0", grow && "flex-1 md:flex-none")}>
       {content}
     </button>
   );
@@ -248,28 +255,37 @@ function TopBarInner() {
         className="flex items-center gap-1 md:gap-2 rounded-full p-1 w-full md:w-auto"
         style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
       >
-        {/* M.O.D. grouping inner ring */}
+        {/* M.O.D. grouping inner ring — compact on mobile so all factors fit without sideways scroll */}
         <div
-          className="flex items-center gap-0.5 rounded-full p-0.5 w-full md:w-auto overflow-x-auto scrollbar-none"
+          className="flex items-center gap-0 rounded-full p-0.5 w-full md:w-auto md:gap-0.5"
           style={{ border: "1px solid var(--qc-hair)" }}
         >
           <span
-            className="flex items-center gap-1 px-2 md:px-3 text-[13px] md:text-sm font-medium whitespace-nowrap shrink-0"
+            className="flex items-center px-1.5 md:px-3 text-[10px] md:text-sm font-medium whitespace-nowrap shrink-0"
             style={{ color: "var(--qc-ink-2)", letterSpacing: "0.05em" }}
           >
             M·O·D
           </span>
 
-          <div className="flex items-center gap-0.5 shrink-0 justify-between flex-1 md:flex-none">
+          <div className="flex items-center min-w-0 flex-1 md:flex-none justify-between md:justify-start md:gap-0.5">
             {FACTOR_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               const score = getScore(item.label);
               return (
-                <PillTab key={item.href} href={withSymbol(item.href)} active={isActive}>
-                  <div className="flex items-center gap-1 md:gap-1.5">
-                    <span>{item.label}</span>
+                <PillTab
+                  key={item.href}
+                  href={withSymbol(item.href)}
+                  active={isActive}
+                  grow
+                  className="!px-1.5 md:!px-4 !py-1 md:!py-2 !text-[10px] md:!text-sm !gap-0.5 md:!gap-1.5"
+                >
+                  <div className="flex items-center gap-0.5 md:gap-1.5 min-w-0">
+                    <span className="truncate">{item.label}</span>
                     {score !== null && (
-                      <span style={{ color: getScoreColor(score), fontWeight: isActive ? 600 : 500 }}>
+                      <span
+                        className="shrink-0 tabular-nums text-[10px] md:text-sm"
+                        style={{ color: getScoreColor(score), fontWeight: isActive ? 600 : 500 }}
+                      >
                         {score}
                       </span>
                     )}

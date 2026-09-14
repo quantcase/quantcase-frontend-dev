@@ -24,6 +24,9 @@ export const LENS_DISPLAY_NAME: Record<string, string> = {
   "earning-quality": "Earnings Quality",
   "earnings-quality": "Earnings Quality",
   "earnings_quality": "Earnings Quality",
+  "eps-engine": "Earnings Forecast",
+  "earnings-forecast": "Earnings Forecast",
+  "earnings_forecast": "Earnings Forecast",
 };
 
 const LENS_SLUG_CANONICAL: Record<string, string> = {

@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, Briefcase, TrendingUp, Settings, Shield, BarChart2, Code2, Activity, Sparkles, Mail, Flag } from "lucide-react";
+import { Home, Briefcase, TrendingUp, Settings, Shield, BarChart2, Code2, Activity, Sparkles, Mail, Flag, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TooltipProvider,
@@ -16,21 +16,24 @@ import { useUser, usesInvestorFlow } from "@/components/providers/UserContext";
 import { UserMenu } from "@/components/molecules/user-menu";
 
 const managerNavItems = [
-  { label: "Home",          href: "/dashboard",              icon: Home,     isActive: (p: string) => p === "/dashboard" },
-  { label: "Opportunities", href: "/wealthos/opportunities",  icon: Sparkles, isActive: (p: string) => p.startsWith("/wealthos") },
-  { label: "Models",        href: "/model-builder",          icon: TrendingUp, isActive: (p: string) => p === "/model-builder" || p.startsWith("/model-builder/") || p === "/model-analytics" },
-  { label: "Settings",      href: "/settings",               icon: Settings, isActive: (p: string) => p.startsWith("/settings") },
+  { label: "Home",          href: "/dashboard",              icon: Home,        isActive: (p: string) => p === "/dashboard" },
+  { label: "Baskets",       href: "/basket",                 icon: LayoutGrid,  isActive: (p: string) => p === "/basket" || p.startsWith("/basket/") },
+  { label: "Opportunities", href: "/wealthos/opportunities",  icon: Sparkles,    isActive: (p: string) => p.startsWith("/wealthos") },
+  { label: "Models",        href: "/model-builder",          icon: TrendingUp,  isActive: (p: string) => p === "/model-builder" || p.startsWith("/model-builder/") || p === "/model-analytics" },
+  { label: "Settings",      href: "/settings",               icon: Settings,    isActive: (p: string) => p.startsWith("/settings") },
 ];
 
 const investorNavItems = [
-  { label: "Home",     href: "/investor/dashboard",  icon: Home,      isActive: (p: string) => p === "/investor/dashboard" },
-  { label: "Diary",    href: "/diary",                icon: BarChart2, isActive: (p: string) => p.startsWith("/diary") },
-  { label: "Settings", href: "/settings",             icon: Settings,  isActive: (p: string) => p.startsWith("/settings") },
+  { label: "Home",     href: "/investor/dashboard",  icon: Home,       isActive: (p: string) => p === "/investor/dashboard" },
+  { label: "Baskets",  href: "/basket",              icon: LayoutGrid, isActive: (p: string) => p === "/basket" || p.startsWith("/basket/") },
+  { label: "Diary",    href: "/diary",                icon: BarChart2,  isActive: (p: string) => p.startsWith("/diary") },
+  { label: "Settings", href: "/settings",             icon: Settings,   isActive: (p: string) => p.startsWith("/settings") },
 ];
 
 // Admin accounts use the investor dashboard flow (Home/Diary/Settings) plus the full admin toolset.
 const adminNavItems = [
   { label: "Home",             href: "/investor/dashboard",    icon: Home,       isActive: (p: string) => p === "/investor/dashboard" },
+  { label: "Baskets",          href: "/basket",                icon: LayoutGrid, isActive: (p: string) => p === "/basket" || p.startsWith("/basket/") },
   { label: "Diary",            href: "/diary",                 icon: BarChart2,  isActive: (p: string) => p.startsWith("/diary") },
   { label: "Settings",         href: "/settings",              icon: Settings,   isActive: (p: string) => p.startsWith("/settings") },
   { label: "HTML Skills",      href: "/admin/html-skills",     icon: Code2,      isActive: (p: string) => p.startsWith("/admin/html-skills") },

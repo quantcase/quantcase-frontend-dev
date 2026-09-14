@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import { BASKET_CATEGORIES, GROUP_LABELS, GROUP_ORDER } from "../_data/categories";
 import { SAMPLE_BASKETS } from "../_data/sample-baskets";
 import type { BasketGroup, BasketListState, SortKey } from "../_lib/types";
@@ -40,7 +40,7 @@ export function BasketListView() {
   );
 
   return (
-    <div className="mx-auto max-w-[1280px] px-3 pb-16 pt-5 sm:px-6 sm:pt-6 lg:px-8">
+    <div className="w-full min-w-0 px-4 pb-16 pt-6 sm:px-6 md:px-8 lg:px-10 xl:px-12">
       <div
         className="mb-4 rounded-lg px-3 py-2 text-center text-[11px] sm:mb-5"
         style={{
@@ -123,7 +123,7 @@ export function BasketListView() {
         style={{ borderColor: "var(--qc-hair)" }}
       >
         <div
-          className="flex w-full items-center gap-2 rounded-full border px-3 py-2 sm:max-w-[340px] sm:flex-1"
+          className="flex w-full items-center gap-2 rounded-full border px-3 py-2 sm:max-w-md sm:flex-1 lg:max-w-lg"
           style={{ background: "var(--qc-section)", borderColor: "var(--qc-hair)" }}
         >
           <Search size={14} strokeWidth={1.8} style={{ color: "var(--qc-ink-3)", flexShrink: 0 }} />
@@ -280,7 +280,7 @@ function Shelf({
 }) {
   const shown = showAll ? baskets : baskets.slice(0, 4);
   return (
-    <div className="mb-7 sm:mb-8">
+    <div className="mb-7 w-full sm:mb-8">
       <div className="mb-1 flex items-end justify-between gap-3">
         <div className="flex items-baseline gap-2.5">
           <h3 className="text-[14px] font-semibold sm:text-[14.5px]" style={{ color: "var(--qc-ink)" }}>
@@ -301,10 +301,16 @@ function Shelf({
           </button>
         )}
       </div>
-      <p className="mb-3.5 max-w-[640px] text-[11.5px] leading-relaxed" style={{ color: "var(--qc-ink-2)" }}>
+      <p className="mb-3.5 max-w-3xl text-[11.5px] leading-relaxed xl:max-w-4xl" style={{ color: "var(--qc-ink-2)" }}>
         {desc}
       </p>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div
+        className={
+          showAll
+            ? "grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 xl:gap-4"
+            : "grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4"
+        }
+      >
         {shown.map((b) => (
           <BasketCard key={b.slug} basket={b} />
         ))}

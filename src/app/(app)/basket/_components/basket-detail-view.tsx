@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import type { SampleBasket } from "../_lib/types";
 import { BASKET_CATEGORIES } from "../_data/categories";
+import type { SampleBasket } from "../_lib/types";
 import {
-  concentrationFields,
-  fmtInr,
-  fundamentalFields,
-  scoreFields,
-  syntheticSeries,
+    concentrationFields,
+    fmtInr,
+    fundamentalFields,
+    scoreFields,
+    syntheticSeries,
 } from "../_lib/utils";
 
 function riskTone(risk: string) {
@@ -31,7 +31,7 @@ export function BasketDetailView({ basket }: { basket: SampleBasket }) {
       : syntheticSeries(basket.slug ?? basket.name, basket.returnVal);
 
   return (
-    <div className="mx-auto max-w-[1280px] px-3 pb-16 pt-5 sm:px-6 sm:pt-6 lg:px-8">
+    <div className="w-full min-w-0 px-4 pb-16 pt-6 sm:px-6 md:px-8 lg:px-10 xl:px-12">
       <Link
         href="/basket"
         className="mb-4 inline-flex items-center gap-1 text-[11.5px] underline decoration-dashed underline-offset-4"
@@ -122,7 +122,7 @@ export function BasketDetailView({ basket }: { basket: SampleBasket }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr] lg:gap-5">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] lg:gap-5 xl:gap-6">
         <div className="space-y-4">
           <Section title="Fundamental Valuation">
             <div className="flex flex-col gap-0.5">

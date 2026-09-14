@@ -25,11 +25,11 @@ export function BasketCard({ basket }: { basket: SampleBasket }) {
   return (
     <Link
       href={`/basket/${encodeURIComponent(slug)}`}
-      className="flex flex-col gap-2.5 rounded-[10px] border p-4 transition-shadow hover:shadow-[var(--qc-shadow-shell)]"
+      className="flex h-full w-full min-w-0 flex-col gap-2.5 rounded-[10px] border p-4 transition-shadow hover:shadow-[var(--qc-shadow-shell)] xl:gap-3 xl:p-5 2xl:p-6"
       style={{ background: "var(--qc-card)", borderColor: "var(--qc-hair)" }}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-[13px] font-semibold leading-snug" style={{ color: "var(--qc-ink)" }}>
+        <h3 className="text-[13px] font-semibold leading-snug xl:text-[14.5px]" style={{ color: "var(--qc-ink)" }}>
           {basket.name}
         </h3>
         <span
@@ -40,7 +40,7 @@ export function BasketCard({ basket }: { basket: SampleBasket }) {
         </span>
       </div>
 
-      <p className="min-h-[32px] text-[11px] leading-relaxed" style={{ color: "var(--qc-ink-2)" }}>
+      <p className="min-h-[32px] text-[11px] leading-relaxed xl:min-h-[36px] xl:text-[12px]" style={{ color: "var(--qc-ink-2)" }}>
         {basket.rationale}
       </p>
 
@@ -93,7 +93,6 @@ export function BasketCard({ basket }: { basket: SampleBasket }) {
     </Link>
   );
 }
-
 function Stat({
   label,
   value,
@@ -114,3 +113,4 @@ function Stat({
     </div>
   );
 }
+

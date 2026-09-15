@@ -12,9 +12,10 @@ import { L3MultiDispatchTab } from "./_components/L3MultiDispatchTab";
 import { DailyRunsTab } from "./_components/DailyRunsTab";
 import { ProwessIngestionTab } from "./_components/ProwessIngestionTab";
 import { ProwessCoverageTab } from "./_components/ProwessCoverageTab";
+import { TickerStatusTab } from "./_components/TickerStatusTab";
 import { HelpModal } from "./_components/HelpModal";
 
-type CoverageTab = "l1" | "l2" | "l2-compressed" | "l2-html-regen" | "l2-compressed-html-regen" | "l3" | "daily" | "prowess" | "prowess-coverage";
+type CoverageTab = "l1" | "l2" | "l2-compressed" | "l2-html-regen" | "l2-compressed-html-regen" | "l3" | "daily" | "prowess" | "prowess-coverage" | "ticker-status";
 
 const TABS: { id: CoverageTab; label: string }[] = [
   { id: "l1", label: "L1" },
@@ -26,6 +27,7 @@ const TABS: { id: CoverageTab; label: string }[] = [
   { id: "daily", label: "Daily Runs" },
   { id: "prowess", label: "Prowess Ingestion" },
   { id: "prowess-coverage", label: "Prowess Coverage" },
+  { id: "ticker-status", label: "Ticker Status" },
 ];
 
 const ADMIN_LINKS = [
@@ -142,6 +144,7 @@ export default function CoveragePage() {
         {activeTab === "daily" && <DailyRunsTab />}
         {activeTab === "prowess" && <ProwessIngestionTab />}
         {activeTab === "prowess-coverage" && <ProwessCoverageTab />}
+        {activeTab === "ticker-status" && <TickerStatusTab />}
       </div>
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}

@@ -816,3 +816,50 @@ export interface SchedulerJobTriggerResponse {
   message: string;
   run_id: string;
 }
+
+// ── Ticker Processing Status / Completeness Matrix ──────────────────────────
+
+export interface TickerStatusQuarterItem {
+  trDoc: number;
+  trSig: number;
+  pptDoc: number;
+  pptSig: number;
+}
+
+export interface TickerStatusPeriodItem {
+  quarters: Record<string, TickerStatusQuarterItem>; // "Q1", "Q2", "Q3", "Q4"
+  arDoc: number;
+  arSig: number;
+}
+
+export interface TickerStatusItem {
+  symbol: string;
+  tier: string;
+  latestL2: string; // "H" | "I" | "0"
+  latestL2Period: string; // e.g. "FY2026 Q2", "FY2026", "-"
+  latestL3: number; // 1 | 0
+  latestL3Period: string; // e.g. "FY2026 Q2", "FY2026", "-"
+  latestL4: number; // 1 | 0
+  latestL4Period: string; // e.g. "FY2026 Q2", "FY2026", "-"
+  periods: Record<string, TickerStatusPeriodItem>; // "FY2026", "FY2025"
+}
+
+export interface TickerStatusPreviewResponse {
+  tickers: TickerStatusItem[];
+  years: string[];
+  pagination: {
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  };
+}
+
+export interface TickerStatusOptionsResponse {
+  tiers: string[];
+  l2Statuses: string[];
+  l3Statuses: string[];
+  l4Statuses: string[];
+  companies?: string[];
+}
+

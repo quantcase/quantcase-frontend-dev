@@ -386,7 +386,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
       {searchOpen && searchResults.length > 0 && (
         <div
           ref={dropdownRef}
-          className="hidden md:block"
+          className="hidden bottom-[calc(60px+env(safe-area-inset-bottom)+12px+56px)] md:block md:bottom-[calc(1.5rem+56px)]"
           style={{
             position: "fixed",
             left: "50%",
@@ -402,7 +402,6 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
             maxHeight: 300,
             overflowY: "auto",
           }}
-          className="bottom-[calc(60px+env(safe-area-inset-bottom)+12px+56px)] md:bottom-[calc(1.5rem+56px)]"
         >
           {searchResults.map((option, index) => (
             <button

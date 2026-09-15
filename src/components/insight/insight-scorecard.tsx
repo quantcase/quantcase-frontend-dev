@@ -240,8 +240,8 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
   const HEIGHT = 320;
   const cx = WIDTH / 2;
   const cy = HEIGHT / 2;
-  // Large plot — mobile labels are text-only (no icons), so more room for the diamond.
-  const maxR = 138;
+  // Desktop keeps prior plot size; mobile enlarges via CSS container height/width.
+  const maxR = 118;
   const n = data.length;
   // 4 rings: 25%, 50%, 75%, 100% — marks the threshold zones visually
   const rings = [0.25, 0.5, 0.75, 1];
@@ -312,8 +312,8 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-      {/* Near full-bleed on mobile (text labels only); desktop keeps prior framing. */}
-      <div className="mx-auto h-[92%] w-[88%] sm:h-full sm:w-full">
+      {/* Mobile: near full-bleed + text-only labels. Desktop: previous full framing. */}
+      <div className="mx-auto h-[92%] w-[90%] sm:h-full sm:w-full">
       <svg width="100%" height="100%" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} style={{ overflow: "visible" }}>
         <defs>
           {/* Per-segment gradients from center (transparent) → vertex color */}
@@ -889,11 +889,11 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
             display: "flex", flexDirection: "column",
           }}
         >
-          {/* Top: radar — maximize mobile plot size while keeping corner text readable */}
+          {/* Top: radar — larger on mobile only; desktop height matches previous */}
           <div className="min-h-[380px] sm:min-h-[340px] px-1 pt-1 pb-0 sm:px-4 sm:pt-4 sm:pb-3" style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
 
             {/* Radar — wide container occupying the card space */}
-            <div className="h-[380px] sm:h-[330px]" style={{ flexShrink: 0, width: "100%", maxWidth: 560, position: "relative", overflow: "visible" }}>
+            <div className="h-[380px] sm:h-[330px]" style={{ flexShrink: 0, width: "100%", maxWidth: 520, position: "relative", overflow: "visible" }}>
               <VertexTooltip lens={hoveredLens} visible={hoveredSlug !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
               <SVGRadar
                 data={radarData}

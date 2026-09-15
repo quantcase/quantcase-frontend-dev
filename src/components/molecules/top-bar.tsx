@@ -74,14 +74,14 @@ function PillTab({
 
   if (href) {
     return (
-      <Link href={href} className={cn("flex min-w-0 w-full", grow && "flex-1 md:flex-none")}>
+      <Link href={href} className={cn("flex min-w-0 shrink-0", grow && "w-full flex-1 justify-center md:w-auto md:flex-none")}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button onClick={onClick} className={cn("flex min-w-0 w-full", grow && "flex-1 md:flex-none")}>
+    <button onClick={onClick} className={cn("flex min-w-0 shrink-0", grow && "w-full flex-1 justify-center md:w-auto md:flex-none")}>
       {content}
     </button>
   );
@@ -231,36 +231,6 @@ function TopBarInner() {
     { label: "Technicals",   href: "/screener/technicals" },
   ];
 
-  const factorTabs = (
-    <div className="flex min-w-0 flex-1 items-center justify-between gap-0.5 md:flex-none md:justify-start md:gap-0.5">
-      {FACTOR_ITEMS.map((item) => {
-        const isActive = pathname === item.href;
-        const score = getScore(item.label);
-        return (
-          <PillTab
-            key={item.href}
-            href={withSymbol(item.href)}
-            active={isActive}
-            grow
-            className="!px-1.5 md:!px-4 !py-1 md:!py-2 !text-[10px] md:!text-sm !gap-0.5 md:!gap-1.5"
-          >
-            <div className="flex min-w-0 items-center gap-0.5 md:gap-1.5">
-              <span className="truncate">{item.label}</span>
-              {score !== null && (
-                <span
-                  className="shrink-0 tabular-nums text-[10px] md:text-sm"
-                  style={{ color: getScoreColor(score), fontWeight: isActive ? 600 : 500 }}
-                >
-                  {score}
-                </span>
-              )}
-            </div>
-          </PillTab>
-        );
-      })}
-    </div>
-  );
-
   if (isIndustryTerminal) {
     leftZone = (
       <div
@@ -281,8 +251,8 @@ function TopBarInner() {
   } else if (isHome || (isTerminal && !hasAssetSelected)) {
     leftZone = <SearchZone />;
   } else if (hasAssetSelected) {
+    /* Desktop-only — previous capsule layout (do not apply mobile grow/grid here) */
     leftZone = (
-      /* Desktop-only capsule: M.O.D + View/Fundamentals/Technicals */
       <div
         className="hidden md:flex items-center gap-2 rounded-full p-1"
         style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
@@ -297,7 +267,29 @@ function TopBarInner() {
           >
             M·O·D
           </span>
-          {factorTabs}
+          {FACTOR_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
+            const score = getScore(item.label);
+            return (
+              <PillTab
+                key={item.href}
+                href={withSymbol(item.href)}
+                active={isActive}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>{item.label}</span>
+                  {score !== null && (
+                    <span
+                      className="tabular-nums text-sm"
+                      style={{ color: getScoreColor(score), fontWeight: isActive ? 600 : 500 }}
+                    >
+                      {score}
+                    </span>
+                  )}
+                </div>
+              </PillTab>
+            );
+          })}
         </div>
         <div className="flex shrink-0 items-center gap-0.5 pr-1">
           {terminalTabs.map((tab) => (
@@ -447,6 +439,7 @@ function TopBarInner() {
                 key={item.href}
                 href={withSymbol(item.href)}
                 active={isActive}
+                grow
                 className="!w-full !justify-center !gap-0.5 !px-1 !py-1.5 !text-[11px]"
               >
                 <div className="flex min-w-0 items-center justify-center gap-0.5">

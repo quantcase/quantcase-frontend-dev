@@ -79,8 +79,9 @@ function ShellInner({ navItems, headerRight, children, companyInfo }: ScreenerPa
               </Chip>
             </div>
           )}
-          {sector && <div className="hidden sm:block"><Chip>{sector}</Chip></div>}
-          {industry && industry !== sector && <div className="hidden sm:block"><Chip>{industry}</Chip></div>}
+          {/* Sector / industry chips: always on mobile (matches product mock), desktop unchanged */}
+          {sector && <Chip>{sector}</Chip>}
+          {industry && industry !== sector && <Chip>{industry}</Chip>}
           {headerRight}
         </div>
       </div>

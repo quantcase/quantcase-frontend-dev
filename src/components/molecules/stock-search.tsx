@@ -14,7 +14,14 @@ const MAX_SUGGESTIONS = 8;
  * universe client-side, navigate to the overview screener on select — rendered
  * light-on-light.
  */
-export function StockSearch() {
+export function StockSearch({
+  className,
+  iconSide = "left",
+}: {
+  className?: string;
+  /** Mobile header chrome matches the product mock with the icon on the right. */
+  iconSide?: "left" | "right";
+} = {}) {
   const router = useRouter();
   const { stocks } = useStocks();
   const [query, setQuery] = useState("");
@@ -76,10 +83,13 @@ export function StockSearch() {
   };
 
   return (
-    <div ref={wrapperRef} className="relative w-full sm:w-[300px]">
+    <div ref={wrapperRef} className={cn("relative w-full sm:w-[300px]", className)}>
       <Search
         aria-hidden
-        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-3"
+        className={cn(
+          "pointer-events-none absolute top-1/2 size-4 -translate-y-1/2 text-ink-3",
+          iconSide === "right" ? "right-3" : "left-3",
+        )}
       />
       <input
         type="text"
@@ -94,7 +104,10 @@ export function StockSearch() {
         placeholder="Search any stock"
         aria-label="Search any stock"
         autoComplete="off"
-        className="h-10 w-full rounded-full border border-hair bg-card pl-9 pr-4 text-[13px] text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-hair-strong"
+        className={cn(
+          "h-10 w-full rounded-full border border-hair bg-card text-[13px] text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-hair-strong",
+          iconSide === "right" ? "pl-4 pr-9" : "pl-9 pr-4",
+        )}
       />
 
       {open && filtered.length > 0 && (

@@ -167,10 +167,11 @@ export function useFinancialStrength(ticker: string): UseFinancialStrengthResult
     setLoading(true);
     setError(null);
 
-    authFetch(`${BACKEND_URL}/api/opportunity/financial-strength?ticker=${ticker}`)
+    authFetch(`${BACKEND_URL}/api/lenses?ticker=${ticker}&category=opportunity`)
       .then((r) => r.json())
-      .then((res: { success: boolean; data: FinancialStrengthData }) => {
-        setData(res.data ?? null);
+      .then((res: { categories?: { opportunity?: LensDetail[] } }) => {
+        const found = res.categories?.opportunity?.find((l: LensDetail) => l.slug === "financial-strength");
+        setData((found as unknown as FinancialStrengthData) ?? null);
         setLoading(false);
       })
       .catch((e) => {

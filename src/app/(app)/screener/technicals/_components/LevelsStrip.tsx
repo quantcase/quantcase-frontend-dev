@@ -29,6 +29,8 @@ type SubColorToken = "up" | "down" | "muted";
 interface MetricItem {
   label: string;
   value: string;
+  /** When set, render each word on its own line (e.g. empty-state tags). */
+  valueLines?: string[];
   sub?: string;
   subColor?: SubColorToken;
   highlight?: boolean;
@@ -41,7 +43,7 @@ const SUB_COLOR: Record<SubColorToken, string> = {
   muted: "var(--qc-ink-2)",
 };
 
-function MetricCell({ label, value, sub, subColor, highlight, tooltip }: MetricItem) {
+function MetricCell({ label, value, valueLines, sub, subColor, highlight, tooltip }: MetricItem) {
   return (
     <div
       className="relative flex flex-col gap-0.5 px-5 py-2 group"
@@ -53,12 +55,23 @@ function MetricCell({ label, value, sub, subColor, highlight, tooltip }: MetricI
       >
         {label}
       </span>
-      <span
-        className="text-base whitespace-nowrap"
-        style={{ color: highlight ? "var(--qc-golden-ink)" : "var(--qc-ink)", fontWeight: highlight ? 700 : 600 }}
-      >
-        {value}
-      </span>
+      {valueLines && valueLines.length > 0 ? (
+        <span
+          className="flex flex-col text-base leading-tight"
+          style={{ color: highlight ? "var(--qc-golden-ink)" : "var(--qc-ink)", fontWeight: highlight ? 700 : 600 }}
+        >
+          {valueLines.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+        </span>
+      ) : (
+        <span
+          className="text-base whitespace-nowrap"
+          style={{ color: highlight ? "var(--qc-golden-ink)" : "var(--qc-ink)", fontWeight: highlight ? 700 : 600 }}
+        >
+          {value}
+        </span>
+      )}
       {sub != null && (
         <span className="text-[11px] font-semibold" style={{ color: subColor ? SUB_COLOR[subColor] : "var(--qc-ink-2)" }}>
           {sub}
@@ -110,7 +123,7 @@ export function LevelsStrip({
   price,
   movingAverages,
   supportResistance,
-  meta,
+  meta: _meta,
   changeDisplay,
   changeIsPositive,
 }: LevelsStripProps) {
@@ -145,40 +158,55 @@ export function LevelsStrip({
     };
   });
 
-  // Support & Resistance group
+  // Support & Resistance group.
+  // Backend may omit support and/or resistance (empty arrays). Never hide those
+  // columns or fall through to meta.srRange when it carries Excel errors like "#VALUE!".
+  const hasSupport = support != null && Number.isFinite(support);
+  const hasResistance = resistance != null && Number.isFinite(resistance);
   const srRangePct =
-    support && resistance
+    hasSupport && hasResistance && support > 0
       ? `${(((resistance - support) / support) * 100).toFixed(1)}%`
-      : "";
+      : undefined;
 
   const srItems: MetricItem[] = [
-    ...(support
-      ? [
-          {
-            label: "Support",
-            value: fmt(support),
-            sub: pctFmt(((price.cmp - support) / support) * 100),
-            subColor: (price.cmp >= support ? "up" : "down") as SubColorToken,
-          },
-        ]
-      : []),
-    ...(resistance
-      ? [
-          {
-            label: "Resistance",
-            value: fmt(resistance),
-            sub: pctFmt(((price.cmp - resistance) / resistance) * 100),
-            subColor: (price.cmp >= resistance ? "up" : "down") as SubColorToken,
-          },
-        ]
-      : []),
+    hasSupport
+      ? {
+          label: "Support",
+          value: fmt(support),
+          sub: pctFmt(((price.cmp - support) / support) * 100),
+          subColor: (price.cmp >= support ? "up" : "down") as SubColorToken,
+        }
+      : {
+          label: "Support",
+          value: "No Floor",
+          valueLines: ["No", "Floor"],
+          subColor: "muted" as SubColorToken,
+        },
+    hasResistance
+      ? {
+          label: "Resistance",
+          value: fmt(resistance),
+          sub: pctFmt(((price.cmp - resistance) / resistance) * 100),
+          subColor: (price.cmp >= resistance ? "up" : "down") as SubColorToken,
+        }
+      : {
+          label: "Resistance",
+          value: "No Ceiling",
+          valueLines: ["No", "Ceiling"],
+          subColor: "muted" as SubColorToken,
+        },
     {
       label: "S/R Range",
       value:
-        support && resistance
+        hasSupport && hasResistance
           ? fmt(resistance - support)
-          : meta.srRange,
-      sub: srRangePct || undefined,
+          : "Open Ended",
+      valueLines:
+        hasSupport && hasResistance
+          ? undefined
+          : ["Open", "Ended"],
+      sub: srRangePct,
+      subColor: hasSupport && hasResistance ? undefined : ("muted" as SubColorToken),
     },
   ];
 

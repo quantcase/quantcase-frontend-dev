@@ -2,7 +2,7 @@
 
 import { useState, type ElementType } from "react";
 import Link from "next/link";
-import { Layers, ArrowRight, HelpCircle, ListTree, SlidersHorizontal, BookMarked, LayoutGrid } from "lucide-react";
+import { Layers, ArrowRight, HelpCircle, ListTree, SlidersHorizontal, BookMarked, LayoutGrid, Database } from "lucide-react";
 import { L1MultiDispatchTab } from "./_components/L1MultiDispatchTab";
 import { L2MultiDispatchTab } from "./_components/L2MultiDispatchTab";
 import { L2CompressedMultiDispatchTab } from "./_components/L2CompressedMultiDispatchTab";
@@ -58,6 +58,12 @@ const ADMIN_LINKS = [
     icon: LayoutGrid,
     title: "Screen Configs",
     subtitle: "Which metrics show on which screener section, in what order and formatting — no deploy needed.",
+  },
+  {
+    href: "/admin/cache",
+    icon: Database,
+    title: "Cache Management",
+    subtitle: "Inspect Redis memory stats, invalidate domain caches, and trigger pre-warming.",
   },
 ];
 

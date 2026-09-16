@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Brain, Loader2, RefreshCw, Braces } from "lucide-react";
 import type {
   ActionableInsight,
@@ -207,6 +207,19 @@ export function DecisionIntelligenceBanner({
   const [activeHorizon, setActiveHorizon] = useState<HorizonKey>(() => getInitialHorizon(di));
   const [showRaw, setShowRaw] = useState(false);
   const [showScoresPopover, setShowScoresPopover] = useState(false);
+  const scorePopoverRef = useRef<HTMLDivElement>(null);
+
+  // Click outside closes the score breakdown (click-to-toggle, not hover).
+  useEffect(() => {
+    if (!showScoresPopover) return;
+    const onPointerDown = (e: MouseEvent) => {
+      if (scorePopoverRef.current && !scorePopoverRef.current.contains(e.target as Node)) {
+        setShowScoresPopover(false);
+      }
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [showScoresPopover]);
 
   // Score & Grade calculation
   const score = scores?.final_score ?? di.convictionScore ?? 0;
@@ -254,7 +267,9 @@ export function DecisionIntelligenceBanner({
 
   return (
     <div
-      className="w-full bg-white border border-[#e6e7e5] rounded-[16px] overflow-hidden shadow-[0_1px_2px_rgba(20,20,20,0.04)] font-sans text-[#1a1c1e]"
+      className={`w-full bg-white border border-[#e6e7e5] rounded-[16px] shadow-[0_1px_2px_rgba(20,20,20,0.04)] font-sans text-[#1a1c1e] ${
+        showScoresPopover ? "overflow-visible" : "overflow-hidden"
+      }`}
       style={{
         background: "var(--qc-card, #ffffff)",
         borderColor: "var(--qc-hair, #e6e7e5)",
@@ -312,7 +327,7 @@ export function DecisionIntelligenceBanner({
 
       {/* ── Banner (Dark stylized gradient) ── */}
       <div
-        className="relative mx-5 mt-4 p-[18px_20px_20px] rounded-[10px] text-white overflow-hidden"
+        className="relative mx-5 mt-4 p-[18px_20px_20px] rounded-[10px] text-white overflow-visible"
         style={{
           background:
             "radial-gradient(ellipse at 100% 100%, rgba(90,110,220,0.35), transparent 60%), linear-gradient(135deg, #241b3d, #120e1e)",
@@ -330,13 +345,14 @@ export function DecisionIntelligenceBanner({
             )}
           </div>
 
-          {/* Score Ring on Dark with optional interactive breakdown */}
+          {/* Score Ring — click to toggle module breakdown */}
           <div
-            className="relative w-[44px] h-[44px] shrink-0 cursor-pointer select-none"
-            onMouseEnter={() => scores && setShowScoresPopover(true)}
-            onMouseLeave={() => scores && setShowScoresPopover(false)}
+            ref={scorePopoverRef}
+            className="relative z-[80] w-[44px] h-[44px] shrink-0 cursor-pointer select-none"
             onClick={() => scores && setShowScoresPopover((v) => !v)}
-            title={scores ? "Click/hover to see score breakdown" : undefined}
+            title={scores ? "Click to see score breakdown" : undefined}
+            role={scores ? "button" : undefined}
+            aria-expanded={scores ? showScoresPopover : undefined}
           >
             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 44 44">
               <circle cx="22" cy="22" r={radius} fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="4" />
@@ -359,10 +375,10 @@ export function DecisionIntelligenceBanner({
               {grade}
             </div>
 
-            {/* Hover breakdown popover */}
+            {/* Click-toggle breakdown popover — high z so it sits above the card */}
             {showScoresPopover && scores && (
               <div
-                className="absolute right-0 top-full mt-2 z-50 w-64 p-3.5 bg-white border border-[#eeefed] rounded-xl shadow-2xl text-[#1a1c1e] text-left pointer-events-auto"
+                className="absolute right-0 top-full mt-2 z-[120] w-64 p-3.5 bg-white border border-[#eeefed] rounded-xl shadow-2xl text-[#1a1c1e] text-left pointer-events-auto"
                 style={{ background: "var(--qc-card, #ffffff)", borderColor: "var(--qc-hair, #eeefed)" }}
                 onClick={(e) => e.stopPropagation()}
               >

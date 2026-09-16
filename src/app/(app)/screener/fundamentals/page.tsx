@@ -345,7 +345,7 @@ function FinancialsContent() {
                   />
                 </div>
               ) : (
-                <PeerComparisonDataTable peers={peersData!.peers} />
+                <PeerComparisonDataTable peers={peersData!.peers} columnsConfig={peersData?.columns} />
               )}
             </TabularCard>
           </div>

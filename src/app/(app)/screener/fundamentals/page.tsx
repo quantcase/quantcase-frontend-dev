@@ -99,7 +99,7 @@ function FinancialsContent() {
 
   const { data, loading, error } = useFinancials(symbol);
   const { data: chartsData } = useFinancialsCharts(symbol);
-  const { data: peersData, loading: peersLoading } = useScreenerPeers(symbol);
+  const { data: peersData, loading: peersLoading, error: peersError } = useScreenerPeers(symbol);
   const { data: shareholdingData, loading: shareholdingLoading } = useShareholding(symbol);
   const { data: screenerData } = useScreenerData(symbol);
   const companyInfo = screenerData?.company
@@ -325,7 +325,7 @@ function FinancialsContent() {
         </div>
 
         {/* Peer Comparison */}
-        {(peersLoading || (peersData && peersData.peers.length > 0)) && (
+        {(peersLoading || (peersData && peersData.peers.length > 0) || peersError) && (
           <div id="section-peer-comparison">
             <TabularCard
               title="Peer Comparison"
@@ -343,6 +343,10 @@ function FinancialsContent() {
                       animation: "spin 0.7s linear infinite",
                     }}
                   />
+                </div>
+              ) : peersError ? (
+                <div style={{ textAlign: "center", padding: "24px 0", color: "var(--qc-down)", fontSize: "var(--qc-fz-12)", fontFamily: "var(--qc-font-mono)" }}>
+                  Failed to load peer comparison ({peersError})
                 </div>
               ) : (
                 <PeerComparisonDataTable peers={peersData!.peers} columnsConfig={peersData?.columns} />

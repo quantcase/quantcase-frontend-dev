@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Loader2, RefreshCw, Braces } from "lucide-react";
+import { Brain, Loader2, RefreshCw, Braces } from "lucide-react";
 import type {
   ActionableInsight,
   DecisionIntelligence,
@@ -265,21 +265,10 @@ export function DecisionIntelligenceBanner({
         className="flex items-center justify-between px-5 py-4 border-b border-[#eeefed]"
         style={{ borderColor: "var(--qc-hair, #eeefed)" }}
       >
-        <div className="flex items-center gap-[9px]">
-          {/* Orbital / atom logo mark from v4 HTML */}
-          <svg className="w-[22px] h-[22px] shrink-0 text-[#1a1c1e]" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.5" />
-            <ellipse cx="12" cy="12" rx="9.5" ry="3.6" stroke="currentColor" strokeWidth="1.3" />
-            <ellipse
-              cx="12"
-              cy="12"
-              rx="9.5"
-              ry="3.6"
-              stroke="currentColor"
-              strokeWidth="1.3"
-              transform="rotate(60 12 12)"
-            />
-          </svg>
+        <div className="flex items-center gap-2">
+          <div className="grid place-items-center rounded-md border border-hair bg-[var(--qc-chip)] p-1.5">
+            <Brain className="size-3.5 text-ink" />
+          </div>
           <span className="text-[14px] font-semibold text-[#1a1c1e]">Decision Intelligence</span>
         </div>
 

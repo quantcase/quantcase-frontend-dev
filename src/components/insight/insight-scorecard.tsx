@@ -240,7 +240,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
   const HEIGHT = 320;
   const cx = WIDTH / 2;
   const cy = HEIGHT / 2;
-  // Larger plot — mobile uses icon-only corner labels, so more of the viewBox can be the radar.
+  // Desktop keeps prior plot size; mobile enlarges via CSS container height/width.
   const maxR = 118;
   const n = data.length;
   // 4 rings: 25%, 50%, 75%, 100% — marks the threshold zones visually
@@ -304,12 +304,16 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
   const sideLabelTransform = isTriangle ? "translateY(-30%)" : "translateY(-50%)";
 
   const iconBoxClass =
-    "w-8 h-8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-150";
+    "hidden sm:flex w-7 h-7 rounded-lg items-center justify-center shrink-0 transition-all duration-150";
+  const labelTextClass =
+    "text-[9.5px] sm:text-[11px] font-semibold tracking-[0.05em] leading-[1.15] uppercase";
+  const sideWordClass =
+    "text-[9px] sm:text-[10.5px] font-semibold tracking-[0.05em] leading-[1.15] uppercase";
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-      {/* Nearly full-bleed on mobile — icon-only corner labels free space for a larger plot. */}
-      <div className="w-[86%] sm:w-full h-full mx-auto">
+      {/* Mobile: near full-bleed + text-only labels. Desktop: previous full framing. */}
+      <div className="mx-auto h-[92%] w-[90%] sm:h-full sm:w-full">
       <svg width="100%" height="100%" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} style={{ overflow: "visible" }}>
         <defs>
           {/* Per-segment gradients from center (transparent) → vertex color */}
@@ -491,17 +495,17 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
       </svg>
       </div>
 
-      {/* ── Lens labels: icons only on mobile, icon + text from sm up ── */}
+      {/* ── Lens labels: mobile = text only; desktop = icon + text ── */}
       {(n === 3 || n === 4) && (
         <>
           {/* Top Label */}
           {topPoint && (
             <div
-              className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              className="flex max-w-[94%] items-center gap-1.5 sm:gap-2 cursor-pointer transition-all duration-150 select-none"
               title={topPoint.lens.name}
               style={{
                 position: "absolute",
-                top: 4,
+                top: 0,
                 left: "50%",
                 transform: "translateX(-50%)",
                 zIndex: 10,
@@ -519,18 +523,16 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
                   boxShadow: isTopHovered ? `0 0 10px ${topTier.hex}33` : undefined,
                 }}
               >
-                {TopIcon && <TopIcon size={15} strokeWidth={1.8} />}
+                {TopIcon && <TopIcon size={14} strokeWidth={1.8} />}
               </div>
               <span
-                className="hidden sm:inline"
+                className={labelTextClass}
                 style={{
-                  fontSize: "11px",
                   fontWeight: isTopHovered ? 700 : 600,
-                  letterSpacing: "0.06em",
                   color: isTopHovered ? topTier.hex : "var(--qc-ink)",
-                  whiteSpace: "nowrap",
                   fontFamily: "var(--qc-font-sans)",
                   transition: "color 0.15s",
+                  textAlign: "center",
                 }}
               >
                 {topPoint.lens.name.toUpperCase()}
@@ -541,11 +543,11 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
           {/* Right Label */}
           {rightPoint && (
             <div
-              className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              className="flex max-w-[30%] sm:max-w-none items-center gap-1 sm:gap-2 cursor-pointer transition-all duration-150 select-none"
               title={rightPoint.lens.name}
               style={{
                 position: "absolute",
-                right: 2,
+                right: 0,
                 top: sideLabelTop,
                 transform: sideLabelTransform,
                 zIndex: 10,
@@ -563,18 +565,16 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
                   boxShadow: isRightHovered ? `0 0 10px ${rightTier.hex}33` : undefined,
                 }}
               >
-                {RightIcon && <RightIcon size={15} strokeWidth={1.8} />}
+                {RightIcon && <RightIcon size={14} strokeWidth={1.8} />}
               </div>
-              <div className="hidden sm:flex flex-col items-start text-left">
+              <div className="flex min-w-0 flex-col items-start text-left">
                 {rightWords.map((word, wi) => (
                   <span
                     key={wi}
+                    className={sideWordClass}
                     style={{
-                      fontSize: "10.5px",
                       fontWeight: isRightHovered ? 700 : 600,
-                      letterSpacing: "0.06em",
                       color: isRightHovered ? rightTier.hex : "var(--qc-ink)",
-                      lineHeight: 1.18,
                       fontFamily: "var(--qc-font-sans)",
                       transition: "color 0.15s",
                     }}
@@ -589,11 +589,11 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
           {/* Bottom Label — diamond only */}
           {n === 4 && bottomPoint && bottomPt && (
             <div
-              className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              className="flex max-w-[94%] items-center gap-1.5 sm:gap-2 cursor-pointer transition-all duration-150 select-none"
               title={bottomPoint.lens.name}
               style={{
                 position: "absolute",
-                bottom: 4,
+                bottom: 0,
                 left: "50%",
                 transform: "translateX(-50%)",
                 zIndex: 10,
@@ -611,18 +611,16 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
                   boxShadow: isBottomHovered ? `0 0 10px ${bottomTier.hex}33` : undefined,
                 }}
               >
-                {BottomIcon && <BottomIcon size={15} strokeWidth={1.8} />}
+                {BottomIcon && <BottomIcon size={14} strokeWidth={1.8} />}
               </div>
               <span
-                className="hidden sm:inline"
+                className={labelTextClass}
                 style={{
-                  fontSize: "11px",
                   fontWeight: isBottomHovered ? 700 : 600,
-                  letterSpacing: "0.06em",
                   color: isBottomHovered ? bottomTier.hex : "var(--qc-ink)",
-                  whiteSpace: "nowrap",
                   fontFamily: "var(--qc-font-sans)",
                   transition: "color 0.15s",
+                  textAlign: "center",
                 }}
               >
                 {bottomPoint.lens.name.toUpperCase()}
@@ -633,11 +631,11 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
           {/* Left Label */}
           {leftPoint && leftPt && (
             <div
-              className="flex items-center gap-2 cursor-pointer transition-all duration-150 select-none"
+              className="flex max-w-[30%] sm:max-w-none items-center gap-1 sm:gap-2 cursor-pointer transition-all duration-150 select-none"
               title={leftPoint.lens.name}
               style={{
                 position: "absolute",
-                left: 2,
+                left: 0,
                 top: sideLabelTop,
                 transform: sideLabelTransform,
                 zIndex: 10,
@@ -646,16 +644,14 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
               onMouseLeave={() => onHoverVertex(null)}
               onClick={() => onLensClick?.(leftPoint.lens.slug)}
             >
-              <div className="hidden sm:flex flex-col items-end text-right">
+              <div className="flex min-w-0 flex-col items-end text-right">
                 {leftWords.map((word, wi) => (
                   <span
                     key={wi}
+                    className={sideWordClass}
                     style={{
-                      fontSize: "10.5px",
                       fontWeight: isLeftHovered ? 700 : 600,
-                      letterSpacing: "0.06em",
                       color: isLeftHovered ? leftTier.hex : "var(--qc-ink)",
-                      lineHeight: 1.18,
                       fontFamily: "var(--qc-font-sans)",
                       transition: "color 0.15s",
                     }}
@@ -673,7 +669,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
                   boxShadow: isLeftHovered ? `0 0 10px ${leftTier.hex}33` : undefined,
                 }}
               >
-                {LeftIcon && <LeftIcon size={15} strokeWidth={1.8} />}
+                {LeftIcon && <LeftIcon size={14} strokeWidth={1.8} />}
               </div>
             </div>
           )}
@@ -893,11 +889,11 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
             display: "flex", flexDirection: "column",
           }}
         >
-          {/* Top: radar centered — expanded sizing to occupy much more space */}
-          <div className="min-h-[300px] sm:min-h-[340px] px-2 pt-3 pb-2 sm:p-4 sm:pb-3" style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          {/* Top: radar — larger on mobile only; desktop height matches previous */}
+          <div className="min-h-[380px] sm:min-h-[340px] px-1 pt-1 pb-0 sm:px-4 sm:pt-4 sm:pb-3" style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
 
             {/* Radar — wide container occupying the card space */}
-            <div className="h-[300px] sm:h-[330px]" style={{ flexShrink: 0, width: "100%", maxWidth: 520, position: "relative", overflow: "visible" }}>
+            <div className="h-[380px] sm:h-[330px]" style={{ flexShrink: 0, width: "100%", maxWidth: 520, position: "relative", overflow: "visible" }}>
               <VertexTooltip lens={hoveredLens} visible={hoveredSlug !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
               <SVGRadar
                 data={radarData}

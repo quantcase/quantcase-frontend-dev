@@ -28,7 +28,8 @@ export function MainContentWrapper({ children }: { children: React.ReactNode }) 
     <div
       className={cn(
         "md:ml-[72px] min-h-screen pb-[60px] md:pb-0",
-        !hideTopBar && (hasAssetSelected ? "pt-[104px] md:pt-[60px]" : "pt-[60px]")
+        // Mobile asset chrome: logo+search (56) + MOD (44) + View/Fund/Tech (44) = 144
+        !hideTopBar && (hasAssetSelected ? "pt-[144px] md:pt-[60px]" : "pt-[60px]")
       )}
       style={{ background: "var(--qc-bg)" }}
     >

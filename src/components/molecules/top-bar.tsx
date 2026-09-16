@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { ChevronRight, Eye, CandlestickChart, BookOpen, Sparkles, LayoutDashboard, Users, PieChart, Wrench, LineChart } from "lucide-react";
+import { Sparkles, Users, PieChart, Wrench, LineChart } from "lucide-react";
 import { Suspense, useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -73,14 +74,14 @@ function PillTab({
 
   if (href) {
     return (
-      <Link href={href} className={cn("flex min-w-0", grow && "flex-1 md:flex-none")}>
+      <Link href={href} className={cn("flex min-w-0 shrink-0", grow && "w-full flex-1 justify-center md:w-auto md:flex-none")}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button onClick={onClick} className={cn("flex min-w-0", grow && "flex-1 md:flex-none")}>
+    <button onClick={onClick} className={cn("flex min-w-0 shrink-0", grow && "w-full flex-1 justify-center md:w-auto md:flex-none")}>
       {content}
     </button>
   );
@@ -217,7 +218,8 @@ function TopBarInner() {
 
   if (isHome || isScreenerHomePage || isBasketPage || isMutualFundPage || isAdmin || isInvestorDashboard || isDiary) return null;
 
-  // Right rail: stock search on the terminal pages that opt in.
+  // Right rail: stock search on the terminal pages that opt in (desktop only —
+  // mobile asset pages use the dedicated logo+search chrome below).
   const rightZone: React.ReactNode = HEADER_SEARCH_PATHS.includes(pathname) ? <StockSearch /> : null;
 
   let leftZone: React.ReactNode = null;
@@ -249,55 +251,47 @@ function TopBarInner() {
   } else if (isHome || (isTerminal && !hasAssetSelected)) {
     leftZone = <SearchZone />;
   } else if (hasAssetSelected) {
+    /* Desktop-only — previous capsule layout (do not apply mobile grow/grid here) */
     leftZone = (
-      /* Outer capsule containing EVERYTHING (M.O.D + Normal tabs) */
       <div
-        className="flex items-center gap-1 md:gap-2 rounded-full p-1 w-full md:w-auto"
+        className="hidden md:flex items-center gap-2 rounded-full p-1"
         style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)" }}
       >
-        {/* M.O.D. grouping inner ring — compact on mobile so all factors fit without sideways scroll */}
         <div
-          className="flex items-center gap-0 rounded-full p-0.5 w-full md:w-auto md:gap-0.5"
+          className="flex items-center gap-0.5 rounded-full p-0.5"
           style={{ border: "1px solid var(--qc-hair)" }}
         >
           <span
-            className="flex items-center px-1.5 md:px-3 text-[10px] md:text-sm font-medium whitespace-nowrap shrink-0"
+            className="flex shrink-0 items-center whitespace-nowrap px-3 text-sm font-medium"
             style={{ color: "var(--qc-ink-2)", letterSpacing: "0.05em" }}
           >
             M·O·D
           </span>
-
-          <div className="flex items-center min-w-0 flex-1 md:flex-none justify-between md:justify-start md:gap-0.5">
-            {FACTOR_ITEMS.map((item) => {
-              const isActive = pathname === item.href;
-              const score = getScore(item.label);
-              return (
-                <PillTab
-                  key={item.href}
-                  href={withSymbol(item.href)}
-                  active={isActive}
-                  grow
-                  className="!px-1.5 md:!px-4 !py-1 md:!py-2 !text-[10px] md:!text-sm !gap-0.5 md:!gap-1.5"
-                >
-                  <div className="flex items-center gap-0.5 md:gap-1.5 min-w-0">
-                    <span className="truncate">{item.label}</span>
-                    {score !== null && (
-                      <span
-                        className="shrink-0 tabular-nums text-[10px] md:text-sm"
-                        style={{ color: getScoreColor(score), fontWeight: isActive ? 600 : 500 }}
-                      >
-                        {score}
-                      </span>
-                    )}
-                  </div>
-                </PillTab>
-              );
-            })}
-          </div>
+          {FACTOR_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
+            const score = getScore(item.label);
+            return (
+              <PillTab
+                key={item.href}
+                href={withSymbol(item.href)}
+                active={isActive}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>{item.label}</span>
+                  {score !== null && (
+                    <span
+                      className="tabular-nums text-sm"
+                      style={{ color: getScoreColor(score), fontWeight: isActive ? 600 : 500 }}
+                    >
+                      {score}
+                    </span>
+                  )}
+                </div>
+              </PillTab>
+            );
+          })}
         </div>
-
-        {/* Normal tabs outside the inner ring (Hidden on mobile, shown in Row 2 instead) */}
-        <div className="hidden md:flex items-center gap-0.5 shrink-0 pr-1">
+        <div className="flex shrink-0 items-center gap-0.5 pr-1">
           {terminalTabs.map((tab) => (
             <PillTab key={tab.href} href={withSymbol(tab.href)} active={pathname === tab.href}>
               {tab.label}
@@ -350,10 +344,16 @@ function TopBarInner() {
     );
   }
 
+  const showMobileAssetChrome = hasAssetSelected;
+  const headerSearch = HEADER_SEARCH_PATHS.includes(pathname);
+
   return (
     <>
     <motion.header
-      className="fixed left-0 md:left-[72px] right-0 top-0 z-30 flex h-[60px] items-center px-2 md:px-6"
+      className={cn(
+        "fixed left-0 md:left-[72px] right-0 top-0 z-30 flex flex-col md:h-[60px] md:flex-row md:items-center md:px-6",
+        showMobileAssetChrome ? "px-0" : "h-[60px] items-center px-2",
+      )}
       animate={scrolled ? "scrolled" : "top"}
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       variants={({
@@ -365,7 +365,7 @@ function TopBarInner() {
           boxShadow: "0 1px 8px rgba(0,0,0,0)",
         },
         scrolled: {
-          background: "rgba(255,255,255,0.82)",
+          background: "rgba(255,255,255,0.92)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           borderBottom: "1px solid rgba(226,226,226,0.6)",
@@ -374,28 +374,104 @@ function TopBarInner() {
       }) as any}
       transition={{ duration: 0.25, ease: "easeInOut" }}
     >
-      <div className="flex h-full items-center min-w-0 w-full">
-        <div className="flex h-full items-center overflow-x-auto scrollbar-none min-w-0 w-full md:w-auto md:flex-1 justify-center md:justify-start">
+      {/* Mobile asset chrome: logo + search + menu (screenshot match) */}
+      {showMobileAssetChrome && (
+        <div
+          className="flex h-14 items-center gap-2.5 px-3 md:hidden"
+          style={{ background: "var(--qc-bg)" }}
+        >
+          <Link
+            href="/screener/home"
+            className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px]"
+            aria-label="QuantCase home"
+          >
+            <Image
+              src="/logos/logo-dark.png"
+              alt="QuantCase"
+              width={36}
+              height={36}
+              priority
+              className="h-full w-full object-cover"
+            />
+          </Link>
+          {headerSearch ? (
+            <StockSearch className="min-w-0 flex-1 !w-auto sm:!w-auto" iconSide="right" />
+          ) : (
+            <div className="min-w-0 flex-1" />
+          )}
+        </div>
+      )}
+
+      {/* Desktop left + right; also used for non-asset mobile pages */}
+      <div
+        className={cn(
+          "h-full min-w-0 w-full items-center",
+          showMobileAssetChrome ? "hidden md:flex" : "flex",
+        )}
+      >
+        <div className="flex h-full min-w-0 w-full items-center justify-center overflow-x-auto scrollbar-none md:w-auto md:flex-1 md:justify-start">
           {leftZone}
         </div>
         {rightZone && (
-          <div className="hidden md:block ml-auto shrink-0 pl-3 w-[200px] sm:w-[300px]">
+          <div className="ml-auto hidden w-[200px] shrink-0 pl-3 sm:w-[300px] md:block">
             {rightZone}
           </div>
         )}
       </div>
+
+      {/* Mobile MOD factor row — equal slots + matching L/R padding */}
+      {showMobileAssetChrome && (
+        <div
+          className="grid h-11 grid-cols-4 items-center gap-1 px-3 md:hidden"
+          style={{ background: "var(--qc-bg)", borderBottom: "1px solid var(--qc-hair)" }}
+        >
+          <span
+            className="flex items-center justify-center text-center text-[11px] font-medium tracking-[0.06em]"
+            style={{ color: "var(--qc-ink-2)" }}
+          >
+            M-O-D
+          </span>
+          {FACTOR_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
+            const score = getScore(item.label);
+            return (
+              <PillTab
+                key={item.href}
+                href={withSymbol(item.href)}
+                active={isActive}
+                grow
+                className="!w-full !justify-center !gap-0.5 !px-1 !py-1.5 !text-[11px]"
+              >
+                <div className="flex min-w-0 items-center justify-center gap-0.5">
+                  <span className="truncate">{item.label}</span>
+                  {score !== null && (
+                    <span
+                      className="shrink-0 text-[10px] font-semibold tabular-nums"
+                      style={{
+                        color: isActive ? "var(--qc-up)" : getScoreColor(score),
+                      }}
+                    >
+                      {score}
+                    </span>
+                  )}
+                </div>
+              </PillTab>
+            );
+          })}
+        </div>
+      )}
     </motion.header>
 
-      {/* Mobile-only Terminal Sub-nav (Row 2) */}
+      {/* Mobile-only Terminal Sub-nav (View / Fundamentals / Technicals) */}
       {hasAssetSelected && (
         <motion.div 
           initial={false}
           animate={{ y: scrolled && scrollDirection === "down" ? "-100%" : 0 }}
           transition={{ duration: 0.25, ease: "easeInOut" }}
-          className="md:hidden fixed left-0 right-0 top-[60px] z-20 flex h-[44px] items-center overflow-x-auto scrollbar-none px-4"
+          className="fixed left-0 right-0 top-[100px] z-20 flex h-[44px] items-center overflow-x-auto scrollbar-none px-4 md:hidden"
           style={{ background: "var(--qc-bg)", borderBottom: "1px solid var(--qc-hair)" }}
         >
-          <div className="flex items-center gap-1 mx-auto">
+          <div className="mx-auto flex items-center gap-1">
             {terminalTabs.map((item) => (
               <PillTab key={item.href} href={withSymbol(item.href)} active={pathname === item.href}>
                 {item.label}
@@ -415,7 +491,7 @@ function TopBarGuard() {
     <Suspense
       fallback={
         <header
-          className="fixed left-0 md:left-[72px] right-0 top-0 z-30 h-[60px]"
+          className="fixed left-0 top-0 z-30 h-[60px] md:left-[72px] right-0"
           style={{ background: "transparent" }}
         />
       }

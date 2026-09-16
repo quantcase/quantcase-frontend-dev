@@ -198,8 +198,12 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
         }}
         className="qc-dark-gradient-card bottom-[calc(60px+env(safe-area-inset-bottom)+12px)] md:bottom-6"
       >
-        {/* Inline stock search */}
-        <div ref={searchRef} style={{ position: "relative", display: "flex", alignItems: "center" }}>
+        {/* Inline stock search — desktop only; mobile uses top-bar search chrome */}
+        <div
+          ref={searchRef}
+          className="hidden md:flex"
+          style={{ position: "relative", alignItems: "center" }}
+        >
           {searchOpen ? (
             <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
               <Search size={13} style={{ position: "absolute", left: 12, color: "rgba(255,255,255,0.55)", pointerEvents: "none" }} />
@@ -256,8 +260,8 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
           )}
         </div>
 
-        {/* Divider */}
-        <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.12)", flexShrink: 0 }} />
+        {/* Divider — desktop only with search */}
+        <div className="hidden md:block" style={{ width: 1, height: 20, background: "rgba(255,255,255,0.12)", flexShrink: 0 }} />
 
         {/* Track button */}
         {inTracking ? (
@@ -382,6 +386,7 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
       {searchOpen && searchResults.length > 0 && (
         <div
           ref={dropdownRef}
+          className="hidden bottom-[calc(60px+env(safe-area-inset-bottom)+12px+56px)] md:block md:bottom-[calc(1.5rem+56px)]"
           style={{
             position: "fixed",
             left: "50%",
@@ -397,7 +402,6 @@ export function AssetActionBar({ ticker, extra }: AssetActionBarProps) {
             maxHeight: 300,
             overflowY: "auto",
           }}
-          className="bottom-[calc(60px+env(safe-area-inset-bottom)+12px+56px)] md:bottom-[calc(1.5rem+56px)]"
         >
           {searchResults.map((option, index) => (
             <button

@@ -23,11 +23,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight } from "lucide-react";
-import type { PeerRow } from "@/hooks/useScreenerPeers";
+import type { PeerRow, PeerColumnDef } from "@/hooks/useScreenerPeers";
 
-function fmtNum(val: number | null | undefined): string {
+function fmtNum(val: number | null | undefined, decimals = 2): string {
   if (val === null || val === undefined) return "—";
-  return val.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+  return val.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: decimals });
 }
 
 function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
@@ -44,13 +44,31 @@ const MONO: React.CSSProperties = {
   letterSpacing: "0.02em",
 };
 
-export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
+const LEGACY_KEY_MAP: Record<string, string> = {
+  PRICE: 'cmp',
+  PE_TTM: 'pe',
+  MCAP_SNAPSHOT: 'marketCapCr',
+  DIVIDEND_YIELD: 'divYld',
+  PAT: 'npQtrCr',
+  PAT_CAGR: 'qtrProfitVar',
+  REV_OP: 'salesQtrCr',
+  REV_CAGR: 'qtrSalesVar',
+  ROCE: 'roce',
+};
+
+export function PeerComparisonDataTable({
+  peers,
+  columnsConfig,
+}: {
+  peers: PeerRow[];
+  columnsConfig?: PeerColumnDef[];
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
 
-  const columns = useMemo<ColumnDef<PeerRow>[]>(
-    () => [
+  const columns = useMemo<ColumnDef<PeerRow>[]>(() => {
+    const baseCols: ColumnDef<PeerRow>[] = [
       {
         id: "sno",
         header: "S.No.",
@@ -77,6 +95,43 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
         ),
         size: 220,
       },
+    ];
+
+    if (columnsConfig && columnsConfig.length > 0) {
+      const metricCols: ColumnDef<PeerRow>[] = columnsConfig.map((col) => {
+        const isVariance = col.label.toLowerCase().includes("var") || col.label.toLowerCase().includes("growth");
+        return {
+          id: col.key,
+          accessorFn: (row: PeerRow) => {
+            const val = row[col.key];
+            if (val !== undefined && val !== null) return val;
+            const legacyKey = LEGACY_KEY_MAP[col.key];
+            if (legacyKey && row[legacyKey] !== undefined && row[legacyKey] !== null) return row[legacyKey];
+            return null;
+          },
+          header: col.label,
+          cell: ({ getValue }) => {
+            const val = getValue() as number | null;
+            const color = isVariance && val !== null
+              ? val > 0
+                ? "var(--qc-up)"
+                : val < 0
+                ? "var(--qc-down)"
+                : "var(--qc-ink)"
+              : "var(--qc-ink)";
+            return (
+              <span style={{ ...MONO, fontSize: "var(--qc-fz-12)", color }}>
+                {fmtNum(val, col.decimalPlaces ?? 2)}
+              </span>
+            );
+          },
+        };
+      });
+      return [...baseCols, ...metricCols];
+    }
+
+    return [
+      ...baseCols,
       {
         accessorKey: "cmp",
         header: "CMP Rs.",
@@ -156,9 +211,8 @@ export function PeerComparisonDataTable({ peers }: { peers: PeerRow[] }) {
           <span style={{ ...MONO, fontSize: "var(--qc-fz-12)", color: "var(--qc-ink)" }}>{fmtNum(getValue() as number | null)}</span>
         ),
       },
-    ],
-    []
-  );
+    ];
+  }, [columnsConfig]);
 
   const table = useReactTable({
     data: peers,

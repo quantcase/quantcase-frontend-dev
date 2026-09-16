@@ -7,6 +7,13 @@ interface ScoreVerdict {
   verdict: string;
 }
 
+export interface PeerColumnDef {
+  key: string;
+  label: string;
+  decimalPlaces?: number;
+  displayOrder?: number;
+}
+
 export interface PeerRow {
   symbol: string;
   name: string;
@@ -24,6 +31,7 @@ export interface PeerRow {
   management: ScoreVerdict;
   opportunity: ScoreVerdict;
   deal: ScoreVerdict;
+  [key: string]: any;
 }
 
 export interface ScreenerPeersResponse {
@@ -33,6 +41,7 @@ export interface ScreenerPeersResponse {
   latestQuarter: string;
   yearAgoQuarter: string;
   count: number;
+  columns?: PeerColumnDef[];
   peers: PeerRow[];
 }
 

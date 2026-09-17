@@ -8,7 +8,8 @@ import { Suspense, useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { StockSearch } from "@/components/molecules/stock-search";
-import { useOverviewFetch } from "@/hooks/useOverviewAnalysis";
+import { useAnalysis } from "@/hooks/useAnalysis";
+import type { InsightType } from "@/types/analysis";
 
 /** Terminal tabs that carry a stock search in the top-bar's right rail. */
 const HEADER_SEARCH_PATHS = ["/screener/fundamentals", "/screener/technicals", "/screener/management", "/screener/opportunity", "/screener/deal", "/screener/overview"];
@@ -153,12 +154,22 @@ function TopBarInner() {
   const scrolled = useScrolled();
   const scrollDirection = useScrollDirection();
 
-  const { data: overviewData } = useOverviewFetch(symbol || "");
+  const { getInsight } = useAnalysis(symbol || "");
 
   const getScore = (type: string) => {
-    if (!overviewData) return null;
-    const dim = overviewData.dimensions.find((d) => d.type === type.toLowerCase());
-    return dim ? Math.round(dim.score) : null;
+    const insight = getInsight(type.toLowerCase() as InsightType);
+    if (!insight) return null;
+    if (typeof insight.score === "number" && !isNaN(insight.score)) {
+      return Math.round(insight.score);
+    }
+    if (insight.lenses && insight.lenses.length > 0) {
+      const valid = insight.lenses.filter((l) => typeof l.score === "number" && !isNaN(l.score));
+      if (valid.length > 0) {
+        const sum = valid.reduce((acc, l) => acc + l.score, 0);
+        return Math.round(sum / valid.length);
+      }
+    }
+    return null;
   };
   
   const getScoreColor = (score: number | null) => {

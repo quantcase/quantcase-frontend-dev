@@ -4,7 +4,6 @@ import React, { Suspense, useState, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { useLenses } from "@/hooks/useLenses";
-import { useOverviewFetch } from "@/hooks/useOverviewAnalysis";
 import { useScreenerData } from "@/hooks/useScreenerData";
 import type { ScreenerData } from "@/types/screener";
 
@@ -365,10 +364,10 @@ function InsightDashboard({
         ?? null
     : null;
 
-  const { data: overviewData } = useOverviewFetch(ticker);
-  const overviewDim = overviewData?.dimensions.find((d) => d.type === type.toLowerCase());
-  const navScore = overviewDim != null ? Math.round(overviewDim.score) : null;
-  const consistentScore = navScore ?? (scorecardLenses.length > 0 ? getTotalScore(scorecardLenses) : Math.round(insight.score));
+  const consistentScore =
+    typeof insight.score === "number" && !isNaN(insight.score)
+      ? Math.round(insight.score)
+      : (scorecardLenses.length > 0 ? getTotalScore(scorecardLenses) : 0);
 
   const lensHeading = `${TYPE_LABELS[type]} Lenses`;
 

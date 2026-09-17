@@ -151,6 +151,9 @@ export interface L2DispatchOptions {
   force?: boolean;
   fiscalYear?: string;
   quarter?: string;
+  requireHistoricBase?: boolean;
+  baseFiscalYear?: string;
+  baseQuarter?: string;
 }
 
 // Preview is now a fast signal-availability report (one query for the whole batch) rather than

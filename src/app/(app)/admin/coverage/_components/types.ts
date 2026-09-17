@@ -816,3 +816,57 @@ export interface SchedulerJobTriggerResponse {
   message: string;
   run_id: string;
 }
+
+// ─── Lens Tier Configs Management ──────────────────────────────────────────
+
+import type { HtmlSkillConfig } from "@/app/(app)/admin/html-skills/_components/types";
+
+export interface LensTierSummary {
+  key: string;
+  name: string;
+  lensCount: number;
+}
+
+export interface LensSkillMeta {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+}
+
+export interface LensTierMatrixResponse {
+  tiers: LensTierSummary[];
+  lenses: LensSkillMeta[];
+  configs: Record<string, Record<string, HtmlSkillConfig>>; // [tierKey][lensSlug] -> config
+}
+
+export interface BulkUpdateTierPayload {
+  tierKey: string;
+  slugs?: string[];
+  updates: {
+    extraction_model?: string;
+    fact_validation_model?: string;
+    html_template_model?: string;
+    visual_qa_model?: string;
+    max_transcript_qtrs?: number | null;
+    max_ppt_qtrs?: number | null;
+    max_annual_report_years?: number | null;
+    max_market_data_months?: number | null;
+    historic_max_transcript_qtrs?: number | null;
+    historic_max_ppt_qtrs?: number | null;
+    historic_max_annual_report_years?: number | null;
+    historic_max_market_data_months?: number | null;
+    enable_data_validation?: boolean;
+    data_validation_loops?: number;
+    enable_html_validation?: boolean;
+    max_tokens?: number | null;
+    strip_html?: boolean | null;
+  };
+}
+
+export interface BulkUpdateTierResponse {
+  success: boolean;
+  updatedCount: number;
+  tierKey: string;
+  appliedFields: string[];
+}

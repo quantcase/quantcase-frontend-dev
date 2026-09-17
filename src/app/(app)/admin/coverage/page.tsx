@@ -8,13 +8,14 @@ import { L2MultiDispatchTab } from "./_components/L2MultiDispatchTab";
 import { L2CompressedMultiDispatchTab } from "./_components/L2CompressedMultiDispatchTab";
 import { L2HtmlRegenerationTab } from "./_components/L2HtmlRegenerationTab";
 import { L2CompressedHtmlRegenerationTab } from "./_components/L2CompressedHtmlRegenerationTab";
+import { LensTierConfigsTab } from "./_components/LensTierConfigsTab";
 import { L3MultiDispatchTab } from "./_components/L3MultiDispatchTab";
 import { DailyRunsTab } from "./_components/DailyRunsTab";
 import { ProwessIngestionTab } from "./_components/ProwessIngestionTab";
 import { ProwessCoverageTab } from "./_components/ProwessCoverageTab";
 import { HelpModal } from "./_components/HelpModal";
 
-type CoverageTab = "l1" | "l2" | "l2-compressed" | "l2-html-regen" | "l2-compressed-html-regen" | "l3" | "daily" | "prowess" | "prowess-coverage";
+type CoverageTab = "l1" | "l2" | "l2-html-regen" | "l2-compressed" | "l2-compressed-html-regen" | "lens-tier-configs" | "l3" | "daily" | "prowess" | "prowess-coverage";
 
 const TABS: { id: CoverageTab; label: string }[] = [
   { id: "l1", label: "L1" },
@@ -22,6 +23,7 @@ const TABS: { id: CoverageTab; label: string }[] = [
   { id: "l2-html-regen", label: "L2 HTML Regen" },
   { id: "l2-compressed", label: "L2.5" },
   { id: "l2-compressed-html-regen", label: "L2.5 HTML Regen" },
+  { id: "lens-tier-configs", label: "Lens Tier Configs" },
   { id: "l3", label: "L3 / L4" },
   { id: "daily", label: "Daily Runs" },
   { id: "prowess", label: "Prowess Ingestion" },
@@ -144,6 +146,7 @@ export default function CoveragePage() {
         {activeTab === "l2-html-regen" && <L2HtmlRegenerationTab />}
         {activeTab === "l2-compressed" && <L2CompressedMultiDispatchTab />}
         {activeTab === "l2-compressed-html-regen" && <L2CompressedHtmlRegenerationTab />}
+        {activeTab === "lens-tier-configs" && <LensTierConfigsTab />}
         {activeTab === "l3" && <L3MultiDispatchTab />}
         {activeTab === "daily" && <DailyRunsTab />}
         {activeTab === "prowess" && <ProwessIngestionTab />}

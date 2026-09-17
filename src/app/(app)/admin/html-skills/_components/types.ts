@@ -126,6 +126,10 @@ export interface HtmlSkillConfig {
   name: string;
   data_extraction_prompt: string;
   html_template_prompt: string;
+  fact_validation_prompt?: string;
+  visual_qa_prompt?: string;
+  expected_json_schema?: string;
+  json_validation_prompt?: string;
   html_template_filename?: string | null;
   use_template_engine: boolean;
   enable_data_validation: boolean;

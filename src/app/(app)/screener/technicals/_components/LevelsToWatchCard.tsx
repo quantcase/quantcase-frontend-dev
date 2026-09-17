@@ -15,7 +15,15 @@ const ROWS: { key: "immediate" | "structural" | "regime"; heading: string }[] = 
   { key: "regime", heading: "Regime" },
 ];
 
-const fmtPrice = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
+const fmtPrice = (n: number) => {
+  if (Math.abs(n) < 100) {
+    return `₹${(Math.round(n * 100) / 100).toLocaleString("en-IN", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+  return `₹${Math.round(n).toLocaleString("en-IN")}`;
+};
 
 /**
  * The AI's three watch levels, with each one's distance from the current price

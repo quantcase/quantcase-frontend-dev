@@ -71,6 +71,12 @@ function fmtLevel(v: number | string | null | undefined): string {
   if (v === undefined || v === null || v === "") return "—";
   const num = typeof v === "number" ? v : parseFloat(String(v));
   if (isNaN(num)) return "—";
+  if (Math.abs(num) < 100) {
+    return (Math.round(num * 100) / 100).toLocaleString("en-IN", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+  }
   return Math.round(num).toLocaleString("en-IN");
 }
 

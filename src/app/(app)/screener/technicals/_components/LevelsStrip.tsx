@@ -17,7 +17,16 @@ interface LevelsStripProps {
   changeIsPositive: boolean;
 }
 
-const fmt = (n: number | null | undefined) => n == null ? "—" : `₹${Math.round(n).toLocaleString("en-IN")}`;
+const fmt = (n: number | null | undefined) => {
+  if (n == null) return "—";
+  if (Math.abs(n) < 100) {
+    return `₹${(Math.round(n * 100) / 100).toLocaleString("en-IN", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+  return `₹${Math.round(n).toLocaleString("en-IN")}`;
+};
 const pctFmt = (n: number | null | undefined) => {
   if (n == null) return "—";
   const sign = n >= 0 ? "+" : "";

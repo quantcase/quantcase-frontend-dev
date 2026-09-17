@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { BACKEND_URL } from "@/lib/constants";
 import { rawFetch } from "@/lib/api";
 
@@ -57,10 +57,15 @@ export function usePrices(symbol: string, options?: UsePricesOptions) {
   const [indicators, setIndicators] = useState<PriceIndicators | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const years = options?.years;
   const from = options?.from;
   const to = options?.to;
+
+  const refresh = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
     if (!symbol?.trim()) return;
@@ -68,6 +73,10 @@ export function usePrices(symbol: string, options?: UsePricesOptions) {
     if (years != null) params.set("years", String(years));
     if (from) params.set("from", from);
     if (to) params.set("to", to);
+    if (refreshTrigger > 0) {
+      params.set("refresh", "1");
+      params.set("_t", String(Date.now()));
+    }
     const qs = params.toString() ? `?${params.toString()}` : "";
 
     rawFetch<PricesResponse>(`${BACKEND_URL}/api/screener/${symbol}/prices${qs}`, {
@@ -79,7 +88,7 @@ export function usePrices(symbol: string, options?: UsePricesOptions) {
       },
       onError: (err) => { setError(err); setLoading(false); },
     });
-  }, [symbol, years, from, to]);
+  }, [symbol, years, from, to, refreshTrigger]);
 
-  return { prices, indicators, loading, error };
+  return { prices, indicators, loading, error, refresh };
 }

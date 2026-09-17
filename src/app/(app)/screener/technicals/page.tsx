@@ -99,9 +99,9 @@ function TechnicalsContent() {
 
   const {
     data, derived, loading, error,
-    insightStatus, insightProgress, isUpdating, isRefreshing, refreshError, refresh,
+    insightStatus, insightProgress, isUpdating, isRefreshing, refreshError, refresh: refreshTechnicals,
   } = useTechnicals(symbol);
-  const { prices, indicators, loading: pricesLoading, error: pricesError } = usePrices(symbol, { years: 2 });
+  const { prices, indicators, loading: pricesLoading, error: pricesError, refresh: refreshPrices } = usePrices(symbol, { years: 2 });
 
   const [dismissedRefreshError, setDismissedRefreshError] = useState(false);
   const lastRefreshAtRef = useRef(0);
@@ -111,8 +111,9 @@ function TechnicalsContent() {
     if (now - lastRefreshAtRef.current < REFRESH_COOLDOWN_MS) return;
     lastRefreshAtRef.current = now;
     setDismissedRefreshError(false);
-    refresh();
-  }, [refresh]);
+    refreshTechnicals();
+    refreshPrices();
+  }, [refreshTechnicals, refreshPrices]);
 
   const refreshDisabled = isRefreshing || insightStatus === "generating";
   const { data: screenerData } = useScreenerData(symbol);

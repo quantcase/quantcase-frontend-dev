@@ -296,6 +296,8 @@ export function L2MultiDispatchTab() {
   // Incremental (unchecked) is disabled for now — Historic mode is forced on and the checkbox is locked.
   const [historic, setHistoric] = useState(true);
   const [force, setForce] = useState(false);
+  const [fiscalYear, setFiscalYear] = useState("");
+  const [quarter, setQuarter] = useState("");
 
   // Preview
   const [preview, setPreview] = useState<L2PreviewResponse | null>(null);
@@ -407,7 +409,13 @@ export function L2MultiDispatchTab() {
   // flag a stale Preview page (see pagination below) — it no longer gates Run.
   const previewSlug = effectiveSkillSlugs[0];
   const previewTickers = source === "csv" && previewSlug ? csvSkillToTickers[previewSlug] : tickerBody.tickers;
-  const previewReqBody = { ...tickerBody, slug: previewSlug, ...(previewTickers ? { tickers: previewTickers } : {}) };
+  const previewReqBody = {
+    ...tickerBody,
+    slug: previewSlug,
+    ...(previewTickers ? { tickers: previewTickers } : {}),
+    ...(fiscalYear.trim() ? { fiscalYear: fiscalYear.trim().toUpperCase() } : {}),
+    ...(quarter.trim() ? { quarter: quarter.trim().toUpperCase() } : {}),
+  };
 
   const previewKey = JSON.stringify(previewReqBody);
   const canPreview = sourceUsable && effectiveSkillSlugs.length > 0 && !previewLoading && (source !== "csv" || (previewTickers?.length ?? 0) > 0);
@@ -451,6 +459,8 @@ export function L2MultiDispatchTab() {
     const runBody: Omit<L2DispatchOptions, "slug"> = { ...tickerBody };
     if (historic) runBody.historic = true;
     if (force) runBody.force = true;
+    if (fiscalYear.trim()) runBody.fiscalYear = fiscalYear.trim().toUpperCase();
+    if (quarter.trim()) runBody.quarter = quarter.trim().toUpperCase();
     effectiveSkillSlugs.forEach((slug) => {
       const perSkillTickers = source === "csv" ? csvSkillToTickers[slug] : runBody.tickers;
       const perSkillBody = { ...runBody, slug, ...(perSkillTickers ? { tickers: perSkillTickers } : {}) };
@@ -561,6 +571,82 @@ export function L2MultiDispatchTab() {
             label="Force"
             hint="Bypasses cache on Run. Run only — ignored by Preview."
           />
+        </div>
+
+        {/* Enforce Historic Time Period */}
+        <div className="pt-3 border-t border-hair space-y-2">
+          <div>
+            <label className={LABEL_CLS}>
+              Enforce Historic Period <span className="normal-case tracking-normal font-normal">(Optional)</span>
+            </label>
+            <p className="text-[11.5px] text-ink-3">
+              Lock the base historic run to a specific period (e.g. <span className="font-mono text-ink font-medium">FY2026 Q4</span>) rather than defaulting to the latest call/report found in DB.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="w-40">
+              <label className="block text-[10px] font-medium text-ink-3 mb-1">Fiscal Year</label>
+              <input
+                value={fiscalYear}
+                onChange={(e) => setFiscalYear(e.target.value)}
+                placeholder="e.g. FY2026"
+                className="w-full rounded-md border border-hair bg-card px-2.5 py-1.5 text-xs text-ink placeholder:text-ink-3/40 outline-none focus:border-hair-strong font-mono uppercase"
+              />
+            </div>
+            <div className="w-36">
+              <label className="block text-[10px] font-medium text-ink-3 mb-1">Quarter</label>
+              <select
+                value={quarter}
+                onChange={(e) => setQuarter(e.target.value)}
+                className="w-full rounded-md border border-hair bg-card px-2.5 py-1.5 text-xs text-ink outline-none focus:border-hair-strong font-mono"
+              >
+                <option value="">Latest / Annual</option>
+                <option value="Q4">Q4</option>
+                <option value="Q3">Q3</option>
+                <option value="Q2">Q2</option>
+                <option value="Q1">Q1</option>
+              </select>
+            </div>
+            {/* Quick Presets */}
+            <div className="flex items-center gap-1.5 self-end pb-0.5">
+              <button
+                type="button"
+                onClick={() => { setFiscalYear("FY2026"); setQuarter("Q4"); }}
+                className={`text-[11px] px-2.5 py-1 rounded border transition-colors ${
+                  fiscalYear.toUpperCase() === "FY2026" && quarter === "Q4"
+                    ? "bg-ink text-[var(--qc-on-dark)] border-ink font-medium"
+                    : "border-hair text-ink-3 hover:text-ink hover:bg-secondary"
+                }`}
+              >
+                FY2026 Q4 (Base)
+              </button>
+              <button
+                type="button"
+                onClick={() => { setFiscalYear("FY2027"); setQuarter("Q1"); }}
+                className={`text-[11px] px-2.5 py-1 rounded border transition-colors ${
+                  fiscalYear.toUpperCase() === "FY2027" && quarter === "Q1"
+                    ? "bg-ink text-[var(--qc-on-dark)] border-ink font-medium"
+                    : "border-hair text-ink-3 hover:text-ink hover:bg-secondary"
+                }`}
+              >
+                FY2027 Q1
+              </button>
+              {(fiscalYear || quarter) && (
+                <button
+                  type="button"
+                  onClick={() => { setFiscalYear(""); setQuarter(""); }}
+                  className="text-[11px] text-ink-3 hover:text-ink underline ml-1"
+                >
+                  Clear (Auto)
+                </button>
+              )}
+            </div>
+          </div>
+          {fiscalYear && (
+            <p className="text-[11px] text-brand font-medium">
+              ✓ Historic period enforced: <span className="font-mono font-semibold">{fiscalYear.toUpperCase()} {quarter || "(Latest in FY / Annual Report)"}</span>
+            </p>
+          )}
         </div>
       </div>
 

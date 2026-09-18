@@ -202,22 +202,140 @@ function LensDescription({ text, name, accentColor, disableHover }: { text: stri
   );
 }
 
+// ─── Mobile accordion lens card ──────────────────────────────────────────────
+
+function MobileLensCard({ lens, onLensClick, ticker }: { lens: InsightLens; onLensClick?: (slug: string) => void; ticker?: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
+  const sentiment = lensSentiment(lens.status, pct);
+  const accentColor = sentimentColor(sentiment);
+  const accentBg = sentiment === "positive" ? "rgba(31,122,74,0.08)" : sentiment === "caution" ? "rgba(180,115,26,0.08)" : "rgba(220,38,38,0.08)";
+  const statusLabel = (lens.status || (pct >= 70 ? "STRONG" : pct >= 40 ? "MODERATE" : "NEUTRAL")).toUpperCase();
+  const Icon = LENS_ICON_CONFIG[lens.slug];
+  const isEarnings = [
+    'earnings-forecast', 'earnings_forecast',
+    'earning-quality', 'earnings-quality', 'earnings_quality',
+    'pe-rerating-potential'
+  ].includes(lens.slug);
+
+  return (
+    <div style={{
+      borderRadius: 16, background: "var(--qc-card)", border: "1px solid var(--qc-hair)",
+      overflow: "hidden",
+    }}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-3 text-left"
+        style={{ padding: "14px 14px 14px 16px", background: "none", border: "none", cursor: "pointer" }}
+        aria-expanded={expanded}
+      >
+        {/* Icon in colored bg */}
+        {Icon && (
+          <div style={{
+            flexShrink: 0, width: 36, height: 36, borderRadius: 10,
+            background: accentBg, display: "flex", alignItems: "center", justifyContent: "center",
+            color: accentColor,
+          }}>
+            <Icon size={16} strokeWidth={1.5} />
+          </div>
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {lens.name}
+            </span>
+            <span style={{
+              flexShrink: 0, fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 999,
+              color: accentColor, background: accentBg, fontFamily: "var(--qc-font-sans)",
+            }}>
+              {statusLabel}
+            </span>
+          </div>
+          {lens.subtitle && (
+            <div style={{ fontSize: 10, color: "var(--qc-ink-3)", marginTop: 2, fontFamily: "var(--qc-font-sans)" }}>
+              {lens.subtitle}
+            </div>
+          )}
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"
+          style={{
+            width: 16, height: 16, flexShrink: 0, color: "var(--qc-ink-3)",
+            transform: expanded ? "rotate(180deg)" : "none",
+            transition: "transform 0.2s",
+          }}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      {expanded && (
+        <div style={{ padding: "0 16px 16px" }}>
+          <div style={{ height: 1, background: "var(--qc-hair)", marginBottom: 14 }} />
+          <div style={{ display: "flex", gap: 12 }}>
+            {/* Accent bar */}
+            <div style={{ width: 3, borderRadius: 99, flexShrink: 0, background: accentColor, alignSelf: "stretch" }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {/* Stat highlight */}
+              <div style={{
+                display: "inline-block", fontSize: 11, fontWeight: 600, padding: "4px 10px",
+                borderRadius: 8, color: accentColor, background: accentBg, marginBottom: 8,
+                fontFamily: "var(--qc-font-sans)",
+              }}>
+                {lens.score}/{lens.max_score} — {statusLabel}
+              </div>
+              <p style={{
+                fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.65,
+                margin: 0, fontFamily: "var(--qc-font-sans)",
+              }}>
+                {renderMd(lens.description)}
+              </p>
+
+              {isEarnings && ticker && (
+                <LensScenarios slug={lens.slug} ticker={ticker} />
+              )}
+
+              {onLensClick && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onLensClick(lens.slug); }}
+                  style={{
+                    marginTop: 12, display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "8px 16px", borderRadius: 10,
+                    background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+                    fontSize: 12, fontWeight: 600, color: "var(--qc-ink)",
+                    fontFamily: "var(--qc-font-sans)", cursor: "pointer",
+                  }}
+                >
+                  <ExpandIcon />
+                  View full analysis
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function InsightLenses({ lenses, heading, subtitle, onLensClick, ticker }: InsightLensesProps) {
   if (!lenses.length) return null;
 
   return (
-    // Header matches the fundamentals page cards (SectionPanel: sans title +
-    // subtitle), so every research card across the screener reads the same.
     <SectionPanel
       className="flex-1"
       title={subtitle ?? `Scored assessment across ${lenses.length} analytical ${lenses.length === 1 ? "lens" : "lenses"}`}
       contentClassName="min-w-0"
     >
-      {/* Grid of individually color-coded cards. Exactly 3 lenses sit in a single
-          row of 3; any other count uses 2 columns (so 4 → 2x2). Full class strings
-          kept static so Tailwind's JIT doesn't purge them. */}
+      {/* ── Mobile: Accordion list ── */}
+      <div className="flex flex-col gap-2.5 md:hidden" style={{ margin: "-16px -16px", padding: "12px 12px 12px" }}>
+        {lenses.map((lens) => (
+          <MobileLensCard key={lens.slug} lens={lens} onLensClick={onLensClick} ticker={ticker} />
+        ))}
+      </div>
+
+      {/* ── Desktop: Grid (unchanged) ── */}
       <div
-        className={`grid grid-cols-1 ${lenses.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+        className={`hidden md:grid ${lenses.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}
         style={{ gap: 10, height: "100%" }}
       >
         {lenses.map((lens) => {

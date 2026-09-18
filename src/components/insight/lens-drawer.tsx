@@ -54,13 +54,13 @@ export function LensDrawer({ lens, onClose, ticker }: LensDrawerProps) {
             }}
           />
 
-          {/* Drawer panel */}
+          {/* Drawer panel — full screen on mobile, side drawer on desktop */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
-            className="w-full sm:w-[min(85vw,1100px)]"
+            className="w-full md:w-[min(85vw,1100px)]"
             style={{
               position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 70,
               background: "var(--qc-card)",

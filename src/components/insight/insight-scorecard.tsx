@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { InsightData, InsightLens } from "@/types/analysis";
 import { DarkGradientCard, MonoLabel } from "@/components/ds";
@@ -236,6 +236,9 @@ interface SVGRadarProps {
 }
 
 function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex, onLensClick }: SVGRadarProps) {
+  // Unique prefix so mobile + desktop radars don't collide on gradient/filter ids
+  // (duplicate url(#…) refs were wiping the fill + solid stroke on desktop).
+  const uid = useId().replace(/:/g, "");
   const WIDTH = 480;
   const HEIGHT = 320;
   const cx = WIDTH / 2;
@@ -245,10 +248,11 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
   const n = data.length;
   // 4 rings: 25%, 50%, 75%, 100% — marks the threshold zones visually
   const rings = [0.25, 0.5, 0.75, 1];
-  const glowId = "radar-glow";
+  const glowId = `radar-glow-${uid}`;
+  const areaFillId = `radar-area-fill-${uid}`;
 
   // One unique gradient per axis based on its own score tier
-  const gradIds = data.map((_, i) => `radar-seg-grad-${i}`);
+  const gradIds = data.map((_, i) => `radar-seg-grad-${uid}-${i}`);
 
   // Vertex positions scaled by each axis's own pct
   // Index 0: Top (angle 0), Index 1: Right (angle PI/2), Index 2: Bottom (angle PI), Index 3: Left (angle 3*PI/2)
@@ -339,7 +343,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
           })}
 
           {/* Radial fill from center — uses overall tier color */}
-          <radialGradient id="radar-area-fill" cx="50%" cy="50%" r="50%">
+          <radialGradient id={areaFillId} cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor={fillTier.hex} stopOpacity={0.35} />
             <stop offset="100%" stopColor={fillTier.hex} stopOpacity={0.06} />
           </radialGradient>
@@ -389,7 +393,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
         {/* ── Data area fill (radial gradient, overall tier) ── */}
         <motion.path
           d={dataPath}
-          fill="url(#radar-area-fill)"
+          fill={`url(#${areaFillId})`}
           initial={{ opacity: 0, scale: 0.2 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
@@ -401,7 +405,7 @@ function SVGRadar({ data, overallScore, insightType, hoveredSlug, onHoverVertex,
           const nextPt = dataPoints[(i + 1) % n];
           const { hex: fromColor } = axisStatusColor(data[i].pct);
           const { hex: toColor } = axisStatusColor(data[(i + 1) % n].pct);
-          const segGradId = `seg-stroke-${i}`;
+          const segGradId = `seg-stroke-${uid}-${i}`;
           return (
             <g key={i}>
               <defs>
@@ -761,6 +765,8 @@ interface InsightScorecardProps {
 export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, scoreOverride }: InsightScorecardProps) {
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ pctX: 0.5, pctY: 0 });
+  const [mobileVerdictExpanded, setMobileVerdictExpanded] = useState(false);
+  const [mobileLensPopup, setMobileLensPopup] = useState<InsightLens | null>(null);
 
   const scorecardLenses = lenses ?? insight.lenses;
 
@@ -768,9 +774,6 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
   const bandBg = verdictBandBg(insight.verdict_band ?? insight.verdict);
   const bandLabel = (insight.verdict_band || insight.verdict || "").toUpperCase();
 
-  // Overall score: prefer scoreOverride (from top nav MOD section),
-  // then lens rollup average (which matches how top nav computes it),
-  // and fall back to insight.score only if no lenses are present.
   const overallScore =
     scoreOverride != null
       ? scoreOverride
@@ -782,7 +785,6 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
 
   const hoveredLens = hoveredSlug !== null ? scorecardLenses.find((l) => l.slug === hoveredSlug) ?? null : null;
 
-  // Map lens slug to its vertex position for tooltip placement when hovering bottom tiles
   const vertexMap: Record<string, { pctX: number; pctY: number }> = {};
   radarData.forEach((d, i) => {
     const angle = (2 * Math.PI * i) / radarData.length;
@@ -793,18 +795,343 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
     vertexMap[d.lens.slug.replace(/-/g, "_")] = { pctX: pt.x / 480, pctY: pt.y / 320 };
   });
 
-  // Foot of the dark verdict panel: the three semantic pill groups from the L3
-  // verdict — strengths (positive), concerns, and watch-fors — each dotted by
-  // its own meaning (green / red / amber).
   const verdictPoints: { text: string; sentiment: "positive" | "concern" | "watch" }[] = [
     ...insight.evidence.map((text) => ({ text, sentiment: "positive" as const })),
     ...insight.concerns.map((text) => ({ text, sentiment: "concern" as const })),
     ...insight.watch_outs.map((text) => ({ text, sentiment: "watch" as const })),
   ];
 
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 12 }}>
+  const overallTier = scoreToTier(overallScore);
+  const overallColor = TIER_COLORS[overallTier].hex;
+
+  // ─── Mobile: ArcGauge (reference-style 78% arc) ────────────────────────────
+  function MobileArcGauge({ value, color, trackColor, size = 56 }: { value: number; color: string; trackColor?: string; size?: number }) {
+    const r = (size - 8) / 2;
+    const cx = size / 2, cy = size / 2;
+    const circ = 2 * Math.PI * r;
+    const arc = circ * 0.78;
+    const fill = arc * (value / 100);
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(126deg)" }}>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={trackColor ?? "var(--qc-hair)"} strokeWidth={4.5}
+          strokeDasharray={`${arc} ${circ - arc}`} strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={4.5}
+          strokeDasharray={`${fill} ${circ - fill}`} strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  // ─── Mobile Layout ─────────────────────────────────────────────────────────
+  const mobileLayout = (
+    <div className="flex flex-col gap-4 md:hidden">
+
+      {/* ── VERDICT CARD ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <DarkGradientCard radius={20} style={{ padding: "20px 18px 18px", position: "relative", overflow: "hidden" }}>
+          {/* ambient glow */}
+          <div style={{
+            position: "absolute", top: -48, right: -48, width: 160, height: 160, borderRadius: "50%",
+            background: `radial-gradient(circle, ${overallColor} 0%, transparent 70%)`,
+            opacity: 0.15, pointerEvents: "none",
+          }} />
+
+          <div style={{ position: "relative" }}>
+            {/* Top row: verdict label + band */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <MonoLabel size={9} tracking="0.14em" color="rgba(255,255,255,0.45)">
+                {verdictLabel}
+              </MonoLabel>
+              <span style={{
+                fontSize: 9, fontWeight: 700, letterSpacing: "0.08em",
+                color: bandColor, background: bandBg, border: `1px solid ${bandColor}40`,
+                borderRadius: 999, padding: "3px 10px", textTransform: "uppercase", whiteSpace: "nowrap",
+                fontFamily: "var(--qc-font-sans)",
+              }}>
+                {bandLabel}
+              </span>
+            </div>
+
+            {/* Score ring + headline side by side */}
+            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              <div style={{ flexShrink: 0, position: "relative", width: 72, height: 72 }}>
+                <MobileArcGauge value={overallScore} color={overallColor} trackColor="rgba(255,255,255,0.08)" size={72} />
+                <div style={{
+                  position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center", paddingBottom: 4,
+                }}>
+                  <span style={{ fontSize: 22, fontWeight: 700, color: overallColor, lineHeight: 1, fontFamily: "var(--qc-font-sans)" }}>
+                    {overallScore}
+                  </span>
+                  <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: "0.12em", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", fontFamily: "var(--qc-font-mono)", marginTop: 2 }}>
+                    {scoreLabel(insight.type)}
+                  </span>
+                </div>
+              </div>
+              <h2 style={{
+                flex: 1, fontSize: 15, fontWeight: 700, lineHeight: 1.4,
+                margin: 0, color: "var(--qc-on-dark)", fontFamily: "var(--qc-font-sans)",
+              }}>
+                {renderMd(insight.headline)}
+              </h2>
+            </div>
+
+            {/* Description — collapsed by default */}
+            {insight.description && (
+              <div style={{ marginTop: 14 }}>
+                <p style={{
+                  fontSize: 12, color: "rgba(255,255,255,0.50)", lineHeight: 1.65,
+                  margin: 0, fontFamily: "var(--qc-font-sans)",
+                  display: mobileVerdictExpanded ? "block" : "-webkit-box",
+                  WebkitLineClamp: mobileVerdictExpanded ? undefined : 3,
+                  WebkitBoxOrient: mobileVerdictExpanded ? undefined : "vertical",
+                  overflow: mobileVerdictExpanded ? "visible" : "hidden",
+                }}>
+                  {renderMd(insight.description)}
+                </p>
+                <button
+                  onClick={() => setMobileVerdictExpanded(!mobileVerdictExpanded)}
+                  style={{
+                    background: "none", border: "none", cursor: "pointer", padding: "6px 0 0",
+                    fontSize: 12, color: overallColor, fontFamily: "var(--qc-font-sans)",
+                    fontWeight: 600,
+                  }}
+                >
+                  {mobileVerdictExpanded ? "Show less ↑" : "Read more ↓"}
+                </button>
+              </div>
+            )}
+
+            {/* Signal chips */}
+            {verdictPoints.length > 0 && (
+              <div style={{
+                display: "flex", flexWrap: "wrap", gap: 6, marginTop: 14,
+                paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.08)",
+              }}>
+                {verdictPoints.map((p, i) => {
+                  const dotColor =
+                    p.sentiment === "positive" ? "var(--qc-up)"
+                    : p.sentiment === "concern" ? "var(--qc-down)"
+                    : "var(--qc-warn)";
+                  return (
+                    <span
+                      key={i}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)",
+                        borderRadius: 999, padding: "5px 10px",
+                        fontSize: 10, color: "rgba(255,255,255,0.80)",
+                        fontFamily: "var(--qc-font-sans)",
+                      }}
+                    >
+                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: dotColor, flexShrink: 0 }} />
+                      {p.text}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </DarkGradientCard>
+      </motion.div>
+
+      {/* ── DIMENSION SCORES 2×2 ── */}
+      <div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, padding: "0 2px" }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "var(--qc-ink-3)", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--qc-font-mono)" }}>
+            DIMENSION SCORES
+          </span>
+          <span style={{ fontSize: 10, color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)" }}>
+            {scorecardLenses.length} pillars
+          </span>
+        </div>
+        <div className="grid grid-cols-2" style={{ gap: 8 }}>
+          {scorecardLenses.map((lens) => {
+            const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
+            const tColor = TIER_COLORS[scoreToTier(pct)].hex;
+            const sLabel = lensStatusLabel(pct, lens.status);
+            return (
+              <div
+                key={lens.slug}
+                onClick={() => setMobileLensPopup(lens)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setMobileLensPopup(lens); }}
+                style={{
+                  borderRadius: 14, background: "var(--qc-card)", border: "1px solid var(--qc-hair)",
+                  padding: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{ position: "relative", width: 48, height: 48 }}>
+                  <MobileArcGauge value={pct} color={tColor} size={48} />
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", paddingBottom: 2 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: tColor, lineHeight: 1, fontFamily: "var(--qc-font-sans)" }}>
+                      {lens.score}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{
+                    fontSize: 9, color: "var(--qc-ink-3)", lineHeight: 1.3, fontFamily: "var(--qc-font-sans)",
+                    whiteSpace: "pre-line",
+                  }}>
+                    {lens.name}
+                  </div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: tColor, marginTop: 3, fontFamily: "var(--qc-font-sans)" }}>
+                    {sLabel}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Mobile lens detail popup — same content as former lens accordion expand */}
+      <AnimatePresence>
+        {mobileLensPopup && (() => {
+          const lens = mobileLensPopup;
+          const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
+          const tColor = TIER_COLORS[scoreToTier(pct)].hex;
+          const tSoft = TIER_COLORS[scoreToTier(pct)].soft;
+          const sLabel = lensStatusLabel(pct, lens.status);
+          const Icon = LENS_ICON_CONFIG[lens.slug];
+          return (
+            <>
+              <motion.div
+                key="lens-popup-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setMobileLensPopup(null)}
+                className="md:hidden"
+                style={{
+                  position: "fixed", inset: 0, zIndex: 60,
+                  background: "rgba(0,0,0,0.40)",
+                }}
+              />
+              <motion.div
+                key="lens-popup-sheet"
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 28, stiffness: 280 }}
+                className="md:hidden"
+                style={{
+                  position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 70,
+                  background: "var(--qc-card)",
+                  borderTopLeftRadius: 20, borderTopRightRadius: 20,
+                  borderTop: "1px solid var(--qc-hair)",
+                  padding: "12px 16px calc(20px + env(safe-area-inset-bottom))",
+                  maxHeight: "75vh", overflowY: "auto",
+                  boxShadow: "0 -8px 32px rgba(0,0,0,0.12)",
+                }}
+              >
+                {/* Handle */}
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+                  <div style={{ width: 36, height: 4, borderRadius: 99, background: "var(--qc-hair)" }} />
+                </div>
+
+                {/* Header */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
+                  {Icon && (
+                    <div style={{
+                      flexShrink: 0, width: 40, height: 40, borderRadius: 10,
+                      background: tSoft, display: "flex", alignItems: "center", justifyContent: "center",
+                      color: tColor,
+                    }}>
+                      <Icon size={18} strokeWidth={1.5} />
+                    </div>
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>
+                        {lens.name}
+                      </span>
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 999,
+                        color: tColor, background: tSoft, fontFamily: "var(--qc-font-sans)",
+                      }}>
+                        {sLabel}
+                      </span>
+                    </div>
+                    {lens.subtitle && (
+                      <div style={{ fontSize: 11, color: "var(--qc-ink-3)", marginTop: 3, fontFamily: "var(--qc-font-sans)" }}>
+                        {lens.subtitle}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setMobileLensPopup(null)}
+                    aria-label="Close"
+                    style={{
+                      flexShrink: 0, width: 32, height: 32, borderRadius: 8,
+                      background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer", color: "var(--qc-ink-3)", fontSize: 16, lineHeight: 1,
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div style={{ height: 1, background: "var(--qc-hair)", marginBottom: 14 }} />
+
+                {/* Detail body — same as former lens accordion expand */}
+                <div style={{ display: "flex", gap: 12 }}>
+                  <div style={{ width: 3, borderRadius: 99, flexShrink: 0, background: tColor, alignSelf: "stretch" }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      display: "inline-block", fontSize: 11, fontWeight: 600, padding: "4px 10px",
+                      borderRadius: 8, color: tColor, background: tSoft, marginBottom: 10,
+                      fontFamily: "var(--qc-font-sans)",
+                    }}>
+                      {lens.score}/{lens.max_score} — {sLabel}
+                    </div>
+                    <p style={{
+                      fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.65,
+                      margin: 0, fontFamily: "var(--qc-font-sans)",
+                    }}>
+                      {renderMd(lens.description)}
+                    </p>
+
+                    {onLensClick && (
+                      <button
+                        onClick={() => {
+                          const slug = lens.slug;
+                          setMobileLensPopup(null);
+                          onLensClick(slug);
+                        }}
+                        style={{
+                          marginTop: 16, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                          padding: "12px 16px", borderRadius: 12,
+                          background: "var(--qc-ink)", border: "none",
+                          fontSize: 13, fontWeight: 600, color: "var(--qc-on-dark, #fff)",
+                          fontFamily: "var(--qc-font-sans)", cursor: "pointer",
+                        }}
+                      >
+                        View full analysis
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          );
+        })()}
+      </AnimatePresence>
+    </div>
+  );
+
+  // ─── Desktop Layout (unchanged) ────────────────────────────────────────────
+  const desktopLayout = (
+    <div className="hidden md:flex" style={{ flexDirection: "column", gap: 12 }}>
+      <div className="grid grid-cols-2" style={{ gap: 12 }}>
 
         {/* LEFT — dark verdict panel */}
         <motion.div
@@ -889,11 +1216,8 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
             display: "flex", flexDirection: "column",
           }}
         >
-          {/* Top: radar — larger on mobile only; desktop height matches previous */}
-          <div className="min-h-[380px] sm:min-h-[340px] px-1 pt-1 pb-0 sm:px-4 sm:pt-4 sm:pb-3" style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-
-            {/* Radar — wide container occupying the card space */}
-            <div className="h-[380px] sm:h-[330px]" style={{ flexShrink: 0, width: "100%", maxWidth: 520, position: "relative", overflow: "visible" }}>
+          <div className="min-h-[340px] px-4 pt-4 pb-3" style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <div className="h-[330px]" style={{ flexShrink: 0, width: "100%", maxWidth: 520, position: "relative", overflow: "visible" }}>
               <VertexTooltip lens={hoveredLens} visible={hoveredSlug !== null} pctX={tooltipPos.pctX} pctY={tooltipPos.pctY} />
               <SVGRadar
                 data={radarData}
@@ -911,15 +1235,12 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
             </div>
           </div>
 
-          {/* Bottom: lens score tiles — columns track the lens count so 3 or 4
-              tiles each fill the full card width (no empty trailing column).
-              Full class strings kept static so Tailwind's JIT doesn't purge them. */}
           <div
-            className={`grid grid-cols-2 ${
-              scorecardLenses.length >= 4 ? "sm:grid-cols-4"
-              : scorecardLenses.length === 3 ? "sm:grid-cols-3"
-              : scorecardLenses.length === 2 ? "sm:grid-cols-2"
-              : "sm:grid-cols-1"
+            className={`grid ${
+              scorecardLenses.length >= 4 ? "grid-cols-4"
+              : scorecardLenses.length === 3 ? "grid-cols-3"
+              : scorecardLenses.length === 2 ? "grid-cols-2"
+              : "grid-cols-1"
             }`}
             style={{
               borderTop: "1px solid var(--qc-hair)",
@@ -980,7 +1301,6 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
                     />
                   </div>
 
-                  {/* Highlight border when vertex hovered */}
                   {isHovered && (
                     <motion.div
                       layoutId="lens-highlight"
@@ -1010,5 +1330,12 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
         </motion.div>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {mobileLayout}
+      {desktopLayout}
+    </>
   );
 }

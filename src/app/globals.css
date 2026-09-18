@@ -773,3 +773,12 @@
   animation: qc-shimmer 1.6s ease-in-out infinite;
 }
 
+/* ── Mobile horizontal scroll — hide scrollbar ──────────────────── */
+.mobile-hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.mobile-hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+

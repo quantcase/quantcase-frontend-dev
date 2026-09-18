@@ -216,7 +216,13 @@ function InsightPageSkeleton() {
     <ScreenerPageShell>
       <div className="px-3 sm:px-6 pt-3 space-y-3">
         <InsightScorecardSkeleton />
-        <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.2fr]" style={{ gap: 12 }}>
+        {/* Mobile: stacked */}
+        <div className="flex flex-col gap-3 md:hidden">
+          <InsightSignalMapSkeleton />
+          <InsightLensesSkeleton />
+        </div>
+        {/* Desktop: side-by-side */}
+        <div className="hidden md:grid md:grid-cols-[3fr_1.2fr]" style={{ gap: 12 }}>
           <InsightLensesSkeleton />
           <InsightSignalMapSkeleton />
         </div>
@@ -268,25 +274,69 @@ function FactorConvictionScore({ score, verdict }: { score: number | undefined; 
   else if (v === "weak") barColor = "var(--qc-down)";
 
   const barWidth = score != null ? `${Math.min(100, Math.max(0, score))}%` : "50%";
-  
-  // Format the text: STRONG — 85/100
-  const scoreText = score != null ? `${(verdict || "UNKNOWN").toUpperCase()} — ${score}/100` : (verdict || "UNKNOWN").toUpperCase();
+  const scoreText = score != null ? `${(verdict || "UNKNOWN").toUpperCase()} · ${score}/100` : (verdict || "UNKNOWN").toUpperCase();
 
   return (
-    <div className="rounded-[10px] px-4 py-3 flex flex-col gap-2" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)", flexShrink: 0 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Conviction</span>
-        <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: barColor, fontFamily: "var(--qc-font-sans)" }}>{scoreText}</span>
+    <>
+      {/* ── Desktop conviction (unchanged) ── */}
+      <div className="hidden md:flex rounded-[10px] px-4 py-3 flex-col gap-2" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair-2)", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Conviction</span>
+          <span style={{ fontSize: "var(--qc-fz-11)", fontWeight: "var(--qc-w-semi)", color: barColor, fontFamily: "var(--qc-font-sans)" }}>{scoreText}</span>
+        </div>
+        <div style={{ height: 4, borderRadius: 999, background: "rgba(0,0,0,0.08)", overflow: "hidden" }}>
+          <div style={{ height: "100%", borderRadius: 999, width: barWidth, background: barColor, transition: "width .4s" }} />
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          {["Low", "Medium", "High"].map((l) => (
+            <span key={l} style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)" }}>{l}</span>
+          ))}
+        </div>
       </div>
-      <div style={{ height: 4, borderRadius: 999, background: "rgba(0,0,0,0.08)", overflow: "hidden" }}>
-        <div style={{ height: "100%", borderRadius: 999, width: barWidth, background: barColor, transition: "width .4s" }} />
+
+      {/* ── Mobile conviction (gradient bar with thumb) ── */}
+      <div className="md:hidden rounded-[14px] px-4 py-3.5" style={{ background: "var(--qc-card)", border: "1px solid var(--qc-hair)", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+          <span style={{ fontFamily: "var(--qc-font-mono)", fontSize: 10, fontWeight: 700, color: "var(--qc-ink-3)", textTransform: "uppercase", letterSpacing: "0.1em" }}>CONVICTION</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: barColor, fontFamily: "var(--qc-font-sans)" }}>{scoreText}</span>
+        </div>
+        {/* Gradient track */}
+        <div style={{ position: "relative", height: 8, borderRadius: 999, overflow: "visible" }}>
+          <div style={{
+            position: "absolute", inset: 0, borderRadius: 999, overflow: "hidden",
+            background: "var(--qc-section)",
+          }}>
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(90deg, var(--qc-down) 0%, var(--qc-warn) 50%, var(--qc-up) 100%)",
+              opacity: 0.15,
+            }} />
+            <div style={{
+              height: "100%", borderRadius: 999,
+              width: barWidth,
+              background: `linear-gradient(90deg, var(--qc-down), ${barColor})`,
+              transition: "width .4s",
+            }} />
+          </div>
+          {/* Thumb indicator */}
+          {score != null && (
+            <div style={{
+              position: "absolute", top: "50%", left: barWidth,
+              transform: "translate(-50%, -50%)",
+              width: 16, height: 16, borderRadius: "50%",
+              background: barColor, border: "2.5px solid var(--qc-card)",
+              boxShadow: `0 2px 8px ${barColor}55`,
+              transition: "left .4s",
+            }} />
+          )}
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+          {["Low", "Medium", "High"].map((l) => (
+            <span key={l} style={{ fontFamily: "var(--qc-font-mono)", fontSize: 9, color: "var(--qc-ink-3)" }}>{l}</span>
+          ))}
+        </div>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        {["Low", "Medium", "High"].map((l) => (
-          <span key={l} style={{ fontFamily: "var(--qc-font-mono)", fontSize: "var(--qc-fz-9)", color: "var(--qc-ink-2)" }}>{l}</span>
-        ))}
-      </div>
-    </div>
+    </>
   );
 }
 function InsightDashboard({
@@ -384,11 +434,36 @@ function InsightDashboard({
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.2fr]" style={{ gap: 12, alignItems: "stretch" }}>
+        {/* ── Mobile: DI + conviction only (radar + lens assessment removed) ── */}
+        <div className="flex flex-col gap-5 md:hidden">
+          {/* Decision Intelligence */}
+          {insight.signal_map.length > 0 && (
+            <div id="section-signal-map-mobile">
+              <InsightSignalMap
+                signals={type === 'deal' ? insight.signal_map.slice(0, 6) : insight.signal_map}
+                heading={
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: "var(--qc-ink-3)", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--qc-font-mono)" }}>
+                      DECISION INTELLIGENCE
+                    </span>
+                    <span style={{ fontSize: 10, color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)" }}>
+                      {(type === 'deal' ? insight.signal_map.slice(0, 6) : insight.signal_map).length} signals
+                    </span>
+                  </div>
+                }
+              />
+            </div>
+          )}
+          {/* Conviction bar */}
+          {insight.signal_map.length > 0 && (
+            <FactorConvictionScore score={consistentScore} verdict={insight.verdict} />
+          )}
+        </div>
+
+        {/* ── Desktop: side-by-side grid (unchanged) ── */}
+        <div className="hidden md:grid md:grid-cols-[3fr_1.2fr]" style={{ gap: 12, alignItems: "stretch" }}>
           {patchedNativeLenses.length > 0 && (
             <div id="section-lenses" style={{ display: "flex", flexDirection: "column" }}>
-              {/* Native lenses only — the cloned Industry lens lives on the scorecard
-                  radar/tiles above, not in this per-pillar lens grid. */}
               <InsightLenses lenses={patchedNativeLenses} heading={lensHeading} subtitle={TYPE_LENS_SUBTITLES[type]} onLensClick={handleLensClick} ticker={ticker} />
             </div>
           )}

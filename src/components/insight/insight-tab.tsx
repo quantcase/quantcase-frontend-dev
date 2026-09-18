@@ -435,15 +435,8 @@ function InsightDashboard({
           />
         </div>
 
-        {/* ── Mobile: single-column stacked sections ── */}
+        {/* ── Mobile: DI + conviction only (radar + lens assessment removed) ── */}
         <div className="flex flex-col gap-5 md:hidden">
-          {/* Lenses — accordion */}
-          {patchedNativeLenses.length > 0 && (
-            <div id="section-lenses-mobile">
-              <InsightLenses lenses={patchedNativeLenses} heading={lensHeading} subtitle={TYPE_LENS_SUBTITLES[type]} onLensClick={handleLensClick} ticker={ticker} />
-            </div>
-          )}
-
           {/* Decision Intelligence */}
           {insight.signal_map.length > 0 && (
             <div id="section-signal-map-mobile">

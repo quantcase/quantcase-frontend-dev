@@ -766,6 +766,7 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ pctX: 0.5, pctY: 0 });
   const [mobileVerdictExpanded, setMobileVerdictExpanded] = useState(false);
+  const [mobileLensPopup, setMobileLensPopup] = useState<InsightLens | null>(null);
 
   const scorecardLenses = lenses ?? insight.lenses;
 
@@ -951,16 +952,18 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
           {scorecardLenses.map((lens) => {
             const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
             const tColor = TIER_COLORS[scoreToTier(pct)].hex;
-            const tSoft = TIER_COLORS[scoreToTier(pct)].soft;
             const sLabel = lensStatusLabel(pct, lens.status);
             return (
               <div
                 key={lens.slug}
-                onClick={() => onLensClick?.(lens.slug)}
+                onClick={() => setMobileLensPopup(lens)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setMobileLensPopup(lens); }}
                 style={{
                   borderRadius: 14, background: "var(--qc-card)", border: "1px solid var(--qc-hair)",
                   padding: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-                  cursor: onLensClick ? "pointer" : "default",
+                  cursor: "pointer",
                 }}
               >
                 <div style={{ position: "relative", width: 48, height: 48 }}>
@@ -988,69 +991,140 @@ export function InsightScorecard({ insight, verdictLabel, onLensClick, lenses, s
         </div>
       </div>
 
-      {/* ── RADAR CHART ── */}
-      <div style={{
-        borderRadius: 20, background: "var(--qc-card)", border: "1px solid var(--qc-hair)",
-        overflow: "visible",
-      }}>
-        <div style={{
-          padding: "16px 18px 8px", display: "flex", alignItems: "center", justifyContent: "space-between",
-        }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: "var(--qc-ink-3)", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--qc-font-mono)" }}>
-            {verdictLabel.replace("VERDICT", "RADAR")}
-          </span>
-          <span style={{ fontSize: 10, color: "var(--qc-ink-3)", fontFamily: "var(--qc-font-sans)" }}>
-            {scoreLabel(insight.type)} {overallScore}
-          </span>
-        </div>
-        <div style={{ padding: "0 8px", height: 280, display: "flex", justifyContent: "center", alignItems: "center" }}>
-          <div style={{ width: "100%", maxWidth: 360, height: 270, position: "relative", overflow: "visible" }}>
-            <SVGRadar
-              data={radarData}
-              overallScore={overallScore}
-              insightType={insight.type}
-              hoveredSlug={hoveredSlug}
-              onHoverVertex={(slug, pctX, pctY) => {
-                setHoveredSlug(slug);
-                if (slug !== null && pctX !== undefined && pctY !== undefined) {
-                  setTooltipPos({ pctX, pctY });
-                }
-              }}
-              onLensClick={onLensClick}
-            />
-          </div>
-        </div>
-        {/* Score legend below chart */}
-        <div className="grid grid-cols-2" style={{ gap: 8, padding: "4px 16px 16px" }}>
-          {scorecardLenses.map((lens) => {
-            const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
-            const tColor = TIER_COLORS[scoreToTier(pct)].hex;
-            const sLabel = lensStatusLabel(pct, lens.status);
-            return (
-              <div
-                key={lens.slug}
-                onClick={() => onLensClick?.(lens.slug)}
+      {/* Mobile lens detail popup — same content as former lens accordion expand */}
+      <AnimatePresence>
+        {mobileLensPopup && (() => {
+          const lens = mobileLensPopup;
+          const pct = lens.max_score > 0 ? (lens.score / lens.max_score) * 100 : 0;
+          const tColor = TIER_COLORS[scoreToTier(pct)].hex;
+          const tSoft = TIER_COLORS[scoreToTier(pct)].soft;
+          const sLabel = lensStatusLabel(pct, lens.status);
+          const Icon = LENS_ICON_CONFIG[lens.slug];
+          return (
+            <>
+              <motion.div
+                key="lens-popup-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setMobileLensPopup(null)}
+                className="md:hidden"
                 style={{
-                  display: "flex", alignItems: "center", gap: 8, borderRadius: 10,
-                  background: "var(--qc-section)", padding: "8px 10px",
-                  cursor: onLensClick ? "pointer" : "default",
+                  position: "fixed", inset: 0, zIndex: 60,
+                  background: "rgba(0,0,0,0.40)",
+                }}
+              />
+              <motion.div
+                key="lens-popup-sheet"
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 28, stiffness: 280 }}
+                className="md:hidden"
+                style={{
+                  position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 70,
+                  background: "var(--qc-card)",
+                  borderTopLeftRadius: 20, borderTopRightRadius: 20,
+                  borderTop: "1px solid var(--qc-hair)",
+                  padding: "12px 16px calc(20px + env(safe-area-inset-bottom))",
+                  maxHeight: "75vh", overflowY: "auto",
+                  boxShadow: "0 -8px 32px rgba(0,0,0,0.12)",
                 }}
               >
-                <div style={{ width: 3, height: 24, borderRadius: 99, flexShrink: 0, background: tColor }} />
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 9, color: "var(--qc-ink-3)", lineHeight: 1.3, fontFamily: "var(--qc-font-sans)" }}>
-                    {lens.name}
+                {/* Handle */}
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+                  <div style={{ width: 36, height: 4, borderRadius: 99, background: "var(--qc-hair)" }} />
+                </div>
+
+                {/* Header */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
+                  {Icon && (
+                    <div style={{
+                      flexShrink: 0, width: 40, height: 40, borderRadius: 10,
+                      background: tSoft, display: "flex", alignItems: "center", justifyContent: "center",
+                      color: tColor,
+                    }}>
+                      <Icon size={18} strokeWidth={1.5} />
+                    </div>
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: "var(--qc-ink)", fontFamily: "var(--qc-font-sans)" }}>
+                        {lens.name}
+                      </span>
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 999,
+                        color: tColor, background: tSoft, fontFamily: "var(--qc-font-sans)",
+                      }}>
+                        {sLabel}
+                      </span>
+                    </div>
+                    {lens.subtitle && (
+                      <div style={{ fontSize: 11, color: "var(--qc-ink-3)", marginTop: 3, fontFamily: "var(--qc-font-sans)" }}>
+                        {lens.subtitle}
+                      </div>
+                    )}
                   </div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginTop: 2 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: tColor, fontFamily: "var(--qc-font-mono)" }}>{lens.score}</span>
-                    <span style={{ fontSize: 9, fontWeight: 700, color: tColor, fontFamily: "var(--qc-font-sans)" }}>{sLabel}</span>
+                  <button
+                    onClick={() => setMobileLensPopup(null)}
+                    aria-label="Close"
+                    style={{
+                      flexShrink: 0, width: 32, height: 32, borderRadius: 8,
+                      background: "var(--qc-section)", border: "1px solid var(--qc-hair)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer", color: "var(--qc-ink-3)", fontSize: 16, lineHeight: 1,
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div style={{ height: 1, background: "var(--qc-hair)", marginBottom: 14 }} />
+
+                {/* Detail body — same as former lens accordion expand */}
+                <div style={{ display: "flex", gap: 12 }}>
+                  <div style={{ width: 3, borderRadius: 99, flexShrink: 0, background: tColor, alignSelf: "stretch" }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      display: "inline-block", fontSize: 11, fontWeight: 600, padding: "4px 10px",
+                      borderRadius: 8, color: tColor, background: tSoft, marginBottom: 10,
+                      fontFamily: "var(--qc-font-sans)",
+                    }}>
+                      {lens.score}/{lens.max_score} — {sLabel}
+                    </div>
+                    <p style={{
+                      fontSize: 13, color: "var(--qc-ink-2)", lineHeight: 1.65,
+                      margin: 0, fontFamily: "var(--qc-font-sans)",
+                    }}>
+                      {renderMd(lens.description)}
+                    </p>
+
+                    {onLensClick && (
+                      <button
+                        onClick={() => {
+                          const slug = lens.slug;
+                          setMobileLensPopup(null);
+                          onLensClick(slug);
+                        }}
+                        style={{
+                          marginTop: 16, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                          padding: "12px 16px", borderRadius: 12,
+                          background: "var(--qc-ink)", border: "none",
+                          fontSize: 13, fontWeight: 600, color: "var(--qc-on-dark, #fff)",
+                          fontFamily: "var(--qc-font-sans)", cursor: "pointer",
+                        }}
+                      >
+                        View full analysis
+                      </button>
+                    )}
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+              </motion.div>
+            </>
+          );
+        })()}
+      </AnimatePresence>
     </div>
   );
 
